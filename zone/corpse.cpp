@@ -15,11 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-/*
-New class for handeling corpses and everything associated with them.
-Child of the Mob class.
--Quagmire
-*/
+
 #include "../common/debug.h"
 #include <stdlib.h>
 #include <stdio.h>
@@ -45,7 +41,6 @@ Child of the Mob class.
 extern EntityList entity_list;
 extern Zone* zone;
 extern WorldServer worldserver;
-extern npcDecayTimes_Struct npcCorpseDecayTimes[100];
 
 void Corpse::SendEndLootErrorPacket(Client* client) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LootComplete, 0);
@@ -222,13 +217,11 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	mDespawnRequested = false;
 	strcpy(orgname, in_npc->GetName());
 	strcpy(name, in_npc->GetName());
-	// Added By Hogie
-	for(int count = 0; count < 100; count++) {
-		if ((level >= npcCorpseDecayTimes[count].minlvl) && (level <= npcCorpseDecayTimes[count].maxlvl)) {
-			mDecayTimer.SetTimer(npcCorpseDecayTimes[count].seconds*1000);
-			break;
-		}
-	}
+
+	// Set the corpse decay time based on level (7.5mins for mobs up to 55 and 30mins for 55 and above)
+	if (level < 55) mDecayTimer.SetTimer(450000);
+	else mDecayTimer.SetTimer(1800000);
+
 	if(IsEmpty())
 	{
 		mDecayTimer.SetTimer(RuleI(NPC,EmptyNPCCorpseDecayTimeMS)+1000);
