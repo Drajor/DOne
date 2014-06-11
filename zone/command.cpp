@@ -1062,7 +1062,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 		if (c->GetTarget()->IsNPC())
 			c->GetTarget()->CastToNPC()->QueryLoot(c);
 		else if (c->GetTarget()->IsCorpse())
-			c->GetTarget()->CastToCorpse()->QueryLoot(c);
+			c->GetTarget()->CastToCorpse()->queryLoot(c);
 		else
 			c->Message(0, "Error: Target's type doesnt have loot");
 	}
@@ -3669,7 +3669,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		else if (!sep->IsNumber(2))
 			c->Message(0, "Error: charid must be a number.");
 		else
-			c->Message(0, "Setting CharID=%u on PlayerCorpse '%s'", target->CastToCorpse()->SetCharID(atoi(sep->arg[2])), target->GetName());
+			c->Message(0, "Setting CharID=%u on PlayerCorpse '%s'", target->CastToCorpse()->setCharacterID(atoi(sep->arg[2])), target->GetName());
 	}
 	else if (strcasecmp(sep->arg[1], "ResetLooter") == 0) {
 		if (target == 0 || !target->IsCorpse())
@@ -3682,7 +3682,7 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(0, "Error: Target the corpse you wish to remove the cash from");
 		else if (!target->IsPlayerCorpse() || c->Admin() >= commandEditPlayerCorpses) {
 			c->Message(0, "Removing Cash from %s.", target->GetName());
-			target->CastToCorpse()->RemoveCash();
+			target->CastToCorpse()->removeCash();
 		}
 		else
 			c->Message(0, "Insufficient status to modify player corpse.");
@@ -3691,13 +3691,13 @@ void command_corpse(Client *c, const Seperator *sep)
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else
-			target->CastToCorpse()->QueryLoot(c);
+			target->CastToCorpse()->queryLoot(c);
 	}
 	else if (strcasecmp(sep->arg[1], "lock") == 0) {
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else {
-			target->CastToCorpse()->Lock();
+			target->CastToCorpse()->lock();
 			c->Message(0, "Locking %s...", target->GetName());
 		}
 	}
@@ -3705,7 +3705,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		if (target == 0 || !target->IsCorpse())
 			c->Message(0, "Error: Target must be a corpse.");
 		else {
-			target->CastToCorpse()->UnLock();
+			target->CastToCorpse()->unlock();
 			c->Message(0, "Unlocking %s...", target->GetName());
 		}
 	}

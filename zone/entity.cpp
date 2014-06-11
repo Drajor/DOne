@@ -1599,7 +1599,7 @@ void EntityList::RemoveAllCorpsesByCharID(uint32 charid)
 {
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
-		if (it->second->GetCharID() == charid) {
+		if (it->second->getCharacterID() == charid) {
 			safe_delete(it->second);
 			free_ids.push(it->first);
 			it = corpse_list.erase(it);
@@ -1629,9 +1629,9 @@ int EntityList::RezzAllCorpsesByCharID(uint32 charid)
 
 	auto it = corpse_list.begin();
 	while (it != corpse_list.end()) {
-		if (it->second->GetCharID() == charid) {
-			RezzExp += it->second->GetRezzExp();
-			it->second->Rezzed(true);
+		if (it->second->getCharacterID() == charid) {
+			RezzExp += it->second->getResurrectionExp();
+			it->second->setResurrected(true);
 			it->second->CompleteRezz();
 		}
 		++it;
@@ -4353,7 +4353,7 @@ void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)
 	while (it != corpse_list.end()) {
 		Corpse *b = it->second;
 
-		if (b && (b->GetCharID() != c->CharacterID())) {
+		if (b && (b->getCharacterID() != c->CharacterID())) {
 			if ((NewMode == HideCorpseAll) || ((NewMode == HideCorpseNPC) && (b->IsNPCCorpse()))) {
 				EQApplicationPacket outapp;
 					b->CreateDespawnPacket(&outapp, false);

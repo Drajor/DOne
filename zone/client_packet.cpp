@@ -2506,7 +2506,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			else
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
-			Message(0, "This corpse %s be resurrected.", tcorpse->Rezzed()?"cannot":"can");
+			Message(0, "This corpse %s be resurrected.", tcorpse->isResurrected()?"cannot":"can");
 			/*
 			hour = 0;
 

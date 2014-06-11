@@ -2598,12 +2598,12 @@ void Client::LogLoot(Client* player, Corpse* corpse, const Item_Struct* item){
 		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Item",logtext,4);
 	}
 	else{
-		if ((corpse->GetPlatinum() + corpse->GetGold() + corpse->GetSilver() + corpse->GetCopper())>0) {
+		if ((corpse->getPlatinum() + corpse->getGold() + corpse->getSilver() + corpse->getCopper())>0) {
 			memset(coinloot,0,sizeof(coinloot));
-			sprintf(coinloot,"%i PP %i GP %i SP %i CP",corpse->GetPlatinum(),corpse->GetGold(),corpse->GetSilver(),corpse->GetCopper());
+			sprintf(coinloot,"%i PP %i GP %i SP %i CP",corpse->getPlatinum(),corpse->getGold(),corpse->getSilver(),corpse->getCopper());
 			logtext=coinloot;
 			strcat(logtext," Looted");
-			if (corpse->GetPlatinum()>10000)
+			if (corpse->getPlatinum()>10000)
 				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Excessive Loot!",logtext,9);
 			else
 				database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),corpse->orgname,"Looting Money",logtext,5);

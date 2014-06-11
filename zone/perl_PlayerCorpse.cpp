@@ -61,7 +61,7 @@ XS(XS_Corpse_GetCharID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCharID();
+		RETVAL = THIS->getCharacterID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -111,7 +111,7 @@ XS(XS_Corpse_Lock)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Lock();
+		THIS->lock();
 	}
 	XSRETURN_EMPTY;
 }
@@ -134,7 +134,7 @@ XS(XS_Corpse_UnLock)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->UnLock();
+		THIS->unlock();
 	}
 	XSRETURN_EMPTY;
 }
@@ -158,7 +158,7 @@ XS(XS_Corpse_IsLocked)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsLocked();
+		RETVAL = THIS->isLocked();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -395,7 +395,7 @@ XS(XS_Corpse_SetCash)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SetCash(in_copper, in_silver, in_gold, in_platinum);
+		THIS->setCash(in_copper, in_silver, in_gold, in_platinum);
 	}
 	XSRETURN_EMPTY;
 }
@@ -418,7 +418,7 @@ XS(XS_Corpse_RemoveCash)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveCash();
+		THIS->removeCash();
 	}
 	XSRETURN_EMPTY;
 }
@@ -443,7 +443,7 @@ XS(XS_Corpse_CountItems)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CountItems();
+		RETVAL = THIS->getNumItems();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -492,7 +492,7 @@ XS(XS_Corpse_GetCopper)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCopper();
+		RETVAL = THIS->getCopper();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -518,7 +518,7 @@ XS(XS_Corpse_GetSilver)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetSilver();
+		RETVAL = THIS->getSilver();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -544,7 +544,7 @@ XS(XS_Corpse_GetGold)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGold();
+		RETVAL = THIS->getGold();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -570,7 +570,7 @@ XS(XS_Corpse_GetPlatinum)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetPlatinum();
+		RETVAL = THIS->getPlatinum();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -687,7 +687,7 @@ XS(XS_Corpse_CanMobLoot)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CanMobLoot(charid);
+		RETVAL = THIS->canMobLoot(charid);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -723,7 +723,7 @@ XS(XS_Corpse_AllowMobLoot)
 		if(them == nullptr)
 			Perl_croak(aTHX_ "them is nullptr, avoiding crash.");
 
-		THIS->AllowMobLoot(them, slot);
+		THIS->addLooter(them, slot);
 	}
 	XSRETURN_EMPTY;
 }
@@ -756,7 +756,7 @@ XS(XS_Corpse_AddLooter)
 		if(who == nullptr)
 			Perl_croak(aTHX_ "who is nullptr, avoiding crash.");
 
-		THIS->AddLooter(who);
+		THIS->addLooter(who);
 	}
 	XSRETURN_EMPTY;
 }
@@ -780,7 +780,7 @@ XS(XS_Corpse_IsRezzed)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Rezzed();
+		RETVAL = THIS->isResurrected();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
