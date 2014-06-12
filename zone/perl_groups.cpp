@@ -59,7 +59,7 @@ XS(XS_Group_DisbandGroup)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->DisbandGroup();
+		THIS->disbandGroup();
 	}
 	XSRETURN_EMPTY;
 }
@@ -93,7 +93,7 @@ XS(XS_Group_IsGroupMember)
 		if(client == nullptr)
 			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsGroupMember(client);
+		RETVAL = THIS->isGroupMember(client);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -129,7 +129,7 @@ XS(XS_Group_CastGroupSpell)
 		if(caster == nullptr)
 			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
-		THIS->CastGroupSpell(caster, spellid);
+		THIS->castGroupSpell(caster, spellid);
 	}
 	XSRETURN_EMPTY;
 }
@@ -163,7 +163,7 @@ XS(XS_Group_SplitExp)
 		if(other == nullptr)
 			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
-		THIS->SplitExp(exp, other);
+		THIS->splitExp(exp, other);
 	}
 	XSRETURN_EMPTY;
 }
@@ -203,11 +203,11 @@ XS(XS_Group_GroupMessage)
 			if ((language >= MAX_PP_LANGUAGE) || (language < 0))
 				language = 0;
 			message = (char *)SvPV_nolen(ST(3));
-			THIS->GroupMessage(sender, language, 100, message);
+			THIS->groupMessage(sender, language, 100, message);
 		}
 		else {	// if no language is specificed, send it in common
 			message = (char *)SvPV_nolen(ST(2));
-			THIS->GroupMessage(sender,0, 100, message);
+			THIS->groupMessage(sender,0, 100, message);
 		}
 	}
 	XSRETURN_EMPTY;
@@ -243,7 +243,7 @@ XS(XS_Group_GetTotalGroupDamage)
 		if(other == nullptr)
 			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetTotalGroupDamage(other);
+		RETVAL = THIS->getTotalGroupDamage(other);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -271,7 +271,7 @@ XS(XS_Group_SplitMoney)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SplitMoney(copper, silver, gold, platinum);
+		THIS->splitMoney(copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
 }
@@ -304,7 +304,7 @@ XS(XS_Group_SetLeader)
 		if(newleader == nullptr)
 			Perl_croak(aTHX_ "newleader is nullptr, avoiding crash.");
 
-		THIS->SetLeader(newleader);
+		THIS->setLeader(newleader);
 	}
 	XSRETURN_EMPTY;
 }
@@ -328,7 +328,7 @@ XS(XS_Group_GetLeader)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetLeader();
+		RETVAL = THIS->getLeader();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -355,7 +355,7 @@ XS(XS_Group_GetLeaderName)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetLeaderName();
+		RETVAL = THIS->getLeaderName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	}
 	XSRETURN(1);
@@ -389,7 +389,7 @@ XS(XS_Group_SendHPPacketsTo)
 		if(newmember == nullptr)
 			Perl_croak(aTHX_ "newmember is nullptr, avoiding crash.");
 
-		THIS->SendHPPacketsTo(newmember);
+		THIS->sendHPPacketsTo(newmember);
 	}
 	XSRETURN_EMPTY;
 }
@@ -422,7 +422,7 @@ XS(XS_Group_SendHPPacketsFrom)
 		if(newmember == nullptr)
 			Perl_croak(aTHX_ "newmember is nullptr, avoiding crash.");
 
-		THIS->SendHPPacketsFrom(newmember);
+		THIS->sendHPPacketsFrom(newmember);
 	}
 	XSRETURN_EMPTY;
 }
@@ -456,7 +456,7 @@ XS(XS_Group_IsLeader)
 		if(leadertest == nullptr)
 			Perl_croak(aTHX_ "leadertest is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsLeader(leadertest);
+		RETVAL = THIS->isLeader(leadertest);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -483,7 +483,7 @@ XS(XS_Group_GroupCount)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GroupCount();
+		RETVAL = THIS->groupCount();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -509,7 +509,7 @@ XS(XS_Group_GetHighestLevel)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetHighestLevel();
+		RETVAL = THIS->getHighestLevel();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -548,7 +548,7 @@ XS(XS_Group_TeleportGroup)
 		if(sender == nullptr)
 			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
-		THIS->TeleportGroup(sender, zoneID, 0, x, y, z, heading);
+		THIS->teleportGroup(sender, zoneID, 0, x, y, z, heading);
 	}
 	XSRETURN_EMPTY;
 }
@@ -604,7 +604,7 @@ XS(XS_Group_GetMember)
 		if (index < 0 || index > 5)
 			RETVAL = nullptr;
 		else {
-			member = THIS->members[index];
+			member = THIS->mMembers[index];
 			if (member != nullptr)
 				RETVAL = member->CastToClient();
 		}

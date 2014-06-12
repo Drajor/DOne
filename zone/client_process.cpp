@@ -156,7 +156,7 @@ bool Client::Process() {
 			if (mygroup)
 			{
 				entity_list.MessageGroup(this,true,15,"%s died.", GetName());
-				mygroup->MemberZoned(this);
+				mygroup->memberZoned(this);
 			}
 			Raid *myraid = entity_list.GetRaidByClient(this);
 			if (myraid)
@@ -732,10 +732,10 @@ bool Client::Process() {
 			{
 				if (!zoning) {
 					entity_list.MessageGroup(this, true, 15, "%s logged out.", GetName());
-					mygroup->DelMember(this);
+					mygroup->delMember(this);
 				} else {
 					entity_list.MessageGroup(this, true, 15, "%s left the zone.", GetName());
-					mygroup->MemberZoned(this);
+					mygroup->memberZoned(this);
 				}
 
 			}
@@ -2180,7 +2180,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		{
 			Group *g = GetGroup();
 			if(g)
-				g->MemberZoned(this);
+				g->memberZoned(this);
 		}
 
 		Raid* r = entity_list.GetRaidByClient(this);

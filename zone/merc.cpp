@@ -630,10 +630,10 @@ int Merc::GroupLeadershipAAHealthEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAHealthEnhancement))
+	switch(g->getLeadershipAA(groupAAHealthEnhancement))
 	{
 		case 0:
 			return 0;
@@ -652,10 +652,10 @@ int Merc::GroupLeadershipAAManaEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAManaEnhancement))
+	switch(g->getLeadershipAA(groupAAManaEnhancement))
 	{
 		case 0:
 			return 0;
@@ -674,10 +674,10 @@ int Merc::GroupLeadershipAAHealthRegeneration()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAHealthRegeneration))
+	switch(g->getLeadershipAA(groupAAHealthRegeneration))
 	{
 		case 0:
 			return 0;
@@ -696,10 +696,10 @@ int Merc::GroupLeadershipAAOffenseEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAOffenseEnhancement))
+	switch(g->getLeadershipAA(groupAAOffenseEnhancement))
 	{
 		case 0:
 			return 0;
@@ -2115,20 +2115,20 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 			switch (iSpellTypes) {
 				case SpellType_Heal: {
 					Mob* tar = nullptr;
-					int8 numToHeal = g->GetNumberNeedingHealedInGroup(IsEngaged() ? 75 : 95, true);
+					int8 numToHeal = g->getNumberNeedingHealedInGroup(IsEngaged() ? 75 : 95, true);
 					int8 checkHPR = IsEngaged() ? 95 : 99;
 					int8 checkPetHPR = IsEngaged() ? 95 : 99;
 
 					//todo: check stance to determine healing spell selection
 
 					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-						if(g->members[i] && !g->members[i]->qglobal) {
-							int8 hpr = (int8)g->members[i]->GetHPRatio();
+						if(g->mMembers[i] && !g->mMembers[i]->qglobal) {
+							int8 hpr = (int8)g->mMembers[i]->GetHPRatio();
 
-							if(g->members[i]->HasPet() && g->members[i]->GetPet()->GetHPRatio() < checkHPR) {
-								if(!tar || ((g->members[i]->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
-									tar = g->members[i]->GetPet();
-									checkPetHPR = g->members[i]->GetPet()->GetHPRatio() + 25;
+							if(g->mMembers[i]->HasPet() && g->mMembers[i]->GetPet()->GetHPRatio() < checkHPR) {
+								if(!tar || ((g->mMembers[i]->GetPet()->GetHPRatio() + 25) < tar->GetHPRatio())) {
+									tar = g->mMembers[i]->GetPet();
+									checkPetHPR = g->mMembers[i]->GetPet()->GetHPRatio() + 25;
 								}
 							}
 
@@ -2136,22 +2136,22 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 								continue;
 							}
 
-							if(IsEngaged() && (g->members[i]->GetClass() == NECROMANCER && hpr >= 50)
-								|| (g->members[i]->GetClass() == SHAMAN && hpr >= 80)) {
+							if(IsEngaged() && (g->mMembers[i]->GetClass() == NECROMANCER && hpr >= 50)
+								|| (g->mMembers[i]->GetClass() == SHAMAN && hpr >= 80)) {
 								//allow necros to lifetap & shaman to canni without wasting mana
 								continue;
 							}
 
-							if(hpr < checkHPR && g->members[i] == GetMercOwner()) {
+							if(hpr < checkHPR && g->mMembers[i] == GetMercOwner()) {
 								if(!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))
-									tar = g->members[i];		//check owner first
+									tar = g->mMembers[i];		//check owner first
 							}
-							else if(hpr < checkHPR && g->HasRole(g->members[i], RoleTank)){
+							else if(hpr < checkHPR && g->hasRole(g->mMembers[i], RoleTank)){
 								if(!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))
-									tar = g->members[i];
+									tar = g->mMembers[i];
 							}
 							else if( hpr < checkHPR && (!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))) {
-								tar = g->members[i];
+								tar = g->mMembers[i];
 							}
 						}
 					}
@@ -2270,8 +2270,8 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 						}
 						else {
 							for( int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-								if(g->members[i]) {
-									Mob* tar = g->members[i];
+								if(g->mMembers[i]) {
+									Mob* tar = g->mMembers[i];
 
 									if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
 										&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
@@ -2429,14 +2429,14 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 				case SpellType_Cure: {
 					Mob* tar = nullptr;
 					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-						if(g->members[i] && !g->members[i]->qglobal) {
-							if(GetNeedsCured(g->members[i]) && (g->members[i]->DontCureMeBefore() < Timer::GetCurrentTime())) {
-								tar = g->members[i];
+						if(g->mMembers[i] && !g->mMembers[i]->qglobal) {
+							if(GetNeedsCured(g->mMembers[i]) && (g->mMembers[i]->DontCureMeBefore() < Timer::GetCurrentTime())) {
+								tar = g->mMembers[i];
 							}
 						}
 					}
 
-					if(tar && !(g->GetNumberNeedingHealedInGroup(IsEngaged() ? 25 : 40, false) > 0) && !(g->GetNumberNeedingHealedInGroup(IsEngaged() ? 40 : 60, false) > 2))
+					if(tar && !(g->getNumberNeedingHealedInGroup(IsEngaged() ? 25 : 40, false) > 0) && !(g->getNumberNeedingHealedInGroup(IsEngaged() ? 40 : 60, false) > 2))
 					{
 						selectedMercSpell = GetBestMercSpellForCure(this, tar);
 
@@ -2455,9 +2455,9 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 									if(g) {
 										for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
-											if(g->members[i] && !g->members[i]->qglobal) {
+											if(g->mMembers[i] && !g->mMembers[i]->qglobal) {
 												if(TempDontCureMeBeforeTime != tar->DontCureMeBefore())
-													g->members[i]->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
+													g->mMembers[i]->SetDontCureMeBefore(Timer::GetCurrentTime() + 4000);
 											}
 										}
 									}
@@ -2531,7 +2531,7 @@ void Merc::CheckHateList() {
 			if(g) {
 				Mob* MercOwner = GetOwner();
 				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
-						float range = g->HasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+						float range = g->hasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 						range = range * range;
 						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
 							AddToHateList(MercOwner->GetTarget(), 1);
@@ -2548,12 +2548,12 @@ void Merc::CheckHateList() {
 						radius *= radius;
 						if(dist <= radius) {
 
-							for(int counter = 0; counter < g->GroupCount(); counter++) {
-								Mob* groupMember = g->members[counter];
+							for(int counter = 0; counter < g->groupCount(); counter++) {
+								Mob* groupMember = g->mMembers[counter];
 								if(groupMember) {
 									if(npc->IsOnHatelist(groupMember)) {
 										if(!hate_list.isHated(npc)) {
-											float range = g->HasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
+											float range = g->hasRole(groupMember, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 											range *= range;
 											if(npc->DistNoRootNoZ(*this) < range) {
 												hate_list.add(npc, 1);
@@ -3719,8 +3719,8 @@ MercSpell Merc::GetBestMercSpellForCure(Merc* caster, Mob *tar) {
 
 			if(g) {
 				for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
-					if(g->members[i] && !g->members[i]->qglobal) {
-						if(caster->GetNeedsCured(g->members[i]))
+					if(g->mMembers[i] && !g->mMembers[i]->qglobal) {
+						if(caster->GetNeedsCured(g->mMembers[i]))
 							countNeedsCured++;
 					}
 				}
@@ -4189,7 +4189,7 @@ void Merc::MercGroupSay(Mob *speaker, const char *msg, ...)
 		Group *g = speaker->GetGroup();
 
 		if(g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->groupMessage(speaker->CastToMob(), 0, 100, buf);
 	}
 }
 
@@ -4353,9 +4353,9 @@ bool Merc::CheckAETaunt() {
 						Group* g = GetGroup();
 
 						if(g) {
-							for(int i = 0; i < g->GroupCount(); i++) {
+							for(int i = 0; i < g->groupCount(); i++) {
 								//if(npc->IsOnHatelist(g->members[i]) && g->members[i]->GetTarget() != npc && g->members[i]->IsEngaged()) {
-								if(GetTarget() != npc && g->members[i]->GetTarget() != npc && npc->IsOnHatelist(g->members[i])) {
+								if(GetTarget() != npc && g->mMembers[i]->GetTarget() != npc && npc->IsOnHatelist(g->mMembers[i])) {
 									result++;
 								}
 							}
@@ -4381,9 +4381,9 @@ Corpse* Merc::GetGroupMemberCorpse() {
 		Group* g = GetGroup();
 
 		if(g) {
-			for(int i = 0; i < g->GroupCount(); i++) {
-				if(g->members[i] && g->members[i]->IsClient()) {
-					corpse = entity_list.GetCorpseByOwnerWithinRange(g->members[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
+			for(int i = 0; i < g->groupCount(); i++) {
+				if(g->mMembers[i] && g->mMembers[i]->IsClient()) {
+					corpse = entity_list.GetCorpseByOwnerWithinRange(g->mMembers[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
 
 					if(corpse && !corpse->isResurrected()) {
 						return corpse;
@@ -5257,7 +5257,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	}
 
 	//check group size
-	if(HasGroup() && GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
+	if(HasGroup() && GetGroup()->groupCount() >= MAX_GROUP_MEMBERS) {
 		if (GetClientVersion() < EQClientRoF)
 			SendMercMerchantResponsePacket(8);
 		else
@@ -5333,7 +5333,7 @@ bool Client::CheckCanUnsuspendMerc() {
 	}
 
 	//check group size
-	if(HasGroup() && GetGroup()->GroupCount() >= MAX_GROUP_MEMBERS) {
+	if(HasGroup() && GetGroup()->groupCount() >= MAX_GROUP_MEMBERS) {
 		if (GetClientVersion() < EQClientRoF)
 			SendMercMerchantResponsePacket(8);
 		else
@@ -5566,11 +5566,11 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
 				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
 				database.RefreshGroupFromDB(mercOwner);
-				g->SaveGroupLeaderAA();
+				g->saveGroupLeaderAA();
 				loaded = true;
 			}
 			else {
-				g->DisbandGroup();
+				g->disbandGroup();
 			}
 		}	//else, somebody from our group is already here...
 		else if (AddMercToGroup(this, mercOwner->GetGroup())) {
@@ -5650,33 +5650,33 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 
 	if(merc && group) {
 		if(merc->HasGroup()) {
-			if(!group->IsLeader(merc)) {
+			if(!group->isLeader(merc)) {
 				merc->SetFollowID(0);
 
-				if(group->DelMember(merc)) {
+				if(group->delMember(merc)) {
 					if(merc->GetMercCharacterID() != 0)
 						database.SetGroupID(merc->GetName(), 0, merc->GetMercCharacterID(), true);
 				}
 
-				if(group->GroupCount() <= 1 && ZoneLoaded)
+				if(group->groupCount() <= 1 && ZoneLoaded)
 				{
-					group->DisbandGroup();
+					group->disbandGroup();
 				}
 			}
 			else {
 				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if(!group->members[i])
+					if(!group->mMembers[i])
 						continue;
 
-					if(!group->members[i]->IsMerc())
+					if(!group->mMembers[i]->IsMerc())
 						continue;
 
-					Merc* groupmerc = group->members[i]->CastToMerc();
+					Merc* groupmerc = group->mMembers[i]->CastToMerc();
 
 					groupmerc->SetOwnerID(0);
 				}
 
-				group->DisbandGroup();
+				group->disbandGroup();
 				database.SetGroupID(merc->GetCleanName(), 0, merc->GetMercCharacterID(), true);
 			}
 
@@ -5696,7 +5696,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 			Merc::RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercOwner() != nullptr) {
+		if(group->addMember(merc) && merc->GetMercOwner() != nullptr) {
 				merc->SetFollowID(merc->GetMercOwner()->GetID());
 				Result = true;
 		}

@@ -644,11 +644,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					uint32 time = spell.base[i]*10;
 					if(g){
 						for(int gi=0; gi < 6; gi++){
-							if(g->members[gi] && g->members[gi]->IsClient())
+							if(g->mMembers[gi] && g->mMembers[gi]->IsClient())
 							{
-								g->members[gi]->CastToClient()->EnableAAEffect(aaEffectWarcry , time);
-								if (g->members[gi]->GetID() != caster->GetID())
-									g->members[gi]->Message(13, "You hear the war cry.");
+								g->mMembers[gi]->CastToClient()->EnableAAEffect(aaEffectWarcry , time);
+								if (g->mMembers[gi]->GetID() != caster->GetID())
+									g->mMembers[gi]->Message(13, "You hear the war cry.");
 								else
 									Message(13, "You let loose a fierce war cry.");
 							}
@@ -1704,7 +1704,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					// We now have a valid target for this spell. Either the caster himself or a targetted player. Lets see if the target is in the group.
 					Group* group = entity_list.GetGroupByClient(TargetClient);
 					if(group) {
-						if(!group->IsGroupMember(TargetClient)) {
+						if(!group->isGroupMember(TargetClient)) {
 							Message(13, "Your target must be a group member for this spell.");
 							break;
 						}
@@ -2403,7 +2403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceHP(spell.base[i], spell.range, caster);
+				g->balanceHP(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2431,7 +2431,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!g)
 					break;
 
-				g->BalanceMana(spell.base[i], spell.range, caster);
+				g->balanceMana(spell.base[i], spell.range, caster);
 				break;
 			}
 
@@ -2515,7 +2515,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					break;
 				}
 
-				g->HealGroup(heal_amt, caster, spell.range);
+				g->healGroup(heal_amt, caster, spell.range);
 				break;
 			}
 

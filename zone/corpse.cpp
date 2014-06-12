@@ -944,7 +944,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				d->gold			= 0;
 				d->platinum		= 0;
 				Group *cgroup = client->GetGroup();
-				cgroup->SplitMoney(getCopper(), getSilver(), getGold(), getPlatinum(), client);
+				cgroup->splitMoney(getCopper(), getSilver(), getGold(), getPlatinum(), client);
 			}
 			else {
 				d->copper		= this->getCopper();
@@ -1254,7 +1254,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app)
 		if(!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
 			if(g != nullptr) {
-				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
+				g->groupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), link);
 			} else {
 				Raid *r = client->GetRaid();
 				if(r != nullptr) {

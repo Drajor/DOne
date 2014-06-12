@@ -853,7 +853,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 		Group* group = GetGroup();
 		if(group != nullptr) {
-			group->GroupMessage(this,language,lang_skill,(const char*) message);
+			group->groupMessage(this,language,lang_skill,(const char*) message);
 		}
 		break;
 	}
@@ -1784,10 +1784,10 @@ void Client::SendManaUpdatePacket() {
 
 
 			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= EQClientSoD))
+				if(g->mMembers[i] && g->mMembers[i]->IsClient() && (g->mMembers[i] != this) && (g->mMembers[i]->CastToClient()->GetClientVersion() >= EQClientSoD))
 				{
-					g->members[i]->CastToClient()->QueuePacket(outapp);
-					g->members[i]->CastToClient()->QueuePacket(outapp2);
+					g->mMembers[i]->CastToClient()->QueuePacket(outapp);
+					g->mMembers[i]->CastToClient()->QueuePacket(outapp2);
 				}
 
 			safe_delete(outapp);
@@ -3023,7 +3023,7 @@ bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
 			Group *g = GetGroup();
 			Raid *r = GetRaid();
 			if (g) {
-				if (g->IsGroupMember(sender))
+				if (g->isGroupMember(sender))
 					return true;
 			} else if (r && sender->IsClient()) {
 				uint32 rgid1 = r->GetGroup(this);
@@ -3185,7 +3185,7 @@ void Client::LinkDead()
 	if (GetGroup())
 	{
 		entity_list.MessageGroup(this,true,15,"%s has gone linkdead.",GetName());
-		GetGroup()->DelMember(this);
+		GetGroup()->delMember(this);
 	}
 	Raid *raid = entity_list.GetRaidByClient(this);
 	if(raid){
@@ -3787,7 +3787,7 @@ void Client::Sacrifice(Client *caster)
 						UnmemSpellAll();
 						Group *g = GetGroup();
 						if(g){
-							g->MemberZoned(this);
+							g->memberZoned(this);
 						}
 						Raid *r = entity_list.GetRaidByClient(this);
 						if(r){
@@ -4088,7 +4088,7 @@ void Client::UpdateLFP() {
 
 	Group *g = GetGroup();
 
-	if(g && !g->IsLeader(this)) {
+	if(g && !g->isLeader(this)) {
 		database.SetLFP(CharacterID(), false);
 		worldserver.StopLFP(CharacterID());
 		LFP = false;
@@ -4117,8 +4117,8 @@ void Client::UpdateLFP() {
 		// for us, if it can.
 		int NextFreeSlot = 1;
 		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if((g->membername[i][0] != '\0') && strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
+			if((g->mMemberNames[i][0] != '\0') && strcasecmp(g->mMemberNames[i], LFPMembers[0].Name))
+				strcpy(LFPMembers[NextFreeSlot++].Name, g->mMemberNames[i]);
 		}
 	}
 	worldserver.UpdateLFP(CharacterID(), LFPMembers);
@@ -4290,7 +4290,7 @@ bool Client::IsLeadershipEXPOn()
 
 	Group *g = GetGroup();
 
-	if(g && g->IsLeader(this) && (g->GroupCount() > 2))
+	if(g && g->isLeader(this) && (g->groupCount() > 2))
 		return true;
 
 	Raid *r = GetRaid();
@@ -4552,7 +4552,7 @@ void Client::HandleLDoNOpen(NPC *target)
 				}
 				else if(GetGroup())
 				{
-					GetGroup()->SplitExp(target->GetLevel()*target->GetLevel()*2625/10, target);
+					GetGroup()->splitExp(target->GetLevel()*target->GetLevel()*2625/10, target);
 				}
 				else
 				{

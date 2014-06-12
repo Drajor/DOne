@@ -1080,7 +1080,7 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	{
 		Group *g = entity_list.GetGroupByClient(initiator);
 		if (g != nullptr) {
-			g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
+			g->teleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
 		}
 		else {
 			Raid *r = entity_list.GetRaidByClient(initiator);
@@ -2248,7 +2248,7 @@ int QuestManager::getlevel(uint8 type)
 	{
 		Group *g = entity_list.GetGroupByClient(initiator);
 		if (g != nullptr)
-			return (g->GetAvgLevel());
+			return (g->getAvgLevel());
 		else
 			return 0;
 	}
@@ -2270,7 +2270,7 @@ int QuestManager::getlevel(uint8 type)
 		Group *g = entity_list.GetGroupByClient(initiator);
 		if(g != nullptr)
 		{
-			return (g->GetAvgLevel());
+			return (g->getAvgLevel());
 		}
 		else
 			return (initiator->GetLevel());

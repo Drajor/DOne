@@ -225,8 +225,8 @@ void WorldServer::Process() {
 						break;
 
 					for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-						if(g->members[i] && g->members[i]->IsClient())
-							g->members[i]->CastToClient()->QueuePacket(outapp);
+						if(g->mMembers[i] && g->mMembers[i]->IsClient())
+							g->mMembers[i]->CastToClient()->QueuePacket(outapp);
 
 					}
 					break;
@@ -869,7 +869,7 @@ void WorldServer::Process() {
 
 					database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
 
-					group->UpdateGroupAAs();
+					group->updateGroupAAs();
 
 					if(Inviter->CastToClient()->GetClientVersion() < EQClientSoD)
 					{
@@ -878,7 +878,7 @@ void WorldServer::Process() {
 						strcpy(outgj->membername, Inviter->GetName());
 						strcpy(outgj->yourname, Inviter->GetName());
 						outgj->action = groupActInviteInitial; // 'You have formed the group'.
-						group->GetGroupAAs(&outgj->leader_aas);
+						group->getGroupAAs(&outgj->leader_aas);
 						Inviter->CastToClient()->QueuePacket(outapp);
 						safe_delete(outapp);
 					}
@@ -906,7 +906,7 @@ void WorldServer::Process() {
 
 				safe_delete(outapp);
 
-				if(!group->AddMember(nullptr, sgfs->gf.name2, sgfs->CharacterID))
+				if(!group->addMember(nullptr, sgfs->gf.name2, sgfs->CharacterID))
 					break;
 
 				if(Inviter->CastToClient()->IsLFP())
@@ -971,7 +971,7 @@ void WorldServer::Process() {
 				}	//else, somebody from our group is already here...
 
 				if(group)
-					group->UpdatePlayer(c);
+					group->updatePlayer(c);
 				else
 				{
 					if(c->GetMerc())
@@ -985,10 +985,10 @@ void WorldServer::Process() {
 			{
 				database.RefreshGroupFromDB(c);
 
-				group->SendHPPacketsTo(c);
+				group->sendHPPacketsTo(c);
 
 				// If the group leader is not set, pull the group leader infomrmation from the database.
-				if(!group->GetLeader())
+				if(!group->getLeader())
 				{
 					char ln[64];
 					char MainTankName[64];
@@ -1000,13 +1000,13 @@ void WorldServer::Process() {
 					strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
 					Client *lc = entity_list.GetClientByName(ln);
 					if(lc)
-						group->SetLeader(lc);
+						group->setLeader(lc);
 
-					group->SetMainTank(MainTankName);
-					group->SetMainAssist(AssistName);
-					group->SetPuller(PullerName);
-					group->SetNPCMarker(NPCMarkerName);
-					group->SetGroupAAs(&GLAA);
+					group->setMainTank(MainTankName);
+					group->setMainAssist(AssistName);
+					group->setPuller(PullerName);
+					group->setNPCMarker(NPCMarkerName);
+					group->setGroupAAs(&GLAA);
 
 				}
 			}
@@ -1036,7 +1036,7 @@ void WorldServer::Process() {
 
 				Group* g = entity_list.GetGroupByID(gj->gid);
 				if(g)
-					g->AddMember(gj->member_name);
+					g->addMember(gj->member_name);
 
 				entity_list.SendGroupJoin(gj->gid, gj->member_name);
 			}
@@ -1072,7 +1072,7 @@ void WorldServer::Process() {
 
 				Group *g = entity_list.GetGroupByID(sd->groupid);
 				if(g)
-					g->DisbandGroup();
+					g->disbandGroup();
 			}
 			break;
 		}

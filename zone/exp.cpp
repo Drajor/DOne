@@ -509,7 +509,7 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) {
 	SetEXP(newexp, GetAAXP());
 }
 
-void Group::SplitExp(uint32 exp, Mob* other) {
+void Group::splitExp(uint32 exp, Mob* other) {
 	if( other->CastToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
 		return;
 
@@ -522,9 +522,9 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 	uint8 maxlevel = 1;
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] != nullptr) {
-			if(members[i]->GetLevel() > maxlevel)
-				maxlevel = members[i]->GetLevel();
+		if (mMembers[i] != nullptr) {
+			if(mMembers[i]->GetLevel() > maxlevel)
+				maxlevel = mMembers[i]->GetLevel();
 
 			membercount++;
 		}
@@ -548,9 +548,9 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		return;
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (members[i] != nullptr && members[i]->IsClient()) // If Group Member is Client
+		if (mMembers[i] != nullptr && mMembers[i]->IsClient()) // If Group Member is Client
 		{
-			Client *cmember = members[i]->CastToClient();
+			Client *cmember = mMembers[i]->CastToClient();
 			// add exp + exp cap
 			int16 diff = cmember->GetLevel() - maxlevel;
 			int16 maxdiff = -(cmember->GetLevel()*15/10 - cmember->GetLevel());

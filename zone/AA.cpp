@@ -1526,10 +1526,10 @@ int Client::GroupLeadershipAAHealthEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAHealthEnhancement))
+	switch(g->getLeadershipAA(groupAAHealthEnhancement))
 	{
 		case 0:
 			return 0;
@@ -1548,10 +1548,10 @@ int Client::GroupLeadershipAAManaEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAManaEnhancement))
+	switch(g->getLeadershipAA(groupAAManaEnhancement))
 	{
 		case 0:
 			return 0;
@@ -1570,10 +1570,10 @@ int Client::GroupLeadershipAAHealthRegeneration()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAHealthRegeneration))
+	switch(g->getLeadershipAA(groupAAHealthRegeneration))
 	{
 		case 0:
 			return 0;
@@ -1592,10 +1592,10 @@ int Client::GroupLeadershipAAOffenseEnhancement()
 {
 	Group *g = GetGroup();
 
-	if(!g || (g->GroupCount() < 3))
+	if(!g || (g->groupCount() < 3))
 		return 0;
 
-	switch(g->GetLeadershipAA(groupAAOffenseEnhancement))
+	switch(g->getLeadershipAA(groupAAOffenseEnhancement))
 	{
 		case 0:
 			return 0;

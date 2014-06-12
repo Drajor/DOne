@@ -1433,14 +1433,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 			Group *g = GetGroup();
 
-			if(g && g->HasRole(this, RoleAssist))
-				g->SetGroupAssistTarget(0);
+			if(g && g->hasRole(this, RoleAssist))
+				g->setGroupAssistTarget(0);
 
-			if(g && g->HasRole(this, RoleTank))
-				g->SetGroupTankTarget(0);
+			if(g && g->hasRole(this, RoleTank))
+				g->setGroupTankTarget(0);
 
-			if(g && g->HasRole(this, RolePuller))
-				g->SetGroupPullerTarget(0);
+			if(g && g->hasRole(this, RolePuller))
+				g->setGroupPullerTarget(0);
 
 			return;
 		}
@@ -1467,14 +1467,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 
 	Group *g = GetGroup();
 
-	if(g && g->HasRole(this, RoleAssist))
-		g->SetGroupAssistTarget(GetTarget());
+	if(g && g->hasRole(this, RoleAssist))
+		g->setGroupAssistTarget(GetTarget());
 
-	if(g && g->HasRole(this, RoleTank))
-		g->SetGroupTankTarget(GetTarget());
+	if(g && g->hasRole(this, RoleTank))
+		g->setGroupTankTarget(GetTarget());
 
-	if(g && g->HasRole(this, RolePuller))
-		g->SetGroupPullerTarget(GetTarget());
+	if(g && g->hasRole(this, RolePuller))
+		g->setGroupPullerTarget(GetTarget());
 
 	// For /target, send reject or success packet
 	if (app->GetOpcode() == OP_TargetCommand) {
@@ -1760,7 +1760,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket *app)
 	else if(IsGrouped())
 	{
 		g = GetGroup();
-		group_members = g->GroupCount();
+		group_members = g->groupCount();
 	}
 	else
 	{
@@ -1821,7 +1821,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket *app)
 			}
 
 			const char *c_name = nullptr;
-			c_name = g->GetClientNameByIndex(x);
+			c_name = g->getClientNameByIndex(x);
 			if(c_name)
 			{
 				memcpy((packet->pBuffer + sizeof(ServerAdventureRequest_Struct) + (64 * i)), c_name, strlen(c_name));
@@ -6266,7 +6266,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	if(Invitee) {
 		if(Invitee->IsClient()) {
 			if((!Invitee->IsGrouped() && !Invitee->IsRaidGrouped()) ||
-				(Invitee->GetGroup() && Invitee->CastToClient()->GetMerc() && Invitee->GetGroup()->GroupCount() == 2))
+				(Invitee->GetGroup() && Invitee->CastToClient()->GetMerc() && Invitee->GetGroup()->groupCount() == 2))
 			{
 				if(app->GetOpcode() == OP_GroupInvite2)
 				{
@@ -6432,7 +6432,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CastToClient()->CharacterID());
 			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
 
-			group->UpdateGroupAAs();
+			group->updateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
 			if(inviter->CastToClient()->GetClientVersion() < EQClientSoD)
@@ -6442,7 +6442,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 				strcpy(outgj->membername, inviter->GetName());
 				strcpy(outgj->yourname, inviter->GetName());
 				outgj->action = groupActInviteInitial; // 'You have formed the group'.
-				group->GetGroupAAs(&outgj->leader_aas);
+				group->getGroupAAs(&outgj->leader_aas);
 				inviter->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
 			}
@@ -6463,7 +6463,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 
 		inviter->CastToClient()->QueuePacket(app);//notify inviter the client accepted
 
-		if(!group->AddMember(this))
+		if(!group->addMember(this))
 			return;
 
 		if(inviter->CastToClient()->IsLFP()) {
@@ -6476,7 +6476,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			SendGroupJoinAcknowledge();
 
 		database.RefreshGroupFromDB(this);
-		group->SendHPPacketsTo(this);
+		group->sendHPPacketsTo(this);
 
 		// Temporary hack for SoD, as things seem to work quite differently
 		if(inviter->CastToClient()->GetClientVersion() >= EQClientSoD)
@@ -6575,8 +6575,8 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	if(!group)
 		return;
 
-	if((group->IsLeader(this) && (GetTarget() == 0 || GetTarget() == this)) || (group->GroupCount()<3)) {
-		group->DisbandGroup();
+	if((group->isLeader(this) && (GetTarget() == 0 || GetTarget() == this)) || (group->groupCount()<3)) {
+		group->disbandGroup();
 		if(GetMerc() != nullptr)
 			GetMerc()->Suspend();
 	} else {
@@ -6587,12 +6587,12 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			memberToDisband = entity_list.GetMob(gd->name2);
 
 			if(memberToDisband ) {
-				if(group->IsLeader(this)) {
+				if(group->isLeader(this)) {
 					// the group leader can kick other members out of the group...
 					//group->DelMember(memberToDisband,false);
 					if(memberToDisband->IsClient())
 					{
-						group->DelMember(memberToDisband,false);
+						group->delMember(memberToDisband,false);
 						Client* memberClient = memberToDisband->CastToClient();
 						Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
 						if(memberClient && memberMerc && group)
@@ -6608,7 +6608,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 								}
 								if(Merc::AddMercToGroup(memberMerc, g)) {
 									database.SetGroupLeaderName(g->GetID(), memberClient->GetName());
-									g->SaveGroupLeaderAA();
+									g->saveGroupLeaderAA();
 									database.SetGroupID(memberClient->GetName(), g->GetID(), memberClient->CharacterID());
 									database.SetGroupID(memberMerc->GetName(), g->GetID(), memberClient->CharacterID(), true);
 									database.RefreshGroupFromDB(memberClient);
@@ -6622,7 +6622,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 				}
 				else {
 					// ...but other members can only remove themselves
-					group->DelMember(this,false);
+					group->delMember(this,false);
 
 					if(!IsGrouped() && GetMerc() != nullptr) {
 						if(!IsGrouped()) {
@@ -6643,7 +6643,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 
 							if(Merc::AddMercToGroup(GetMerc(), g)) {
 								database.SetGroupLeaderName(g->GetID(), this->GetName());
-								g->SaveGroupLeaderAA();
+								g->saveGroupLeaderAA();
 								database.SetGroupID(this->GetName(), g->GetID(), this->CharacterID());
 								database.SetGroupID(GetMerc()->GetName(), g->GetID(), this->CharacterID(), true);
 								database.RefreshGroupFromDB(this);
@@ -6673,7 +6673,7 @@ void Client::Handle_OP_GroupDelete(const EQApplicationPacket *app)
 //should check for leader, only they should be able to do this..
 	Group* group = GetGroup();
 	if (group)
-		group->DisbandGroup();
+		group->disbandGroup();
 
 	if(LFP)
 		UpdateLFP();
@@ -8125,7 +8125,7 @@ void Client::Handle_OP_Split(const EQApplicationPacket *app)
 		Message(13, "You do not have enough money to do that split.");
 		return;
 	}
-	cgroup->SplitMoney(split->copper, split->silver, split->gold, split->platinum);
+	cgroup->splitMoney(split->copper, split->silver, split->gold, split->platinum);
 
 	return;
 
@@ -8977,7 +8977,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		}	//else, somebody from our group is already here...
 
 		if(group)
-			group->UpdatePlayer(this);
+			group->updatePlayer(this);
 		else
 			database.SetGroupID(GetName(), 0, CharacterID());	//cannot re-establish group, kill it
 
@@ -8990,7 +8990,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	if(group){
 		// If the group leader is not set, pull the group leader infomrmation from the database.
-		if(!group->GetLeader()){
+		if(!group->getLeader()){
 			char ln[64];
 			char MainTankName[64];
 			char AssistName[64];
@@ -9001,13 +9001,13 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
 			Client *c = entity_list.GetClientByName(ln);
 			if(c)
-				group->SetLeader(c);
+				group->setLeader(c);
 
-			group->SetMainTank(MainTankName);
-			group->SetMainAssist(AssistName);
-			group->SetPuller(PullerName);
-			group->SetNPCMarker(NPCMarkerName);
-			group->SetGroupAAs(&GLAA);
+			group->setMainTank(MainTankName);
+			group->setMainAssist(AssistName);
+			group->setPuller(PullerName);
+			group->setNPCMarker(NPCMarkerName);
+			group->setGroupAAs(&GLAA);
 
 			//group->NotifyMainTank(this, 1);
 			//group->NotifyMainAssist(this, 1);
@@ -9015,8 +9015,8 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 			// If we are the leader, force an update of our group AAs to other members in the zone, in case
 			// we purchased a new one while out-of-zone.
-			if(group->IsLeader(this))
-				group->SendLeadershipAAUpdate();
+			if(group->isLeader(this))
+				group->sendLeadershipAAUpdate();
 
 		}
 		LFG = false;
@@ -9659,8 +9659,8 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app) {
 
 	// Update all group members with the new AA the leader has purchased.
 	if(g) {
-		g->UpdateGroupAAs();
-		g->SendLeadershipAAUpdate();
+		g->updateGroupAAs();
+		g->sendLeadershipAAUpdate();
 	}
 
 }
@@ -9821,7 +9821,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		if(i){
 			Group *g = i->GetGroup();
 			if(g){
-				if(g->IsLeader(i) == false)
+				if(g->isLeader(i) == false)
 					Message(13, "You can only invite an ungrouped player or group leader to join your raid.");
 				else{
 					//This sends an "invite" to the client in question.
@@ -9863,7 +9863,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				r->VerifyRaid();
 				Group *g = GetGroup();
 				if(g){
-					if(g->GroupCount()+r->RaidCount() > MAX_RAID_MEMBERS)
+					if(g->groupCount()+r->RaidCount() > MAX_RAID_MEMBERS)
 					{
 						i->Message(13, "Invite failed, group invite would create a raid larger than the maximum number of members allowed.");
 						return;
@@ -9881,10 +9881,10 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					Client *addClient = nullptr;
 					for(int x = 0; x < 6; x++)
 					{
-						if(g->members[x]){
+						if(g->mMembers[x]){
 							Client *c = nullptr;
-							if(g->members[x]->IsClient())
-								c = g->members[x]->CastToClient();
+							if(g->mMembers[x]->IsClient())
+								c = g->mMembers[x]->CastToClient();
 							else
 								continue;
 
@@ -9896,7 +9896,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 
 							r->SendRaidCreate(c);
 							r->SendMakeLeaderPacketTo(r->leadername, c);
-							if(g->IsLeader(g->members[x]))
+							if(g->isLeader(g->mMembers[x]))
 								r->AddMember(c, freeGroup, false, true);
 							else
 								r->AddMember(c, freeGroup);
@@ -9906,7 +9906,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->disbandGroup();
 					r->GroupUpdate(freeGroup);
 				}
 				else{
@@ -9934,17 +9934,17 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						Client *addClientig = nullptr;
 						for(int x = 0; x < 6; x++)
 						{
-							if(ig->members[x]){
+							if(ig->mMembers[x]){
 								if(!addClientig){
-									if(ig->members[x]->IsClient()){
-										addClientig = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient()){
+										addClientig = ig->mMembers[x]->CastToClient();
 										r->SetGroupLeader(addClientig->GetName());
 									}
 								}
-								if(ig->IsLeader(ig->members[x])){
+								if(ig->isLeader(ig->mMembers[x])){
 									Client *c = nullptr;
-									if(ig->members[x]->IsClient())
-										c = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient())
+										c = ig->mMembers[x]->CastToClient();
 									else
 										continue;
 									r->SendRaidCreate(c);
@@ -9957,8 +9957,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 								else{
 									Client *c = nullptr;
-									if(ig->members[x]->IsClient())
-										c = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient())
+										c = ig->mMembers[x]->CastToClient();
 									else
 										continue;
 									r->SendRaidCreate(c);
@@ -9971,7 +9971,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 							}
 						}
-						ig->DisbandGroup();
+						ig->disbandGroup();
 						r->GroupUpdate(groupFree);
 						groupFree = r->GetFreeGroup();
 					}
@@ -9984,19 +9984,19 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					//now add the existing group
 					for(int x = 0; x < 6; x++)
 					{
-						if(g->members[x]){
+						if(g->mMembers[x]){
 							if(!addClient)
 							{
-								if(g->members[x]->IsClient()){
-									addClient = g->members[x]->CastToClient();
+								if(g->mMembers[x]->IsClient()){
+									addClient = g->mMembers[x]->CastToClient();
 									r->SetGroupLeader(addClient->GetName());
 								}
 							}
-							if(g->IsLeader(g->members[x]))
+							if(g->isLeader(g->mMembers[x]))
 							{
 								Client *c = nullptr;
-								if(g->members[x]->IsClient())
-									c = g->members[x]->CastToClient();
+								if(g->mMembers[x]->IsClient())
+									c = g->mMembers[x]->CastToClient();
 								else
 									continue;
 								r->SendRaidCreate(c);
@@ -10010,8 +10010,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							else
 							{
 								Client *c = nullptr;
-								if(g->members[x]->IsClient())
-									c = g->members[x]->CastToClient();
+								if(g->mMembers[x]->IsClient())
+									c = g->mMembers[x]->CastToClient();
 								else
 									continue;
 								r->SendRaidCreate(c);
@@ -10024,7 +10024,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->disbandGroup();
 					r->GroupUpdate(groupFree);
 				}
 				else
@@ -10036,19 +10036,19 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						Client *addClientig = nullptr;
 						for(int x = 0; x < 6; x++)
 						{
-							if(ig->members[x])
+							if(ig->mMembers[x])
 							{
 								if(!addClientig){
-									if(ig->members[x]->IsClient()){
-										addClientig = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient()){
+										addClientig = ig->mMembers[x]->CastToClient();
 										r->SetGroupLeader(addClientig->GetName());
 									}
 								}
-								if(ig->IsLeader(ig->members[x]))
+								if(ig->isLeader(ig->mMembers[x]))
 								{
 									Client *c = nullptr;
-									if(ig->members[x]->IsClient())
-										c = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient())
+										c = ig->mMembers[x]->CastToClient();
 									else
 										continue;
 
@@ -10063,8 +10063,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								else
 								{
 									Client *c = nullptr;
-									if(ig->members[x]->IsClient())
-										c = ig->members[x]->CastToClient();
+									if(ig->mMembers[x]->IsClient())
+										c = ig->mMembers[x]->CastToClient();
 									else
 										continue;
 
@@ -10082,7 +10082,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						r->SendMakeLeaderPacketTo(r->leadername, this);
 						r->SendBulkRaid(this);
 						r->AddMember(this);
-						ig->DisbandGroup();
+						ig->disbandGroup();
 						r->GroupUpdate(0);
 						if(r->IsLocked()) {
 							r->SendRaidLockTo(this);
@@ -10646,7 +10646,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
 	if(g) {
 		// This should not happen. The client checks if you are in a group and will not let you put LFP on if
 		// you are not the leader.
-		if(!g->IsLeader(this)) {
+		if(!g->isLeader(this)) {
 			LogFile->write(EQEMuLog::Error,"Client sent LFP on for character %s who is grouped but not leader.", GetName());
 			return;
 		}
@@ -10656,8 +10656,8 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app) {
 		// for us, if it can.
 		int NextFreeSlot = 1;
 		for(unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if(strcasecmp(g->membername[i], LFPMembers[0].Name))
-				strcpy(LFPMembers[NextFreeSlot++].Name, g->membername[i]);
+			if(strcasecmp(g->mMemberNames[i], LFPMembers[0].Name))
+				strcpy(LFPMembers[NextFreeSlot++].Name, g->mMemberNames[i]);
 		}
 	}
 
@@ -10895,7 +10895,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) 
 			{
 				Group* g = GetGroup();
 				if(g)
-					g->MarkNPC(GetTarget(), dglas->Parameter);
+					g->markNPC(GetTarget(), dglas->Parameter);
 			}
 			break;
 		}
@@ -10909,10 +10909,10 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app) 
 
 			Group *g = GetGroup();
 
-			if(!g || (g->GroupCount() < 3))
+			if(!g || (g->groupCount() < 3))
 				return;
 
-			Target->CastToClient()->InspectBuffs(this, g->GetLeadershipAA(groupAAInspectBuffs));
+			Target->CastToClient()->InspectBuffs(this, g->getLeadershipAA(groupAAInspectBuffs));
 
 			break;
 		}
@@ -10937,7 +10937,7 @@ void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app) {
 	Group *g = GetGroup();
 
 	if(g)
-		g->ClearAllNPCMarks();
+		g->clearAllNPCMarks();
 }
 
 void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app) {
@@ -10962,22 +10962,22 @@ void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app) {
 	{
 		case 0:
 		{
-			g->DelegateMainAssist(das->Name);
+			g->delegateMainAssist(das->Name);
 			break;
 		}
 		case 1:
 		{
-			g->DelegateMarkNPC(das->Name);
+			g->delegateMarkNPC(das->Name);
 			break;
 		}
 		case 2:
 		{
-			g->DelegateMainTank(das->Name);
+			g->delegateMainTank(das->Name);
 			break;
 		}
 		case 3:
 		{
-			g->DelegatePuller(das->Name);
+			g->delegatePuller(das->Name);
 			break;
 		}
 		default:
@@ -11358,8 +11358,8 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 
 			if (newleader && group) {
 				// the client only sends this if it's the group leader, but check anyway
-				if(group->IsLeader(this))
-					group->ChangeLeader(newleader);
+				if(group->isLeader(this))
+					group->changeLeader(newleader);
 				else {
 					LogFile->write(EQEMuLog::Debug, "Group /makeleader request originated from non-leader member: %s",GetName());
 					DumpPacket(app);
@@ -11973,25 +11973,25 @@ void Client::Handle_OP_GroupRoles(const EQApplicationPacket *app)
 		case 1: //Main Tank
 		{
 			if(grs->Toggle)
-				g->DelegateMainTank(grs->Name1, grs->Toggle);
+				g->delegateMainTank(grs->Name1, grs->Toggle);
 			else
-				g->UnDelegateMainTank(grs->Name1, grs->Toggle);
+				g->undelegateMainTank(grs->Name1, grs->Toggle);
 			break;
 		}
 		case 2: //Main Assist
 		{
 			if(grs->Toggle)
-				g->DelegateMainAssist(grs->Name1, grs->Toggle);
+				g->delegateMainAssist(grs->Name1, grs->Toggle);
 			else
-				g->UnDelegateMainAssist(grs->Name1, grs->Toggle);
+				g->undelegateMainAssist(grs->Name1, grs->Toggle);
 			break;
 		}
 		case 3: //Puller
 		{
 			if(grs->Toggle)
-				g->DelegatePuller(grs->Name1, grs->Toggle);
+				g->delegatePuller(grs->Name1, grs->Toggle);
 			else
-				g->UnDelegatePuller(grs->Name1, grs->Toggle);
+				g->undelegatePuller(grs->Name1, grs->Toggle);
 			break;
 		}
 		default:
@@ -12392,8 +12392,8 @@ void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket *app)
 
 	if (NewLeader && g)
 	{
-		if(g->IsLeader(this))
-			g->ChangeLeader(NewLeader);
+		if(g->isLeader(this))
+			g->changeLeader(NewLeader);
 		else {
 			LogFile->write(EQEMuLog::Debug, "Group /makeleader request originated from non-leader member: %s", GetName());
 			DumpPacket(app);
@@ -13097,7 +13097,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.GetClientByName(g->GetMainTankName());
+				Client *c = entity_list.GetClientByName(g->getMainTankName());
 
 				if(c)
 				{
@@ -13106,7 +13106,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 				}
 				else
 				{
-					strncpy(XTargets[Slot].Name, g->GetMainTankName(), 64);
+					strncpy(XTargets[Slot].Name, g->getMainTankName(), 64);
 				}
 				SendXTargetPacket(Slot, c);
 			}
@@ -13117,7 +13117,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			Group *g = GetGroup();
 
 			if(g)
-				g->NotifyTankTarget(this);
+				g->notifyTankTarget(this);
 
 			break;
 		}
@@ -13128,7 +13128,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.GetClientByName(g->GetMainAssistName());
+				Client *c = entity_list.GetClientByName(g->getMainAssistName());
 
 				if(c)
 				{
@@ -13137,7 +13137,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 				}
 				else
 				{
-					strncpy(XTargets[Slot].Name, g->GetMainAssistName(), 64);
+					strncpy(XTargets[Slot].Name, g->getMainAssistName(), 64);
 				}
 				SendXTargetPacket(Slot, c);
 			}
@@ -13150,7 +13150,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			Group *g = GetGroup();
 
 			if(g)
-				g->NotifyAssistTarget(this);
+				g->notifyAssistTarget(this);
 
 			break;
 		}
@@ -13161,7 +13161,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.GetClientByName(g->GetPullerName());
+				Client *c = entity_list.GetClientByName(g->getPullerName());
 
 				if(c)
 				{
@@ -13170,7 +13170,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 				}
 				else
 				{
-					strncpy(XTargets[Slot].Name, g->GetPullerName(), 64);
+					strncpy(XTargets[Slot].Name, g->getPullerName(), 64);
 				}
 				SendXTargetPacket(Slot, c);
 			}
@@ -13183,7 +13183,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			Group *g = GetGroup();
 
 			if(g)
-				g->NotifyPullerTarget(this);
+				g->notifyPullerTarget(this);
 
 			break;
 		}
@@ -13195,7 +13195,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			Group *g = GetGroup();
 
 			if(g)
-				g->SendMarkedNPCsToMember(this);
+				g->sendMarkedNPCsToMember(this);
 
 			break;
 		}

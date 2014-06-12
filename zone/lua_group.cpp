@@ -14,77 +14,77 @@
 
 void Lua_Group::DisbandGroup() {
 	Lua_Safe_Call_Void();
-	self->DisbandGroup();
+	self->disbandGroup();
 }
 
 bool Lua_Group::IsGroupMember(Lua_Mob mob) {
 	Lua_Safe_Call_Bool();
-	return self->IsGroupMember(mob);
+	return self->isGroupMember(mob);
 }
 
 void Lua_Group::CastGroupSpell(Lua_Mob caster, int spell_id) {
 	Lua_Safe_Call_Void();
-	self->CastGroupSpell(caster, spell_id);
+	self->castGroupSpell(caster, spell_id);
 }
 
 void Lua_Group::SplitExp(uint32 exp, Lua_Mob other) {
 	Lua_Safe_Call_Void();
-	self->SplitExp(exp, other);
+	self->splitExp(exp, other);
 }
 
 void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char *message) {
 	Lua_Safe_Call_Void();
-	self->GroupMessage(sender, language, 100, message);
+	self->groupMessage(sender, language, 100, message);
 }
 
 uint32 Lua_Group::GetTotalGroupDamage(Lua_Mob other) {
 	Lua_Safe_Call_Int();
-	return self->GetTotalGroupDamage(other);
+	return self->getTotalGroupDamage(other);
 }
 
 void Lua_Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	Lua_Safe_Call_Void();
-	self->SplitMoney(copper, silver, gold, platinum);
+	self->splitMoney(copper, silver, gold, platinum);
 }
 
 void Lua_Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter) {
 	Lua_Safe_Call_Void();
-	self->SplitMoney(copper, silver, gold, platinum, splitter);
+	self->splitMoney(copper, silver, gold, platinum, splitter);
 }
 
 void Lua_Group::SetLeader(Lua_Mob leader) {
 	Lua_Safe_Call_Void();
-	self->SetLeader(leader);
+	self->setLeader(leader);
 }
 
 Lua_Mob Lua_Group::GetLeader() {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return self->GetLeader();
+	return self->getLeader();
 }
 
 const char *Lua_Group::GetLeaderName() {
 	Lua_Safe_Call_String();
-	return self->GetLeaderName();
+	return self->getLeaderName();
 }
 
 bool Lua_Group::IsLeader(Lua_Mob leader) {
 	Lua_Safe_Call_Bool();
-	return self->IsLeader(leader);
+	return self->isLeader(leader);
 }
 
 int Lua_Group::GroupCount() {
 	Lua_Safe_Call_Int();
-	return self->GroupCount();
+	return self->groupCount();
 }
 
 int Lua_Group::GetHighestLevel() {
 	Lua_Safe_Call_Int();
-	return self->GetHighestLevel();
+	return self->getHighestLevel();
 }
 
 void Lua_Group::TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h) {
 	Lua_Safe_Call_Void();
-	self->TeleportGroup(sender, zone_id, instance_id, x, y, z, h);
+	self->teleportGroup(sender, zone_id, instance_id, x, y, z, h);
 }
 
 int Lua_Group::GetID() {
@@ -99,7 +99,7 @@ Lua_Mob Lua_Group::GetMember(int index) {
 		return Lua_Mob();
 	}
 
-	return self->members[index];
+	return self->mMembers[index];
 }
 
 luabind::scope lua_register_group() {

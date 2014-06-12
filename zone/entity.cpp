@@ -376,7 +376,7 @@ void EntityList::GroupProcess()
 
 	auto it = group_list.begin();
 	while (it != group_list.end()) {
-		(*it)->Process();
+		(*it)->process();
 		++it;
 	}
 
@@ -389,7 +389,7 @@ void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPac
 {
 	auto it = group_list.begin();
 	while (it != group_list.end()) {
-		(*it)->QueueHPPacketsForNPCHealthAA(sender, app);
+		(*it)->queueHPPacketsForNPCHealthAA(sender, app);
 		++it;
 	}
 }
@@ -501,7 +501,7 @@ void EntityList::MobProcess()
 				Group *g = GetGroupByMob(mob);
 				if (g) {
 					LogFile->write(EQEMuLog::Error, "About to delete a client still in a group.");
-					g->DelMember(mob);
+					g->delMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if (r) {
@@ -1401,7 +1401,7 @@ void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
 				(filter == FilterNone
 				|| filter2 == FilterShow
 				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
-					(ent->GetGroup() && ent->GetGroup()->IsGroupMember(sender))))
+					(ent->GetGroup() && ent->GetGroup()->isGroupMember(sender))))
 				|| (filter2 == FilterShowSelfOnly && ent == sender))
 			&& (ent->DistNoRoot(*sender) <= dist2)) {
 				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
@@ -1646,7 +1646,7 @@ Group *EntityList::GetGroupByMob(Mob *mob)
 	iterator = group_list.begin();
 
 	while (iterator != group_list.end()) {
-		if ((*iterator)->IsGroupMember(mob))
+		if ((*iterator)->isGroupMember(mob))
 			return *iterator;
 		++iterator;
 	}
@@ -1663,7 +1663,7 @@ Group *EntityList::GetGroupByLeaderName(const char *leader)
 	iterator = group_list.begin();
 
 	while (iterator != group_list.end()) {
-		if (!strcmp((*iterator)->GetLeaderName(), leader))
+		if (!strcmp((*iterator)->getLeaderName(), leader))
 			return *iterator;
 		++iterator;
 	}
@@ -1697,7 +1697,7 @@ Group *EntityList::GetGroupByClient(Client *client)
 	iterator = group_list.begin();
 
 	while (iterator != group_list.end()) {
-		if ((*iterator)->IsGroupMember(client->CastToMob()))
+		if ((*iterator)->isGroupMember(client->CastToMob()))
 			return *iterator;
 		++iterator;
 	}
@@ -2923,7 +2923,7 @@ bool EntityList::MakeTrackPacket(Client *client)
 				track_ent->distance = MobDistance;
 				track_ent->level = cur_entity->GetLevel();
 				track_ent->NPC = !cur_entity->IsClient();
-				if (g && cur_entity->IsClient() && g->IsGroupMember(cur_entity->CastToMob()))
+				if (g && cur_entity->IsClient() && g->isGroupMember(cur_entity->CastToMob()))
 					track_ent->GroupMember = 1;
 				else
 					track_ent->GroupMember = 0;
@@ -3688,13 +3688,13 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 					strcpy(gj->membername, name);
 					gj->action = groupActLeave;
 					strcpy(gj->yourname, c->GetName());
-					Mob *Leader = g->GetLeader();
+					Mob *Leader = g->getLeader();
 					if (Leader)
 						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
 					c->QueuePacket(outapp);
 					safe_delete(outapp);
-					g->DelMemberOOZ(name);
-					if (g->IsLeader(c) && c->IsLFP())
+					g->delMemberOOZ(name);
+					if (g->isLeader(c) && c->IsLFP())
 						c->UpdateLFP();
 				}
 			}
@@ -3717,7 +3717,7 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name)
 					strcpy(gj->membername, name);
 					gj->action = groupActJoin;
 					strcpy(gj->yourname, it->second->GetName());
-					Mob *Leader = g->GetLeader();
+					Mob *Leader = g->getLeader();
 					if (Leader)
 						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
 
@@ -4091,7 +4091,7 @@ void EntityList::UnMarkNPC(uint16 ID)
 			g = it->second->GetGroup();
 
 			if (g)
-				g->UnMarkNPC(ID);
+				g->unMarkNPC(ID);
 		}
 		++it;
 	}
@@ -4359,7 +4359,7 @@ void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)
 					b->CreateDespawnPacket(&outapp, false);
 				c->QueuePacket(&outapp);
 			} else if(NewMode == HideCorpseAllButGroup) {
-				if (!g->IsGroupMember(b->GetOwnerName())) {
+				if (!g->isGroupMember(b->GetOwnerName())) {
 					EQApplicationPacket outapp;
 						b->CreateDespawnPacket(&outapp, false);
 					c->QueuePacket(&outapp);

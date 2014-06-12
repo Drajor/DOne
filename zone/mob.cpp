@@ -1075,7 +1075,7 @@ void Mob::SendHPUpdate()
 	{
 		group = entity_list.GetGroupByMob(this);
 		if(group) //not sure why this might be null, but it happens
-			group->SendHPPacketsFrom(this);
+			group->sendHPPacketsFrom(this);
 	}
 
 	if(IsClient()){
@@ -1091,7 +1091,7 @@ void Mob::SendHPUpdate()
 		GetOwner()->CastToClient()->QueuePacket(&hp_app, false);
 		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
 		if(group)
-			group->SendHPPacketsFrom(this);
+			group->sendHPPacketsFrom(this);
 		Raid *r = entity_list.GetRaidByClient(GetOwner()->CastToClient());
 		if(r)
 			r->SendHPPacketsFrom(this);

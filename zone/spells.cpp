@@ -1910,7 +1910,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
 					if(target_group)
 					{
-						target_group->CastGroupSpell(this, spell_id);
+						target_group->castGroupSpell(this, spell_id);
 					}
 				}
 				else if(spell_target->IsRaidGrouped() && spell_target->IsClient())
@@ -2189,7 +2189,7 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse: spell %d, Group targeting group of %s", spell_id, spell_target->GetName());
 				Group *target_group = entity_list.GetGroupByMob(spell_target);
 				if(target_group)
-					target_group->GroupBardPulse(this, spell_id);
+					target_group->groupBardPulse(this, spell_id);
 			}
 			else if(spell_target->IsRaidGrouped() && spell_target->IsClient()) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse: spell %d, Raid group targeting raid group of %s", spell_id, spell_target->GetName());
@@ -3432,7 +3432,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				{
 					Group *g = entity_list.GetGroupByMob(this);
 					if(g)
-						g->CastGroupSpell(this, recourse_spell);
+						g->castGroupSpell(this, recourse_spell);
 					else{
 						SpellOnTarget(recourse_spell, this);
 #ifdef GROUP_BUFF_PETS
@@ -3468,7 +3468,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					{
 						Group *g = entity_list.GetGroupByMob(GetOwner());
 						if(g)
-							g->CastGroupSpell(this, recourse_spell);
+							g->castGroupSpell(this, recourse_spell);
 						else{
 							SpellOnTarget(recourse_spell, GetOwner());
 							SpellOnTarget(recourse_spell, this);

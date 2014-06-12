@@ -110,10 +110,10 @@ Mob* HateList::getHighestDamage(Mob* hater)
 		}
 		else if ((*iterator)->mMOB != nullptr && grp != nullptr)
 		{
-			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
+			if (grp->getTotalGroupDamage(hater) >= dmg_amt)
 			{
 				current = (*iterator)->mMOB;
-				dmg_amt = grp->GetTotalGroupDamage(hater);
+				dmg_amt = grp->getTotalGroupDamage(hater);
 			}
 		}
 		else if ((*iterator)->mMOB != nullptr && (uint32)(*iterator)->mDamage >= dmg_amt)

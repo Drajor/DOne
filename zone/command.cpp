@@ -388,7 +388,6 @@ int command_init(void) {
 		command_add("pf","- ",0,command_pf) ||
 		command_add("logsql","- enable SQL logging",200,command_logsql) ||
 		command_add("bestz","- Ask map for a good Z coord for your x,y coords.",0,command_bestz) ||
-		command_add("ginfo","- get group info on target.",20,command_ginfo) ||
 		command_add("path","- view and edit pathing",200,command_path) ||
 		command_add("flags","- displays the flags of you or your target",0,command_flags) ||
 		command_add("flagedit","- Edit zone flags on your target",100,command_flagedit) ||
@@ -7787,42 +7786,6 @@ void command_undyeme(Client *c, const Seperator *sep)
 	if(c) {
 		c->Undye();
 		c->Message(13, "Dye removed from all slots. Please zone for the process to complete.");
-	}
-}
-
-void command_ginfo(Client *c, const Seperator *sep)
-{
-	Client *t;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t = c->GetTarget()->CastToClient();
-	else
-		t = c;
-
-	Group *g = t->GetGroup();
-	if(!g) {
-		c->Message(0, "This client is not in a group");
-		return;
-	}
-
-	c->Message(0, "Player: %s is in Group #%lu: with %i members", t->GetName(), (unsigned long)g->GetID(), g->GroupCount());
-
-	uint32 r;
-	for(r = 0; r < MAX_GROUP_MEMBERS; r++) {
-		if(g->members[r] == nullptr) {
-			if(g->membername[r][0] == '\0')
-				continue;
-			c->Message(0, "...Zoned Member: %s, Roles: %s %s %s", g->membername[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
-				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
-		} else {
-			c->Message(0, "...In-Zone Member: %s (0x%x) Roles: %s %s %s", g->membername[r], g->members[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
-				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
-
-		}
 	}
 }
 

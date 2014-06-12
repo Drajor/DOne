@@ -2284,7 +2284,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 
 	strcpy(gu->yourname, c->GetName());
 	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
-	gu->NPCMarkerID = g->GetNPCMarkerID();
+	gu->NPCMarkerID = g->getNPCMarkerID();
 
 	int index = 0;
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name from group_id where groupid=%d", g->GetID()), errbuf, &result)) {
@@ -2308,17 +2308,17 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	safe_delete(outapp);
 
 	if(c->GetClientVersion() >= EQClientSoD) {
-		g->NotifyMainTank(c, 1);
-		g->NotifyPuller(c, 1);
+		g->notifyMainTank(c, 1);
+		g->notifyPuller(c, 1);
 	}
 
-	g->NotifyMainAssist(c, 1);
+	g->notifyMainAssist(c, 1);
 
-	g->NotifyMarkNPC(c);
-	g->NotifyAssistTarget(c);
-	g->NotifyTankTarget(c);
-	g->NotifyPullerTarget(c);
-	g->SendMarkedNPCsToMember(c);
+	g->notifyMarkNPC(c);
+	g->notifyAssistTarget(c);
+	g->notifyTankTarget(c);
+	g->notifyPullerTarget(c);
+	g->sendMarkedNPCsToMember(c);
 
 }
 

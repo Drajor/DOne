@@ -1661,9 +1661,9 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 					{
 						for(int i=0;i<6;i++)
 						{
-							if(group->members[i] != nullptr)
+							if(group->mMembers[i] != nullptr)
 							{
-								new_corpse->addLooter(group->members[i],i);
+								new_corpse->addLooter(group->mMembers[i],i);
 							}
 						}
 					}
@@ -1707,7 +1707,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		{
 			Group *g = GetGroup();
 			if(g)
-				g->MemberZoned(this);
+				g->memberZoned(this);
 		}
 
 		Raid* r = entity_list.GetRaidByClient(this);
@@ -2155,9 +2155,9 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->HasOwner()) {
 
 		bool ownerInGroup = false;
-		if((give_exp->HasGroup() && give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner()))
+		if((give_exp->HasGroup() && give_exp->GetGroup()->isGroupMember(give_exp->GetUltimateOwner()))
 			|| (give_exp->IsPet() && (give_exp->GetOwner()->IsClient()
-			|| ( give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())))))
+			|| ( give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->isGroupMember(give_exp->GetOwner()->GetUltimateOwner())))))
 			ownerInGroup = true;
 
 		give_exp = give_exp->GetUltimateOwner();
@@ -2222,15 +2222,15 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
 			if(!IsLdonTreasure) {
-				kg->SplitExp((finalxp), this);
-				if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
+				kg->splitExp((finalxp), this);
+				if(killerMob && (kg->isGroupMember(killerMob->GetName()) || kg->isGroupMember(killerMob->GetUltimateOwner()->GetName())))
 					killerMob->TrySpellOnKill(killed_level,spell);
 			}
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
-					Client *c = kg->members[i]->CastToClient();
+				if (kg->mMembers[i] != nullptr && kg->mMembers[i]->IsClient()) { // If Group Member is Client
+					Client *c = kg->mMembers[i]->CastToClient();
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
 					mod_npc_killed_merit(c);
@@ -2251,8 +2251,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 1; // Group Fight
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
-						Client *c = kg->members[i]->CastToClient();
+					if (kg->mMembers[i] != nullptr && kg->mMembers[i]->IsClient()) { // If Group Member is Client
+						Client *c = kg->mMembers[i]->CastToClient();
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
 					}
@@ -2335,8 +2335,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				Group* group = entity_list.GetGroupByClient(killer->CastToClient());
 				if(group != 0) {
 					for(int i=0;i<6;i++) { // Doesnt work right, needs work
-						if(group->members[i] != nullptr) {
-							corpse->addLooter(group->members[i],i);
+						if(group->mMembers[i] != nullptr) {
+							corpse->addLooter(group->mMembers[i],i);
 						}
 					}
 				}
