@@ -47,87 +47,88 @@ private:
 
 class Group : public GroupIDConsumer {
 public:
-	Group(Mob* leader);
-	Group(uint32 gid);
+	Group(Mob* pLeader);
+	Group(uint32 pGroupID);
 	~Group();
 
-	bool addMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0);
-	void addMember(const char* NewMemberName);
-	void sendUpdate(uint32 type, Mob* member);
+	bool addMember(Mob* pNewMember, const char* pNewMemberName = nullptr, uint32 pCharacterID = 0);
+	void addMember(const char* pNewMemberName);
+	void sendUpdate(uint32 pType, Mob* pMember);
 	void sendLeadershipAAUpdate();
-	void sendWorldGroup(uint32 zone_id, Mob* zoningmember);
-	bool delMemberOOZ(const char *Name);
-	bool delMember(Mob* oldmember, bool ignoresender = false);
+	bool delMemberOOZ(const char* pName);
+	bool delMember(Mob* pOldMember, bool pIgnoreSender = false);
 	void disbandGroup();
-	bool isGroupMember(Mob* client);
-	bool isGroupMember(const char *Name);
+	bool isGroupMember(Mob* pClient);
+	bool isGroupMember(const char* pName);
 	bool process();
-	bool isGroup()			{ return true; }
-	void castGroupSpell(Mob* caster, uint16 spellid);
-	void groupBardPulse(Mob* caster, uint16 spellid);
-	void splitExp(uint32 exp, Mob* other);
-	void groupMessage(Mob* sender, uint8 language, uint8 lang_skill, const char* message);
-	void groupMessage_StringID(Mob* sender, uint32 type, uint32 string_id, const char* message, const char* message2 = 0, const char* message3 = 0, const char* message4 = 0, const char* message5 = 0, const char* message6 = 0, const char* message7 = 0, const char* message8 = 0, const char* message9 = 0, uint32 distance = 0);
-	uint32 getTotalGroupDamage(Mob* other);
-	void splitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
-	inline void setLeader(Mob* newleader){ mLeader = newleader; };
+	bool isGroup() { return true; }
+	void castGroupSpell(Mob* pCaster, uint16 pSpellID);
+	void groupBardPulse(Mob* pCaster, uint16 pSpellID);
+	void splitExp(uint32 pExp, Mob* pOther);
+	void groupMessage(Mob* pSender, uint8 pLanguage, uint8 pLanguageSkill, const char* pMessage);
+	void groupMessage_StringID(Mob* pSender, uint32 pType, uint32 pStringID, const char* pMessage, const char* pMessage2 = 0, const char* pMessage3 = 0, const char* pMessage4 = 0, const char* pMessage5 = 0, const char* pMessage6 = 0, const char* pMessage7 = 0, const char* pMessage8 = 0, const char* pMessage9 = 0, uint32 pDistance = 0);
+	uint32 getTotalGroupDamage(Mob* pOther);
+	void splitMoney(uint32 pCopper, uint32 pSilver, uint32 pGold, uint32 pPlatinum, Client* pSplitter = nullptr);
+	inline void setLeader(Mob* pNewLeader){ mLeader = pNewLeader; };
 	inline Mob* getLeader(){ return mLeader; };
 	char* getLeaderName() { return mMemberNames[0]; };
-	void sendHPPacketsTo(Mob* newmember);
-	void sendHPPacketsFrom(Mob* newmember);
-	bool updatePlayer(Mob* update);
-	void memberZoned(Mob* removemob);
-	inline bool isLeader(Mob* leadertest) { return leadertest == mLeader; };
+	void sendHPPacketsTo(Mob* pNewMember);
+	void sendHPPacketsFrom(Mob* pNewMember);
+	bool updatePlayer(Mob* pUpdate);
+	void memberZoned(Mob* pRemove);
+	inline bool isLeader(Mob* pMOB) { return pMOB == mLeader; };
 	uint8 groupCount();
 	uint32 getHighestLevel();
 	uint32 getLowestLevel();
-	void queuePacket(const EQApplicationPacket *app, bool ack_req = true);
-	void teleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float x, float y, float z, float heading);
+	void queuePacket(const EQApplicationPacket* pApp, bool pAckReq = true);
+	void teleportGroup(Mob* pSender, uint32 pZoneID, uint16 pInstanceID, float pX, float pY, float pZ, float pHeading);
 	uint16 getAvgLevel();
 	bool learnMembers();
 	void verifyGroup();
-	void balanceHP(int32 penalty, int32 range = 0, Mob* caster = nullptr);
-	void balanceMana(int32 penalty, int32 range = 0, Mob* caster = nullptr);
-	void healGroup(uint32 heal_amt, Mob* caster, int32 range = 0);
-	inline void setGroupAAs(GroupLeadershipAA_Struct *From) { memcpy(&mLeaderAbilities, From, sizeof(GroupLeadershipAA_Struct)); }
-	inline void getGroupAAs(GroupLeadershipAA_Struct *Into) { memcpy(Into, &mLeaderAbilities, sizeof(GroupLeadershipAA_Struct)); }
+	void balanceHP(int32 pPenalty, int32 pRange = 0, Mob* pCaster = nullptr);
+	void balanceMana(int32 pPenalty, int32 pRange = 0, Mob* pCaster = nullptr);
+	void healGroup(uint32 pAmount, Mob* pCaster, int32 pRange = 0);
+	inline void setGroupAAs(GroupLeadershipAA_Struct* pFrom) { memcpy(&mLeaderAbilities, pFrom, sizeof(GroupLeadershipAA_Struct)); }
+	inline void getGroupAAs(GroupLeadershipAA_Struct* pInto) { memcpy(pInto, &mLeaderAbilities, sizeof(GroupLeadershipAA_Struct)); }
 	void updateGroupAAs();
 	void saveGroupLeaderAA();
-	void markNPC(Mob* Target, int Number);
-	int8 getNumberNeedingHealedInGroup(int8 hpr, bool includePets);
-	void delegateMainTank(const char *NewMainAssistName, uint8 toggle = 0);
-	void delegateMainAssist(const char *NewMainAssistName, uint8 toggle = 0);
-	void delegatePuller(const char *NewMainAssistName, uint8 toggle = 0);
-	void undelegateMainTank(const char *OldMainAssistName, uint8 toggle = 0);
-	void undelegateMainAssist(const char *OldMainAssistName, uint8 toggle = 0);
-	void undelegatePuller(const char *OldMainAssistName, uint8 toggle = 0);
-	bool isNPCMarker(Client *c);
-	void setGroupAssistTarget(Mob *m);
-	void setGroupTankTarget(Mob *m);
-	void setGroupPullerTarget(Mob *m);
-	bool hasRole(Mob *m, uint8 Role);
-	void notifyAssistTarget(Client *c);
-	void notifyTankTarget(Client *c);
-	void notifyPullerTarget(Client *c);
-	void delegateMarkNPC(const char *NewNPCMarkerName);
-	void unDelegateMarkNPC(const char *OldNPCMarkerName);
-	void notifyMainTank(Client *c, uint8 toggle = 0);
-	void notifyMainAssist(Client *c, uint8 toggle = 0);
-	void notifyPuller(Client *c, uint8 toggle = 0);
-	void notifyMarkNPC(Client *c);
+	void markNPC(Mob* pTarget, int pNumber);
+	int8 getNumberNeedingHealing(int8 pHPRatio, bool pIncludePets);
+	
+	void delegateMainTank(const char* pNewMainTankName, uint8 pToggle = 0);
+	void delegateMainAssist(const char* pNewMainAssistName, uint8 pToggle = 0);
+	void delegatePuller(const char* pNewPullerName, uint8 pToggle = 0);
+	void undelegateMainTank(const char* pOldMainTankName, uint8 pToggle = 0);
+	void undelegateMainAssist(const char* pOldMainAssistName, uint8 pToggle = 0);
+	void undelegatePuller(const char* pOldPullerName, uint8 pToggle = 0);
+
+	bool isNPCMarker(Client* pClient);
+	void setGroupAssistTarget(Mob* pMOB);
+	void setGroupTankTarget(Mob* pMOB);
+	void setGroupPullerTarget(Mob* pMOB);
+	bool hasRole(Mob* pMOB, uint8 pRole);
+	void notifyAssistTarget(Client* pClient);
+	void notifyTankTarget(Client* pClient);
+	void notifyPullerTarget(Client* pClient);
+	void delegateMarkNPC(const char* pNewNPCMarkerName);
+	void undelegateMarkNPC(const char* pOldNPCMarkerName);
+	void notifyMainTank(Client* pClient, uint8 pToggle = 0);
+	void notifyMainAssist(Client* pClient, uint8 pToggle = 0);
+	void notifyPuller(Client* pClient, uint8 pToggle = 0);
+	void notifyMarkNPC(Client* pClient);
 	inline uint32 getNPCMarkerID() { return mNPCMarkerID; }
-	void setMainTank(const char *NewMainTankName);
-	void setMainAssist(const char *NewMainAssistName);
-	void setPuller(const char *NewPullerName);
+	void setMainTank(const char* pNewMainTankName);
+	void setMainAssist(const char* pNewMainAssistName);
+	void setPuller(const char* pNewPullerName);
 	const char* getMainTankName() { return mMainTankName.c_str(); }
 	const char* getMainAssistName() { return mMainAssistName.c_str(); }
 	const char* getPullerName() { return mPullerName.c_str(); }
-	void setNPCMarker(const char *NewNPCMarkerName);
-	void unMarkNPC(uint16 ID);
-	void sendMarkedNPCsToMember(Client *c, bool Clear = false);
-	inline int getLeadershipAA(int AAID) { return mLeaderAbilities.ranks[AAID]; }
+	void setNPCMarker(const char* pNewNPCMarkerName);
+	void unMarkNPC(uint16 pID);
+	void sendMarkedNPCsToMember(Client* pClient, bool pClear = false);
+	inline int getLeadershipAA(int pAAID) { return mLeaderAbilities.ranks[pAAID]; }
 	void clearAllNPCMarks();
-	void queueHPPacketsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
+	void queueHPPacketsForNPCHealthAA(Mob* pSender, const EQApplicationPacket* pApp);
 	void changeLeader(Mob* pNewLeader);
 	const char* getClientNameByIndex(uint8 pIndex);
 	void updateXTargetMarkedNPC(uint32 pNumber, Mob* pMOB);

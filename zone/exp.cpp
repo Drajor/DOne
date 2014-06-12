@@ -509,62 +509,6 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) {
 	SetEXP(newexp, GetAAXP());
 }
 
-void Group::splitExp(uint32 exp, Mob* other) {
-	if( other->CastToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
-		return;
-
-	if(other->GetOwner() && other->GetOwner()->IsClient()) // Ensure owner isn't pc
-		return;
-
-	unsigned int i;
-	uint32 groupexp = exp;
-	uint8 membercount = 0;
-	uint8 maxlevel = 1;
-
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (mMembers[i] != nullptr) {
-			if(mMembers[i]->GetLevel() > maxlevel)
-				maxlevel = mMembers[i]->GetLevel();
-
-			membercount++;
-		}
-	}
-
-	float groupmod;
-	if (membercount > 1 && membercount < 6)
-		groupmod = 1 + .2*(membercount - 1); //2members=1.2exp, 3=1.4, 4=1.6, 5=1.8
-	else if (membercount == 6)
-		groupmod = 2.16;
-	else
-		groupmod = 1.0;
-
-	groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
-
-	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
-	if(conlevel == CON_GREEN)
-		return;	//no exp for greenies...
-
-	if (membercount == 0)
-		return;
-
-	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if (mMembers[i] != nullptr && mMembers[i]->IsClient()) // If Group Member is Client
-		{
-			Client *cmember = mMembers[i]->CastToClient();
-			// add exp + exp cap
-			int16 diff = cmember->GetLevel() - maxlevel;
-			int16 maxdiff = -(cmember->GetLevel()*15/10 - cmember->GetLevel());
-				if(maxdiff > -5)
-					maxdiff = -5;
-			if (diff >= (maxdiff)) { /*Instead of person who killed the mob, the person who has the highest level in the group*/
-				uint32 tmp = (cmember->GetLevel()+3) * (cmember->GetLevel()+3) * 75 * 35 / 10;
-				uint32 tmp2 = groupexp / membercount;
-				cmember->AddEXP( tmp < tmp2 ? tmp : tmp2, conlevel );
-			}
-		}
-	}
-}
-
 void Raid::SplitExp(uint32 exp, Mob* other) {
 	if( other->CastToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
 		return;

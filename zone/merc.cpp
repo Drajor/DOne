@@ -2115,7 +2115,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 			switch (iSpellTypes) {
 				case SpellType_Heal: {
 					Mob* tar = nullptr;
-					int8 numToHeal = g->getNumberNeedingHealedInGroup(IsEngaged() ? 75 : 95, true);
+					int8 numToHeal = g->getNumberNeedingHealing(IsEngaged() ? 75 : 95, true);
 					int8 checkHPR = IsEngaged() ? 95 : 99;
 					int8 checkPetHPR = IsEngaged() ? 95 : 99;
 
@@ -2436,7 +2436,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 						}
 					}
 
-					if(tar && !(g->getNumberNeedingHealedInGroup(IsEngaged() ? 25 : 40, false) > 0) && !(g->getNumberNeedingHealedInGroup(IsEngaged() ? 40 : 60, false) > 2))
+					if(tar && !(g->getNumberNeedingHealing(IsEngaged() ? 25 : 40, false) > 0) && !(g->getNumberNeedingHealing(IsEngaged() ? 40 : 60, false) > 2))
 					{
 						selectedMercSpell = GetBestMercSpellForCure(this, tar);
 
