@@ -256,7 +256,7 @@ void Client::RefreshGuildInfo()
 			ClearGuildBank();
 
 			if(guild_id != GUILD_NONE)
-				GuildBanks->SendGuildBank(this);
+				GuildBanks->sendGuildBank(this);
 		}
 	}
 

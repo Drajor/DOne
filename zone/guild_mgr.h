@@ -114,25 +114,25 @@ class GuildBankManager
 
 public:
 	~GuildBankManager();
-	void SendGuildBank(Client *c);
-	bool AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 QtyOrCharges, const char *Donator, uint8 Permissions, const char *WhoFor);
-	int Promote(uint32 GuildID, int SlotID);
-	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName);
-	ItemInst* GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
-	bool HasItem(uint32 GuildID, uint32 ItemID);
-	bool IsAreaFull(uint32 GuildID, uint16 Area);
-	bool MergeStacks(uint32 GuildID, uint16 SlotID);
-	bool SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity);
-	bool AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name);
+	void sendGuildBank(Client* pClient);
+	bool addItem(uint32 pGuildID, uint8 pArea, uint32 pItemID, int32 pQtyOrCharges, const char* pDonator, uint8 pPermissions, const char* WhoFor);
+	int promote(uint32 pGuildID, int pSlotID);
+	void setPermissions(uint32 pGuildID, uint16 pSlotID, uint32 pPermissions, const char* pMemberName);
+	ItemInst* getItem(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity);
+	bool deleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
+	bool hasItem(uint32 pGuildID, uint32 pItemID);
+	bool isAreaFull(uint32 pGuildID, uint16 pArea);
+	bool mergeStacks(uint32 pGuildID, uint16 pSlotID);
+	bool splitStack(uint32 pGuildID, uint16 pSlotID, uint32 pQuantity);
+	bool allowedToWithdraw(uint32 pGuildID, uint16 pArea, uint16 pSlotID, const char* pName);
 
 private:
-	bool IsLoaded(uint32 GuildID);
-	bool Load(uint32 GuildID);
-	std::list<GuildBank*>::iterator GetGuildBank(uint32 GuildID);
-	void UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
+	bool isLoaded(uint32 pGuildID);
+	bool load(uint32 pGuildID);
+	std::list<GuildBank*>::iterator getGuildBank(uint32 pGuildID);
+	void updateItemQuantity(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity);
 
-	std::list<GuildBank*> Banks;
+	std::list<GuildBank*> mBanks;
 
 };
 

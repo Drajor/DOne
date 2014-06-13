@@ -4414,7 +4414,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 				return;
 			}
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
-				GuildBanks->SendGuildBank(this);
+				GuildBanks->sendGuildBank(this);
 			SendGuildRanks();
 
 		}
@@ -9549,7 +9549,7 @@ void Client::CompleteConnect()
 	DoItemEnterZone();
 
 	if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
-		GuildBanks->SendGuildBank(this);
+		GuildBanks->sendGuildBank(this);
 
 	if(GetClientVersion() >= EQClientSoD)
 		entity_list.SendFindableNPCList(this);
@@ -11720,7 +11720,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	{
 		case GuildBankPromote:
 		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea))
+			if(GuildBanks->isAreaFull(GuildID(), GuildBankMainArea))
 			{
 				Message_StringID(13, GUILD_BANK_FULL);
 
@@ -11731,11 +11731,11 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 			GuildBankPromote_Struct *gbps = (GuildBankPromote_Struct*)app->pBuffer;
 
-			int Slot = GuildBanks->Promote(GuildID(), gbps->Slot);
+			int Slot = GuildBanks->promote(GuildID(), gbps->Slot);
 
 			if(Slot >= 0)
 			{
-				ItemInst* inst = GuildBanks->GetItem(GuildID(), GuildBankMainArea, Slot, 1);
+				ItemInst* inst = GuildBanks->getItem(GuildID(), GuildBankMainArea, Slot, 1);
 
 				if(inst)
 				{
@@ -11755,7 +11755,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			GuildBankViewItem_Struct *gbvis = (GuildBankViewItem_Struct*)app->pBuffer;
 
-			ItemInst* inst = GuildBanks->GetItem(GuildID(), gbvis->Area, gbvis->SlotID, 1);
+			ItemInst* inst = GuildBanks->getItem(GuildID(), gbvis->Area, gbvis->SlotID, 1);
 
 			if(!inst)
 				break;
@@ -11769,7 +11769,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		case GuildBankDeposit:	// Deposit Item
 		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankDepositArea))
+			if(GuildBanks->isAreaFull(GuildID(), GuildBankDepositArea))
 			{
 				Message_StringID(13, GUILD_BANK_FULL);
 
@@ -11817,7 +11817,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 				Allowed = false;
 			}
-			else if(CursorItem->LoreFlag && GuildBanks->HasItem(GuildID(), CursorItem->ID))
+			else if(CursorItem->LoreFlag && GuildBanks->hasItem(GuildID(), CursorItem->ID))
 			{
 				Message_StringID(13, GUILD_BANK_CANNOT_DEPOSIT);
 
@@ -11831,7 +11831,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				return;
 			}
 
-			if(GuildBanks->AddItem(GuildID(), GuildBankDepositArea, CursorItem->ID, CursorItemInst->GetCharges(), GetName(), GuildBankBankerOnly, ""))
+			if(GuildBanks->addItem(GuildID(), GuildBankDepositArea, CursorItem->ID, CursorItemInst->GetCharges(), GetName(), GuildBankBankerOnly, ""))
 			{
 				GuildBankDepositAck(false);
 
@@ -11846,9 +11846,9 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			GuildBankPermissions_Struct *gbps = (GuildBankPermissions_Struct*)app->pBuffer;
 
 			if(gbps->Permissions == 1)
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName);
+				GuildBanks->setPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName);
 			else
-				GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, "");
+				GuildBanks->setPermissions(GuildID(), gbps->SlotID, gbps->Permissions, "");
 
 			GuildBankAck();
 			break;
@@ -11867,7 +11867,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 			GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
-			ItemInst* inst = GuildBanks->GetItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
+			ItemInst* inst = GuildBanks->getItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
 
 			if(!inst)
 			{
@@ -11876,7 +11876,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 				break;
 			}
 
-			if(!IsGuildBanker() && !GuildBanks->AllowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
+			if(!IsGuildBanker() && !GuildBanks->allowedToWithdraw(GuildID(), gbwis->Area, gbwis->SlotID, GetName()))
 			{
 				_log(GUILDS__BANK_ERROR, "Suspected attempted hack on the guild bank from %s", GetName());
 
@@ -11904,7 +11904,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 				SendItemPacket(SLOT_CURSOR, inst, ItemPacketSummonItem);
 
-				GuildBanks->DeleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
+				GuildBanks->deleteItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
 			}
 			else
 			{
@@ -11920,13 +11920,13 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 		case GuildBankSplitStacks:
 		{
-			if(GuildBanks->IsAreaFull(GuildID(), GuildBankMainArea))
+			if(GuildBanks->isAreaFull(GuildID(), GuildBankMainArea))
 				Message_StringID(13, GUILD_BANK_FULL);
 			else
 			{
 				GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
-				GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity);
+				GuildBanks->splitStack(GuildID(), gbwis->SlotID, gbwis->Quantity);
 			}
 
 			GuildBankAck();
@@ -11938,7 +11938,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		{
 			GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
-			GuildBanks->MergeStacks(GuildID(), gbwis->SlotID);
+			GuildBanks->mergeStacks(GuildID(), gbwis->SlotID);
 
 			GuildBankAck();
 
@@ -12481,7 +12481,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 			Message(clientMessageYellow, "You are now the leader of %s", GuildName);
 
 			if(zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
-				GuildBanks->SendGuildBank(this);
+				GuildBanks->sendGuildBank(this);
 			SendGuildRanks();
 		}
 	}

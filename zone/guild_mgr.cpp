@@ -14,7 +14,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+	*/
 #include "../common/debug.h"
 #include "guild_mgr.h"
 #include "zonedb.h"
@@ -27,50 +27,50 @@
 /*
 
 CREATE TABLE guilds (
-	id MEDIUMINT UNSIGNED NOT NULL,
-	name VARCHAR(32) NOT NULL,
-	leader int NOT NULL,
-	minstatus SMALLINT NOT NULL,
-	tribute INT UNSIGNED NOT NULL,
-	motd TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(id),
-	UNIQUE KEY(name),
-	UNIQUE KEY(leader)
+id MEDIUMINT UNSIGNED NOT NULL,
+name VARCHAR(32) NOT NULL,
+leader int NOT NULL,
+minstatus SMALLINT NOT NULL,
+tribute INT UNSIGNED NOT NULL,
+motd TEXT NOT NULL DEFAULT '',
+PRIMARY KEY(id),
+UNIQUE KEY(name),
+UNIQUE KEY(leader)
 );
 
 CREATE TABLE guild_ranks (
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	title VARCHAR(128) NOT NULL,
-	can_hear TINYINT UNSIGNED NOT NULL,
-	can_speak TINYINT UNSIGNED NOT NULL,
-	can_invite TINYINT UNSIGNED NOT NULL,
-	can_remove TINYINT UNSIGNED NOT NULL,
-	can_promote TINYINT UNSIGNED NOT NULL,
-	can_demote TINYINT UNSIGNED NOT NULL,
-	can_motd TINYINT UNSIGNED NOT NULL,
-	can_warpeace TINYINT UNSIGNED NOT NULL,
-	PRIMARY KEY(guild_id,rank)
+guild_id MEDIUMINT UNSIGNED NOT NULL,
+rank TINYINT UNSIGNED NOT NULL,
+title VARCHAR(128) NOT NULL,
+can_hear TINYINT UNSIGNED NOT NULL,
+can_speak TINYINT UNSIGNED NOT NULL,
+can_invite TINYINT UNSIGNED NOT NULL,
+can_remove TINYINT UNSIGNED NOT NULL,
+can_promote TINYINT UNSIGNED NOT NULL,
+can_demote TINYINT UNSIGNED NOT NULL,
+can_motd TINYINT UNSIGNED NOT NULL,
+can_warpeace TINYINT UNSIGNED NOT NULL,
+PRIMARY KEY(guild_id,rank)
 );
 
 # guild1 < guild2 by definition.
 CREATE TABLE guild_relations (
-	guild1 MEDIUMINT UNSIGNED NOT NULL,
-	guild2 MEDIUMINT UNSIGNED NOT NULL,
-	relation TINYINT NOT NULL,
-	PRIMARY KEY(guild1, guild1)
+guild1 MEDIUMINT UNSIGNED NOT NULL,
+guild2 MEDIUMINT UNSIGNED NOT NULL,
+relation TINYINT NOT NULL,
+PRIMARY KEY(guild1, guild1)
 );
 
 CREATE TABLE guild_members (
-	char_id INT NOT NULL,
-	guild_id MEDIUMINT UNSIGNED NOT NULL,
-	rank TINYINT UNSIGNED NOT NULL,
-	tribute_enable TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	total_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	last_tribute INT UNSIGNED NOT NULL DEFAULT 0,
-	banker TINYINT UNSIGNED NOT NULL DEFAULT 0,
-	public_note TEXT NOT NULL DEFAULT '',
-	PRIMARY KEY(char_id)
+char_id INT NOT NULL,
+guild_id MEDIUMINT UNSIGNED NOT NULL,
+rank TINYINT UNSIGNED NOT NULL,
+tribute_enable TINYINT UNSIGNED NOT NULL DEFAULT 0,
+total_tribute INT UNSIGNED NOT NULL DEFAULT 0,
+last_tribute INT UNSIGNED NOT NULL DEFAULT 0,
+banker TINYINT UNSIGNED NOT NULL DEFAULT 0,
+public_note TEXT NOT NULL DEFAULT '',
+PRIMARY KEY(char_id)
 );
 
 
@@ -86,7 +86,7 @@ extern volatile bool ZoneLoaded;
 void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
 	_log(GUILDS__REFRESH, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
 	ServerPacket* pack = new ServerPacket(ServerOP_RefreshGuild, sizeof(ServerGuildRefresh_Struct));
-	ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
+	ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *)pack->pBuffer;
 	s->guild_id = guild_id;
 	s->name_change = name;
 	s->motd_change = motd;
@@ -97,13 +97,14 @@ void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, b
 }
 
 void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid) {
-	if(guild_id == 0) {
+	if (guild_id == 0) {
 		_log(GUILDS__REFRESH, "Guild lookup for char %d when sending char refresh.", charid);
 
 		CharGuildInfo gci;
-		if(!GetCharInfo(charid, gci)) {
+		if (!GetCharInfo(charid, gci)) {
 			guild_id = GUILD_NONE;
-		} else {
+		}
+		else {
 			guild_id = gci.guild_id;
 		}
 	}
@@ -111,7 +112,7 @@ void ZoneGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uin
 	_log(GUILDS__REFRESH, "Sending char refresh for %d from guild %d to world", charid, guild_id);
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
-	ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
+	ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *)pack->pBuffer;
 	s->guild_id = guild_id;
 	s->old_guild_id = old_guild_id;
 	s->char_id = charid;
@@ -123,7 +124,7 @@ void ZoneGuildManager::SendRankUpdate(uint32 CharID)
 {
 	CharGuildInfo gci;
 
-	if(!GetCharInfo(CharID, gci))
+	if (!GetCharInfo(CharID, gci))
 		return;
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildRankUpdate, sizeof(ServerGuildRankUpdate_Struct));
@@ -143,7 +144,7 @@ void ZoneGuildManager::SendRankUpdate(uint32 CharID)
 void ZoneGuildManager::SendGuildDelete(uint32 guild_id) {
 	_log(GUILDS__REFRESH, "Sending guild delete for guild %d to world", guild_id);
 	ServerPacket* pack = new ServerPacket(ServerOP_DeleteGuild, sizeof(ServerGuildID_Struct));
-	ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
+	ServerGuildID_Struct *s = (ServerGuildID_Struct *)pack->pBuffer;
 	s->guild_id = guild_id;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -154,10 +155,10 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	uint8 *retbuffer;
 
 	//hack because we dont have the "remove from guild" packet right now.
-	if(guild_id == GUILD_NONE) {
+	if (guild_id == GUILD_NONE) {
 		length = sizeof(Internal_GuildMembers_Struct);
 		retbuffer = new uint8[length];
-		Internal_GuildMembers_Struct *gms = (Internal_GuildMembers_Struct *) retbuffer;
+		Internal_GuildMembers_Struct *gms = (Internal_GuildMembers_Struct *)retbuffer;
 		strcpy(gms->player_name, prefix_name);
 		gms->count = 0;
 		gms->name_length = 0;
@@ -166,30 +167,30 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	}
 
 	std::vector<CharGuildInfo *> members;
-	if(!GetEntireGuild(guild_id, members))
+	if (!GetEntireGuild(guild_id, members))
 		return(nullptr);
 
 	//figure out the actual packet length.
-	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct) + members.size()*sizeof(Internal_GuildMemberEntry_Struct);
+	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct)+members.size()*sizeof(Internal_GuildMemberEntry_Struct);
 	std::vector<CharGuildInfo *>::iterator cur, end;
 	CharGuildInfo *ci;
 	cur = members.begin();
 	end = members.end();
 	uint32 name_len = 0;
 	uint32 note_len = 0;
-	for(; cur != end; ++cur) {
+	for (; cur != end; ++cur) {
 		ci = *cur;
 		name_len += ci->char_name.length();
 		note_len += ci->public_note.length();
 	}
 
 	//calc total length.
-	length = fixed_length + name_len + note_len + members.size()*2;	//string data + null terminators
+	length = fixed_length + name_len + note_len + members.size() * 2;	//string data + null terminators
 
 	//make our nice buffer
 	retbuffer = new uint8[length];
 
-	Internal_GuildMembers_Struct *gms = (Internal_GuildMembers_Struct *) retbuffer;
+	Internal_GuildMembers_Struct *gms = (Internal_GuildMembers_Struct *)retbuffer;
 
 	//fill in the global header
 	strcpy(gms->player_name, prefix_name);
@@ -197,27 +198,27 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 	gms->name_length = name_len;
 	gms->note_length = note_len;
 
-	char *name_buf = (char *) ( retbuffer + fixed_length );
-	char *note_buf = (char *) ( name_buf + name_len + members.size() );
+	char *name_buf = (char *)(retbuffer + fixed_length);
+	char *note_buf = (char *)(name_buf + name_len + members.size());
 
 	//fill in each member's entry.
 	Internal_GuildMemberEntry_Struct *e = gms->member;
 
 	cur = members.begin();
 	end = members.end();
-	for(; cur != end; ++cur) {
+	for (; cur != end; ++cur) {
 		ci = *cur;
 
 		//the order we set things here must match the struct
 
-//nice helper macro
+		//nice helper macro
 #define SlideStructString(field, str) \
-		strcpy(field, str.c_str()); \
-		field += str.length() + 1
+	strcpy(field, str.c_str()); \
+	field += str.length() + 1
 #define PutField(field) \
-		e->field = ci->field
+	e->field = ci->field
 
-		SlideStructString( name_buf, ci->char_name );
+		SlideStructString(name_buf, ci->char_name);
 		PutField(level);
 		e->banker = ci->banker + (ci->alt * 2);	// low bit is banker flag, next bit is 'alt' flag.
 		PutField(class_);
@@ -226,7 +227,7 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		PutField(tribute_enable);
 		PutField(total_tribute);
 		PutField(last_tribute);
-		SlideStructString( note_buf, ci->public_note );
+		SlideStructString(note_buf, ci->public_note);
 		e->zoneinstance = 0;
 		e->zone_id = 0;	// Flag them as offline (zoneid 0) as world will update us with their online status afterwards.
 #undef SlideStructString
@@ -247,7 +248,7 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 	cur = m_guilds.begin();
 	end = m_guilds.end();
 	int r = 0;
-	for(; cur != end; ++cur) {
+	for (; cur != end; ++cur) {
 		leadername[0] = '\0';
 		database.GetCharName(cur->second->leader_char_id, leadername);
 		if (leadername[0] == '\0')
@@ -263,7 +264,7 @@ void ZoneGuildManager::ListGuilds(Client *c) const {
 void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
-	if(res == m_guilds.end()) {
+	if (res == m_guilds.end()) {
 		c->Message(0, "Guild %d not found.", guild_id);
 		return;
 	}
@@ -281,8 +282,8 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	for (i = 0; i <= GUILD_MAX_RANK; i++) {
 		char *permptr = permbuffer;
 		uint8 r;
-		for(r = 0; r < _MaxGuildAction; r++)
-			permptr += sprintf(permptr, "  %s: %c", GuildActionNames[r], info->ranks[i].permissions[r]?'Y':'N');
+		for (r = 0; r < _MaxGuildAction; r++)
+			permptr += sprintf(permptr, "  %s: %c", GuildActionNames[r], info->ranks[i].permissions[r] ? 'Y' : 'N');
 
 		c->Message(0, "Rank %i: %s", i, info->ranks[i].name.c_str());
 		c->Message(0, "Permissions: %s", permbuffer);
@@ -299,10 +300,10 @@ void ZoneGuildManager::RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank)
 bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank) {
 	std::map<uint32, std::pair<uint32, uint8> >::iterator res;
 	res = m_inviteQueue.find(char_id);
-	if(res == m_inviteQueue.end())
+	if (res == m_inviteQueue.end())
 		return(false);	//no entry...
 	bool valid = false;
-	if(res->second.first == guild_id && res->second.second == rank) {
+	if (res->second.first == guild_id && res->second.second == rank) {
 		valid = true;
 	}
 	m_inviteQueue.erase(res);
@@ -310,149 +311,150 @@ bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uin
 }
 
 void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
-	switch(pack->opcode) {
+	switch (pack->opcode) {
 	case ServerOP_RefreshGuild: {
-		if(pack->size != sizeof(ServerGuildRefresh_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
-			return;
-		}
-		ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
+									if (pack->size != sizeof(ServerGuildRefresh_Struct)) {
+										_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildRefresh_Struct));
+										return;
+									}
+									ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *)pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
+									_log(GUILDS__REFRESH, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
 
-		//reload all the guild details from the database.
-		RefreshGuild(s->guild_id);
+									//reload all the guild details from the database.
+									RefreshGuild(s->guild_id);
 
-		if(s->motd_change) {
-			//resend guild MOTD to all guild members in this zone.
-			entity_list.SendGuildMOTD(s->guild_id);
-		}
+									if (s->motd_change) {
+										//resend guild MOTD to all guild members in this zone.
+										entity_list.SendGuildMOTD(s->guild_id);
+									}
 
-		if(s->name_change) {
-			//until we figure out the guild update packet, we resend the whole guild list.
-			entity_list.SendGuildList();
-		}
+									if (s->name_change) {
+										//until we figure out the guild update packet, we resend the whole guild list.
+										entity_list.SendGuildList();
+									}
 
-		if(s->rank_change) {
-			//we need to send spawn appearance packets for all members of this guild in the zone, to everybody.
-			entity_list.SendGuildSpawnAppearance(s->guild_id);
-		}
+									if (s->rank_change) {
+										//we need to send spawn appearance packets for all members of this guild in the zone, to everybody.
+										entity_list.SendGuildSpawnAppearance(s->guild_id);
+									}
 
-		if(s->relation_change) {
-			//unknown until we implement guild relations.
-		}
+									if (s->relation_change) {
+										//unknown until we implement guild relations.
+									}
 
-		break;
+									break;
 	}
 
 	case ServerOP_GuildCharRefresh: {
-		if(pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
-			return;
-		}
-		ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
+										if (pack->size != sizeof(ServerGuildCharRefresh_Struct)) {
+											_log(GUILDS__ERROR, "Received ServerOP_RefreshGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildCharRefresh_Struct));
+											return;
+										}
+										ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *)pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
+										_log(GUILDS__REFRESH, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
 
-		Client *c = entity_list.GetClientByCharID(s->char_id);
+										Client *c = entity_list.GetClientByCharID(s->char_id);
 
-		if(c != nullptr) {
-			//this reloads the char's guild info from the database and sends appearance updates
-			c->RefreshGuildInfo();
-		}
+										if (c != nullptr) {
+											//this reloads the char's guild info from the database and sends appearance updates
+											c->RefreshGuildInfo();
+										}
 
-		//it would be nice if we had the packet to send just a one-person update
-		if(s->guild_id == GUILD_NONE) {
-			if(c != nullptr)
-				c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
-		} else {
-			entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
-		}
+										//it would be nice if we had the packet to send just a one-person update
+										if (s->guild_id == GUILD_NONE) {
+											if (c != nullptr)
+												c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
+										}
+										else {
+											entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
+										}
 
-		if(s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
-			entity_list.SendGuildMembers(s->old_guild_id);
-		else if(c != nullptr && s->guild_id != GUILD_NONE) {
-			//char is in zone, and has changed into a new guild, send MOTD.
-			c->SendGuildMOTD();
-		}
+										if (s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
+											entity_list.SendGuildMembers(s->old_guild_id);
+										else if (c != nullptr && s->guild_id != GUILD_NONE) {
+											//char is in zone, and has changed into a new guild, send MOTD.
+											c->SendGuildMOTD();
+										}
 
 
-		break;
+										break;
 	}
 
 	case ServerOP_GuildRankUpdate:
 	{
-		if(ZoneLoaded)
-		{
-			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
-			{
-				_log(GUILDS__ERROR, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
-					pack->size, sizeof(ServerGuildRankUpdate_Struct));
+									 if (ZoneLoaded)
+									 {
+										 if (pack->size != sizeof(ServerGuildRankUpdate_Struct))
+										 {
+											 _log(GUILDS__ERROR, "Received ServerOP_RankUpdate of incorrect size %d, expected %d",
+												 pack->size, sizeof(ServerGuildRankUpdate_Struct));
 
-				return;
-			}
+											 return;
+										 }
 
-			ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
+										 ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
 
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
+										 EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
 
-			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
+										 GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 
-			gsrs->Rank = sgrus->Rank;
-			strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
-			gsrs->Banker = sgrus->Banker;
+										 gsrs->Rank = sgrus->Rank;
+										 strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
+										 gsrs->Banker = sgrus->Banker;
 
-			entity_list.QueueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
+										 entity_list.QueueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
 
-			safe_delete(outapp);
-		}
+										 safe_delete(outapp);
+									 }
 
-		break;
+									 break;
 	}
 
 	case ServerOP_DeleteGuild: {
-		if(pack->size != sizeof(ServerGuildID_Struct)) {
-			_log(GUILDS__ERROR, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
-			return;
-		}
-		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
+								   if (pack->size != sizeof(ServerGuildID_Struct)) {
+									   _log(GUILDS__ERROR, "Received ServerOP_DeleteGuild of incorrect size %d, expected %d", pack->size, sizeof(ServerGuildID_Struct));
+									   return;
+								   }
+								   ServerGuildID_Struct *s = (ServerGuildID_Struct *)pack->pBuffer;
 
-		_log(GUILDS__REFRESH, "Received guild delete from world for guild %d", s->guild_id);
+								   _log(GUILDS__REFRESH, "Received guild delete from world for guild %d", s->guild_id);
 
-		//clear all the guild tags.
-		entity_list.RefreshAllGuildInfo(s->guild_id);
+								   //clear all the guild tags.
+								   entity_list.RefreshAllGuildInfo(s->guild_id);
 
-		//remove the guild data from the local guild manager
-		guild_mgr.LocalDeleteGuild(s->guild_id);
+								   //remove the guild data from the local guild manager
+								   guild_mgr.LocalDeleteGuild(s->guild_id);
 
-		//if we stop forcing guild list to send on guild create, we need to do this:
-		//in the case that we delete a guild and add a new one.
-		//entity_list.SendGuildList();
+								   //if we stop forcing guild list to send on guild create, we need to do this:
+								   //in the case that we delete a guild and add a new one.
+								   //entity_list.SendGuildList();
 
-		break;
+								   break;
 	}
 
 	case ServerOP_GuildMemberUpdate:
 	{
-		ServerGuildMemberUpdate_Struct *sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
+									   ServerGuildMemberUpdate_Struct *sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
 
-		if(ZoneLoaded)
-		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
+									   if (ZoneLoaded)
+									   {
+										   EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 
-			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
+										   GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 
-			gmus->GuildID = sgmus->GuildID;
-			strn0cpy(gmus->MemberName, sgmus->MemberName, sizeof(gmus->MemberName));
-			gmus->ZoneID = sgmus->ZoneID;
-			gmus->InstanceID = 0;	// I don't think we care what Instance they are in, for the Guild Management Window.
-			gmus->LastSeen = sgmus->LastSeen;
+										   gmus->GuildID = sgmus->GuildID;
+										   strn0cpy(gmus->MemberName, sgmus->MemberName, sizeof(gmus->MemberName));
+										   gmus->ZoneID = sgmus->ZoneID;
+										   gmus->InstanceID = 0;	// I don't think we care what Instance they are in, for the Guild Management Window.
+										   gmus->LastSeen = sgmus->LastSeen;
 
-			entity_list.QueueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
+										   entity_list.QueueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
 
-			safe_delete(outapp);
-		}
-		break;
+										   safe_delete(outapp);
+									   }
+									   break;
 	}
 	case ServerOP_OnlineGuildMembersResponse:
 		if (ZoneLoaded)
@@ -465,23 +467,23 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 			if (!c || !c->IsInAGuild())
 			{
-				_log(GUILDS__ERROR,"Invalid Client or not in guild. ID=%i", FromID);
+				_log(GUILDS__ERROR, "Invalid Client or not in guild. ID=%i", FromID);
 				break;
 			}
-			_log(GUILDS__IN_PACKETS,"Processing ServerOP_OnlineGuildMembersResponse");
+			_log(GUILDS__IN_PACKETS, "Processing ServerOP_OnlineGuildMembersResponse");
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 			GuildMemberUpdate_Struct *gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
 			char Name[64];
 			gmus->LastSeen = time(nullptr);
 			gmus->InstanceID = 0;
 			gmus->GuildID = c->GuildID();
-			for (int i=0;i<Count;i++)
+			for (int i = 0; i < Count; i++)
 			{
 				// Just make the packet once and swap out name/zone and send
 				VARSTRUCT_DECODE_STRING(Name, Buffer);
 				strn0cpy(gmus->MemberName, Name, sizeof(gmus->MemberName));
 				gmus->ZoneID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-				_log(GUILDS__OUT_PACKETS,"Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i",FromID,Name,gmus->ZoneID);
+				_log(GUILDS__OUT_PACKETS, "Sending OP_GuildMemberUpdate to %i. Name=%s ZoneID=%i", FromID, Name, gmus->ZoneID);
 				c->QueuePacket(outapp);
 			}
 			safe_delete(outapp);
@@ -491,44 +493,44 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_LFGuildUpdate:
 	{
-		if(ZoneLoaded)
-		{
-			char GuildName[33];
-			char Comments[257];
-			uint32 FromLevel, ToLevel, Classes, AACount, TimeZone, TimePosted, Toggle;
+								   if (ZoneLoaded)
+								   {
+									   char GuildName[33];
+									   char Comments[257];
+									   uint32 FromLevel, ToLevel, Classes, AACount, TimeZone, TimePosted, Toggle;
 
-			pack->ReadString(GuildName);
-			pack->ReadString(Comments);
-			FromLevel = pack->ReadUInt32();
-			ToLevel = pack->ReadUInt32();
-			Classes = pack->ReadUInt32();
-			AACount = pack->ReadUInt32();
-			TimeZone = pack->ReadUInt32();
-			TimePosted = pack->ReadUInt32();
-			Toggle = pack->ReadUInt32();
+									   pack->ReadString(GuildName);
+									   pack->ReadString(Comments);
+									   FromLevel = pack->ReadUInt32();
+									   ToLevel = pack->ReadUInt32();
+									   Classes = pack->ReadUInt32();
+									   AACount = pack->ReadUInt32();
+									   TimeZone = pack->ReadUInt32();
+									   TimePosted = pack->ReadUInt32();
+									   Toggle = pack->ReadUInt32();
 
-			uint32 GuildID = GetGuildIDByName(GuildName);
+									   uint32 GuildID = GetGuildIDByName(GuildName);
 
-			if(GuildID == GUILD_NONE)
-				break;
+									   if (GuildID == GUILD_NONE)
+										   break;
 
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
+									   EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
 
-			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)outapp->pBuffer;
-			gts->Command = 1;
-			strcpy(gts->Comment, Comments);
-			gts->FromLevel = FromLevel;
-			gts->ToLevel = ToLevel;
-			gts->Classes = Classes;
-			gts->AACount = AACount;
-			gts->TimeZone = TimeZone;
-			gts->Toggle = Toggle;
-			gts->TimePosted = TimePosted;
-			gts->Name[0] = 0;
-			entity_list.QueueClientsGuild(nullptr, outapp, false, GuildID);
-			safe_delete(outapp);
-			break;
-		}
+									   LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)outapp->pBuffer;
+									   gts->Command = 1;
+									   strcpy(gts->Comment, Comments);
+									   gts->FromLevel = FromLevel;
+									   gts->ToLevel = ToLevel;
+									   gts->Classes = Classes;
+									   gts->AACount = AACount;
+									   gts->TimeZone = TimeZone;
+									   gts->Toggle = Toggle;
+									   gts->TimePosted = TimePosted;
+									   gts->Name[0] = 0;
+									   entity_list.QueueClientsGuild(nullptr, outapp, false, GuildID);
+									   safe_delete(outapp);
+									   break;
+								   }
 	}
 	}
 }
@@ -564,34 +566,34 @@ void ZoneGuildManager::ProcessApproval()
 	LinkedListIterator<GuildApproval*> iterator(list);
 
 	iterator.Reset();
-	while(iterator.MoreElements())
+	while (iterator.MoreElements())
 	{
-		if(!iterator.GetData()->ProcessApproval())
+		if (!iterator.GetData()->ProcessApproval())
 			iterator.RemoveCurrent();
 		iterator.Advance();
 	}
 }
 
-void ZoneGuildManager::AddGuildApproval(const char* guildname,Client* owner)
+void ZoneGuildManager::AddGuildApproval(const char* guildname, Client* owner)
 {
-	GuildApproval* tmp = new GuildApproval(guildname,owner,GetFreeID());
+	GuildApproval* tmp = new GuildApproval(guildname, owner, GetFreeID());
 	list.Insert(tmp);
 }
 
-void ZoneGuildManager::AddMemberApproval(uint32 refid,Client* name)
+void ZoneGuildManager::AddMemberApproval(uint32 refid, Client* name)
 {
 	GuildApproval* tmp = FindGuildByIDApproval(refid);
-	if(tmp != 0)
+	if (tmp != 0)
 	{
-		if(!tmp->AddMemberApproval(name))
-			name->Message(0,"Unable to add to list.");
+		if (!tmp->AddMemberApproval(name))
+			name->Message(0, "Unable to add to list.");
 		else
 		{
-			name->Message(0,"Added to list.");
+			name->Message(0, "Added to list.");
 		}
 	}
 	else
-		name->Message(0,"Unable to find guild reference id.");
+		name->Message(0, "Unable to find guild reference id.");
 }
 
 ZoneGuildManager::~ZoneGuildManager()
@@ -609,9 +611,9 @@ GuildApproval* ZoneGuildManager::FindGuildByIDApproval(uint32 refid)
 	LinkedListIterator<GuildApproval*> iterator(list);
 
 	iterator.Reset();
-	while(iterator.MoreElements())
+	while (iterator.MoreElements())
 	{
-		if(iterator.GetData()->GetID() == refid)
+		if (iterator.GetData()->GetID() == refid)
 			return iterator.GetData();
 		iterator.Advance();
 	}
@@ -623,9 +625,9 @@ GuildApproval* ZoneGuildManager::FindGuildByOwnerApproval(Client* owner)
 	LinkedListIterator<GuildApproval*> iterator(list);
 
 	iterator.Reset();
-	while(iterator.MoreElements())
+	while (iterator.MoreElements())
 	{
-		if(iterator.GetData()->GetOwner() == owner)
+		if (iterator.GetData()->GetOwner() == owner)
 			return iterator.GetData();
 		iterator.Advance();
 	}
@@ -634,9 +636,9 @@ GuildApproval* ZoneGuildManager::FindGuildByOwnerApproval(Client* owner)
 
 GuildBankManager::~GuildBankManager()
 {
-	std::list<GuildBank*>::iterator Iterator = Banks.begin();
+	std::list<GuildBank*>::iterator Iterator = mBanks.begin();
 
-	while(Iterator != Banks.end())
+	while (Iterator != mBanks.end())
 	{
 		safe_delete(*Iterator);
 
@@ -644,10 +646,10 @@ GuildBankManager::~GuildBankManager()
 	}
 }
 
-bool GuildBankManager::Load(uint32 GuildID)
+bool GuildBankManager::load(uint32 pGuildID)
 {
 	const char *LoadQuery = "SELECT `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `whofor` from `guild_bank` "
-				"WHERE `guildid` = %i";
+		"WHERE `guildid` = %i";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
@@ -657,21 +659,21 @@ bool GuildBankManager::Load(uint32 GuildID)
 
 	MYSQL_ROW row;
 
-	if(database.RunQuery(query, MakeAnyLenString(&query, LoadQuery, GuildID), errbuf, &result))
+	if (database.RunQuery(query, MakeAnyLenString(&query, LoadQuery, pGuildID), errbuf, &result))
 	{
 		GuildBank *Bank = new GuildBank;
 
-		Bank->GuildID = GuildID;
+		Bank->GuildID = pGuildID;
 
-		for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+		for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
 			Bank->Items.MainArea[i].ItemID = 0;
 
-		for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
+		for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
 			Bank->Items.DepositArea[i].ItemID = 0;
 
 		char Donator[64], WhoFor[64];
 
-		while((row = mysql_fetch_row(result)))
+		while ((row = mysql_fetch_row(result)))
 		{
 			int Area = atoi(row[0]);
 
@@ -681,21 +683,21 @@ bool GuildBankManager::Load(uint32 GuildID)
 
 			int Qty = atoi(row[3]);
 
-			if(row[4])
+			if (row[4])
 				strn0cpy(Donator, row[4], sizeof(Donator));
 			else
 				Donator[0] = '\0';
 
 			int Permissions = atoi(row[5]);
 
-			if(row[6])
+			if (row[6])
 				strn0cpy(WhoFor, row[6], sizeof(WhoFor));
 			else
 				WhoFor[0] = '\0';
 
-			if(Area == GuildBankMainArea)
+			if (Area == GuildBankMainArea)
 			{
-				if((Slot >= 0) && (Slot < GUILD_BANK_MAIN_AREA_SIZE))
+				if ((Slot >= 0) && (Slot < GUILD_BANK_MAIN_AREA_SIZE))
 				{
 					Bank->Items.MainArea[Slot].ItemID = ItemID;
 
@@ -710,7 +712,7 @@ bool GuildBankManager::Load(uint32 GuildID)
 			}
 			else
 			{
-				if((Slot >= 0 ) && (Slot < GUILD_BANK_DEPOSIT_AREA_SIZE))
+				if ((Slot >= 0) && (Slot < GUILD_BANK_DEPOSIT_AREA_SIZE))
 				{
 					Bank->Items.DepositArea[Slot].ItemID = ItemID;
 
@@ -729,7 +731,7 @@ bool GuildBankManager::Load(uint32 GuildID)
 
 		safe_delete_array(query);
 
-		Banks.push_back(Bank);
+		mBanks.push_back(Bank);
 	}
 	else
 	{
@@ -744,54 +746,54 @@ bool GuildBankManager::Load(uint32 GuildID)
 
 }
 
-bool GuildBankManager::IsLoaded(uint32 GuildID)
+bool GuildBankManager::isLoaded(uint32 pGuildID)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	return (Iterator != Banks.end());
+	return (Iterator != mBanks.end());
 }
 
-void GuildBankManager::SendGuildBank(Client *c)
+void GuildBankManager::sendGuildBank(Client* pClient)
 {
-	if(!c || !c->IsInAGuild())
+	if (!pClient || !pClient->IsInAGuild())
 		return;
 
-	if(!IsLoaded(c->GuildID()))
-		Load(c->GuildID());
+	if (!isLoaded(pClient->GuildID()))
+		load(pClient->GuildID());
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(c->GuildID());
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pClient->GuildID());
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 	{
-		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", c->GuildID());
+		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", pClient->GuildID());
 
 		return;
 	}
 
-	for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
+	for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
 	{
-		if((*Iterator)->Items.DepositArea[i].ItemID > 0)
+		if ((*Iterator)->Items.DepositArea[i].ItemID > 0)
 		{
 			const Item_Struct *Item = database.GetItem((*Iterator)->Items.DepositArea[i].ItemID);
 
-			if(!Item)
+			if (!Item)
 				continue;
 
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
 
 			GuildBankItemUpdate_Struct *gbius = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
 
-			if(!Item->Stackable)
+			if (!Item->Stackable)
 				gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon, 1,
-						(*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
+				(*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
 			else
 			{
-				if((*Iterator)->Items.DepositArea[i].Quantity == Item->StackSize)
+				if ((*Iterator)->Items.DepositArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
-							(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
+					(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 0, 0);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
-							(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 1, 0);
+					(*Iterator)->Items.DepositArea[i].Quantity, (*Iterator)->Items.DepositArea[i].Permissions, 1, 0);
 			}
 
 			strn0cpy(gbius->ItemName, Item->Name, sizeof(gbius->ItemName));
@@ -800,36 +802,36 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 			strn0cpy(gbius->WhoFor, (*Iterator)->Items.DepositArea[i].WhoFor, sizeof(gbius->WhoFor));
 
-			c->FastQueuePacket(&outapp);
+			pClient->FastQueuePacket(&outapp);
 		}
 	}
 
-	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+	for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
 	{
-		if((*Iterator)->Items.MainArea[i].ItemID > 0)
+		if ((*Iterator)->Items.MainArea[i].ItemID > 0)
 		{
 			const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[i].ItemID);
 
-			if(!Item)
+			if (!Item)
 				continue;
 
-			bool Useable = Item->IsEquipable(c->GetBaseRace(), c->GetBaseClass());
+			bool Useable = Item->IsEquipable(pClient->GetBaseRace(), pClient->GetBaseClass());
 
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
 
 			GuildBankItemUpdate_Struct *gbius = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
 
-			if(!Item->Stackable)
+			if (!Item->Stackable)
 				gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon, 1,
-						(*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
+				(*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
 			else
 			{
-				if((*Iterator)->Items.MainArea[i].Quantity == Item->StackSize)
+				if ((*Iterator)->Items.MainArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
-							(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
+					(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 0, Useable);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
-							(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 1, Useable);
+					(*Iterator)->Items.MainArea[i].Quantity, (*Iterator)->Items.MainArea[i].Permissions, 1, Useable);
 			}
 
 			strn0cpy(gbius->ItemName, Item->Name, sizeof(gbius->ItemName));
@@ -838,22 +840,22 @@ void GuildBankManager::SendGuildBank(Client *c)
 
 			strn0cpy(gbius->WhoFor, (*Iterator)->Items.MainArea[i].WhoFor, sizeof(gbius->WhoFor));
 
-			c->FastQueuePacket(&outapp);
+			pClient->FastQueuePacket(&outapp);
 		}
 	}
 }
-bool GuildBankManager::IsAreaFull(uint32 GuildID, uint16 Area)
+bool GuildBankManager::isAreaFull(uint32 pGuildID, uint16 pArea)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return true;
 
 	GuildBankItem* BankArea = nullptr;
 
 	int AreaSize = 0;
 
-	if(Area == GuildBankMainArea)
+	if (pArea == GuildBankMainArea)
 	{
 		BankArea = &(*Iterator)->Items.MainArea[0];
 
@@ -866,20 +868,20 @@ bool GuildBankManager::IsAreaFull(uint32 GuildID, uint16 Area)
 		AreaSize = GUILD_BANK_DEPOSIT_AREA_SIZE;
 	}
 
-	for(int i = 0; i < AreaSize; ++i)
-		if(BankArea[i].ItemID == 0)
-			return false;
+	for (int i = 0; i < AreaSize; ++i)
+	if (BankArea[i].ItemID == 0)
+		return false;
 
 	return true;
 }
 
-bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 QtyOrCharges, const char *Donator, uint8 Permissions, const char *WhoFor)
+bool GuildBankManager::addItem(uint32 pGuildID, uint8 pArea, uint32 pItemID, int32 pQtyOrCharges, const char* pDonator, uint8 pPermissions, const char* pWhoFor)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 	{
-		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", GuildID);
+		_log(GUILDS__BANK_ERROR, "Unable to find guild bank for guild ID %i", pGuildID);
 
 		return false;
 	}
@@ -888,7 +890,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	int AreaSize = 0;
 
-	if(Area == GuildBankMainArea)
+	if (pArea == GuildBankMainArea)
 	{
 		BankArea = &(*Iterator)->Items.MainArea[0];
 
@@ -903,41 +905,36 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	int Slot = -1;
 
-	for(int i = 0; i < AreaSize; ++i)
+	for (int i = 0; i < AreaSize; ++i)
 	{
-		if(BankArea[i].ItemID == 0)
+		if (BankArea[i].ItemID == 0)
 		{
-			BankArea[i].ItemID = ItemID;
-
-			BankArea[i].Quantity = QtyOrCharges;
-
-			strn0cpy(BankArea[i].Donator, Donator, sizeof(BankArea[i].Donator));
-
-			BankArea[i].Permissions = Permissions;
-
-			strn0cpy(BankArea[i].WhoFor, WhoFor, sizeof(BankArea[i].WhoFor));
-
+			BankArea[i].ItemID = pItemID;
+			BankArea[i].Quantity = pQtyOrCharges;
+			strn0cpy(BankArea[i].Donator, pDonator, sizeof(BankArea[i].Donator));
+			BankArea[i].Permissions = pPermissions;
+			strn0cpy(BankArea[i].WhoFor, pWhoFor, sizeof(BankArea[i].WhoFor));
 			Slot = i;
 
 			break;
 		}
 	}
 
-	if(Slot < 0)
+	if (Slot < 0)
 	{
 		_log(GUILDS__BANK_ERROR, "No space to add item to the guild bank.");
 
 		return false;
 	}
 
-	const char *Query="INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
-				"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
+	const char *Query = "INSERT INTO `guild_bank` (`guildid`, `area`, `slot`, `itemid`, `qty`, `donator`, `permissions`, `WhoFor`) "
+		"VALUES (%i, %i, %i, %i, %i, '%s', %i, '%s')";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	char* query = 0;
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, Slot, ItemID, QtyOrCharges, Donator, Permissions, WhoFor), errbuf))
+	if (!database.RunQuery(query, MakeAnyLenString(&query, Query, pGuildID, pArea, Slot, pItemID, pQtyOrCharges, pDonator, pPermissions, pWhoFor), errbuf))
 	{
 		_log(GUILDS__BANK_ERROR, "Insert Error: %s : %s", query, errbuf);
 
@@ -948,78 +945,78 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	safe_delete_array(query);
 
-	const Item_Struct *Item = database.GetItem(ItemID);
+	const Item_Struct *Item = database.GetItem(pItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 0, 0);
+	if (!Item->Stackable)
+		gbius.Init(GuildBankItemUpdate, 1, Slot, pArea, 1, pItemID, Item->Icon, Item->Stackable ? pQtyOrCharges : 1, pPermissions, 0, 0);
 	else
 	{
-		if(QtyOrCharges == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 0, 0);
+		if (pQtyOrCharges == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, Slot, pArea, 1, pItemID, Item->Icon, Item->Stackable ? pQtyOrCharges : 1, pPermissions, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, Slot, pArea, 1, pItemID, Item->Icon, Item->Stackable ? pQtyOrCharges : 1, pPermissions, 1, 0);
 	}
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	strn0cpy(gbius.Donator, Donator, sizeof(gbius.Donator));
+	strn0cpy(gbius.Donator, pDonator, sizeof(gbius.Donator));
 
-	strn0cpy(gbius.WhoFor, WhoFor, sizeof(gbius.WhoFor));
+	strn0cpy(gbius.WhoFor, pWhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return true;
 }
 
-int GuildBankManager::Promote(uint32 GuildID, int SlotID)
+int GuildBankManager::promote(uint32 pGuildID, int pSlotID)
 {
-	if((SlotID < 0) || (SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
+	if ((pSlotID < 0) || (pSlotID >(GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 		return -1;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 	{
 		return -1;
 	}
 
-	if((*Iterator)->Items.DepositArea[SlotID].ItemID == 0)
+	if ((*Iterator)->Items.DepositArea[pSlotID].ItemID == 0)
 	{
 		return -1;
 	}
 
 	int MainSlot = -1;
 
-	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-		if((*Iterator)->Items.MainArea[i].ItemID == 0)
-		{
-			MainSlot = i;
+	for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+	if ((*Iterator)->Items.MainArea[i].ItemID == 0)
+	{
+		MainSlot = i;
 
-			break;
-		}
+		break;
+	}
 
-	if(MainSlot == -1)
+	if (MainSlot == -1)
 		return -1;
 
 
-	(*Iterator)->Items.MainArea[MainSlot].ItemID = (*Iterator)->Items.DepositArea[SlotID].ItemID;
+	(*Iterator)->Items.MainArea[MainSlot].ItemID = (*Iterator)->Items.DepositArea[pSlotID].ItemID;
 
-	(*Iterator)->Items.MainArea[MainSlot].Quantity = (*Iterator)->Items.DepositArea[SlotID].Quantity;
+	(*Iterator)->Items.MainArea[MainSlot].Quantity = (*Iterator)->Items.DepositArea[pSlotID].Quantity;
 
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].Donator, (*Iterator)->Items.DepositArea[SlotID].Donator, sizeof((*Iterator)->Items.MainArea[MainSlot].Donator));
-	(*Iterator)->Items.MainArea[MainSlot].Permissions = (*Iterator)->Items.DepositArea[SlotID].Permissions;
+	strn0cpy((*Iterator)->Items.MainArea[MainSlot].Donator, (*Iterator)->Items.DepositArea[pSlotID].Donator, sizeof((*Iterator)->Items.MainArea[MainSlot].Donator));
+	(*Iterator)->Items.MainArea[MainSlot].Permissions = (*Iterator)->Items.DepositArea[pSlotID].Permissions;
 
-	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[SlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
+	strn0cpy((*Iterator)->Items.MainArea[MainSlot].WhoFor, (*Iterator)->Items.DepositArea[pSlotID].WhoFor, sizeof((*Iterator)->Items.MainArea[MainSlot].WhoFor));
 
-	const char *Query="UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
+	const char *Query = "UPDATE `guild_bank` SET `area` = 1, `slot` = %i WHERE `guildid` = %i AND `area` = 0 AND `slot` = %i LIMIT 1";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	char* query = 0;
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, MainSlot, GuildID, SlotID), errbuf))
+	if (!database.RunQuery(query, MakeAnyLenString(&query, Query, MainSlot, pGuildID, pSlotID), errbuf))
 	{
 		_log(GUILDS__BANK_ERROR, "error promoting item: %s : %s", query, errbuf);
 
@@ -1030,59 +1027,59 @@ int GuildBankManager::Promote(uint32 GuildID, int SlotID)
 
 	safe_delete_array(query);
 
-	(*Iterator)->Items.DepositArea[SlotID].ItemID = 0;
+	(*Iterator)->Items.DepositArea[pSlotID].ItemID = 0;
 
 	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[MainSlot].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Item->Stackable)
+	if (!Item->Stackable)
 		gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[MainSlot].Quantity == Item->StackSize)
+		if ((*Iterator)->Items.MainArea[MainSlot].Quantity == Item->StackSize)
 			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
+			(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 0, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, MainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
+			(*Iterator)->Items.MainArea[MainSlot].Quantity, 0, 1, 0);
 	}
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
-	gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
+	gbius.Init(GuildBankItemUpdate, 1, pSlotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return MainSlot;
 }
 
-void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName)
+void GuildBankManager::setPermissions(uint32 pGuildID, uint16 pSlotID, uint32 pPermissions, const char* pMemberName)
 {
-	if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
+	if ((pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 		return;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 	{
 		return;
 	}
 
-	if((*Iterator)->Items.MainArea[SlotID].ItemID == 0)
+	if ((*Iterator)->Items.MainArea[pSlotID].ItemID == 0)
 	{
 		return;
 	}
 
-	const char *Query="UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
+	const char *Query = "UPDATE `guild_bank` SET `permissions` = %i, `whofor` = '%s' WHERE `guildid` = %i AND `area` = 1 AND `slot` = %i LIMIT 1";
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 
 	char* query = 0;
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Permissions, MemberName, GuildID, SlotID), errbuf))
+	if (!database.RunQuery(query, MakeAnyLenString(&query, Query, pPermissions, pMemberName, pGuildID, pSlotID), errbuf))
 	{
 		_log(GUILDS__BANK_ERROR, "error changing permissions: %s : %s", query, errbuf);
 
@@ -1093,57 +1090,57 @@ void GuildBankManager::SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Perm
 
 	safe_delete_array(query);
 
-	(*Iterator)->Items.MainArea[SlotID].Permissions = Permissions;
+	(*Iterator)->Items.MainArea[pSlotID].Permissions = pPermissions;
 
-	if(Permissions == GuildBankSingleMember)
-		strn0cpy((*Iterator)->Items.MainArea[SlotID].WhoFor, MemberName, sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor));
+	if (pPermissions == GuildBankSingleMember)
+		strn0cpy((*Iterator)->Items.MainArea[pSlotID].WhoFor, pMemberName, sizeof((*Iterator)->Items.MainArea[pSlotID].WhoFor));
 	else
-		(*Iterator)->Items.MainArea[SlotID].WhoFor[0] = '\0';
+		(*Iterator)->Items.MainArea[pSlotID].WhoFor[0] = '\0';
 
 
-	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[pSlotID].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Item->Stackable)
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+	if (!Item->Stackable)
+		gbius.Init(GuildBankItemUpdate, 1, pSlotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*Iterator)->Items.MainArea[pSlotID].Permissions, 0, 0);
 	else
 	{
-		if((*Iterator)->Items.MainArea[SlotID].Quantity == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 0, 0);
+		if ((*Iterator)->Items.MainArea[pSlotID].Quantity == Item->StackSize)
+			gbius.Init(GuildBankItemUpdate, 1, pSlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+			(*Iterator)->Items.MainArea[pSlotID].Quantity, (*Iterator)->Items.MainArea[pSlotID].Permissions, 0, 0);
 		else
-			gbius.Init(GuildBankItemUpdate, 1, SlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*Iterator)->Items.MainArea[SlotID].Quantity, (*Iterator)->Items.MainArea[SlotID].Permissions, 1, 0);
+			gbius.Init(GuildBankItemUpdate, 1, pSlotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
+			(*Iterator)->Items.MainArea[pSlotID].Quantity, (*Iterator)->Items.MainArea[pSlotID].Permissions, 1, 0);
 	}
 
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	strn0cpy(gbius.WhoFor, (*Iterator)->Items.MainArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+	strn0cpy(gbius.WhoFor, (*Iterator)->Items.MainArea[pSlotID].WhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 }
 
-ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+ItemInst* GuildBankManager::getItem(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return nullptr;
 
 	GuildBankItem* BankArea = nullptr;
 
 	ItemInst* inst = nullptr;
 
-	if(Area == GuildBankDepositArea)
+	if (pArea == GuildBankDepositArea)
 	{
-		if((SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
+		if ((pSlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.DepositArea[SlotID].ItemID);
+		inst = database.CreateItem((*Iterator)->Items.DepositArea[pSlotID].ItemID);
 
-		if(!inst)
+		if (!inst)
 			return nullptr;
 
 		BankArea = &(*Iterator)->Items.DepositArea[0];
@@ -1151,55 +1148,55 @@ ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, 
 	else
 	{
 
-		if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
+		if ((pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+		inst = database.CreateItem((*Iterator)->Items.MainArea[pSlotID].ItemID);
 
-		if(!inst)
+		if (!inst)
 			return nullptr;
 
 		BankArea = &(*Iterator)->Items.MainArea[0];
 	}
 
-	if(!inst->IsStackable())
-		inst->SetCharges(BankArea[SlotID].Quantity);
+	if (!inst->IsStackable())
+		inst->SetCharges(BankArea[pSlotID].Quantity);
 	else
 	{
-		if(Quantity <= BankArea[SlotID].Quantity)
-			inst->SetCharges(Quantity);
+		if (pQuantity <= BankArea[pSlotID].Quantity)
+			inst->SetCharges(pQuantity);
 		else
-			inst->SetCharges(BankArea[SlotID].Quantity);
+			inst->SetCharges(BankArea[pSlotID].Quantity);
 	}
 
 	return inst;
 }
 
-bool GuildBankManager::HasItem(uint32 GuildID, uint32 ItemID)
+bool GuildBankManager::hasItem(uint32 pGuildID, uint32 pItemID)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return false;
 
-	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
-		if((*Iterator)->Items.MainArea[i].ItemID == ItemID)
-			return true;
+	for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i)
+	if ((*Iterator)->Items.MainArea[i].ItemID == pItemID)
+		return true;
 
-	for(int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
-		if((*Iterator)->Items.DepositArea[i].ItemID == ItemID)
-			return true;
+	for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i)
+	if ((*Iterator)->Items.DepositArea[i].ItemID == pItemID)
+		return true;
 
 	return false;
 }
 
-std::list<GuildBank*>::iterator GuildBankManager::GetGuildBank(uint32 GuildID)
+std::list<GuildBank*>::iterator GuildBankManager::getGuildBank(uint32 pGuildID)
 {
-	std::list<GuildBank*>::iterator Iterator = Banks.begin();
+	std::list<GuildBank*>::iterator Iterator = mBanks.begin();
 
-	while(Iterator != Banks.end())
+	while (Iterator != mBanks.end())
 	{
-		if((*Iterator)->GuildID == GuildID)
+		if ((*Iterator)->GuildID == pGuildID)
 			break;
 
 		++Iterator;
@@ -1208,11 +1205,11 @@ std::list<GuildBank*>::iterator GuildBankManager::GetGuildBank(uint32 GuildID)
 	return Iterator;
 }
 
-bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+bool GuildBankManager::deleteItem(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity)
 {
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return false;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1221,16 +1218,16 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 	GuildBankItem* BankArea = nullptr;
 
-	if(Area == GuildBankMainArea)
+	if (pArea == GuildBankMainArea)
 	{
-		if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+		if (pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 			return false;
 
 		BankArea = &(*Iterator)->Items.MainArea[0];
 	}
 	else
 	{
-		if(SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
+		if (pSlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1))
 			return false;
 
 		BankArea = &(*Iterator)->Items.DepositArea[0];
@@ -1239,13 +1236,13 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 	bool Deleted = true;
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem(BankArea[pSlotID].ItemID);
 
-	if(!Item->Stackable || (Quantity >= BankArea[SlotID].Quantity))
+	if (!Item->Stackable || (pQuantity >= BankArea[pSlotID].Quantity))
 	{
 		const char *Query = "DELETE from `guild_bank` where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, GuildID, Area, SlotID), errbuf))
+		if (!database.RunQuery(query, MakeAnyLenString(&query, Query, pGuildID, pArea, pSlotID), errbuf))
 		{
 			_log(GUILDS__BANK_ERROR, "Delete item failed. %s : %s", query, errbuf);
 
@@ -1256,14 +1253,14 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 		safe_delete_array(query);
 
-		BankArea[SlotID].ItemID = 0;
+		BankArea[pSlotID].ItemID = 0;
 	}
 	else
 	{
 		const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
 
-		if(!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[SlotID].Quantity - Quantity,
-				GuildID, Area, SlotID), errbuf))
+		if (!database.RunQuery(query, MakeAnyLenString(&query, Query, BankArea[pSlotID].Quantity - pQuantity,
+			pGuildID, pArea, pSlotID), errbuf))
 		{
 			_log(GUILDS__BANK_ERROR, "Update item failed. %s : %s", query, errbuf);
 
@@ -1274,89 +1271,89 @@ bool GuildBankManager::DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, ui
 
 		safe_delete_array(query);
 
-		BankArea[SlotID].Quantity -= Quantity;
+		BankArea[pSlotID].Quantity -= pQuantity;
 
 		Deleted = false;
 	}
 	GuildBankItemUpdate_Struct gbius;
 
-	if(!Deleted)
+	if (!Deleted)
 	{
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 1, Item->ID, Item->Icon, BankArea[SlotID].Quantity, BankArea[SlotID].Permissions, 1, 0);
+		gbius.Init(GuildBankItemUpdate, 1, pSlotID, pArea, 1, Item->ID, Item->Icon, BankArea[pSlotID].Quantity, BankArea[pSlotID].Permissions, 1, 0);
 
 		strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-		strn0cpy(gbius.WhoFor, BankArea[SlotID].WhoFor, sizeof(gbius.WhoFor));
+		strn0cpy(gbius.WhoFor, BankArea[pSlotID].WhoFor, sizeof(gbius.WhoFor));
 	}
 	else
-		gbius.Init(GuildBankItemUpdate, 1, SlotID, Area, 0, 0, 0, 0, 0, 0, 0);
+		gbius.Init(GuildBankItemUpdate, 1, pSlotID, pArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return true;
 
 }
 
-bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
+bool GuildBankManager::mergeStacks(uint32 pGuildID, uint16 pSlotID)
 {
-	if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+	if (pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 		return false;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return false;
 
 	GuildBankItem* BankArea = &(*Iterator)->Items.MainArea[0];
 
-	if(BankArea[SlotID].ItemID == 0)
+	if (BankArea[pSlotID].ItemID == 0)
 		return false;
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem(BankArea[pSlotID].ItemID);
 
-	if(!Item->Stackable)
+	if (!Item->Stackable)
 		return false;
 
-	uint32 ItemID = BankArea[SlotID].ItemID;
+	uint32 ItemID = BankArea[pSlotID].ItemID;
 
-	for(int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE - 1; ++i)
+	for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE - 1; ++i)
 	{
-		if(BankArea[i].ItemID != ItemID)
+		if (BankArea[i].ItemID != ItemID)
 			continue;
 
-		if(BankArea[i].Quantity == Item->StackSize)
+		if (BankArea[i].Quantity == Item->StackSize)
 			continue;
 
 		bool Merged = false;
 
-		for(int j = i + 1; j < GUILD_BANK_MAIN_AREA_SIZE; ++j)
+		for (int j = i + 1; j < GUILD_BANK_MAIN_AREA_SIZE; ++j)
 		{
-			if(BankArea[j].ItemID != ItemID)
+			if (BankArea[j].ItemID != ItemID)
 				continue;
 
-			if(BankArea[j].Permissions != BankArea[i].Permissions)
+			if (BankArea[j].Permissions != BankArea[i].Permissions)
 				continue;
 
-			if(BankArea[i].Permissions == 1)
-				if(strncmp(BankArea[i].WhoFor, BankArea[j].WhoFor, sizeof(BankArea[i].WhoFor)))
-					continue;
+			if (BankArea[i].Permissions == 1)
+			if (strncmp(BankArea[i].WhoFor, BankArea[j].WhoFor, sizeof(BankArea[i].WhoFor)))
+				continue;
 
-			if((BankArea[i].Quantity + BankArea[j].Quantity) <= Item->StackSize)
+			if ((BankArea[i].Quantity + BankArea[j].Quantity) <= Item->StackSize)
 			{
 				BankArea[i].Quantity += BankArea[j].Quantity;
 
-				DeleteItem(GuildID, GuildBankMainArea, j, BankArea[j].Quantity);
+				deleteItem(pGuildID, GuildBankMainArea, j, BankArea[j].Quantity);
 
 				Merged = true;
 
-				if(BankArea[i].Quantity == Item->StackSize)
+				if (BankArea[i].Quantity == Item->StackSize)
 					break;
 			}
 			else
 			{
 				uint32 QuantityToMove = Item->StackSize - BankArea[i].Quantity;
 
-				DeleteItem(GuildID, GuildBankMainArea, j, QuantityToMove);
+				deleteItem(pGuildID, GuildBankMainArea, j, QuantityToMove);
 
 				BankArea[i].Quantity = Item->StackSize;
 
@@ -1366,13 +1363,13 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 			}
 		}
 
-		if(Merged)
+		if (Merged)
 		{
-			UpdateItemQuantity(GuildID, GuildBankMainArea, i, BankArea[i].Quantity);
+			updateItemQuantity(pGuildID, GuildBankMainArea, i, BankArea[i].Quantity);
 
 			GuildBankItemUpdate_Struct gbius;
 
-			if(BankArea[i].Quantity == Item->StackSize)
+			if (BankArea[i].Quantity == Item->StackSize)
 				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 0, 0);
 			else
 				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 1, 0);
@@ -1381,7 +1378,7 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 
 			strn0cpy(gbius.WhoFor, BankArea[i].WhoFor, sizeof(gbius.WhoFor));
 
-			entity_list.QueueClientsGuildBankItemUpdate(&gbius, GuildID);
+			entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
 		}
 
 	}
@@ -1389,40 +1386,40 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 	return true;
 }
 
-bool GuildBankManager::SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity)
+bool GuildBankManager::splitStack(uint32 pGuildID, uint16 pSlotID, uint32 pQuantity)
 {
-	if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+	if (pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 		return false;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return false;
 
-	if(IsAreaFull(GuildID, GuildBankMainArea))
+	if (isAreaFull(pGuildID, GuildBankMainArea))
 		return false;
 
 	GuildBankItem* BankArea = &(*Iterator)->Items.MainArea[0];
 
-	if(BankArea[SlotID].ItemID == 0)
+	if (BankArea[pSlotID].ItemID == 0)
 		return false;
 
-	if(BankArea[SlotID].Quantity <= Quantity || Quantity == 0)
+	if (BankArea[pSlotID].Quantity <= pQuantity || pQuantity == 0)
 		return false;
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const Item_Struct *Item = database.GetItem(BankArea[pSlotID].ItemID);
 
-	if(!Item->Stackable)
+	if (!Item->Stackable)
 		return false;
 
-	AddItem(GuildID, GuildBankMainArea, BankArea[SlotID].ItemID, Quantity, "", BankArea[SlotID].Permissions, BankArea[SlotID].WhoFor);
+	addItem(pGuildID, GuildBankMainArea, BankArea[pSlotID].ItemID, pQuantity, "", BankArea[pSlotID].Permissions, BankArea[pSlotID].WhoFor);
 
-	DeleteItem(GuildID, GuildBankMainArea, SlotID, Quantity);
+	deleteItem(pGuildID, GuildBankMainArea, pSlotID, pQuantity);
 
 	return true;
 }
 
-void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+void GuildBankManager::updateItemQuantity(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity)
 {
 	// Helper method for MergeStacks. Assuming all passed parameters are valid.
 	//
@@ -1432,7 +1429,7 @@ void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 Sl
 
 	const char *Query = "UPDATE `guild_bank` SET `qty` = %i where `guildid` = %i AND `area` = %i AND `slot` = %i LIMIT 1";
 
-	if(!database.RunQuery(query, MakeAnyLenString(&query, Query, Quantity, GuildID, Area, SlotID), errbuf))
+	if (!database.RunQuery(query, MakeAnyLenString(&query, Query, pQuantity, pGuildID, pArea, pSlotID), errbuf))
 	{
 		_log(GUILDS__BANK_ERROR, "Update item quantity failed. %s : %s", query, errbuf);
 
@@ -1444,31 +1441,31 @@ void GuildBankManager::UpdateItemQuantity(uint32 GuildID, uint16 Area, uint16 Sl
 	safe_delete_array(query);
 }
 
-bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 SlotID, const char *Name)
+bool GuildBankManager::allowedToWithdraw(uint32 pGuildID, uint16 pArea, uint16 pSlotID, const char* pName)
 {
 	// Is a none-Guild Banker allowed to withdraw the item at this slot ?
 	// This is really here for anti-hacking measures, as the client should not request an item it does not have permission to withdraw.
 	//
-	if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+	if (pSlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
 		return false;
 
-	std::list<GuildBank*>::iterator Iterator = GetGuildBank(GuildID);
+	std::list<GuildBank*>::iterator Iterator = getGuildBank(pGuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == mBanks.end())
 		return false;
 
-	if(Area != GuildBankMainArea)
+	if (pArea != GuildBankMainArea)
 		return false;
 
-	uint8 Permissions = (*Iterator)->Items.MainArea[SlotID].Permissions;
+	uint8 Permissions = (*Iterator)->Items.MainArea[pSlotID].Permissions;
 
-	if(Permissions == GuildBankBankerOnly)
+	if (Permissions == GuildBankBankerOnly)
 		return false;
 
-	if(Permissions != GuildBankSingleMember)	// Public or Public-If-Useable (should really check if item is useable)
+	if (Permissions != GuildBankSingleMember)	// Public or Public-If-Useable (should really check if item is useable)
 		return true;
 
-	if(!strncmp((*Iterator)->Items.MainArea[SlotID].WhoFor, Name, sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor)))
+	if (!strncmp((*Iterator)->Items.MainArea[pSlotID].WhoFor, pName, sizeof((*Iterator)->Items.MainArea[pSlotID].WhoFor)))
 		return true;
 
 	return false;
@@ -1478,32 +1475,32 @@ bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 Slo
 
 bool GuildApproval::ProcessApproval()
 {
-	if(owner && owner->GuildID() != 0)
+	if (owner && owner->GuildID() != 0)
 	{
-		owner->Message(10,"You are already in a guild! Guild request deleted.");
+		owner->Message(10, "You are already in a guild! Guild request deleted.");
 		return false;
 	}
-	if(deletion_timer->Check() || !owner)
+	if (deletion_timer->Check() || !owner)
 	{
-		if(owner)
-			owner->Message(0,"You took too long! Your guild request has been deleted.");
+		if (owner)
+			owner->Message(0, "You took too long! Your guild request has been deleted.");
 		return false;
 	}
 
 	return true;
 }
 
-GuildApproval::GuildApproval(const char* guildname, Client* owner,uint32 id)
+GuildApproval::GuildApproval(const char* guildname, Client* owner, uint32 id)
 {
 	database.GetVariable("GuildCreation", founders, 3);
 	uint8 tmp = atoi(founders);
 	deletion_timer = new Timer(1800000);
-	strcpy(guild,guildname);
+	strcpy(guild, guildname);
 	this->owner = owner;
 	this->refid = id;
-	if(owner)
-		owner->Message(0,"You can now start getting your guild approved, tell your %i members to #guildapprove %i, you have 30 minutes to create your guild.",tmp,GetID());
-	for(int i=0;i<tmp;i++)
+	if (owner)
+		owner->Message(0, "You can now start getting your guild approved, tell your %i members to #guildapprove %i, you have 30 minutes to create your guild.", tmp, GetID());
+	for (int i = 0; i < tmp; i++)
 		members[i] = 0;
 }
 
@@ -1516,24 +1513,24 @@ bool GuildApproval::AddMemberApproval(Client* addition)
 {
 	database.GetVariable("GuildCreation", founders, 3);
 	uint8 tmp = atoi(founders);
-	for(int i=0;i<tmp;i++)
+	for (int i = 0; i < tmp; i++)
 	{
-		if(members[i] && members[i] == addition)
+		if (members[i] && members[i] == addition)
 			return false;
 	}
 
-	for(int i=0;i<tmp;i++)
+	for (int i = 0; i < tmp; i++)
 	{
-		if(!members[i])
+		if (!members[i])
 		{
 			members[i] = addition;
-			int z=0;
-			for(int i=0;i<tmp;i++)
+			int z = 0;
+			for (int i = 0; i < tmp; i++)
 			{
-				if(members[i])
+				if (members[i])
 					z++;
 			}
-			if(z==tmp)
+			if (z == tmp)
 				GuildApproved();
 
 			return true;
@@ -1546,10 +1543,10 @@ void GuildApproval::ApprovedMembers(Client* requestee)
 {
 	database.GetVariable("GuildCreation", founders, 3);
 	uint8 tmp = atoi(founders);
-	for(int i=0;i<tmp;i++)
+	for (int i = 0; i < tmp; i++)
 	{
-		if(members[i])
-			requestee->Message(0,"%i: %s",i,members[i]->GetName());
+		if (members[i])
+			requestee->Message(0, "%i: %s", i, members[i]->GetName());
 	}
 }
 
@@ -1558,31 +1555,31 @@ void GuildApproval::GuildApproved()
 	char petitext[PBUFFER] = "A new guild was founded! Guildname: ";
 	char gmembers[MBUFFER] = " ";
 
-	if(!owner)
+	if (!owner)
 		return;
 	database.GetVariable("GuildCreation", founders, 3);
 	uint8 tmp = atoi(founders);
 	uint32 tmpeq = guild_mgr.CreateGuild(guild, owner->CharacterID());
-	guild_mgr.SetGuild(owner->CharacterID(),tmpeq,2);
-	owner->SendAppearancePacket(AT_GuildID,true,false);
-	for(int i=0;i<tmp;i++)
+	guild_mgr.SetGuild(owner->CharacterID(), tmpeq, 2);
+	owner->SendAppearancePacket(AT_GuildID, true, false);
+	for (int i = 0; i < tmp; i++)
 	{
-		if(members[i])
-			{
-			owner->Message(0, "%s",members[i]->GetName());
-			owner->Message(0, "%i",members[i]->CharacterID());
-			guild_mgr.SetGuild(members[i]->CharacterID(),tmpeq,0);
-			size_t len = MBUFFER - strlen(gmembers)+1;
-			strncat(gmembers," ",len);
-			strncat(gmembers,members[i]->GetName(),len);
-			}
+		if (members[i])
+		{
+			owner->Message(0, "%s", members[i]->GetName());
+			owner->Message(0, "%i", members[i]->CharacterID());
+			guild_mgr.SetGuild(members[i]->CharacterID(), tmpeq, 0);
+			size_t len = MBUFFER - strlen(gmembers) + 1;
+			strncat(gmembers, " ", len);
+			strncat(gmembers, members[i]->GetName(), len);
+		}
 	}
-	size_t len = PBUFFER - strlen(petitext)+1;
-	strncat(petitext,guild,len);
-	strncat(petitext," Leader: ",len);
-	strncat(petitext,owner->CastToClient()->GetName(),len);
-	strncat(petitext," Members:",len);
-	strncat(petitext,gmembers,len);
+	size_t len = PBUFFER - strlen(petitext) + 1;
+	strncat(petitext, guild, len);
+	strncat(petitext, " Leader: ", len);
+	strncat(petitext, owner->CastToClient()->GetName(), len);
+	strncat(petitext, " Members:", len);
+	strncat(petitext, gmembers, len);
 	Petition* pet = new Petition(owner->CastToClient()->CharacterID());
 	pet->SetAName(owner->CastToClient()->AccountName());
 	pet->SetClass(owner->CastToClient()->GetClass());
