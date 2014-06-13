@@ -129,7 +129,7 @@ public:
 private:
 	bool isLoaded(uint32 pGuildID);
 	bool load(uint32 pGuildID);
-	std::list<GuildBank*>::iterator getGuildBank(uint32 pGuildID);
+	GuildBank* getGuildBank(uint32 pGuildID);
 	void updateItemQuantity(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity);
 
 	std::list<GuildBank*> mBanks;
