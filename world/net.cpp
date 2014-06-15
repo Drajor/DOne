@@ -177,7 +177,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	dbasync = new DBAsync(&database);
-	guild_mgr.SetDatabase(&database);
+	guild_mgr.setDatabase(&database);
 
 	if (argc >= 2) {
 		char tmp[2];
@@ -291,7 +291,7 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");
 	}
 	_log(WORLD__INIT, "Loading guilds..");
-	guild_mgr.LoadGuilds();
+	guild_mgr.loadGuilds();
 	//rules:
 	{
 		char tmp[64];

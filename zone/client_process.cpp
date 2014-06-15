@@ -2390,14 +2390,14 @@ void Client::SendLFGuildStatus()
 
 void Client::SendGuildLFGuildStatus()
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + +strlen(guild_mgr.GetGuildName(GuildID())) + 18);
+	ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + +strlen(guild_mgr.getGuildName(GuildID())) + 18);
 
 	pack->WriteUInt32(zone->GetZoneID());
 	pack->WriteUInt32(zone->GetInstanceID());
 	pack->WriteString(GetName());
 	pack->WriteUInt32(QSG_LFGuild);
 	pack->WriteUInt32(QSG_LFGuild_RequestGuildInfo);
-	pack->WriteString(guild_mgr.GetGuildName(GuildID()));
+	pack->WriteString(guild_mgr.getGuildName(GuildID()));
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);

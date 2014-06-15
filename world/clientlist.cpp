@@ -535,7 +535,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		(whomlen == 0 || (
 			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 			strncasecmp(countcle->name(),whom->whom, whomlen) == 0 ||
-			(strncasecmp(guild_mgr.GetGuildName(countcle->GuildID()), whom->whom, whomlen) == 0) ||
+			(strncasecmp(guild_mgr.getGuildName(countcle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(countcle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
@@ -543,12 +543,12 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			if((countcle->Anon()>0 && admin>=countcle->Admin() && admin>0) || countcle->Anon()==0 ){
 				totalusers++;
 				if(totalusers<=20 || admin>=100)
-					totallength=totallength+strlen(countcle->name())+strlen(countcle->AccountName())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
+					totallength=totallength+strlen(countcle->name())+strlen(countcle->AccountName())+strlen(guild_mgr.getGuildName(countcle->GuildID()))+5;
 			}
 			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || countcle->Anon()==0 && !countcle->GetGM()){
 				totalusers++;
 				if(totalusers<=20 || admin>=100)
-					totallength=totallength+strlen(countcle->name())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
+					totallength=totallength+strlen(countcle->name())+strlen(guild_mgr.getGuildName(countcle->GuildID()))+5;
 			}
 		}
 		countclients.Advance();
@@ -615,7 +615,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		(whomlen == 0 || (
 			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
-			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
+			(strncasecmp(guild_mgr.getGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
@@ -661,7 +661,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			idx++;
 			char guildbuffer[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
-				sprintf(guildbuffer,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
+				sprintf(guildbuffer,"<%s>", guild_mgr.getGuildName(cle->GuildID()));
 			uint32 formatstring=5025;
 			if(cle->Anon()==1 && (admin<cle->Admin() || admin==0))
 				formatstring=5024;
@@ -782,7 +782,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 		if(CLE && CLE->name() && (CLE->Online() >= CLE_Status_Zoning) && !(CLE->GetGM() && CLE->Anon())) {
 			FriendsCLEs.push_back(CLE);
 			TotalLength += strlen(CLE->name());
-			int GuildNameLength = strlen(guild_mgr.GetGuildName(CLE->GuildID()));
+			int GuildNameLength = strlen(guild_mgr.getGuildName(CLE->GuildID()));
 			if(GuildNameLength>0)
 				TotalLength += (GuildNameLength + 2);
 		}
@@ -831,7 +831,7 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 
 			char GuildName[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
-				sprintf(GuildName,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
+				sprintf(GuildName,"<%s>", guild_mgr.getGuildName(cle->GuildID()));
 			uint32 FormatMSGID=5025; // 5025 %T1[%2 %3] %4 (%5) %6 %7 %8 %9
 			if(cle->Anon()==1)
 				FormatMSGID=5024; // 5024 %T1[ANONYMOUS] %2 %3
@@ -1002,7 +1002,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 		(whomlen == 0 || (
 			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
-			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
+			(strncasecmp(guild_mgr.getGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
 			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
@@ -1043,8 +1043,8 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 				tmpgm[0] = 0;
 // end Myra
 
-			if (guild_mgr.GuildExists(cle->GuildID())) {
-				snprintf(tmpguild, 36, " <%s>", guild_mgr.GetGuildName(cle->GuildID()));
+			if (guild_mgr.guildExists(cle->GuildID())) {
+				snprintf(tmpguild, 36, " <%s>", guild_mgr.getGuildName(cle->GuildID()));
 			} else
 				tmpguild[0] = 0;
 

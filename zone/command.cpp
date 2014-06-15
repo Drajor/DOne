@@ -4828,10 +4828,10 @@ void command_guild(Client *c, const Seperator *sep)
 		else {
 			if (client->IsInAGuild())
 				c->Message(0, "%s is not in a guild.", client->GetName());
-			else if (guild_mgr.IsGuildLeader(client->GuildID(), client->CharacterID()))
-				c->Message(0, "%s is the leader of <%s> rank: %s", client->GetName(), guild_mgr.GetGuildName(client->GuildID()), guild_mgr.GetRankName(client->GuildID(), client->GuildRank()));
+			else if (guild_mgr.isGuildLeader(client->GuildID(), client->CharacterID()))
+				c->Message(0, "%s is the leader of <%s> rank: %s", client->GetName(), guild_mgr.getGuildName(client->GuildID()), guild_mgr.getRankName(client->GuildID(), client->GuildRank()));
 			else
-				c->Message(0, "%s is a member of <%s> rank: %s", client->GetName(), guild_mgr.GetGuildName(client->GuildID()), guild_mgr.GetRankName(client->GuildID(), client->GuildRank()));
+				c->Message(0, "%s is a member of <%s> rank: %s", client->GetName(), guild_mgr.getGuildName(client->GuildID()), guild_mgr.getRankName(client->GuildID(), client->GuildRank()));
 		}
 	}
 	else if (strcasecmp(sep->arg[1], "info") == 0) {
@@ -4912,7 +4912,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 			if(guild_id == 0)
 				guild_id = GUILD_NONE;
-			else if(!guild_mgr.GuildExists(guild_id)) {
+			else if(!guild_mgr.guildExists(guild_id)) {
 				c->Message(13, "Guild %d does not exist.", guild_id);
 				return;
 			}
@@ -4935,10 +4935,10 @@ void command_guild(Client *c, const Seperator *sep)
 			} else {
 				_log(GUILDS__ACTIONS, "%s: Putting %s (%d) into guild %s (%d) with GM command.", c->GetName(),
 					sep->arg[2], charid,
-					guild_mgr.GetGuildName(guild_id), guild_id);
+					guild_mgr.getGuildName(guild_id), guild_id);
 			}
 
-			if(!guild_mgr.SetGuild(charid, guild_id, GUILD_MEMBER)) {
+			if(!guild_mgr.setGuild(charid, guild_id, GUILD_MEMBER)) {
 				c->Message(13, "Error putting '%s' into guild %d", sep->arg[2], guild_id);
 			} else {
 				c->Message(0, "%s has been put into guild %d", sep->arg[2], guild_id);
@@ -4985,7 +4985,7 @@ void command_guild(Client *c, const Seperator *sep)
 			_log(GUILDS__ACTIONS, "%s: Setting %s (%d)'s guild rank to %d with GM command.", c->GetName(),
 				sep->arg[2], charid, rank);
 
-			if(!guild_mgr.SetGuildRank(charid, rank))
+			if(!guild_mgr.setGuildRank(charid, rank))
 				c->Message(13, "Error while setting rank %d on '%s'.", rank, sep->arg[2]);
 			else
 				c->Message(0, "%s has been set to rank %d", sep->arg[2], rank);
@@ -5011,9 +5011,9 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			uint32 tmp = guild_mgr.FindGuildByLeader(leader);
+			uint32 tmp = guild_mgr.findGuildByLeader(leader);
 			if (tmp != GUILD_NONE) {
-				c->Message(0, "Error: %s already is the leader of DB# %i '%s'.", sep->arg[2], tmp, guild_mgr.GetGuildName(tmp));
+				c->Message(0, "Error: %s already is the leader of DB# %i '%s'.", sep->arg[2], tmp, guild_mgr.getGuildName(tmp));
 			}
 			else {
 
@@ -5022,7 +5022,7 @@ void command_guild(Client *c, const Seperator *sep)
 					return;
 				}
 
-				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
+				uint32 id = guild_mgr.createGuild(sep->argplus[3], leader);
 
 				_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.", c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
@@ -5032,7 +5032,7 @@ void command_guild(Client *c, const Seperator *sep)
 				else {
 					c->Message(0, "Guild created: Leader: %i, number %i: %s", leader, id, sep->argplus[3]);
 
-					if(!guild_mgr.SetGuild(leader, id, GUILD_LEADER))
+					if(!guild_mgr.setGuild(leader, id, GUILD_LEADER))
 						c->Message(0, "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
 				}
 
@@ -5047,7 +5047,7 @@ void command_guild(Client *c, const Seperator *sep)
 		else {
 			uint32 id = atoi(sep->arg[2]);
 
-			if(!guild_mgr.GuildExists(id)) {
+			if(!guild_mgr.guildExists(id)) {
 				c->Message(0, "Guild %d does not exist!", id);
 				return;
 			}
@@ -5057,16 +5057,16 @@ void command_guild(Client *c, const Seperator *sep)
 				if(c->GuildID() != id) {
 					c->Message(13, "Access denied to edit other people's guilds");
 					return;
-				} else if(!guild_mgr.CheckGMStatus(id, admin)) {
+				} else if(!guild_mgr.checkGMStatus(id, admin)) {
 					c->Message(13, "Access denied to edit your guild with GM commands.");
 					return;
 				}
 			}
 
 			_log(GUILDS__ACTIONS, "%s: Deleting guild %s (%d) with GM command.", c->GetName(),
-				guild_mgr.GetGuildName(id), id);
+				guild_mgr.getGuildName(id), id);
 
-			if (!guild_mgr.DeleteGuild(id))
+			if (!guild_mgr.deleteGuild(id))
 				c->Message(0, "Guild delete failed.");
 			else {
 				c->Message(0, "Guild %d deleted.", id);
@@ -5081,7 +5081,7 @@ void command_guild(Client *c, const Seperator *sep)
 		else {
 			uint32 id = atoi(sep->arg[2]);
 
-			if(!guild_mgr.GuildExists(id)) {
+			if(!guild_mgr.guildExists(id)) {
 				c->Message(0, "Guild %d does not exist!", id);
 				return;
 			}
@@ -5091,16 +5091,16 @@ void command_guild(Client *c, const Seperator *sep)
 				if(c->GuildID() != id) {
 					c->Message(13, "Access denied to edit other people's guilds");
 					return;
-				} else if(!guild_mgr.CheckGMStatus(id, admin)) {
+				} else if(!guild_mgr.checkGMStatus(id, admin)) {
 					c->Message(13, "Access denied to edit your guild with GM commands.");
 					return;
 				}
 			}
 
 			_log(GUILDS__ACTIONS, "%s: Renaming guild %s (%d) to '%s' with GM command.", c->GetName(),
-				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
+				guild_mgr.getGuildName(id), id, sep->argplus[3]);
 
-			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
+			if (!guild_mgr.renameGuild(id, sep->argplus[3]))
 				c->Message(0, "Guild rename failed.");
 			else {
 				c->Message(0, "Guild %d renamed to %s", id, sep->argplus[3]);
@@ -5123,7 +5123,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			uint32 tmpdb = guild_mgr.FindGuildByLeader(leader);
+			uint32 tmpdb = guild_mgr.findGuildByLeader(leader);
 			if (leader == 0)
 				c->Message(0, "New leader not found.");
 			else if (tmpdb != 0) {
@@ -5132,7 +5132,7 @@ void command_guild(Client *c, const Seperator *sep)
 			else {
 				uint32 id = atoi(sep->arg[2]);
 
-				if(!guild_mgr.GuildExists(id)) {
+				if(!guild_mgr.guildExists(id)) {
 					c->Message(0, "Guild %d does not exist!", id);
 					return;
 				}
@@ -5142,16 +5142,16 @@ void command_guild(Client *c, const Seperator *sep)
 					if(c->GuildID() != id) {
 						c->Message(13, "Access denied to edit other people's guilds");
 						return;
-					} else if(!guild_mgr.CheckGMStatus(id, admin)) {
+					} else if(!guild_mgr.checkGMStatus(id, admin)) {
 						c->Message(13, "Access denied to edit your guild with GM commands.");
 						return;
 					}
 				}
 
 				_log(GUILDS__ACTIONS, "%s: Setting leader of guild %s (%d) to %d with GM command.", c->GetName(),
-					guild_mgr.GetGuildName(id), id, leader);
+					guild_mgr.getGuildName(id), id, leader);
 
-				if(!guild_mgr.SetGuildLeader(id, leader))
+				if(!guild_mgr.setGuildLeader(id, leader))
 					c->Message(0, "Guild leader change failed.");
 				else {
 					c->Message(0, "Guild leader changed: guild # %d, Leader: %s", id, sep->argplus[3]);

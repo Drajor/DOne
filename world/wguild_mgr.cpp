@@ -79,7 +79,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		zoneserver_list.SendPacket(pack);
 
 		//preform a local refresh.
-		if(!RefreshGuild(s->guild_id)) {
+		if(!refreshGuild(s->guild_id)) {
 			_log(GUILDS__ERROR, "Unable to preform local refresh on guild %d", s->guild_id);
 			//can we do anything?
 		}
@@ -118,7 +118,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		zoneserver_list.SendPacket(pack);
 
 		//preform a local refresh.
-		if(!LocalDeleteGuild(s->guild_id)) {
+		if(!localDeleteGuild(s->guild_id)) {
 			_log(GUILDS__ERROR, "Unable to preform local delete on guild %d", s->guild_id);
 			//can we do anything?
 		}

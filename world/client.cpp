@@ -1271,7 +1271,7 @@ void Client::SendGuildList() {
 	outapp = new EQApplicationPacket(OP_GuildsList);
 
 	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.MakeGuildList("", outapp->size);
+	outapp->pBuffer = guild_mgr.makeGuildList("", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		clog(GUILDS__ERROR, "Unable to make guild list!");
 		return;

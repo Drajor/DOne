@@ -3875,11 +3875,11 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 	mlog(GUILDS__IN_PACKETS, "Received OP_GuildDelete");
 	mpkt(GUILDS__IN_PACKET_TRACE, app);
 
-	if(!IsInAGuild() || !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
+	if(!IsInAGuild() || !guild_mgr.isGuildLeader(GuildID(), CharacterID()))
 		Message(0,"You are not a guild leader or not in a guild.");
 	else {
-		mlog(GUILDS__ACTIONS, "Deleting guild %s (%d)", guild_mgr.GetGuildName(GuildID()), GuildID());
-		if (!guild_mgr.DeleteGuild(GuildID()))
+		mlog(GUILDS__ACTIONS, "Deleting guild %s (%d)", guild_mgr.getGuildName(GuildID()), GuildID());
+		if (!guild_mgr.deleteGuild(GuildID()))
 			Message(0, "Guild delete failed.");
 		else {
 			Message(0, "Guild successfully deleted.");
@@ -3899,22 +3899,22 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 	}
 	GuildUpdate_PublicNote* gpn=(GuildUpdate_PublicNote*)app->pBuffer;
 
-	CharGuildInfo gci;
-	if(!guild_mgr.GetCharInfo(gpn->target, gci)) {
+	CharacterGuildInfo gci;
+	if(!guild_mgr.getCharInfo(gpn->target, gci)) {
 		Message(0, "Unable to find '%s'", gpn->target);
 		return;
 	}
-	if(gci.guild_id != GuildID()) {
+	if(gci.mGuildID != GuildID()) {
 		Message(0, "You aren't in the same guild, what do you think you are doing?");
 		return;
 	}
 
 	mlog(GUILDS__ACTIONS, "Setting public note on %s (%d) in guild %s (%d) to: %s",
-		gpn->target, gci.char_id,
-		guild_mgr.GetGuildName(GuildID()), GuildID(),
+		gpn->target, gci.mCharacterID,
+		guild_mgr.getGuildName(GuildID()), GuildID(),
 		gpn->note);
 
-	if(!guild_mgr.SetPublicNote(gci.char_id, gpn->note)) {
+	if(!guild_mgr.setPublicNote(gci.mCharacterID, gpn->note)) {
 		Message(13, "Failed to set public note on %s", gpn->target);
 	} else {
 		Message(0, "Successfully changed public note on %s", gpn->target);
@@ -3959,7 +3959,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 		Message(13, "You are not in a guild!");
 		return;
 	}
-	if(!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_MOTD)) {
+	if(!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_MOTD)) {
 		Message(13, "You do not have permissions to edit your guild's MOTD.");
 		return;
 	}
@@ -3967,9 +3967,9 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 	GuildMOTD_Struct* gmotd=(GuildMOTD_Struct*)app->pBuffer;
 
 	mlog(GUILDS__ACTIONS, "Setting MOTD for %s (%d) to: %s - %s",
-		guild_mgr.GetGuildName(GuildID()), GuildID(), GetName(), gmotd->motd);
+		guild_mgr.getGuildName(GuildID()), GuildID(), GetName(), gmotd->motd);
 
-	if (!guild_mgr.SetGuildMOTD(GuildID(), gmotd->motd, GetName())) {
+	if (!guild_mgr.setGuildMOTD(GuildID(), gmotd->motd, GetName())) {
 		Message(0, "Motd update failed.");
 	}
 
@@ -3992,22 +3992,22 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 		return;
 	}
 
-	CharGuildInfo gci;
+	CharacterGuildInfo gci;
 
-	if(!guild_mgr.GetCharInfo(gmb->member, gci))
+	if(!guild_mgr.getCharInfo(gmb->member, gci))
 	{
 		Message(0, "Unable to find '%s'", gmb->member);
 		return;
 	}
-	bool IsCurrentlyABanker = guild_mgr.GetBankerFlag(gci.char_id);
+	bool IsCurrentlyABanker = guild_mgr.getBankerFlag(gci.mCharacterID);
 
-	bool IsCurrentlyAnAlt = guild_mgr.GetAltFlag(gci.char_id);
+	bool IsCurrentlyAnAlt = guild_mgr.getAltFlag(gci.mCharacterID);
 
 	bool NewBankerStatus = gmb->enabled & 0x01;
 
 	bool NewAltStatus = gmb->enabled & 0x02;
 
-	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
+	if((IsCurrentlyABanker != NewBankerStatus) && !guild_mgr.isGuildLeader(GuildID(), CharacterID()))
 	{
 		Message(13, "Only the guild leader can assign guild bankers!");
 		return;
@@ -4024,14 +4024,14 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 		}
 	}
 
-	if(gci.guild_id != GuildID()) {
+	if(gci.mGuildID != GuildID()) {
 		Message(0, "You aren't in the same guild, what do you think you are doing?");
 		return;
 	}
 
 	if(IsCurrentlyABanker != NewBankerStatus)
 	{
-		if(!guild_mgr.SetBankerFlag(gci.char_id, NewBankerStatus)) {
+		if(!guild_mgr.setBankerFlag(gci.mCharacterID, NewBankerStatus)) {
 			Message(13, "Error setting guild banker flag.");
 			return;
 		}
@@ -4043,7 +4043,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 	}
 	if(IsCurrentlyAnAlt != NewAltStatus)
 	{
-		if(!guild_mgr.SetAltFlag(gci.char_id, NewAltStatus)) {
+		if(!guild_mgr.setAltFlag(gci.mCharacterID, NewAltStatus)) {
 			Message(13, "Error setting guild alt flag.");
 			return;
 		}
@@ -4083,7 +4083,7 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 	GuildMakeLeader* gml=(GuildMakeLeader*)app->pBuffer;
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
-	else if (!guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
+	else if (!guild_mgr.isGuildLeader(GuildID(), CharacterID()))
 		Message(0, "Error: You arent the guild leader!");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
@@ -4095,10 +4095,10 @@ void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 		if(newleader) {
 
 			mlog(GUILDS__ACTIONS, "Transfering leadership of %s (%d) to %s (%d)",
-				guild_mgr.GetGuildName(GuildID()), GuildID(),
+				guild_mgr.getGuildName(GuildID()), GuildID(),
 				newleader->GetName(), newleader->CharacterID());
 
-			if(guild_mgr.SetGuildLeader(GuildID(), newleader->CharacterID())){
+			if(guild_mgr.setGuildLeader(GuildID(), newleader->CharacterID())){
 				Message(0,"Successfully Transfered Leadership to %s.",gml->target);
 				newleader->Message(15,"%s has transfered the guild leadership into your hands.",GetName());
 			}
@@ -4124,37 +4124,37 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 
 	if (!IsInAGuild())
 		Message(0, "Error: You arent in a guild!");
-	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
+	else if (!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
 		Message(0, "You dont have permission to invite.");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
 		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
 
-		CharGuildInfo gci;
-		if(!guild_mgr.GetCharInfo(demote->target, gci)) {
+		CharacterGuildInfo gci;
+		if(!guild_mgr.getCharInfo(demote->target, gci)) {
 			Message(0, "Unable to find '%s'", demote->target);
 			return;
 		}
-		if(gci.guild_id != GuildID()) {
+		if(gci.mGuildID != GuildID()) {
 			Message(0, "You aren't in the same guild, what do you think you are doing?");
 			return;
 		}
 
-		if(gci.rank < 1) {
+		if(gci.mRank < 1) {
 			Message(0, "%s cannot be demoted any further!", demote->target);
 			return;
 		}
-		uint8 rank = gci.rank - 1;
+		uint8 rank = gci.mRank - 1;
 
 
 		mlog(GUILDS__ACTIONS, "Demoting %s (%d) from rank %s (%d) to %s (%d) in %s (%d)",
-			demote->target, gci.char_id,
-			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
-			guild_mgr.GetRankName(GuildID(), rank), rank,
-			guild_mgr.GetGuildName(GuildID()), GuildID());
+			demote->target, gci.mCharacterID,
+			guild_mgr.getRankName(GuildID(), gci.mRank), gci.mRank,
+			guild_mgr.getRankName(GuildID(), rank), rank,
+			guild_mgr.getGuildName(GuildID()), GuildID());
 
-		if(!guild_mgr.SetGuildRank(gci.char_id, rank)) {
+		if(!guild_mgr.setGuildRank(gci.mCharacterID, rank)) {
 			Message(13, "Error while setting rank %d on '%s'.", rank, demote->target);
 			return;
 		}
@@ -4200,7 +4200,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				//they are already in this guild, must be a promotion or demotion
 				if(gc->officer < client->GuildRank()) {
 					//demotion
-					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE)) {
+					if (!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_DEMOTE)) {
 						Message(13, "You dont have permission to demote.");
 						return;
 					}
@@ -4212,16 +4212,16 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
 						gc->officer,
-						guild_mgr.GetGuildName(GuildID()), GuildID());
+						guild_mgr.getGuildName(GuildID()), GuildID());
 
-					if(!guild_mgr.SetGuildRank(client->CharacterID(), gc->officer)) {
+					if(!guild_mgr.setGuildRank(client->CharacterID(), gc->officer)) {
 						Message(13, "There was an error during the demotion, DB may now be inconsistent.");
 						return;
 					}
 
 				} else if(gc->officer > client->GuildRank()) {
 					//promotion
-					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE)) {
+					if (!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_PROMOTE)) {
 						Message(13, "You dont have permission to demote.");
 						return;
 					}
@@ -4230,7 +4230,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
 						gc->officer,
-						guild_mgr.GetGuildName(GuildID()), GuildID());
+						guild_mgr.getGuildName(GuildID()), GuildID());
 
 					//record the promotion with guild manager so we know its valid when we get the reply
 					guild_mgr.recordInvite(client->CharacterID(), GuildID(), gc->officer);
@@ -4255,14 +4255,14 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					return;
 				}
 
-				if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_INVITE)) {
+				if (!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_INVITE)) {
 					Message(13, "You dont have permission to invite.");
 					return;
 				}
 
 				mlog(GUILDS__ACTIONS, "Inviting %s (%d) into guild %s (%d)",
 					client->GetName(), client->CharacterID(),
-					guild_mgr.GetGuildName(GuildID()), GuildID());
+					guild_mgr.getGuildName(GuildID()), GuildID());
 
 				//record the invite with guild manager so we know its valid when we get the reply
 				guild_mgr.recordInvite(client->CharacterID(), GuildID(), gc->officer);
@@ -4298,7 +4298,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 		Message(0, "Error: You arent in a guild!");
 	// we can always remove ourself, otherwise, our rank needs remove permissions
 	else if (strcasecmp(gc->othername,GetName()) != 0 &&
-			!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_REMOVE))
+			!guild_mgr.checkPermission(GuildID(), GuildRank(), GUILD_REMOVE))
 		Message(0, "You dont have permission to remove guild members.");
 	else if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
@@ -4315,25 +4315,25 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 
 			mlog(GUILDS__ACTIONS, "Removing %s (%d) from guild %s (%d)",
 				client->GetName(), client->CharacterID(),
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+				guild_mgr.getGuildName(GuildID()), GuildID());
 		} else {
-			CharGuildInfo gci;
-			if(!guild_mgr.GetCharInfo(gc->othername, gci)) {
+			CharacterGuildInfo gci;
+			if(!guild_mgr.getCharInfo(gc->othername, gci)) {
 				Message(0, "Unable to find '%s'", gc->othername);
 				return;
 			}
-			if(gci.guild_id != GuildID()) {
+			if(gci.mGuildID != GuildID()) {
 				Message(0, "You aren't in the same guild, what do you think you are doing?");
 				return;
 			}
-			char_id = gci.char_id;
+			char_id = gci.mCharacterID;
 
 			mlog(GUILDS__ACTIONS, "Removing remote/offline %s (%d) into guild %s (%d)",
-				gci.char_name.c_str(), gci.char_id,
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+				gci.mCharacterName.c_str(), gci.mCharacterID,
+				guild_mgr.getGuildName(GuildID()), GuildID());
 		}
 
-		if(!guild_mgr.SetGuild(char_id, GUILD_NONE, 0)) {
+		if(!guild_mgr.setGuild(char_id, GUILD_NONE, 0)) {
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageRemove, sizeof(GuildManageRemove_Struct));
 			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*) outapp->pBuffer;
 			gm->guildeqid = GuildID();
@@ -4395,9 +4395,9 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 			mlog(GUILDS__ACTIONS, "Changing guild rank of %s (%d) to rank %d in guild %s (%d)",
 				GetName(), CharacterID(),
 				gj->response,
-				guild_mgr.GetGuildName(GuildID()), GuildID());
+				guild_mgr.getGuildName(GuildID()), GuildID());
 
-			if(!guild_mgr.SetGuildRank(CharacterID(), gj->response)) {
+			if(!guild_mgr.setGuildRank(CharacterID(), gj->response)) {
 				Message(13, "There was an error during the rank change, DB may now be inconsistent.");
 				return;
 			}
@@ -4405,11 +4405,11 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			mlog(GUILDS__ACTIONS, "Adding %s (%d) to guild %s (%d) at rank %d",
 				GetName(), CharacterID(),
-				guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid,
+				guild_mgr.getGuildName(gj->guildeqid), gj->guildeqid,
 				gj->response);
 
 			//change guild and rank.
-			if(!guild_mgr.SetGuild(CharacterID(), gj->guildeqid, gj->response)) {
+			if(!guild_mgr.setGuild(CharacterID(), gj->guildeqid, gj->response)) {
 				Message(13, "There was an error during the invite, DB may now be inconsistent.");
 				return;
 			}
@@ -8804,7 +8804,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		m_pp.guild_id = GuildID();
 
 		if(zone->GetZoneID() == RuleI(World, GuildBankZoneID))
-			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
+			GuildBanker = (guild_mgr.isGuildLeader(GuildID(), CharacterID()) || guild_mgr.getBankerFlag(CharacterID()));
 	}
 
 	m_pp.guildbanker = GuildBanker;
@@ -12043,16 +12043,16 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 	if(!IsInAGuild())
 		return;
 
-	if(!guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
+	if(!guild_mgr.isGuildLeader(GuildID(), CharacterID()))
 	{
 		Message(13, "Only the guild leader can change the Channel or URL.!");
 		return;
 	}
 
 	if(guuacs->Action == 0)
-		guild_mgr.SetGuildURL(GuildID(), guuacs->Text);
+		guild_mgr.setGuildURL(GuildID(), guuacs->Text);
 	else
-		guild_mgr.SetGuildChannel(GuildID(), guuacs->Text);
+		guild_mgr.setGuildChannel(GuildID(), guuacs->Text);
 
 }
 
@@ -12085,13 +12085,13 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 		return;
 	}
 
-	const char *GuildName = guild_mgr.GetGuildName(TargetGuildID);
+	const char *GuildName = guild_mgr.getGuildName(TargetGuildID);
 
 	if(!GuildName)
 		return;
 
-	bool IsLeader = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_PROMOTE);
-	bool IsOfficer = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_INVITE);
+	bool IsLeader = guild_mgr.checkPermission(TargetGuildID, c->GuildRank(), GUILD_PROMOTE);
+	bool IsOfficer = guild_mgr.checkPermission(TargetGuildID, c->GuildRank(), GUILD_INVITE);
 
 	if((TargetGuildID == GuildID()) && (c != this))
 	{
@@ -12451,7 +12451,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 		}
 	}
 
-	int32 GuildCount = guild_mgr.DoesAccountContainAGuildLeader(AccountID());
+	int32 GuildCount = guild_mgr.doesAccountContainAGuildLeader(AccountID());
 
 	if(GuildCount >= RuleI(Guild, PlayerCreationLimit))
 	{
@@ -12459,13 +12459,13 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 		return;
 	}
 
-	if(guild_mgr.GetGuildIDByName(GuildName) != GUILD_NONE)
+	if(guild_mgr.getGuildIDByName(GuildName) != GUILD_NONE)
 	{
 		Message_StringID(clientMessageError, GUILD_NAME_IN_USE);
 		return;
 	}
 
-	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
+	uint32 NewGuildID = guild_mgr.createGuild(GuildName, CharacterID());
 
 	_log(GUILDS__ACTIONS, "%s: Creating guild %s with leader %d via UF+ GUI. It was given id %lu.", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
@@ -12474,7 +12474,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 		Message(clientMessageError, "Guild creation failed.");
 	else
 	{
-		if(!guild_mgr.SetGuild(CharacterID(), NewGuildID, GUILD_LEADER))
+		if(!guild_mgr.setGuild(CharacterID(), NewGuildID, GUILD_LEADER))
 			Message(clientMessageError, "Unable to set guild leader's guild in the database. Contact a GM.");
 		else
 		{
@@ -12941,14 +12941,14 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 #endif // __DARWIN
 				return;
 
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(gts->Comment) + strlen(guild_mgr.GetGuildName(GuildID())) + 43);
+			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + strlen(gts->Comment) + strlen(guild_mgr.getGuildName(GuildID())) + 43);
 
 			pack->WriteUInt32(zone->GetZoneID());
 			pack->WriteUInt32(zone->GetInstanceID());
 			pack->WriteString(GetName());
 			pack->WriteUInt32(QSG_LFGuild);
 			pack->WriteUInt32(QSG_LFGuild_UpdateGuildInfo);
-			pack->WriteString(guild_mgr.GetGuildName(GuildID()));
+			pack->WriteString(guild_mgr.getGuildName(GuildID()));
 			pack->WriteString(gts->Comment);
 			pack->WriteUInt32(gts->FromLevel);
 			pack->WriteUInt32(gts->ToLevel);

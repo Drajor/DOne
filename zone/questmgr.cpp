@@ -1218,7 +1218,7 @@ void QuestManager::setsky(uint8 new_sky) {
 void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient()) {
-		guild_mgr.SetGuild(initiator->CharacterID(), new_guild_id, new_rank);
+		guild_mgr.setGuild(initiator->CharacterID(), new_guild_id, new_rank);
 	}
 }
 
@@ -1231,19 +1231,19 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 				return;
 			}
 
-			uint32 tmp = guild_mgr.FindGuildByLeader(cid);
+			uint32 tmp = guild_mgr.findGuildByLeader(cid);
 			if (tmp != GUILD_NONE) {
-				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %u '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
+				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %u '%s'.", leader, tmp, guild_mgr.getGuildName(tmp));
 				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
 			}
 			else {
-				uint32 gid = guild_mgr.CreateGuild(guild_name, cid);
+				uint32 gid = guild_mgr.createGuild(guild_name, cid);
 				if (gid == GUILD_NONE)
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild creation failed");
 				else {
 					sprintf(hString, "Guild Creation: Guild created: Leader: %u, number %u: %s", cid, gid, leader);
 					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
-					if(!guild_mgr.SetGuild(cid, gid, GUILD_LEADER))
+					if(!guild_mgr.setGuild(cid, gid, GUILD_LEADER))
 						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
 				}
 
@@ -2685,7 +2685,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 
 const char* QuestManager::getguildnamebyid(int guild_id) {
 	if (guild_id > 0)
-		return guild_mgr.GetGuildName(guild_id);
+		return guild_mgr.getGuildName(guild_id);
 	else
 		return("");
 }

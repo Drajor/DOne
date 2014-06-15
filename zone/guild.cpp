@@ -55,7 +55,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	strn0cpy(motd->name, m_pp.name, 64);
 
 	if(IsInAGuild()) {
-		if(!guild_mgr.GetGuildMOTD(GuildID(), motd->motd, motd->setby_name)) {
+		if(!guild_mgr.getGuildMOTD(GuildID(), motd->motd, motd->setby_name)) {
 			motd->setby_name[0] = '\0';
 			strcpy(motd->motd, "ERROR GETTING MOTD!");
 		}
@@ -83,7 +83,7 @@ void Client::SendGuildURL()
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
-		if(guild_mgr.GetGuildURL(GuildID(), guuacs->Text))
+		if(guild_mgr.getGuildURL(GuildID(), guuacs->Text))
 		{
 			guuacs->Action = 0;
 			FastQueuePacket(&outapp);
@@ -104,7 +104,7 @@ void Client::SendGuildChannel()
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
-		if(guild_mgr.GetGuildChannel(GuildID(), guuacs->Text))
+		if(guild_mgr.getGuildChannel(GuildID(), guuacs->Text))
 		{
 			guuacs->Action = 1;
 
@@ -157,7 +157,7 @@ void Client::SendGuildSpawnAppearance() {
 		SendAppearancePacket(AT_GuildID, GUILD_NONE);
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for no guild tag.");
 	} else {
-		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		uint8 rank = guild_mgr.getDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
 		SendAppearancePacket(AT_GuildRank, rank);
@@ -172,7 +172,7 @@ void Client::SendGuildList() {
 	outapp = new EQApplicationPacket(OP_GuildsList);
 
 	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
+	outapp->pBuffer = guild_mgr.makeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
@@ -226,15 +226,15 @@ void Client::RefreshGuildInfo()
 
 	bool WasBanker = GuildBanker;
 
-	CharGuildInfo info;
-	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
+	CharacterGuildInfo info;
+	if(!guild_mgr.getCharInfo(CharacterID(), info)) {
 		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
 		return;
 	}
 
-	guildrank = info.rank;
-	guild_id = info.guild_id;
-	GuildBanker = info.banker || guild_mgr.IsGuildLeader(GuildID(), CharacterID());
+	guildrank = info.mRank;
+	guild_id = info.mGuildID;
+	GuildBanker = info.mBanker || guild_mgr.isGuildLeader(GuildID(), CharacterID());
 
 	if(((int)zone->GetZoneID() == RuleI(World, GuildBankZoneID)))
 	{

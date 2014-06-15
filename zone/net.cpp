@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
 	}
 	dbasync = new DBAsync(&database);
 	dbasync->AddFQ(&MTdbafq);
-	guild_mgr.SetDatabase(&database);
+	guild_mgr.setDatabase(&database);
 
 	GuildBanks = nullptr;
 
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
 	}
 
 	_log(ZONE__INIT, "Loading guilds");
-	guild_mgr.LoadGuilds();
+	guild_mgr.loadGuilds();
 	_log(ZONE__INIT, "Loading factions");
 	database.LoadFactionData();
 	_log(ZONE__INIT, "Loading titles");

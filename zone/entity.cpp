@@ -1790,7 +1790,7 @@ void EntityList::ChannelMessageFromWorld(const char *from, const char *to,
 		if (chan_num == 0) {
 			if (!client->IsInGuild(guild_id))
 				continue;
-			if (!guild_mgr.CheckPermission(guild_id, client->GuildRank(), GUILD_HEAR))
+			if (!guild_mgr.checkPermission(guild_id, client->GuildRank(), GUILD_HEAR))
 				continue;
 			if (client->GetFilter(FilterGuildChat) == FilterHide)
 				continue;
@@ -3943,7 +3943,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 					continue;
 			}
 			if (WhomLength && strncasecmp(Who->whom, ClientEntry->GetName(), WhomLength) &&
-					strncasecmp(guild_mgr.GetGuildName(ClientEntry->GuildID()), Who->whom, WhomLength))
+					strncasecmp(guild_mgr.getGuildName(ClientEntry->GuildID()), Who->whom, WhomLength))
 				continue;
 
 			Entries++;
@@ -3951,8 +3951,8 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 
 			PacketLength = PacketLength + strlen(ClientEntry->GetName());
 
-			if (strlen(guild_mgr.GetGuildName(ClientEntry->GuildID())) > 0)
-				PacketLength = PacketLength + strlen(guild_mgr.GetGuildName(ClientEntry->GuildID())) + 2;
+			if (strlen(guild_mgr.getGuildName(ClientEntry->GuildID())) > 0)
+				PacketLength = PacketLength + strlen(guild_mgr.getGuildName(ClientEntry->GuildID())) + 2;
 		}
 	}
 
@@ -4009,12 +4009,12 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 					continue;
 			}
 			if (WhomLength && strncasecmp(Who->whom, ClientEntry->GetName(), WhomLength) &&
-					strncasecmp(guild_mgr.GetGuildName(ClientEntry->GuildID()), Who->whom, WhomLength))
+					strncasecmp(guild_mgr.getGuildName(ClientEntry->GuildID()), Who->whom, WhomLength))
 				continue;
 			std::string GuildName;
 			if ((ClientEntry->GuildID() != GUILD_NONE) && (ClientEntry->GuildID() > 0)) {
 				GuildName = "<";
-				GuildName += guild_mgr.GetGuildName(ClientEntry->GuildID());
+				GuildName += guild_mgr.getGuildName(ClientEntry->GuildID());
 				GuildName += ">";
 			}
 			uint32 FormatMSGID = 5025; // 5025 %T1[%2 %3] %4 (%5) %6 %7 %8 %9

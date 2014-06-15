@@ -100,12 +100,12 @@ void ZoneGuildManager::sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint
 	if (pGuildID == 0) {
 		_log(GUILDS__REFRESH, "Guild lookup for char %d when sending char refresh.", pCharacterID);
 
-		CharGuildInfo gci;
-		if (!GetCharInfo(pCharacterID, gci)) {
+		CharacterGuildInfo gci;
+		if (!getCharInfo(pCharacterID, gci)) {
 			pGuildID = GUILD_NONE;
 		}
 		else {
-			pGuildID = gci.guild_id;
+			pGuildID = gci.mGuildID;
 		}
 	}
 
@@ -122,19 +122,19 @@ void ZoneGuildManager::sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint
 
 void ZoneGuildManager::sendRankUpdate(uint32 pCharacterID)
 {
-	CharGuildInfo gci;
+	CharacterGuildInfo gci;
 
-	if (!GetCharInfo(pCharacterID, gci))
+	if (!getCharInfo(pCharacterID, gci))
 		return;
 
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildRankUpdate, sizeof(ServerGuildRankUpdate_Struct));
 
 	ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
 
-	sgrus->GuildID = gci.guild_id;
-	strn0cpy(sgrus->MemberName, gci.char_name.c_str(), sizeof(sgrus->MemberName));
-	sgrus->Rank = gci.rank;
-	sgrus->Banker = gci.banker + (gci.alt * 2);
+	sgrus->GuildID = gci.mGuildID;
+	strn0cpy(sgrus->MemberName, gci.mCharacterName.c_str(), sizeof(sgrus->MemberName));
+	sgrus->Rank = gci.mRank;
+	sgrus->Banker = gci.mBanker + (gci.mAlt * 2);
 
 	worldserver.SendPacket(pack);
 
@@ -166,22 +166,22 @@ uint8 *ZoneGuildManager::makeGuildMembers(uint32 pGuildID, const char* pPrefixNa
 		return(retbuffer);
 	}
 
-	std::vector<CharGuildInfo *> members;
-	if (!GetEntireGuild(pGuildID, members))
+	std::vector<CharacterGuildInfo *> members;
+	if (!getEntireGuild(pGuildID, members))
 		return(nullptr);
 
 	//figure out the actual packet length.
 	uint32 fixed_length = sizeof(Internal_GuildMembers_Struct)+members.size()*sizeof(Internal_GuildMemberEntry_Struct);
-	std::vector<CharGuildInfo *>::iterator cur, end;
-	CharGuildInfo *ci;
+	std::vector<CharacterGuildInfo *>::iterator cur, end;
+	CharacterGuildInfo *ci;
 	cur = members.begin();
 	end = members.end();
 	uint32 name_len = 0;
 	uint32 note_len = 0;
 	for (; cur != end; ++cur) {
 		ci = *cur;
-		name_len += ci->char_name.length();
-		note_len += ci->public_note.length();
+		name_len += ci->mCharacterName.length();
+		note_len += ci->mPublicNote.length();
 	}
 
 	//calc total length.
@@ -215,19 +215,17 @@ uint8 *ZoneGuildManager::makeGuildMembers(uint32 pGuildID, const char* pPrefixNa
 #define SlideStructString(field, str) \
 	strcpy(field, str.c_str()); \
 	field += str.length() + 1
-#define PutField(field) \
-	e->field = ci->field
 
-		SlideStructString(name_buf, ci->char_name);
-		PutField(level);
-		e->banker = ci->banker + (ci->alt * 2);	// low bit is banker flag, next bit is 'alt' flag.
-		PutField(class_);
-		PutField(rank);
-		PutField(time_last_on);
-		PutField(tribute_enable);
-		PutField(total_tribute);
-		PutField(last_tribute);
-		SlideStructString(note_buf, ci->public_note);
+		SlideStructString(name_buf, ci->mCharacterName);
+		e->level = ci->mLevel;
+		e->banker = ci->mBanker + (ci->mAlt * 2);	// low bit is banker flag, next bit is 'alt' flag.
+		e->class_ = ci->mClass_;
+		e->rank = ci->mRank;
+		e->time_last_on = ci->mTimeLastOn;
+		e->tribute_enable = ci->mTributeEnable;
+		e->total_tribute = ci->mTotalTribute;
+		e->last_tribute = ci->mLastTribute;
+		SlideStructString(note_buf, ci->mPublicNote);
 		e->zoneinstance = 0;
 		e->zone_id = 0;	// Flag them as offline (zoneid 0) as world will update us with their online status afterwards.
 #undef SlideStructString
@@ -245,16 +243,16 @@ void ZoneGuildManager::listGuilds(Client* pClient) const {
 	pClient->Message(0, "Listing guilds on the server:");
 	char leadername[64];
 	std::map<uint32, GuildInfo *>::const_iterator cur, end;
-	cur = m_guilds.begin();
-	end = m_guilds.end();
+	cur = mGuilds.begin();
+	end = mGuilds.end();
 	int r = 0;
 	for (; cur != end; ++cur) {
 		leadername[0] = '\0';
-		database.GetCharName(cur->second->leader_char_id, leadername);
+		database.GetCharName(cur->second->mLeaderCharacterID, leadername);
 		if (leadername[0] == '\0')
-			pClient->Message(0, "  Guild #%i <%s>", cur->first, cur->second->name.c_str());
+			pClient->Message(0, "  Guild #%i <%s>", cur->first, cur->second->mName.c_str());
 		else
-			pClient->Message(0, "  Guild #%i <%s> Leader: %s", cur->first, cur->second->name.c_str(), leadername);
+			pClient->Message(0, "  Guild #%i <%s> Leader: %s", cur->first, cur->second->mName.c_str(), leadername);
 		r++;
 	}
 	pClient->Message(0, "%i guilds listed.", r);
@@ -263,18 +261,18 @@ void ZoneGuildManager::listGuilds(Client* pClient) const {
 
 void ZoneGuildManager::describeGuild(Client* pClient, uint32 pGuildID) const {
 	std::map<uint32, GuildInfo *>::const_iterator res;
-	res = m_guilds.find(pGuildID);
-	if (res == m_guilds.end()) {
+	res = mGuilds.find(pGuildID);
+	if (res == mGuilds.end()) {
 		pClient->Message(0, "Guild %d not found.", pGuildID);
 		return;
 	}
 
 	const GuildInfo *info = res->second;
 
-	pClient->Message(0, "Guild info DB# %i <%s>", pGuildID, info->name.c_str());
+	pClient->Message(0, "Guild info DB# %i <%s>", pGuildID, info->mName.c_str());
 
 	char leadername[64];
-	database.GetCharName(info->leader_char_id, leadername);
+	database.GetCharName(info->mLeaderCharacterID, leadername);
 	pClient->Message(0, "Guild Leader: %s", leadername);
 
 	char permbuffer[256];
@@ -283,9 +281,9 @@ void ZoneGuildManager::describeGuild(Client* pClient, uint32 pGuildID) const {
 		char *permptr = permbuffer;
 		uint8 r;
 		for (r = 0; r < _MaxGuildAction; r++)
-			permptr += sprintf(permptr, "  %s: %c", GuildActionNames[r], info->ranks[i].permissions[r] ? 'Y' : 'N');
+			permptr += sprintf(permptr, "  %s: %c", GuildActionNames[r], info->mRanks[i].mPermissions[r] ? 'Y' : 'N');
 
-		pClient->Message(0, "Rank %i: %s", i, info->ranks[i].name.c_str());
+		pClient->Message(0, "Rank %i: %s", i, info->mRanks[i].mName.c_str());
 		pClient->Message(0, "Permissions: %s", permbuffer);
 	}
 
@@ -322,7 +320,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 									_log(GUILDS__REFRESH, "Received guild refresh from world for %d, changes: name=%d, motd=%d, rank=%d, relation=%d", s->guild_id, s->name_change, s->motd_change, s->rank_change, s->relation_change);
 
 									//reload all the guild details from the database.
-									RefreshGuild(s->guild_id);
+									refreshGuild(s->guild_id);
 
 									if (s->motd_change) {
 										//resend guild MOTD to all guild members in this zone.
@@ -425,7 +423,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 								   entity_list.RefreshAllGuildInfo(s->guild_id);
 
 								   //remove the guild data from the local guild manager
-								   guild_mgr.LocalDeleteGuild(s->guild_id);
+								   guild_mgr.localDeleteGuild(s->guild_id);
 
 								   //if we stop forcing guild list to send on guild create, we need to do this:
 								   //in the case that we delete a guild and add a new one.
@@ -509,7 +507,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 									   TimePosted = pPacket->ReadUInt32();
 									   Toggle = pPacket->ReadUInt32();
 
-									   uint32 GuildID = GetGuildIDByName(GuildName);
+									   uint32 GuildID = getGuildIDByName(GuildName);
 
 									   if (GuildID == GUILD_NONE)
 										   break;
@@ -585,7 +583,7 @@ void ZoneGuildManager::addMemberApproval(uint32 pRefID, Client* pClient)
 
 ZoneGuildManager::~ZoneGuildManager()
 {
-	ClearGuilds();
+	clearGuilds();
 }
 
 GuildApproval* ZoneGuildManager::getGuildApproval(uint32 refid)
@@ -1469,8 +1467,8 @@ void GuildApproval::guildApproved()
 		return;
 	database.GetVariable("GuildCreation", mFounders, 3);
 	uint8 tmp = atoi(mFounders);
-	uint32 tmpeq = guild_mgr.CreateGuild(mGuild, mOwner->CharacterID());
-	guild_mgr.SetGuild(mOwner->CharacterID(), tmpeq, 2);
+	uint32 tmpeq = guild_mgr.createGuild(mGuild, mOwner->CharacterID());
+	guild_mgr.setGuild(mOwner->CharacterID(), tmpeq, 2);
 	mOwner->SendAppearancePacket(AT_GuildID, true, false);
 	for (int i = 0; i < tmp; i++)
 	{
@@ -1478,7 +1476,7 @@ void GuildApproval::guildApproved()
 		{
 			mOwner->Message(0, "%s", mMembers[i]->GetName());
 			mOwner->Message(0, "%i", mMembers[i]->CharacterID());
-			guild_mgr.SetGuild(mMembers[i]->CharacterID(), tmpeq, 0);
+			guild_mgr.setGuild(mMembers[i]->CharacterID(), tmpeq, 0);
 			size_t len = MBUFFER - strlen(gmembers) + 1;
 			strncat(gmembers, " ", len);
 			strncat(gmembers, mMembers[i]->GetName(), len);

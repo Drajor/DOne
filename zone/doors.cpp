@@ -244,7 +244,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 		{
 			std::string tmp;
 			char tmpmsg[240]; // guild doors msgs
-			if(guild_mgr.GetGuildNameByID(guild_id, tmp))
+			if(guild_mgr.getGuildNameByID(guild_id, tmp))
 			{
 				sprintf(tmpmsg, "Only members of the <%s> guild may enter here", tmp.c_str());
 			}
