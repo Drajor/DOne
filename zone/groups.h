@@ -112,10 +112,12 @@ public:
 	void notifyPullerTarget(Client* pClient);
 	void delegateMarkNPC(const char* pNewNPCMarkerName);
 	void undelegateMarkNPC(const char* pOldNPCMarkerName);
+	
 	void notifyMainTank(Client* pClient, uint8 pToggle = 0);
 	void notifyMainAssist(Client* pClient, uint8 pToggle = 0);
 	void notifyPuller(Client* pClient, uint8 pToggle = 0);
 	void notifyMarkNPC(Client* pClient);
+
 	inline uint32 getNPCMarkerID() { return mNPCMarkerID; }
 	void setMainTank(const char* pNewMainTankName);
 	void setMainAssist(const char* pNewMainAssistName);

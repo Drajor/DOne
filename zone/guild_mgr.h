@@ -19,52 +19,52 @@ extern PetitionList petition_list;
 class Client;
 class ServerPacket;
 
-struct GuildBankItem
-{
-	uint32	ItemID;
-	uint32	Quantity;
-	char	Donator[64];
-	uint8	Permissions;
-	char	WhoFor[64];
+struct GuildBankItem {
+	uint32 mItemID;
+	uint32 mQuantity;
+	char mDonator[64];
+	uint8 mPermissions;
+	char mWhoFor[64];
 };
 
-struct GuildBankItems
-{
-	GuildBankItem	MainArea[GUILD_BANK_MAIN_AREA_SIZE];
-	GuildBankItem	DepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
+struct GuildBankItems {
+	GuildBankItem mMainArea[GUILD_BANK_MAIN_AREA_SIZE];
+	GuildBankItem mDepositArea[GUILD_BANK_DEPOSIT_AREA_SIZE];
 };
 
-struct GuildBank
-{
-	uint32	GuildID;
-	GuildBankItems	Items;
+struct GuildBank {
+	uint32 mGuildID;
+	GuildBankItems mItems;
 };
 
-enum {	GuildBankBulkItems = 0, GuildBankItemUpdate = 1, GuildBankPromote = 3, GuildBankViewItem = 4, GuildBankDeposit = 5,
-	GuildBankPermissions = 6, GuildBankWithdraw = 7, GuildBankSplitStacks = 8, GuildBankMergeStacks = 9, GuildBankAcknowledge = 10 };
+enum {
+	GuildBankBulkItems = 0, GuildBankItemUpdate = 1, GuildBankPromote = 3, GuildBankViewItem = 4, GuildBankDeposit = 5,
+	GuildBankPermissions = 6, GuildBankWithdraw = 7, GuildBankSplitStacks = 8, GuildBankMergeStacks = 9, GuildBankAcknowledge = 10
+};
 
-enum {	GuildBankDepositArea = 0, GuildBankMainArea = 1 };
+enum { GuildBankDepositArea = 0, GuildBankMainArea = 1 };
 
-enum {	GuildBankBankerOnly = 0, GuildBankSingleMember = 1, GuildBankPublicIfUsable = 2, GuildBankPublic = 3 };
+enum { GuildBankBankerOnly = 0, GuildBankSingleMember = 1, GuildBankPublicIfUsable = 2, GuildBankPublic = 3 };
 
-class GuildApproval
-{
+class GuildApproval {
 public:
-	GuildApproval(const char* guildname,Client* owner,uint32 id);
+	GuildApproval(const char* pGuildName, Client* pOwner, uint32 pID);
 	~GuildApproval();
-	bool	ProcessApproval();
-	bool	AddMemberApproval(Client* addition);
-	uint32	GetID() { return refid; }
-	Client*	GetOwner() { return owner; }
-	void	GuildApproved();
-	void	ApprovedMembers(Client* requestee);
+
+	bool processApproval();
+	bool addMemberApproval(Client* pAddition);
+	uint32 getID() { return mRefID; }
+	Client*	getOwner() { return mOwner; }
+	void guildApproved();
+	void approvedMembers(Client* pRequestee);
+
 private:
-	Timer* deletion_timer;
-	char guild[16];
-	char founders[3];
-	Client* owner;
-	Client* members[6];
-	uint32 refid;
+	Timer* mDeletionTimer;
+	char mGuild[16];
+	char mFounders[3];
+	Client* mOwner;
+	Client* mMembers[6];
+	uint32 mRefID;
 };
 
 class ZoneGuildManager : public BaseGuildManager {
@@ -72,12 +72,12 @@ public:
 	~ZoneGuildManager(void);
 
 	void	AddGuildApproval(const char* guildname, Client* owner);
-	void	AddMemberApproval(uint32 refid,Client* name);
+	void	AddMemberApproval(uint32 refid, Client* name);
 	void	ClearGuildsApproval();
 	GuildApproval* FindGuildByIDApproval(uint32 refid);
 	GuildApproval* FindGuildByOwnerApproval(Client* owner);
 	void	ProcessApproval();
-	uint32	GetFreeID() { return id+1; }
+	uint32	GetFreeID() { return id + 1; }
 	//called by worldserver when it receives a message from world.
 	void ProcessWorldPacket(ServerPacket *pack);
 
@@ -85,7 +85,7 @@ public:
 	void DescribeGuild(Client *c, uint32 guild_id) const;
 
 
-//	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
+	//	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
 
 	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
 

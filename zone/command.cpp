@@ -8235,7 +8235,7 @@ void command_guildlist(Client *c, const Seperator *sep)
 	GuildApproval* tmp = guild_mgr.FindGuildByIDApproval(atoi(sep->arg[1]));
 	if(tmp)
 	{
-		tmp->ApprovedMembers(c);
+		tmp->approvedMembers(c);
 	}
 	else
 		c->Message(0,"Could not find reference id.");
