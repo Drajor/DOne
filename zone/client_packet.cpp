@@ -4233,7 +4233,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 						guild_mgr.GetGuildName(GuildID()), GuildID());
 
 					//record the promotion with guild manager so we know its valid when we get the reply
-					guild_mgr.RecordInvite(client->CharacterID(), GuildID(), gc->officer);
+					guild_mgr.recordInvite(client->CharacterID(), GuildID(), gc->officer);
 
 					if(gc->guildeqid == 0)
 						gc->guildeqid = GuildID();
@@ -4265,7 +4265,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					guild_mgr.GetGuildName(GuildID()), GuildID());
 
 				//record the invite with guild manager so we know its valid when we get the reply
-				guild_mgr.RecordInvite(client->CharacterID(), GuildID(), gc->officer);
+				guild_mgr.recordInvite(client->CharacterID(), GuildID(), gc->officer);
 
 				if(gc->guildeqid == 0)
 					gc->guildeqid = GuildID();
@@ -4365,7 +4365,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	if (gj->response == 5 || gj->response == 4) {
 		//dont care if the check fails (since we dont know the rank), just want to clear the entry.
-		guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
+		guild_mgr.verifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
 
 		worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has declined to join the guild.", this->GetName());
 
@@ -4383,7 +4383,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 		//we dont really care a lot about what this packet means, as long as
 		//it has been authorized with the guild manager
-		if(!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
+		if(!guild_mgr.verifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
 			worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has sent an invalid response to your invite!", GetName());
 			Message(13, "Invalid invite response packet!");
 			return;
@@ -9557,8 +9557,8 @@ void Client::CompleteConnect()
 	if(IsInAGuild())
 	{
 		SendGuildRanks();
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
-		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
+		guild_mgr.sendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
+		guild_mgr.requestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
 	/** Request adventure info **/

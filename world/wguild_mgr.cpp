@@ -31,35 +31,35 @@ WorldGuildManager guild_mgr;
 
 
 
-void WorldGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
-	_log(GUILDS__REFRESH, "Broadcasting guild refresh for %d, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
+void WorldGuildManager::sendGuildRefresh(uint32 pGuildID, bool pName, bool pMOTD, bool pRank, bool pRelation) {
+	_log(GUILDS__REFRESH, "Broadcasting guild refresh for %d, changes: name=%d, motd=%d, rank=d, relation=%d", pGuildID, pName, pMOTD, pRank, pRelation);
 	ServerPacket* pack = new ServerPacket(ServerOP_RefreshGuild, sizeof(ServerGuildRefresh_Struct));
 	ServerGuildRefresh_Struct *s = (ServerGuildRefresh_Struct *) pack->pBuffer;
-	s->guild_id = guild_id;
-	s->name_change = name;
-	s->motd_change = motd;
-	s->rank_change = rank;
-	s->relation_change = relation;
+	s->guild_id = pGuildID;
+	s->name_change = pName;
+	s->motd_change = pMOTD;
+	s->rank_change = pRank;
+	s->relation_change = pRelation;
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }
 
-void WorldGuildManager::SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid) {
-	_log(GUILDS__REFRESH, "Broadcasting char refresh for %d from guild %d to world", charid, guild_id);
+void WorldGuildManager::sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint32 pCharacterID) {
+	_log(GUILDS__REFRESH, "Broadcasting char refresh for %d from guild %d to world", pCharacterID, pGuildID);
 	ServerPacket* pack = new ServerPacket(ServerOP_GuildCharRefresh, sizeof(ServerGuildCharRefresh_Struct));
 	ServerGuildCharRefresh_Struct *s = (ServerGuildCharRefresh_Struct *) pack->pBuffer;
-	s->guild_id = guild_id;
-	s->old_guild_id = old_guild_id;
-	s->char_id = charid;
+	s->guild_id = pGuildID;
+	s->old_guild_id = pOldGuildID;
+	s->char_id = pCharacterID;
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }
 
-void WorldGuildManager::SendGuildDelete(uint32 guild_id) {
-	_log(GUILDS__REFRESH, "Broadcasting guild delete for guild %d to world", guild_id);
+void WorldGuildManager::sendGuildDelete(uint32 pGuildID) {
+	_log(GUILDS__REFRESH, "Broadcasting guild delete for guild %d to world", pGuildID);
 	ServerPacket* pack = new ServerPacket(ServerOP_DeleteGuild, sizeof(ServerGuildID_Struct));
 	ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
-	s->guild_id = guild_id;
+	s->guild_id = pGuildID;
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }

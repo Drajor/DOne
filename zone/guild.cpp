@@ -187,7 +187,7 @@ void Client::SendGuildList() {
 
 void Client::SendGuildMembers() {
 	uint32 len;
-	uint8 *data = guild_mgr.MakeGuildMembers(GuildID(), GetName(), len);
+	uint8 *data = guild_mgr.makeGuildMembers(GuildID(), GetName(), len);
 	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
 

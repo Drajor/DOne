@@ -4849,7 +4849,7 @@ void command_guild(Client *c, const Seperator *sep)
 				tmp = atoi(sep->arg[2]);
 
 			if(tmp != GUILD_NONE)
-				guild_mgr.DescribeGuild(c, tmp);
+				guild_mgr.describeGuild(c, tmp);
 		}
 	}
 	/*
@@ -5164,7 +5164,7 @@ void command_guild(Client *c, const Seperator *sep)
 			c->Message(13, "Access denied.");
 			return;
 		}
-		guild_mgr.ListGuilds(c);
+		guild_mgr.listGuilds(c);
 	}
 	else {
 		c->Message(0, "Unknown guild command, try #guild help");
@@ -8217,7 +8217,7 @@ void command_guildcreate(Client *c, const Seperator *sep)
 {
 	if(strlen(sep->argplus[1])>4 && strlen(sep->argplus[1])<16)
 	{
-		guild_mgr.AddGuildApproval(sep->argplus[1],c);
+		guild_mgr.addGuildApproval(sep->argplus[1],c);
 	}
 	else
 	{
@@ -8227,12 +8227,12 @@ void command_guildcreate(Client *c, const Seperator *sep)
 
 void command_guildapprove(Client *c, const Seperator *sep)
 {
-	guild_mgr.AddMemberApproval(atoi(sep->arg[1]),c);
+	guild_mgr.addMemberApproval(atoi(sep->arg[1]),c);
 }
 
 void command_guildlist(Client *c, const Seperator *sep)
 {
-	GuildApproval* tmp = guild_mgr.FindGuildByIDApproval(atoi(sep->arg[1]));
+	GuildApproval* tmp = guild_mgr.getGuildApproval(atoi(sep->arg[1]));
 	if(tmp)
 	{
 		tmp->approvedMembers(c);

@@ -90,10 +90,10 @@ public:
 
 protected:
 	//the methods which must be defined by base classes.
-	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) = 0;
-	virtual void SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid) = 0;
-	virtual void SendRankUpdate(uint32 CharID) = 0;
-	virtual void SendGuildDelete(uint32 guild_id) = 0;
+	virtual void sendGuildRefresh(uint32 pGuildID, bool pName, bool pMOTD, bool pRank, bool pRelation) = 0;
+	virtual void sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint32 pCharacterID) = 0;
+	virtual void sendRankUpdate(uint32 pCharacterID) = 0;
+	virtual void sendGuildDelete(uint32 pGuildID) = 0;
 
 	uint32	DBCreateGuild(const char* name, uint32 leader_char_id);
 	bool	DBDeleteGuild(uint32 guild_id);

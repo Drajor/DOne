@@ -328,7 +328,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 Client::~Client() {
 	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+		guild_mgr.sendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
 	Mob* horse = entity_list.GetMob(this->CastToClient()->GetHorseId());
 	if (horse)

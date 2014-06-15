@@ -351,8 +351,8 @@ uint32 BaseGuildManager::CreateGuild(const char* name, uint32 leader_char_id) {
 	if(gid == GUILD_NONE)
 		return(GUILD_NONE);
 
-	SendGuildRefresh(gid, true, false, false, false);
-	SendCharRefresh(GUILD_NONE, gid, leader_char_id);
+	sendGuildRefresh(gid, true, false, false, false);
+	sendCharRefresh(GUILD_NONE, gid, leader_char_id);
 
 	return(gid);
 }
@@ -361,7 +361,7 @@ bool BaseGuildManager::DeleteGuild(uint32 guild_id) {
 	if(!DBDeleteGuild(guild_id))
 		return(false);
 
-	SendGuildDelete(guild_id);
+	sendGuildDelete(guild_id);
 
 	return(true);
 }
@@ -370,7 +370,7 @@ bool BaseGuildManager::RenameGuild(uint32 guild_id, const char* name) {
 	if(!DBRenameGuild(guild_id, name))
 		return(false);
 
-	SendGuildRefresh(guild_id, true, false, false, false);
+	sendGuildRefresh(guild_id, true, false, false, false);
 
 	return(true);
 }
@@ -387,9 +387,9 @@ bool BaseGuildManager::SetGuildLeader(uint32 guild_id, uint32 leader_char_id) {
 	if(!DBSetGuildLeader(guild_id, leader_char_id))
 		return(false);
 
-	SendGuildRefresh(guild_id, false, false, false, false);
-	SendCharRefresh(GUILD_NONE, guild_id, old_leader);
-	SendCharRefresh(GUILD_NONE, guild_id, leader_char_id);
+	sendGuildRefresh(guild_id, false, false, false, false);
+	sendCharRefresh(GUILD_NONE, guild_id, old_leader);
+	sendCharRefresh(GUILD_NONE, guild_id, leader_char_id);
 
 	return(true);
 }
@@ -398,7 +398,7 @@ bool BaseGuildManager::SetGuildMOTD(uint32 guild_id, const char* motd, const cha
 	if(!DBSetGuildMOTD(guild_id, motd, setter))
 		return(false);
 
-	SendGuildRefresh(guild_id, false, true, false, false);
+	sendGuildRefresh(guild_id, false, true, false, false);
 
 	return(true);
 }
@@ -408,7 +408,7 @@ bool BaseGuildManager::SetGuildURL(uint32 GuildID, const char* URL)
 	if(!DBSetGuildURL(GuildID, URL))
 		return(false);
 
-	SendGuildRefresh(GuildID, false, true, false, false);
+	sendGuildRefresh(GuildID, false, true, false, false);
 
 	return(true);
 }
@@ -418,7 +418,7 @@ bool BaseGuildManager::SetGuildChannel(uint32 GuildID, const char* Channel)
 	if(!DBSetGuildChannel(GuildID, Channel))
 		return(false);
 
-	SendGuildRefresh(GuildID, false, true, false, false);
+	sendGuildRefresh(GuildID, false, true, false, false);
 
 	return(true);
 }
@@ -437,7 +437,7 @@ bool BaseGuildManager::SetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 	if(!DBSetGuild(charid, guild_id, rank))
 		return(false);
 
-	SendCharRefresh(old_guild, guild_id, charid);
+	sendCharRefresh(old_guild, guild_id, charid);
 
 	return(true);
 }
@@ -450,7 +450,7 @@ bool BaseGuildManager::SetGuildRank(uint32 charid, uint8 rank) {
 	if(!DBSetGuildRank(charid, rank))
 		return(false);
 
-	SendCharRefresh(GUILD_NONE, 0, charid);
+	sendCharRefresh(GUILD_NONE, 0, charid);
 
 	return(true);
 }
@@ -460,7 +460,7 @@ bool BaseGuildManager::SetBankerFlag(uint32 charid, bool is_banker) {
 	if(!DBSetBankerFlag(charid, is_banker))
 		return(false);
 
-	SendRankUpdate(charid);
+	sendRankUpdate(charid);
 
 	return(true);
 }
@@ -470,7 +470,7 @@ bool BaseGuildManager::SetAltFlag(uint32 charid, bool is_alt)
 	if(!DBSetAltFlag(charid, is_alt))
 		return(false);
 
-	SendRankUpdate(charid);
+	sendRankUpdate(charid);
 
 	return(true);
 }
@@ -479,7 +479,7 @@ bool BaseGuildManager::SetTributeFlag(uint32 charid, bool enabled) {
 	if(!DBSetTributeFlag(charid, enabled))
 		return(false);
 
-	SendCharRefresh(GUILD_NONE, 0, charid);
+	sendCharRefresh(GUILD_NONE, 0, charid);
 
 	return(true);
 }
@@ -488,7 +488,7 @@ bool BaseGuildManager::SetPublicNote(uint32 charid, const char *note) {
 	if(!DBSetPublicNote(charid, note))
 		return(false);
 
-	SendCharRefresh(GUILD_NONE, 0, charid);
+	sendCharRefresh(GUILD_NONE, 0, charid);
 
 	return(true);
 }

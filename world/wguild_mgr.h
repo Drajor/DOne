@@ -16,10 +16,10 @@ public:
 	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
 
 protected:
-	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
-	virtual void SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid);
-	virtual void SendRankUpdate(uint32 CharID) { return; }
-	virtual void SendGuildDelete(uint32 guild_id);
+	virtual void sendGuildRefresh(uint32 pGuildID, bool pName, bool pMOTD, bool pRank, bool pRelation);
+	virtual void sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint32 pCharacterID);
+	virtual void sendRankUpdate(uint32 pCharacterID) {};
+	virtual void sendGuildDelete(uint32 pGuildID);
 
 	//map<uint32, uint32> m_tribute;	//map from guild ID to current tribute ammount
 };

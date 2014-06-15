@@ -577,7 +577,7 @@ void WorldServer::Process() {
 //		case ServerOP_GuildGMSet:
 //		case ServerOP_GuildGMSetRank:
 //		case ServerOP_GuildJoin:
-			guild_mgr.ProcessWorldPacket(pack);
+			guild_mgr.processWorldPacket(pack);
 			break;
 
 		case ServerOP_FlagUpdate: {

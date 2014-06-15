@@ -71,40 +71,36 @@ class ZoneGuildManager : public BaseGuildManager {
 public:
 	~ZoneGuildManager(void);
 
-	void	AddGuildApproval(const char* guildname, Client* owner);
-	void	AddMemberApproval(uint32 refid, Client* name);
-	void	ClearGuildsApproval();
-	GuildApproval* FindGuildByIDApproval(uint32 refid);
-	GuildApproval* FindGuildByOwnerApproval(Client* owner);
-	void	ProcessApproval();
-	uint32	GetFreeID() { return id + 1; }
+	void addGuildApproval(const char* pGuildName, Client* pOwner);
+	void addMemberApproval(uint32 pRefID, Client* pClient);
+	GuildApproval* getGuildApproval(uint32 pRefID);
+	uint32 getFreeID() { return mID + 1; }
 	//called by worldserver when it receives a message from world.
-	void ProcessWorldPacket(ServerPacket *pack);
+	void processWorldPacket(ServerPacket* pPacket);
 
-	void ListGuilds(Client *c) const;
-	void DescribeGuild(Client *c, uint32 guild_id) const;
+	
+	void listGuilds(Client* pClient) const;
+	void describeGuild(Client* pClient, uint32 pGuildID) const;
 
+	uint8* makeGuildMembers(uint32 pGuildID, const char* pPrefixName, uint32& pLength);
 
-	//	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
-
-	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
-
-	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
-	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
-	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);
-	void RequestOnlineGuildMembers(uint32 FromID, uint32 GuildID);
+	void recordInvite(uint32 pCharacterID, uint32 pGuildID, uint8 pRank);
+	bool verifyAndClearInvite(uint32 pCharacterID, uint32 pGuildID, uint8 pRank);
+	void sendGuildMemberUpdateToWorld(const char* pMemberName, uint32 pGuildID, uint16 pZoneID, uint32 pLastSeen);
+	void requestOnlineGuildMembers(uint32 pFromID, uint32 pGuildID);
 
 protected:
-	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);
-	virtual void SendCharRefresh(uint32 old_guild_id, uint32 guild_id, uint32 charid);
-	virtual void SendRankUpdate(uint32 CharID);
-	virtual void SendGuildDelete(uint32 guild_id);
 
-	std::map<uint32, std::pair<uint32, uint8> > m_inviteQueue;	//map from char ID to guild,rank
+	virtual void sendGuildRefresh(uint32 pGuildID, bool pName, bool pMOTD, bool pRank, bool pRelation);
+	virtual void sendCharRefresh(uint32 pOldGuildID, uint32 pGuildID, uint32 pCharacterID);
+	virtual void sendRankUpdate(uint32 pCharacterID);
+	virtual void sendGuildDelete(uint32 pGuildID);
+
+	std::map<uint32, std::pair<uint32, uint8> > mInviteQueue;	//map from char ID to guild,rank
 
 private:
-	LinkedList<GuildApproval*> list;
-	uint32 id;
+	LinkedList<GuildApproval*> mGuildApprovals;
+	uint32 mID; // TODO: I do not think this is ever initialised.
 
 };
 
