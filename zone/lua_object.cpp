@@ -8,7 +8,7 @@
 
 void Lua_Object::Depop() {
 	Lua_Safe_Call_Void();
-	self->Depop();
+	self->depop();
 }
 
 void Lua_Object::Repop() {
@@ -115,17 +115,17 @@ void Lua_Object::ClearUser() {
 
 void Lua_Object::SetID(int user) {
 	Lua_Safe_Call_Void();
-	self->SetID(user);
+	self->setID(user);
 }
 
 int Lua_Object::GetID() {
 	Lua_Safe_Call_Int();
-	return self->GetID();
+	return self->getID();
 }
 
 bool Lua_Object::Save() {
 	Lua_Safe_Call_Int();
-	return self->Save();
+	return self->save();
 }
 
 uint32 Lua_Object::VarSave() {

@@ -117,7 +117,7 @@ Doors::~Doors()
 {
 }
 
-bool Doors::Process()
+bool Doors::process()
 {
 	if(close_timer.Enabled() && close_timer.Check() && IsDoorOpen())
 	{
@@ -141,7 +141,7 @@ bool Doors::Process()
 void Doors::HandleClick(Client* sender, uint8 trigger)
 {
 	//door debugging info dump
-	_log(DOORS__INFO, "%s clicked door %s (dbid %d, eqid %d) at (%.4f,%.4f,%.4f @%.4f)", sender->GetName(), door_name, db_id, door_id, pos_x, pos_y, pos_z, heading);
+	_log(DOORS__INFO, "%s clicked door %s (dbid %d, eqid %d) at (%.4f,%.4f,%.4f @%.4f)", sender->getName(), door_name, db_id, door_id, pos_x, pos_y, pos_z, heading);
 	_log(DOORS__INFO, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
 	_log(DOORS__INFO, "  size %d, invert %d, dest: %s (%.4f,%.4f,%.4f @%.4f)", size, invert_state, dest_zone, dest_x, dest_y, dest_z, dest_heading);
 
@@ -180,7 +180,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				sender->PendingAdventureDoorClick();
 				ServerPacket *pack = new ServerPacket(ServerOP_AdventureClickDoor, sizeof(ServerPlayerClickedAdventureDoor_Struct));
 				ServerPlayerClickedAdventureDoor_Struct *ads = (ServerPlayerClickedAdventureDoor_Struct*)pack->pBuffer;
-				strcpy(ads->player, sender->GetName());
+				strcpy(ads->player, sender->getName());
 				ads->zone_id = zone->GetZoneID();
 				ads->id = GetDoorDBID();
 				worldserver.SendPacket(pack);
@@ -454,7 +454,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 void Doors::NPCOpen(NPC* sender, bool alt_mode)
 {
 	if(sender) {
-		if(GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || opentype == 59 || opentype == 58 || !sender->IsNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!
+		if(GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || opentype == 59 || opentype == 58 || !sender->isNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!
 			return;
 		}
 

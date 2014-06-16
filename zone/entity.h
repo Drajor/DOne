@@ -56,54 +56,54 @@ public:
 	Entity();
 	virtual ~Entity();
 
-	virtual bool IsClient()			const { return false; }
-	virtual bool IsNPC()			const { return false; }
-	virtual bool IsMob()			const { return false; }
-	virtual bool IsMerc()			const { return false; }
-	virtual bool IsCorpse()			const { return false; }
-	virtual bool IsPlayerCorpse()	const { return false; }
-	virtual bool IsNPCCorpse()		const { return false; }
-	virtual bool IsObject()			const { return false; }
-	virtual bool IsDoor()			const { return false; }
-	virtual bool IsTrap()			const { return false; }
-	virtual bool IsBeacon()			const { return false; }
+	virtual bool isClient() const { return false; }
+	virtual bool isNPC() const { return false; }
+	virtual bool isMOB() const { return false; }
+	virtual bool isMerc() const { return false; }
+	virtual bool isCorpse() const { return false; }
+	virtual bool isPlayerCorpse() const { return false; }
+	virtual bool isNPCCorpse() const { return false; }
+	virtual bool isObject() const { return false; }
+	virtual bool isDoor() const { return false; }
+	virtual bool isTrap() const { return false; }
+	virtual bool isBeacon() const { return false; }
 
-	virtual bool Process() { return false; }
-	virtual bool Save() { return true; }
-	virtual void Depop(bool StartSpawnTimer = false) {}
+	virtual bool process() { return false; }
+	virtual bool save() { return true; }
+	virtual void depop(bool StartSpawnTimer = false) {}
 
-	Client	*CastToClient();
-	NPC		*CastToNPC();
-	Mob		*CastToMob();
-	Merc	*CastToMerc();
-	Corpse	*CastToCorpse();
-	Object	*CastToObject();
-	Doors	*CastToDoors();
-	Trap	*CastToTrap();
-	Beacon	*CastToBeacon();
+	Client* castToClient();
+	const Client* castToClient() const;
+	NPC* castToNPC();
+	const NPC* castToNPC() const;
+	Mob* castToMOB();
+	const Mob* castToMOB() const;
+	Merc* castToMerc();
+	const Merc* castToMerc() const;
+	Corpse* castToCorpse();
+	const Corpse* castToCorpse() const;
+	Object* castToObject();
+	const Object* castToObject() const;
+	Doors* castToDoors();
+	const Doors* castToDoors() const;
+	Trap* castToTrap();
+	const Trap* castToTrap() const;
+	Beacon* castToBeacon();
+	const Beacon* castToBeacon() const;
 
-	const Client	*CastToClient() const;
-	const NPC		*CastToNPC() const;
-	const Mob		*CastToMob() const;
-	const Merc		*CastToMerc() const;
-	const Corpse	*CastToCorpse() const;
-	const Object	*CastToObject() const;
-	const Doors		*CastToDoors() const;
-	const Trap		*CastToTrap() const;
-	const Beacon	*CastToBeacon() const;
+	inline const uint16& getID() const { return mID; }
 
-	inline const uint16& GetID() const { return id; }
-
-	virtual const char* GetName() { return ""; }
-	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { pDBAsyncWorkID = 0; }
-	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
+	virtual const char* getName() { return ""; }
+	// TODO: Look more closely at DBAWComplete and checkCoordLosNoZLeaps before modifying.
+	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw) { mDBAsyncWorkID = 0; }
+	bool checkCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 protected:
 	friend class EntityList;
-	inline virtual void SetID(uint16 set_id) { id = set_id; }
-	uint32 pDBAsyncWorkID;
+	inline virtual void setID(uint16 pID) { mID = pID; }
+	uint32 mDBAsyncWorkID;
 private:
-	uint16 id;
+	uint16 mID;
 };
 
 class EntityList

@@ -524,8 +524,8 @@ void handle_item_proc(QuestInterface *parse, lua_State* L, Client* client, ItemI
 
 void handle_item_loot(QuestInterface *parse, lua_State* L, Client* client, ItemInst* item, Mob *mob, std::string data, uint32 extra_data,
 					  std::vector<void*> *extra_pointers) {
-	if(mob && mob->IsCorpse()) {
-		Lua_Corpse l_corpse(mob->CastToCorpse());
+	if(mob && mob->isCorpse()) {
+		Lua_Corpse l_corpse(mob->castToCorpse());
 		luabind::object l_corpse_o = luabind::object(L, l_corpse);
 		l_corpse_o.push(L);
 		lua_setfield(L, -2, "corpse");

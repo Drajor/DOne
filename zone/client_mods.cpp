@@ -873,9 +873,9 @@ int16 Client::CalcAC() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = castToClient()->m_inv.GetItem(14);
 		if(equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
+			uint8 shield = castToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
 				displayed += itembonuses.HeroicSTR/2;
 		}
@@ -903,9 +903,9 @@ int16 Client::GetACMit() {
 
 	// Shield AC bonus for HeroicSTR
 	if(itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(14);
+		bool equiped = castToClient()->m_inv.GetItem(14);
 		if(equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
+			uint8 shield = castToClient()->m_inv.GetItem(14)->GetItem()->ItemType;
 			if(shield == ItemTypeShield)
 				mitigation += itembonuses.HeroicSTR/2;
 		}
@@ -958,7 +958,7 @@ int32 Client::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogFile->write(EQEMuLog::Debug, "Client::CalcMaxMana() called for %s - returning %d", getName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1055,7 +1055,7 @@ int32 Client::CalcBaseMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	LogFile->write(EQEMuLog::Debug, "Client::CalcBaseMana() called for %s - returning %d", getName(), max_m);
 #endif
 	return max_m;
 }
@@ -1873,7 +1873,7 @@ uint16 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmod = effectmodcap;
 
 	_log(SPELLS__BARDS, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
-			GetName(), spell_id, effectmod, effectmodcap);
+			getName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
 }

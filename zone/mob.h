@@ -110,7 +110,7 @@ public:
 	);
 	virtual ~Mob();
 
-	inline virtual bool IsMob() const { return true; }
+	inline virtual bool isMOB() const { return true; }
 	inline virtual bool InZone() const { return true; }
 
 	//Somewhat sorted: needs documenting!
@@ -318,12 +318,12 @@ public:
 	inline uint32 GetArmorTint(uint8 i) const { return armor_tint[(i < _MaterialCount) ? i : 0]; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
-	inline const char* GetName() const { return name; }
+	inline const char* getName() const { return name; }
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
 	const char *GetCleanName();
 	virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) :
-		strn0cpy(name, GetName(), 64); return; };
+		strn0cpy(name, getName(), 64); return; };
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
@@ -645,7 +645,7 @@ public:
 	void SetOwnerID(uint16 NewOwnerID);
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
-	inline virtual bool IsPet() { return(HasOwner() && !IsMerc()); }
+	inline virtual bool IsPet() { return(HasOwner() && !isMerc()); }
 	inline bool HasPet() const { if(GetPetID()==0){return false;} return (entity_list.GetMob(GetPetID()) != 0);}
 	bool HadTempPets() const { return(hasTempPet); }
 	void TempPets(bool i) { hasTempPet = i; }

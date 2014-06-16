@@ -15,17 +15,17 @@ struct SpecialAbilities { };
 
 const char *Lua_Mob::GetName() {
 	Lua_Safe_Call_String();
-	return self->GetName();
+	return self->getName();
 }
 
 void Lua_Mob::Depop() {
 	Lua_Safe_Call_Void();
-	return self->Depop();
+	return self->depop();
 }
 
 void Lua_Mob::Depop(bool start_spawn_timer) {
 	Lua_Safe_Call_Void();
-	return self->Depop(start_spawn_timer);
+	return self->depop(start_spawn_timer);
 }
 
 bool Lua_Mob::BehindMob() {
@@ -1218,10 +1218,10 @@ bool Lua_Mob::EntityVariableExists(const char *name) {
 void Lua_Mob::Signal(uint32 id) {
 	Lua_Safe_Call_Void();
 	
-	if(self->IsClient()) {
-		self->CastToClient()->Signal(id);
-	} else if(self->IsNPC()) {
-		self->CastToNPC()->SignalNPC(id);
+	if(self->isClient()) {
+		self->castToClient()->Signal(id);
+	} else if(self->isNPC()) {
+		self->castToNPC()->SignalNPC(id);
 	}
 }
 

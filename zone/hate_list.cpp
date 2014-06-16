@@ -43,10 +43,10 @@ void HateList::clear()
 		Mob* m = (*i)->mMOB;
 		if(m)
 		{
-			parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), m, "0", 0);
+			parse->EventNPC(EVENT_HATE_LIST, mOwner->castToNPC(), m, "0", 0);
 
-			if(m->IsClient())
-				m->CastToClient()->DecrementAggroCount();
+			if(m->isClient())
+				m->castToClient()->DecrementAggroCount();
 		}
 		delete (*i);
 		i = mEntries.erase(i);
@@ -95,8 +95,8 @@ Mob* HateList::getHighestDamage(Mob* hater)
 		grp = nullptr;
 		r = nullptr;
 
-		if((*iterator)->mMOB && (*iterator)->mMOB->IsClient()){
-			r = entity_list.GetRaidByClient((*iterator)->mMOB->CastToClient());
+		if((*iterator)->mMOB && (*iterator)->mMOB->isClient()){
+			r = entity_list.GetRaidByClient((*iterator)->mMOB->castToClient());
 		}
 
 		grp = entity_list.GetGroupByMob((*iterator)->mMOB);
@@ -141,8 +141,8 @@ Mob* HateList::getClosest(Mob *hater) {
 		++iterator;
 	}
 
-	if (close == 0 && hater->IsNPC() || close->DivineAura())
-		close = hater->CastToNPC()->GetHateTop();
+	if (close == 0 && hater->isNPC() || close->DivineAura())
+		close = hater->castToNPC()->GetHateTop();
 
 	return close;
 }
@@ -152,10 +152,10 @@ void HateList::add(Mob* pMOB, int32 pHate, int32 pDamage, bool pFrenzy, bool iAd
 	if (!pMOB) return;
 
 	// Do not add corpses to HateList.
-	if (pMOB->IsCorpse()) return;
+	if (pMOB->isCorpse()) return;
 
 	// Do not add dead dead players to HateList.
-	if (pMOB->IsClient() && pMOB->CastToClient()->IsDead()) return;
+	if (pMOB->isClient() && pMOB->castToClient()->IsDead()) return;
 
 	// Where pMOB is already on the HateList, increase Hate/Damage values.
 	HateEntry *entry = find(pMOB);
@@ -169,11 +169,11 @@ void HateList::add(Mob* pMOB, int32 pHate, int32 pDamage, bool pFrenzy, bool iAd
 	else if (iAddIfNotExist) {
 		entry = new HateEntry(pMOB, (pDamage >= 0) ? pDamage : 0, pHate, pFrenzy);
 		mEntries.push_back(entry);
-		parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), pMOB, "1", 0);
+		parse->EventNPC(EVENT_HATE_LIST, mOwner->castToNPC(), pMOB, "1", 0);
 
 		// Where pMOB is client, update 'Aggro Count'.
-		if (pMOB->IsClient())
-			pMOB->CastToClient()->IncrementAggroCount();
+		if (pMOB->isClient())
+			pMOB->castToClient()->IncrementAggroCount();
 	}
 }
 
@@ -183,8 +183,8 @@ bool HateList::clear(Mob* pMOB)
 
 	for (auto i = mEntries.begin(); i != mEntries.end(); i++) {
 		if ((*i)->mMOB == pMOB) {
-			parse->EventNPC(EVENT_HATE_LIST, mOwner->CastToNPC(), pMOB, "0", 0);
-			pMOB->CastToClient()->DecrementAggroCount();
+			parse->EventNPC(EVENT_HATE_LIST, mOwner->castToNPC(), pMOB, "0", 0);
+			pMOB->castToClient()->DecrementAggroCount();
 
 			// Clean up.
 			delete *i;
@@ -204,8 +204,8 @@ void HateList::DoFactionHits(int32 nfl_id) {
 	{
 		Client *p;
 
-		if ((*iterator)->mMOB && (*iterator)->mMOB->IsClient())
-			p = (*iterator)->mMOB->CastToClient();
+		if ((*iterator)->mMOB && (*iterator)->mMOB->isClient())
+			p = (*iterator)->mMOB->castToClient();
 		else
 			p = nullptr;
 
@@ -219,7 +219,7 @@ int HateList::getSummonedPetCount() {
 	int count = 0;
 	for (auto i = mEntries.begin(); i != mEntries.end(); i++) {
 		Mob* entryMOB = (*i)->mMOB;
-		if (entryMOB && entryMOB->IsNPC() && (entryMOB->CastToNPC()->IsPet() || (entryMOB->CastToNPC()->GetSwarmOwner() > 0)))
+		if (entryMOB && entryMOB->isNPC() && (entryMOB->castToNPC()->IsPet() || (entryMOB->castToNPC()->GetSwarmOwner() > 0)))
 			count++;
 	}
 
@@ -255,7 +255,7 @@ Mob *HateList::getHighestHate(Mob *center)
 				continue;
 			}
 
-			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
+			if(center->isNPC() && center->castToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(cur->mMOB->GetX(), cur->mMOB->GetY(), cur->mMOB->GetZ())) {
 					skipped_count++;
 					++iterator;
@@ -275,9 +275,9 @@ Mob *HateList::getHighestHate(Mob *center)
 
 			int32 currentHate = cur->mHate;
 
-			if(cur->mMOB->IsClient()){
+			if(cur->mMOB->isClient()){
 
-				if(cur->mMOB->CastToClient()->IsSitting()){
+				if(cur->mMOB->castToClient()->IsSitting()){
 					aggroMod += RuleI(Aggro, SittingAggroMod);
 				}
 
@@ -328,10 +328,10 @@ Mob *HateList::getHighestHate(Mob *center)
 		}
 
 		if(topClientTypeInRange != nullptr && top != nullptr) {
-			bool isTopClientType = top->IsClient();
+			bool isTopClientType = top->isClient();
 
 			if(!isTopClientType) {
-				if(top->IsMerc()) {
+				if(top->isMerc()) {
 					isTopClientType = true;
 					topClientTypeInRange = top;
 				}
@@ -355,7 +355,7 @@ Mob *HateList::getHighestHate(Mob *center)
 		while(iterator != mEntries.end())
 		{
 			HateEntry *cur = (*iterator);
-			if(center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
+			if(center->isNPC() && center->castToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(cur->mMOB->GetX(), cur->mMOB->GetY(), cur->mMOB->GetZ())) {
 					skipped_count++;
 					++iterator;
@@ -451,7 +451,7 @@ void HateList::PrintToClient(Client *c)
 	{
 		HateEntry *e = (*iterator);
 		c->Message(0, "- name: %s, damage: %d, hate: %d",
-			(e->mMOB && e->mMOB->GetName()) ? e->mMOB->GetName() : "(null)",
+			(e->mMOB && e->mMOB->getName()) ? e->mMOB->getName() : "(null)",
 			e->mDamage, e->mHate);
 
 		++iterator;
@@ -474,7 +474,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 		{
 			if(caster->CombatRange(h->mMOB))
 			{
-				id_list.push_back(h->mMOB->GetID());
+				id_list.push_back(h->mMOB->getID());
 				++ret;
 			}
 		}
@@ -517,12 +517,12 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 		{
 			if(caster->DistNoRoot(*h->mMOB) <= range)
 			{
-				id_list.push_back(h->mMOB->GetID());
+				id_list.push_back(h->mMOB->getID());
 			}
 		}
 		else
 		{
-			id_list.push_back(h->mMOB->GetID());
+			id_list.push_back(h->mMOB->getID());
 		}
 		++iterator;
 	}

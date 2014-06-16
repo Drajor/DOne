@@ -233,9 +233,9 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	int16 act_power = 0; // The actual pet power we'll use.
 	if (petpower == -1) {
-		if (this->IsClient()) {
-			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
-			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+		if (this->isClient()) {
+			act_power = castToClient()->GetFocusEffect(focusPetPower, spell_id);
+			act_power = castToClient()->mod_pet_power(act_power, spell_id);
 		}
 	}
 	else if (petpower > 0)
@@ -266,7 +266,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if (this->IsClient() && record.petpower == -1)
+	if (this->isClient() && record.petpower == -1)
 	{
 		float scale_power = (float)act_power / 100.0f;
 		if(scale_power > 0)
@@ -308,16 +308,16 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		npc_type->name[25] = '\0';
 		strcat(npc_type->name, "`s_pet");
 	} else if (record.petnaming == 1) {
-		strcpy(npc_type->name, this->GetName());
+		strcpy(npc_type->name, this->getName());
 		npc_type->name[19] = '\0';
 		strcat(npc_type->name, "`s_familiar");
 	} else if (record.petnaming == 2) {
-		strcpy(npc_type->name, this->GetName());
+		strcpy(npc_type->name, this->getName());
 		npc_type->name[21] = 0;
 		strcat(npc_type->name, "`s_Warder");
 	} else if (record.petnaming == 4) {
 		// Keep the DB name
-	} else if (record.petnaming == 3 && IsClient()) {
+	} else if (record.petnaming == 3 && isClient()) {
 		strcpy(npc_type->name, GetRandPetName());
 	} else {
 		strcpy(npc_type->name, this->GetCleanName());
@@ -428,7 +428,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		npc->size = in_size;
 
 	entity_list.AddNPC(npc, true, true);
-	SetPetID(npc->GetID());
+	SetPetID(npc->getID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 }
 /* This is why the pets ghost - pets were being spawned too far away from its npc owner and some
@@ -440,7 +440,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	GiveNPCTypeData(type_data);
 	typeofpet = type;
 	petpower = power;
-	SetOwnerID(owner->GetID());
+	SetOwnerID(owner->getID());
 	SetPetSpellID(spell_id);
 	taunting = true;
 }
@@ -502,7 +502,7 @@ Mob* Mob::GetPet() {
 		return(nullptr);
 	}
 
-	if(tmp->GetOwnerID() != GetID()) {
+	if(tmp->GetOwnerID() != getID()) {
 		SetPetID(0);
 		return(nullptr);
 	}
@@ -518,29 +518,29 @@ void Mob::SetPet(Mob* newpet) {
 	if (newpet == nullptr) {
 		SetPetID(0);
 	} else {
-		SetPetID(newpet->GetID());
+		SetPetID(newpet->getID());
 		Mob* oldowner = entity_list.GetMob(newpet->GetOwnerID());
 		if (oldowner)
 			oldowner->SetPetID(0);
-		newpet->SetOwnerID(this->GetID());
+		newpet->SetOwnerID(this->getID());
 	}
 }
 
 void Mob::SetPetID(uint16 NewPetID) {
-	if (NewPetID == GetID() && NewPetID != 0)
+	if (NewPetID == getID() && NewPetID != 0)
 		return;
 	petid = NewPetID;
 
-	if(IsClient())
+	if(isClient())
 	{
 		Mob* NewPet = entity_list.GetMob(NewPetID);
-		CastToClient()->UpdateXTargetType(MyPet, NewPet);
+		castToClient()->UpdateXTargetType(MyPet, NewPet);
 	}
 }
 
 void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 	//save the pet name
-	strn0cpy(name, GetName(), 64);
+	strn0cpy(name, getName(), 64);
 
 	//save their items, we only care about what they are actually wearing
 	memcpy(items, equipment, sizeof(uint32)*MAX_WORN_INVENTORY);

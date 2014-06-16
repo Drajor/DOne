@@ -22,12 +22,12 @@ void Lua_Client::SendSound() {
 
 void Lua_Client::Save() {
 	Lua_Safe_Call_Void();
-	self->Save();
+	self->save();
 }
 
 void Lua_Client::Save(int commit_now) {
 	Lua_Safe_Call_Void();
-	self->Save(commit_now);
+	self->save(commit_now);
 }
 
 void Lua_Client::SaveBackup() {

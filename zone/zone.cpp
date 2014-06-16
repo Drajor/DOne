@@ -277,7 +277,7 @@ bool Zone::LoadZoneObjects() {
 			entity_list.AddObject(object, false);
 			if(type == OT_DROPPEDITEM && itemid != 0)
 			{
-				entity_list.RemoveObject(object->GetID());
+				entity_list.RemoveObject(object->getID());
 			}
 
 			safe_delete(inst);

@@ -36,7 +36,7 @@ void EntityList::CheckClientAggro(Client *around)
 {
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		Mob *mob = it->second;
-		if (mob->IsClient())	//also ensures that mob != around
+		if (mob->isClient())	//also ensures that mob != around
 			continue;
 
 		if (mob->CheckWillAggro(around)) {
@@ -51,12 +51,12 @@ void EntityList::CheckClientAggro(Client *around)
 void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbose) {
 	float d2 = d*d;
 
-	towho->Message(0, "Describing aggro for %s", from_who->GetName());
+	towho->Message(0, "Describing aggro for %s", from_who->getName());
 
 	bool engaged = from_who->IsEngaged();
 	if(engaged) {
 		Mob *top = from_who->GetHateTop();
-		towho->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->GetName());
+		towho->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->getName());
 	}
 	bool check_npcs = from_who->WillAggroNPCs();
 
@@ -81,7 +81,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		Mob *mob = it->second;
-		if (mob->IsClient())	//also ensures that mob != around
+		if (mob->isClient())	//also ensures that mob != around
 			continue;
 
 		if (mob->DistNoRoot(*from_who) > d2)
@@ -90,11 +90,11 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		if (engaged) {
 			uint32 amm = from_who->GetHateAmount(mob);
 			if (amm == 0)
-				towho->Message(0, "... %s is not on my hate list.", mob->GetName());
+				towho->Message(0, "... %s is not on my hate list.", mob->getName());
 			else
-				towho->Message(0, "... %s is on my hate list with value %lu", mob->GetName(), (unsigned long)amm);
-		} else if (!check_npcs && mob->IsNPC()) {
-				towho->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->GetName());
+				towho->Message(0, "... %s is on my hate list with value %lu", mob->getName(), (unsigned long)amm);
+		} else if (!check_npcs && mob->isNPC()) {
+				towho->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->getName());
 		} else {
 			from_who->DescribeAggro(towho, mob, verbose);
 		}
@@ -119,43 +119,43 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange) ) {
-		towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->GetName(),
+		towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->getName(),
 		t1, t2, t3, iAggroRange);
 		return;
 	}
 
 	if(mob->IsInvisible(this)) {
-		towho->Message(0, "...%s is invisible to me. ", mob->GetName());
+		towho->Message(0, "...%s is invisible to me. ", mob->getName());
 		return;
 	}
-	if((mob->IsClient() &&
-		(!mob->CastToClient()->Connected()
-		|| mob->CastToClient()->IsLD()
-		|| mob->CastToClient()->IsBecomeNPC()
-		|| mob->CastToClient()->GetGM()
+	if((mob->isClient() &&
+		(!mob->castToClient()->Connected()
+		|| mob->castToClient()->IsLD()
+		|| mob->castToClient()->IsBecomeNPC()
+		|| mob->castToClient()->GetGM()
 		)
 		))
 	{
-		towho->Message(0, "...%s is my owner. ", mob->GetName());
+		towho->Message(0, "...%s is my owner. ", mob->getName());
 		return;
 	}
 
 
 	if(mob == GetOwner()) {
-		towho->Message(0, "...%s a GM or is not connected. ", mob->GetName());
+		towho->Message(0, "...%s a GM or is not connected. ", mob->getName());
 		return;
 	}
 
 	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
-		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->GetName(),
+		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->getName(),
 		dist2, iAggroRange2);
 		return;
 	}
 
 	if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
-		towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
+		towho->Message(0, "...%s is red to me (basically)", mob->getName(),
 		dist2, iAggroRange2);
 		return;
 	}
@@ -171,9 +171,9 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			mob_primary = own->GetPrimaryFaction();
 
 		if(mob_primary == 0) {
-			towho->Message(0, "...%s has no primary faction", mob->GetName());
+			towho->Message(0, "...%s has no primary faction", mob->getName());
 		} else if(mob_primary < 0) {
-			towho->Message(0, "...%s is on special faction %d", mob->GetName(), mob_primary);
+			towho->Message(0, "...%s is on special faction %d", mob->getName(), mob_primary);
 		} else {
 			char namebuf[256];
 			if(!database.GetFactionName(mob_primary, namebuf, sizeof(namebuf)))
@@ -186,22 +186,22 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 				struct NPCFaction* fac = *cur;
 				if ((int32)fac->factionID == mob_primary) {
 					if (fac->npc_value > 0) {
-						towho->Message(0, "...%s is on ALLY faction %s (%d) with %d", mob->GetName(), namebuf, mob_primary, fac->npc_value);
+						towho->Message(0, "...%s is on ALLY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
 						res = true;
 						break;
 					} else if (fac->npc_value < 0) {
-						towho->Message(0, "...%s is on ENEMY faction %s (%d) with %d", mob->GetName(), namebuf, mob_primary, fac->npc_value);
+						towho->Message(0, "...%s is on ENEMY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
 						res = true;
 						break;
 					} else {
-						towho->Message(0, "...%s is on NEUTRAL faction %s (%d) with 0", mob->GetName(), namebuf, mob_primary);
+						towho->Message(0, "...%s is on NEUTRAL faction %s (%d) with 0", mob->getName(), namebuf, mob_primary);
 						res = true;
 						break;
 					}
 				}
 			}
 			if(!res) {
-				towho->Message(0, "...%s is on faction %s (%d), which I have no entry for.", mob->GetName(), namebuf, mob_primary);
+				towho->Message(0, "...%s is on faction %s (%d), which I have no entry for.", mob->getName(), namebuf, mob_primary);
 			}
 		}
 	}
@@ -215,18 +215,18 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			||
 			fv == FACTION_THREATENLY
 		)) {
-		towho->Message(0, "...%s faction not low enough. value='%s'", mob->GetName(), FactionValueToString(fv));
+		towho->Message(0, "...%s faction not low enough. value='%s'", mob->getName(), FactionValueToString(fv));
 		return;
 	}
 	if(fv == FACTION_THREATENLY) {
-		towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->GetName());
+		towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->getName());
 	}
 
 	if(!CheckLosFN(mob)) {
-		towho->Message(0, "...%s is out of sight.", mob->GetName());
+		towho->Message(0, "...%s is out of sight.", mob->getName());
 	}
 
-	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->GetName());
+	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->getName());
 }
 
 /*
@@ -239,13 +239,13 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
-	if (mob->IsClient()) {
-		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn())
+	if (mob->isClient()) {
+		if (!mob->castToClient()->ClientFinishedLoading() || mob->castToClient()->IsHoveringForRespawn())
 			return false;
 	}
 
 	Mob *ownr = mob->GetOwner();
-	if(ownr && ownr->IsClient() && !ownr->CastToClient()->ClientFinishedLoading())
+	if(ownr && ownr->isClient() && !ownr->castToClient()->ClientFinishedLoading())
 		return false;
 
 	float iAggroRange = GetAggroRange();
@@ -272,11 +272,11 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange)
 		||(mob->IsInvisible(this))
-		|| (mob->IsClient() &&
-			(!mob->CastToClient()->Connected()
-				|| mob->CastToClient()->IsLD()
-				|| mob->CastToClient()->IsBecomeNPC()
-				|| mob->CastToClient()->GetGM()
+		|| (mob->isClient() &&
+			(!mob->castToClient()->Connected()
+				|| mob->castToClient()->IsLD()
+				|| mob->castToClient()->IsBecomeNPC()
+				|| mob->castToClient()->GetGM()
 			)
 		))
 	{
@@ -313,10 +313,10 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		heroicCHA_mod = THREATENLY_ARRGO_CHANCE;
 	if
 	(
-	//old InZone check taken care of above by !mob->CastToClient()->Connected()
+	//old InZone check taken care of above by !mob->castToClient()->Connected()
 	(
 		( GetINT() <= RuleI(Aggro, IntAggroThreshold) )
-		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
+		||( mob->isClient() && mob->castToClient()->IsSitting() )
 		||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
 
 	)
@@ -340,7 +340,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 			// Aggro
 			#if EQDEBUG>=6
-				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", GetName(), mob->GetName());
+				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", getName(), mob->getName());
 			#endif
 			return( mod_will_aggro(mob, this) );
 		}
@@ -357,7 +357,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 }
 
 Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
-	if (!sender || !sender->IsNPC())
+	if (!sender || !sender->isNPC())
 		return(nullptr);
 
 #ifdef REVERSE_AGGRO
@@ -441,7 +441,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 			&& mob->GetPrimaryFaction() != 0
 			&& mob->DistNoRoot(*sender) <= r
 			&& !mob->IsEngaged()
-			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->IsClient()))
+			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->isClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
 			)
 		{
@@ -450,7 +450,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 			if(attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
 			{
 				bool useprimfaction = false;
-				if(mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction())
+				if(mob->GetPrimaryFaction() == sender->castToNPC()->GetPrimaryFaction())
 				{
 					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->GetNPCFactionID());
 					if(cf){
@@ -466,7 +466,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
 						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->GetName(), attacker->GetName(), mob->GetName(), attacker->GetName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
+						sender->getName(), attacker->getName(), mob->getName(), attacker->getName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 1, 0, false);
 					}
@@ -514,11 +514,11 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return false;
 
 	// invalidate for swarm pets for later on if their owner is a corpse
-	if (IsNPC() && CastToNPC()->GetSwarmInfo() && our_owner &&
-			our_owner->IsCorpse() && !our_owner->IsPlayerCorpse())
+	if (isNPC() && castToNPC()->GetSwarmInfo() && our_owner &&
+			our_owner->isCorpse() && !our_owner->isPlayerCorpse())
 		our_owner = nullptr;
-	if (target->IsNPC() && target->CastToNPC()->GetSwarmInfo() && target_owner &&
-			target_owner->IsCorpse() && !target_owner->IsPlayerCorpse())
+	if (target->isNPC() && target->castToNPC()->GetSwarmInfo() && target_owner &&
+			target_owner->isCorpse() && !target_owner->isPlayerCorpse())
 		target_owner = nullptr;
 
 	//cannot hurt untargetable mobs
@@ -526,8 +526,8 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 
 	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
-			if (target->IsNPC()) {
-				if (!target->CastToNPC()->GetSwarmOwner()) {
+			if (target->isNPC()) {
+				if (!target->castToNPC()->GetSwarmOwner()) {
 					return(false);
 				}
 			} else {
@@ -561,8 +561,8 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		{
 			if(_CLIENT(mob2))					// client vs client
 			{
-				c1 = mob1->CastToClient();
-				c2 = mob2->CastToClient();
+				c1 = mob1->castToClient();
+				c2 = mob2->castToClient();
 
 				if	// if both are pvp they can fight
 				(
@@ -574,8 +574,8 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 				(
 					c1->IsDueling() &&
 					c2->IsDueling() &&
-					c1->GetDuelTarget() == c2->GetID() &&
-					c2->GetDuelTarget() == c1->GetID()
+					c1->GetDuelTarget() == c2->getID() &&
+					c2->GetDuelTarget() == c1->getID()
 				)
 					return true;
 				else
@@ -587,8 +587,8 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 			}
 			else if(_BECOMENPC(mob2))	// client vs becomenpc
 			{
-				c1 = mob1->CastToClient();
-				becomenpc = mob2->CastToClient();
+				c1 = mob1->castToClient();
+				becomenpc = mob2->castToClient();
 
 				if(c1->GetLevel() > becomenpc->GetBecomeNPCLevel())
 					return false;
@@ -614,8 +614,8 @@ this is stupid... somebody else should check this rule if they want to
 enforce it, this just says 'can they possibly fight based on their
 type', in which case, the answer is yes.
 */
-/*				npc1 = mob1->CastToNPC();
-				npc2 = mob2->CastToNPC();
+/*				npc1 = mob1->castToNPC();
+				npc2 = mob2->castToNPC();
 				if
 				(
 					npc1->GetPrimaryFaction() != 0 &&
@@ -684,7 +684,7 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEMuLog::Debug, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
+	LogFile->write(EQEMuLog::Debug, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->getName(), target->getName());
 	return false;
 }
 
@@ -723,8 +723,8 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 		{
 			if(_CLIENT(mob2))					// client to client
 			{
-				c1 = mob1->CastToClient();
-				c2 = mob2->CastToClient();
+				c1 = mob1->castToClient();
+				c2 = mob2->castToClient();
 
 				if(c1->GetPVP() == c2->GetPVP())
 					return true;
@@ -732,8 +732,8 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 				(
 					c1->IsDueling() &&
 					c2->IsDueling() &&
-					c1->GetDuelTarget() == c2->GetID() &&
-					c2->GetDuelTarget() == c1->GetID()
+					c1->GetDuelTarget() == c2->getID() &&
+					c2->GetDuelTarget() == c1->getID()
 				)
 					return true;
 				else
@@ -820,7 +820,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	LogFile->write(EQEMuLog::Debug, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
+	LogFile->write(EQEMuLog::Debug, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->getName(), target->getName());
 	return false;
 }
 
@@ -1083,8 +1083,8 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, bool isproc)
 
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		if (isClient())
+			HateMod += castToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
 
 		AggroAmount = (AggroAmount * HateMod) / 100;
 
@@ -1133,8 +1133,8 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible)
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 
-		if (IsClient())
-			HateMod += CastToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
+		if (isClient())
+			HateMod += castToClient()->GetFocusEffect(focusSpellHateMod, spell_id);
 
 		//Live AA - Spell casting subtlety
 		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
@@ -1227,7 +1227,7 @@ bool Mob::PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id) {
 
 		else
 		{
-			if (caster->IsClient())
+			if (caster->isClient())
 			{
 				//3: At maxed ability, Total Domination has a 50% chance of preventing the charm break that otherwise would have occurred.
 				int16 TotalDominationBonus = caster->aabonuses.CharmBreakChance + caster->spellbonuses.CharmBreakChance + caster->itembonuses.CharmBreakChance;

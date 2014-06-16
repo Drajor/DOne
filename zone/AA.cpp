@@ -233,7 +233,7 @@ void Client::ActivateAA(aaID activate){
 	switch(caa->target) {
 		case aaTargetUser:
 		case aaTargetGroup:
-			target_id = GetID();
+			target_id = getID();
 			break;
 		case aaTargetCurrent:
 		case aaTargetCurrentGroup:
@@ -242,7 +242,7 @@ void Client::ActivateAA(aaID activate){
 				p_timers.Clear(&database, AATimerID + pTimerAAStart);
 				return;
 			}
-			target_id = GetTarget()->GetID();
+			target_id = GetTarget()->getID();
 			break;
 		case aaTargetPet:
 			if(GetPet() == nullptr) {
@@ -319,7 +319,7 @@ void Client::ActivateAA(aaID activate){
 		m_epp.expended_aa += aas_send[activate]->cost;
 		SetAA(activate, 0);
 
-		Save();
+		save();
 		SendAA(activate);
 		SendAATable();
 	}
@@ -510,7 +510,7 @@ void Client::HandleAAAction(aaID activate) {
 	switch(target) {
 		case aaTargetUser:
 		case aaTargetGroup:
-			target_id = GetID();
+			target_id = getID();
 			break;
 		case aaTargetCurrent:
 		case aaTargetCurrentGroup:
@@ -519,7 +519,7 @@ void Client::HandleAAAction(aaID activate) {
 				p_timers.Clear(&database, timer_id + pTimerAAEffectStart);
 				return;
 			}
-			target_id = GetTarget()->GetID();
+			target_id = GetTarget()->getID();
 			break;
 		case aaTargetPet:
 			if(GetPet() == nullptr) {
@@ -577,8 +577,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	if(IsClient())
-		pet.duration += (CastToClient()->GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000);
+	if(isClient())
+		pet.duration += (castToClient()->GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000);
 
 	pet.npc_id = record.npc_type;
 
@@ -634,7 +634,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				GetZ(), GetHeading(), FlyMode3);
 
 		if((spell_id == 6882) || (spell_id == 6884))
-			npca->SetFollowID(GetID());
+			npca->SetFollowID(getID());
 
 		if(!npca->GetSwarmInfo()){
 			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
@@ -646,12 +646,12 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 
 		//removing this prevents the pet from attacking
-		npca->GetSwarmInfo()->owner_id = GetID();
+		npca->GetSwarmInfo()->owner_id = getID();
 
 		//give the pets somebody to "love"
 		if(targ != nullptr){
 			npca->AddToHateList(targ, 1000, 1000);
-			npca->GetSwarmInfo()->target = targ->GetID();
+			npca->GetSwarmInfo()->target = targ->getID();
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
@@ -736,12 +736,12 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		}
 
 		//removing this prevents the pet from attacking
-		npca->GetSwarmInfo()->owner_id = GetID();
+		npca->GetSwarmInfo()->owner_id = getID();
 
 		//give the pets somebody to "love"
 		if(targ != nullptr){
 			npca->AddToHateList(targ, 1000, 1000);
-			npca->GetSwarmInfo()->target = targ->GetID();
+			npca->GetSwarmInfo()->target = targ->getID();
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
@@ -913,12 +913,12 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		npca->GetSwarmInfo()->duration->Start(duration*1000);
 	}
 
-	npca->GetSwarmInfo()->owner_id = GetID();
+	npca->GetSwarmInfo()->owner_id = getID();
 
 	//give the pet somebody to "love"
 	if(target != nullptr){
 		npca->AddToHateList(target, 100000);
-		npca->GetSwarmInfo()->target = target->GetID();
+		npca->GetSwarmInfo()->target = target->getID();
 	}
 
 	//gear stuff, need to make sure there's
@@ -1057,7 +1057,7 @@ void Client::BuyAA(AA_Action* action)
 
 		m_pp.aapoints -= real_cost;
 
-		Save();
+		save();
 		if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
 			&& ((aa2->max_level == (cur_level+1)) && aa2->sof_next_id)){
 			SendAA(aa2->id);
@@ -1617,7 +1617,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 {
 	if(!Inspector || (Rank == 0)) return;
 
-	Inspector->Message_StringID(0, CURRENT_SPELL_EFFECTS, GetName());
+	Inspector->Message_StringID(0, CURRENT_SPELL_EFFECTS, getName());
 	uint32 buff_count = GetMaxTotalSlots();
 	for (uint32 i = 0; i < buff_count; ++i)
 	{

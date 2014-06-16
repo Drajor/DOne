@@ -1192,7 +1192,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 	// task system was apparently first introduced for LDoN missions, type 1 may be for missions.
 	//
 	AvailableTaskHeader->unknown1 = 2;
-	AvailableTaskHeader->TaskGiver = mob->GetID();
+	AvailableTaskHeader->TaskGiver = mob->getID();
 
 	Ptr = (char *) AvailableTaskHeader + sizeof(AvailableTaskHeader_Struct);
 
@@ -1312,7 +1312,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 
 	outapp->WriteUInt32(ValidTasks);	// TaskCount
 	outapp->WriteUInt32(2);			// Unknown2
-	outapp->WriteUInt32(mob->GetID());	// TaskGiver
+	outapp->WriteUInt32(mob->getID());	// TaskGiver
 
 	for(int i=0; i<TaskCount;i++) {
 
@@ -1642,7 +1642,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeI
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
 				_log(TASKS__UPDATE, "Char: %s Task: %i, Activity %i, Activity type %i for NPC %i failed zone check",
-							c->GetName(), ActiveTasks[i].TaskID, j, ActivityType, NPCTypeID);
+							c->getName(), ActiveTasks[i].TaskID, j, ActivityType, NPCTypeID);
 				continue;
 			}
 			// Is the activity to kill this type of NPC ?
@@ -1762,7 +1762,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
 				_log(TASKS__UPDATE, "Char: %s Activity type %i for Item %i failed zone check",
-							c->GetName(), Type, ItemID);
+							c->getName(), Type, ItemID);
 				continue;
 			}
 			// Is the activity related to this item ?
@@ -1813,7 +1813,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 			if(Task->Activity[j].Type != ActivityExplore) continue;
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
 				_log(TASKS__UPDATE, "Char: %s Explore exploreid %i failed zone check",
-							c->GetName(), ExploreID);
+							c->getName(), ExploreID);
 				continue;
 			}
 			// Is the activity to explore this area id ?
@@ -1870,7 +1870,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
 				_log(TASKS__UPDATE, "Char: %s Deliver activity failed zone check (current zone %i, need zone %i",
-					c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
+					c->getName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
 				continue;
 			}
 			// Is the activity to deliver to this NPCTypeID ?
@@ -1937,7 +1937,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 			if(Task->Activity[j].GoalMethod != METHODSINGLEID) continue;
 			if(Task->Activity[j].ZoneID != ZoneID) {
 				_log(TASKS__UPDATE, "Char: %s Touch activity failed zone check",
-							c->GetName());
+							c->getName());
 				continue;
 			}
 			// We found an active task to zone into this zone, so set done count to goal count
@@ -3240,7 +3240,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 	char *buf = 0;
 	MakeAnyLenString(&buf, "%d", TaskID);
 
-	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
+	NPC *npc = entity_list.GetID(NPCID)->castToNPC();
 	if(!npc) {
 		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
 		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTD to. Report this bug.");

@@ -84,7 +84,7 @@ XS(XS_Client_Save)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Save(iCommitNow);
+		RETVAL = THIS->save(iCommitNow);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -4059,7 +4059,7 @@ XS(XS_Client_RefundAA) {
 		}
 
 		if(refunded){
-			THIS->Save(); //save of course
+			THIS->save(); //save of course
 			THIS->Kick(); //client gets all buggy if we don't immediatly relog so just force it on them
 		}
 	}
@@ -5860,10 +5860,10 @@ XS(XS_Client_SilentMessage)
                 if(THIS == NULL)
                         Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
                 if(THIS->GetTarget() != NULL){
-                        if(THIS->GetTarget()->IsNPC()){
+                        if(THIS->GetTarget()->isNPC()){
                                 if (THIS->DistNoRootNoZ(*THIS->GetTarget()) <= 200) {
-                                                if(THIS->GetTarget()->CastToNPC()->IsMoving() && !THIS->GetTarget()->CastToNPC()->IsOnHatelist(THIS->GetTarget()))
-                                                        THIS->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
+                                                if(THIS->GetTarget()->castToNPC()->IsMoving() && !THIS->GetTarget()->castToNPC()->IsOnHatelist(THIS->GetTarget()))
+                                                        THIS->GetTarget()->castToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
                                         THIS->ChannelMessageReceived(8, 0, 100, SvPV_nolen(ST(1)));
                                 }
                         }

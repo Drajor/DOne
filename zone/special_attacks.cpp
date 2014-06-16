@@ -67,7 +67,7 @@ void Mob::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 
 	int item_slot = -1;
 	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
-	if (IsClient()){
+	if (isClient()){
 
 		switch (skill){
 
@@ -93,7 +93,7 @@ void Mob::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 
 		if (item_slot >= 0){
 			const ItemInst* itm = nullptr;
-			itm = CastToClient()->GetInv().GetItem(item_slot);
+			itm = castToClient()->GetInv().GetItem(item_slot);
 			if(itm)
 				dmg += itm->GetItem()->AC * (RuleI(Combat, SpecialAttackACBonus))/100;
 		}
@@ -110,9 +110,9 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if(skill == SkillBash)
 	{
-		if(IsClient())
+		if(isClient())
 		{
-			ItemInst *item = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+			ItemInst *item = castToClient()->GetInv().GetItem(SLOT_SECONDARY);
 			if(item)
 			{
 				if(item->GetItem()->ItemType == ItemTypeShield)
@@ -187,7 +187,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 	CombatAbility_Struct* ca_atk = (CombatAbility_Struct*) app->pBuffer;
 
-	if(GetTarget()->GetID() != ca_atk->m_target)
+	if(GetTarget()->getID() != ca_atk->m_target)
 		return;	//invalid packet.
 
 	if(!IsAttackAllowed(GetTarget()))
@@ -465,8 +465,8 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			return(1000); /* nice long delay for them, the caller depends on this! */
 	}
 
-	if(IsClient()){
-		if(GetWeaponDamage(other, CastToClient()->GetInv().GetItem(itemslot)) <= 0){
+	if(isClient()){
+		if(GetWeaponDamage(other, castToClient()->GetInv().GetItem(itemslot)) <= 0){
 			ndamage = -5;
 		}
 	}
@@ -506,8 +506,8 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	bool bCanFrontalBS = false;
 
 	//make sure we have a proper weapon if we are a client.
-	if(IsClient()) {
-		const ItemInst *wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+	if(isClient()) {
+		const ItemInst *wpn = castToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		if(!wpn || (wpn->GetItem()->ItemType != ItemType1HPiercing)){
 			Message_StringID(13, BACKSTAB_WEAPON);
 			return;
@@ -531,7 +531,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	if (bIsBehind || bCanFrontalBS){ // Player is behind other OR can do Frontal Backstab
 
 		if (bCanFrontalBS) {
-			CastToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
+			castToClient()->Message(0,"Your fierce attack is executed with such grace, your target did not see it coming!");
 		}
 
 		// solar - chance to assassinate
@@ -539,14 +539,14 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if(
 			level >= 60 && // player is 60 or higher
 			other->GetLevel() <= 45 && // mob 45 or under
-			!other->CastToNPC()->IsEngaged() && // not aggro
+			!other->castToNPC()->IsEngaged() && // not aggro
 			other->GetHP()<=32000
-			&& other->IsNPC()
+			&& other->isNPC()
 			&& MakeRandomFloat(0, 99) < chance // chance
 			) {
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, getName());
+			if(isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 			RogueAssassinate(other);
 		}
 		else {
@@ -564,8 +564,8 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 						RogueBackstab(other,false,ReuseTime);
 				}
 			}
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+			if(isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 		}
 	}
 	//Live AA - Chaotic Backstab
@@ -575,8 +575,8 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		RogueBackstab(other, true);
 		if (level > 54) {
 			float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
-			if(IsClient())
-				CastToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+			if(isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 			// Check for double attack with main hand assuming maxed DA Skill (MS)
 			if(MakeRandomFloat(0, 1) < DoubleAttackProbability)		// Max 62.4 % chance of DA
 				if(other->GetHP() > 0)
@@ -601,9 +601,9 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	int32 primaryweapondamage = 0;
 	int32 backstab_dmg = 0;
 
-	if(IsClient()){
+	if(isClient()){
 		const ItemInst *wpn = nullptr;
-		wpn = CastToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		wpn = castToClient()->GetInv().GetItem(SLOT_PRIMARY);
 		if(wpn) {
 			primaryweapondamage = GetWeaponDamage(other, wpn);
 			backstab_dmg = wpn->GetItem()->BackstabDmg;
@@ -678,7 +678,7 @@ void Mob::RogueAssassinate(Mob* other)
 {
 	//can you dodge, parry, etc.. an assassinate??
 	//if so, use DoSpecialAttackDamage(other, BACKSTAB, 32000); instead
-	if(GetWeaponDamage(other, IsClient()?CastToClient()->GetInv().GetItem(SLOT_PRIMARY):(const ItemInst*)nullptr) > 0){
+	if(GetWeaponDamage(other, isClient()?castToClient()->GetInv().GetItem(SLOT_PRIMARY):(const ItemInst*)nullptr) > 0){
 		other->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
@@ -728,7 +728,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	}
 
-	mlog(COMBAT__RANGED, "Shooting %s with bow %s (%d) and arrow %s (%d)", GetTarget()->GetName(), RangeItem->Name, RangeItem->ID, AmmoItem->Name, AmmoItem->ID);
+	mlog(COMBAT__RANGED, "Shooting %s with bow %s (%d) and arrow %s (%d)", GetTarget()->getName(), RangeItem->Name, RangeItem->ID, AmmoItem->Name, AmmoItem->ID);
 
 	//look for ammo in inventory if we only have 1 left...
 	if(Ammo->GetCharges() == 1) {
@@ -842,7 +842,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		improved_hidden = false;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
+		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
@@ -856,10 +856,10 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 		return;
 
 	if (!other->CheckHitChance(this, SkillArchery, 13,chance_mod)) {
-		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
+		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->getName());
 		other->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
 	} else {
-		mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->GetName());
+		mlog(COMBAT__RANGED, "Ranged attack hit %s.", other->getName());
 
 		if(!TryHeadShot(other, SkillArchery))
 		{
@@ -899,7 +899,7 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					{
 						if(RuleB(Combat, ArcheryBonusRequiresStationary))
 						{
-							if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
+							if(other->isNPC() && !other->IsMoving() && !other->IsRooted())
 							{
 								dobonus = true;
 							}
@@ -1029,7 +1029,7 @@ void NPC::RangedAttack(Mob* other)
 	// Hit?
 	if (!GetTarget()->CheckHitChance(this, SkillArchery, 13))
 	{
-		mlog(COMBAT__RANGED, "Ranged attack missed %s.", GetTarget()->GetName());
+		mlog(COMBAT__RANGED, "Ranged attack missed %s.", GetTarget()->getName());
 		GetTarget()->Damage(this, 0, SPELL_UNKNOWN, SkillArchery);
 	}
 	else
@@ -1038,7 +1038,7 @@ void NPC::RangedAttack(Mob* other)
 		int16 ADmg = GetWeaponDamage(GetTarget(), ammo);
 		if(WDmg > 0 || ADmg > 0)
 		{
-			mlog(COMBAT__RANGED, "Ranged attack hit %s.", GetTarget()->GetName());
+			mlog(COMBAT__RANGED, "Ranged attack hit %s.", GetTarget()->getName());
 			int32 TotalDmg = 0;
 
 			int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
@@ -1091,7 +1091,7 @@ void NPC::RangedAttack(Mob* other)
 		improved_hidden = false;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
+		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
@@ -1156,7 +1156,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	mlog(COMBAT__RANGED, "Throwing %s (%d) at %s", item->Name, item->ID, GetTarget()->GetName());
+	mlog(COMBAT__RANGED, "Throwing %s (%d) at %s", item->Name, item->ID, GetTarget()->getName());
 
 	if(RangeWeapon->GetCharges() == 1) {
 		//first check ammo
@@ -1236,7 +1236,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		improved_hidden = false;
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
+		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
@@ -1250,10 +1250,10 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 		return;
 
 	if (!other->CheckHitChance(this, SkillThrowing, 13, chance_mod)){
-		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->GetName());
+		mlog(COMBAT__RANGED, "Ranged attack missed %s.", other->getName());
 		other->Damage(this, 0, SPELL_UNKNOWN, SkillThrowing);
 	} else {
-		mlog(COMBAT__RANGED, "Throwing attack hit %s.", other->GetName());
+		mlog(COMBAT__RANGED, "Throwing attack hit %s.", other->getName());
 
 		int16 WDmg = 0;
 
@@ -1302,8 +1302,8 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 	as->src_x = GetX();
 	as->src_y = GetY();
 	as->src_z = GetZ();
-	as->source_id = GetID();
-	as->target_id = to->GetID();
+	as->source_id = getID();
+	as->target_id = to->getID();
 	as->item_id = item->ID;
 
 	as->item_type = item->ItemType;
@@ -1387,8 +1387,8 @@ void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, f
 	as->src_x = GetX();
 	as->src_y = GetY();
 	as->src_z = GetZ();
-	as->source_id = GetID();
-	as->target_id = to->GetID();
+	as->source_id = getID();
+	as->target_id = to->getID();
 	as->item_id = item->ID;
 	as->item_type = item_type;
 	as->skill = 0;	// Doesn't seem to have any effect
@@ -1421,13 +1421,13 @@ void NPC::DoClassAttacks(Mob *target) {
 		int knightreuse = 1000; //lets give it a small cooldown actually.
 		switch(GetClass()){
 			case SHADOWKNIGHT: case SHADOWKNIGHTGM:{
-				CastSpell(SPELL_NPC_HARM_TOUCH, target->GetID());
+				CastSpell(SPELL_NPC_HARM_TOUCH, target->getID());
 				knightreuse = HarmTouchReuseTime * 1000;
 				break;
 			}
 			case PALADIN: case PALADINGM:{
 				if(GetHPRatio() < 20) {
-					CastSpell(SPELL_LAY_ON_HANDS, GetID());
+					CastSpell(SPELL_LAY_ON_HANDS, getID());
 					knightreuse = LayOnHandsReuseTime * 1000;
 				} else {
 					knightreuse = 2000; //Check again in two seconds.
@@ -1440,9 +1440,9 @@ void NPC::DoClassAttacks(Mob *target) {
 
 	//general stuff, for all classes....
 	//only gets used when their primary ability get used too
-	if (taunting && HasOwner() && target->IsNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
+	if (taunting && HasOwner() && target->isNPC() && target->GetBodyType() != BT_Undead && taunt_time) {
 		this->GetOwner()->Message_StringID(MT_PetResponse, PET_TAUNTING);
-		Taunt(target->CastToNPC(), false);
+		Taunt(target->castToNPC(), false);
 	}
 
 	if(!ca_time)
@@ -1866,8 +1866,8 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	if(!CombatRange(who))
 		return;
 
-	if(!always_succeed && IsClient())
-		CastToClient()->CheckIncreaseSkill(TAUNT, who, 10);
+	if(!always_succeed && isClient())
+		castToClient()->CheckIncreaseSkill(TAUNT, who, 10);
 
 	int level = GetLevel();
 	Mob *hate_top = who->GetHateMost();
@@ -1923,16 +1923,16 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 			// new hate: find diff of player's hate and whoever's at top of list, add that plus tauntvalue to players hate
 			newhate = who->GetNPCHate(hate_top) - who->GetNPCHate(this) + tauntvalue;
 			// add the hate
-			who->CastToNPC()->AddToHateList(this, newhate);
+			who->castToNPC()->AddToHateList(this, newhate);
 		}
 		else{
 			//generate at least some hate reguardless of the outcome.
-			who->CastToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
+			who->castToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
 		}
 	}
 
 	//generate at least some hate reguardless of the outcome.
-	who->CastToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
+	who->castToNPC()->AddToHateList(this, (MakeRandomInt(2, 4)*level));
 	if (HasSkillProcs()){
 		float chance = (float)TauntReuseTime*RuleR(Combat, AvgProcsPerMinute)/60000.0f;
 		TrySkillProc(who, TAUNT, chance);
@@ -1951,8 +1951,8 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	if(!CombatRange(who))
 		return;
 
-	if(!always_succeed && IsClient())
-		CastToClient()->CheckIncreaseSkill(SkillTaunt, who, 10);
+	if(!always_succeed && isClient())
+		castToClient()->CheckIncreaseSkill(SkillTaunt, who, 10);
 
 	Mob *hate_top = who->GetHateMost();
 
@@ -1989,8 +1989,8 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 		}
 
 		//TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable result.
-		if (IsClient() && !always_succeed)
-			tauntchance -= (RuleR(Combat,TauntSkillFalloff) * (CastToClient()->MaxSkill(SkillTaunt) - GetSkill(SkillTaunt)));
+		if (isClient() && !always_succeed)
+			tauntchance -= (RuleR(Combat,TauntSkillFalloff) * (castToClient()->MaxSkill(SkillTaunt) - GetSkill(SkillTaunt)));
 
 		//From SE_Taunt (Does a taunt with a chance modifier)
 		if (chance_bonus)
@@ -2005,10 +2005,10 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 			if (hate_top && hate_top != this){
 				newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1;
-				who->CastToNPC()->AddToHateList(this, newhate);
+				who->castToNPC()->AddToHateList(this, newhate);
 			}
 			else
-				who->CastToNPC()->AddToHateList(this,12);
+				who->castToNPC()->AddToHateList(this,12);
 
 			if (who->CanTalk())
 				who->Say_StringID(SUCCESSFUL_TAUNT,GetCleanName());
@@ -2033,7 +2033,7 @@ void Mob::InstillDoubt(Mob *who) {
 	/*int skill = GetSkill(INTIMIDATION);*/	//unused
 
 	//make sure our target is an NPC
-	if(!who || !who->IsNPC())
+	if(!who || !who->isNPC())
 		return;
 
 	if(DivineAura())
@@ -2043,9 +2043,9 @@ void Mob::InstillDoubt(Mob *who) {
 	if(!CombatRange(who))
 		return;
 
-	if(IsClient())
+	if(isClient())
 	{
-		CastToClient()->CheckIncreaseSkill(SkillIntimidation, who, 10);
+		castToClient()->CheckIncreaseSkill(SkillIntimidation, who, 10);
 	}
 
 	//I think this formula needs work
@@ -2079,14 +2079,14 @@ bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 
 	if(defender && skillInUse == SkillArchery) {
 		if(GetAA(aaHeadshot) && defender->GetBodyType() == BT_Humanoid) {
-			if((GetLevelCon(GetLevel(), defender->GetLevel()) == CON_LIGHTBLUE || GetLevelCon(GetLevel(), defender->GetLevel()) == CON_GREEN) && defender->GetLevel() <= 60 && !defender->IsClient()) {
+			if((GetLevelCon(GetLevel(), defender->GetLevel()) == CON_LIGHTBLUE || GetLevelCon(GetLevel(), defender->GetLevel()) == CON_GREEN) && defender->GetLevel() <= 60 && !defender->isClient()) {
 				// WildcardX: These chance formula's below are arbitrary. If someone has a better formula that is more
 				// consistent with live, feel free to update these.
 				int AttackerChance = 20 + ((GetLevel() - 51) / 2) + (itembonuses.HeroicDEX / 10);
 				int DefenderChance = MakeRandomInt(0, 100);
 				if(AttackerChance > DefenderChance) {
 					mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
+					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, getName());
 					defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
 					Result = true;
 				}
@@ -2171,8 +2171,8 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		damage = -5;
 
 	if(skillinuse == SkillBash){
-		if(IsClient()){
-			ItemInst *item = CastToClient()->GetInv().GetItem(SLOT_SECONDARY);
+		if(isClient()){
+			ItemInst *item = castToClient()->GetInv().GetItem(SLOT_SECONDARY);
 			if(item){
 				if(item->GetItem()->ItemType == ItemTypeShield)	{
 					hate += item->GetItem()->AC;
@@ -2223,7 +2223,7 @@ bool Mob::CanDoSpecialAttack(Mob *other)
 	if(!GetTarget())
 		SetTarget(other);
 
-	if ((other == nullptr || ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead))
+	if ((other == nullptr || ((isClient() && castToClient()->dead) || (other->isClient() && other->castToClient()->dead))
 		|| HasDied() || (!IsAttackAllowed(other)))) {
 		return false;
 	}

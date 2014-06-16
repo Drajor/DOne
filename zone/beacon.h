@@ -40,9 +40,9 @@ public:
 	virtual Raid* GetRaid() { return 0; }
 	virtual Group* GetGroup() { return 0; }
 
-	bool	IsBeacon()			const { return true; }
-	bool	Process();
-	virtual void	Depop(bool not_used = true)	{ remove_me = true; }
+	bool	isBeacon()			const { return true; }
+	bool	process();
+	virtual void	depop(bool not_used = true)	{ remove_me = true; }
 	void AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust);
 
 protected:

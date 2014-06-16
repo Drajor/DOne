@@ -1016,7 +1016,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::Process() {
+bool Client::process() {
 	bool ret = true;
 	//bool sendguilds = true;
 	sockaddr_in to;

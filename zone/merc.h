@@ -67,7 +67,7 @@ public:
 	//virtual bool AI_PursueCastCheck();
 	virtual bool AI_IdleCastCheck();
 
-	virtual bool Process();
+	virtual bool process();
 
 	// Static Merc Group Methods
 	static bool AddMercToGroup(Merc* merc, Group* group);
@@ -120,7 +120,7 @@ public:
 	bool HasOrMayGetAggro();
 	bool UseDiscipline(int32 spell_id, int32 target);
 
-	virtual bool IsMerc() const { return true; }
+	virtual bool isMerc() const { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
@@ -134,8 +134,8 @@ public:
 	bool Suspend();
 	bool Unsuspend(bool setMaxStats);
 	void Zone();
-	virtual void Depop();
-	virtual bool Save();
+	virtual void depop();
+	virtual bool save();
 	bool GetDepop() { return p_depop; }
 
 	bool IsDead() { return GetHP() < 0;};

@@ -123,7 +123,7 @@ void ClientManager::Process()
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
-		if((*iter)->Process() == false)
+		if((*iter)->process() == false)
 		{
 			server_log->Log(log_client, "Client had a fatal error and had to be removed from the login.");
 			delete (*iter);

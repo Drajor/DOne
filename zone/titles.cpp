@@ -342,7 +342,7 @@ void Client::SetAATitle(const char *Title)
 
 	strn0cpy(strs->title, Title, sizeof(strs->title));
 
-	strs->entity_id = GetID();
+	strs->entity_id = getID();
 
 	entity_list.QueueClients(this, outapp, false);
 
@@ -361,7 +361,7 @@ void Client::SetTitleSuffix(const char *Suffix)
 
 	strn0cpy(strs->title, Suffix, sizeof(strs->title));
 
-	strs->entity_id = GetID();
+	strs->entity_id = getID();
 
 	entity_list.QueueClients(this, outapp, false);
 

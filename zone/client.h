@@ -237,7 +237,7 @@ public:
 	void	KeyRingAdd(uint32 item_id);
 	bool	KeyRingCheck(uint32 item_id);
 	void	KeyRingList();
-	virtual bool IsClient() const { return true; }
+	virtual bool isClient() const { return true; }
 	virtual void DBAWComplete(uint8 workpt_b1, DBAsyncWork* dbaw);
 	bool	FinishConnState2(DBAsyncWork* dbaw);
 	void	CompleteConnect();
@@ -281,7 +281,7 @@ public:
 	const	char* GetBuyerWelcomeMessage() { return BuyerWelcomeMessage.c_str(); }
 
 	void	FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	virtual bool Process();
+	virtual bool process();
 	void	LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const Item_Struct* item, bool buying);
 	void	SendPacketQueue(bool Block = true);
 	void	QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
@@ -309,8 +309,8 @@ public:
 	inline bool		IsLFP() { return LFP; }
 	void			UpdateLFP();
 
-	virtual bool	Save() { return Save(0); }
-			bool	Save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
+	virtual bool	save() { return save(0); }
+			bool	save(uint8 iCommitNow); // 0 = delayed, 1=async now, 2=sync now
 			void	SaveBackup();
 
 	inline bool ClientDataLoaded() const { return client_data_loaded; }

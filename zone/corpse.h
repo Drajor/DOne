@@ -50,11 +50,11 @@ public:
 
 	void LoadPlayerCorpseDecayTime(uint32 dbid);
 
-	bool	IsCorpse()			const { return true; }
-	bool	IsPlayerCorpse()	const { return mPlayerCorpse; }
-	bool	IsNPCCorpse()		const { return !mPlayerCorpse; }
-	bool	Process();
-	bool	Save();
+	bool	isCorpse()			const { return true; }
+	bool	isPlayerCorpse()	const { return mPlayerCorpse; }
+	bool	isNPCCorpse()		const { return !mPlayerCorpse; }
+	bool	process();
+	bool	save();
 	
 	uint32	GetDecayTime()		{ if (!mDecayTimer.Enabled()) return 0xFFFFFFFF; else return mDecayTimer.GetRemainingTime(); }
 	uint32	GetResTime()		{ if (!mResurrectionTimer.Enabled()) return 0; else return mResurrectionTimer.GetRemainingTime(); }
@@ -78,7 +78,7 @@ public:
 	
 	void	Delete();
 	void	Bury();
-	virtual void	Depop();
+	virtual void	depop();
 	virtual void	DepopCorpse();
 
 	void	FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
@@ -130,7 +130,7 @@ public:
 	uint32 getCharacterID() { return mCharacterID; }
 	// Sets the Character ID this corpse belongs to.
 	// (SCRIPTING)
-	uint32 setCharacterID(uint32 pCharacterID) { if (IsPlayerCorpse()) { return (mCharacterID = pCharacterID); } return 0xFFFFFFFF; };
+	uint32 setCharacterID(uint32 pCharacterID) { if (isPlayerCorpse()) { return (mCharacterID = pCharacterID); } return 0xFFFFFFFF; };
 
 	// Locks the corpse to prevent looting by non-GM characters.
 	// (SCRIPTING)

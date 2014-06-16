@@ -38,7 +38,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 #if EQDEBUG >= 5
-	LogFile->write(EQEMuLog::Debug, "Zone request from %s", GetName());
+	LogFile->write(EQEMuLog::Debug, "Zone request from %s", getName());
 	DumpPacket(app);
 #endif
 	ZoneChange_Struct* zc=(ZoneChange_Struct*)app->pBuffer;
@@ -84,7 +84,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 				CheatDetected(MQZone, zc->x, zc->y, zc->z);
 				Message(13, "Invalid unsolicited zone request.");
-				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", getName(), target_zone_id);
 				SendZoneCancel(zc);
 				return;
 			}
@@ -116,7 +116,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			//if we didnt get a zone point, or its to a different zone,
 			//then we assume this is invalid.
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
-				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", GetName(), target_zone_id);
+				LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%d'.", getName(), target_zone_id);
 				CheatDetected(MQGate, zc->x, zc->y, zc->z);
 				SendZoneCancel(zc);
 				return;
@@ -147,7 +147,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(13, "Invalid target zone ID.");
-		LogFile->write(EQEMuLog::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", GetName(), target_zone_id);
+		LogFile->write(EQEMuLog::Error, "Zoning %s: Unable to get zone name for zone id '%d'.", getName(), target_zone_id);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -160,7 +160,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
 		Message(13, "Invalid target zone while getting safe points.");
-		LogFile->write(EQEMuLog::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", GetName(), target_zone_name);
+		LogFile->write(EQEMuLog::Error, "Zoning %s: Unable to get safe coordinates for zone '%s'.", getName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	}
@@ -180,7 +180,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	switch(zone_mode) {
 	case EvacToSafeCoords:
 	case ZoneToSafeCoords:
-		LogFile->write(EQEMuLog::Debug, "Zoning %s to safe coords (%f,%f,%f) in %s (%d)", GetName(), safe_x, safe_y, safe_z, target_zone_name, target_zone_id);
+		LogFile->write(EQEMuLog::Debug, "Zoning %s to safe coords (%f,%f,%f) in %s (%d)", getName(), safe_x, safe_y, safe_z, target_zone_name, target_zone_id);
 		dest_x = safe_x;
 		dest_y = safe_y;
 		dest_z = safe_z;
@@ -240,7 +240,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 		//could not find a valid reason for them to be zoning, stop it.
 		CheatDetected(MQZoneUnknownDest, 0.0, 0.0, 0.0);
-		LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", GetName(), target_zone_name);
+		LogFile->write(EQEMuLog::Error, "Zoning %s: Invalid unsolicited zone request to zone id '%s'. Not near a zone point.", getName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;
 	default:
@@ -275,7 +275,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
 	} else {
-		LogFile->write(EQEMuLog::Error, "Zoning %s: Rules prevent this char from zoning into '%s'", GetName(), target_zone_name);
+		LogFile->write(EQEMuLog::Error, "Zoning %s: Rules prevent this char from zoning into '%s'", getName(), target_zone_name);
 		SendZoneError(zc, myerror);
 	}
 }
@@ -343,14 +343,14 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	m_pp.zoneInstance = instance_id;
 
 	//Force a save so its waiting for them when they zone
-	Save(2);
+	save(2);
 
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
 		// likely to a bind point), also fixes a bug since the default response was failure
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneChange,sizeof(ZoneChange_Struct));
 		ZoneChange_Struct* zc2 = (ZoneChange_Struct*) outapp->pBuffer;
-		strcpy(zc2->char_name, GetName());
+		strcpy(zc2->char_name, getName());
 		zc2->zoneID = zone_id;
 		zc2->instanceID = instance_id;
 		zc2->success = 1;
@@ -370,7 +370,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 		ztz->requested_instance_id = instance_id;
 		ztz->admin = admin;
 		ztz->ignorerestrictions = ignore_r;
-		strcpy(ztz->name, GetName());
+		strcpy(ztz->name, getName());
 		ztz->guild_id = GuildID();
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -517,7 +517,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
-			LogFile->write(EQEMuLog::Debug, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
+			LogFile->write(EQEMuLog::Debug, "Player %s has died and will be zoned to bind point in zone: %s at LOC x=%f, y=%f, z=%f, heading=%f", getName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
 			zonesummon_x = x_pos = x;
@@ -526,7 +526,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case Rewind:
-			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", GetName(), x_pos, y_pos, z_pos, rewind_x, rewind_y, rewind_z, zone->GetShortName());
+			LogFile->write(EQEMuLog::Debug, "%s has requested a /rewind from %f, %f, %f, to %f, %f, %f in %s", getName(), x_pos, y_pos, z_pos, rewind_x, rewind_y, rewind_z, zone->GetShortName());
 			zonesummon_x = x_pos = x;
 			zonesummon_y = y_pos = y;
 			zonesummon_z = z_pos = z;
@@ -637,7 +637,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 
-		_log(NET__DEBUG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", GetName(), x, y, z, heading, zoneID);
+		_log(NET__DEBUG, "Player %s has requested a zoning to LOC x=%f, y=%f, z=%f, heading=%f in zoneid=%i", getName(), x, y, z, heading, zoneID);
 		//Clear zonesummon variables if we're zoning to our own zone
 		//Client wont generate a zone change packet to the server in this case so
 		//They aren't needed and it keeps behavior on next zone attempt from being undefined.
@@ -726,7 +726,7 @@ void Client::SetZoneFlag(uint32 zone_id) {
 	if(!database.RunQuery(query,MakeAnyLenString(&query,
 		"INSERT INTO zone_flags (charID,zoneID) VALUES(%d,%d)",
 		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", GetName(), errbuf);
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to set zone flag for %s: %s", getName(), errbuf);
 	}
 }
 
@@ -744,7 +744,7 @@ void Client::ClearZoneFlag(uint32 zone_id) {
 	if(!database.RunQuery(query,MakeAnyLenString(&query,
 		"DELETE FROM zone_flags WHERE charID=%d AND zoneID=%d",
 		CharacterID(),zone_id),errbuf)) {
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", GetName(), errbuf);
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to clear zone flag for %s: %s", getName(), errbuf);
 	}
 }
 
@@ -766,7 +766,7 @@ void Client::LoadZoneFlags() {
 	}
 	else	// DB query error!
 	{
-		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", GetName(), errbuf);
+		LogFile->write(EQEMuLog::Error, "MySQL Error while trying to load zone flags for %s: %s", getName(), errbuf);
 	}
 	safe_delete_array(query);
 }
@@ -777,7 +777,7 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 
 void Client::SendZoneFlagInfo(Client *to) const {
 	if(zone_flags.empty()) {
-		to->Message(0, "%s has no zone flags.", GetName());
+		to->Message(0, "%s has no zone flags.", getName());
 		return;
 	}
 
@@ -786,7 +786,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	end = zone_flags.end();
 	char empty[1] = { '\0' };
 
-	to->Message(0, "Flags for %s:", GetName());
+	to->Message(0, "Flags for %s:", getName());
 
 	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;

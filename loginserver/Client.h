@@ -68,7 +68,7 @@ public:
 	/**
 	* Processes the client's connection and does various actions.
 	*/
-	bool Process();
+	bool process();
 
 	/**
 	* Sends our reply to session ready packet.

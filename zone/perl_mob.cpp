@@ -64,7 +64,7 @@ XS(XS_Mob_IsClient)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsClient();
+		RETVAL = THIS->isClient();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -90,7 +90,7 @@ XS(XS_Mob_IsNPC)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsNPC();
+		RETVAL = THIS->isNPC();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -116,7 +116,7 @@ XS(XS_Mob_IsMob)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsMob();
+		RETVAL = THIS->isMOB();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -142,7 +142,7 @@ XS(XS_Mob_IsCorpse)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsCorpse();
+		RETVAL = THIS->isCorpse();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -168,7 +168,7 @@ XS(XS_Mob_IsPlayerCorpse)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsPlayerCorpse();
+		RETVAL = THIS->isPlayerCorpse();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -194,7 +194,7 @@ XS(XS_Mob_IsNPCCorpse)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsNPCCorpse();
+		RETVAL = THIS->isNPCCorpse();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -220,7 +220,7 @@ XS(XS_Mob_IsObject)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsObject();
+		RETVAL = THIS->isObject();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -246,7 +246,7 @@ XS(XS_Mob_IsDoor)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsDoor();
+		RETVAL = THIS->isDoor();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -272,7 +272,7 @@ XS(XS_Mob_IsTrap)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsTrap();
+		RETVAL = THIS->isTrap();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -298,7 +298,7 @@ XS(XS_Mob_IsBeacon)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsBeacon();
+		RETVAL = THIS->isBeacon();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -324,7 +324,7 @@ XS(XS_Mob_CastToClient)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CastToClient();
+		RETVAL = THIS->castToClient();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -350,7 +350,7 @@ XS(XS_Mob_CastToNPC)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CastToNPC();
+		RETVAL = THIS->castToNPC();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void*)RETVAL);
 	}
@@ -376,7 +376,7 @@ XS(XS_Mob_CastToMob)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CastToMob();
+		RETVAL = THIS->castToMOB();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -402,7 +402,7 @@ XS(XS_Mob_CastToCorpse)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CastToCorpse();
+		RETVAL = THIS->castToCorpse();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void*)RETVAL);
 	}
@@ -429,7 +429,7 @@ XS(XS_Mob_GetID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetID();
+		RETVAL = THIS->getID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -455,7 +455,7 @@ XS(XS_Mob_GetName)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetName();
+		RETVAL = THIS->getName();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	}
 	XSRETURN(1);
@@ -486,7 +486,7 @@ XS(XS_Mob_Depop)
 			StartSpawnTimer = (bool)SvTRUE(ST(1));
 		}
 
-		THIS->Depop(StartSpawnTimer);
+		THIS->depop(StartSpawnTimer);
 	}
 	XSRETURN_EMPTY;
 }

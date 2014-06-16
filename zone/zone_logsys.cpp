@@ -28,7 +28,7 @@ void log_message_mob(LogType type, Mob *who, const char *fmt, ...) {
 		return;	//could prolly put this in the macro, but it feels even dirtier than prototyping this in common
 
 	char prefix_buffer[256];
-	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->GetName());
+	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->getName());
 	prefix_buffer[255] = '\0';
 
 	va_list args;
@@ -42,7 +42,7 @@ void log_message_mobVA(LogType type, Mob *who, const char *fmt, va_list args) {
 		return;	//could prolly put this in the macro, but it feels even dirtier than prototyping this in common
 
 	char prefix_buffer[256];
-	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->GetName());
+	snprintf(prefix_buffer, 255, "[%s] %s: ", log_type_info[type].name, who->getName());
 	prefix_buffer[255] = '\0';
 
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer, fmt, args);
@@ -61,7 +61,7 @@ void log_packet_mob(LogType type, Mob *who, const BasePacket *p) {
 
 	char buffer[80];
 	p->build_header_dump(buffer);
-	log_message(type,"[%s] %s: %s", log_type_info[type].name, who->GetName(), buffer);
+	log_message(type,"[%s] %s: %s", log_type_info[type].name, who->getName(), buffer);
 	log_hex(type,(const char *)p->pBuffer,p->size);
 }
 

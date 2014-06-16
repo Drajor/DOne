@@ -567,7 +567,7 @@ XS(XS_Raid_GetMember)
 			RETVAL = nullptr;
 		else {
 			if(THIS->members[index].member != nullptr)
-				RETVAL = THIS->members[index].member->CastToClient();
+				RETVAL = THIS->members[index].member->castToClient();
 		}
 
 		ST(0) = sv_newmortal();

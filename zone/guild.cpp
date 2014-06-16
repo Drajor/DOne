@@ -187,7 +187,7 @@ void Client::SendGuildList() {
 
 void Client::SendGuildMembers() {
 	uint32 len;
-	uint8 *data = guild_mgr.makeGuildMembers(GuildID(), GetName(), len);
+	uint8 *data = guild_mgr.makeGuildMembers(GuildID(), getName(), len);
 	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
 
@@ -228,7 +228,7 @@ void Client::RefreshGuildInfo()
 
 	CharacterGuildInfo info;
 	if(!guild_mgr.getCharInfo(CharacterID(), info)) {
-		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
+		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", getName(), CharacterID());
 		return;
 	}
 
@@ -245,7 +245,7 @@ void Client::RefreshGuildInfo()
 			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 
 			gsrs->Rank = guildrank;
-			strn0cpy(gsrs->MemberName, GetName(), sizeof(gsrs->MemberName));
+			strn0cpy(gsrs->MemberName, getName(), sizeof(gsrs->MemberName));
 			gsrs->Banker = GuildBanker;
 
 			FastQueuePacket(&outapp);
@@ -355,7 +355,7 @@ void EntityList::SendGuildJoin(GuildJoin_Struct* gj){
 	iterator.Reset();
 	while(iterator.MoreElements())
 	{
-		Client* client = iterator.GetData()->CastToClient();
+		Client* client = iterator.GetData()->castToClient();
 		if (client->IsInGuild(gj->guild_id))
 			client->SendGuildJoin(gj);
 		iterator.Advance();

@@ -75,11 +75,11 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 Beacon::~Beacon()
 {
 #ifdef SOLAR
-	entity_list.Message(0, 0, "Beacon %d being removed at %0.2f %0.2f %0.2f heading %0.2f", GetID(), GetX(), GetY(), GetZ(), GetHeading());
+	entity_list.Message(0, 0, "Beacon %d being removed at %0.2f %0.2f %0.2f heading %0.2f", getID(), GetX(), GetY(), GetZ(), GetHeading());
 #endif
 }
 
-bool Beacon::Process()
+bool Beacon::process()
 {
 	if(remove_me)
 	{
@@ -96,7 +96,7 @@ bool Beacon::Process()
 		Mob *caster = entity_list.GetMob(caster_id);
 		if(caster && spell_iterations--)
 		{
-			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled());	//NPC AE spells do not affect the NPC caster
+			bool affect_caster = (!caster->isNPC() && !caster->IsAIControlled());	//NPC AE spells do not affect the NPC caster
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust);
 		}
 		else
@@ -122,7 +122,7 @@ void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adj
 	if(!IsValidSpell(cast_spell_id) || !caster)
 		return;
 
-	caster_id = caster->GetID();
+	caster_id = caster->getID();
 	spell_id = cast_spell_id;
 	this->resist_adjust = resist_adjust;
 	spell_iterations = spells[spell_id].AEDuration / 2500;

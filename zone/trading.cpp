@@ -66,14 +66,14 @@ void Trade::Start(uint32 mob_id, bool initiate_with)
 	if (initiate_with) {
 		Mob* with = With();
 		if (with)
-			with->trade->Start(owner->GetID(), false);
+			with->trade->Start(owner->getID(), false);
 	}
 }
 
 // Add item from a given slot to trade bucket (automatically does bag data too)
 void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 {
-	if (!owner || !owner->IsClient()) {
+	if (!owner || !owner->isClient()) {
 		// This should never happen
 		LogFile->write(EQEMuLog::Debug, "Programming error: NPC's should not call Trade::AddEntity()");
 		return;
@@ -86,14 +86,14 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 		with->trade->state = Trading;
 
 	// Item always goes into trade bucket from cursor
-	Client* client = owner->CastToClient();
+	Client* client = owner->castToClient();
 	const ItemInst* inst = client->GetInv().GetItem(SLOT_CURSOR);
 	if (!inst) {
 		client->Message(13, "Error: Could not find item on your cursor!");
 		return;
 	}
 
-	_log(TRADING__HOLDER, "%s added item '%s' to trade slot %i", owner->GetName(), inst->GetItem()->Name, trade_slot_id);
+	_log(TRADING__HOLDER, "%s added item '%s' to trade slot %i", owner->getName(), inst->GetItem()->Name, trade_slot_id);
 
 	ItemInst* inst2 = client->GetInv().GetItem(trade_slot_id);
 	int new_charges = 0;
@@ -140,12 +140,12 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 {
 	// @merth: This needs to be redone with new item classes
 	Mob* mob = With();
-	if (!mob->IsClient())
+	if (!mob->isClient())
 		return; // Not sending packets to NPCs!
 
-	Client* with = mob->CastToClient();
-	Client* trader = owner->CastToClient();
-	if (with && with->IsClient()) {
+	Client* with = mob->castToClient();
+	Client* trader = owner->castToClient();
+	if (with && with->isClient()) {
 		with->SendItemPacket(dest_slot_id -IDX_TRADE,inst,ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
 			for (uint16 i=0; i<10; i++) {
@@ -165,10 +165,10 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 void Trade::LogTrade()
 {
 	Mob* with = With();
-	if (!owner->IsClient() || !with)
+	if (!owner->isClient() || !with)
 		return; // Should never happen
 
-	Client* trader = owner->CastToClient();
+	Client* trader = owner->castToClient();
 	bool logtrade = false;
 	int admin_level = 0;
 	uint8 item_count = 0;
@@ -221,7 +221,7 @@ void Trade::LogTrade()
 		// Log items offered by owner
 		cash = this->cp + this->sp + this->gp + this->pp;
 		if ((cash>0) || (item_count>0)) {
-			sprintf(logtext, "%s gave %s ", trader->GetName(), with->GetName());
+			sprintf(logtext, "%s gave %s ", trader->getName(), with->getName());
 
 			if (item_count > 0) {
 				strcat(logtext, "items {");
@@ -262,7 +262,7 @@ void Trade::LogTrade()
 			}
 
 			database.logevents(trader->AccountName(), trader->AccountID(),
-				trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
+				trader->Admin(), trader->getName(), with->getName(), "Trade", logtext, 6);
 		}
 	}
 }
@@ -272,12 +272,12 @@ void Trade::DumpTrade()
 {
 	Mob* with = With();
 	LogFile->write(EQEMuLog::Debug, "Dumping trade data: '%s' in TradeState %i with '%s'",
-		this->owner->GetName(), state, ((with==nullptr)?"(null)":with->GetName()));
+		this->owner->getName(), state, ((with==nullptr)?"(null)":with->getName()));
 
-	if (!owner->IsClient())
+	if (!owner->isClient())
 		return;
 
-	Client* trader = owner->CastToClient();
+	Client* trader = owner->castToClient();
 	for (uint16 i=3000; i<=3007; i++) {
 		const ItemInst* inst = trader->GetInv().GetItem(i);
 
@@ -334,11 +334,11 @@ void Client::ResetTrade() {
 
 void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer) {
 
-	if(tradingWith && tradingWith->IsClient()) {
-		Client* other = tradingWith->CastToClient();
+	if(tradingWith && tradingWith->isClient()) {
+		Client* other = tradingWith->castToClient();
 
 		if(other) {
-			mlog(TRADING__CLIENT, "Finishing trade with client %s", other->GetName());
+			mlog(TRADING__CLIENT, "Finishing trade with client %s", other->getName());
 
 			int16 slot_id;
 			const Item_Struct* item				= nullptr;
@@ -361,7 +361,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 
 				if(inst == nullptr) { continue; }
 
-				mlog(TRADING__CLIENT, "Giving %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, i, other->GetName());
+				mlog(TRADING__CLIENT, "Giving %s (%d) in slot %d to %s", inst->GetItem()->Name, inst->GetItem()->ID, i, other->getName());
 
 				/// Log Player Trades through QueryServ if Rule Enabled
 				if(QSPLT) {
@@ -437,7 +437,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 					}
 					else {
 						PushItemOnCursor(*inst, true);
-						mlog(TRADING__ERROR, "Unable to give item %d (%d) to %s, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
+						mlog(TRADING__ERROR, "Unable to give item %d (%d) to %s, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->getName());
 
 						if(QSPLT) {
 							qsaudit->items[parent_offset].to_id	= this->character_id;
@@ -504,7 +504,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			//Do not reset the trade here, done by the caller.
 		}
 	}
-	else if(tradingWith && tradingWith->IsNPC()) {
+	else if(tradingWith && tradingWith->isNPC()) {
 		QSPlayerLogHandin_Struct* qsaudit = nullptr;
 		bool QSPLH = false;
 
@@ -597,7 +597,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 							if (baginst) {
 								const Item_Struct* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsInstNoDrop() == false))) {
-									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist, 
+									tradingWith->castToNPC()->AddLootDrop(bagitem, &tradingWith->castToNPC()->itemlist, 
 										baginst->GetCharges(), 1, 127, true, true);
 								}
 								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
@@ -607,7 +607,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 						}
 					}
 	
-					tradingWith->CastToNPC()->AddLootDrop(item, &tradingWith->CastToNPC()->itemlist, 
+					tradingWith->castToNPC()->AddLootDrop(item, &tradingWith->castToNPC()->itemlist, 
 						inst->GetCharges(), 1, 127, true, true);
 				}
 				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
@@ -651,7 +651,7 @@ void Client::FinishTrade(Mob* tradingWith, ServerPacket* qspack, bool finalizer)
 			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
-		parse->EventNPC(EVENT_TRADE, tradingWith->CastToNPC(), this, "", 0, &item_list);
+		parse->EventNPC(EVENT_TRADE, tradingWith->castToNPC(), this, "", 0, &item_list);
 
 		for(int i = 0; i < 4; ++i) {
 			if(insts[i]) {
@@ -707,9 +707,9 @@ void Client::SendTraderPacket(Client* Trader, uint32 Unknown72)
 
 	bts->Code = BazaarTrader_StartTraderMode;
 
-	bts->ID = Trader->GetID();
+	bts->ID = Trader->getID();
 
-	strn0cpy(bts->Name, Trader->GetName(), sizeof(bts->Name));
+	strn0cpy(bts->Name, Trader->getName(), sizeof(bts->Name));
 
 	bts->Unknown072 = Unknown72;
 
@@ -728,7 +728,7 @@ void Client::Trader_CustomerBrowsing(Client *Customer) {
 
 	sis->Code = BazaarTrader_CustomerBrowsing;
 
-	sis->TraderID = Customer->GetID();
+	sis->TraderID = Customer->getID();
 
 	QueuePacket(outapp);
 }
@@ -744,7 +744,7 @@ void Client::Trader_StartTrader() {
 
 	sis->Code = BazaarTrader_StartTraderMode;
 
-	sis->TraderID = this->GetID();
+	sis->TraderID = this->getID();
 
 	QueuePacket(outapp);
 
@@ -760,9 +760,9 @@ void Client::Trader_StartTrader() {
 
 	bts->Code = 1;
 
-	bts->ID = this->GetID();
+	bts->ID = this->getID();
 
-	strn0cpy(bts->Name, GetName(), sizeof(bts->Name));
+	strn0cpy(bts->Name, getName(), sizeof(bts->Name));
 
 	entity_list.QueueClients(this, outapp, false);
 
@@ -784,7 +784,7 @@ void Client::Trader_EndTrader() {
 			TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
 
 			tdis->Unknown000 = 0;
-			tdis->TraderID = Customer->GetID();
+			tdis->TraderID = Customer->getID();
 			tdis->Unknown012 = 0;
 			Customer->Message(13, "The Trader is no longer open for business");
 
@@ -812,9 +812,9 @@ void Client::Trader_EndTrader() {
 
 	bts->Code = 0;
 
-	bts->ID = this->GetID();
+	bts->ID = this->getID();
 
-	strn0cpy(bts->Name, GetName(), sizeof(bts->Name));
+	strn0cpy(bts->Name, getName(), sizeof(bts->Name));
 
 	entity_list.QueueClients(this, outapp, false);
 
@@ -861,7 +861,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 		FreeSlotID = m_inv.FindFreeSlot(false, true, inst->GetItem()->Size, is_arrow);
 
 		PutItemInInventory(FreeSlotID, *inst);
-		Save();
+		save();
 
 		SendItemPacket(FreeSlotID, inst, ItemPacketTrade);
 
@@ -991,7 +991,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 		}
 	}
 	_log(TRADING__CLIENT, "Could NOT find a match for Item: %i with a quantity of: %i on Trader: %s\n",
-					SerialNumber , Quantity, this->GetName());
+					SerialNumber , Quantity, this->getName());
 
 	return 0;
 }
@@ -1009,7 +1009,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 		TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
 
 		tdis->Unknown000 = 0;
-		tdis->TraderID = Customer->GetID();
+		tdis->TraderID = Customer->getID();
 		tdis->ItemID = SerialNumber;
 		tdis->Unknown012 = 0;
 
@@ -1120,7 +1120,7 @@ void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* 
 		}
 	}
 	_log(TRADING__CLIENT, "Could NOT find a match for Item: %i with a quantity of: %i on Trader: %s\n",SerialNumber,
-					Quantity,this->GetName());
+					Quantity,this->getName());
 }
 
 void Client::ReturnTraderReq(const EQApplicationPacket* app, int16 TraderItemCharges){
@@ -1137,7 +1137,7 @@ void Client::ReturnTraderReq(const EQApplicationPacket* app, int16 TraderItemCha
 
 	outtbs->Quantity = TraderItemCharges;
 
-	outtbs->TraderID = this->GetID();
+	outtbs->TraderID = this->getID();
 
 	outtbs->AlreadySold = 0;
 
@@ -1231,7 +1231,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 		Trader->Message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
 		LogFile->write(EQEMuLog::Error, "Bazaar: Zero price transaction between %s and %s aborted."
 						"Item: %s, Charges: %i, TBS: Qty %i, Price: %i",
-						GetName(), Trader->GetName(),
+						getName(), Trader->getName(),
 						BuyItem->GetItem()->Name, BuyItem->GetCharges(), tbs->Quantity, tbs->Price);
 		TradeRequestFailed(app);
 		safe_delete(outapp);
@@ -1249,7 +1249,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 
 	ReturnTraderReq(app, outtbs->Quantity);
 
-	outtbs->TraderID = this->GetID();
+	outtbs->TraderID = this->getID();
 
 	outtbs->Action = BazaarBuyItem;
 
@@ -1302,7 +1302,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	_pkt(TRADING__PACKETS, outapp2);
 
 	if(RuleB(Bazaar, AuditTrail))
-		BazaarAuditTrail(Trader->GetName(), GetName(), BuyItem->GetItem()->Name, outtbs->Quantity, outtbs->Price, 0);
+		BazaarAuditTrail(Trader->getName(), getName(), BuyItem->GetItem()->Name, outtbs->Quantity, outtbs->Price, 0);
 
 	Trader->FindAndNukeTraderItem(tbs->ItemID, outtbs->Quantity, this, 0);
 
@@ -1604,7 +1604,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			VARSTRUCT_ENCODE_TYPE(int32, bufptr, SerialNumber);
 			Client* Trader2=entity_list.GetClientByCharID(atoi(Row[1]));
 			if(Trader2){
-				ID = Trader2->GetID();
+				ID = Trader2->getID();
 				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, ID);
 			}
 			else{
@@ -1630,7 +1630,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			// Extra fields for SoD+
 			//
 			if(Trader2)
-				sprintf(Name, "%s", Trader2->GetName());
+				sprintf(Name, "%s", Trader2->getName());
 			else
 				sprintf(Name, "Unknown");
 
@@ -1739,7 +1739,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		TraderDelItem_Struct* tdis = (TraderDelItem_Struct*)outapp->pBuffer;
 
 		tdis->Unknown000 = 0;
-		tdis->TraderID = Customer->GetID();
+		tdis->TraderID = Customer->getID();
 		tdis->Unknown012 = 0;
 		Customer->Message(13, "The Trader has withdrawn the %s from sale.", item->Name);
 
@@ -1760,7 +1760,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		return;
 	}
 
-	_log(TRADING__CLIENT, "Sending price updates to customer %s", Customer->GetName());
+	_log(TRADING__CLIENT, "Sending price updates to customer %s", Customer->getName());
 
 	ItemInst* inst = database.CreateItem(item);
 
@@ -1803,7 +1803,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 	TraderPriceUpdate_Struct* tpus = (TraderPriceUpdate_Struct*)app->pBuffer;
 
 	_log(TRADING__CLIENT, "Received Price Update for %s, Item Serial No. %i, New Price %i",
-					GetName(), tpus->SerialNumber, tpus->NewPrice);
+					getName(), tpus->SerialNumber, tpus->NewPrice);
 
 	// Pull the items this Trader currently has for sale from the trader table.
 	//
@@ -1933,7 +1933,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 				gis->ItemCost[i] = tpus->NewPrice;
 
 				_log(TRADING__CLIENT, "Adding new item for %s. ItemID %i, SerialNumber %i, Charges %i, Price: %i, Slot %i",
-							GetName(), newgis->Items[i], newgis->SerialNumber[i], newgis->Charges[i],
+							getName(), newgis->Items[i], newgis->SerialNumber[i], newgis->Charges[i],
 							tpus->NewPrice, i);
 			}
 		}
@@ -2075,9 +2075,9 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);			// Quantity
 			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);				// Unknown - probably a flag field
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);				// Price
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());		// Entity ID
+			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->getID());		// Entity ID
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);				// Flag for + Items , probably ItemCount
-			VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());		// Seller Name
+			VARSTRUCT_ENCODE_STRING(Buf, Buyer->getName());		// Seller Name
 
 			_pkt(TRADING__BARTER, outapp);
 
@@ -2107,7 +2107,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 		return;
 	}
 
-	bir->Approval = Buyer->WithCustomer(GetID());
+	bir->Approval = Buyer->WithCustomer(getID());
 
 	QueuePacket(app);
 
@@ -2119,7 +2119,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	const char *WelcomeMessagePointer = Buyer->GetBuyerWelcomeMessage();
 
 	if(strlen(WelcomeMessagePointer) > 0)
-		Message(10, "%s greets you, '%s'.", Buyer->GetName(), WelcomeMessagePointer);
+		Message(10, "%s greets you, '%s'.", Buyer->getName(), WelcomeMessagePointer);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, sizeof(BuyerBrowsing_Struct));
 
@@ -2128,7 +2128,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	// This packet produces the SoandSo is browsing your Buy Lines message
 	bb->Action = Barter_SellerBrowsing;
 
-	sprintf(bb->PlayerName, "%s", GetName());
+	sprintf(bb->PlayerName, "%s", getName());
 
 	Buyer->QueuePacket(outapp);
 
@@ -2178,9 +2178,9 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buf, 1);				// Flag
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
+			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->getID());
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-			VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
+			VARSTRUCT_ENCODE_STRING(Buf, Buyer->getName());
 
 			_pkt(TRADING__BARTER, outapp);
 			QueuePacket(outapp);
@@ -2241,14 +2241,14 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	if(!Buyer->HasMoney(Quantity * Price)) {
 		Message(13, "The Buyer does not have sufficient money to purchase that quantity of %s.", item->Name);
-		Buyer->Message(13, "%s tried to sell you %i %s, but you have insufficient funds.", GetName(), Quantity, item->Name);
+		Buyer->Message(13, "%s tried to sell you %i %s, but you have insufficient funds.", getName(), Quantity, item->Name);
 		return;
 	}
 
 	if(Buyer->CheckLoreConflict(item)) {
 		Message(13, "That item is LORE and the Buyer already has one.");
 		Buyer->Message(13, "%s tried to sell you %s but this item is LORE and you already have one.",
-					GetName(), item->Name);
+					getName(), item->Name);
 		return;
 	}
 
@@ -2403,7 +2403,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	AddMoneyToPP(Quantity * Price, false);
 
 	if(RuleB(Bazaar, AuditTrail))
-		BazaarAuditTrail(GetName(), Buyer->GetName(), ItemName, Quantity, Quantity * Price, 1);
+		BazaarAuditTrail(getName(), Buyer->getName(), ItemName, Quantity, Quantity * Price, 1);
 
 	// We now send a packet to the Seller, which causes it to display 'You have sold <Qty> <Item> to <Player> for <money>'
 	//
@@ -2427,7 +2427,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
 	}
 
-	sprintf(Buf, "%s", Buyer->GetName()); Buf += 64;
+	sprintf(Buf, "%s", Buyer->getName()); Buf += 64;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
 	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
@@ -2452,7 +2452,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
 	}
 
-	sprintf(Buf, "%s", GetName()); Buf += 64;
+	sprintf(Buf, "%s", getName()); Buf += 64;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x00);
 	VARSTRUCT_ENCODE_TYPE(uint8, Buf, 0x01);
@@ -2493,10 +2493,10 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	}
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
+	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->getID());
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
 
-	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
+	VARSTRUCT_ENCODE_STRING(Buf, Buyer->getName());
 
 	_pkt(TRADING__BARTER, outapp3);
 	QueuePacket(outapp3);
@@ -2528,7 +2528,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4); // Unknown
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-	VARSTRUCT_ENCODE_STRING(Buf, Buyer->GetName());
+	VARSTRUCT_ENCODE_STRING(Buf, Buyer->getName());
 
 	_pkt(TRADING__BARTER, outapp4);
 	Buyer->QueuePacket(outapp4);
@@ -2541,14 +2541,14 @@ void Client::SendBuyerPacket(Client* Buyer) {
 
 	// This is the Buyer Appearance packet. This method is called for each Buyer when a Client connects to the zone.
 	//
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 13 + strlen(GetName()));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 13 + strlen(getName()));
 
 	char* Buf = (char*)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerAppearance);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->GetID());
+	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Buyer->getID());
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x01);
-	VARSTRUCT_ENCODE_STRING(Buf, GetName());
+	VARSTRUCT_ENCODE_STRING(Buf, getName());
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2556,12 +2556,12 @@ void Client::SendBuyerPacket(Client* Buyer) {
 
 void Client::ToggleBuyerMode(bool TurnOn) {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 13 + strlen(GetName()));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, 13 + strlen(getName()));
 
 	char* Buf = (char*)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerAppearance);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buf, GetID());
+	VARSTRUCT_ENCODE_TYPE(uint32, Buf, getID());
 
 	if(TurnOn) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x01);
@@ -2572,7 +2572,7 @@ void Client::ToggleBuyerMode(bool TurnOn) {
 		CustomerID = 0;
 	}
 
-	VARSTRUCT_ENCODE_STRING(Buf, GetName());
+	VARSTRUCT_ENCODE_STRING(Buf, getName());
 
 	entity_list.QueueClients(this, outapp, false);
 
@@ -2612,7 +2612,7 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 	bool LoreConflict = CheckLoreConflict(item);
 
 	_log(TRADING__BARTER, "UpdateBuyLine: Char: %s BuySlot: %i ItemID %i %s Quantity %i Toggle: %i Price %i ItemCount %i LoreConflict %i",
-					GetName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
+					getName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
 
 	if((item->NoDrop != 0) && !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) && ToggleOnOff && (ItemCount == 0)) {
 		_log(TRADING__BARTER, "Adding to database");
@@ -2653,7 +2653,7 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, Price);
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0x08f4);			// Unknown
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);
-		VARSTRUCT_ENCODE_STRING(Buf, GetName());
+		VARSTRUCT_ENCODE_STRING(Buf, getName());
 
 		_pkt(TRADING__BARTER, outapp);
 		QueuePacket(outapp);

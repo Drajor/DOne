@@ -1454,7 +1454,7 @@ void GuildApproval::approvedMembers(Client* pRequestee)
 	for (int i = 0; i < tmp; i++)
 	{
 		if (mMembers[i])
-			pRequestee->Message(0, "%i: %s", i, mMembers[i]->GetName());
+			pRequestee->Message(0, "%i: %s", i, mMembers[i]->getName());
 	}
 }
 
@@ -1474,28 +1474,28 @@ void GuildApproval::guildApproved()
 	{
 		if (mMembers[i])
 		{
-			mOwner->Message(0, "%s", mMembers[i]->GetName());
+			mOwner->Message(0, "%s", mMembers[i]->getName());
 			mOwner->Message(0, "%i", mMembers[i]->CharacterID());
 			guild_mgr.setGuild(mMembers[i]->CharacterID(), tmpeq, 0);
 			size_t len = MBUFFER - strlen(gmembers) + 1;
 			strncat(gmembers, " ", len);
-			strncat(gmembers, mMembers[i]->GetName(), len);
+			strncat(gmembers, mMembers[i]->getName(), len);
 		}
 	}
 	size_t len = PBUFFER - strlen(petitext) + 1;
 	strncat(petitext, mGuild, len);
 	strncat(petitext, " Leader: ", len);
-	strncat(petitext, mOwner->CastToClient()->GetName(), len);
+	strncat(petitext, mOwner->castToClient()->getName(), len);
 	strncat(petitext, " Members:", len);
 	strncat(petitext, gmembers, len);
-	Petition* pet = new Petition(mOwner->CastToClient()->CharacterID());
-	pet->SetAName(mOwner->CastToClient()->AccountName());
-	pet->SetClass(mOwner->CastToClient()->GetClass());
-	pet->SetLevel(mOwner->CastToClient()->GetLevel());
-	pet->SetCName(mOwner->CastToClient()->GetName());
-	pet->SetRace(mOwner->CastToClient()->GetRace());
+	Petition* pet = new Petition(mOwner->castToClient()->CharacterID());
+	pet->SetAName(mOwner->castToClient()->AccountName());
+	pet->SetClass(mOwner->castToClient()->GetClass());
+	pet->SetLevel(mOwner->castToClient()->GetLevel());
+	pet->SetCName(mOwner->castToClient()->getName());
+	pet->SetRace(mOwner->castToClient()->GetRace());
 	pet->SetLastGM("");
-	pet->SetCName(mOwner->CastToClient()->GetName()); //aza77 is this really 2 times needed ??
+	pet->SetCName(mOwner->castToClient()->getName()); //aza77 is this really 2 times needed ??
 	pet->SetPetitionText(petitext);
 	pet->SetZone(zone->GetZoneID());
 	pet->SetUrgency(0);
@@ -1503,7 +1503,7 @@ void GuildApproval::guildApproved()
 	database.InsertPetitionToDB(pet);
 	petition_list.UpdateGMQueue();
 	petition_list.UpdateZoneListQueue();
-	worldserver.SendEmoteMessage(0, 0, 80, 15, "%s has made a petition. #%i", mOwner->CastToClient()->GetName(), pet->GetID());
+	worldserver.SendEmoteMessage(0, 0, 80, 15, "%s has made a petition. #%i", mOwner->castToClient()->getName(), pet->GetID());
 	ServerPacket* pack = new ServerPacket;
 	pack->opcode = ServerOP_RefreshGuild;
 	pack->size = tmp;

@@ -281,7 +281,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 
 		auto arg_function = NPCArgumentDispatch[evt];
 		arg_function(this, L, npc, init, data, extra_data, extra_pointers);
-		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
+		Client *c = (init && init->isClient()) ? init->castToClient() : nullptr;
 		
 		quest_manager.StartQuest(npc, c, nullptr);
 		if(lua_pcall(L, 1, 1, 0)) {

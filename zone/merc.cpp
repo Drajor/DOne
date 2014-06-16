@@ -75,7 +75,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 Merc::~Merc() {
 	AI_Stop();
-	entity_list.RemoveMerc(this->GetID());
+	entity_list.RemoveMerc(this->getID());
 	UninitializeBuffSlots();
 }
 
@@ -967,7 +967,7 @@ int32 Merc::CalcMaxMana()
 	}
 
 #if EQDEBUG >= 11
-	LogFile->write(EQEMuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	LogFile->write(EQEMuLog::Debug, "Merc::CalcMaxMana() called for %s - returning %d", getName(), max_mana);
 #endif
 	return max_mana;
 }
@@ -1353,7 +1353,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	}
 }
 
-bool Merc::Process()
+bool Merc::process()
 {
 	if(IsStunned() && stunned_timer.Check())
 	{
@@ -1378,7 +1378,7 @@ bool Merc::Process()
 	}
 
 	if (HasGroup() && GetFollowID() == 0) {
-		SetFollowID(GetMercOwner()->GetID());
+		SetFollowID(GetMercOwner()->getID());
 	}
 
 
@@ -1476,7 +1476,7 @@ void Merc::AI_Process() {
 		return;
 
 	try {
-		if(MercOwner->CastToClient()->IsDead()) {
+		if(MercOwner->castToClient()->IsDead()) {
 			SetTarget(0);
 			SetOwnerID(0);
 			return;
@@ -2049,7 +2049,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 		SendPosition();
 		SetMoving(false);
 
-		result = CastSpell(spellid, tar->GetID(), 1, -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0);
+		result = CastSpell(spellid, tar->getID(), 1, -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0);
 
 		if(IsCasting() && IsSitting())
 			Stand();
@@ -2257,7 +2257,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 								if(selectedMercSpell.spellid > 0) {
 									if(isDiscipline) {
-										castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+										castedSpell = UseDiscipline(selectedMercSpell.spellid, getID());
 									}
 									else {
 										castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1, &TempDontBuffMeBeforeTime);
@@ -2284,7 +2284,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 										if(selectedMercSpell.spellid > 0) {
 											if(isDiscipline) {
-												castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetID());
+												castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->getID());
 											}
 											else {
 												castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar, -1, &TempDontBuffMeBeforeTime);
@@ -2311,7 +2311,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 											if(selectedMercSpell.spellid > 0) {
 												if(isDiscipline) {
-													castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetPet()->GetID());
+													castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetPet()->getID());
 												}
 												else {
 													castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar->GetPet(), -1, &TempDontBuffMeBeforeTime);
@@ -2383,7 +2383,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 					if(selectedMercSpell.spellid > 0) {
 						if(isDiscipline) {
-							castedSpell = UseDiscipline(selectedMercSpell.spellid, GetTarget()->GetID());
+							castedSpell = UseDiscipline(selectedMercSpell.spellid, GetTarget()->getID());
 						}
 						else {
 							castedSpell = AIDoSpellCast(selectedMercSpell.spellid, GetTarget(), -1);
@@ -2416,7 +2416,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 
 							if(selectedMercSpell.spellid > 0) {
 								if(isDiscipline) {
-									castedSpell = UseDiscipline(selectedMercSpell.spellid, GetID());
+									castedSpell = UseDiscipline(selectedMercSpell.spellid, getID());
 								}
 								else {
 									castedSpell = AIDoSpellCast(selectedMercSpell.spellid, this, -1);
@@ -2505,7 +2505,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 								break;
 
 							if(isDiscipline) {
-								castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->GetID());
+								castedSpell = UseDiscipline(selectedMercSpell.spellid, tar->getID());
 							}
 							else {
 								castedSpell = AIDoSpellCast(selectedMercSpell.spellid, tar, -1);
@@ -2530,7 +2530,7 @@ void Merc::CheckHateList() {
 			Group* g = GetGroup();
 			if(g) {
 				Mob* MercOwner = GetOwner();
-				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->IsNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->CastToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
+				if(MercOwner && MercOwner->GetTarget() && MercOwner->GetTarget()->isNPC() && (MercOwner->GetTarget()->GetHateAmount(MercOwner) || MercOwner->castToClient()->AutoAttackEnabled()) && IsAttackAllowed(MercOwner->GetTarget())) {
 						float range = g->hasRole(MercOwner, RolePuller) ? RuleI(Mercs, AggroRadiusPuller) : RuleI(Mercs, AggroRadius);
 						range = range * range;
 						if(MercOwner->GetTarget()->DistNoRootNoZ(*this) < range) {
@@ -2825,7 +2825,7 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value = (value * GetSpellScale() / 100);	
 				
 			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
-					OTHER_CRIT_BLAST, GetName(), itoa(-value));
+					OTHER_CRIT_BLAST, getName(), itoa(-value));
 
 			return value;
 		}
@@ -2896,7 +2896,7 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += value*target->GetHealRate(spell_id, this)/100; 
 
 		if (Critical)
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", GetName(), value);
+			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", getName(), value);
 
 		return value;
 	}
@@ -4189,7 +4189,7 @@ void Merc::MercGroupSay(Mob *speaker, const char *msg, ...)
 		Group *g = speaker->GetGroup();
 
 		if(g)
-			g->groupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->groupMessage(speaker->castToMOB(), 0, 100, buf);
 	}
 }
 
@@ -4382,8 +4382,8 @@ Corpse* Merc::GetGroupMemberCorpse() {
 
 		if(g) {
 			for(int i = 0; i < g->groupCount(); i++) {
-				if(g->mMembers[i] && g->mMembers[i]->IsClient()) {
-					corpse = entity_list.GetCorpseByOwnerWithinRange(g->mMembers[i]->CastToClient(), this, RuleI(Mercs, ResurrectRadius));
+				if(g->mMembers[i] && g->mMembers[i]->isClient()) {
+					corpse = entity_list.GetCorpseByOwnerWithinRange(g->mMembers[i]->castToClient(), this, RuleI(Mercs, ResurrectRadius));
 
 					if(corpse && !corpse->isResurrected()) {
 						return corpse;
@@ -4407,7 +4407,7 @@ bool Merc::TryHide() {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa_out->spawn_id = GetID();
+	sa_out->spawn_id = getID();
 	sa_out->type = 0x03;
 	sa_out->parameter = 1;
 	entity_list.QueueClients(this, outapp, true);
@@ -4705,7 +4705,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 
 void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
 {
-	if(IsDead() || IsCorpse())
+	if(IsDead() || isCorpse())
 		return;
 
 	if(spell_id==0)
@@ -4749,19 +4749,19 @@ bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attac
 	if(!NPC::Death(killerMob, damage, spell, attack_skill))
 		return false;
 
-	Save();
+	save();
 
 	Mob *give_exp = hate_list.getHighestDamage(this);
 	Client *give_exp_client = nullptr;
 
-	if(give_exp && give_exp->IsClient())
-		give_exp_client = give_exp->CastToClient();
+	if(give_exp && give_exp->isClient())
+		give_exp_client = give_exp->castToClient();
 
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 
 	//no corpse, no exp if we're a merc. We'll suspend instead, since that's what live does. I'm not actually sure live supports 'depopping' merc corpses.
-	if(entity_list.GetCorpseByID(GetID()))
-		entity_list.GetCorpseByID(GetID())->Depop();
+	if(entity_list.GetCorpseByID(getID()))
+		entity_list.GetCorpseByID(getID())->depop();
 
 	return true;
 }
@@ -4771,9 +4771,9 @@ Client* Merc::GetMercOwner() {
 
 	if(GetOwner())
 	{
-		if(GetOwner()->IsClient())
+		if(GetOwner()->isClient())
 		{
-			mercOwner = GetOwner()->CastToClient();
+			mercOwner = GetOwner()->castToClient();
 		}
 	}
 
@@ -4789,7 +4789,7 @@ Mob* Merc::GetOwner() {
 		this->SetOwnerID(0);
 	}
 
-	return Result->CastToMob();
+	return Result->castToMOB();
 }
 
 const char* Merc::GetRandomName(){
@@ -4949,7 +4949,7 @@ bool Merc::LoadMercSpells() {
 	return true;
 }
 
-bool Merc::Save() {
+bool Merc::save() {
 	bool Result = false;
 	if(database.SaveMerc(this)){
 		Result = true;
@@ -4994,7 +4994,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				gender = c->GetMercInfo().Gender;
 			}
 
-			sprintf(npc_type->lastname, "%s's %s", c->GetName(), "Mercenary");
+			sprintf(npc_type->lastname, "%s's %s", c->getName(), "Mercenary");
 			npc_type->gender = gender;
 			npc_type->loottable_id = 0; // Loottable has to be 0, otherwise we'll be leavin' some corpses!
 			npc_type->npc_id = 0; //NPC ID has to be 0, otherwise db gets all confuzzled.
@@ -5453,7 +5453,7 @@ void Client::SpawnMercOnZone()
 				Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 				if(merc) {
 					SpawnMerc(merc, false);
-					SendMercTimerPacket(merc->GetID(), 5, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
+					SendMercTimerPacket(merc->getID(), 5, GetMercInfo().SuspendedTime, GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
 				}
 			}
 		}
@@ -5500,12 +5500,12 @@ bool Merc::Suspend() {
 	mercOwner->GetMercInfo().SuspendedTime = time(nullptr) + RuleI(Mercs, SuspendIntervalS);
 	mercOwner->GetMercInfo().MercTimerRemaining = mercOwner->GetMercTimer()->GetRemainingTime();
 	mercOwner->GetMercInfo().Stance = GetStance();
-	Save();
+	save();
 	mercOwner->GetMercTimer()->Disable();
 
 	mercOwner->SendMercSuspendResponsePacket(mercOwner->GetMercInfo().SuspendedTime);
 
-	Depop();
+	depop();
 
 	mercOwner->SendMercTimerPacket(0, 1, mercOwner->GetMercInfo().SuspendedTime, mercOwner->GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
 	return true;
@@ -5522,7 +5522,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 	if(!mercOwner)
 		return false;
 
-	if(GetID()) {
+	if(getID()) {
 		uint32 mercState = 5;
 		uint32 suspendedTime = 0;
 
@@ -5536,7 +5536,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		mercOwner->GetMercInfo().SuspendedTime = 0;
 		mercOwner->GetMercTimer()->Start(RuleI(Mercs, UpkeepIntervalMS));
 		mercOwner->GetMercTimer()->SetTimer(mercOwner->GetMercInfo().MercTimerRemaining);
-		mercOwner->SendMercTimerPacket(GetID(), mercState, suspendedTime, mercOwner->GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
+		mercOwner->SendMercTimerPacket(getID(), mercState, suspendedTime, mercOwner->GetMercInfo().MercTimerRemaining, RuleI(Mercs, SuspendIntervalMS));
 		if(!mercOwner->GetPTimers().Expired(&database, pTimerMercSuspend, false))
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
@@ -5562,9 +5562,9 @@ bool Merc::Unsuspend(bool setMaxStats) {
 
 			if(AddMercToGroup(this, g)) {
 				entity_list.AddGroup(g, g->GetID());
-				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
-				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
-				database.SetGroupID(this->GetName(), g->GetID(), mercOwner->CharacterID(), true);
+				database.SetGroupLeaderName(g->GetID(), mercOwner->getName());
+				database.SetGroupID(mercOwner->getName(), g->GetID(), mercOwner->CharacterID());
+				database.SetGroupID(this->getName(), g->GetID(), mercOwner->CharacterID(), true);
 				database.RefreshGroupFromDB(mercOwner);
 				g->saveGroupLeaderAA();
 				loaded = true;
@@ -5574,7 +5574,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			}
 		}	//else, somebody from our group is already here...
 		else if (AddMercToGroup(this, mercOwner->GetGroup())) {
-			database.SetGroupID(GetName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);
+			database.SetGroupID(getName(), mercOwner->GetGroup()->GetID(), mercOwner->CharacterID(), true);
 			database.RefreshGroupFromDB(mercOwner);
 
 			loaded = true;
@@ -5616,33 +5616,33 @@ bool Merc::Dismiss(){
 
 	database.DeleteMerc(GetMercID());
 
-	Depop();
+	depop();
 
 	return true;
 }
 
 void Merc::Zone() {
-	Save();
-	Depop();
+	save();
+	depop();
 }
 
-void Merc::Depop() {
+void Merc::depop() {
 	WipeHateList();
-	entity_list.RemoveMerc(this->GetID());
+	entity_list.RemoveMerc(this->getID());
 	entity_list.RemoveFromHateLists(this);
 
 	if(HasGroup())
 		Merc::RemoveMercFromGroup(this, GetGroup());
 
 	if(HasPet()) {
-		GetPet()->Depop();
+		GetPet()->depop();
 	}
 
 	SetOwnerID(0);
 
 	p_depop = true;
 
-	NPC::Depop(false);
+	NPC::depop(false);
 }
 
 bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
@@ -5655,7 +5655,7 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 
 				if(group->delMember(merc)) {
 					if(merc->GetMercCharacterID() != 0)
-						database.SetGroupID(merc->GetName(), 0, merc->GetMercCharacterID(), true);
+						database.SetGroupID(merc->getName(), 0, merc->GetMercCharacterID(), true);
 				}
 
 				if(group->groupCount() <= 1 && ZoneLoaded)
@@ -5668,10 +5668,10 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 					if(!group->mMembers[i])
 						continue;
 
-					if(!group->mMembers[i]->IsMerc())
+					if(!group->mMembers[i]->isMerc())
 						continue;
 
-					Merc* groupmerc = group->mMembers[i]->CastToMerc();
+					Merc* groupmerc = group->mMembers[i]->castToMerc();
 
 					groupmerc->SetOwnerID(0);
 				}
@@ -5697,7 +5697,7 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
 		if(group->addMember(merc) && merc->GetMercOwner() != nullptr) {
-				merc->SetFollowID(merc->GetMercOwner()->GetID());
+				merc->SetFollowID(merc->GetMercOwner()->getID());
 				Result = true;
 		}
 		else {
@@ -5725,7 +5725,7 @@ Merc* Client::GetMerc() {
 		return(nullptr);
 	}
 
-	if(tmp->GetOwnerID() != GetID()) {
+	if(tmp->GetOwnerID() != getID()) {
 		SetMercID(0);
 		return(nullptr);
 	}
@@ -5777,10 +5777,10 @@ void Client::SetMerc(Merc* newmerc) {
 		memset(GetMercInfo().merc_name, 0, 64);
 		memset(GetEPP().merc_name, 0, 64);
 	} else {
-		SetMercID(newmerc->GetID());
+		SetMercID(newmerc->getID());
 		//newmerc->SetMercEntityID(newmerc->GetID());
 		//Client* oldowner = entity_list.GetClientByID(newmerc->GetOwnerID());
-		newmerc->SetOwnerID(this->GetID());
+		newmerc->SetOwnerID(this->getID());
 		newmerc->SetMercCharacterID(this->CharacterID());
 		newmerc->SetClientVersion((uint8)this->GetClientVersion());
 		GetMercInfo().mercid = newmerc->GetMercID();

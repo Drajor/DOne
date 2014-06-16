@@ -99,7 +99,7 @@ public:
 
 	// Destructor
 	~Object();
-	bool Process();
+	bool process();
 	bool IsGroundSpawn() { return m_ground_spawn; }
 	// Event handlers
 	bool HandleClick(Client* sender, const ClickObject_Struct* click_object);
@@ -114,7 +114,7 @@ public:
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);
 	void CreateDeSpawnPacket(EQApplicationPacket* app);
-	void Depop();
+	void depop();
 	void Repop();
 
 	//Decay functions
@@ -126,10 +126,10 @@ public:
 	ItemInst* PopItem(uint8 index); // Pop item out of container
 
 	// Override base class implementations
-	virtual bool IsObject()	const { return true; }
-	virtual bool Save();
+	virtual bool isObject()	const { return true; }
+	virtual bool save();
 	virtual uint16 VarSave();
-	virtual void SetID(uint16 set_id);
+	virtual void setID(uint16 set_id);
 
 	void ClearUser() { user = nullptr; }
 

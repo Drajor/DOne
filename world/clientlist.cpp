@@ -53,7 +53,7 @@ void ClientList::Process() {
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
-		if (!iterator.GetData()->Process()) {
+		if (!iterator.GetData()->process()) {
 			struct in_addr in;
 			in.s_addr = iterator.GetData()->GetIP();
 			_log(WORLD__CLIENTLIST,"Removing client from %s:%d", inet_ntoa(in), iterator.GetData()->GetPort());

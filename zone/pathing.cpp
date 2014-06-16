@@ -681,7 +681,7 @@ Map::Vertex Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &
 
 		if((PathingLoopCount > 5) && !IsRooted())
 		{
-			mlog(PATHING__DEBUG, "appears to be stuck. Teleporting them to next position.", GetName());
+			mlog(PATHING__DEBUG, "appears to be stuck. Teleporting them to next position.", getName());
 
 			if(Route.size() == 0)
 			{
@@ -1292,7 +1292,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 			if(d && !d->IsDoorOpen() )
 			{
-				_log(PATHING__DEBUG, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->GetName());
+				_log(PATHING__DEBUG, "Opening door %i for %s", PathNodes[Node1].Neighbours[i].DoorID, ForWho->getName());
 
 				d->ForceOpen(ForWho);
 			}

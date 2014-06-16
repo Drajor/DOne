@@ -139,7 +139,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 				drop_chance = MakeRandomFloat(0.0, 100.0);
 
 #if EQDEBUG>=11
-			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->GetName(), thischance, drop_chance);
+			LogFile->write(EQEMuLog::Debug, "Drop chance for npc: %s, this chance:%f, drop roll:%f", npc->getName(), thischance, drop_chance);
 #endif
 			if (thischance == 100.0 || drop_chance < thischance)
 			{
@@ -181,7 +181,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 	ServerLootItem_Struct* item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
-		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
+		LogFile->write(EQEMuLog::Debug, "Adding drop to npc: %s, Item: %i", getName(), item2->ID);
 #endif
 
 	EQApplicationPacket* outapp = nullptr;
@@ -189,7 +189,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	if(wearchange) {
 		outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 		wc = (WearChange_Struct*)outapp->pBuffer;
-		wc->spawn_id = GetID();
+		wc->spawn_id = getID();
 		wc->material=0;
 	}
 
@@ -276,7 +276,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 
 		if (foundslot == SLOT_PRIMARY) {
 			if (item2->Proc.Effect != 0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
+				castToMOB()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = MaterialPrimary;
 		}
@@ -286,7 +286,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			item2->ItemType == ItemType1HPiercing))
 		{
 			if (item2->Proc.Effect!=0)
-				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
+				castToMOB()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = MaterialSecondary;
 		}

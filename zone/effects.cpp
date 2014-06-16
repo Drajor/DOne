@@ -153,7 +153,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
-					OTHER_CRIT_BLAST, GetName(), itoa(-value));
+					OTHER_CRIT_BLAST, getName(), itoa(-value));
 			Message_StringID(MT_SpellCrits, YOU_CRIT_BLAST, itoa(-value));
 
 			return value;
@@ -343,7 +343,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		if (Critical) {
 			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
-					OTHER_CRIT_HEAL, GetName(), itoa(value));
+					OTHER_CRIT_HEAL, getName(), itoa(value));
 			Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
 		}
 
@@ -685,7 +685,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(spell.recast_time > 0)
 	{
 		uint32 reduced_recast = spell.recast_time / 1000;
-		reduced_recast -= CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
+		reduced_recast -= castToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
 		if(reduced_recast < 0)
 			reduced_recast = 0;
 
@@ -742,14 +742,14 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	float dist2 = dist * dist;
 
 	bool bad = IsDetrimentalSpell(spell_id);
-	bool isnpc = caster->IsNPC();
+	bool isnpc = caster->isNPC();
 	const int MAX_TARGETS_ALLOWED = 4;
 	int iCounter = 0;
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		curmob = it->second;
 		// test to fix possible cause of random zone crashes..external methods accessing client properties before they're initialized
-		if (curmob->IsClient() && !curmob->CastToClient()->ClientFinishedLoading())
+		if (curmob->isClient() && !curmob->castToClient()->ClientFinishedLoading())
 			continue;
 		if (curmob == center)	//do not affect center
 			continue;
@@ -757,7 +757,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
 			continue;
-		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->isNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
 			if (bad) {
 				//affect mobs that are on our hate list, or
@@ -819,10 +819,10 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 			continue;
 
 		//Only npcs mgb should hit are client pets...
-		if (curmob->IsNPC()) {
+		if (curmob->isNPC()) {
 			Mob *owner = curmob->GetOwner();
 			if (owner) {
-				if (!owner->IsClient()) {
+				if (!owner->isClient()) {
 					continue;
 				}
 			} else {
@@ -849,7 +849,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 	float dist2 = dist * dist;
 
 	bool bad = IsDetrimentalSpell(spell_id);
-	bool isnpc = caster->IsNPC();
+	bool isnpc = caster->isNPC();
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		curmob = it->second;
@@ -859,7 +859,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			continue;
 		if (center->DistNoRoot(*curmob) > dist2)	//make sure they are in range
 			continue;
-		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->isNPC()) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
 			if (bad) {
 				//affect mobs that are on our hate list, or
@@ -887,8 +887,8 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 		//if we get here... cast the spell.
 		curmob->BardPulse(spell_id, caster);
 	}
-	if (caster->IsClient())
-		caster->CastToClient()->CheckSongSkillIncrease(spell_id);
+	if (caster->isClient())
+		caster->castToClient()->CheckSongSkillIncrease(spell_id);
 }
 
 //Dook- Rampage and stuff for clients.
@@ -903,7 +903,7 @@ void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool I
 
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		curmob = it->second;
-		if (curmob->IsNPC()
+		if (curmob->isNPC()
 				&& curmob != attacker //this is not needed unless NPCs can use this
 				&&(attacker->IsAttackAllowed(curmob))
 				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */

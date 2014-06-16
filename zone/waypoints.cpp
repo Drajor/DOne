@@ -88,7 +88,7 @@ void NPC::DisplayWaypointInfo(Client *c) {
 void NPC::StopWandering()
 {	// stops a mob from wandering, takes him off grid and sends him back to spawn point
 	roamer=false;
-	CastToNPC()->SetGrid(0);
+	castToNPC()->SetGrid(0);
 	SendPosition();
 	mlog(QUESTS__PATHING, "Stop Wandering requested.");
 	return;
@@ -96,7 +96,7 @@ void NPC::StopWandering()
 
 void NPC::ResumeWandering()
 {	// causes wandering to continue - overrides waypoint pause timer and PauseWandering()
-	if(!IsNPC())
+	if(!isNPC())
 		return;
 	if (GetGrid() != 0)
 	{
@@ -163,7 +163,7 @@ void NPC::PauseWandering(int pausetime)
 
 void NPC::MoveTo(float mtx, float mty, float mtz, float mth, bool saveguardspot)
 {	// makes mob walk to specified location
-	if (IsNPC() && GetGrid() != 0)
+	if (isNPC() && GetGrid() != 0)
 	{	// he is on a grid
 		if (GetGrid() < 0)
 		{	// currently stopped by a quest command
@@ -510,7 +510,7 @@ float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 }
 
 bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool checkZ) {
-	if(GetID()==0)
+	if(getID()==0)
 		return true;
 
 	if ((x_pos-x == 0) && (y_pos-y == 0)) {//spawn is at target coords
@@ -526,8 +526,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	{
 		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
-		if(IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		if(isNPC()) {
+			entity_list.ProcessMove(castToNPC(), x, y, z);
 		}
 
 		x_pos = x;
@@ -542,8 +542,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		float new_x = x_pos + tar_vx*tar_vector;
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
-		if(IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		if(isNPC()) {
+			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -554,8 +554,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 		uint8 NPCFlyMode = 0;
 
-		if(IsNPC()) {
-			if(CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
+		if(isNPC()) {
+			if(castToNPC()->GetFlyMode() == 1 || castToNPC()->GetFlyMode() == 2)
 				NPCFlyMode = 1;
 		}
 
@@ -638,8 +638,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			float new_x = x_pos + tar_vx;
 			float new_y = y_pos + tar_vy;
 			float new_z = z_pos + tar_vz;
-			if(IsNPC()) {
-				entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+			if(isNPC()) {
+				entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
 			}
 
 			x_pos = new_x;
@@ -651,8 +651,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		}
 		else
 		{
-			if(IsNPC()) {
-				entity_list.ProcessMove(CastToNPC(), x, y, z);
+			if(isNPC()) {
+				entity_list.ProcessMove(castToNPC(), x, y, z);
 			}
 
 			x_pos = x;
@@ -670,8 +670,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		float new_x = x_pos + tar_vx*tar_vector;
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
-		if(IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		if(isNPC()) {
+			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -683,8 +683,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 
 	uint8 NPCFlyMode = 0;
 
-	if(IsNPC()) {
-		if(CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
+	if(isNPC()) {
+		if(castToNPC()->GetFlyMode() == 1 || castToNPC()->GetFlyMode() == 2)
 			NPCFlyMode = 1;
 	}
 
@@ -723,7 +723,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 	delta_z=z_pos-nz;
 	delta_heading=0;
 
-	if (IsClient())
+	if (isClient())
 		SendPosUpdate(1);
 	else
 		SendPosUpdate();
@@ -734,7 +734,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 }
 
 bool Mob::CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ) {
-	if(IsNPC() || IsClient() || IsPet()) {
+	if(isNPC() || isClient() || IsPet()) {
 		pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 		speed *= NPC_SPEED_MULTIPLIER;
 	}
@@ -743,7 +743,7 @@ bool Mob::CalculateNewPosition2(float x, float y, float z, float speed, bool che
 }
 
 bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool checkZ) {
-	if(GetID()==0)
+	if(getID()==0)
 		return true;
 
 	float nx = x_pos;
@@ -783,8 +783,8 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 	heading = CalculateHeadingToTarget(x, y);
 
 	if (tar_vector >= 1.0) {
-		if(IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
+		if(isNPC()) {
+			entity_list.ProcessMove(castToNPC(), x, y, z);
 		}
 
 		x_pos = x;
@@ -796,8 +796,8 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		float new_x = x_pos + tar_vx*tar_vector;
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
-		if(IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+		if(isNPC()) {
+			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -808,8 +808,8 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 	uint8 NPCFlyMode = 0;
 
-	if(IsNPC()) {
-		if(CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
+	if(isNPC()) {
+		if(castToNPC()->GetFlyMode() == 1 || castToNPC()->GetFlyMode() == 2)
 			NPCFlyMode = 1;
 	}
 
@@ -865,7 +865,7 @@ void NPC::AssignWaypoints(int32 grid) {
 
 	if(grid < 0) {
 		// Allow setting negative grid values for pausing pathing
-		this->CastToNPC()->SetGrid(grid);
+		this->castToNPC()->SetGrid(grid);
 		return;
 	}
 
@@ -904,7 +904,7 @@ void NPC::AssignWaypoints(int32 grid) {
 
 	if(!GridErr)
 	{
-		this->CastToNPC()->SetGrid(grid);	// Assign grid number
+		this->castToNPC()->SetGrid(grid);	// Assign grid number
 
 		// Retrieve all waypoints for this grid
 		if(database.RunQuery(query,MakeAnyLenString(&query,"SELECT `x`,`y`,`z`,`pause`,`heading` FROM grid_entries WHERE `gridid`=%i AND `zoneid`=%i ORDER BY `number`",grid,zone->GetZoneID()),errbuf,&result))
@@ -963,8 +963,8 @@ void NPC::AssignWaypoints(int32 grid) {
 }
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
+	if(isNPC()) {
+		entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
 	}
 
 	x_pos = new_x;
@@ -997,8 +997,8 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 }
 
 void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
-	if(IsNPC()) {
-		entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z + 0.1);
+	if(isNPC()) {
+		entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z + 0.1);
 	}
 
 	x_pos = new_x;

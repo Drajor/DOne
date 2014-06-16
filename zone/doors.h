@@ -15,9 +15,9 @@ public:
 	Doors(const Door* door);
 	Doors(const char *dmodel, float dx, float dy, float dz, float dheading, uint8 dopentype = 58, uint16 dsize = 100);
 	~Doors();
-	bool	IsDoor() const { return true; }
+	bool	isDoor() const { return true; }
 	void	HandleClick(Client* sender, uint8 trigger);
-	bool	Process();
+	bool	process();
 	uint8	GetDoorID() { return door_id; }
 	uint32	GetDoorDBID() { return db_id; }
 	uint32	GetGuildID() { return guild_id; }

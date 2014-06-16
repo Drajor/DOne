@@ -39,8 +39,8 @@ class Trap: public Entity
 public:
 	Trap();
 	virtual ~Trap();
-	virtual bool Process();
-	virtual bool IsTrap() const { return true; }
+	virtual bool process();
+	virtual bool isTrap() const { return true; }
 	void	Trigger(Mob* trigger);
 
 	void	SpellOnTarget(Mob* trigger, uint32 spell_id);

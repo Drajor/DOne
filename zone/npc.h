@@ -95,9 +95,9 @@ public:
 	virtual Raid* GetRaid() { return 0; }
 	virtual Group* GetGroup() { return 0; }
 
-	virtual bool IsNPC() const { return true; }
+	virtual bool isNPC() const { return true; }
 
-	virtual bool Process();
+	virtual bool process();
 	virtual void	AI_Init();
 	virtual void	AI_Start(uint32 iMoveDelay = 0);
 	virtual void	AI_Stop();
@@ -223,7 +223,7 @@ public:
 	inline void	MerchantOpenShop() { merchant_open = true; }
 	inline void	MerchantCloseShop() { merchant_open = false; }
 	inline bool	IsMerchantOpen() { return merchant_open; }
-	void	Depop(bool StartSpawnTimer = false);
+	void	depop(bool StartSpawnTimer = false);
 	void	Stun(int duration);
 	void	UnStun();
 	uint32	GetSwarmOwner();

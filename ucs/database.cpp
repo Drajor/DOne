@@ -112,7 +112,7 @@ void Database::GetAccountStatus(Client *c) {
 	if (!RunQuery(query,MakeAnyLenString(&query, "select `status`, `hideme`, `karma`, `revoked` from `account` where `id`='%i' limit 1",
 						c->GetAccountID()),errbuf,&result)){
 
-		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", c->GetName().c_str(), errbuf);
+		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", c->getName().c_str(), errbuf);
 
 		safe_delete_array(query);
 
@@ -135,7 +135,7 @@ void Database::GetAccountStatus(Client *c) {
 	c->SetKarma(atoi(row[2]));
 	c->SetRevoked((atoi(row[3])==1?true:false));
 
-	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", c->GetAccountStatus(), c->GetHideMe(), c->GetKarma(), c->GetName().c_str());
+	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", c->GetAccountStatus(), c->GetHideMe(), c->GetKarma(), c->getName().c_str());
 	mysql_free_result(result);
 }
 

@@ -139,7 +139,7 @@ void Client::SummonHorse(uint16 spell_id) {
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		LogFile->write(EQEMuLog::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		LogFile->write(EQEMuLog::Error, "%s tried to summon an unknown horse, spell id %d", getName(), spell_id);
 		return;
 	}
 
@@ -155,7 +155,7 @@ void Client::SummonHorse(uint16 spell_id) {
 
 
 	EQApplicationPacket outapp;
-	horse->CreateHorseSpawnPacket(&outapp, GetName(), GetID());
+	horse->CreateHorseSpawnPacket(&outapp, getName(), getID());
 /*	// Doodman: Kludged in here instead of adding a field to PCType. FIXME!
 	NewSpawn_Struct* ns=(NewSpawn_Struct*)outapp->pBuffer;
 	ns->spawn.texture=mount_color;
@@ -166,7 +166,7 @@ void Client::SummonHorse(uint16 spell_id) {
 	entity_list.QueueClients(horse, &outapp);
 
 
-	uint16 tmpID = horse->GetID();
+	uint16 tmpID = horse->getID();
 	SetHorseId(tmpID);
 
 }
@@ -181,7 +181,7 @@ void Client::SetHorseId(uint16 horseid_in) {
 	if(horseId) {
 		Mob *horse = entity_list.GetMob(horseId);
 		if(horse != nullptr)
-			horse->Depop();
+			horse->depop();
 	}
 
 	//now we take whatever they gave us.

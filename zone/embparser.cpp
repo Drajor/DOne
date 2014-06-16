@@ -621,8 +621,8 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		return 0;
 
 	int ret_value = 0;
-	if(mob && mob->IsClient())
-		quest_manager.StartQuest(other, mob->CastToClient(), iteminst);
+	if(mob && mob->isClient())
+		quest_manager.StartQuest(other, mob->castToClient(), iteminst);
 	else
 		quest_manager.StartQuest(other, nullptr, nullptr);
 
@@ -677,7 +677,7 @@ int PerlembParser::SendCommands(const char *pkgprefix, const char *event, uint32
 		}
 
 		//only export NPC if it's a npc quest
-		if(!other->IsClient()){
+		if(!other->isClient()){
 			NPC *curn = quest_manager.GetNPC();
 			snprintf(namebuf, 64, "%s::npc", pkgprefix);
 			SV *npc = get_sv(namebuf, true);
@@ -873,16 +873,16 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 }
 
 void PerlembParser::ExportCharID(const std::string &package_name, int &char_id, NPC *npcmob, Mob *mob) {
-	if (mob && mob->IsClient()) {  // some events like waypoint and spawn don't have a player involved
-		char_id = mob->CastToClient()->CharacterID();
+	if (mob && mob->isClient()) {  // some events like waypoint and spawn don't have a player involved
+		char_id = mob->castToClient()->CharacterID();
 	} else {
 		if(npcmob)
 		{
 			char_id = -static_cast<int>(npcmob->GetNPCTypeID());  // make char id negative npc id as a fudge
 		}
-		else if(mob && mob->IsNPC())
+		else if(mob && mob->isNPC())
 		{
-			char_id = -static_cast<int>(mob->CastToNPC()->GetNPCTypeID());  // make char id negative npc id as a fudge
+			char_id = -static_cast<int>(mob->castToNPC()->GetNPCTypeID());  // make char id negative npc id as a fudge
 		}
 	}
 	ExportVar(package_name.c_str(), "charid", char_id);
@@ -903,8 +903,8 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 
 			//retrieve our globals
 			npc_c = npcmob->GetQGlobals();
-			if(mob && mob->IsClient())
-				char_c = mob->CastToClient()->GetQGlobals();
+			if(mob && mob->isClient())
+				char_c = mob->castToClient()->GetQGlobals();
 			zone_c = zone->GetQGlobals();
 
 			if(!npc_c)
@@ -915,10 +915,10 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 
 			if(!char_c)
 			{
-				if(mob && mob->IsClient())
+				if(mob && mob->isClient())
 				{
-					char_c = mob->CastToClient()->CreateQGlobals();
-					char_c->LoadByCharID(mob->CastToClient()->CharacterID());
+					char_c = mob->castToClient()->CreateQGlobals();
+					char_c->LoadByCharID(mob->castToClient()->CharacterID());
 				}
 			}
 
@@ -962,16 +962,16 @@ void PerlembParser::ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest,
 		QGlobalCache *zone_c = nullptr;
 
 		//retrieve our globals
-		if(mob && mob->IsClient())
-			char_c = mob->CastToClient()->GetQGlobals();
+		if(mob && mob->isClient())
+			char_c = mob->castToClient()->GetQGlobals();
 		zone_c = zone->GetQGlobals();
 
 		if(!char_c)
 		{
-			if(mob && mob->IsClient())
+			if(mob && mob->isClient())
 			{
-				char_c = mob->CastToClient()->CreateQGlobals();
-				char_c->LoadByCharID(mob->CastToClient()->CharacterID());
+				char_c = mob->castToClient()->CreateQGlobals();
+				char_c->LoadByCharID(mob->castToClient()->CharacterID());
 			}
 		}
 
@@ -1008,35 +1008,35 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 		bool isSpellQuest, std::string &package_name, Mob *mob, NPC *npcmob) 
 {
 	uint8 fac = 0;
-	if (mob && mob->IsClient()) {
-		ExportVar(package_name.c_str(), "uguild_id", mob->CastToClient()->GuildID());
-		ExportVar(package_name.c_str(), "uguildrank", mob->CastToClient()->GuildRank());
-		ExportVar(package_name.c_str(), "status", mob->CastToClient()->Admin());
+	if (mob && mob->isClient()) {
+		ExportVar(package_name.c_str(), "uguild_id", mob->castToClient()->GuildID());
+		ExportVar(package_name.c_str(), "uguildrank", mob->castToClient()->GuildRank());
+		ExportVar(package_name.c_str(), "status", mob->castToClient()->Admin());
 	}
 
 	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest) {
-		if (mob && npcmob && mob->IsClient()) {
-			Client* client = mob->CastToClient();
+		if (mob && npcmob && mob->isClient()) {
+			Client* client = mob->castToClient();
 
-			fac = client->GetFactionLevel(client->CharacterID(), npcmob->GetID(), client->GetRace(), 
+			fac = client->GetFactionLevel(client->CharacterID(), npcmob->getID(), client->GetRace(), 
 				client->GetClass(), client->GetDeity(), npcmob->GetPrimaryFaction(), npcmob);
 		}
 	}
 
 	if(mob) {
-		ExportVar(package_name.c_str(), "name", mob->GetName());
+		ExportVar(package_name.c_str(), "name", mob->getName());
 		ExportVar(package_name.c_str(), "race", GetRaceName(mob->GetRace()));
 		ExportVar(package_name.c_str(), "class", GetEQClassName(mob->GetClass()));
 		ExportVar(package_name.c_str(), "ulevel", mob->GetLevel());
-		ExportVar(package_name.c_str(), "userid", mob->GetID());
+		ExportVar(package_name.c_str(), "userid", mob->getID());
 	}
 
 	if(!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest)
 	{
 		if (npcmob)
 		{
-			ExportVar(package_name.c_str(), "mname", npcmob->GetName());
-			ExportVar(package_name.c_str(), "mobid", npcmob->GetID());
+			ExportVar(package_name.c_str(), "mname", npcmob->getName());
+			ExportVar(package_name.c_str(), "mobid", npcmob->getID());
 			ExportVar(package_name.c_str(), "mlevel", npcmob->GetLevel());
 			ExportVar(package_name.c_str(), "hpratio",npcmob->GetHPRatio());
 			ExportVar(package_name.c_str(), "x", npcmob->GetX() );
@@ -1044,8 +1044,8 @@ void PerlembParser::ExportMobVariables(bool isPlayerQuest, bool isGlobalPlayerQu
 			ExportVar(package_name.c_str(), "z", npcmob->GetZ() );
 			ExportVar(package_name.c_str(), "h", npcmob->GetHeading() );
 			if(npcmob->GetTarget()) {
-				ExportVar(package_name.c_str(), "targetid", npcmob->GetTarget()->GetID());
-				ExportVar(package_name.c_str(), "targetname", npcmob->GetTarget()->GetName());
+				ExportVar(package_name.c_str(), "targetid", npcmob->GetTarget()->getID());
+				ExportVar(package_name.c_str(), "targetname", npcmob->GetTarget()->getName());
 			}
 		}
 
@@ -1076,7 +1076,7 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 #define HASITEM_ISNULLITEM(item) ((item==-1) || (item==0))
 
 void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
-	if(mob && mob->IsClient())
+	if(mob && mob->isClient())
 	{
 		std::string hashname = package_name + std::string("::hasitem");
 
@@ -1086,7 +1086,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		for(int slot = HASITEM_FIRST; slot <= HASITEM_LAST; slot++)
 		{
 			char *hi_decl=nullptr;
-			int itemid = mob->CastToClient()->GetItemIDAt(slot);
+			int itemid = mob->castToClient()->GetItemIDAt(slot);
 			if(!HASITEM_ISNULLITEM(itemid))
 			{
 				MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, slot);
@@ -1096,11 +1096,11 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob) {
 		}
 	}
 
-	if(mob && mob->IsClient()) {
+	if(mob && mob->isClient()) {
 		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
-		int itemid = mob->CastToClient()->GetItemIDAt(30);
+		int itemid = mob->castToClient()->GetItemIDAt(30);
 		if(!HASITEM_ISNULLITEM(itemid)) {
 			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);",hashname.c_str(), itemid, 30);
 			perl->eval(hi_decl);
@@ -1304,7 +1304,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 		}
 
 		case EVENT_GROUP_CHANGE: {
-			if(mob && mob->IsClient())
+			if(mob && mob->isClient())
 			{
 				ExportVar(package_name.c_str(), "grouped", mob->IsGrouped());
 				ExportVar(package_name.c_str(), "raided", mob->IsRaidGrouped());

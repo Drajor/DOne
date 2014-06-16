@@ -390,7 +390,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	{
 		Raid *r = this->GetRaid();
 		if(r){
-			r->UpdateLevel(GetName(), set_level);
+			r->UpdateLevel(getName(), set_level);
 		}
 	}
 	if(set_level > m_pp.level2)
@@ -421,7 +421,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	safe_delete(outapp);
 	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
-		LogFile->write(EQEMuLog::Normal,"Setting Level for %s to %i", GetName(), set_level);
+		LogFile->write(EQEMuLog::Normal,"Setting Level for %s to %i", getName(), set_level);
 
 	CalcBonuses();
 	if(!RuleB(Character, HealOnLevel))
@@ -441,7 +441,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	UpdateWho();
 		if(GetMerc())
 			UpdateMercLevel();
-	Save();
+	save();
 }
 
 // Note: The client calculates exp separately, we cant change this function
@@ -510,10 +510,10 @@ void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) {
 }
 
 void Raid::SplitExp(uint32 exp, Mob* other) {
-	if( other->CastToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
+	if( other->castToNPC()->MerchantType != 0 ) // Ensure NPC isn't a merchant
 		return;
 
-	if(other->GetOwner() && other->GetOwner()->IsClient()) // Ensure owner isn't pc
+	if(other->GetOwner() && other->GetOwner()->isClient()) // Ensure owner isn't pc
 		return;
 
 	uint32 groupexp = exp;

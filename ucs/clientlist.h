@@ -92,7 +92,7 @@ public:
 	void ClearCharacters() { Characters.clear(); }
 	void SendMailBoxes();
 	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
-	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
+	std::string getName() { if(Characters.size()) return Characters[0].Name; else return ""; }
 	void JoinChannels(std::string ChannelList);
 	void LeaveChannels(std::string ChannelList);
 	void LeaveAllChannels(bool SendUpdatedChannelList = true);

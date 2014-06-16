@@ -78,13 +78,13 @@ Trap::~Trap()
 	//cleaning up mob here can actually cause a crash via race condition
 }
 
-bool Trap::Process()
+bool Trap::process()
 {
 	if (chkarea_timer.Enabled() && chkarea_timer.Check()
 		/*&& zone->GetClientCount() > 0*/ )
 	{
 		Mob* trigger = entity_list.GetTrapTrigger(this);
-		if (trigger && !(trigger->IsClient() && trigger->CastToClient()->GetGM()))
+		if (trigger && !(trigger->isClient() && trigger->castToClient()->GetGM()))
 		{
 			Trigger(trigger);
 		}
@@ -108,7 +108,7 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeDebuff:
 			if(message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->GetName());
+				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
 			}
 			else
 			{
@@ -175,13 +175,13 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeDamage:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->GetName());
+				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
 			}
 			else
 			{
 				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
 			}
-			if(trigger->IsClient())
+			if(trigger->isClient())
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
@@ -189,11 +189,11 @@ void Trap::Trigger(Mob* trigger)
 				trigger->SetHP(trigger->GetHP() - dmg);
 				a->damage = dmg;
 				a->sequence = MakeRandomInt(0, 1234567);
-				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->GetID() : trigger->GetID();
+				a->source = GetHiddenTrigger()!=nullptr ? GetHiddenTrigger()->getID() : trigger->getID();
 				a->spellid = 0;
-				a->target = trigger->GetID();
+				a->target = trigger->getID();
 				a->type = 253;
-				trigger->CastToClient()->QueuePacket(outapp);
+				trigger->castToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
 			}
 	}

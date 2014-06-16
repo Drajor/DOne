@@ -2282,7 +2282,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	strcpy(gu->yourname, c->GetName());
+	strcpy(gu->yourname, c->getName());
 	GetGroupLeadershipInfo(g->GetID(), gu->leadersname, nullptr, nullptr, nullptr, nullptr, &gu->leader_aas);
 	gu->NPCMarkerID = g->getNPCMarkerID();
 
@@ -2290,7 +2290,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *c){
 	if (RunQuery(query, MakeAnyLenString(&query, "SELECT name from group_id where groupid=%d", g->GetID()), errbuf, &result)) {
 		while((row = mysql_fetch_row(result))){
 			if(index < 6){
-				if(strcmp(c->GetName(), row[0]) != 0){
+				if(strcmp(c->getName(), row[0]) != 0){
 					strcpy(gu->membername[index], row[0]);
 					index++;
 				}
@@ -2651,8 +2651,8 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 			buffs[slot_id].spellid = spell_id;
 			buffs[slot_id].casterlevel = caster_level;
 			if(caster) {
-				buffs[slot_id].casterid = caster->GetID();
-				strcpy(buffs[slot_id].caster_name, caster->GetName());
+				buffs[slot_id].casterid = caster->getID();
+				strcpy(buffs[slot_id].caster_name, caster->getName());
 				buffs[slot_id].client = true;
 			} else {
 				buffs[slot_id].casterid = 0;

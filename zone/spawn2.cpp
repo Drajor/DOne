@@ -232,7 +232,7 @@ bool Spawn2::Process() {
 			if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
 		npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
 		if(zone->InstantGrids()) {
-			_log(SPAWNS__MAIN, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f).", spawn2_id, spawngroup_id_, npc->GetName(), npcid, x, y, z);
+			_log(SPAWNS__MAIN, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f).", spawn2_id, spawngroup_id_, npc->getName(), npcid, x, y, z);
 			LoadGrid();
 		} else {
 			_log(SPAWNS__MAIN, "Spawn2 %d: Group %d spawned %s (%d) at (%.3f, %.3f, %.3f). Grid loading delayed.", spawn2_id, spawngroup_id_, tmp->name, npcid, x, y, z);
@@ -245,7 +245,7 @@ void Spawn2::Disable()
 {
 	if(npcthis)
 	{
-		npcthis->Depop();
+		npcthis->depop();
 	}
 	enabled = false;
 }
@@ -260,7 +260,7 @@ void Spawn2::LoadGrid() {
 	//dont set an NPC's grid until its loaded for them.
 	npcthis->SetGrid(grid_);
 	npcthis->AssignWaypoints(grid_);
-	_log(SPAWNS__MAIN, "Spawn2 %d: Loading grid %d for %s", spawn2_id, grid_, npcthis->GetName());
+	_log(SPAWNS__MAIN, "Spawn2 %d: Loading grid %d for %s", spawn2_id, grid_, npcthis->getName());
 }
 
 
@@ -301,14 +301,14 @@ void Spawn2::ForceDespawn()
 		{
 			if(sg->despawn == 3 || sg->despawn == 4)
 			{
-				npcthis->Depop(true);
+				npcthis->depop(true);
 				IsDespawned = true;
 				npcthis = nullptr;
 				return;
 			}
 			else
 			{
-				npcthis->Depop(false);
+				npcthis->depop(false);
 				npcthis = nullptr;
 			}
 		}
@@ -493,20 +493,20 @@ void Spawn2::SpawnConditionChanged(const SpawnCondition &c, int16 old_value) {
 	case SpawnCondition::DoDepop:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Depoping our mob.", spawn2_id, new_state?"enabled":"disabled");
 		if(npcthis != nullptr)
-			npcthis->Depop(false);	//remove the current mob
+			npcthis->depop(false);	//remove the current mob
 		Reset();	//reset our spawn timer
 		break;
 	case SpawnCondition::DoRepop:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Forcing a repop.", spawn2_id, new_state?"enabled":"disabled");
 		if(npcthis != nullptr)
-			npcthis->Depop(false);	//remove the current mob
+			npcthis->depop(false);	//remove the current mob
 		Repop();	//repop
 		break;
 	case SpawnCondition::DoRepopIfReady:
 		_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our condition is now %s. Forcing a repop if repsawn timer is expired.", spawn2_id, new_state?"enabled":"disabled");
 		if(npcthis != nullptr) {
-			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our npcthis is currently not null. The zone thinks it is %s. Forcing a depop.", spawn2_id, npcthis->GetName());
-			npcthis->Depop(false);	//remove the current mob
+			_log(SPAWNS__CONDITIONS, "Spawn2 %d: Our npcthis is currently not null. The zone thinks it is %s. Forcing a depop.", spawn2_id, npcthis->getName());
+			npcthis->depop(false);	//remove the current mob
 			npcthis = nullptr;
 		}
 		if(new_state) { // only get repawn timer remaining when the SpawnCondition is enabled.

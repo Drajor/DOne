@@ -227,7 +227,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	if(IsClientInChannel(c)) {
 
-		_log(UCS__ERROR, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
+		_log(UCS__ERROR, "Client %s already in channel %s", c->getName().c_str(), GetName().c_str());
 
 		return;
 	}
@@ -236,7 +236,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	int AccountStatus = c->GetAccountStatus();
 
-	_log(UCS__TRACE, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
+	_log(UCS__TRACE, "Adding %s to channel %s", c->getName().c_str(), Name.c_str());
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
 
@@ -261,7 +261,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	if(!c) return false;
 
-	_log(UCS__TRACE, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
+	_log(UCS__TRACE, "RemoveClient %s from channel %s", c->getName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
 
@@ -359,7 +359,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 		if(MembersInLine > 0)
 			Message += ", ";
 
-		Message += ChannelClient->GetName();
+		Message += ChannelClient->getName();
 
 		MembersInLine++;
 
@@ -397,7 +397,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 		if(ChannelClient)
 		{
 			_log(UCS__TRACE, "Sending message to %s from %s",
-					ChannelClient->GetName().c_str(), Sender->GetName().c_str());
+					ChannelClient->getName().c_str(), Sender->getName().c_str());
 			ChannelClient->SendChannelMessage(Name, Message, Sender);
 		}
 
@@ -483,7 +483,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
 
 	if(!RequiredChannel)
-		RequiredChannel = CreateChannel(NormalisedName, c->GetName(), Password, false, 0);
+		RequiredChannel = CreateChannel(NormalisedName, c->getName(), Password, false, 0);
 
 	if(RequiredChannel->GetMinStatus() > c->GetAccountStatus()) {
 
@@ -497,16 +497,16 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	if(RequiredChannel->IsClientInChannel(c))
 		return nullptr;
 
-	if(RequiredChannel->IsInvitee(c->GetName())) {
+	if(RequiredChannel->IsInvitee(c->getName())) {
 
 		RequiredChannel->AddClient(c);
 
-		RequiredChannel->RemoveInvitee(c->GetName());
+		RequiredChannel->RemoveInvitee(c->getName());
 
 		return RequiredChannel;
 	}
 
-	if(RequiredChannel->CheckPassword(Password) || RequiredChannel->IsOwner(c->GetName()) || RequiredChannel->IsModerator(c->GetName()) ||
+	if(RequiredChannel->CheckPassword(Password) || RequiredChannel->IsOwner(c->getName()) || RequiredChannel->IsModerator(c->getName()) ||
 			c->IsChannelAdmin()) {
 
 		RequiredChannel->AddClient(c);

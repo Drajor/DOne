@@ -54,7 +54,7 @@ const char* Lua_Corpse::GetOwnerName() {
 
 bool Lua_Corpse::Save() {
 	Lua_Safe_Call_Bool();
-	return self->Save();
+	return self->save();
 }
 
 void Lua_Corpse::Delete() {
@@ -69,7 +69,7 @@ void Lua_Corpse::Bury() {
 
 void Lua_Corpse::Depop() {
 	Lua_Safe_Call_Void();
-	self->Depop();
+	self->depop();
 }
 
 uint32 Lua_Corpse::CountItems() {

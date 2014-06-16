@@ -1265,8 +1265,8 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	}
 
 	//Applies any perma NPC spell bonuses from npc_spells_effects table.
-	if (IsNPC())
-		CastToNPC()->ApplyAISpellEffects(newbon);
+	if (isNPC())
+		castToNPC()->ApplyAISpellEffects(newbon);
 
 	//Removes the spell bonuses that are effected by a 'negate' debuff.
 	if (spellbonuses.NegateEffects){

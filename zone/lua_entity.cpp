@@ -14,62 +14,62 @@
 
 bool Lua_Entity::IsClient() {
 	Lua_Safe_Call_Bool();
-	return self->IsClient();
+	return self->isClient();
 }
 
 bool Lua_Entity::IsNPC() {
 	Lua_Safe_Call_Bool();
-	return self->IsNPC();
+	return self->isNPC();
 }
 
 bool Lua_Entity::IsMob() {
 	Lua_Safe_Call_Bool();
-	return self->IsMob();
+	return self->isMOB();
 }
 
 bool Lua_Entity::IsMerc() {
 	Lua_Safe_Call_Bool();
-	return self->IsMerc();
+	return self->isMerc();
 }
 
 bool Lua_Entity::IsCorpse() {
 	Lua_Safe_Call_Bool();
-	return self->IsCorpse();
+	return self->isCorpse();
 }
 
 bool Lua_Entity::IsPlayerCorpse() {
 	Lua_Safe_Call_Bool();
-	return self->IsPlayerCorpse();
+	return self->isPlayerCorpse();
 }
 
 bool Lua_Entity::IsNPCCorpse() {
 	Lua_Safe_Call_Bool();
-	return self->IsNPCCorpse();
+	return self->isNPCCorpse();
 }
 
 bool Lua_Entity::IsObject() {
 	Lua_Safe_Call_Bool();
-	return self->IsObject();
+	return self->isObject();
 }
 
 bool Lua_Entity::IsDoor() {
 	Lua_Safe_Call_Bool();
-	return self->IsDoor();
+	return self->isDoor();
 }
 
 bool Lua_Entity::IsTrap() {
 	Lua_Safe_Call_Bool();
-	return self->IsTrap();
+	return self->isTrap();
 }
 
 bool Lua_Entity::IsBeacon() {
 	Lua_Safe_Call_Bool();
-	return self->IsBeacon();
+	return self->isBeacon();
 }
 
 int Lua_Entity::GetID() {
 	Lua_Safe_Call_Bool();
-	return self->GetID();
+	return self->getID();
 }
 
 Lua_Client Lua_Entity::CastToClient() {

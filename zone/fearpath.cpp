@@ -191,7 +191,7 @@ void Mob::CalculateNewFearpoint()
 		if (ranz == -999999)
 			continue;
 		float fdist = ranz - GetZ();
-		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
+		if (fdist >= -12 && fdist <= 12 && checkCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
 		{
 			curfp = true;
 			break;

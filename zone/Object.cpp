@@ -259,13 +259,13 @@ Object::~Object()
 	}
 }
 
-void Object::SetID(uint16 set_id)
+void Object::setID(uint16 set_id)
 {
 	// Invoke base class
-	Entity::SetID(set_id);
+	Entity::setID(set_id);
 
 	// Store new id as drop_id
-	m_data.drop_id = (uint32)this->GetID();
+	m_data.drop_id = (uint32)this->getID();
 }
 
 // Reset state of object back to zero
@@ -279,7 +279,7 @@ void Object::ResetState()
 	memset(&m_data, 0, sizeof(Object_Struct));
 }
 
-bool Object::Save()
+bool Object::save()
 {
 	if (m_id) {
 		// Update existing
@@ -335,7 +335,7 @@ void Object::PutItem(uint8 index, const ItemInst* inst)
 		}
 		database.SaveWorldContainer(zone->GetZoneID(),m_id,m_inst);
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
-		Save();
+		save();
 	}
 }
 
@@ -371,7 +371,7 @@ void Object::DeleteItem(uint8 index)
 		m_inst->DeleteItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
-		Save();
+		save();
 	}
 }
 
@@ -384,7 +384,7 @@ ItemInst* Object::PopItem(uint8 index)
 		inst = m_inst->PopItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
-		Save();
+		save();
 	}
 
 	return inst;
@@ -409,12 +409,12 @@ void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 	co->player_id = 0;
 }
 
-bool Object::Process(){
+bool Object::process(){
 	if(m_type == OT_DROPPEDITEM && decay_timer.Enabled() && decay_timer.Check()) {
 		// Send click to all clients (removes entity on client)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
-		click_object->drop_id = GetID();
+		click_object->drop_id = getID();
 		entity_list.QueueClients(nullptr, outapp, false);
 		safe_delete(outapp);
 
@@ -493,7 +493,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		// Remove object
 		database.DeleteObject(m_id);
 		if(!m_ground_spawn)
-			entity_list.RemoveEntity(this->GetID());
+			entity_list.RemoveEntity(this->getID());
 	} else {
 		// Tradeskill item
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
@@ -762,13 +762,13 @@ void Object::SetY(float pos)
 	safe_delete(app2);
 }
 
-void Object::Depop()
+void Object::depop()
 {
 	EQApplicationPacket* app = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	entity_list.QueueClients(0, app);
 	safe_delete(app);
-	entity_list.RemoveObject(this->GetID());
+	entity_list.RemoveObject(this->getID());
 }
 
 void Object::Repop()

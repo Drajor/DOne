@@ -188,7 +188,7 @@ XS(XS_Object_IsObject)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsObject();
+		RETVAL = THIS->isObject();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -215,7 +215,7 @@ XS(XS_Object_Save)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->Save();
+		RETVAL = THIS->save();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -242,7 +242,7 @@ XS(XS_Object_SetID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SetID(set_id);
+		THIS->setID(set_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -318,7 +318,7 @@ XS(XS_Object_GetID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetID();
+		RETVAL = THIS->getID();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -824,7 +824,7 @@ XS(XS_Object_Depop)
 			Perl_croak(aTHX_ "THIS is not of type Object");
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		THIS->Depop();
+		THIS->depop();
 	}
 	XSRETURN_EMPTY;
 }

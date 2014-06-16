@@ -118,7 +118,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.GetMob(name);
 	if(mob != 0)
-		entity_list.RemoveEntity(mob->GetID());
+		entity_list.RemoveEntity(mob->getID());
 
 	int moblevel=GetLevel();
 
@@ -254,7 +254,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	npc_aggro = d->npc_aggro;
 
-	if(!IsMerc())
+	if(!isMerc())
 		AI_Start();
 
 	d_meele_texture1 = d->d_meele_texture1;
@@ -362,7 +362,7 @@ NPC::~NPC()
 	AI_Stop();
 
 	if(proximity != nullptr) {
-		entity_list.RemoveProximity(GetID());
+		entity_list.RemoveProximity(getID());
 		safe_delete(proximity);
 	}
 
@@ -454,7 +454,7 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 
 void NPC::CheckMinMaxLevel(Mob *them)
 {
-	if(them == nullptr || !them->IsClient())
+	if(them == nullptr || !them->isClient())
 		return;
 
 	uint16 themlevel = them->GetLevel();
@@ -517,7 +517,7 @@ void NPC::QueryLoot(Client* to) {
 			LogFile->write(EQEMuLog::Error, "Database error, invalid item");
 		x++;
 	}
-	to->Message(0, "%i items on %s.", x, GetName());
+	to->Message(0, "%i items on %s.", x, getName());
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
@@ -556,7 +556,7 @@ void NPC::RemoveCash() {
 	platinum = 0;
 }
 
-bool NPC::Process()
+bool NPC::process()
 {
 	if (IsStunned() && stunned_timer.Check())
 	{
@@ -624,7 +624,7 @@ bool NPC::Process()
 			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
 			{
 				Mob *o = GetOwner();
-				if(o && o->IsClient())
+				if(o && o->isClient())
 				{
 					float x_diff = ds->dest_x - GetX();
 					float y_diff = ds->dest_y - GetY();
@@ -635,14 +635,14 @@ bool NPC::Process()
 						zone->DoAdventureCountIncrease();
 						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
 							" this wretched place. I'll find my way from here.");
-						Depop();
+						depop();
 					}
 				}
 			}
 		}
 	}
 
-	if (sendhpupdate_timer.Check() && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->IsClient()))) {
+	if (sendhpupdate_timer.Check() && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->isClient()))) {
 		if(!IsFullHP || cur_hp<max_hp){
 			SendHPUpdate();
 		}
@@ -712,7 +712,7 @@ uint32 NPC::CountLoot() {
 	return(itemlist.size());
 }
 
-void NPC::Depop(bool StartSpawnTimer) {
+void NPC::depop(bool StartSpawnTimer) {
 	uint16 emoteid = this->GetEmoteID();
 	if(emoteid != 0)
 		this->DoNPCEmote(ONDESPAWN,emoteid);
@@ -757,7 +757,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 		case SE_SummonPet: {
 			if(GetPet()){
 #ifdef SPELLQUEUE
-				printf("%s: Attempted to make a second pet, denied.\n",GetName());
+				printf("%s: Attempted to make a second pet, denied.\n",getName());
 #endif
 				return false;
 			}
@@ -999,7 +999,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				}
 			}
 			char tmpstr[64];
-			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
+			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
 			if (npc_type_id)
 			{
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (id, name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
@@ -1018,7 +1018,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			}
 			if(c) c->LogSQL(query);
 			safe_delete_array(query);
-			snprintf(tmpstr, sizeof(tmpstr), "%s-%s", zone, spawn->GetName());
+			snprintf(tmpstr, sizeof(tmpstr), "%s-%s", zone, spawn->getName());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (id, name) values(%i, '%s')", tmp, tmpstr), errbuf, 0, 0, &spawngroupid)) {
 					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
@@ -1046,7 +1046,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 		case 1:{ // Add new spawn group and spawn point for an existing NPC Type ID
 			tmp2 = spawn->GetNPCTypeID();
 			char tmpstr[64];
-			snprintf(tmpstr, sizeof(tmpstr), "%s%s%i", zone, spawn->GetName(),Timer::GetCurrentTime());
+			snprintf(tmpstr, sizeof(tmpstr), "%s%s%i", zone, spawn->getName(),Timer::GetCurrentTime());
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO spawngroup (name) values('%s')", tmpstr), errbuf, 0, 0, &last_insert_id)) {
 					LogFile->write(EQEMuLog::Error, "NPCSpawnDB Error: %s %s", query, errbuf);
 				safe_delete(query);
@@ -1082,7 +1082,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 			break;
 		}
 		case 2: { // Update npc_type appearance and other data on targeted spawn
-			if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
+			if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE npc_types SET name=\"%s\", level=%i, race=%i, class=%i, hp=%i, gender=%i, texture=%i, helmtexture=%i, size=%i, loottable_id=%i, merchant_id=%i, face=%i, WHERE id=%i", spawn->getName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID()), errbuf, 0)) {
 				if(c) c->LogSQL(query);
 				safe_delete_array(query);
 				return true;
@@ -1182,7 +1182,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 		case 6: { // add npc_type
 			uint32 npc_type_id;
 			char tmpstr[64];
-			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
+			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
 				safe_delete(query);
 				return false;
@@ -1744,7 +1744,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			if (!IsCharmed() && GetOwnerID()) {
 				Client *c = entity_list.GetClientByID(GetOwnerID());
 				if(c)
-					sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
+					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}
 			else if (GetSwarmOwner()) {
 				ns->spawn.bodytype = 11;
@@ -1752,7 +1752,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 				{
 					Client *c = entity_list.GetClientByID(GetSwarmOwner());
 					if(c)
-						sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
+						sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 				}
 			}
 		}
@@ -1762,7 +1762,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 			if (!IsCharmed() && GetOwnerID()) {
 				Client *c = entity_list.GetClientByID(GetOwnerID());
 				if(c)
-					sprintf(ns->spawn.lastName, "%s's Pet", c->GetName());
+					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}
 		} else
 			ns->spawn.is_pet = 0;
@@ -2372,7 +2372,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 
 	//make sure iOther is an npc
 	//also, if we dont have a faction, then they arnt gunna think anything of us either
-	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
+	if(!iOther->isNPC() || GetPrimaryFaction() == 0)
 		return(FACTION_INDIFFERENT);
 
 	//if we get here, iOther is an NPC too
@@ -2380,7 +2380,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 	//otherwise, employ the npc faction stuff
 	//so we need to look at iOther's faction table to see
 	//what iOther thinks about our primary faction
-	return(iOther->CastToNPC()->CheckNPCFactionAlly(GetPrimaryFaction()));
+	return(iOther->castToNPC()->CheckNPCFactionAlly(GetPrimaryFaction()));
 }
 
 //Look through our faction list and return a faction con based

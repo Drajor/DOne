@@ -34,7 +34,7 @@ Client::Client(EQStream *c, ClientVersion v)
 	play_sequence_id = 0;
 }
 
-bool Client::Process()
+bool Client::process()
 {
 	EQApplicationPacket *app = connection->PopPacket();
 	while(app)

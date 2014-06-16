@@ -606,7 +606,7 @@ XS(XS_Group_GetMember)
 		else {
 			member = THIS->mMembers[index];
 			if (member != nullptr)
-				RETVAL = member->CastToClient();
+				RETVAL = member->castToClient();
 		}
 
 		ST(0) = sv_newmortal();

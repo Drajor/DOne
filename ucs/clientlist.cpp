@@ -556,10 +556,10 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
+		if(((*Iterator) != c) && ((c->getName() == (*Iterator)->getName())
 				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
 
-			_log(UCS__CLIENT, "Removing old connection for %s", c->GetName().c_str());
+			_log(UCS__CLIENT, "Removing old connection for %s", c->getName().c_str());
 
 			struct in_addr in;
 
@@ -895,7 +895,7 @@ void Clientlist::CloseAllConnections() {
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-		_log(UCS__TRACE, "Removing client %s", (*Iterator)->GetName().c_str());
+		_log(UCS__TRACE, "Removing client %s", (*Iterator)->getName().c_str());
 
 		(*Iterator)->CloseConnection();
 	}
@@ -904,7 +904,7 @@ void Clientlist::CloseAllConnections() {
 void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 
 	if(!CharacterName) return;
-	_log(UCS__TRACE, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
+	_log(UCS__TRACE, "Adding character %s with ID %i for %s", CharacterName, CharID, getName().c_str());
 	CharacterEntry NewCharacter;
 	NewCharacter.CharID = CharID;
 	NewCharacter.Name = CharacterName;
@@ -955,7 +955,7 @@ Client *Clientlist::FindCharacter(std::string CharacterName) {
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-		if((*Iterator)->GetName() == CharacterName)
+		if((*Iterator)->getName() == CharacterName)
 			return ((*Iterator));
 
 	}
@@ -970,7 +970,7 @@ void Client::AddToChannelList(ChatChannel *JoinedChannel) {
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
 		if(JoinedChannels[i] == nullptr) {
 			JoinedChannels[i] = JoinedChannel;
-			_log(UCS__TRACE, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
+			_log(UCS__TRACE, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, getName().c_str());
 			return;
 		}
 }
@@ -1013,7 +1013,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 		}
 	}
 
-	_log(UCS__TRACE, "Client: %s joining channels %s", GetName().c_str(), ChannelNameList.c_str());
+	_log(UCS__TRACE, "Client: %s joining channels %s", getName().c_str(), ChannelNameList.c_str());
 
 	int NumberOfChannels = ChannelCount();
 
@@ -1115,7 +1115,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 
 void Client::LeaveChannels(std::string ChannelNameList) {
 
-	_log(UCS__TRACE, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
+	_log(UCS__TRACE, "Client: %s leaving channels %s", getName().c_str(), ChannelNameList.c_str());
 
 	std::string::size_type CurrentPos = 0;
 
@@ -1295,7 +1295,7 @@ void Client::SendChannelMessage(std::string Message)
 
 	std::string ChannelName = Message.substr(1, MessageStart-1);
 
-	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
+	_log(UCS__TRACE, "%s tells %s, [%s]", getName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1312,7 +1312,7 @@ void Client::SendChannelMessage(std::string Message)
 			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
 			{
-				if(Characters[x].Name.compare(GetName()) == 0)
+				if(Characters[x].Name.compare(getName()) == 0)
 				{
 					char_ent = &Characters[x];
 					break;
@@ -1332,8 +1332,8 @@ void Client::SendChannelMessage(std::string Message)
 	if(RequiredChannel)
 		if(RuleB(Chat, EnableAntiSpam))
 		{
-			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
-				RequiredChannel->IsModerator(GetName()) || IsChannelAdmin())
+			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(getName()) || RequiredChannel->IsOwner(getName()) ||
+				RequiredChannel->IsModerator(getName()) || IsChannelAdmin())
 			{
 				if(GlobalChatLimiterTimer)
 				{
@@ -1378,8 +1378,8 @@ void Client::SendChannelMessage(std::string Message)
 		}
 		else
 		{
-			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
-				RequiredChannel->IsModerator(GetName()) || IsChannelAdmin())
+			if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(getName()) || RequiredChannel->IsOwner(getName()) ||
+				RequiredChannel->IsModerator(getName()) || IsChannelAdmin())
 				RequiredChannel->SendMessageToChannel(Message.substr(MessageStart+1), this);
 			else
 				GeneralChannelMessage("Channel " + ChannelName + " is moderated and you have not been granted a voice.");
@@ -1425,7 +1425,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 			CharacterEntry *char_ent = nullptr;
 			for(int x = 0; x < Characters.size(); ++x)
 			{
-				if(Characters[x].Name.compare(GetName()) == 0)
+				if(Characters[x].Name.compare(getName()) == 0)
 				{
 					char_ent = &Characters[x];
 					break;
@@ -1442,13 +1442,13 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 		}
 	}
 
-	_log(UCS__TRACE, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
+	_log(UCS__TRACE, "%s tells %s, [%s]", getName().c_str(), RequiredChannel->GetName().c_str(),
 							Message.substr(MessageStart + 1).c_str());
 
 	if(RuleB(Chat, EnableAntiSpam))
 	{
-		if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
-			RequiredChannel->IsModerator(GetName()))
+		if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(getName()) || RequiredChannel->IsOwner(getName()) ||
+			RequiredChannel->IsModerator(getName()))
 		{
 				if(GlobalChatLimiterTimer)
 				{
@@ -1492,8 +1492,8 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 	}
 	else
 	{
-		if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(GetName()) || RequiredChannel->IsOwner(GetName()) ||
-			RequiredChannel->IsModerator(GetName()))
+		if(!RequiredChannel->IsModerated() || RequiredChannel->HasVoice(getName()) || RequiredChannel->IsOwner(getName()) ||
+			RequiredChannel->IsModerator(getName()))
 			RequiredChannel->SendMessageToChannel(Message.substr(MessageStart+1), this);
 		else
 			GeneralChannelMessage("Channel " + RequiredChannel->GetName() + " is moderated and you have not been granted a voice.");
@@ -1505,7 +1505,7 @@ void Client::SendChannelMessage(std::string ChannelName, std::string Message, Cl
 
 	if(!Sender) return;
 
-	std::string FQSenderName = WorldShortName + "." + Sender->GetName();
+	std::string FQSenderName = WorldShortName + "." + Sender->getName();
 
 	int PacketLength = ChannelName.length() + Message.length() + FQSenderName.length() + 3;
 
@@ -1552,14 +1552,14 @@ void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
 
 	if(!Channel || !c) return;
 
-	int PacketLength = Channel->GetName().length() + c->GetName().length() + 2;
+	int PacketLength = Channel->GetName().length() + c->getName().length() + 2;
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChannelAnnounceJoin, PacketLength);
 
 	char *PacketBuffer = (char *)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
+	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->getName().c_str());
 
 	_pkt(UCS__PACKETS, outapp);
 
@@ -1572,14 +1572,14 @@ void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
 
 	if(!Channel || !c) return;
 
-	int PacketLength = Channel->GetName().length() + c->GetName().length() + 2;
+	int PacketLength = Channel->GetName().length() + c->getName().length() + 2;
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChannelAnnounceLeave, PacketLength);
 
 	char *PacketBuffer = (char *)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_STRING(PacketBuffer, Channel->GetName().c_str());
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->GetName().c_str());
+	VARSTRUCT_ENCODE_STRING(PacketBuffer, c->getName().c_str());
 
 	_pkt(UCS__PACKETS, outapp);
 
@@ -1654,7 +1654,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	else
 		Message = "Password change on channel " + ChannelName;
 
-	_log(UCS__TRACE, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), GetName().c_str());
+	_log(UCS__TRACE, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), getName().c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1664,7 +1664,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !RequiredChannel->IsModerator(getName()) && !IsChannelAdmin()) {
 		std::string Message = "You do not own or have moderator rights on channel " + ChannelName;
 		GeneralChannelMessage(Message);
 		return;
@@ -1718,7 +1718,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !IsChannelAdmin()) {
 		std::string Message = "You do not own channel " + ChannelName;
 		GeneralChannelMessage(Message);
 		return;
@@ -1797,7 +1797,7 @@ void Client::ChannelInvite(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
+	_log(UCS__TRACE, "[%s] invites [%s] to channel [%s]", getName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Invitee);
 
@@ -1827,7 +1827,7 @@ void Client::ChannelInvite(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName())) {
+	if(!RequiredChannel->IsOwner(getName()) && !RequiredChannel->IsModerator(getName())) {
 
 		std::string Message = "You do not own or have moderator rights to channel " + ChannelName;
 
@@ -1844,7 +1844,7 @@ void Client::ChannelInvite(std::string CommandString) {
 
 	RequiredChannel->AddInvitee(Invitee);
 
-	RequiredClient->GeneralChannelMessage(GetName() + " has invited you to join channel " + ChannelName);
+	RequiredClient->GeneralChannelMessage(getName() + " has invited you to join channel " + ChannelName);
 
 	GeneralChannelMessage("Invitation sent to " + Invitee + " to join channel " + ChannelName);
 
@@ -1875,7 +1875,7 @@ void Client::ChannelModerate(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !RequiredChannel->IsModerator(getName()) && !IsChannelAdmin()) {
 
 		GeneralChannelMessage("You do not own or have moderator rights to channel " + ChannelName);
 		return;
@@ -1924,7 +1924,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
+	_log(UCS__TRACE, "[%s] gives [%s] moderator rights to channel [%s]", getName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Moderator);
 
@@ -1948,7 +1948,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !IsChannelAdmin()) {
 
 		GeneralChannelMessage("You do not own channel " + ChannelName);
 		return;
@@ -1959,7 +1959,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 		RequiredChannel->RemoveModerator(Moderator);
 
 		if(RequiredClient)
-			RequiredClient->GeneralChannelMessage(GetName() + " has removed your moderator rights to channel " + ChannelName);
+			RequiredClient->GeneralChannelMessage(getName() + " has removed your moderator rights to channel " + ChannelName);
 
 		GeneralChannelMessage("Removing moderator rights from " + Moderator + " to channel " + ChannelName);
 	}
@@ -1967,7 +1967,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 		RequiredChannel->AddModerator(Moderator);
 
 		if(RequiredClient)
-			RequiredClient->GeneralChannelMessage(GetName() + " has made you a moderator of channel " + ChannelName);
+			RequiredClient->GeneralChannelMessage(getName() + " has made you a moderator of channel " + ChannelName);
 
 		GeneralChannelMessage(Moderator + " is now a moderator on channel " + ChannelName);
 	}
@@ -2005,7 +2005,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
+	_log(UCS__TRACE, "[%s] gives [%s] voice to channel [%s]", getName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Voicee);
 
@@ -2029,13 +2029,13 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !RequiredChannel->IsModerator(getName()) && !IsChannelAdmin()) {
 
 		GeneralChannelMessage("You do not own or have moderator rights to channel " + ChannelName);
 		return;
 	}
 
-	if(RequiredChannel->IsOwner(RequiredClient->GetName()) || RequiredChannel->IsModerator(RequiredClient->GetName())) {
+	if(RequiredChannel->IsOwner(RequiredClient->getName()) || RequiredChannel->IsModerator(RequiredClient->getName())) {
 
 		GeneralChannelMessage("The channel owner and moderators automatically have voice.");
 		return;
@@ -2046,7 +2046,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 		RequiredChannel->RemoveVoice(Voicee);
 
 		if(RequiredClient)
-			RequiredClient->GeneralChannelMessage(GetName() + " has removed your voice rights to channel " + ChannelName);
+			RequiredClient->GeneralChannelMessage(getName() + " has removed your voice rights to channel " + ChannelName);
 
 		GeneralChannelMessage("Removing voice from " + Voicee + " in channel " + ChannelName);
 	}
@@ -2054,7 +2054,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 		RequiredChannel->AddVoice(Voicee);
 
 		if(RequiredClient)
-			RequiredClient->GeneralChannelMessage(GetName() + " has given you voice in channel " + ChannelName);
+			RequiredClient->GeneralChannelMessage(getName() + " has given you voice in channel " + ChannelName);
 
 		GeneralChannelMessage(Voicee + " now has voice in channel " + ChannelName);
 	}
@@ -2093,7 +2093,7 @@ void Client::ChannelKick(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	_log(UCS__TRACE, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
+	_log(UCS__TRACE, "[%s] kicks [%s] from channel [%s]", getName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = CL->FindCharacter(Kickee);
 
@@ -2117,19 +2117,19 @@ void Client::ChannelKick(std::string CommandString) {
 		return;
 	}
 
-	if(!RequiredChannel->IsOwner(GetName()) && !RequiredChannel->IsModerator(GetName()) && !IsChannelAdmin()) {
+	if(!RequiredChannel->IsOwner(getName()) && !RequiredChannel->IsModerator(getName()) && !IsChannelAdmin()) {
 
 		GeneralChannelMessage("You do not own or have moderator rights to channel " + ChannelName);
 		return;
 	}
 
-	if(RequiredChannel->IsOwner(RequiredClient->GetName())) {
+	if(RequiredChannel->IsOwner(RequiredClient->getName())) {
 
 		GeneralChannelMessage("You cannot kick the owner out of the channel.");
 		return;
 	}
 
-	if(RequiredChannel->IsModerator(Kickee) && !RequiredChannel->IsOwner(GetName())) {
+	if(RequiredChannel->IsModerator(Kickee) && !RequiredChannel->IsOwner(getName())) {
 
 		GeneralChannelMessage("Only the channel owner can kick a moderator out of the channel.");
 		return;
@@ -2139,12 +2139,12 @@ void Client::ChannelKick(std::string CommandString) {
 
 		RequiredChannel->RemoveModerator(Kickee);
 
-		RequiredClient->GeneralChannelMessage(GetName() + " has removed your moderator rights to channel " + ChannelName);
+		RequiredClient->GeneralChannelMessage(getName() + " has removed your moderator rights to channel " + ChannelName);
 
 		GeneralChannelMessage("Removing moderator rights from " + Kickee + " to channel " + ChannelName);
 	}
 
-	RequiredClient->GeneralChannelMessage(GetName() + " has kicked you from channel " + ChannelName);
+	RequiredClient->GeneralChannelMessage(getName() + " has kicked you from channel " + ChannelName);
 
 	GeneralChannelMessage("Kicked " + Kickee + " from channel " + ChannelName);
 
