@@ -329,7 +329,7 @@ void Client::GoFish()
 
 						npc->AddToHateList(this, 1, 0, false);	//no help yelling
 
-						entity_list.AddNPC(npc);
+						entity_list.addNPC(npc);
 
 						Message(MT_Emote, "You fish up a little more than you bargained for...");
 					}

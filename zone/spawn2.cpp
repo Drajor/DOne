@@ -226,7 +226,7 @@ bool Spawn2::Process() {
 		npc->SetSp2(spawngroup_id_);
 		npc->SaveGuardPointAnim(anim);
 		npc->SetAppearance((EmuAppearance)anim);
-		entity_list.AddNPC(npc);
+		entity_list.addNPC(npc);
 		//this limit add must be done after the AddNPC since we need the entity ID.
 		entity_list.LimitAddNPC(npc);
 			if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
@@ -255,7 +255,7 @@ void Spawn2::LoadGrid() {
 		return;
 	if(grid_ < 1)
 		return;
-	if(!entity_list.IsMobInZone(npcthis))
+	if(!entity_list.isMOBInZone(npcthis))
 		return;
 	//dont set an NPC's grid until its loaded for them.
 	npcthis->SetGrid(grid_);

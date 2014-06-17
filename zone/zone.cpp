@@ -217,7 +217,7 @@ bool Zone::LoadZoneObjects() {
 					d.client_version_mask = 0xFFFFFFFF; //We should load the mask from the zone.
 
 					Doors* door = new Doors(&d);
-					entity_list.AddDoor(door);
+					entity_list.addDoor(door);
 				}
 
 				continue;
@@ -274,10 +274,10 @@ bool Zone::LoadZoneObjects() {
 			}
 
 			Object* object = new Object(id, type, icon, data, inst);
-			entity_list.AddObject(object, false);
+			entity_list.addObject(object, false);
 			if(type == OT_DROPPEDITEM && itemid != 0)
 			{
-				entity_list.RemoveObject(object->getID());
+				entity_list.removeObject(object->getID());
 			}
 
 			safe_delete(inst);
@@ -313,7 +313,7 @@ bool Zone::LoadGroundSpawns() {
 				name = groundspawn.spawn[gsindex].name;
 				for(ix=0;ix<gsnumber;ix++){
 					Object* object = new Object(inst,name,groundspawn.spawn[gsindex].max_x,groundspawn.spawn[gsindex].min_x,groundspawn.spawn[gsindex].max_y,groundspawn.spawn[gsindex].min_y,groundspawn.spawn[gsindex].max_z,groundspawn.spawn[gsindex].heading,groundspawn.spawn[gsindex].respawntimer);//new object with id of 10000+
-					entity_list.AddObject(object, false);
+					entity_list.addObject(object, false);
 				}
 				safe_delete(inst);
 			}
@@ -793,7 +793,7 @@ void Zone::Shutdown(bool quite)
 	zone->ResetAuth();
 	safe_delete(zone);
 	dbasync->CommitWrites();
-	entity_list.ClearAreas();
+	entity_list.clearAreas();
 	parse->ReloadQuests(true);
 	UpdateWindowTitle();
 }
@@ -821,7 +821,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 	Door *d = dlist;
 	for(r = 0; r < count; r++, d++) {
 		Doors* newdoor = new Doors(d);
-		entity_list.AddDoor(newdoor);
+		entity_list.addDoor(newdoor);
 	}
 	delete[] dlist;
 }
@@ -945,7 +945,7 @@ Zone::~Zone() {
 	safe_delete(Weather_Timer);
 	NPCEmoteList.Clear();
 	zone_point_list.Clear();
-	entity_list.Clear();
+	entity_list.clear();
 	ClearBlockedSpells();
 
 	safe_delete(Instance_Timer);
@@ -1103,7 +1103,7 @@ void Zone::ReloadStaticData() {
 	}
 
 	LogFile->write(EQEMuLog::Status, "Reloading traps...");
-	entity_list.RemoveAllTraps();
+	entity_list.removeAllTraps();
 	if (!database.LoadTraps(GetShortName(), GetInstanceVersion()))
 	{
 		LogFile->write(EQEMuLog::Error, "Reloading traps failed.");
@@ -1115,16 +1115,16 @@ void Zone::ReloadStaticData() {
 		LogFile->write(EQEMuLog::Error, "Reloading ground spawns failed. continuing.");
 	}
 
-	entity_list.RemoveAllObjects();
+	entity_list.removeAllObjects();
 	LogFile->write(EQEMuLog::Status, "Reloading World Objects from DB...");
 	if (!LoadZoneObjects())
 	{
 		LogFile->write(EQEMuLog::Error, "Reloading World Objects failed. continuing.");
 	}
 
-	entity_list.RemoveAllDoors();
+	entity_list.removeAllDoors();
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 
 	zone->LoadVeteranRewards();
 	zone->LoadAlternateCurrencies();
@@ -2314,7 +2314,7 @@ void Zone::DoAdventureActions()
 			{
 				NPC* npc = new NPC(tmp, 0, ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h, FlyMode3);
 				npc->AddLootTable();
-				entity_list.AddNPC(npc);
+				entity_list.addNPC(npc);
 				npc->Shout("Rarrrgh!");
 				did_adventure_actions = true;
 			}
@@ -2359,7 +2359,7 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 void Zone::ReloadWorld(uint32 Option){
 	if(Option == 1){
 		zone->Repop(0);
-		entity_list.ClearAreas();
+		entity_list.clearAreas();
 		parse->ReloadQuests();
 	}
 }

@@ -1777,7 +1777,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		// the spells are AE target, but we aim them on a beacon
 		Mob *beacon_loc = spell_target ? spell_target : this;
 		Beacon *beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
-		entity_list.AddBeacon(beacon);
+		entity_list.addBeacon(beacon);
 		mlog(SPELLS__CASTING, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->getName());
 		spell_target = nullptr;
 		ae_center = beacon;

@@ -858,7 +858,7 @@ void WorldServer::Process() {
 					if(!group)
 						break;
 
-					entity_list.AddGroup(group);
+					entity_list.addGroup(group);
 
 					if(group->GetID() == 0) {
 						Inviter->Message(13, "Unable to get new group id. Cannot create group.");
@@ -965,7 +965,7 @@ void WorldServer::Process() {
 					group = new Group(groupid);
 
 					if(group->GetID() != 0)
-						entity_list.AddGroup(group, groupid);
+						entity_list.addGroup(group, groupid);
 					else
 						group = nullptr;
 				}	//else, somebody from our group is already here...
@@ -1479,7 +1479,7 @@ void WorldServer::Process() {
 			ServerDepopAllPlayersCorpses_Struct *sdapcs = (ServerDepopAllPlayersCorpses_Struct *)pack->pBuffer;
 
 			if(zone && !((zone->GetZoneID() == sdapcs->ZoneID) && (zone->GetInstanceID() == sdapcs->InstanceID)))
-				entity_list.RemoveAllCorpsesByCharID(sdapcs->CharacterID);
+				entity_list.removeAllCorpsesByCharacterID(sdapcs->CharacterID);
 
 			break;
 
@@ -1490,7 +1490,7 @@ void WorldServer::Process() {
 			ServerDepopPlayerCorpse_Struct *sdpcs = (ServerDepopPlayerCorpse_Struct *)pack->pBuffer;
 
 			if(zone && !((zone->GetZoneID() == sdpcs->ZoneID) && (zone->GetInstanceID() == sdpcs->InstanceID)))
-				entity_list.RemoveCorpseByDBID(sdpcs->DBID);
+				entity_list.removeCorpseByDatabaseID(sdpcs->DBID);
 
 			break;
 

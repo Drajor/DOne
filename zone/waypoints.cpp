@@ -527,7 +527,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		mlog(AI__WAYPOINTS, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(isNPC()) {
-			entity_list.ProcessMove(castToNPC(), x, y, z);
+			entity_list.processMove(castToNPC(), x, y, z);
 		}
 
 		x_pos = x;
@@ -543,7 +543,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
 		if(isNPC()) {
-			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
+			entity_list.processMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -639,7 +639,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 			float new_y = y_pos + tar_vy;
 			float new_z = z_pos + tar_vz;
 			if(isNPC()) {
-				entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
+				entity_list.processMove(castToNPC(), new_x, new_y, new_z);
 			}
 
 			x_pos = new_x;
@@ -652,7 +652,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		else
 		{
 			if(isNPC()) {
-				entity_list.ProcessMove(castToNPC(), x, y, z);
+				entity_list.processMove(castToNPC(), x, y, z);
 			}
 
 			x_pos = x;
@@ -671,7 +671,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
 		if(isNPC()) {
-			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
+			entity_list.processMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -784,7 +784,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 
 	if (tar_vector >= 1.0) {
 		if(isNPC()) {
-			entity_list.ProcessMove(castToNPC(), x, y, z);
+			entity_list.processMove(castToNPC(), x, y, z);
 		}
 
 		x_pos = x;
@@ -797,7 +797,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, float speed, bool chec
 		float new_y = y_pos + tar_vy*tar_vector;
 		float new_z = z_pos + tar_vz*tar_vector;
 		if(isNPC()) {
-			entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
+			entity_list.processMove(castToNPC(), new_x, new_y, new_z);
 		}
 
 		x_pos = new_x;
@@ -964,7 +964,7 @@ void NPC::AssignWaypoints(int32 grid) {
 
 void Mob::SendTo(float new_x, float new_y, float new_z) {
 	if(isNPC()) {
-		entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z);
+		entity_list.processMove(castToNPC(), new_x, new_y, new_z);
 	}
 
 	x_pos = new_x;
@@ -998,7 +998,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	if(isNPC()) {
-		entity_list.ProcessMove(castToNPC(), new_x, new_y, new_z + 0.1);
+		entity_list.processMove(castToNPC(), new_x, new_y, new_z + 0.1);
 	}
 
 	x_pos = new_x;

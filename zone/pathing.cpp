@@ -591,7 +591,7 @@ void PathManager::SpawnPathNodes()
 		NPC* npc = new NPC(npc_type, 0, PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
 
-		entity_list.AddNPC(npc, true, true);
+		entity_list.addNPC(npc, true, true);
 	}
 }
 
@@ -1288,7 +1288,7 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 
 		if(PathNodes[Node1].Neighbours[i].DoorID >= 0)
 		{
-			Doors *d = entity_list.FindDoor(PathNodes[Node1].Neighbours[i].DoorID);
+			Doors *d = entity_list.findDoor(PathNodes[Node1].Neighbours[i].DoorID);
 
 			if(d && !d->IsDoorOpen() )
 			{
@@ -1578,7 +1578,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 
 		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
-		entity_list.AddNPC(npc, true, true);
+		entity_list.addNPC(npc, true, true);
 
 		safe_delete_array(ClosedListFlag);
 		ClosedListFlag = new int[Head.PathNodeCount];
@@ -1638,7 +1638,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 
 		NPC* npc = new NPC(npc_type, 0, new_node.v.x, new_node.v.y, new_node.v.z, 0, FlyMode1);
 		npc->GiveNPCTypeData(npc_type);
-		entity_list.AddNPC(npc, true, true);
+		entity_list.addNPC(npc, true, true);
 
 		ClosedListFlag = new int[Head.PathNodeCount];
 

@@ -387,7 +387,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 
 	if((GetTriggerDoorID() != 0) && (GetTriggerType() == 1))
 	{
-		Doors* triggerdoor = entity_list.FindDoor(GetTriggerDoorID());
+		Doors* triggerdoor = entity_list.findDoor(GetTriggerDoorID());
 		if(triggerdoor && !triggerdoor->triggered)
 		{
 			triggered=true;
@@ -400,7 +400,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	}
 	else if((GetTriggerDoorID() != 0) && (GetTriggerType() != 1))
 	{
-		Doors* triggerdoor = entity_list.FindDoor(GetTriggerDoorID());
+		Doors* triggerdoor = entity_list.findDoor(GetTriggerDoorID());
 		if(triggerdoor && !triggerdoor->triggered)
 		{
 			triggered=true;
@@ -726,57 +726,57 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 
 void Doors::SetLocation(float x, float y, float z)
 {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	pos_x = x;
 	pos_y = y;
 	pos_z = z;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::SetX(float in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	pos_x = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 void Doors::SetY(float in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	pos_y = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 void Doors::SetZ(float in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	pos_z = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 void Doors::SetHeading(float in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	heading = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::SetIncline(int in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	incline = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::SetOpenType(uint8 in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	opentype = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::SetDoorName(const char* name) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	memset(door_name, 0, sizeof(door_name));
 	strncpy(door_name, name, sizeof(door_name));
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::SetSize(uint16 in) {
-	entity_list.DespawnAllDoors();
+	entity_list.despawnAllDoors();
 	size = in;
-	entity_list.RespawnAllDoors();
+	entity_list.respawnAllDoors();
 }
 
 void Doors::CreateDatabaseEntry()

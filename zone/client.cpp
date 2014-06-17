@@ -1041,7 +1041,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			break;
 
 		if(quest_manager.ProximitySayInUse())
-			entity_list.ProcessProximitySay(message, this, language);
+			entity_list.processProximitySay(message, this, language);
 
 		if (GetTarget() != 0 && GetTarget()->isNPC()) {
 			if(!GetTarget()->castToNPC()->IsEngaged()) {
@@ -3796,7 +3796,7 @@ void Client::Sacrifice(Client *caster)
 						ClearAllProximities();
 						if(RuleB(Character, LeaveCorpses)){
 							Corpse *new_corpse = new Corpse(this, 0);
-							entity_list.AddCorpse(new_corpse, getID());
+							entity_list.addCorpse(new_corpse, getID());
 							setID(0);
 							entity_list.QueueClients(this, &app2, true);
 						}
@@ -4746,7 +4746,7 @@ void Client::SummonAndRezzAllCorpses()
 
 	safe_delete(Pack);
 
-	entity_list.RemoveAllCorpsesByCharID(CharacterID());
+	entity_list.removeAllCorpsesByCharacterID(CharacterID());
 
 	int CorpseCount = database.SummonAllPlayerCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
 								GetX(), GetY(), GetZ(), GetHeading());
@@ -4756,7 +4756,7 @@ void Client::SummonAndRezzAllCorpses()
 		return;
 	}
 
-	int RezzExp = entity_list.RezzAllCorpsesByCharID(CharacterID());
+	int RezzExp = entity_list.resurrectAllCorpsesByCharacterID(CharacterID());
 
 	if(RezzExp > 0)
 		SetEXP(GetEXP() + RezzExp, GetAAXP(), true);
@@ -4784,7 +4784,7 @@ void Client::SummonAllCorpses(float dest_x, float dest_y, float dest_z, float de
 
 	safe_delete(Pack);
 
-	entity_list.RemoveAllCorpsesByCharID(CharacterID());
+	entity_list.removeAllCorpsesByCharacterID(CharacterID());
 
 	int CorpseCount = database.SummonAllPlayerCorpses(CharacterID(), zone->GetZoneID(), zone->GetInstanceID(),
 								dest_x, dest_y, dest_z, dest_heading);
@@ -4808,7 +4808,7 @@ void Client::DepopAllCorpses()
 
 	safe_delete(Pack);
 
-	entity_list.RemoveAllCorpsesByCharID(CharacterID());
+	entity_list.removeAllCorpsesByCharacterID(CharacterID());
 }
 
 void Client::DepopPlayerCorpse(uint32 dbid)
@@ -4825,7 +4825,7 @@ void Client::DepopPlayerCorpse(uint32 dbid)
 
 	safe_delete(Pack);
 
-	entity_list.RemoveCorpseByDBID(dbid);
+	entity_list.removeCorpseByDatabaseID(dbid);
 }
 
 void Client::BuryPlayerCorpses()
@@ -6327,7 +6327,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca);
+		entity_list.addNPC(npca);
 		summon_count--;
 	}
 }

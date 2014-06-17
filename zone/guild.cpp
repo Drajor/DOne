@@ -14,7 +14,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+	*/
 #include "../common/debug.h"
 #include "masterentity.h"
 #include "worldserver.h"
@@ -47,19 +47,20 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 	// So OP_GuildMOTD should be sent on zone entry and when an Officer changes the MOTD, and OP_GetGuildMOTDReply
 	// should be sent when the client issues the /getguildmotd command.
 	//
-	if(GetGuildMOTDReply)
+	if (GetGuildMOTDReply)
 		outapp->SetOpcode(OP_GetGuildMOTDReply);
 
-	GuildMOTD_Struct *motd = (GuildMOTD_Struct *) outapp->pBuffer;
+	GuildMOTD_Struct *motd = (GuildMOTD_Struct *)outapp->pBuffer;
 	motd->unknown0 = 0;
 	strn0cpy(motd->name, m_pp.name, 64);
 
-	if(IsInAGuild()) {
-		if(!guild_mgr.getGuildMOTD(GuildID(), motd->motd, motd->setby_name)) {
+	if (IsInAGuild()) {
+		if (!guild_mgr.getGuildMOTD(GuildID(), motd->motd, motd->setby_name)) {
 			motd->setby_name[0] = '\0';
 			strcpy(motd->motd, "ERROR GETTING MOTD!");
 		}
-	} else {
+	}
+	else {
 		//we have to send them an empty MOTD anywyas.
 		motd->motd[0] = '\0';	//just to be sure
 		motd->setby_name[0] = '\0';	//just to be sure
@@ -74,16 +75,16 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 void Client::SendGuildURL()
 {
-	if(GetClientVersion() < EQClientSoF)
+	if (GetClientVersion() < EQClientSoF)
 		return;
 
-	if(IsInAGuild())
+	if (IsInAGuild())
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
-		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
+		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*)outapp->pBuffer;
 
-		if(guild_mgr.getGuildURL(GuildID(), guuacs->Text))
+		if (guild_mgr.getGuildURL(GuildID(), guuacs->Text))
 		{
 			guuacs->Action = 0;
 			FastQueuePacket(&outapp);
@@ -95,16 +96,16 @@ void Client::SendGuildURL()
 
 void Client::SendGuildChannel()
 {
-	if(GetClientVersion() < EQClientSoF)
+	if (GetClientVersion() < EQClientSoF)
 		return;
 
-	if(IsInAGuild())
+	if (IsInAGuild())
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
-		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
+		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*)outapp->pBuffer;
 
-		if(guild_mgr.getGuildChannel(GuildID(), guuacs->Text))
+		if (guild_mgr.getGuildChannel(GuildID(), guuacs->Text))
 		{
 			guuacs->Action = 1;
 
@@ -117,21 +118,21 @@ void Client::SendGuildChannel()
 
 void Client::SendGuildRanks()
 {
-	if(GetClientVersion() < EQClientRoF)
+	if (GetClientVersion() < EQClientRoF)
 		return;
 
 	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
 	int ranks = 8 + 1; // Static number of RoF+ ranks as of May 2014
 	int j = 1;
 	int i = 1;
-	if(IsInAGuild())
+	if (IsInAGuild())
 	{
-		while(j < ranks)
+		while (j < ranks)
 		{
-			while(i < permissions)
+			while (i < permissions)
 			{
 				EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateRanks_Struct));
-				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*) outapp->pBuffer;
+				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*)outapp->pBuffer;
 				//guuacs->Unknown0008 = this->GuildID();
 				strncpy(guuacs->Unknown0012, this->GetCleanName(), 64);
 				guuacs->Action = 5;
@@ -156,7 +157,8 @@ void Client::SendGuildSpawnAppearance() {
 		// clear guildtag
 		SendAppearancePacket(AT_GuildID, GUILD_NONE);
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for no guild tag.");
-	} else {
+	}
+	else {
 		uint8 rank = guild_mgr.getDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		mlog(GUILDS__OUT_PACKETS, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
@@ -168,18 +170,18 @@ void Client::SendGuildSpawnAppearance() {
 
 void Client::SendGuildList() {
 	EQApplicationPacket *outapp;
-//	outapp = new EQApplicationPacket(OP_ZoneGuildList);
+	//	outapp = new EQApplicationPacket(OP_ZoneGuildList);
 	outapp = new EQApplicationPacket(OP_GuildsList);
 
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.makeGuildList(/*GetName()*/"", outapp->size);
-	if(outapp->pBuffer == nullptr) {
+	if (outapp->pBuffer == nullptr) {
 		mlog(GUILDS__ERROR, "Unable to make guild list!");
 		return;
 	}
 
 	mlog(GUILDS__OUT_PACKETS, "Sending OP_ZoneGuildList of length %d", outapp->size);
-//	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
+	//	mpkt(GUILDS__OUT_PACKET_TRACE, outapp);
 
 	FastQueuePacket(&outapp);
 }
@@ -188,7 +190,7 @@ void Client::SendGuildList() {
 void Client::SendGuildMembers() {
 	uint32 len;
 	uint8 *data = guild_mgr.makeGuildMembers(GuildID(), getName(), len);
-	if(data == nullptr)
+	if (data == nullptr)
 		return;	//invalid guild, shouldent happen.
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
@@ -227,7 +229,7 @@ void Client::RefreshGuildInfo()
 	bool WasBanker = GuildBanker;
 
 	CharacterGuildInfo info;
-	if(!guild_mgr.getCharInfo(CharacterID(), info)) {
+	if (!guild_mgr.getCharInfo(CharacterID(), info)) {
 		mlog(GUILDS__ERROR, "Unable to obtain guild char info for %s (%d)", getName(), CharacterID());
 		return;
 	}
@@ -236,9 +238,9 @@ void Client::RefreshGuildInfo()
 	guild_id = info.mGuildID;
 	GuildBanker = info.mBanker || guild_mgr.isGuildLeader(GuildID(), CharacterID());
 
-	if(((int)zone->GetZoneID() == RuleI(World, GuildBankZoneID)))
+	if (((int)zone->GetZoneID() == RuleI(World, GuildBankZoneID)))
 	{
-		if(WasBanker != GuildBanker)
+		if (WasBanker != GuildBanker)
 		{
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
 
@@ -251,11 +253,11 @@ void Client::RefreshGuildInfo()
 			FastQueuePacket(&outapp);
 		}
 
-		if((guild_id != OldGuildID) && GuildBanks)
+		if ((guild_id != OldGuildID) && GuildBanks)
 		{
 			ClearGuildBank();
 
-			if(guild_id != GUILD_NONE)
+			if (guild_id != GUILD_NONE)
 				GuildBanks->sendGuildBank(this);
 		}
 	}
@@ -263,76 +265,68 @@ void Client::RefreshGuildInfo()
 	SendGuildSpawnAppearance();
 }
 
-void EntityList::SendGuildMOTD(uint32 guild_id) {
-	if(guild_id == GUILD_NONE)
+void EntityList::sendGuildMOTD(uint32 pGuildID) {
+	if (pGuildID == GUILD_NONE)
 		return;
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if (client->GuildID() == guild_id) {
+
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client* client = i->second;
+		if (client->GuildID() == pGuildID) {
 			client->SendGuildMOTD();
 			client->SendGuildURL();
 			client->SendGuildChannel();
 		}
-		++it;
 	}
 }
 
-void EntityList::SendGuildSpawnAppearance(uint32 guild_id) {
-	if(guild_id == GUILD_NONE)
+void EntityList::sendGuildSpawnAppearance(uint32 pGuildID) {
+	if (pGuildID == GUILD_NONE)
 		return;
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if (client->GuildID() == guild_id) {
+
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client* client = i->second;
+		if (client->GuildID() == pGuildID) {
 			client->SendGuildSpawnAppearance();
 		}
-		++it;
 	}
 }
 
-void EntityList::RefreshAllGuildInfo(uint32 guild_id) {
-	if(guild_id == GUILD_NONE)
+void EntityList::refreshAllGuildInfo(uint32 pGuildID) {
+	if (pGuildID == GUILD_NONE)
 		return;
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if (client->GuildID() == guild_id) {
+
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client* client = i->second;
+		if (client->GuildID() == pGuildID) {
 			client->RefreshGuildInfo();
 		}
-		++it;
 	}
 }
 
-void EntityList::SendGuildMembers(uint32 guild_id) {
-	if(guild_id == GUILD_NONE)
+void EntityList::sendGuildMembers(uint32 pGuildID) {
+	if (pGuildID == GUILD_NONE)
 		return;
 
 	//this could be optimized a bit to only build the member's packet once
 	//and then keep swapping out the name in the packet on each send.
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if (client->GuildID() == guild_id) {
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client* client = i->second;
+		if (client->GuildID() == pGuildID) {
 			client->SendGuildMembers();
 		}
-		++it;
 	}
 }
 
-void EntityList::SendGuildList() {
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		client->SendGuildList();
-		++it;
+void EntityList::sendGuildList() {
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		i->second->SendGuildList();
 	}
 }
 
 void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
-	GuildJoin_Struct* outgj=(GuildJoin_Struct*)outapp->pBuffer;
+	GuildJoin_Struct* outgj = (GuildJoin_Struct*)outapp->pBuffer;
 	outgj->class_ = gj->class_;
 	outgj->guild_id = gj->guild_id;
 	outgj->level = gj->level;
@@ -345,83 +339,84 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 
 	FastQueuePacket(&outapp);
 
-//	SendGuildMembers(gj->guild_id, true);
+	//	SendGuildMembers(gj->guild_id, true);
 }
 
 /*
 void EntityList::SendGuildJoin(GuildJoin_Struct* gj){
-	LinkedListIterator<Client*> iterator(client_list);
+LinkedListIterator<Client*> iterator(client_list);
 
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		Client* client = iterator.GetData()->castToClient();
-		if (client->IsInGuild(gj->guild_id))
-			client->SendGuildJoin(gj);
-		iterator.Advance();
-	}
+iterator.Reset();
+while(iterator.MoreElements())
+{
+Client* client = iterator.GetData()->castToClient();
+if (client->IsInGuild(gj->guild_id))
+client->SendGuildJoin(gj);
+iterator.Advance();
+}
 }*/
 
 
 
 /*bool Client::SetGuild(uint32 in_guild_id, uint8 in_rank) {
 	if (in_guild_id == 0) {
-		// update DB
-		if (!guild_mgr.SetGuild(character_id, 0, GUILD_MEMBER))
-			return false;
-		// clear guildtag
-		guild_id = GUILD_NONE;
-		SendAppearancePacket(AT_GuildID, GUILD_NONE);
-		SendAppearancePacket(AT_GuildRank, GUILD_RANK_NONE);
-		UpdateWho();
-		return true;
+	// update DB
+	if (!guild_mgr.SetGuild(character_id, 0, GUILD_MEMBER))
+	return false;
+	// clear guildtag
+	guild_id = GUILD_NONE;
+	SendAppearancePacket(AT_GuildID, GUILD_NONE);
+	SendAppearancePacket(AT_GuildRank, GUILD_RANK_NONE);
+	UpdateWho();
+	return true;
 	} else {
-		if (!guild_mgr.SetGuild(character_id, in_guild_id, in_rank))
-			return false;
-		guildrank = in_rank;
-		if (guild_id != in_guild_id) {
-			guild_id = in_guild_id;
-			SendAppearancePacket(AT_GuildID, in_guild_id);
-		}
-		SendAppearancePacket(AT_GuildRank, in_rank);
-		UpdateWho();
-		return true;
+	if (!guild_mgr.SetGuild(character_id, in_guild_id, in_rank))
+	return false;
+	guildrank = in_rank;
+	if (guild_id != in_guild_id) {
+	guild_id = in_guild_id;
+	SendAppearancePacket(AT_GuildID, in_guild_id);
+	}
+	SendAppearancePacket(AT_GuildRank, in_rank);
+	UpdateWho();
+	return true;
 	}
 	UpdateWho();
 	return false;
-}*/
+	}*/
 
 /*
 void Client::GuildChangeRank(uint32 guild_id, uint32 oldrank, uint32 newrank){
-	GuildChangeRank(GetName(), guild_id, oldrank, newrank);
+GuildChangeRank(GetName(), guild_id, oldrank, newrank);
 }
 
 void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, uint32 newrank) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageStatus, sizeof(GuildManageStatus_Struct));
-	GuildManageStatus_Struct* gms = (GuildManageStatus_Struct*) outapp->pBuffer;
-	gms->guild_id = guild_id;
-	strcpy(gms->name, name);
-	gms->newrank = newrank;
-	gms->oldrank = oldrank;
-	entity_list.QueueClientsGuild(this, outapp, false, guild_id);
-	safe_delete(outapp);
-	SendGuildMembers(guild_id, true);
+EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageStatus, sizeof(GuildManageStatus_Struct));
+GuildManageStatus_Struct* gms = (GuildManageStatus_Struct*) outapp->pBuffer;
+gms->guild_id = guild_id;
+strcpy(gms->name, name);
+gms->newrank = newrank;
+gms->oldrank = oldrank;
+entity_list.QueueClientsGuild(this, outapp, false, guild_id);
+safe_delete(outapp);
+SendGuildMembers(guild_id, true);
 }*/
 
 
-bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone) {
+bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
 	MYSQL_ROW row;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
 	if (!RunQuery(query, MakeAnyLenString(&query,
 		"SELECT guild FROM doors where doorid=%i AND zone='%s'",
-		doorid-128, zone), errbuf, &result))
+		doorid - 128, zone), errbuf, &result))
 	{
 		LogFile->write(EQEMuLog::Error, "Error in CheckGuildDoor query '%s': %s", query, errbuf);
 		safe_delete_array(query);
 		return false;
-	} else {
+	}
+	else {
 		if (mysql_num_rows(result) == 1) {
 			row = mysql_fetch_row(result);
 			if (atoi(row[0]) == guild_id)
@@ -443,7 +438,7 @@ bool ZoneDatabase::CheckGuildDoor(uint8 doorid,uint16 guild_id,const char* zone)
 	return false;
 }
 
-bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
+bool ZoneDatabase::SetGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	uint32	affected_rows = 0;
@@ -451,7 +446,7 @@ bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) 
 		doorid = doorid - 128;
 	if (!RunQuery(query, MakeAnyLenString(&query,
 		"UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
-		guild_id, doorid, zone), errbuf, 0,&affected_rows))
+		guild_id, doorid, zone), errbuf, 0, &affected_rows))
 	{
 		LogFile->write(EQEMuLog::Error, "Error in SetGuildDoor query '%s': %s", query, errbuf);
 		safe_delete_array(query);

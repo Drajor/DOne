@@ -107,32 +107,32 @@ Lua_Client Lua_EntityList::GetClientByWID(uint32 wid) {
 
 Lua_Object Lua_EntityList::GetObjectByID(int id) {
 	Lua_Safe_Call_Class(Lua_Object);
-	return Lua_Object(self->GetObjectByID(id));
+	return Lua_Object(self->getObjectByID(id));
 }
 
 Lua_Object Lua_EntityList::GetObjectByDBID(uint32 db_id) {
 	Lua_Safe_Call_Class(Lua_Object);
-	return Lua_Object(self->GetObjectByDBID(db_id));
+	return Lua_Object(self->getObjectByDatabaseID(db_id));
 }
 
 Lua_Door Lua_EntityList::GetDoorsByID(int id) {
 	Lua_Safe_Call_Class(Lua_Door);
-	return Lua_Door(self->GetDoorsByID(id));
+	return Lua_Door(self->getDoorsByID(id));
 }
 
 Lua_Door Lua_EntityList::GetDoorsByDBID(uint32 db_id) {
 	Lua_Safe_Call_Class(Lua_Door);
-	return Lua_Door(self->GetDoorsByDBID(db_id));
+	return Lua_Door(self->getDoorsByDatabaseID(db_id));
 }
 
 Lua_Door Lua_EntityList::GetDoorsByDoorID(uint32 door_id) {
 	Lua_Safe_Call_Class(Lua_Door);
-	return Lua_Door(self->GetDoorsByDoorID(door_id));
+	return Lua_Door(self->getDoorsByDoorID(door_id));
 }
 
 Lua_Door Lua_EntityList::FindDoor(uint32 id) {
 	Lua_Safe_Call_Class(Lua_Door);
-	return Lua_Door(self->FindDoor(id));
+	return Lua_Door(self->findDoor(id));
 }
 
 Lua_Group Lua_EntityList::GetGroupByMob(Lua_Mob mob) {
@@ -182,17 +182,17 @@ Lua_Corpse Lua_EntityList::GetCorpseByName(const char *name) {
 
 Lua_Spawn Lua_EntityList::GetSpawnByID(uint32 id) {
 	Lua_Safe_Call_Class(Lua_Spawn);
-	return self->GetSpawnByID(id);
+	return self->getSpawnByID(id);
 }
 
 void Lua_EntityList::ClearClientPetitionQueue() {
 	Lua_Safe_Call_Void();
-	self->ClearClientPetitionQueue();
+	self->clearClientPetitionQueue();
 }
 
 bool Lua_EntityList::CanAddHateForMob(Lua_Mob p) {
 	Lua_Safe_Call_Bool();
-	return self->CanAddHateForMob(p);
+	return self->canAddHateForMOB(p);
 }
 
 void Lua_EntityList::Message(uint32 guild_dbid, uint32 type, const char *message) {

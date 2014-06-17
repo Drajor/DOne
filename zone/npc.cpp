@@ -362,7 +362,7 @@ NPC::~NPC()
 	AI_Stop();
 
 	if(proximity != nullptr) {
-		entity_list.RemoveProximity(getID());
+		entity_list.removeProximity(getID());
 		safe_delete(proximity);
 	}
 
@@ -937,7 +937,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 		NPC* npc = new NPC(npc_type, 0, in_x, in_y, in_z, in_heading/8, FlyMode3);
 		npc->GiveNPCTypeData(npc_type);
 
-		entity_list.AddNPC(npc);
+		entity_list.addNPC(npc);
 
 		if (client) {
 			// Notify client of spawn data

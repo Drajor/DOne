@@ -386,7 +386,7 @@ XS(XS_EntityList_GetObjectByDBID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetObjectByDBID(id);
+		RETVAL = THIS->getObjectByDatabaseID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void*)RETVAL);
 	}
@@ -413,7 +413,7 @@ XS(XS_EntityList_GetObjectByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetObjectByID(id);
+		RETVAL = THIS->getObjectByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void*)RETVAL);
 	}
@@ -440,7 +440,7 @@ XS(XS_EntityList_GetDoorsByDBID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetDoorsByDBID(id);
+		RETVAL = THIS->getDoorsByDatabaseID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void*)RETVAL);
 	}
@@ -467,7 +467,7 @@ XS(XS_EntityList_GetDoorsByDoorID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetDoorsByDoorID(id);
+		RETVAL = THIS->getDoorsByDoorID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void*)RETVAL);
 	}
@@ -494,7 +494,7 @@ XS(XS_EntityList_GetDoorsByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetDoorsByID(id);
+		RETVAL = THIS->getDoorsByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void*)RETVAL);
 	}
@@ -521,7 +521,7 @@ XS(XS_EntityList_FindDoor)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->FindDoor(id);
+		RETVAL = THIS->findDoor(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void*)RETVAL);
 	}
@@ -825,7 +825,7 @@ XS(XS_EntityList_ClearClientPetitionQueue)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->ClearClientPetitionQueue();
+		THIS->clearClientPetitionQueue();
 	}
 	XSRETURN_EMPTY;
 }
@@ -859,7 +859,7 @@ XS(XS_EntityList_CanAddHateForMob)
 		if(p == nullptr)
 			Perl_croak(aTHX_ "p is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CanAddHateForMob(p);
+		RETVAL = THIS->canAddHateForMOB(p);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -884,7 +884,7 @@ XS(XS_EntityList_Clear)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Clear();
+		THIS->clear();
 	}
 	XSRETURN_EMPTY;
 }
@@ -909,7 +909,7 @@ XS(XS_EntityList_RemoveMob)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveMob(delete_id);
+		RETVAL = THIS->removeMOB(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -936,7 +936,7 @@ XS(XS_EntityList_RemoveClient)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveClient(delete_id);
+		RETVAL = THIS->removeClient(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -963,7 +963,7 @@ XS(XS_EntityList_RemoveNPC)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveNPC(delete_id);
+		RETVAL = THIS->removeNPC(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -990,7 +990,7 @@ XS(XS_EntityList_RemoveGroup)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveGroup(delete_id);
+		RETVAL = THIS->removeGroup(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -1017,7 +1017,7 @@ XS(XS_EntityList_RemoveCorpse)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveCorpse(delete_id);
+		RETVAL = THIS->removeCorpse(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -1044,7 +1044,7 @@ XS(XS_EntityList_RemoveDoor)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveDoor(delete_id);
+		RETVAL = THIS->removeDoor(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -1071,7 +1071,7 @@ XS(XS_EntityList_RemoveTrap)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveTrap(delete_id);
+		RETVAL = THIS->removeTrap(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -1098,7 +1098,7 @@ XS(XS_EntityList_RemoveObject)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->RemoveObject(delete_id);
+		RETVAL = THIS->removeObject(delete_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -1123,7 +1123,7 @@ XS(XS_EntityList_RemoveAllMobs)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllMobs();
+		THIS->removeAllMobs();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1146,7 +1146,7 @@ XS(XS_EntityList_RemoveAllClients)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllClients();
+		THIS->removeAllClients();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1169,7 +1169,7 @@ XS(XS_EntityList_RemoveAllNPCs)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllNPCs();
+		THIS->removeAllNPCs();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1192,7 +1192,7 @@ XS(XS_EntityList_RemoveAllGroups)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllGroups();
+		THIS->removeAllGroups();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1215,7 +1215,7 @@ XS(XS_EntityList_RemoveAllCorpses)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllCorpses();
+		THIS->removeAllCorpses();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1238,7 +1238,7 @@ XS(XS_EntityList_RemoveAllDoors)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllDoors();
+		THIS->removeAllDoors();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1261,7 +1261,7 @@ XS(XS_EntityList_RemoveAllTraps)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllTraps();
+		THIS->removeAllTraps();
 	}
 	XSRETURN_EMPTY;
 }
@@ -1284,7 +1284,7 @@ XS(XS_EntityList_RemoveAllObjects)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveAllObjects();
+		THIS->removeAllObjects();
 	}
 	XSRETURN_EMPTY;
 }

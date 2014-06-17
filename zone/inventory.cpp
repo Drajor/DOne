@@ -631,7 +631,7 @@ void Client::DropItem(int16 slot_id)
 
 	// Package as zone object
 	Object* object = new Object(this, inst);
-	entity_list.AddObject(object, true);
+	entity_list.addObject(object, true);
 	object->StartDecay();
 
 	safe_delete(inst);
@@ -655,7 +655,7 @@ void Client::DropInst(const ItemInst* inst)
 
 	// Package as zone object
 	Object* object = new Object(this, inst);
-	entity_list.AddObject(object, true);
+	entity_list.addObject(object, true);
 	object->StartDecay();
 }
 

@@ -658,7 +658,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca, true, true);
+		entity_list.addNPC(npca, true, true);
 		summon_count--;
 	}
 
@@ -748,7 +748,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 		if(npc_dup != nullptr)
 			npca->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca, true, true);
+		entity_list.addNPC(npca, true, true);
 		summon_count--;
 	}
 }
@@ -937,7 +937,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	if(make_npc != nullptr)
 		npca->GiveNPCTypeData(make_npc);
 
-	entity_list.AddNPC(npca, true, true);
+	entity_list.addNPC(npca, true, true);
 
 	//the target of these swarm pets will take offense to being cast on...
 	if(target != nullptr)

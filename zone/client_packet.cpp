@@ -616,7 +616,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = new EQApplicationPacket;
 
 	// Send Zone Doors
-	if(entity_list.MakeDoorSpawnPacket(outapp, this))
+	if(entity_list.makeDoorSpawnPacket(outapp, this))
 	{
 		QueuePacket(outapp);
 	}
@@ -1217,7 +1217,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	if(proximity_timer.Check()) {
-		entity_list.ProcessMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		entity_list.processMove(this, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 		if(RuleB(TaskSystem, EnableTaskSystem) && RuleB(TaskSystem,EnableTaskProximity))
 			ProcessTaskProximities(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 		proximity_x = ppu->x_pos;
@@ -5923,7 +5923,7 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 		}
 
 		ClickObjectAction_Struct* oos = (ClickObjectAction_Struct*)app->pBuffer;
-		Entity* entity = entity_list.GetEntityObject(oos->drop_id);
+		Entity* entity = entity_list.getEntityObject(oos->drop_id);
 		if (entity && entity->isObject()) {
 			Object* object = entity->castToObject();
 			if(oos->open == 0) {
@@ -6187,7 +6187,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		return;
 	}
 	ClickDoor_Struct* cd = (ClickDoor_Struct*)app->pBuffer;
-	Doors* currentdoor = entity_list.FindDoor(cd->doorid);
+	Doors* currentdoor = entity_list.findDoor(cd->doorid);
 	if(!currentdoor)
 	{
 		Message(0,"Unable to find door, please notify a GM (DoorID: %i).",cd->doorid);
@@ -6420,7 +6420,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 			group = new Group(inviter);
 			if(!group)
 				return;
-			entity_list.AddGroup(group);
+			entity_list.addGroup(group);
 
 			if(group->GetID() == 0) {
 				Message(13, "Unable to get new group id. Cannot create group.");
@@ -6600,7 +6600,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 							if(!memberMerc->IsGrouped() && !memberClient->IsGrouped()) {
 								Group *g = new Group(memberClient);
 
-								entity_list.AddGroup(g);
+								entity_list.addGroup(g);
 
 								if(g->GetID() == 0) {
 									safe_delete(g);
@@ -6634,7 +6634,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 								return;
 							}
 
-							entity_list.AddGroup(g);
+							entity_list.addGroup(g);
 
 							if(g->GetID() == 0) {
 								safe_delete(g);
@@ -8052,7 +8052,7 @@ void Client::Handle_OP_Track(const EQApplicationPacket *app)
 	else
 		CheckIncreaseSkill(SkillTracking, nullptr, 15);
 
-	if(!entity_list.MakeTrackPacket(this))
+	if(!entity_list.makeTrackPacket(this))
 		LogFile->write(EQEMuLog::Error, "Unable to generate OP_Track packet requested by client.");
 
 	return;
@@ -8968,7 +8968,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 		if(!group) {	//nobody from our is here... start a new group
 			group = new Group(groupid);
 			if(group->GetID() != 0)
-				entity_list.AddGroup(group, groupid);
+				entity_list.addGroup(group, groupid);
 			else	//error loading group members...
 			{
 				delete group;
@@ -9278,7 +9278,7 @@ void Client::CompleteConnect()
 		if(!raid){
 			raid = new Raid(raidid);
 			if(raid->GetID() != 0){
-				entity_list.AddRaid(raid, raidid);
+				entity_list.addRaid(raid, raidid);
 			}
 			else
 				raid = nullptr;
@@ -9468,7 +9468,7 @@ void Client::CompleteConnect()
 			pet->SendWearChange(x);
 	}
 
-	entity_list.SendTraders(this);
+	entity_list.sendTraders(this);
 
 	zoneinpacket_timer.Start();
 
@@ -9926,7 +9926,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				if(g) //if our target has a group
 				{
 					r = new Raid(i);
-					entity_list.AddRaid(r);
+					entity_list.addRaid(r);
 					r->SetRaidDetails();
 
 					uint32 groupFree = r->GetFreeGroup(); //get a free group
@@ -10031,7 +10031,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				{
 					if(ig){
 						r = new Raid(i);
-						entity_list.AddRaid(r);
+						entity_list.addRaid(r);
 						r->SetRaidDetails();
 						Client *addClientig = nullptr;
 						for(int x = 0; x < 6; x++)
@@ -10090,7 +10090,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 					}
 					else{
 						r = new Raid(i);
-						entity_list.AddRaid(r);
+						entity_list.addRaid(r);
 						r->SetRaidDetails();
 						r->SendRaidCreate(i);
 						r->SendRaidCreate(this);
@@ -12340,7 +12340,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	if(!corpse || !corpse->isPlayerCorpse() || corpse->castToCorpse()->IsBeingLooted())
 		return;
 
-	Client *c = entity_list.FindCorpseDragger(corpse->getID());
+	Client *c = entity_list.findCorpseDragger(corpse->getID());
 
 	if(c)
 	{

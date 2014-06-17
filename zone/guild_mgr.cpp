@@ -324,17 +324,17 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 
 									if (s->motd_change) {
 										//resend guild MOTD to all guild members in this zone.
-										entity_list.SendGuildMOTD(s->guild_id);
+										entity_list.sendGuildMOTD(s->guild_id);
 									}
 
 									if (s->name_change) {
 										//until we figure out the guild update packet, we resend the whole guild list.
-										entity_list.SendGuildList();
+										entity_list.sendGuildList();
 									}
 
 									if (s->rank_change) {
 										//we need to send spawn appearance packets for all members of this guild in the zone, to everybody.
-										entity_list.SendGuildSpawnAppearance(s->guild_id);
+										entity_list.sendGuildSpawnAppearance(s->guild_id);
 									}
 
 									if (s->relation_change) {
@@ -366,11 +366,11 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 												c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
 										}
 										else {
-											entity_list.SendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
+											entity_list.sendGuildMembers(s->guild_id);		//even send GUILD_NONE (empty)
 										}
 
 										if (s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
-											entity_list.SendGuildMembers(s->old_guild_id);
+											entity_list.sendGuildMembers(s->old_guild_id);
 										else if (c != nullptr && s->guild_id != GUILD_NONE) {
 											//char is in zone, and has changed into a new guild, send MOTD.
 											c->SendGuildMOTD();
@@ -420,7 +420,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 								   _log(GUILDS__REFRESH, "Received guild delete from world for guild %d", s->guild_id);
 
 								   //clear all the guild tags.
-								   entity_list.RefreshAllGuildInfo(s->guild_id);
+								   entity_list.refreshAllGuildInfo(s->guild_id);
 
 								   //remove the guild data from the local guild manager
 								   guild_mgr.localDeleteGuild(s->guild_id);

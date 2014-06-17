@@ -793,7 +793,7 @@ void Group::disbandGroup() {
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
-	entity_list.RemoveGroup(GetID());
+	entity_list.removeGroup(GetID());
 	if (GetID() != 0)
 		database.ClearGroup(GetID());
 

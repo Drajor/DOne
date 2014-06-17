@@ -75,7 +75,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 Merc::~Merc() {
 	AI_Stop();
-	entity_list.RemoveMerc(this->getID());
+	entity_list.removeMerc(this->getID());
 	UninitializeBuffSlots();
 }
 
@@ -5129,7 +5129,7 @@ bool Merc::Spawn(Client *owner) {
 	if(!merc_template)
 		return false;
 
-	entity_list.AddMerc(this, true, true);
+	entity_list.addMerc(this, true, true);
 
 	SendPosition();
 
@@ -5552,7 +5552,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 				return false;
 			}
 
-			entity_list.AddGroup(g);
+			entity_list.addGroup(g);
 
 			if(g->GetID() == 0) {
 				delete g;
@@ -5561,7 +5561,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			}
 
 			if(AddMercToGroup(this, g)) {
-				entity_list.AddGroup(g, g->GetID());
+				entity_list.addGroup(g, g->GetID());
 				database.SetGroupLeaderName(g->GetID(), mercOwner->getName());
 				database.SetGroupID(mercOwner->getName(), g->GetID(), mercOwner->CharacterID());
 				database.SetGroupID(this->getName(), g->GetID(), mercOwner->CharacterID(), true);
@@ -5628,7 +5628,7 @@ void Merc::Zone() {
 
 void Merc::depop() {
 	WipeHateList();
-	entity_list.RemoveMerc(this->getID());
+	entity_list.removeMerc(this->getID());
 	entity_list.RemoveFromHateLists(this);
 
 	if(HasGroup())

@@ -2729,7 +2729,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 
 				npc->AddLootTable();
-			entity_list.AddNPC(npc);
+			entity_list.addNPC(npc);
 		}
 		else
 			c->Message(0, "NPC Type %i not found", atoi(sep->arg[1]));
@@ -3334,13 +3334,13 @@ void command_reloadqst(Client *c, const Seperator *sep)
 	if (sep->arg[1][0] == 0)
 	{
 		c->Message(0, "Clearing quest memory cache.");
-		entity_list.ClearAreas();
+		entity_list.clearAreas();
 		parse->ReloadQuests();
 	}
 	else
 	{
 		c->Message(0, "Clearing quest memory cache and stopping timers.");
-		entity_list.ClearAreas();
+		entity_list.clearAreas();
 		parse->ReloadQuests(true);
 	}
 
@@ -9579,7 +9579,7 @@ void command_object(Client *c, const Seperator *sep)
 				if (id)
 				{
 					// Not in database. Already spawned, just not saved?
-					if (entity_list.FindObject(id))
+					if (entity_list.findObject(id))
 					{
 						// Yep, already spawned.
 
@@ -9623,7 +9623,7 @@ void command_object(Client *c, const Seperator *sep)
 			if (iObjectsFound == 0)
 			{
 				// No objects found in database too close. How about spawned but not yet saved?
-				if (entity_list.FindNearbyObject(od.x, od.y, od.z, 0.2f))
+				if (entity_list.findNearbyObject(od.x, od.y, od.z, 0.2f))
 				{
 					iObjectsFound++;
 				}
@@ -9683,7 +9683,7 @@ void command_object(Client *c, const Seperator *sep)
 			}
 
 			// Make sure not to overwrite already-spawned objects that haven't been saved yet.
-			while (o = entity_list.FindObject(id))
+			while (o = entity_list.findObject(id))
 			{
 				id++;
 			}
@@ -9699,7 +9699,7 @@ void command_object(Client *c, const Seperator *sep)
 			o = new Object(id, od.object_type, icon, od, nullptr);
 
 			// Add to our zone entity list and spawn immediately for all clients
-			entity_list.AddObject(o, true);
+			entity_list.addObject(o, true);
 
 			// Bump player back to avoid getting stuck inside new object
 
@@ -9726,7 +9726,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o = entity_list.FindObject(id);
+			o = entity_list.findObject(id);
 
 			// Object already available in-zone?
 			if (o)
@@ -10028,7 +10028,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if (!(o = entity_list.FindObject(id)))
+			if (!(o = entity_list.findObject(id)))
 			{
 				len = snprintf(query, sizeof(query), "SELECT zoneid, version, type FROM object WHERE id=%u", id);
 
@@ -10153,7 +10153,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			if ((o = entity_list.FindObject(id)) == nullptr)
+			if ((o = entity_list.findObject(id)) == nullptr)
 			{
 				c->Message(0, "ERROR: Object %u not found in zone, or is a static object not yet unlocked with '#object Edit' for editing.", id);
 
@@ -10182,7 +10182,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o = entity_list.FindObject(id);
+			o = entity_list.findObject(id);
 
 			sprintf(query, "SELECT zoneid, version, type FROM object WHERE id=%u", id);
 
@@ -10369,7 +10369,7 @@ void command_object(Client *c, const Seperator *sep)
 				entity_list.QueueClients(0, app);
 				safe_delete(app);
 
-				entity_list.RemoveObject(o->getID());
+				entity_list.removeObject(o->getID());
 
 				memset(&door, 0, sizeof(door));
 
@@ -10412,7 +10412,7 @@ void command_object(Client *c, const Seperator *sep)
 				door.client_version_mask = 0xFFFFFFFF;
 
 				doors = new Doors(&door);
-				entity_list.AddDoor(doors);
+				entity_list.addDoor(doors);
 
 				app = new EQApplicationPacket(OP_SpawnDoor, sizeof(Door_Struct));
 				ds = (Door_Struct*)app->pBuffer;
@@ -10561,7 +10561,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o = entity_list.FindObject(id);
+			o = entity_list.findObject(id);
 
 			if (o)
 			{
@@ -10571,7 +10571,7 @@ void command_object(Client *c, const Seperator *sep)
 				o->CreateDeSpawnPacket(app);
 				entity_list.QueueClients(nullptr, app);
 
-				entity_list.RemoveObject(o->getID());
+				entity_list.removeObject(o->getID());
 
 				// Verifying ZoneID and Version in case someone else ended up adding an object with our ID
 				// from a different zone/version. Don't want to delete someone else's work.
@@ -10629,7 +10629,7 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			o = entity_list.FindObject(id);
+			o = entity_list.findObject(id);
 
 			if (!o)
 			{
@@ -10649,7 +10649,7 @@ void command_object(Client *c, const Seperator *sep)
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
 			entity_list.QueueClients(0, app);
-			entity_list.RemoveObject(o->getID());
+			entity_list.removeObject(o->getID());
 			safe_delete(app);
 
 			len = snprintf(query, sizeof(query),
@@ -10695,7 +10695,7 @@ void command_object(Client *c, const Seperator *sep)
 			}
 
 			o = new Object(id, od.object_type, icon, od, nullptr);
-			entity_list.AddObject(o, true);
+			entity_list.addObject(o, true);
 
 			c->Message(0, "Object %u reloaded from database.", id);
 			break;

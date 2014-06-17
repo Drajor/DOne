@@ -146,7 +146,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					NPC* new_npc = new NPC(tmp, 0, x-5+MakeRandomInt(0, 10), y-5+MakeRandomInt(0, 10), z-5+MakeRandomInt(0, 10), MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
-					entity_list.AddNPC(new_npc);
+					entity_list.addNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
 			}
@@ -167,7 +167,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					NPC* new_npc = new NPC(tmp, 0, x-2+MakeRandomInt(0, 5), y-2+MakeRandomInt(0, 5), z-2+MakeRandomInt(0, 5), MakeRandomInt(0, 249), FlyMode3);
 					new_npc->AddLootTable();
-					entity_list.AddNPC(new_npc);
+					entity_list.addNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
 				}
 			}
@@ -291,7 +291,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 			trap->respawn_time = atoi(row[12]);
 			trap->respawn_var = atoi(row[13]);
 			trap->level = atoi(row[14]);
-			entity_list.AddTrap(trap);
+			entity_list.addTrap(trap);
 			trap->CreateHiddenTrigger();
 		}
 		mysql_free_result(result);
@@ -329,7 +329,7 @@ void Trap::CreateHiddenTrigger()
 	strcpy(make_npc->special_abilities, "19,1^20,1^24,1^25,1");
 	NPC* npca = new NPC(make_npc, 0, x, y, z, 0, FlyMode3);
 	npca->GiveNPCTypeData(make_npc);
-	entity_list.AddNPC(npca);
+	entity_list.addNPC(npca);
 
 	hiddenTrigger = npca;
 	ownHiddenTrigger = true;

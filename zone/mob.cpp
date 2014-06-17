@@ -413,7 +413,7 @@ Mob::~Mob()
 	}
 
 	if(HadTempPets()){
-		entity_list.DestroyTempPets(this);
+		entity_list.destroyTempPets(this);
 	}
 	entity_list.UnMarkNPC(getID());
 	safe_delete(PathingLOSCheckTimer);
@@ -1346,7 +1346,7 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 	Route.clear();
 
 	if(isNPC()) {
-		entity_list.ProcessMove(castToNPC(), x, y, z);
+		entity_list.processMove(castToNPC(), x, y, z);
 	}
 
 	x_pos = x;
@@ -2725,7 +2725,7 @@ void Mob::SetNextIncHPEvent( int inchpevent )
 void Mob::Warp( float x, float y, float z )
 {
 	if(isNPC()) {
-		entity_list.ProcessMove(castToNPC(), x, y, z);
+		entity_list.processMove(castToNPC(), x, y, z);
 	}
 
 	x_pos = x;

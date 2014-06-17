@@ -768,7 +768,7 @@ void Object::depop()
 	this->CreateDeSpawnPacket(app);
 	entity_list.QueueClients(0, app);
 	safe_delete(app);
-	entity_list.RemoveObject(this->getID());
+	entity_list.removeObject(this->getID());
 }
 
 void Object::Repop()

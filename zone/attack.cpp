@@ -1670,7 +1670,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 				}
 			}
 
-			entity_list.AddCorpse(new_corpse, getID());
+			entity_list.addCorpse(new_corpse, getID());
 			setID(0);
 
 			//send the become corpse packet to everybody else in the zone.
@@ -2322,10 +2322,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
-		entity_list.AddCorpse(corpse, getID());
+		entity_list.addCorpse(corpse, getID());
 
 		entity_list.UnMarkNPC(getID());
-		entity_list.RemoveNPC(getID());
+		entity_list.removeNPC(getID());
 		this->setID(0);
 		if(killer != 0 && emoteid != 0)
 			corpse->castToNPC()->DoNPCEmote(AFTERDEATH, emoteid);

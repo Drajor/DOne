@@ -427,7 +427,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	if (in_size > 0.0f)
 		npc->size = in_size;
 
-	entity_list.AddNPC(npc, true, true);
+	entity_list.addNPC(npc, true, true);
 	SetPetID(npc->getID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 }

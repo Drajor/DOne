@@ -880,15 +880,15 @@ luabind::object lua_get_zone_time(lua_State *L) {
 }
 
 void lua_add_area(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z) {
-	entity_list.AddArea(id, type, min_x, max_x, min_y, max_y, min_z, max_z);
+	entity_list.addArea(id, type, min_x, max_x, min_y, max_y, min_z, max_z);
 }
 
 void lua_remove_area(int id) {
-	entity_list.RemoveArea(id);
+	entity_list.removeArea(id);
 }
 
 void lua_clear_areas() {
-	entity_list.ClearAreas();
+	entity_list.clearAreas();
 }
 
 void lua_remove_spawn_point(uint32 spawn2_id) {

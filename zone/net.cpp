@@ -377,7 +377,7 @@ int main(int argc, char** argv) {
 			in.s_addr = eqsi->GetRemoteIP();
 			_log(WORLD__CLIENT, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 			Client* client = new Client(eqsi);
-			entity_list.AddClient(client);
+			entity_list.addClient(client);
 		}
 
 		if ( numclients < 1 && zoneupdate_timer.GetDuration() != IDLEZONEUPDATE )
@@ -403,28 +403,28 @@ int main(int argc, char** argv) {
 		if (ZoneLoaded && zoneupdate_timer.Check()) {
 			{
 				if(net.group_timer.Enabled() && net.group_timer.Check())
-					entity_list.GroupProcess();
+					entity_list.groupProcess();
 
 				if(net.door_timer.Enabled() && net.door_timer.Check())
-					entity_list.DoorProcess();
+					entity_list.doorProcess();
 
 				if(net.object_timer.Enabled() && net.object_timer.Check())
-					entity_list.ObjectProcess();
+					entity_list.objectProcess();
 
 				if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
-					entity_list.CorpseProcess();
+					entity_list.corpseProcess();
 
 				if(net.trap_timer.Enabled() && net.trap_timer.Check())
-					entity_list.TrapProcess();
+					entity_list.trapProcess();
 
 				if(net.raid_timer.Enabled() && net.raid_timer.Check())
-					entity_list.RaidProcess();
+					entity_list.raidProcess();
 
 				entity_list.Process();
 
-				entity_list.MobProcess();
+				entity_list.MOBProcess();
 
-				entity_list.BeaconProcess();
+				entity_list.beaconProcess();
 
 				if (zone) {
 					if(!zone->Process()) {
@@ -480,7 +480,7 @@ int main(int argc, char** argv) {
 		Sleep(ZoneTimerResolution);
 	}
 
-	entity_list.Clear();
+	entity_list.clear();
 
 	parse->ClearInterfaces();
 

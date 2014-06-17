@@ -149,7 +149,7 @@ void Client::SummonHorse(uint16 spell_id) {
 
 	//we want to manage the spawn packet ourself.
 	//another reason is we dont want quests executing on it.
-	entity_list.AddNPC(horse, false);
+	entity_list.addNPC(horse, false);
 
 	// Okay, lets say they have a horse now.
 

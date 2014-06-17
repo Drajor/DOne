@@ -1740,7 +1740,7 @@ Corpse* ZoneDatabase::SummonBurriedPlayerCorpse(uint32 char_id, uint32 dest_zone
 		if(row) {
 			NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), char_id, row[1], (uchar*) row[2], lengths[2], dest_x, dest_y, dest_z, dest_heading, row[3],atoi(row[4])==1, false);
 			if(NewCorpse) {
-				entity_list.AddCorpse(NewCorpse);
+				entity_list.addCorpse(NewCorpse);
 				NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
 				NewCorpse->Spawn();
 				if(!UnburyPlayerCorpse(NewCorpse->GetDBID(), dest_zoneid, dest_instanceid, dest_x, dest_y, dest_z, dest_heading))
@@ -1788,7 +1788,7 @@ bool ZoneDatabase::SummonAllPlayerCorpses(uint32 char_id, uint32 dest_zoneid, ui
 			NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), char_id, row[1], (uchar*) row[2], lengths[2], dest_x, dest_y,
 								dest_z, dest_heading, row[3],atoi(row[4])==1, false);
 			if(NewCorpse) {
-				entity_list.AddCorpse(NewCorpse);
+				entity_list.addCorpse(NewCorpse);
 				NewCorpse->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
 				NewCorpse->Spawn();
 				++CorpseCount;
@@ -1844,7 +1844,7 @@ Corpse* ZoneDatabase::LoadPlayerCorpse(uint32 player_corpse_id) {
 		if(row && lengths)
 		{
 		NewCorpse = Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10]));
-		entity_list.AddCorpse(NewCorpse);
+		entity_list.addCorpse(NewCorpse);
 		}
 		mysql_free_result(result);
 	}
@@ -1876,7 +1876,7 @@ bool ZoneDatabase::LoadPlayerCorpses(uint32 iZoneID, uint16 iInstanceID) {
 		safe_delete_array(query);
 		while ((row = mysql_fetch_row(result))) {
 			lengths = mysql_fetch_lengths(result);
-			entity_list.AddCorpse(Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10])));
+			entity_list.addCorpse(Corpse::LoadFromDBData(atoi(row[0]), atoi(row[1]), row[2], (uchar*) row[7], lengths[7], atof(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), row[8],atoi(row[9])==1, atoi(row[10])));
 		}
 		mysql_free_result(result);
 	}

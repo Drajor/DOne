@@ -114,7 +114,7 @@ void QuestManager::Process() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
-			if(entity_list.IsMobInZone(cur->mob)) {
+			if(entity_list.isMOBInZone(cur->mob)) {
 				if(cur->mob->isNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->castToNPC(), nullptr, cur->name, 0);
 				} else {
@@ -240,7 +240,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y, 
 	{
 		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
 		npc->AddLootTable();
-		entity_list.AddNPC(npc,true,true);
+		entity_list.addNPC(npc,true,true);
 		if(grid > 0)
 		{
 			npc->AssignWaypoints(grid);
@@ -262,7 +262,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, flo
 	{
 		NPC* npc = new NPC(tmp, 0, x, y, z, heading, FlyMode3);
 		npc->AddLootTable();
-		entity_list.AddNPC(npc,true,true);
+		entity_list.addNPC(npc,true,true);
 		if(grid > 0)
 		{
 			npc->AssignWaypoints(grid);
@@ -339,7 +339,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		found_spawn->SetNPCPointer(npc);
 		npc->AddLootTable();
 		npc->SetSp2(found_spawn->SpawnGroupID());
-		entity_list.AddNPC(npc);
+		entity_list.addNPC(npc);
 		entity_list.LimitAddNPC(npc);
 
 		if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
@@ -1628,7 +1628,7 @@ void QuestManager::respawn(int npc_type, int grid) {
 	{
 		owner = new NPC(tmp, 0, x, y, z, h, FlyMode3);
 		owner->castToNPC()->AddLootTable();
-		entity_list.AddNPC(owner->castToNPC(),true,true);
+		entity_list.addNPC(owner->castToNPC(),true,true);
 		if(grid > 0)
 			owner->castToNPC()->AssignWaypoints(grid);
 
@@ -1641,7 +1641,7 @@ void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy,
 	if (!owner || !owner->isNPC())
 		return;
 
-	entity_list.AddProximity(owner->castToNPC());
+	entity_list.addProximity(owner->castToNPC());
 
 	owner->castToNPC()->proximity->min_x = minx;
 	owner->castToNPC()->proximity->max_x = maxx;
@@ -1656,7 +1656,7 @@ void QuestManager::clear_proximity() {
 	if(!owner || !owner->isNPC())
 		return;
 
-	entity_list.RemoveProximity(owner->getID());
+	entity_list.removeProximity(owner->getID());
 	safe_delete(owner->castToNPC()->proximity);
 }
 
@@ -1813,7 +1813,7 @@ bool QuestManager::buryplayercorpse(uint32 char_id)
 }
 
 void QuestManager::forcedooropen(uint32 doorid, bool altmode) {
-	Doors* d = entity_list.FindDoor(doorid);
+	Doors* d = entity_list.findDoor(doorid);
 	if(d){
 		if(GetInitiator())
 			d->ForceOpen(GetInitiator(), altmode);
@@ -1823,7 +1823,7 @@ void QuestManager::forcedooropen(uint32 doorid, bool altmode) {
 }
 
 void QuestManager::forcedoorclose(uint32 doorid, bool altmode) {
-	Doors* d = entity_list.FindDoor(doorid);
+	Doors* d = entity_list.findDoor(doorid);
 	if(d){
 		if(GetInitiator())
 			d->ForceClose(GetInitiator(), altmode);
@@ -1833,7 +1833,7 @@ void QuestManager::forcedoorclose(uint32 doorid, bool altmode) {
 }
 
 void QuestManager::toggledoorstate(uint32 doorid) {
-	Doors* d = entity_list.FindDoor(doorid);
+	Doors* d = entity_list.findDoor(doorid);
 	if(d){
 		if(GetInitiator())
 			d->ToggleState(GetInitiator());
@@ -1843,7 +1843,7 @@ void QuestManager::toggledoorstate(uint32 doorid) {
 }
 
 bool QuestManager::isdooropen(uint32 doorid) {
-	Doors* d = entity_list.FindDoor(doorid);
+	Doors* d = entity_list.findDoor(doorid);
 	if(d){
 		return d->IsDoorOpen();
 	}
