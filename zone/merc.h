@@ -53,7 +53,7 @@ public:
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return 0; }
-	virtual Group* GetGroup() { return entity_list.GetGroupByMob(this); }
+	virtual Group* GetGroup() { return entity_list.getGroupByMOB(this); }
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Start(int32 iMoveDelay = 0);

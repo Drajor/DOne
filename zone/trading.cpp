@@ -132,7 +132,7 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 // Done like this in case 'with' mob goes LD and Mob* becomes invalid
 Mob* Trade::With()
 {
-	return entity_list.GetMob(with_id);
+	return entity_list.getMOB(with_id);
 }
 
 // Private Method: Send item data for trade item to other person involved in trade
@@ -776,7 +776,7 @@ void Client::Trader_EndTrader() {
 	// If someone is looking at our wares, remove all the items from the window.
 	//
 	if(CustomerID) {
-		Client* Customer = entity_list.GetClientByID(CustomerID);
+		Client* Customer = entity_list.getClientByID(CustomerID);
 		GetItems_Struct* gis=GetTraderItems();
 
 		if(Customer && gis) {
@@ -1378,7 +1378,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 	Search.append("where trader.item_id=items.id");
 
 	if(TraderID > 0){
-		Client* Trader = entity_list.GetClientByID(TraderID);
+		Client* Trader = entity_list.getClientByID(TraderID);
 
 		if(Trader){
 			sprintf(Tmp," and trader.char_id=%i",Trader->CharacterID());
@@ -1602,7 +1602,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 			VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Count);
 			SerialNumber = atoi(Row[3]);
 			VARSTRUCT_ENCODE_TYPE(int32, bufptr, SerialNumber);
-			Client* Trader2=entity_list.GetClientByCharID(atoi(Row[1]));
+			Client* Trader2=entity_list.getClientByCharacterID(atoi(Row[1]));
 			if(Trader2){
 				ID = Trader2->getID();
 				VARSTRUCT_ENCODE_TYPE(uint32, bufptr, ID);
@@ -1681,7 +1681,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 	// Send Item packets to the customer to update the Merchant window with the
 	// new items for sale, and give them a message in their chat window.
 
-	Client* Customer = entity_list.GetClientByID(CustomerID);
+	Client* Customer = entity_list.getClientByID(CustomerID);
 
 	if(!Customer) return;
 
@@ -1725,7 +1725,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 	// Send ItemPackets to update the customer's Merchant window with the new price (or remove the item if
 	// the new price is 0) and inform them with a chat message.
 
-	Client* Customer = entity_list.GetClientByID(CustomerID);
+	Client* Customer = entity_list.getClientByID(CustomerID);
 
 	if(!Customer) return;
 
@@ -2059,7 +2059,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 
 			// Save having to scan the client list when dealing with multiple buylines for the same Character.
 			if(CharID != LastCharID) {
-				Buyer = entity_list.GetClientByCharID(CharID);
+				Buyer = entity_list.getClientByCharacterID(CharID);
 				LastCharID = CharID;
 			}
 
@@ -2098,7 +2098,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 	BuyerInspectRequest_Struct* bir = ( BuyerInspectRequest_Struct*)app->pBuffer;
 
-	Client *Buyer = entity_list.GetClientByID(bir->BuyerID);
+	Client *Buyer = entity_list.getClientByID(bir->BuyerID);
 
 	if(!Buyer) {
 		bir->Approval = 0; // Tell the client that the Buyer is unavailable
@@ -2220,7 +2220,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	}
 
 
-	Client *Buyer = entity_list.GetClientByID(BuyerID);
+	Client *Buyer = entity_list.getClientByID(BuyerID);
 
 	if(!Buyer || !Buyer->IsBuyer()) {
 		Message(13, "The Buyer has gone away.");

@@ -1290,7 +1290,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 		return;
 
 	if(casterId > 0)
-		caster = entity_list.GetMob(casterId);
+		caster = entity_list.getMOB(casterId);
 
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{

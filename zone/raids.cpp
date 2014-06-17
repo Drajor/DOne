@@ -109,7 +109,7 @@ void Raid::RemoveMember(const char *c)
 		mysql_free_result(result);
 	}
 
-	Client *m = entity_list.GetClientByName(c);
+	Client *m = entity_list.getClientByName(c);
 	safe_delete_array(query);
 	disbandCheck = true;
 	SendRaidRemoveAll(c);
@@ -232,7 +232,7 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 
 	strn0cpy(leadername, name, 64);
 
-	Client *c = entity_list.GetClientByName(name);
+	Client *c = entity_list.getClientByName(name);
 	if(c)
 		SetLeader(c);
 
@@ -1020,7 +1020,7 @@ void Raid::SendRaidMove(const char* who, Client *to)
 	if(!to)
 		return;
 
-	Client *c = entity_list.GetClientByName(who);
+	Client *c = entity_list.getClientByName(who);
 	if(c && c == to){
 		SendRaidCreate(c);
 		SendMakeLeaderPacketTo(leadername, c);
@@ -1037,7 +1037,7 @@ void Raid::SendRaidMove(const char* who, Client *to)
 
 void Raid::SendRaidMoveAll(const char* who)
 {
-	Client *c = entity_list.GetClientByName(who);
+	Client *c = entity_list.getClientByName(who);
 	SendRaidRemoveAll(who);
 	if(c)
 		SendRaidCreate(c);
@@ -1372,7 +1372,7 @@ void Raid::VerifyRaid()
 			members[x].member = nullptr;
 		}
 		else{
-			Client *c = entity_list.GetClientByName(members[x].membername);
+			Client *c = entity_list.getClientByName(members[x].membername);
 			if(c){
 				members[x].member = c;
 			}

@@ -47,62 +47,62 @@ struct Lua_Spawn_List {
 
 Lua_Mob Lua_EntityList::GetMobID(int id) {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return Lua_Mob(self->GetMobID(id));
+	return Lua_Mob(self->getMOBByID(id));
 }
 
 Lua_Mob Lua_EntityList::GetMob(const char *name) {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return Lua_Mob(self->GetMob(name));
+	return Lua_Mob(self->getMOB(name));
 }
 
 Lua_Mob Lua_EntityList::GetMob(int id) {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return Lua_Mob(self->GetMob(id));
+	return Lua_Mob(self->getMOB(id));
 }
 
 Lua_Mob Lua_EntityList::GetMobByNpcTypeID(int npc_type) {
 	Lua_Safe_Call_Class(Lua_Mob);
-	return Lua_Mob(self->GetMobByNpcTypeID(npc_type));
+	return Lua_Mob(self->getMOBByNpcTypeID(npc_type));
 }
 
 bool Lua_EntityList::IsMobSpawnedByNpcTypeID(int npc_type) {
 	Lua_Safe_Call_Bool();
-	return self->IsMobSpawnedByNpcTypeID(npc_type);
+	return self->isMOBSpawnedByNpcTypeID(npc_type);
 }
 
 Lua_NPC Lua_EntityList::GetNPCByID(int id) {
 	Lua_Safe_Call_Class(Lua_NPC);
-	return Lua_NPC(self->GetNPCByID(id));
+	return Lua_NPC(self->getNPCByID(id));
 }
 
 Lua_NPC Lua_EntityList::GetNPCByNPCTypeID(int npc_type) {
 	Lua_Safe_Call_Class(Lua_NPC);
-	return Lua_NPC(self->GetNPCByNPCTypeID(npc_type));
+	return Lua_NPC(self->getNPCByNPCTypeID(npc_type));
 }
 
 Lua_Client Lua_EntityList::GetClientByName(const char *name) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return Lua_Client(self->GetClientByName(name));
+	return Lua_Client(self->getClientByName(name));
 }
 
 Lua_Client Lua_EntityList::GetClientByAccID(uint32 acct_id) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return Lua_Client(self->GetClientByAccID(acct_id));
+	return Lua_Client(self->getClientByAccountID(acct_id));
 }
 
 Lua_Client Lua_EntityList::GetClientByID(int id) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return Lua_Client(self->GetClientByID(id));
+	return Lua_Client(self->getClientByID(id));
 }
 
 Lua_Client Lua_EntityList::GetClientByCharID(uint32 char_id) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return Lua_Client(self->GetClientByCharID(char_id));
+	return Lua_Client(self->getClientByCharacterID(char_id));
 }
 
 Lua_Client Lua_EntityList::GetClientByWID(uint32 wid) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return Lua_Client(self->GetClientByWID(wid));
+	return Lua_Client(self->getClientByWID(wid));
 }
 
 Lua_Object Lua_EntityList::GetObjectByID(int id) {
@@ -137,47 +137,47 @@ Lua_Door Lua_EntityList::FindDoor(uint32 id) {
 
 Lua_Group Lua_EntityList::GetGroupByMob(Lua_Mob mob) {
 	Lua_Safe_Call_Class(Lua_Group);
-	return Lua_Group(self->GetGroupByMob(mob));
+	return Lua_Group(self->getGroupByMOB(mob));
 }
 
 Lua_Group Lua_EntityList::GetGroupByClient(Lua_Client client) {
 	Lua_Safe_Call_Class(Lua_Group);
-	return Lua_Group(self->GetGroupByClient(client));
+	return Lua_Group(self->getGroupByClient(client));
 }
 
 Lua_Group Lua_EntityList::GetGroupByID(int id) {
 	Lua_Safe_Call_Class(Lua_Group);
-	return Lua_Group(self->GetGroupByID(id));
+	return Lua_Group(self->getGroupByID(id));
 }
 
 Lua_Group Lua_EntityList::GetGroupByLeaderName(const char *name) {
 	Lua_Safe_Call_Class(Lua_Group);
-	return Lua_Group(self->GetGroupByLeaderName(name));
+	return Lua_Group(self->getGroupByLeaderName(name));
 }
 
 Lua_Raid Lua_EntityList::GetRaidByID(int id) {
 	Lua_Safe_Call_Class(Lua_Raid);
-	return Lua_Raid(self->GetRaidByID(id));
+	return Lua_Raid(self->getRaidByID(id));
 }
 
 Lua_Raid Lua_EntityList::GetRaidByClient(Lua_Client client) {
 	Lua_Safe_Call_Class(Lua_Raid);
-	return Lua_Raid(self->GetRaidByClient(client));
+	return Lua_Raid(self->getRaidByClient(client));
 }
 
 Lua_Corpse Lua_EntityList::GetCorpseByOwner(Lua_Client client) {
 	Lua_Safe_Call_Class(Lua_Corpse);
-	return Lua_Corpse(self->GetCorpseByOwner(client));
+	return Lua_Corpse(self->getCorpseByOwner(client));
 }
 
 Lua_Corpse Lua_EntityList::GetCorpseByID(int id) {
 	Lua_Safe_Call_Class(Lua_Corpse);
-	return Lua_Corpse(self->GetCorpseByID(id));
+	return Lua_Corpse(self->getCorpseByID(id));
 }
 
 Lua_Corpse Lua_EntityList::GetCorpseByName(const char *name) {
 	Lua_Safe_Call_Class(Lua_Corpse);
-	return Lua_Corpse(self->GetCorpseByName(name));
+	return Lua_Corpse(self->getCorpseByName(name));
 }
 
 Lua_Spawn Lua_EntityList::GetSpawnByID(uint32 id) {
@@ -298,12 +298,12 @@ void Lua_EntityList::MessageGroup(Lua_Mob who, bool skip_close, uint32 type, con
 
 Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(x, y, z, dist);
+	return self->getRandomClient(x, y, z, dist);
 }
 
 Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist, Lua_Client exclude) {
 	Lua_Safe_Call_Class(Lua_Client);
-	return self->GetRandomClient(x, y, z, dist, exclude);
+	return self->getRandomClient(x, y, z, dist, exclude);
 }
 
 Lua_Mob_List Lua_EntityList::GetMobList() {

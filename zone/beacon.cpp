@@ -93,7 +93,7 @@ bool Beacon::process()
 		IsValidSpell(spell_id)
 	)
 	{
-		Mob *caster = entity_list.GetMob(caster_id);
+		Mob *caster = entity_list.getMOB(caster_id);
 		if(caster && spell_iterations--)
 		{
 			bool affect_caster = (!caster->isNPC() && !caster->IsAIControlled());	//NPC AE spells do not affect the NPC caster

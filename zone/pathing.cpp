@@ -1375,7 +1375,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 			sprintf(Name, "%s_%s_%s000", DigitToWord(PathNodes[i].id/100), DigitToWord((PathNodes[i].id % 100)/10),
 				DigitToWord(((PathNodes[i].id % 100) %10)));
 
-		Mob *m = entity_list.GetMob(Name);
+		Mob *m = entity_list.getMOB(Name);
 
 		if(m)
 			m->SendIllusionPacket(151);
@@ -1399,7 +1399,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 			sprintf(Name, "%s_%s_%s000", DigitToWord(Node->Neighbours[i].id/100), DigitToWord((Node->Neighbours[i].id % 100)/10),
 				DigitToWord(((Node->Neighbours[i].id % 100) %10)));
 
-		Mob *m = entity_list.GetMob(Name);
+		Mob *m = entity_list.getMOB(Name);
 
 		if(m)
 			m->SendIllusionPacket(46);

@@ -2634,7 +2634,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 				continue;
 			}
 
-			Client *caster = entity_list.GetClientByName(row[3]);
+			Client *caster = entity_list.getClientByName(row[3]);
 			uint32 caster_level = atoi(row[2]);
 			uint32 ticsremaining = atoul(row[4]);
 			uint32 counters = atoul(row[5]);

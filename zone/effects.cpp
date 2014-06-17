@@ -714,8 +714,8 @@ void EntityList::AETaunt(Client* taunter, float range)
 
 	range = range * range;
 
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
+	auto it = mNPCs.begin();
+	while (it != mNPCs.end()) {
 		NPC *them = it->second;
 		float zdiff = taunter->GetZ() - them->GetZ();
 		if (zdiff < 0)
@@ -746,7 +746,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	const int MAX_TARGETS_ALLOWED = 4;
 	int iCounter = 0;
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		curmob = it->second;
 		// test to fix possible cause of random zone crashes..external methods accessing client properties before they're initialized
 		if (curmob->isClient() && !curmob->castToClient()->ClientFinishedLoading())
@@ -809,7 +809,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 
 	bool bad = IsDetrimentalSpell(spell_id);
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		curmob = it->second;
 		if (curmob == center)	//do not affect center
 			continue;
@@ -851,7 +851,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->isNPC();
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		curmob = it->second;
 		if (curmob == center)	//do not affect center
 			continue;
@@ -901,7 +901,7 @@ void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool I
 
 	int hit = 0;
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		curmob = it->second;
 		if (curmob->isNPC()
 				&& curmob != attacker //this is not needed unless NPCs can use this

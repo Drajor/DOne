@@ -1543,7 +1543,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 			} else {
 				//otherwise, we just died, end the duel.
-				Mob* who = entity_list.GetMob(GetDuelTarget());
+				Mob* who = entity_list.getMOB(GetDuelTarget());
 				if(who && who->isClient()) {
 					who->castToClient()->SetDueling(false);
 					who->castToClient()->SetDuelTarget(0);
@@ -1656,7 +1656,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 				else
 					new_corpse->setPKItem(0);
 				if(killerMob->castToClient()->isgrouped) {
-					Group* group = entity_list.GetGroupByClient(killerMob->castToClient());
+					Group* group = entity_list.getGroupByClient(killerMob->castToClient());
 					if(group != 0)
 					{
 						for(int i=0;i<6;i++)
@@ -1710,7 +1710,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 				g->memberZoned(this);
 		}
 
-		Raid* r = entity_list.GetRaidByClient(this);
+		Raid* r = entity_list.getRaidByClient(this);
 
 		if(r)
 			r->MemberZoned(this);
@@ -2172,8 +2172,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 	if (give_exp_client && !isCorpse() && MerchantType == 0)
 	{
-		Group *kg = entity_list.GetGroupByClient(give_exp_client);
-		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
+		Group *kg = entity_list.getGroupByClient(give_exp_client);
+		Raid *kr = entity_list.getRaidByClient(give_exp_client);
 
         int32 finalxp = EXP_FORMULA;
         finalxp = give_exp_client->mod_client_xp(finalxp, this);
@@ -2332,7 +2332,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		if(killer != 0 && killer->isClient()) {
 			corpse->addLooter(killer, 0);
 			if(killer->IsGrouped()) {
-				Group* group = entity_list.GetGroupByClient(killer->castToClient());
+				Group* group = entity_list.getGroupByClient(killer->castToClient());
 				if(group != 0) {
 					for(int i=0;i<6;i++) { // Doesnt work right, needs work
 						if(group->mMembers[i] != nullptr) {
@@ -2342,7 +2342,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				}
 			}
 			else if(killer->IsRaidGrouped()){
-				Raid* r = entity_list.GetRaidByClient(killer->castToClient());
+				Raid* r = entity_list.getRaidByClient(killer->castToClient());
 				if(r){
 					int i = 0;
 					for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -4209,7 +4209,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 	if (IsPet())
 		owner = GetOwner();
 	else if ((isNPC() && castToNPC()->GetSwarmOwner()))
-		owner = entity_list.GetMobID(castToNPC()->GetSwarmOwner());
+		owner = entity_list.getMOBByID(castToNPC()->GetSwarmOwner());
 	else
 		return;
 

@@ -1796,7 +1796,7 @@ void Merc::AI_Process() {
 
 		if(AImovement_timer->Check()) {
 			if(GetFollowID()) {
-				Mob* follow = entity_list.GetMob(GetFollowID());
+				Mob* follow = entity_list.getMOB(GetFollowID());
 
 				if(follow) {
 					float dist = DistNoRoot(*follow);
@@ -4383,7 +4383,7 @@ Corpse* Merc::GetGroupMemberCorpse() {
 		if(g) {
 			for(int i = 0; i < g->groupCount(); i++) {
 				if(g->mMembers[i] && g->mMembers[i]->isClient()) {
-					corpse = entity_list.GetCorpseByOwnerWithinRange(g->mMembers[i]->castToClient(), this, RuleI(Mercs, ResurrectRadius));
+					corpse = entity_list.getCorpseByOwnerWithinRange(g->mMembers[i]->castToClient(), this, RuleI(Mercs, ResurrectRadius));
 
 					if(corpse && !corpse->isResurrected()) {
 						return corpse;
@@ -4760,8 +4760,8 @@ bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attac
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 
 	//no corpse, no exp if we're a merc. We'll suspend instead, since that's what live does. I'm not actually sure live supports 'depopping' merc corpses.
-	if(entity_list.GetCorpseByID(getID()))
-		entity_list.GetCorpseByID(getID())->depop();
+	if(entity_list.getCorpseByID(getID()))
+		entity_list.getCorpseByID(getID())->depop();
 
 	return true;
 }
@@ -4783,7 +4783,7 @@ Client* Merc::GetMercOwner() {
 Mob* Merc::GetOwner() {
 	Mob* Result = 0;
 
-	Result = entity_list.GetMob(GetOwnerID());
+	Result = entity_list.getMOB(GetOwnerID());
 
 	if(!Result) {
 		this->SetOwnerID(0);
@@ -4985,7 +4985,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			}
 			uint8 gender = 0;
 			if(merchant_id > 0) {
-				NPC* tar = entity_list.GetNPCByID(merchant_id);
+				NPC* tar = entity_list.getNPCByID(merchant_id);
 				if(tar) {
 					gender = Mob::GetDefaultGender(npc_type->race, tar->GetGender());
 				}
@@ -5541,7 +5541,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			mercOwner->GetPTimers().Clear(&database, pTimerMercSuspend);
 
 		mercOwner->SendMercPersonalInfo();
-		Group* g = entity_list.GetGroupByClient(mercOwner);
+		Group* g = entity_list.getGroupByClient(mercOwner);
 
 		if(!g) {	//nobody from our group is here... start a new group
 			g = new Group(mercOwner);
@@ -5719,7 +5719,7 @@ Merc* Client::GetMerc() {
 	if(GetMercID() == 0)
 		return(nullptr);
 
-	Merc* tmp = entity_list.GetMercByID(GetMercID());
+	Merc* tmp = entity_list.getMercByID(GetMercID());
 	if(tmp == nullptr) {
 		SetMercID(0);
 		return(nullptr);

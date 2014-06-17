@@ -110,61 +110,68 @@ class EntityList
 {
 public:
 	struct Area {
-		int id;
-		int type;
-		float min_x, max_x;
-		float min_y, max_y;
-		float min_z, max_z;
+		Area() : mID(0), mType(0), mMinX(0.0f), mMaxX(0.0f), mMinY(0.0f), mMaxY(0.0f), mMinZ(0.0f), mMaxZ(0.0f) {};
+		int mID;
+		int mType;
+		float mMinX;
+		float mMaxX;
+		float mMinY;
+		float mMaxY;
+		float mMinZ;
+		float mMaxZ;
 	};
 
 	EntityList();
 	~EntityList();
 
-	Entity* GetID(uint16 id);
-	Mob *GetMob(uint16 id);
-	inline Mob *GetMobID(uint16 id) { return(GetMob(id)); }	//for perl
-	Mob *GetMob(const char* name);
-	Mob *GetMobByNpcTypeID(uint32 get_id);
-	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
-	Mob *GetTargetForVirus(Mob* spreader);
-	inline NPC *GetNPCByID(uint16 id)
-		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
-	NPC *GetNPCByNPCTypeID(uint32 npc_id);
-	inline Merc *GetMercByID(uint16 id)
-		{ return merc_list.count(id) ? merc_list.at(id) : nullptr; }
-	Client *GetClientByName(const char *name);
-	Client *GetClientByAccID(uint32 accid);
-	inline Client *GetClientByID(uint16 id)
-		{ return client_list.count(id) ? client_list.at(id) : nullptr; }
-	Client *GetClientByCharID(uint32 iCharID);
-	Client *GetClientByWID(uint32 iWID);
-	Client *GetClient(uint32 ip, uint16 port);
-	Client *GetRandomClient(float x, float y, float z, float Distance, Client *ExcludeClient = nullptr);
-	Group *GetGroupByMob(Mob* mob);
-	Group *GetGroupByClient(Client* client);
-	Group *GetGroupByID(uint32 id);
-	Group *GetGroupByLeaderName(const char* leader);
-	Raid *GetRaidByMob(Mob* mob);
-	Raid *GetRaidByClient(Client* client);
-	Raid *GetRaidByID(uint32 id);
-	Raid *GetRaidByLeaderName(const char *leader);
+	Entity* getID(uint16 pID);
+	Mob* getMOB(uint16 pID);
+	
+	bool isMOBSpawnedByNpcTypeID(uint32 pID);
 
-	Corpse *GetCorpseByOwner(Client* client);
-	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
-	inline Corpse *GetCorpseByID(uint16 id)
-		{ return corpse_list.count(id) ? corpse_list.at(id) : nullptr; }
-	Corpse *GetCorpseByDBID(uint32 dbid);
-	Corpse *GetCorpseByName(const char* name);
+	// Search for MOB 
+	Mob* getMOB(const char* pName);
+	Mob* getMOBByNpcTypeID(uint32 pID);
+	Mob* getTargetForVirus(Mob* pSpreader);
+	inline Mob* getMOBByID(uint16 pID) { return getMOB(pID); }
+
+	NPC* getNPCByNPCTypeID(uint32 pNPCTypeID);
+	inline NPC* getNPCByID(uint16 pID) { return mNPCs.count(pID) ? mNPCs.at(pID) : nullptr; }
+	inline Merc* getMercByID(uint16 pID) { return mMercs.count(pID) ? mMercs.at(pID) : nullptr; }
+
+	// Search for Client
+	Client* getClientByName(const char* pName);
+	Client* getClientByAccountID(uint32 pAccountID);
+	Client* getClientByCharacterID(uint32 pCharacterID);
+	Client* getClientByWID(uint32 pWID);
+	Client* getRandomClient(float pX, float pY, float pZ, float pDistance, Client* pExcludeClient = nullptr);
+	inline Client* getClientByID(uint16 pID) { return mClients.count(pID) ? mClients.at(pID) : nullptr; }
+
+	Group* getGroupByMOB(Mob* pMOB);
+	Group* getGroupByClient(Client* pClient);
+	// Returns the Group which has ID pGroupID, or null where it does not exist.
+	Group* getGroupByID(uint32 pGroupID);
+	// Returns the Group which has leader named pLeaderName, or null where it does not exist.
+	Group* getGroupByLeaderName(const char* pLeaderName);
+
+	Raid* getRaidByClient(Client* pClient);
+	Raid* getRaidByID(uint32 pRaidID);
+
+	Corpse* getCorpseByOwner(Client* pClient);
+	Corpse* getCorpseByOwnerWithinRange(Client* pClient, Mob* pCenter, int pRange);
+	Corpse* getCorpseByDatabaseID(uint32 pDatabaseID);
+	Corpse* getCorpseByName(const char* pName);
+	inline Corpse* getCorpseByID(uint16 pID) { return mCorpses.count(pID) ? mCorpses.at(pID) : nullptr; }
 
 	Spawn2* GetSpawnByID(uint32 id);
 
 	Client* FindCorpseDragger(uint16 CorpseID);
 
 	inline Object *GetObjectByID(uint16 id)
-		{ return object_list.count(id) ? object_list.at(id) : nullptr; }
+		{ return mObjects.count(id) ? mObjects.at(id) : nullptr; }
 	Object *GetObjectByDBID(uint32 id);
 	inline Doors *GetDoorsByID(uint16 id)
-		{ return door_list.count(id) ? door_list.at(id) : nullptr; }
+		{ return mDoors.count(id) ? mDoors.at(id) : nullptr; }
 	Doors *GetDoorsByDoorID(uint32 id);
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);
@@ -420,22 +427,21 @@ private:
 	uint32	NumSpawnsOnQueue;
 	LinkedList<NewSpawn_Struct*> SpawnQueue;
 
-	std::unordered_map<uint16, Client *> client_list;
-	std::unordered_map<uint16, Mob *> mob_list;
-	std::unordered_map<uint16, NPC *> npc_list;
-	std::unordered_map<uint16, Merc *> merc_list;
-	std::unordered_map<uint16, Corpse *> corpse_list;
-	std::unordered_map<uint16, Object *> object_list;
-	std::unordered_map<uint16, Doors *> door_list;
-	std::unordered_map<uint16, Trap *> trap_list;
-	std::unordered_map<uint16, Beacon *> beacon_list;
+	std::unordered_map<uint16, Client*> mClients;
+	std::unordered_map<uint16, Mob*> mMOBs;
+	std::unordered_map<uint16, NPC*> mNPCs;
+	std::unordered_map<uint16, Merc*> mMercs;
+	std::unordered_map<uint16, Corpse*> mCorpses;
+	std::unordered_map<uint16, Object*> mObjects;
+	std::unordered_map<uint16, Doors*> mDoors;
+	std::unordered_map<uint16, Trap*> mTraps;
+	std::unordered_map<uint16, Beacon*> mBeacons;
 	std::list<NPC *> proximity_list;
-	std::list<Group *> group_list;
-	std::list<Raid *> raid_list;
-	std::list<Area> area_list;
+	std::list<Group *> mGroups;
+	std::list<Raid *> mRaids;
+	std::list<Area> mAreas;
 	std::queue<uint16> free_ids;
 
-	// Please Do Not Declare Any EntityList Class Members After This Comment
 };
 
 class BulkZoneSpawnPacket {

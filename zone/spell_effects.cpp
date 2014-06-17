@@ -640,7 +640,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 				if(group_id_caster){
-					Group *g = entity_list.GetGroupByID(group_id_caster);
+					Group *g = entity_list.getGroupByID(group_id_caster);
 					uint32 time = spell.base[i]*10;
 					if(g){
 						for(int gi=0; gi < 6; gi++){
@@ -1702,7 +1702,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						TargetClient = this->castToClient();
 
 					// We now have a valid target for this spell. Either the caster himself or a targetted player. Lets see if the target is in the group.
-					Group* group = entity_list.GetGroupByClient(TargetClient);
+					Group* group = entity_list.getGroupByClient(TargetClient);
 					if(group) {
 						if(!group->isGroupMember(TargetClient)) {
 							Message(13, "Your target must be a group member for this spell.");
@@ -1710,7 +1710,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						}
 					}
 					else {
-						Raid *r = entity_list.GetRaidByClient(caster->castToClient());
+						Raid *r = entity_list.getRaidByClient(caster->castToClient());
 						if(r)
 						{
 							uint32 gid = 0xFFFFFFFF;
@@ -1735,7 +1735,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 						if (TargetClient->GetLevel() <= effect_value){
 
-							Corpse *corpse = entity_list.GetCorpseByOwner(TargetClient);
+							Corpse *corpse = entity_list.getCorpseByOwner(TargetClient);
 							if(corpse) {
 								if(TargetClient == this->castToClient())
 									Message_StringID(4, SUMMONING_CORPSE, TargetClient->castToMOB()->GetCleanName());
@@ -2386,7 +2386,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!caster->isClient())
 					break;
 
-				Raid *r = entity_list.GetRaidByClient(caster->castToClient());
+				Raid *r = entity_list.getRaidByClient(caster->castToClient());
 				if(r)
 				{
 					uint32 gid = 0xFFFFFFFF;
@@ -2398,7 +2398,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				Group *g = entity_list.GetGroupByClient(caster->castToClient());
+				Group *g = entity_list.getGroupByClient(caster->castToClient());
 
 				if(!g)
 					break;
@@ -2414,7 +2414,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if(!caster->isClient())
 					break;
 
-				Raid *r = entity_list.GetRaidByClient(caster->castToClient());
+				Raid *r = entity_list.getRaidByClient(caster->castToClient());
 				if(r)
 				{
 					uint32 gid = 0xFFFFFFFF;
@@ -2426,7 +2426,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				Group *g = entity_list.GetGroupByClient(caster->castToClient());
+				Group *g = entity_list.getGroupByClient(caster->castToClient());
 
 				if(!g)
 					break;
@@ -2496,7 +2496,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->SetMana(caster->GetMana() - max_mana);
 				}
 
-				Raid *r = entity_list.GetRaidByClient(caster->castToClient());
+				Raid *r = entity_list.getRaidByClient(caster->castToClient());
 				if(r)
 				{
 					uint32 gid = 0xFFFFFFFF;
@@ -2508,7 +2508,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					}
 				}
 
-				Group *g = entity_list.GetGroupByClient(caster->castToClient());
+				Group *g = entity_list.getGroupByClient(caster->castToClient());
 
 				if(!g){
 					caster->HealDamage(heal_amt);
@@ -3149,7 +3149,7 @@ void Mob::BuffProcess()
 	{
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN)
 		{
-			DoBuffTic(buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining, buffs[buffs_i].casterlevel, entity_list.GetMob(buffs[buffs_i].casterid));
+			DoBuffTic(buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining, buffs[buffs_i].casterlevel, entity_list.getMOB(buffs[buffs_i].casterid));
 			// If the Mob died during DoBuffTic, then the buff we are currently processing will have been removed
 			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
 				continue;
@@ -3893,7 +3893,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	}
 
 	// notify caster (or their master) of buff that it's worn off
-	Mob *p = entity_list.GetMob(buffs[slot].casterid);
+	Mob *p = entity_list.getMOB(buffs[slot].casterid);
 	if (p && p != this && !IsBardSong(buffs[slot].spellid))
 	{
 		Mob *notify = p;
@@ -5747,7 +5747,7 @@ bool Mob::ImprovedTaunt(){
 
 		if (spellbonuses.ImprovedTaunt[2] >= 0){
 
-			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+			target = entity_list.getMOB(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
 
 			if (target){
 				SetTarget(target);

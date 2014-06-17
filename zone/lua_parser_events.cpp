@@ -247,7 +247,7 @@ void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, st
 						 std::vector<void*> *extra_pointers) {
 	Seperator sep(data.c_str());
 
-	Mob *o = entity_list.GetMobID(std::stoi(sep.arg[0]));
+	Mob *o = entity_list.getMOBByID(std::stoi(sep.arg[0]));
 	Lua_Mob l_mob(o);
 	luabind::object l_mob_o = luabind::object(L, l_mob);
 	l_mob_o.push(L);

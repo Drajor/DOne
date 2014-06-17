@@ -96,10 +96,10 @@ Mob* HateList::getHighestDamage(Mob* hater)
 		r = nullptr;
 
 		if((*iterator)->mMOB && (*iterator)->mMOB->isClient()){
-			r = entity_list.GetRaidByClient((*iterator)->mMOB->castToClient());
+			r = entity_list.getRaidByClient((*iterator)->mMOB->castToClient());
 		}
 
-		grp = entity_list.GetGroupByMob((*iterator)->mMOB);
+		grp = entity_list.getGroupByMOB((*iterator)->mMOB);
 
 		if((*iterator)->mMOB && r){
 			if(r->GetTotalRaidDamage(hater) >= dmg_amt)
@@ -483,7 +483,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	std::list<uint32>::iterator iter = id_list.begin();
 	while(iter != id_list.end())
 	{
-		Mob *cur = entity_list.GetMobID((*iter));
+		Mob *cur = entity_list.getMOBByID((*iter));
 		if(cur)
 		{
 			for(int i = 0; i < count; ++i) {
@@ -530,7 +530,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range)
 	std::list<uint32>::iterator iter = id_list.begin();
 	while(iter != id_list.end())
 	{
-		Mob *cur = entity_list.GetMobID((*iter));
+		Mob *cur = entity_list.getMOBByID((*iter));
 		if(cur)
 		{
 			caster->SpellOnTarget(spell_id, cur);

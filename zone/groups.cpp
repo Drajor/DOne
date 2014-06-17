@@ -103,7 +103,7 @@ Group::~Group()
 	for (int i = 0; i < MAX_MARKED_NPCS; ++i)
 	if (mMarkedNPCs[i])
 	{
-		Mob* m = entity_list.GetMob(mMarkedNPCs[i]);
+		Mob* m = entity_list.getMOB(mMarkedNPCs[i]);
 		if (m)
 			m->IsTargeted(-1);
 	}
@@ -972,7 +972,7 @@ void Group::verifyGroup() {
 
 		//it should be safe to use GetClientByName, but Group is trying
 		//to be generic, so we'll go for general Mob
-		Mob *them = entity_list.GetMob(mMemberNames[i]);
+		Mob *them = entity_list.getMOB(mMemberNames[i]);
 		if (them == nullptr && mMembers[i] != nullptr) {	//they arnt here anymore....
 #if EQDEBUG >= 6
 			LogFile->write(EQEMuLog::Debug, "Member of group %lu named '%s' has disappeared!!", (unsigned long)GetID(), mMemberNames[i]);
@@ -1203,7 +1203,7 @@ void Group::markNPC(Mob* pTarget, int pNumber)
 	{
 		if (mMarkedNPCs[pNumber - 1])
 		{
-			Mob* m = entity_list.GetMob(mMarkedNPCs[pNumber - 1]);
+			Mob* m = entity_list.getMOB(mMarkedNPCs[pNumber - 1]);
 			if (m)
 				m->IsTargeted(-1);
 
@@ -1212,7 +1212,7 @@ void Group::markNPC(Mob* pTarget, int pNumber)
 
 		if (EntityID)
 		{
-			Mob* m = entity_list.GetMob(pTarget->getID());
+			Mob* m = entity_list.getMOB(pTarget->getID());
 			if (m)
 				m->IsTargeted(1);
 		}
@@ -1228,7 +1228,7 @@ void Group::markNPC(Mob* pTarget, int pNumber)
 
 	mnpcs->Number = pNumber;
 
-	Mob *m = entity_list.GetMob(EntityID);
+	Mob *m = entity_list.getMOB(EntityID);
 
 	if (m)
 		sprintf(mnpcs->Name, "%s", m->GetCleanName());
@@ -1252,7 +1252,7 @@ void Group::delegateMainTank(const char *pNewMainTankName, uint8 pToggle)
 	if (!pNewMainTankName)
 		return;
 
-	Mob *m = entity_list.GetMob(pNewMainTankName);
+	Mob *m = entity_list.getMOB(pNewMainTankName);
 
 	if (!m)
 		return;
@@ -1265,7 +1265,7 @@ void Group::delegateMainTank(const char *pNewMainTankName, uint8 pToggle)
 	else
 		mTankTargetID = 0;
 
-	Mob *mtt = mTankTargetID ? entity_list.GetMob(mTankTargetID) : 0;
+	Mob *mtt = mTankTargetID ? entity_list.getMOB(mTankTargetID) : 0;
 
 	setMainTank(pNewMainTankName);
 
@@ -1304,7 +1304,7 @@ void Group::delegateMainAssist(const char *pNewMainAssistName, uint8 pToggle)
 	if (!pNewMainAssistName)
 		return;
 
-	Mob *m = entity_list.GetMob(pNewMainAssistName);
+	Mob *m = entity_list.getMOB(pNewMainAssistName);
 
 	if (!m)
 		return;
@@ -1353,7 +1353,7 @@ void Group::delegatePuller(const char *pNewPullerName, uint8 pToggle)
 	if (!pNewPullerName)
 		return;
 
-	Mob *m = entity_list.GetMob(pNewPullerName);
+	Mob *m = entity_list.getMOB(pNewPullerName);
 
 	if (!m)
 		return;
@@ -1717,7 +1717,7 @@ void Group::notifyAssistTarget(Client* pClient)
 
 	safe_delete(outapp);
 
-	Mob *m = entity_list.GetMob(mAssistTargetID);
+	Mob *m = entity_list.getMOB(mAssistTargetID);
 
 	pClient->UpdateXTargetType(GroupAssistTarget, m);
 
@@ -1728,7 +1728,7 @@ void Group::notifyTankTarget(Client* pClient)
 	if (!pClient)
 		return;
 
-	Mob *m = entity_list.GetMob(mTankTargetID);
+	Mob *m = entity_list.getMOB(mTankTargetID);
 
 	pClient->UpdateXTargetType(GroupTankTarget, m);
 }
@@ -1738,7 +1738,7 @@ void Group::notifyPullerTarget(Client* pClient)
 	if (!pClient)
 		return;
 
-	Mob *m = entity_list.GetMob(mPullerTargetID);
+	Mob *m = entity_list.getMOB(mPullerTargetID);
 
 	pClient->UpdateXTargetType(PullerTarget, m);
 }
@@ -1806,7 +1806,7 @@ void Group::setNPCMarker(const char *pNewNPCMarkerName)
 {
 	mNPCMarkerName = pNewNPCMarkerName;
 
-	Client *m = entity_list.GetClientByName(mNPCMarkerName.c_str());
+	Client *m = entity_list.getClientByName(mNPCMarkerName.c_str());
 
 	if (!m)
 		mNPCMarkerID = 0;
@@ -1927,7 +1927,7 @@ void Group::sendMarkedNPCsToMember(Client* pClient, bool pClear)
 		{
 			mnpcs->TargetID = mMarkedNPCs[i];
 
-			Mob *m = entity_list.GetMob(mMarkedNPCs[i]);
+			Mob *m = entity_list.getMOB(mMarkedNPCs[i]);
 
 			if (m)
 				sprintf(mnpcs->Name, "%s", m->GetCleanName());
@@ -1958,7 +1958,7 @@ void Group::clearAllNPCMarks()
 	{
 		if (mMarkedNPCs[i])
 		{
-			Mob* m = entity_list.GetMob(mMarkedNPCs[i]);
+			Mob* m = entity_list.getMOB(mMarkedNPCs[i]);
 
 			if (m)
 				m->IsTargeted(-1);

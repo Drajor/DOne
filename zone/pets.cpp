@@ -496,7 +496,7 @@ Mob* Mob::GetPet() {
 	if(GetPetID() == 0)
 		return(nullptr);
 
-	Mob* tmp = entity_list.GetMob(GetPetID());
+	Mob* tmp = entity_list.getMOB(GetPetID());
 	if(tmp == nullptr) {
 		SetPetID(0);
 		return(nullptr);
@@ -519,7 +519,7 @@ void Mob::SetPet(Mob* newpet) {
 		SetPetID(0);
 	} else {
 		SetPetID(newpet->getID());
-		Mob* oldowner = entity_list.GetMob(newpet->GetOwnerID());
+		Mob* oldowner = entity_list.getMOB(newpet->GetOwnerID());
 		if (oldowner)
 			oldowner->SetPetID(0);
 		newpet->SetOwnerID(this->getID());
@@ -533,7 +533,7 @@ void Mob::SetPetID(uint16 NewPetID) {
 
 	if(isClient())
 	{
-		Mob* NewPet = entity_list.GetMob(NewPetID);
+		Mob* NewPet = entity_list.getMOB(NewPetID);
 		castToClient()->UpdateXTargetType(MyPet, NewPet);
 	}
 }

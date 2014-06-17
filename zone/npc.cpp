@@ -116,7 +116,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	taunt_timer(TauntReuseTime * 1000)
 {
 	//What is the point of this, since the names get mangled..
-	Mob* mob = entity_list.GetMob(name);
+	Mob* mob = entity_list.getMOB(name);
 	if(mob != 0)
 		entity_list.RemoveEntity(mob->getID());
 
@@ -402,7 +402,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	//our target is already set, do not turn from the course, unless our current target is dead.
 	if(GetSwarmInfo() && GetTarget() && (GetTarget()->GetHP() > 0)) {
-		Mob *targ = entity_list.GetMob(GetSwarmInfo()->target);
+		Mob *targ = entity_list.getMOB(GetSwarmInfo()->target);
 		if(targ != mob){
 			return;
 		}
@@ -567,7 +567,7 @@ bool NPC::process()
 
 	if (p_depop)
 	{
-		Mob* owner = entity_list.GetMob(this->ownerid);
+		Mob* owner = entity_list.getMOB(this->ownerid);
 		if (owner != 0)
 		{
 			//if(GetBodyType() != BT_SwarmPet)
@@ -1725,7 +1725,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	//Basic settings to make sure swarm pets work properly.
 	if  (GetSwarmOwner()) {
-		Client *c = entity_list.GetClientByID(GetSwarmOwner());
+		Client *c = entity_list.getClientByID(GetSwarmOwner());
 			if(c) {
 				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
 				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
@@ -1742,7 +1742,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		if(GetOwnerID() || GetSwarmOwner()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.GetClientByID(GetOwnerID());
+				Client *c = entity_list.getClientByID(GetOwnerID());
 				if(c)
 					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}
@@ -1750,7 +1750,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 				ns->spawn.bodytype = 11;
 				if(!IsCharmed())
 				{
-					Client *c = entity_list.GetClientByID(GetSwarmOwner());
+					Client *c = entity_list.getClientByID(GetSwarmOwner());
 					if(c)
 						sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 				}
@@ -1760,7 +1760,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		if(GetOwnerID()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.GetClientByID(GetOwnerID());
+				Client *c = entity_list.getClientByID(GetOwnerID());
 				if(c)
 					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}

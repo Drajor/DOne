@@ -179,7 +179,7 @@ void Client::SetHorseId(uint16 horseid_in) {
 	//otherwise it changed.
 	//if we have a horse, get rid of it no matter what.
 	if(horseId) {
-		Mob *horse = entity_list.GetMob(horseId);
+		Mob *horse = entity_list.getMOB(horseId);
 		if(horse != nullptr)
 			horse->depop();
 	}

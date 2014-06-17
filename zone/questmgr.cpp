@@ -252,7 +252,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, float x, float y, 
 }
 
 Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, float x, float y, float z, float heading) {
-	Mob *other = entity_list.GetMobByNpcTypeID(npc_type);
+	Mob *other = entity_list.getMOBByNpcTypeID(npc_type);
 	if(other != nullptr) {
 		return other;
 	}
@@ -392,7 +392,7 @@ void QuestManager::incstat(int stat, int value) {
 void QuestManager::castspell(int spell_id, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (owner) {
-		Mob *tgt = entity_list.GetMob(target_id);
+		Mob *tgt = entity_list.getMOB(target_id);
 		if(tgt != nullptr)
 			owner->SpellFinished(spell_id, tgt, 10, 0, -1, spells[spell_id].ResistDiff);
 	}
@@ -627,7 +627,7 @@ void QuestManager::depop(int npc_type) {
 	}
 	else {
 		if (npc_type != 0) {
-			Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
+			Mob * tmp = entity_list.getMOBByNpcTypeID(npc_type);
 			if (tmp) {
 				if (tmp != owner) {
 					tmp->castToNPC()->depop();
@@ -657,7 +657,7 @@ void QuestManager::depop_withtimer(int npc_type) {
 	}
 	else {
 		if (npc_type != 0) {
-			Mob * tmp = entity_list.GetMobByNpcTypeID(npc_type);
+			Mob * tmp = entity_list.getMOBByNpcTypeID(npc_type);
 			if (tmp) {
 				if (tmp != owner) {
 					tmp->castToNPC()->depop(true);
@@ -708,9 +708,9 @@ void QuestManager::settarget(const char *type, int target_id) {
 
 	Mob* tmp = nullptr;
 	if (!strcasecmp(type,"npctype"))
-		tmp = entity_list.GetMobByNpcTypeID(target_id);
+		tmp = entity_list.getMOBByNpcTypeID(target_id);
 	else if (!strcasecmp(type, "entity"))
-		tmp = entity_list.GetMob(target_id);
+		tmp = entity_list.getMOB(target_id);
 
 	if (tmp != nullptr)
 		owner->SetTarget(tmp);
@@ -1078,12 +1078,12 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->isClient())
 	{
-		Group *g = entity_list.GetGroupByClient(initiator);
+		Group *g = entity_list.getGroupByClient(initiator);
 		if (g != nullptr) {
 			g->teleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
 		}
 		else {
-			Raid *r = entity_list.GetRaidByClient(initiator);
+			Raid *r = entity_list.getRaidByClient(initiator);
 			if (r != nullptr) {
 				uint32 gid = r->GetGroup(initiator);
 				if (gid >= 0 && gid < 12) {
@@ -1144,7 +1144,7 @@ void QuestManager::attack(const char *client_name) {
 	if (!owner || !owner->isNPC())
 		return;
 
-	Client* getclient = entity_list.GetClientByName(client_name);
+	Client* getclient = entity_list.getClientByName(client_name);
 	if (getclient && owner->IsAttackAllowed(getclient))
 		owner->AddToHateList(getclient,1);
 	else
@@ -1156,7 +1156,7 @@ void QuestManager::attacknpc(int npc_entity_id) {
 	if (!owner || !owner->isNPC())
 		return;
 
-	Mob *it = entity_list.GetMob(npc_entity_id);
+	Mob *it = entity_list.getMOB(npc_entity_id);
 	if (it && owner->IsAttackAllowed(it)) {
 		owner->AddToHateList(it,1);
 	} else {
@@ -1172,7 +1172,7 @@ void QuestManager::attacknpctype(int npc_type_id) {
 	if (!owner || !owner->isNPC())
 		return;
 
-	Mob *it = entity_list.GetMobByNpcTypeID(npc_type_id);
+	Mob *it = entity_list.getMOBByNpcTypeID(npc_type_id);
 	if (it && owner->IsAttackAllowed(it)) {
 		owner->AddToHateList(it,1);
 	} else {
@@ -1670,7 +1670,7 @@ void QuestManager::disable_proximity_say() {
 
 void QuestManager::setanim(int npc_type, int animnum) {
 	//adds appearance changes
-	Mob* thenpc = entity_list.GetMobByNpcTypeID(npc_type);
+	Mob* thenpc = entity_list.getMOBByNpcTypeID(npc_type);
 	if(!thenpc || animnum < 0 || animnum >= _eaMaxAppearance)
 		return;
 	thenpc->SetAppearance(EmuAppearance(animnum));
@@ -1769,7 +1769,7 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, float dest_x, float de
 	bool Result = false;
 
 	if(char_id > 0) {
-		Client* c = entity_list.GetClientByCharID(char_id);
+		Client* c = entity_list.getClientByCharacterID(char_id);
 		c->SummonAllCorpses(dest_x, dest_y, dest_z, dest_heading);
 		Result = true;
 	}
@@ -1795,7 +1795,7 @@ bool QuestManager::buryplayercorpse(uint32 char_id)
 		if(PlayerCorpse > 0)
 		{
 			database.BuryPlayerCorpse(PlayerCorpse);
-			Corpse* corpse = entity_list.GetCorpseByDBID(PlayerCorpse);
+			Corpse* corpse = entity_list.getCorpseByDatabaseID(PlayerCorpse);
 			if(corpse)
 			{
 				corpse->save();
@@ -1803,7 +1803,7 @@ bool QuestManager::buryplayercorpse(uint32 char_id)
 			}
 			else
 			{
-				Client *c = entity_list.GetClientByCharID(char_id);
+				Client *c = entity_list.getClientByCharacterID(char_id);
 				c->DepopPlayerCorpse(PlayerCorpse);
 			}
 			Result = true;
@@ -2246,7 +2246,7 @@ int QuestManager::getlevel(uint8 type)
 	}
 	else if(type == 1)
 	{
-		Group *g = entity_list.GetGroupByClient(initiator);
+		Group *g = entity_list.getGroupByClient(initiator);
 		if (g != nullptr)
 			return (g->getAvgLevel());
 		else
@@ -2254,7 +2254,7 @@ int QuestManager::getlevel(uint8 type)
 	}
 	else if(type == 2)
 	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
+		Raid *r = entity_list.getRaidByClient(initiator);
 		if (r != nullptr)
 			return (r->GetAvgLevel());
 		else
@@ -2262,12 +2262,12 @@ int QuestManager::getlevel(uint8 type)
 	}
 	else if(type == 3)
 	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
+		Raid *r = entity_list.getRaidByClient(initiator);
 		if(r != nullptr)
 		{
 			return (r->GetAvgLevel());
 		}
-		Group *g = entity_list.GetGroupByClient(initiator);
+		Group *g = entity_list.getGroupByClient(initiator);
 		if(g != nullptr)
 		{
 			return (g->getAvgLevel());
@@ -2396,7 +2396,7 @@ void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 
 // used to set the number of an item in the selected merchant's temp item list. Defaults to zero if no quantity is specified.
 void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity) {
-	Mob* merchant = entity_list.GetMobByNpcTypeID(NPCid);
+	Mob* merchant = entity_list.getMOBByNpcTypeID(NPCid);
 
 	if (merchant == 0 || !merchant->isNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
@@ -2409,7 +2409,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 }
 
 uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
-	Mob* merchant = entity_list.GetMobByNpcTypeID(NPCid);
+	Mob* merchant = entity_list.getMOBByNpcTypeID(NPCid);
 
 	if (merchant == 0 || !merchant->isNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
@@ -2799,7 +2799,7 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 	QuestManagerCurrentQuestVars();
 	if(owner && str)
 	{
-		Client *c = entity_list.GetClientByName(str);
+		Client *c = entity_list.getClientByName(str);
 
 		if(c)
 		{

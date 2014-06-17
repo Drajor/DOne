@@ -289,7 +289,7 @@ void Client::ActivateAA(aaID activate){
 			}
 			// Bards can cast instant cast AAs while they are casting another song
 			if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-				if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
+				if(!SpellFinished(caa->spell_id, entity_list.getMOB(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
 					//Reset on failed cast
 					SendAATimer(AATimerID, 0, 0xFFFFFF);
 					Message_StringID(15,ABILITY_FAILED);
@@ -1986,5 +1986,5 @@ AA_SwarmPetInfo::~AA_SwarmPetInfo()
 
 Mob *AA_SwarmPetInfo::GetOwner()
 {
-	return entity_list.GetMobID(owner_id);
+	return entity_list.getMOBByID(owner_id);
 }

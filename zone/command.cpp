@@ -1214,7 +1214,7 @@ void command_summon(Client *c, const Seperator *sep)
 
 	if(sep->arg[1][0] != 0)		// arg specified
 	{
-		Client* client = entity_list.GetClientByName(sep->arg[1]);
+		Client* client = entity_list.getClientByName(sep->arg[1]);
 		if (client != 0)	// found player in zone
 			t=client->castToMOB();
 		else
@@ -1764,14 +1764,14 @@ void command_zclip(Client *c, const Seperator *sep)
 void command_npccast(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetTarget()->isNPC() && !sep->IsNumber(1) && sep->arg[1] != 0 && sep->IsNumber(2)) {
-		Mob* spelltar = entity_list.GetMob(sep->arg[1]);
+		Mob* spelltar = entity_list.getMOB(sep->arg[1]);
 		if (spelltar)
 			c->GetTarget()->CastSpell(atoi(sep->arg[2]), spelltar->getID());
 		else
 			c->Message(0, "Error: %s not found", sep->arg[1]);
 	}
 	else if (c->GetTarget() && c->GetTarget()->isNPC() && sep->IsNumber(1) && sep->IsNumber(2) ) {
-		Mob* spelltar = entity_list.GetMob(atoi(sep->arg[1]));
+		Mob* spelltar = entity_list.getMOB(atoi(sep->arg[1]));
 		if (spelltar)
 			c->GetTarget()->CastSpell(atoi(sep->arg[2]), spelltar->getID());
 		else
@@ -2059,7 +2059,7 @@ void command_ai(Client *c, const Seperator *sep)
 	}
 	else if (strcasecmp(sep->arg[1], "con") == 0) {
 		if (target && sep->arg[2][0] != 0) {
-			Mob* tar2 = entity_list.GetMob(sep->arg[2]);
+			Mob* tar2 = entity_list.getMOB(sep->arg[2]);
 			if (tar2)
 				c->Message(0, "%s considering %s: %i", target->getName(), tar2->getName(), tar2->GetReverseFactionCon(target));
 			else
@@ -2655,7 +2655,7 @@ void command_level(Client *c, const Seperator *sep)
 void command_spawn(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] != 0){
-		Client* client = entity_list.GetClientByName(sep->arg[1]);
+		Client* client = entity_list.getClientByName(sep->arg[1]);
 		if(client){
 				c->Message(0,"You cannot spawn a mob with the same name as a character!");
 				return;
@@ -3421,7 +3421,7 @@ void command_kick(Client *c, const Seperator *sep)
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #kick [charname]");
 	else {
-		Client* client = entity_list.GetClientByName(sep->arg[1]);
+		Client* client = entity_list.getClientByName(sep->arg[1]);
 		if (client != 0) {
 			if (client->Admin() <= c->Admin()) {
 				client->Message(0, "You have been kicked by %s",c->getName());
@@ -3448,7 +3448,7 @@ void command_kick(Client *c, const Seperator *sep)
 void command_attack(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1] != 0) {
-		Mob* sictar = entity_list.GetMob(sep->argplus[1]);
+		Mob* sictar = entity_list.getMOB(sep->argplus[1]);
 		if (sictar)
 			c->GetTarget()->castToNPC()->AddToHateList(sictar, 1, 0);
 		else
@@ -4818,7 +4818,7 @@ void command_guild(Client *c, const Seperator *sep)
 	else if (strcasecmp(sep->arg[1], "status") == 0 || strcasecmp(sep->arg[1], "stat") == 0) {
 		Client* client = 0;
 		if (sep->arg[2][0] != 0)
-			client = entity_list.GetClientByName(sep->argplus[2]);
+			client = entity_list.getClientByName(sep->argplus[2]);
 		else if (target != 0 && target->isClient())
 			client = target->castToClient();
 		if (client == 0)
@@ -6308,7 +6308,7 @@ void command_ban(Client *c, const Seperator *sep)
 			safe_delete(pack);
 
 			Client *client = nullptr;
-			client = entity_list.GetClientByName(sep->arg[1]);
+			client = entity_list.getClientByName(sep->arg[1]);
 			if(client)
 			{
 				client->WorldKick();
@@ -6370,7 +6370,7 @@ void command_suspend(Client *c, const Seperator *sep)
 
 			safe_delete_array(query);
 
-			Client *BannedClient = entity_list.GetClientByName(sep->arg[1]);
+			Client *BannedClient = entity_list.getClientByName(sep->arg[1]);
 
 			if(BannedClient)
 				BannedClient->WorldKick();
@@ -6426,7 +6426,7 @@ void command_revoke(Client *c, const Seperator *sep)
 			int flag = sep->arg[2][0] == '1' ? true : false;
 			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE account set revoked=%d where id = %i", flag, tmp), errbuf, 0);
 			c->Message(13,"%s account number %i with the character %s.", flag?"Revoking":"Unrevoking", tmp, sep->arg[1]);
-			Client* revokee = entity_list.GetClientByAccID(tmp);
+			Client* revokee = entity_list.getClientByAccountID(tmp);
 			if(revokee)
 			{
 				c->Message(0, "Found %s in this zone.", revokee->getName());

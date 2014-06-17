@@ -208,8 +208,8 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 
 	float max_dist2 = max_dist*max_dist;
 	Trap *cur;
-	auto it = trap_list.begin();
-	while (it != trap_list.end()) {
+	auto it = mTraps.begin();
+	while (it != mTraps.end()) {
 		cur = it->second;
 		if(!cur->disarmed) {
 			float curdist = 0;
@@ -238,8 +238,8 @@ Mob* EntityList::GetTrapTrigger(Trap* trap) {
 
 	float maxdist = trap->radius * trap->radius;
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client* cur = it->second;
 		zdiff = cur->GetZ() - trap->z;
 		if(zdiff < 0)

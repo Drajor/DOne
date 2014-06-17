@@ -158,7 +158,7 @@ bool Client::process() {
 				entity_list.MessageGroup(this,true,15,"%s died.", getName());
 				mygroup->memberZoned(this);
 			}
-			Raid *myraid = entity_list.GetRaidByClient(this);
+			Raid *myraid = entity_list.getRaidByClient(this);
 			if (myraid)
 			{
 				myraid->MemberZoned(this);
@@ -182,7 +182,7 @@ bool Client::process() {
 				GetMerc()->depop();
 			}
 			LeaveGroup();
-			Raid *myraid = entity_list.GetRaidByClient(this);
+			Raid *myraid = entity_list.getRaidByClient(this);
 			if (myraid)
 			{
 				myraid->MemberZoned(this);
@@ -218,7 +218,7 @@ bool Client::process() {
 			if(bardsong_target_id == getID()) {
 				song_target = this;
 			} else {
-				song_target = entity_list.GetMob(bardsong_target_id);
+				song_target = entity_list.getMOB(bardsong_target_id);
 			}
 
 			if (song_target == nullptr) {
@@ -739,7 +739,7 @@ bool Client::process() {
 				}
 
 			}
-			Raid *myraid = entity_list.GetRaidByClient(this);
+			Raid *myraid = entity_list.getRaidByClient(this);
 			if (myraid)
 			{
 				if (!zoning) {
@@ -775,7 +775,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	if(hard_disconnect) {
 		LeaveGroup();
 
-		Raid *MyRaid = entity_list.GetRaidByClient(this);
+		Raid *MyRaid = entity_list.getRaidByClient(this);
 
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
@@ -970,7 +970,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
-	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
+	Mob* merch = entity_list.getMOBByNpcTypeID(npcid);
 	if(merlist.size()==0){ //Attempt to load the data, it might have been missed if someone spawned the merchant after the zone was loaded
 		zone->LoadNewMerchantData(merchant_id);
 		merlist = zone->merchanttable[merchant_id];
@@ -1114,7 +1114,7 @@ uint8 Client::WithCustomer(uint16 NewCustomer){
 
 	// Check that the player browsing our wares hasn't gone away.
 
-	Client* c = entity_list.GetClientByID(CustomerID);
+	Client* c = entity_list.getClientByID(CustomerID);
 
 	if(!c) {
 		_log(TRADING__CLIENT, "Previous customer has gone away.");
@@ -1587,7 +1587,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	GMTrainee_Struct* gmtrain = (GMTrainee_Struct*) outapp->pBuffer;
 
-	Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
+	Mob* pTrainer = entity_list.getMOB(gmtrain->npcid);
 
 	if(!pTrainer || !pTrainer->isNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
@@ -1633,7 +1633,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 
 	FastQueuePacket(&outapp);
 
-	Mob* pTrainer = entity_list.GetMob(p->npcid);
+	Mob* pTrainer = entity_list.getMOB(p->npcid);
 	if(!pTrainer || !pTrainer->isNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
 
@@ -1662,7 +1662,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 
 	GMSkillChange_Struct* gmskill = (GMSkillChange_Struct*) app->pBuffer;
 
-	Mob* pTrainer = entity_list.GetMob(gmskill->npcid);
+	Mob* pTrainer = entity_list.getMOB(gmskill->npcid);
 	if(!pTrainer || !pTrainer->isNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
 
@@ -1818,7 +1818,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 void Client::OPGMSummon(const EQApplicationPacket *app)
 {
 	GMSummon_Struct* gms = (GMSummon_Struct*) app->pBuffer;
-	Mob* st = entity_list.GetMob(gms->charname);
+	Mob* st = entity_list.getMOB(gms->charname);
 
 	if(st && st->isCorpse())
 	{
@@ -1988,7 +1988,7 @@ void Client::DoTracking()
 	if(TrackingID == 0)
 		return;
 
-	Mob *m = entity_list.GetMob(TrackingID);
+	Mob *m = entity_list.getMOB(TrackingID);
 
 	if(!m || m->isCorpse())
 	{
@@ -2097,7 +2097,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			}
 			SetHP(GetMaxHP() / 5);
 
-			Corpse* corpse = entity_list.GetCorpseByName(PendingRezzCorpseName.c_str());
+			Corpse* corpse = entity_list.getCorpseByName(PendingRezzCorpseName.c_str());
 
 			if (corpse)
 			{
@@ -2183,7 +2183,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 				g->memberZoned(this);
 		}
 
-		Raid* r = entity_list.GetRaidByClient(this);
+		Raid* r = entity_list.getRaidByClient(this);
 		if(r)
 			r->MemberZoned(this);
 

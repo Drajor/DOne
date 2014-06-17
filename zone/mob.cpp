@@ -397,7 +397,7 @@ Mob::~Mob()
 
 	EQApplicationPacket app;
 	CreateDespawnPacket(&app, !isCorpse());
-	Corpse* corpse = entity_list.GetCorpseByID(getID());
+	Corpse* corpse = entity_list.getCorpseByID(getID());
 	if(!corpse || (corpse && !corpse->isPlayerCorpse()))
 		entity_list.QueueClients(this, &app, true);
 
@@ -526,7 +526,7 @@ float Mob::_GetMovementSpeed(int mod) const
 				speed_mod += speed_mod * static_cast<float>(mod) / 100.0f;
 			return speed_mod;
 		} else {
-			Mob *horse = entity_list.GetMob(castToClient()->GetHorseId());
+			Mob *horse = entity_list.getMOB(castToClient()->GetHorseId());
 			if (horse) {
 				speed_mod = horse->GetBaseRunspeed();
 				if (mod != 0)
@@ -1073,13 +1073,13 @@ void Mob::SendHPUpdate()
 	// send to group
 	if(IsGrouped())
 	{
-		group = entity_list.GetGroupByMob(this);
+		group = entity_list.getGroupByMOB(this);
 		if(group) //not sure why this might be null, but it happens
 			group->sendHPPacketsFrom(this);
 	}
 
 	if(isClient()){
-		Raid *r = entity_list.GetRaidByClient(castToClient());
+		Raid *r = entity_list.getRaidByClient(castToClient());
 		if(r){
 			r->SendHPPacketsFrom(this);
 		}
@@ -1089,10 +1089,10 @@ void Mob::SendHPUpdate()
 	if(GetOwner() && GetOwner()->isClient())
 	{
 		GetOwner()->castToClient()->QueuePacket(&hp_app, false);
-		group = entity_list.GetGroupByClient(GetOwner()->castToClient());
+		group = entity_list.getGroupByClient(GetOwner()->castToClient());
 		if(group)
 			group->sendHPPacketsFrom(this);
-		Raid *r = entity_list.GetRaidByClient(GetOwner()->castToClient());
+		Raid *r = entity_list.getRaidByClient(GetOwner()->castToClient());
 		if(r)
 			r->SendHPPacketsFrom(this);
 	}
@@ -1834,7 +1834,7 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 Mob* Mob::GetOwnerOrSelf() {
 	if (!GetOwnerID())
 		return this;
-	Mob* owner = entity_list.GetMob(this->GetOwnerID());
+	Mob* owner = entity_list.getMOB(this->GetOwnerID());
 	if (!owner) {
 		SetOwnerID(0);
 		return(this);
@@ -1850,7 +1850,7 @@ Mob* Mob::GetOwnerOrSelf() {
 }
 
 Mob* Mob::GetOwner() {
-	Mob* owner = entity_list.GetMob(this->GetOwnerID());
+	Mob* owner = entity_list.getMOB(this->GetOwnerID());
 	if (owner && owner->GetPetID() == this->getID()) {
 
 		return owner;
@@ -2352,7 +2352,7 @@ bool Mob::HateSummon() {
 	// if the mob can summon and is charmed, it can only summon mobs it has LoS to
 	Mob* mob_owner = nullptr;
 	if(GetOwnerID())
-		mob_owner = entity_list.GetMob(GetOwnerID());
+		mob_owner = entity_list.getMOB(GetOwnerID());
 
 	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
 	if(summon_level == 1 || summon_level == 2) {
@@ -2631,7 +2631,7 @@ void Mob::Say(const char *format, ...)
 	Mob* talker = this;
 	if(spellbonuses.VoiceGraft != 0) {
 		if(spellbonuses.VoiceGraft == GetPetID())
-			talker = entity_list.GetMob(spellbonuses.VoiceGraft);
+			talker = entity_list.getMOB(spellbonuses.VoiceGraft);
 		else
 			spellbonuses.VoiceGraft = 0;
 	}
@@ -4367,7 +4367,7 @@ void Mob::SpellProjectileEffect()
 			continue;
 		}
 
-		Mob* target = entity_list.GetMobID(projectile_target_id[i]);
+		Mob* target = entity_list.getMOBByID(projectile_target_id[i]);
 		
 		float dist = 0;
 		
@@ -4422,7 +4422,7 @@ void Mob::DoGravityEffect()
 
 					int casterId = buffs[slot].casterid;
 					if(casterId)
-						caster = entity_list.GetMob(casterId);
+						caster = entity_list.getMOB(casterId);
 
 					if(!caster || casterId == this->getID())
 						continue;
@@ -4493,12 +4493,12 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 {
 	int num_targs = spells[spell_id].viral_targets;
 
-	Mob* caster = entity_list.GetMob(casterID);
+	Mob* caster = entity_list.getMOB(casterID);
 	Mob* target = nullptr;
 	// Only spread in zones without perm buffs
 	if(!zone->BuffTimersSuspended()) {
 		for(int i = 0; i < num_targs; i++) {
-			target = entity_list.GetTargetForVirus(this);
+			target = entity_list.getTargetForVirus(this);
 			if(target) {
 				// Only spreads to the uninfected
 				if(!target->FindBuff(spell_id)) {

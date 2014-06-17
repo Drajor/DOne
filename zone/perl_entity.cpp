@@ -62,7 +62,7 @@ XS(XS_EntityList_GetMobID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMobID(id);
+		RETVAL = THIS->getMOBByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -89,7 +89,7 @@ XS(XS_EntityList_GetMob)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMob(name);
+		RETVAL = THIS->getMOB(name);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -116,7 +116,7 @@ XS(XS_EntityList_GetMobByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMob(id);
+		RETVAL = THIS->getMOB(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -143,7 +143,7 @@ XS(XS_EntityList_GetMobByNpcTypeID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMobByNpcTypeID(get_id);
+		RETVAL = THIS->getMOBByNpcTypeID(get_id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void*)RETVAL);
 	}
@@ -170,7 +170,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsMobSpawnedByNpcTypeID(get_id);
+		RETVAL = THIS->isMOBSpawnedByNpcTypeID(get_id);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -197,7 +197,7 @@ XS(XS_EntityList_GetNPCByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetNPCByID(id);
+		RETVAL = THIS->getNPCByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void*)RETVAL);
 	}
@@ -224,7 +224,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
+		RETVAL = THIS->getNPCByNPCTypeID(npc_id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void*)RETVAL);
 	}
@@ -251,7 +251,7 @@ XS(XS_EntityList_GetClientByName)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientByName(name);
+		RETVAL = THIS->getClientByName(name);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -278,7 +278,7 @@ XS(XS_EntityList_GetClientByAccID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientByAccID(accid);
+		RETVAL = THIS->getClientByAccountID(accid);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -305,7 +305,7 @@ XS(XS_EntityList_GetClientByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientByID(id);
+		RETVAL = THIS->getClientByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -332,7 +332,7 @@ XS(XS_EntityList_GetClientByCharID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientByCharID(iCharID);
+		RETVAL = THIS->getClientByCharacterID(iCharID);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -359,7 +359,7 @@ XS(XS_EntityList_GetClientByWID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientByWID(iWID);
+		RETVAL = THIS->getClientByWID(iWID);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}
@@ -557,7 +557,7 @@ XS(XS_EntityList_GetGroupByMob)
 		if(mob == nullptr)
 			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGroupByMob(mob);
+		RETVAL = THIS->getGroupByMOB(mob);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void*)RETVAL);
 	}
@@ -593,7 +593,7 @@ XS(XS_EntityList_GetGroupByClient)
 		if(client == nullptr)
 			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGroupByClient(client);
+		RETVAL = THIS->getGroupByClient(client);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void*)RETVAL);
 	}
@@ -620,7 +620,7 @@ XS(XS_EntityList_GetGroupByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGroupByID(id);
+		RETVAL = THIS->getGroupByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void*)RETVAL);
 	}
@@ -647,7 +647,7 @@ XS(XS_EntityList_GetGroupByLeaderName)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetGroupByLeaderName(leader);
+		RETVAL = THIS->getGroupByLeaderName(leader);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void*)RETVAL);
 	}
@@ -674,7 +674,7 @@ XS(XS_EntityList_GetRaidByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetRaidByID(id);
+		RETVAL = THIS->getRaidByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void*)RETVAL);
 	}
@@ -710,7 +710,7 @@ XS(XS_EntityList_GetRaidByClient)
 		if(client == nullptr)
 			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetRaidByClient(client);
+		RETVAL = THIS->getRaidByClient(client);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void*)RETVAL);
 	}
@@ -746,7 +746,7 @@ XS(XS_EntityList_GetCorpseByOwner)
 		if(client == nullptr)
 			Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCorpseByOwner(client);
+		RETVAL = THIS->getCorpseByOwner(client);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void*)RETVAL);
 	}
@@ -773,7 +773,7 @@ XS(XS_EntityList_GetCorpseByID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCorpseByID(id);
+		RETVAL = THIS->getCorpseByID(id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void*)RETVAL);
 	}
@@ -800,7 +800,7 @@ XS(XS_EntityList_GetCorpseByName)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetCorpseByName(name);
+		RETVAL = THIS->getCorpseByName(name);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void*)RETVAL);
 	}
@@ -1875,7 +1875,7 @@ XS(XS_EntityList_GetRandomClient)
 				c = INT2PTR(Client *,tmp);
 			}
 		}
-		RETVAL = entity_list.GetRandomClient(x, y, z, d * d, c);
+		RETVAL = entity_list.getRandomClient(x, y, z, d * d, c);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void*)RETVAL);
 	}

@@ -34,7 +34,7 @@ extern Zone* zone;
 //look around a client for things which might aggro the client.
 void EntityList::CheckClientAggro(Client *around)
 {
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		Mob *mob = it->second;
 		if (mob->isClient())	//also ensures that mob != around
 			continue;
@@ -79,7 +79,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		towho->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
 	}
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
+	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		Mob *mob = it->second;
 		if (mob->isClient())	//also ensures that mob != around
 			continue;
@@ -362,11 +362,11 @@ Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssist
 
 #ifdef REVERSE_AGGRO
 	//with reverse aggro, npc->client is checked elsewhere, no need to check again
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
+	auto it = mNPCs.begin();
+	while (it != mNPCs.end()) {
 #else
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
+	auto it = mMOBs.begin();
+	while (it != mMOBs.end()) {
 #endif
 		Mob *mob = it->second;
 
@@ -386,7 +386,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 
 	int Count = 0;
 
-	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+	for (auto it = mNPCs.begin(); it != mNPCs.end(); ++it) {
 		NPC *mob = it->second;
 		if (!mob || (mob == exclude))
 			continue;
@@ -425,7 +425,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 	if (sender->GetPrimaryFaction() == 0 )
 		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
 
-	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+	for (auto it = mNPCs.begin(); it != mNPCs.end(); ++it) {
 		NPC *mob = it->second;
 		if (!mob)
 			continue;
@@ -1177,7 +1177,7 @@ void Mob::ClearFeignMemory() {
 	std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
 	while (RememberedCharID != feign_memory_list.end())
 	{
-		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+		Client* remember_client = entity_list.getClientByCharacterID(*RememberedCharID);
 		if(remember_client != nullptr) //Still in zone
 			remember_client->RemoveXTarget(this, false);
 		++RememberedCharID;

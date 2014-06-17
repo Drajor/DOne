@@ -330,11 +330,11 @@ Client::~Client() {
 	if(IsInAGuild())
 		guild_mgr.sendGuildMemberUpdateToWorld(getName(), GuildID(), 0, time(nullptr));
 
-	Mob* horse = entity_list.GetMob(this->castToClient()->GetHorseId());
+	Mob* horse = entity_list.getMOB(this->castToClient()->GetHorseId());
 	if (horse)
 		horse->depop();
 
-	Mob* merc = entity_list.GetMob(this->GetMercID());
+	Mob* merc = entity_list.getMOB(this->GetMercID());
 	if (merc)
 		merc->depop();
 
@@ -360,7 +360,7 @@ Client::~Client() {
 
 	ChangeSQLLog(nullptr);
 	if(IsDueling() && GetDuelTarget() != 0) {
-		Entity* entity = entity_list.GetID(GetDuelTarget());
+		Entity* entity = entity_list.getID(GetDuelTarget());
 		if(entity != nullptr && entity->isClient()) {
 			entity->castToClient()->SetDueling(false);
 			entity->castToClient()->SetDuelTarget(0);
@@ -845,7 +845,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case 2: { // GroupChat
-		Raid* raid = entity_list.GetRaidByClient(this);
+		Raid* raid = entity_list.getRaidByClient(this);
 		if(raid) {
 			raid->RaidGroupSay((const char*) message, this);
 			break;
@@ -858,7 +858,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		break;
 	}
 	case 15: { //raid say
-		Raid* raid = entity_list.GetRaidByClient(this);
+		Raid* raid = entity_list.getRaidByClient(this);
 		if(raid){
 			raid->RaidSay((const char*) message, this);
 		}
@@ -3187,7 +3187,7 @@ void Client::LinkDead()
 		entity_list.MessageGroup(this,true,15,"%s has gone linkdead.",getName());
 		GetGroup()->delMember(this);
 	}
-	Raid *raid = entity_list.GetRaidByClient(this);
+	Raid *raid = entity_list.getRaidByClient(this);
 	if(raid){
 		raid->MemberZoned(this);
 	}
@@ -3313,7 +3313,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 //neat idea from winter's roar, not implemented
 void Client::Insight(uint32 t_id)
 {
-	Mob* who = entity_list.GetMob(t_id);
+	Mob* who = entity_list.getMOB(t_id);
 	if (!who)
 		return;
 	if (!who->isNPC())
@@ -3789,7 +3789,7 @@ void Client::Sacrifice(Client *caster)
 						if(g){
 							g->memberZoned(this);
 						}
-						Raid *r = entity_list.GetRaidByClient(this);
+						Raid *r = entity_list.getRaidByClient(this);
 						if(r){
 							r->MemberZoned(this);
 						}
@@ -6201,7 +6201,7 @@ bool Client::IsDraggingCorpse(uint16 CorpseID)
 void Client::DragCorpses()
 {
 	for (auto It = DraggedCorpses.begin(); It != DraggedCorpses.end(); ++It) {
-		Mob *corpse = entity_list.GetMob(It->second);
+		Mob *corpse = entity_list.getMOB(It->second);
 
 		if (corpse && corpse->isPlayerCorpse() &&
 				(DistNoRootNoZ(*corpse) <= RuleR(Character, DragCorpseDistance)))

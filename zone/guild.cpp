@@ -266,8 +266,8 @@ void Client::RefreshGuildInfo()
 void EntityList::SendGuildMOTD(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildMOTD();
@@ -281,8 +281,8 @@ void EntityList::SendGuildMOTD(uint32 guild_id) {
 void EntityList::SendGuildSpawnAppearance(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildSpawnAppearance();
@@ -294,8 +294,8 @@ void EntityList::SendGuildSpawnAppearance(uint32 guild_id) {
 void EntityList::RefreshAllGuildInfo(uint32 guild_id) {
 	if(guild_id == GUILD_NONE)
 		return;
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->RefreshGuildInfo();
@@ -311,8 +311,8 @@ void EntityList::SendGuildMembers(uint32 guild_id) {
 	//this could be optimized a bit to only build the member's packet once
 	//and then keep swapping out the name in the packet on each send.
 
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client *client = it->second;
 		if (client->GuildID() == guild_id) {
 			client->SendGuildMembers();
@@ -322,8 +322,8 @@ void EntityList::SendGuildMembers(uint32 guild_id) {
 }
 
 void EntityList::SendGuildList() {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
+	auto it = mClients.begin();
+	while (it != mClients.end()) {
 		Client *client = it->second;
 		client->SendGuildList();
 		++it;

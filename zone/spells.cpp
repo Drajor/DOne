@@ -127,7 +127,7 @@ void NPC::SpellProcess()
 		if (GetSwarmInfo()->duration->Check(false))
 			depop();
 
-		Mob *targMob = entity_list.GetMob(GetSwarmInfo()->target);
+		Mob *targMob = entity_list.getMOB(GetSwarmInfo()->target);
 		if (GetSwarmInfo()->target != 0) {
 			if(!targMob || (targMob && targMob->isCorpse()))
 				depop();
@@ -456,7 +456,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if (IsAIControlled())
 	{
 		SetRunAnimSpeed(0);
-		pMob = entity_list.GetMob(target_id);
+		pMob = entity_list.getMOB(target_id);
 		if (pMob && this != pMob)
 			FaceTarget(pMob);
 	}
@@ -500,7 +500,7 @@ bool Mob::DoCastingChecks()
 	}
 
 	uint16 spell_id = casting_spell_id;
-	Mob *spell_target = entity_list.GetMob(casting_spell_targetid);
+	Mob *spell_target = entity_list.getMOB(casting_spell_targetid);
 
 	if (RuleB(Spells, BuffLevelRestrictions)) {
 		// casting_spell_targetid is guaranteed to be what we went, check for ST_Self for now should work though
@@ -933,7 +933,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 	bool bard_song_mode = false;
 	bool regain_conc = false;
-	Mob *spell_target = entity_list.GetMob(target_id);
+	Mob *spell_target = entity_list.getMOB(target_id);
 	// here we do different things if this is a bard casting a bard song from
 	// a spell bar slot
 	if(GetClass() == BARD) // bard's can move when casting any spell...
@@ -1907,7 +1907,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				// it can affect up to 7 people if the targeted group is not our own
 				if(spell_target->IsGrouped())
 				{
-					Group *target_group = entity_list.GetGroupByMob(spell_target);
+					Group *target_group = entity_list.getGroupByMOB(spell_target);
 					if(target_group)
 					{
 						target_group->castGroupSpell(this, spell_id);
@@ -1915,7 +1915,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				}
 				else if(spell_target->IsRaidGrouped() && spell_target->isClient())
 				{
-					Raid *target_raid = entity_list.GetRaidByClient(spell_target->castToClient());
+					Raid *target_raid = entity_list.getRaidByClient(spell_target->castToClient());
 					uint32 gid = 0xFFFFFFFF;
 					if(target_raid){
 						gid = target_raid->GetGroup(spell_target->getName());
@@ -2187,13 +2187,13 @@ bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
 		{
 			if(spell_target->IsGrouped()) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse: spell %d, Group targeting group of %s", spell_id, spell_target->getName());
-				Group *target_group = entity_list.GetGroupByMob(spell_target);
+				Group *target_group = entity_list.getGroupByMOB(spell_target);
 				if(target_group)
 					target_group->groupBardPulse(this, spell_id);
 			}
 			else if(spell_target->IsRaidGrouped() && spell_target->isClient()) {
 				mlog(SPELLS__BARDS, "Bard Song Pulse: spell %d, Raid group targeting raid group of %s", spell_id, spell_target->getName());
-				Raid *r = entity_list.GetRaidByClient(spell_target->castToClient());
+				Raid *r = entity_list.getRaidByClient(spell_target->castToClient());
 				if(r){
 					uint32 gid = r->GetGroup(spell_target->getName());
 					if(gid < 12){
@@ -2825,7 +2825,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		if (curbuf.spellid != SPELL_UNKNOWN) {
 			// there's a buff in this slot
 			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
-					caster_level, entity_list.GetMobID(curbuf.casterid), caster);
+					caster_level, entity_list.getMOBByID(curbuf.casterid), caster);
 			if (ret == -1) {	// stop the spell
 				mlog(SPELLS__BUFFS, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
@@ -3215,8 +3215,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 
 				//Caster client pointers
 				pClient = this->castToClient();
-				pRaid = entity_list.GetRaidByClient(pClient);
-				pBasicGroup = entity_list.GetGroupByMob(this);
+				pRaid = entity_list.getRaidByClient(pClient);
+				pBasicGroup = entity_list.getGroupByMOB(this);
 				if(pRaid)
 					nGroup = pRaid->GetGroup(pClient) + 1;
 
@@ -3224,8 +3224,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				if(spelltar->isClient())
 				{
 					pClientTarget = spelltar->castToClient();
-					pRaidTarget = entity_list.GetRaidByClient(pClientTarget);
-					pBasicGroupTarget = entity_list.GetGroupByMob(spelltar);
+					pRaidTarget = entity_list.getRaidByClient(pClientTarget);
+					pBasicGroupTarget = entity_list.getGroupByMOB(spelltar);
 					if(pRaidTarget)
 						nGroupTarget = pRaidTarget->GetGroup(pClientTarget) + 1;
 				}
@@ -3236,8 +3236,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					if(owner->isClient())
 					{
 						pClientTargetPet = owner->castToClient();
-						pRaidTargetPet = entity_list.GetRaidByClient(pClientTargetPet);
-						pBasicGroupTargetPet = entity_list.GetGroupByMob(owner);
+						pRaidTargetPet = entity_list.getRaidByClient(pClientTargetPet);
+						pBasicGroupTargetPet = entity_list.getGroupByMOB(owner);
 						if(pRaidTargetPet)
 							nGroupTargetPet = pRaidTargetPet->GetGroup(pClientTargetPet) + 1;
 					}
@@ -3430,7 +3430,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 			{
 				if(IsGrouped())
 				{
-					Group *g = entity_list.GetGroupByMob(this);
+					Group *g = entity_list.getGroupByMOB(this);
 					if(g)
 						g->castGroupSpell(this, recourse_spell);
 					else{
@@ -3443,7 +3443,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				}
 				else if(IsRaidGrouped() && isClient())
 				{
-					Raid *r = entity_list.GetRaidByClient(castToClient());
+					Raid *r = entity_list.getRaidByClient(castToClient());
 					uint32 gid = 0xFFFFFFFF;
 					if(r)
 						gid = r->GetGroup(getName());
@@ -3466,7 +3466,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				{
 					if(GetOwner()->IsGrouped())
 					{
-						Group *g = entity_list.GetGroupByMob(GetOwner());
+						Group *g = entity_list.getGroupByMOB(GetOwner());
 						if(g)
 							g->castGroupSpell(this, recourse_spell);
 						else{
@@ -3476,7 +3476,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					}
 					else if(GetOwner()->IsRaidGrouped() && GetOwner()->isClient())
 					{
-						Raid *r = entity_list.GetRaidByClient(GetOwner()->castToClient());
+						Raid *r = entity_list.getRaidByClient(GetOwner()->castToClient());
 						uint32 gid = 0xFFFFFFFF;
 						if(r)
 							gid = r->GetGroup(GetOwner()->getName());
@@ -3750,7 +3750,7 @@ void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
 			{
 				//this is a pretty terrible way to do this but
 				//there really isn't another way till I rewrite the basics
-				Mob * c = entity_list.GetMob(buffs[j].casterid);
+				Mob * c = entity_list.getMOB(buffs[j].casterid);
 				if(c && c == caster)
 					BuffFadeBySlot(j, false);
 			}

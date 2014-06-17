@@ -382,7 +382,7 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 
 
 	//Only iterate through NPCs
-	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+	for (auto it = mNPCs.begin(); it != mNPCs.end(); ++it) {
 		NPC* mob = it->second;
 
 		//Since >90% of mobs will always be out of range, try to
@@ -568,7 +568,7 @@ void Client::AI_Stop() {
 	entity_list.QueueClients(this, app);
 	safe_delete(app);
 
-	SetTarget(entity_list.GetMob(pClientSideTarget));
+	SetTarget(entity_list.getMOB(pClientSideTarget));
 	SendAppearancePacket(AT_Anim, GetAppearanceValue(GetAppearance()));
 	SendAppearancePacket(AT_Linkdead, 0); // Removing LD packet so *LD* no longer appears by the player name when charmed/feared -Kasai
 	if (!auto_attack) {
@@ -949,7 +949,7 @@ void Client::AI_Process()
 			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
 			while (RememberedCharID != feign_memory_list.end()) {
-				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+				Client* remember_client = entity_list.getClientByCharacterID(*RememberedCharID);
 				if (remember_client == nullptr) {
 					//they are gone now...
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
@@ -1210,7 +1210,7 @@ void Mob::AI_Process() {
 						if (IsPet())
 							owner = GetOwner();
 						else 
-							owner = entity_list.GetMobID(castToNPC()->GetSwarmOwner());
+							owner = entity_list.getMOBByID(castToNPC()->GetSwarmOwner());
 							
 						if (owner) {
 						int16 flurry_chance = owner->aabonuses.PetFlurry +
@@ -1402,7 +1402,7 @@ void Mob::AI_Process() {
 			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
 			while (RememberedCharID != feign_memory_list.end()) {
-				Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);
+				Client* remember_client = entity_list.getClientByCharacterID(*RememberedCharID);
 				if (remember_client == nullptr) {
 					//they are gone now...
 					RememberedCharID = feign_memory_list.erase(RememberedCharID);
@@ -1504,7 +1504,7 @@ void Mob::AI_Process() {
 			}
 			else if (GetFollowID())
 			{
-				Mob* follow = entity_list.GetMob(GetFollowID());
+				Mob* follow = entity_list.getMOB(GetFollowID());
 				if (!follow) SetFollowID(0);
 				else
 				{
@@ -1856,7 +1856,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 	{
 		if(castToNPC()->GetCombatEvent() && GetHP() > 0)
 		{
-			if(entity_list.GetNPCByID(this->getID()))
+			if(entity_list.getNPCByID(this->getID()))
 			{
 			uint16 emoteid = castToNPC()->GetEmoteID();
 			parse->EventNPC(EVENT_COMBAT, castToNPC(), nullptr, "0", 0);
@@ -1965,7 +1965,7 @@ void Mob::StartEnrage()
 	}
 
 	if(RuleB(NPC, LiveLikeEnrage) && !((IsPet() && !IsCharmed() && GetOwner() && GetOwner()->isClient()) ||
-		(castToNPC()->GetSwarmOwner() && entity_list.GetMob(castToNPC()->GetSwarmOwner())->isClient()))) {
+		(castToNPC()->GetSwarmOwner() && entity_list.getMOB(castToNPC()->GetSwarmOwner())->isClient()))) {
 		return;
 	}
 
@@ -2059,7 +2059,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		if (index_hit >= rampage_targets)
 			break;
 		// range is important
-		Mob *m_target = entity_list.GetMob(RampageArray[i]);
+		Mob *m_target = entity_list.getMOB(RampageArray[i]);
 		if (m_target) {
 			if (m_target == GetTarget())
 				continue;

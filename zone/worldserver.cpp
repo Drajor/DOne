@@ -175,7 +175,7 @@ void WorldServer::Process() {
 			}
 			else {
 				Client* client;
-				client = entity_list.GetClientByName(scm->deliverto);
+				client = entity_list.getClientByName(scm->deliverto);
 				if (client != 0) {
 					if (client->Connected()) {
 						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->message);
@@ -210,7 +210,7 @@ void WorldServer::Process() {
 
 			switch(svm->Type) {
 				case VoiceMacroTell: {
-					Client* c = entity_list.GetClientByName(svm->To);
+					Client* c = entity_list.getClientByName(svm->To);
 					if(!c)
 						break;
 
@@ -219,7 +219,7 @@ void WorldServer::Process() {
 				}
 
 				case VoiceMacroGroup: {
-					Group* g = entity_list.GetGroupByID(svm->GroupID);
+					Group* g = entity_list.getGroupByID(svm->GroupID);
 
 					if(!g)
 						break;
@@ -233,7 +233,7 @@ void WorldServer::Process() {
 				}
 
 				case VoiceMacroRaid: {
-					Raid *r = entity_list.GetRaidByID(svm->RaidID);
+					Raid *r = entity_list.getRaidByID(svm->RaidID);
 
 					if(!r)
 						break;
@@ -295,7 +295,7 @@ void WorldServer::Process() {
 			if(ztz->current_zone_id == zone->GetZoneID()
 				&& ztz->current_instance_id == zone->GetInstanceID()) {
 				// it's a response
-				Entity* entity = entity_list.GetClientByName(ztz->name);
+				Entity* entity = entity_list.getClientByName(ztz->name);
 				if(entity == 0)
 					break;
 
@@ -370,7 +370,7 @@ void WorldServer::Process() {
 
 			WhoAllReturnStruct* wars= (WhoAllReturnStruct*)pack->pBuffer;
 			if (wars && wars->id!=0 && wars->id<0xFFFFFFFF){
-				Client* client = entity_list.GetClientByID(wars->id);
+				Client* client = entity_list.getClientByID(wars->id);
 				if (client) {
 					if(pack->size==64)//no results
 						client->Message_StringID(0,WHOALL_NO_RESULTS);
@@ -401,7 +401,7 @@ void WorldServer::Process() {
 				if (strcasecmp(sem->to, zone->GetShortName()) == 0)
 					entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, (char*)sem->message);
 				else {
-					Client* client = entity_list.GetClientByName(sem->to);
+					Client* client = entity_list.getClientByName(sem->to);
 					if (client != 0){
 						char* newmessage=0;
 						if(strstr(sem->message,"^")==0)
@@ -518,7 +518,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ZonePlayer: {
 			ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(szp->name);
+			Client* client = entity_list.getClientByName(szp->name);
 			printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
 			if (client != 0) {
 				if (strcasecmp(szp->adminname, szp->name) == 0)
@@ -534,7 +534,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_KickPlayer: {
 			ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(skp->name);
+			Client* client = entity_list.getClientByName(skp->name);
 			if (client != 0) {
 				if (skp->adminrank >= client->Admin()) {
 					client->WorldKick();
@@ -550,7 +550,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_KillPlayer: {
 			ServerKillPlayer_Struct* skp = (ServerKillPlayer_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(skp->target);
+			Client* client = entity_list.getClientByName(skp->target);
 			if (client != 0) {
 				if (skp->admin >= client->Admin()) {
 					client->GMKill();
@@ -581,7 +581,7 @@ void WorldServer::Process() {
 			break;
 
 		case ServerOP_FlagUpdate: {
-			Client* client = entity_list.GetClientByAccID(*((uint32*) pack->pBuffer));
+			Client* client = entity_list.getClientByAccountID(*((uint32*) pack->pBuffer));
 			if (client != 0) {
 				client->UpdateAdmin();
 			}
@@ -595,7 +595,7 @@ void WorldServer::Process() {
 			if (!ZoneLoaded)
 				break;
 			ServerGMGoto_Struct* gmg = (ServerGMGoto_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(gmg->gotoname);
+			Client* client = entity_list.getClientByName(gmg->gotoname);
 			if (client != 0) {
 				SendEmoteMessage(gmg->myname, 0, 13, "Summoning you to: %s @ %s, %1.1f, %1.1f, %1.1f", client->getName(), zone->GetShortName(), client->GetX(), client->GetY(), client->GetZ());
 				ServerPacket* outpack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
@@ -617,7 +617,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_MultiLineMsg: {
 			ServerMultiLineMsg_Struct* mlm = (ServerMultiLineMsg_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(mlm->to);
+			Client* client = entity_list.getClientByName(mlm->to);
 			if (client) {
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_MultiLineMsg, strlen(mlm->message));
 				strcpy((char*) outapp->pBuffer, mlm->message);
@@ -661,7 +661,7 @@ void WorldServer::Process() {
 			{
 				// The Rezz request has arrived in the zone the player to be rezzed is currently in,
 				// so we send the request to their client which will bring up the confirmation box.
-				Client* client = entity_list.GetClientByName(srs->rez.your_name);
+				Client* client = entity_list.getClientByName(srs->rez.your_name);
 				if (client)
 				{
 					if(client->IsRezzPending())
@@ -691,7 +691,7 @@ void WorldServer::Process() {
 			if (srs->rezzopcode == OP_RezzComplete){
 				// We get here when the Rezz complete packet has come back via the world server
 				// to the zone that the corpse is in.
-				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
+				Corpse* corpse = entity_list.getCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->isCorpse()) {
 					_log(SPELLS__REZ, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
@@ -709,7 +709,7 @@ void WorldServer::Process() {
 		{
 			char *Rezzer = (char *)pack->pBuffer;
 
-			Client* c = entity_list.GetClientByName(Rezzer);
+			Client* c = entity_list.getClientByName(Rezzer);
 
 			if (c)
 				c->Message_StringID(MT_WornOff, REZZ_ALREADY_PENDING);
@@ -781,7 +781,7 @@ void WorldServer::Process() {
 				break;
 			}
 			ServerChangeWID_Struct* scw = (ServerChangeWID_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByCharID(scw->charid);
+			Client* client = entity_list.getClientByCharacterID(scw->charid);
 			if (client)
 				client->SetWID(scw->newwid);
 			break;
@@ -792,7 +792,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_Revoke: {
 			RevokeStruct* rev = (RevokeStruct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(rev->name);
+			Client* client = entity_list.getClientByName(rev->name);
 			if (client)
 			{
 				SendEmoteMessage(rev->adminname, 0, 0, "%s: %srevoking %s", zone->GetShortName(), rev->toggle?"":"un", client->getName());
@@ -828,7 +828,7 @@ void WorldServer::Process() {
 			//
 			GroupInvite_Struct* gis = (GroupInvite_Struct*)pack->pBuffer;
 
-			Mob *Invitee = entity_list.GetMob(gis->invitee_name);
+			Mob *Invitee = entity_list.getMOB(gis->invitee_name);
 
 			if(Invitee && Invitee->isClient() && !Invitee->IsGrouped() && !Invitee->IsRaidGrouped())
 			{
@@ -845,11 +845,11 @@ void WorldServer::Process() {
 			//
 			ServerGroupFollow_Struct* sgfs = (ServerGroupFollow_Struct*) pack->pBuffer;
 
-			Mob* Inviter = entity_list.GetClientByName(sgfs->gf.name1);
+			Mob* Inviter = entity_list.getClientByName(sgfs->gf.name1);
 
 			if(Inviter && Inviter->isClient())
 			{
-				Group* group = entity_list.GetGroupByClient(Inviter->castToClient());
+				Group* group = entity_list.getGroupByClient(Inviter->castToClient());
 
 				if(!group){
 
@@ -947,7 +947,7 @@ void WorldServer::Process() {
 			//
 			ServerGroupFollowAck_Struct* sgfas = (ServerGroupFollowAck_Struct*)pack->pBuffer;
 
-			Client *c = entity_list.GetClientByName(sgfas->Name);
+			Client *c = entity_list.getClientByName(sgfas->Name);
 
 			if(!c)
 				break;
@@ -958,7 +958,7 @@ void WorldServer::Process() {
 
 			if(groupid > 0)
 			{
-				group = entity_list.GetGroupByID(groupid);
+				group = entity_list.getGroupByID(groupid);
 
 				if(!group)
 				{	//nobody from our group is here... start a new group
@@ -998,7 +998,7 @@ void WorldServer::Process() {
 					GroupLeadershipAA_Struct GLAA;
 					memset(ln, 0, 64);
 					strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
-					Client *lc = entity_list.GetClientByName(ln);
+					Client *lc = entity_list.getClientByName(ln);
 					if(lc)
 						group->setLeader(lc);
 
@@ -1017,7 +1017,7 @@ void WorldServer::Process() {
 
 			GroupCancel_Struct* sgcs = (GroupCancel_Struct*) pack->pBuffer;
 
-			Mob* Inviter = entity_list.GetClientByName(sgcs->name1);
+			Mob* Inviter = entity_list.getClientByName(sgcs->name1);
 
 			if(Inviter && Inviter->isClient())
 			{
@@ -1034,7 +1034,7 @@ void WorldServer::Process() {
 				if(gj->zoneid == zone->GetZoneID() && gj->instance_id == zone->GetInstanceID())
 					break;
 
-				Group* g = entity_list.GetGroupByID(gj->gid);
+				Group* g = entity_list.getGroupByID(gj->gid);
 				if(g)
 					g->addMember(gj->member_name);
 
@@ -1070,7 +1070,7 @@ void WorldServer::Process() {
 				if(sd->zoneid == zone->GetZoneID() && sd->instance_id == zone->GetInstanceID())
 					break;
 
-				Group *g = entity_list.GetGroupByID(sd->groupid);
+				Group *g = entity_list.getGroupByID(sd->groupid);
 				if(g)
 					g->disbandGroup();
 			}
@@ -1082,7 +1082,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
@@ -1098,10 +1098,10 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->SendRaidRemoveAll(rga->playername);
-					Client *rem = entity_list.GetClientByName(rga->playername);
+					Client *rem = entity_list.getClientByName(rga->playername);
 					if(rem){
 						r->SendRaidDisband(rem);
 					}
@@ -1118,7 +1118,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->SendRaidDisbandAll();
 					r->LearnMembers();
@@ -1134,7 +1134,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->GetRaidDetails(); //update our details
 					if(rga->gid)
@@ -1152,11 +1152,11 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
-					Client *c = entity_list.GetClientByName(rga->playername);
+					Client *c = entity_list.getClientByName(rga->playername);
 					if(c){
 						r->SendRaidDisband(c);
 						r->SendRaidRemoveAll(rga->playername);
@@ -1181,7 +1181,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->GroupUpdate(rga->gid, false);
 				}
@@ -1204,9 +1204,9 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
-					Client *c = entity_list.GetClientByName(rga->playername);
+					Client *c = entity_list.getClientByName(rga->playername);
 					strn0cpy(r->leadername, rga->playername, 64);
 					if(c){
 						r->SetLeader(c);
@@ -1225,7 +1225,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->GetRaidDetails();
 					r->LearnMembers();
@@ -1241,7 +1241,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Client *c = entity_list.GetClientByName(rga->playername);
+				Client *c = entity_list.getClientByName(rga->playername);
 				if(c)
 				{
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
@@ -1258,7 +1258,7 @@ void WorldServer::Process() {
 		case ServerOP_RaidGroupAdd:{
 			ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 			if(zone){
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
@@ -1289,7 +1289,7 @@ void WorldServer::Process() {
 		case ServerOP_RaidGroupRemove:{
 			ServerRaidGroupAction_Struct* rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 			if(zone){
-				Raid *r = entity_list.GetRaidByID(rga->rid);
+				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
@@ -1320,7 +1320,7 @@ void WorldServer::Process() {
 		case ServerOP_RaidGroupSay:{
 			ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;
 			if(zone){
-				Raid *r = entity_list.GetRaidByID(rmsg->rid);
+				Raid *r = entity_list.getRaidByID(rmsg->rid);
 				if(r)
 				{
 					for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -1346,7 +1346,7 @@ void WorldServer::Process() {
 			ServerRaidMessage_Struct* rmsg = (ServerRaidMessage_Struct*)pack->pBuffer;
 			if(zone)
 			{
-				Raid *r = entity_list.GetRaidByID(rmsg->rid);
+				Raid *r = entity_list.getRaidByID(rmsg->rid);
 				if(r)
 				{
 					for(int x = 0; x < MAX_RAID_MEMBERS; x++)
@@ -1378,7 +1378,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_Consent: {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-			Client* client = entity_list.GetClientByName(s->grantname);
+			Client* client = entity_list.getClientByName(s->grantname);
 			if(client) {
 				if(s->permission == 1)
 					client->consent_list.push_back(s->ownername);
@@ -1418,7 +1418,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_Consent_Response: {
 			ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
-			Client* client = entity_list.GetClientByName(s->ownername);
+			Client* client = entity_list.getClientByName(s->ownername);
 			if(client) {
 				client->Message_StringID(0, s->message_string_id);
 			}
@@ -1584,7 +1584,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureRequestAccept:
 		{
 			ServerAdventureRequestAccept_Struct *ars = (ServerAdventureRequestAccept_Struct*)pack->pBuffer;
-			Client *c = entity_list.GetClientByName(ars->leader);
+			Client *c = entity_list.getClientByName(ars->leader);
 			if(c)
 			{
 				c->NewAdventure(ars->id, ars->theme, ars->text, ars->member_count, (const char*)(pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)));
@@ -1596,7 +1596,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureRequestDeny:
 		{
 			ServerAdventureRequestDeny_Struct *ars = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
-			Client *c = entity_list.GetClientByName(ars->leader);
+			Client *c = entity_list.getClientByName(ars->leader);
 			if(c)
 			{
 				c->SendAdventureError(ars->reason);
@@ -1607,7 +1607,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureCreateDeny:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureData();
@@ -1618,7 +1618,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureData:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearAdventureData();
@@ -1634,7 +1634,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureDataClear:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				if(c->HasAdventureData())
@@ -1649,7 +1649,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureClickDoorReply:
 		{
 			ServerPlayerClickedAdventureDoorReply_Struct *adr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
-			Client *c = entity_list.GetClientByName(adr->player);
+			Client *c = entity_list.getClientByName(adr->player);
 			if(c)
 			{
 				c->ClearPendingAdventureDoorClick();
@@ -1660,7 +1660,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureClickDoorError:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureDoorClick();
@@ -1671,7 +1671,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaveReply:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureLeave();
@@ -1682,7 +1682,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaveDeny:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureLeave();
@@ -1694,7 +1694,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureCountUpdate:
 		{
 			ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
-			Client *c = entity_list.GetClientByName(ac->player);
+			Client *c = entity_list.getClientByName(ac->player);
 			if(c)
 			{
 				c->SendAdventureCount(ac->count, ac->total);
@@ -1717,7 +1717,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureFinish:
 		{
 			ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
-			Client *c = entity_list.GetClientByName(af->player);
+			Client *c = entity_list.getClientByName(af->player);
 			if(c)
 			{
 				c->AdventureFinish(af->win, af->theme, af->points);
@@ -1727,7 +1727,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaderboard:
 		{
-			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
+			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureLeaderboardReply, sizeof(AdventureLeaderboard_Struct));
@@ -1756,7 +1756,7 @@ void WorldServer::Process() {
 			char From[64];
 			pack->ReadString(From);
 
-			Client *c = entity_list.GetClientByName(From);
+			Client *c = entity_list.getClientByName(From);
 
 			if(!c)
 				return;
@@ -1780,7 +1780,7 @@ void WorldServer::Process() {
 		case ServerOP_CZSignalClient:
 		{
 			CZClientSignal_Struct* CZCS = (CZClientSignal_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByCharID(CZCS->charid);
+			Client* client = entity_list.getClientByCharacterID(CZCS->charid);
 			if (client != 0) {
 				client->Signal(CZCS->data);
 			}
@@ -1789,7 +1789,7 @@ void WorldServer::Process() {
 		case ServerOP_CZSignalClientByName:
 		{
 			CZClientSignalByName_Struct* CZCS = (CZClientSignalByName_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(CZCS->Name);
+			Client* client = entity_list.getClientByName(CZCS->Name);
 			if (client != 0) {
 				client->Signal(CZCS->data);
 			}
@@ -1798,7 +1798,7 @@ void WorldServer::Process() {
 		case ServerOP_CZMessagePlayer:
 		{
 			CZMessagePlayer_Struct* CZCS = (CZMessagePlayer_Struct*) pack->pBuffer;
-			Client* client = entity_list.GetClientByName(CZCS->CharName);
+			Client* client = entity_list.getClientByName(CZCS->CharName);
 			if (client != 0) {
 				client->Message(CZCS->Type, CZCS->Message);
 			}
@@ -2086,7 +2086,7 @@ void WorldServer::HandleLFGMatches(ServerPacket *pack) {
 
 	uint32 EntityID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 
-	Client* client = entity_list.GetClientByID(EntityID);
+	Client* client = entity_list.getClientByID(EntityID);
 
 	if(client) {
 		ServerLFGMatchesResponse_Struct* smrs = (ServerLFGMatchesResponse_Struct*)Buffer;
@@ -2131,7 +2131,7 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 
 	ServerLFPMatchesResponse_Struct* smrs = (ServerLFPMatchesResponse_Struct*)Buffer;
 
-	Client* client = entity_list.GetClientByID(EntityID);
+	Client* client = entity_list.getClientByID(EntityID);
 
 	if(client) {
 		for(int i=0; i<Entries; i++) {
