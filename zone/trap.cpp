@@ -108,11 +108,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeDebuff:
 			if(message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
+				entity_list.messageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
+				entity_list.messageClose(trigger,false,100,13,"%s",message.c_str());
 			}
 			if(hiddenTrigger){
 				hiddenTrigger->SpellFinished(effectvalue, trigger, 10, 0, -1, spells[effectvalue].ResistDiff);
@@ -121,11 +121,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeAlarm:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"A loud alarm rings out through the air...");
+				entity_list.messageClose(trigger,false,effectvalue,13,"A loud alarm rings out through the air...");
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,effectvalue,13,"%s",message.c_str());
+				entity_list.messageClose(trigger,false,effectvalue,13,"%s",message.c_str());
 			}
 
 			entity_list.SendAlarm(this,trigger,effectvalue);
@@ -133,11 +133,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeMysticSpawn:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"The air shimmers...");
+				entity_list.messageClose(trigger,false,100,13,"The air shimmers...");
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
+				entity_list.messageClose(trigger,false,100,13,"%s",message.c_str());
 			}
 
 			for (i = 0; i < effectvalue2; i++)
@@ -154,11 +154,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeBanditSpawn:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"A bandit leaps out from behind a tree!");
+				entity_list.messageClose(trigger,false,100,13,"A bandit leaps out from behind a tree!");
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
+				entity_list.messageClose(trigger,false,100,13,"%s",message.c_str());
 			}
 
 			for (i = 0; i < effectvalue2; i++)
@@ -175,11 +175,11 @@ void Trap::Trigger(Mob* trigger)
 		case trapTypeDamage:
 			if (message.empty())
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
+				entity_list.messageClose(trigger,false,100,13,"%s triggers a trap!",trigger->getName());
 			}
 			else
 			{
-				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
+				entity_list.messageClose(trigger,false,100,13,"%s",message.c_str());
 			}
 			if(trigger->isClient())
 			{

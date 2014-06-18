@@ -48,23 +48,23 @@ void EntityList::CheckClientAggro(Client *around)
 	}
 }
 
-void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbose) {
-	float d2 = d*d;
+void EntityList::describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool pVerbose) {
+	float d2 = pDistance*pDistance;
 
-	towho->Message(0, "Describing aggro for %s", from_who->getName());
+	pClient->Message(0, "Describing aggro for %s", pNPC->getName());
 
-	bool engaged = from_who->IsEngaged();
+	bool engaged = pNPC->IsEngaged();
 	if(engaged) {
-		Mob *top = from_who->GetHateTop();
-		towho->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->getName());
+		Mob *top = pNPC->GetHateTop();
+		pClient->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->getName());
 	}
-	bool check_npcs = from_who->WillAggroNPCs();
+	bool check_npcs = pNPC->WillAggroNPCs();
 
-	if(verbose) {
+	if(pVerbose) {
 		char namebuf[256];
 
-		int my_primary = from_who->GetPrimaryFaction();
-		Mob *own = from_who->GetOwner();
+		int my_primary = pNPC->GetPrimaryFaction();
+		Mob *own = pNPC->GetOwner();
 		if(own != nullptr)
 			my_primary = own->GetPrimaryFaction();
 
@@ -76,27 +76,27 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 			if(!database.GetFactionName(my_primary, namebuf, sizeof(namebuf)))
 				strcpy(namebuf, "(Unknown)");
 		}
-		towho->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
+		pClient->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
 	}
 
-	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
-		Mob *mob = it->second;
+	for (auto i = mMOBs.begin(); i != mMOBs.end(); ++i) {
+		Mob *mob = i->second;
 		if (mob->isClient())	//also ensures that mob != around
 			continue;
 
-		if (mob->DistNoRoot(*from_who) > d2)
+		if (mob->DistNoRoot(*pNPC) > d2)
 			continue;
 
 		if (engaged) {
-			uint32 amm = from_who->GetHateAmount(mob);
+			uint32 amm = pNPC->GetHateAmount(mob);
 			if (amm == 0)
-				towho->Message(0, "... %s is not on my hate list.", mob->getName());
+				pClient->Message(0, "... %s is not on my hate list.", mob->getName());
 			else
-				towho->Message(0, "... %s is on my hate list with value %lu", mob->getName(), (unsigned long)amm);
+				pClient->Message(0, "... %s is on my hate list with value %lu", mob->getName(), (unsigned long)amm);
 		} else if (!check_npcs && mob->isNPC()) {
-				towho->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->getName());
+				pClient->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->getName());
 		} else {
-			from_who->DescribeAggro(towho, mob, verbose);
+			pNPC->DescribeAggro(pClient, mob, pVerbose);
 		}
 	}
 }

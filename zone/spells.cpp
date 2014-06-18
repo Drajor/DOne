@@ -1024,7 +1024,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			// if we got here, we regained concentration
 			regain_conc = true;
 			Message_StringID(MT_Spells,REGAIN_AND_CONTINUE);
-			entity_list.MessageClose_StringID(this, true, 200, MT_Spells, OTHER_REGAIN_CAST, this->GetCleanName());
+			entity_list.messageCloseStringID(this, true, 200, MT_Spells, OTHER_REGAIN_CAST, this->GetCleanName());
 		}
 	}
 

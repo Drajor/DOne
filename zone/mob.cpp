@@ -2390,7 +2390,7 @@ bool Mob::HateSummon() {
 	if(target)
 	{
 		if(summon_level == 1) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
+			entity_list.messageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 	
 			if (target->isClient()) {
 				target->castToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x_pos, y_pos, z_pos, target->GetHeading(), 0, SummonPC);
@@ -2401,7 +2401,7 @@ bool Mob::HateSummon() {
 	
 			return true;
 		} else if(summon_level == 2) {
-			entity_list.MessageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
+			entity_list.messageClose(this, true, 500, MT_Say, "%s says,'You will not evade me, %s!'", GetCleanName(), target->GetCleanName());
 			GMMove(target->GetX(), target->GetY(), target->GetZ());
 		}
 	}
@@ -2639,7 +2639,7 @@ void Mob::Say(const char *format, ...)
 	if(!talker)
 		talker = this;
 
-	entity_list.MessageClose_StringID(talker, false, 200, 10,
+	entity_list.messageCloseStringID(talker, false, 200, 10,
 		GENERIC_SAY, GetCleanName(), buf);
 }
 
@@ -2652,7 +2652,7 @@ void Mob::Say_StringID(uint32 string_id, const char *message3, const char *messa
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
+	entity_list.messageCloseStringID(this, false, 200, 10,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
@@ -2664,7 +2664,7 @@ void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, cons
 
 	snprintf(string_id_str, 10, "%d", string_id);
 
-	entity_list.MessageClose_StringID(this, false, 200, type,
+	entity_list.messageCloseStringID(this, false, 200, type,
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
@@ -2679,7 +2679,7 @@ void Mob::Shout(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.Message_StringID(this, false, MT_Shout,
+	entity_list.messageStringID(this, false, MT_Shout,
 		GENERIC_SHOUT, GetCleanName(), buf);
 }
 
@@ -2692,7 +2692,7 @@ void Mob::Emote(const char *format, ...)
 	vsnprintf(buf, 1000, format, ap);
 	va_end(ap);
 
-	entity_list.MessageClose_StringID(this, false, 200, 10,
+	entity_list.messageCloseStringID(this, false, 200, 10,
 		GENERIC_EMOTE, GetCleanName(), buf);
 }
 

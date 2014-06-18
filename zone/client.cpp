@@ -869,7 +869,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		entity_list.channelMessage(sender, chan_num, language, lang_skill, message);
 		break;
 	}
 	case 4: { // Auction
@@ -907,7 +907,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, message);
+		entity_list.channelMessage(sender, chan_num, language, message);
 		}
 		break;
 	}
@@ -954,7 +954,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 				sender = GetPet();
 
-			entity_list.ChannelMessage(sender, chan_num, language, message);
+			entity_list.channelMessage(sender, chan_num, language, message);
 		}
 		break;
 	}
@@ -1034,7 +1034,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
 			sender = GetPet();
 
-		entity_list.ChannelMessage(sender, chan_num, language, lang_skill, message);
+		entity_list.channelMessage(sender, chan_num, language, lang_skill, message);
 		parse->EventPlayer(EVENT_SAY, this, message, language);
 
 		if (sender != this)
@@ -8157,7 +8157,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
        DeleteItemInInventory(slot, 1, false);
 
        if(!auto_consume) //no message if the client consumed for us
-           entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, getName(), item->Name);
+           entity_list.messageCloseStringID(this, true, 50, 0, EATING_MESSAGE, getName(), item->Name);
 
 #if EQDEBUG >= 5
        LogFile->write(EQEMuLog::Debug, "Eating from slot:%i", (int)slot);
@@ -8174,7 +8174,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
         DeleteItemInInventory(slot, 1, false);
 
         if(!auto_consume) //no message if the client consumed for us
-            entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, getName(), item->Name);
+            entity_list.messageCloseStringID(this, true, 50, 0, DRINKING_MESSAGE, getName(), item->Name);
 
 #if EQDEBUG >= 5
         LogFile->write(EQEMuLog::Debug, "Drinking from slot:%i", (int)slot);

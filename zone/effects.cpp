@@ -70,7 +70,7 @@ int32 NPC::GetActSpellDamage(uint16 spell_id, int32 value,  Mob* target) {
 			
 				ratio += spellbonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncNoStack;
 				value += (value*ratio)/100;
-				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_BLAST, GetCleanName(), itoa(-value));
+				entity_list.messageCloseStringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_BLAST, GetCleanName(), itoa(-value));
 			}
 		}
 		else {
@@ -152,7 +152,7 @@ int32 Client::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
-			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
+			entity_list.messageCloseStringID(this, true, 100, MT_SpellCrits,
 					OTHER_CRIT_BLAST, getName(), itoa(-value));
 			Message_StringID(MT_SpellCrits, YOU_CRIT_BLAST, itoa(-value));
 
@@ -289,7 +289,7 @@ int32 NPC::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 			if(spellbonuses.CriticalHealChance && (MakeRandomInt(0,99) < spellbonuses.CriticalHealChance)) {
 				value = value*2;	 			
-				entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_HEAL, GetCleanName(), itoa(value));
+				entity_list.messageCloseStringID(this, true, 100, MT_SpellCrits, OTHER_CRIT_HEAL, GetCleanName(), itoa(value));
 			}
 		}
 		else if(spellbonuses.CriticalHealOverTime && (MakeRandomInt(0,99) < spellbonuses.CriticalHealOverTime)) {
@@ -342,7 +342,7 @@ int32 Client::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += value*target->GetHealRate(spell_id, this)/100;
 
 		if (Critical) {
-			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
+			entity_list.messageCloseStringID(this, true, 100, MT_SpellCrits,
 					OTHER_CRIT_HEAL, getName(), itoa(value));
 			Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
 		}

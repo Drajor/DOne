@@ -1615,7 +1615,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	if (shield_target)
 	{
-		entity_list.MessageClose_StringID(this, false, 100, 0,
+		entity_list.messageCloseStringID(this, false, 100, 0,
 			END_SHIELDING, getName(), shield_target->getName());
 		for (int y = 0; y < 2; y++)
 		{
@@ -1641,7 +1641,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 			{
 				if (shield_target->shielder[x].shielder_id == 0)
 				{
-					entity_list.MessageClose_StringID(this ,false, 100, 0,
+					entity_list.messageCloseStringID(this ,false, 100, 0,
 						START_SHIELDING, getName(), shield_target->getName());
 					shield_target->shielder[x].shielder_id = getID();
 					int shieldbonus = shield->AC*2;
@@ -3373,7 +3373,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 	uint16 totalfeign = primfeign + secfeign;
 	if (MakeRandomFloat(0, 160) > totalfeign) {
 		SetFeigned(false);
-		entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, getName());
+		entity_list.messageCloseStringID(this, false, 200, 10, STRING_FEIGNFAILED, getName());
 	}
 	else {
 		SetFeigned(true);
@@ -4644,7 +4644,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 	DeleteItem_Struct* alc = (DeleteItem_Struct*) app->pBuffer;
 	const ItemInst *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == ItemTypeAlcohol) {
-		entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, getName(), inst->GetItem()->Name);
+		entity_list.messageCloseStringID(this, true, 50, 0, DRINKING_MESSAGE, getName(), inst->GetItem()->Name);
 		CheckIncreaseSkill(SkillAlcoholTolerance, nullptr, 25);
 
 		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
@@ -6695,10 +6695,10 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 	GMEmoteZone_Struct* gmez = (GMEmoteZone_Struct*)app->pBuffer;
 	char* newmessage=0;
 	if(strstr(gmez->text,"^")==0)
-		entity_list.Message(0, 15, gmez->text);
+		entity_list.message(0, 15, gmez->text);
 	else{
 		for(newmessage = strtok((char*)gmez->text,"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
-			entity_list.Message(0, 15, newmessage);
+			entity_list.message(0, 15, newmessage);
 	}
 	return;
 }

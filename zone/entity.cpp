@@ -1021,49 +1021,44 @@ uint16 EntityList::GetFreeID()
 }
 
 // if no language skill is specified, sent with 100 skill
-void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language, const char *message, ...)
+void EntityList::channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguage, const char* pMessage, ...)
 {
-	ChannelMessage(from, chan_num, language, 100, message);
+	channelMessage(pFrom, pChannelNumber, pLanguage, 100, pMessage);
 }
 
-void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
-	uint8 lang_skill, const char *message, ...)
-{
+void EntityList::channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguage, uint8 pLanguageSkill, const char* pMessage, ...) {
 	va_list argptr;
 	char buffer[4096];
 
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
+	va_start(argptr, pMessage);
+	vsnprintf(buffer, 4096, pMessage, argptr);
 	va_end(argptr);
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client *client = i->second;
 		eqFilterType filter = FilterNone;
-		if (chan_num == 3) //shout
+		if (pChannelNumber == 3) //shout
 			filter = FilterShouts;
-		else if (chan_num == 4) //auction
+		else if (pChannelNumber == 4) //auction
 			filter = FilterAuctions;
-		//
+
 		// Only say is limited in range
-		if (chan_num != 8 || client->Dist(*from) < 200)
+		if (pChannelNumber != 8 || client->Dist(*pFrom) < 200)
 		if (filter == FilterNone || client->GetFilter(filter) != FilterHide)
-			client->ChannelMessageSend(from->getName(), 0, chan_num, language, lang_skill, buffer);
-		++it;
+			client->ChannelMessageSend(pFrom->getName(), 0, pChannelNumber, pLanguage, pLanguageSkill, buffer);
 	}
 }
 
-void EntityList::ChannelMessageSend(Mob *to, uint8 chan_num, uint8 language, const char *message, ...)
-{
+void EntityList::channelMessageSend(Mob* pTo, uint8 pChannelNumber, uint8 pLanguage, const char* pMessage, ...) {
 	va_list argptr;
 	char buffer[4096];
 
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
+	va_start(argptr, pMessage);
+	vsnprintf(buffer, 4096, pMessage, argptr);
 	va_end(argptr);
 
-	if (mClients.count(to->getID()))
-		mClients.at(to->getID())->ChannelMessageSend(0, 0, chan_num, language, buffer);
+	if (mClients.count(pTo->getID()))
+		mClients.at(pTo->getID())->ChannelMessageSend(0, 0, pChannelNumber, pLanguage, buffer);
 }
 
 void EntityList::SendZoneSpawns(Client *client)
@@ -1618,42 +1613,37 @@ Client* EntityList::getClientByAccountID(uint32 pAccountID) {
 	return nullptr;
 }
 
-void EntityList::ChannelMessageFromWorld(const char *from, const char *to,
-	uint8 chan_num, uint32 guild_id, uint8 language, const char *message)
-{
-	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
-		Client *client = it->second;
-		if (chan_num == 0) {
-			if (!client->IsInGuild(guild_id))
+void EntityList::channelMessageFromWorld(const char* pFrom, const char* pTo, uint8 pChannelNumber, uint32 pGuildID, uint8 pLanguage, const char* pMessage) {
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client *client = i->second;
+		if (pChannelNumber == 0) {
+			if (!client->IsInGuild(pGuildID))
 				continue;
-			if (!guild_mgr.checkPermission(guild_id, client->GuildRank(), GUILD_HEAR))
+			if (!guild_mgr.checkPermission(pGuildID, client->GuildRank(), GUILD_HEAR))
 				continue;
 			if (client->GetFilter(FilterGuildChat) == FilterHide)
 				continue;
 		}
-		else if (chan_num == 5) {
+		else if (pChannelNumber == 5) {
 			if (client->GetFilter(FilterOOC) == FilterHide)
 				continue;
 		}
-		client->ChannelMessageSend(from, to, chan_num, language, message);
+		client->ChannelMessageSend(pFrom, pTo, pChannelNumber, pLanguage, pMessage);
 	}
 }
 
-void EntityList::Message(uint32 to_guilddbid, uint32 type, const char *message, ...)
-{
+void EntityList::message(uint32 pGuildID, uint32 pType, const char* pMessage, ...) {
 	va_list argptr;
 	char buffer[4096];
 
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
+	va_start(argptr, pMessage);
+	vsnprintf(buffer, 4096, pMessage, argptr);
 	va_end(argptr);
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if (to_guilddbid == 0 || client->IsInGuild(to_guilddbid))
-			client->Message(type, buffer);
-		++it;
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client *client = i->second;
+		if (pGuildID == 0 || client->IsInGuild(pGuildID))
+			client->Message(pType, buffer);
 	}
 }
 
@@ -1695,99 +1685,72 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 	safe_delete(outapp);
 }
 
-void EntityList::MessageStatus(uint32 to_guild_id, int to_minstatus, uint32 type, const char *message, ...)
-{
+void EntityList::messageStatus(uint32 pGuildID, int pMinStatus, uint32 pType, const char* pMessage, ...) {
 	va_list argptr;
 	char buffer[4096];
 
-	va_start(argptr, message);
-	vsnprintf(buffer, 4096, message, argptr);
+	va_start(argptr, pMessage);
+	vsnprintf(buffer, 4096, pMessage, argptr);
 	va_end(argptr);
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *client = it->second;
-		if ((to_guild_id == 0 || client->IsInGuild(to_guild_id)) && client->Admin() >= to_minstatus)
-			client->Message(type, buffer);
-		++it;
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client *client = i->second;
+		if ((pGuildID == 0 || client->IsInGuild(pGuildID)) && client->Admin() >= pMinStatus)
+			client->Message(pType, buffer);
 	}
 }
 
 // works much like MessageClose, but with formatted strings
-void EntityList::MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1, const char* message2, const char* message3, const char* message4, const char* message5, const char* message6, const char* message7, const char* message8, const char* message9)
-{
-	Client *c;
-	float dist2 = dist * dist;
-
-	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
-		c = it->second;
-		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
-			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
+void EntityList::messageCloseStringID(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, uint32 pStringID, const char* pMessage1, const char* pMessage2, const char* pMessage3, const char* pMessage4, const char* pMessage5, const char* pMessage6, const char* pMessage7, const char* pMessage8, const char* pMessage9) {
+	Client* client;
+	float dist2 = pDistance * pDistance;
+	for (auto i = mClients.begin(); i != mClients.end(); ++i) {
+		client = i->second;
+		if (client && client->DistNoRoot(*pSender) <= dist2 && (!pSkipSender || client != pSender))
+			client->Message_StringID(pType, pStringID, pMessage1, pMessage2, pMessage3, pMessage4, pMessage5, pMessage6, pMessage7, pMessage8, pMessage9);
 	}
 }
 
-void EntityList::FilteredMessageClose_StringID(Mob *sender, bool skipsender,
-	float dist, uint32 type, eqFilterType filter, uint32 string_id,
-	const char *message1, const char *message2, const char *message3,
-	const char *message4, const char *message5, const char *message6,
-	const char *message7, const char *message8, const char *message9)
-{
-	Client *c;
-	float dist2 = dist * dist;
-
-	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
-		c = it->second;
-		if (c && c->DistNoRoot(*sender) <= dist2 && (!skipsender || c != sender))
-			c->FilteredMessage_StringID(sender, type, filter, string_id,
-			message1, message2, message3, message4, message5,
-			message6, message7, message8, message9);
+void EntityList::filteredMessageCloseStringID(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, eqFilterType pFilter, uint32 pStringID, const char* pMessage1, const char* pMessage2, const char* pMessage3, const char* pMessage4, const char* pMessage5, const char* pMessage6, const char* pMessage7, const char* pMessage8, const char* pMessage9) {
+	Client* client;
+	float dist2 = pDistance * pDistance;
+	for (auto i = mClients.begin(); i != mClients.end(); ++i) {
+		client = i->second;
+		if (client && client->DistNoRoot(*pSender) <= dist2 && (!pSkipSender || client != pSender))
+			client->FilteredMessage_StringID(pSender, pType, pFilter, pStringID, pMessage1, pMessage2, pMessage3, pMessage4, pMessage5, pMessage6, pMessage7, pMessage8, pMessage9);
 	}
 }
 
-void EntityList::Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1, const char* message2, const char* message3, const char* message4, const char* message5, const char* message6, const char* message7, const char* message8, const char* message9)
-{
-	Client *c;
-
-	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
-		c = it->second;
-		if (c && (!skipsender || c != sender))
-			c->Message_StringID(type, string_id, message1, message2, message3, message4, message5, message6, message7, message8, message9);
+void EntityList::messageStringID(Mob* pSender, bool pSkipSender, uint32 pType, uint32 pStringID, const char* pMessage1, const char* pMessage2, const char* pMessage3, const char* pMessage4, const char* pMessage5, const char* pMessage6, const char* pMessage7, const char* pMessage8, const char* pMessage9) {
+	Client* client;
+	for (auto i = mClients.begin(); i != mClients.end(); ++i) {
+		client = i->second;
+		if (client && (!pSkipSender || client != pSender))
+			client->Message_StringID(pType, pStringID, pMessage1, pMessage2, pMessage3, pMessage4, pMessage5, pMessage6, pMessage7, pMessage8, pMessage9);
 	}
 }
 
-void EntityList::FilteredMessage_StringID(Mob *sender, bool skipsender,
-	uint32 type, eqFilterType filter, uint32 string_id,
-	const char *message1, const char *message2, const char *message3,
-	const char *message4, const char *message5, const char *message6,
-	const char *message7, const char *message8, const char *message9)
-{
-	Client *c;
-
-	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
-		c = it->second;
-		if (c && (!skipsender || c != sender))
-			c->FilteredMessage_StringID(sender, type, filter, string_id,
-			message1, message2, message3, message4, message5, message6,
-			message7, message8, message9);
+void EntityList::filteredMessageStringID(Mob* pSender, bool pSkipSender, uint32 pType, eqFilterType pFilter, uint32 pStringID, const char* pMessage1, const char* pMessage2, const char* pMessage3, const char* pMessage4, const char* pMessage5, const char* pMessage6, const char* pMessage7, const char* pMessage8, const char* pMessage9) {
+	Client *client;
+	for (auto i = mClients.begin(); i != mClients.end(); ++i) {
+		client = i->second;
+		if (client && (!pSkipSender || client != pSender))
+			client->FilteredMessage_StringID(pSender, pType, pFilter, pStringID, pMessage1, pMessage2, pMessage3, pMessage4, pMessage5, pMessage6, pMessage7, pMessage8, pMessage9);
 	}
 }
 
-void EntityList::MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...)
-{
+void EntityList::messageClose(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, const char* pMessage, ...) {
 	va_list argptr;
 	char buffer[4096];
 
-	va_start(argptr, message);
-	vsnprintf(buffer, 4095, message, argptr);
+	va_start(argptr, pMessage);
+	vsnprintf(buffer, 4095, pMessage, argptr);
 	va_end(argptr);
 
-	float dist2 = dist * dist;
-
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		if (it->second->DistNoRoot(*sender) <= dist2 && (!skipsender || it->second != sender))
-			it->second->Message(type, buffer);
-		++it;
+	float dist2 = pDistance * pDistance;
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		if (i->second->DistNoRoot(*pSender) <= dist2 && (!pSkipSender || i->second != pSender))
+			i->second->Message(pType, buffer);
 	}
 }
 

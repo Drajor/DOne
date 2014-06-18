@@ -1467,7 +1467,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 	if(killerMob && killerMob->isClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 		char val1[20]={0};
-		entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+		entity_list.messageCloseStringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
 			killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 	}
 
@@ -2089,7 +2089,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 		if(killerMob && killerMob->isClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20]={0};
-			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
+			entity_list.messageCloseStringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
 				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	} else {
@@ -3508,7 +3508,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				int healed = damage;
 				healed = attacker->GetActSpellHealing(spell_id, healed);
 				attacker->HealDamage(healed);
-				entity_list.MessageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
+				entity_list.messageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
 				attacker->castToClient()->DisableAAEffect(aaEffectLeechTouch);
 			}
 
@@ -3522,7 +3522,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
+				entity_list.messageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
 			}
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
@@ -3597,7 +3597,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//fade mez if we are mezzed
 		if (IsMezzed()) {
 			mlog(COMBAT__HITS, "Breaking mez due to attack.");
-			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
+			entity_list.messageCloseStringID(this, true, 100, MT_WornOff,
 					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
 		}
@@ -3744,7 +3744,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 							}
 						}
 						else
-							entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
+							entity_list.messageCloseStringID(this, true, 100, MT_NonMelee,HIT_NON_MELEE,attacker->GetCleanName(),GetCleanName(),ConvertArray(damage,val1));
 				} else {
 					if(damage > 0) {
 						if(spell_id != SPELL_UNKNOWN)
@@ -3794,7 +3794,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			attacker->FilteredMessage_StringID(attacker, MT_DoTDamage, FilterDOT,
 					YOUR_HIT_DOT, GetCleanName(), itoa(damage), spells[spell_id].name);
 			// older clients don't have the below String ID, but it will be filtered
-			entity_list.FilteredMessageClose_StringID(attacker, true, 200,
+			entity_list.filteredMessageCloseStringID(attacker, true, 200,
 					MT_DoTDamage, FilterDOT, OTHER_HIT_DOT, GetCleanName(),
 					itoa(damage), attacker->GetCleanName(), spells[spell_id].name);
 		}
@@ -4235,7 +4235,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 		{
 			critMod += GetCritDmgMob(skill) * 2; // To account for base crit mod being 200 not 100
 			damage = (damage * critMod) / 100;
-			entity_list.FilteredMessageClose_StringID(this, false, 200,
+			entity_list.filteredMessageCloseStringID(this, false, 200,
 					MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,
 					GetCleanName(), itoa(damage));
 		}
@@ -4269,7 +4269,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			if(MakeRandomFloat(0, 1) < critChance){
 				int16 SlayDmgBonus = aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
 				damage = (damage*SlayDmgBonus*2.25)/100;
-				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
+				entity_list.messageClose(this, false, 200, MT_CritMelee, "%s cleanses %s target!(%d)", GetCleanName(), this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its", damage);
 				return;
 			}
 		}
@@ -4358,7 +4358,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 			}
 
 			if (crip_success) {
-				entity_list.FilteredMessageClose_StringID(this, false, 200,
+				entity_list.filteredMessageCloseStringID(this, false, 200,
 						MT_CritMelee, FilterMeleeCrits, CRIPPLING_BLOW,
 						GetCleanName(), itoa(damage));
 				// Crippling blows also have a chance to stun
@@ -4368,11 +4368,11 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 					defender->Stun(0);
 				}
 			} else if (deadlySuccess) {
-				entity_list.FilteredMessageClose_StringID(this, false, 200,
+				entity_list.filteredMessageCloseStringID(this, false, 200,
 						MT_CritMelee, FilterMeleeCrits, DEADLY_STRIKE,
 						GetCleanName(), itoa(damage));
 			} else {
-				entity_list.FilteredMessageClose_StringID(this, false, 200,
+				entity_list.filteredMessageCloseStringID(this, false, 200,
 						MT_CritMelee, FilterMeleeCrits, CRITICAL_HIT,
 						GetCleanName(), itoa(damage));
 			}
@@ -4395,7 +4395,7 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 
 		if(defender->GetLevel() <= levelreq && (chance >= MakeRandomInt(0, 1000))){
 			mlog(COMBAT__ATTACKS, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, getName());
+			entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, getName());
 			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 			return true;
 		}

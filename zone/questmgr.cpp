@@ -181,7 +181,7 @@ void QuestManager::ClearAllTimers() {
 //quest perl functions
 void QuestManager::echo(int colour, const char *str) {
 	QuestManagerCurrentQuestVars();
-	entity_list.MessageClose(initiator, false, 200, colour, str);
+	entity_list.messageClose(initiator, false, 200, colour, str);
 }
 
 void QuestManager::say(const char *str) {
@@ -207,7 +207,7 @@ void QuestManager::say(const char *str, uint8 language) {
 		return;
 	}
 	else {
-		entity_list.ChannelMessage(owner, 8, language, str);
+		entity_list.channelMessage(owner, 8, language, str);
 	}
 }
 
@@ -215,7 +215,7 @@ void QuestManager::me(const char *str) {
 	QuestManagerCurrentQuestVars();
 	if (!initiator)
 		return;
-	entity_list.MessageClose(initiator, false, 200, 10, str);
+	entity_list.messageClose(initiator, false, 200, 10, str);
 }
 
 void QuestManager::summonitem(uint32 itemid, int16 charges) {
@@ -616,7 +616,7 @@ void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint
 	if(send_to_world)
 		worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
 	else
-		entity_list.MessageStatus(to_guilddbid, to_minstatus, color, "%s", str);
+		entity_list.messageStatus(to_guilddbid, to_minstatus, color, "%s", str);
 }
 
 void QuestManager::depop(int npc_type) {
@@ -2230,7 +2230,7 @@ void QuestManager::clearspawntimers() {
 }
 
 void QuestManager::ze(int type, const char *str) {
-	entity_list.Message(0, type, str);
+	entity_list.message(0, type, str);
 }
 
 void QuestManager::we(int type, const char *str) {

@@ -675,7 +675,7 @@ void Client::Gate() {
 }
 
 void NPC::Gate() {
-	entity_list.MessageClose_StringID(this, true, 200, MT_Spells, GATES, GetCleanName());
+	entity_list.messageCloseStringID(this, true, 200, MT_Spells, GATES, GetCleanName());
 
 	Mob::Gate();
 }

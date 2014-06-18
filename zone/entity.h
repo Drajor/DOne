@@ -255,19 +255,21 @@ public:
 	Entity* getEntityMOB(const char* pName);
 	Entity* getEntityCorpse(const char* pName);
 
-	void DescribeAggro(Client *towho, NPC *from_who, float dist, bool verbose);
+	void describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool pVerbose);
 
-	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
-	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
-	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
-	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessage_StringID(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	FilteredMessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
-	void	ChannelMessageFromWorld(const char* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message);
-	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, const char* message, ...);
-	void	ChannelMessage(Mob* from, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
-	void	ChannelMessageSend(Mob* to, uint8 chan_num, uint8 language, const char* message, ...);
+	void message(uint32 pGuildID, uint32 pType, const char* pMessage, ...);
+	void messageStatus(uint32 pGuildID, int pMinStatus, uint32 pType, const char* pMessage, ...);
+	void messageClose(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, const char* pMessage, ...);
+	void messageStringID(Mob* pSender, bool pSkipSender, uint32 pType, uint32 pStringID, const char* pMessage1=0, const char* pMmessage2=0,const char* pMessage3=0, const char* pMessage4=0, const char* pMessage5=0, const char* pMessage6=0, const char* pMessage7=0, const char* pMessage8=0, const char* pMessage9=0);
+	void filteredMessageStringID(Mob* pSender, bool pSkipSender, uint32 pType, eqFilterType pFilter, uint32 StringID, const char* pMessage1 = 0, const char* pMmessage2 = 0, const char* pMessage3 = 0, const char* pMessage4 = 0, const char* pMessage5 = 0, const char* pMessage6 = 0, const char* pMessage7 = 0, const char* pMessage8 = 0, const char* pMessage9 = 0);
+	void messageCloseStringID(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, uint32 StringID, const char* pMessage1 = 0, const char* pMmessage2 = 0, const char* pMessage3 = 0, const char* pMessage4 = 0, const char* pMessage5 = 0, const char* pMessage6 = 0, const char* pMessage7 = 0, const char* pMessage8 = 0, const char* pMessage9 = 0);
+	void filteredMessageCloseStringID(Mob* pSender, bool pSkipSender, float pDistance, uint32 pType, eqFilterType pFilter, uint32 pStringID, const char* pMessage1 = 0, const char* pMmessage2 = 0, const char* pMessage3 = 0, const char* pMessage4 = 0, const char* pMessage5 = 0, const char* pMessage6 = 0, const char* pMessage7 = 0, const char* pMessage8 = 0, const char* pMessage9 = 0);
+	
+	void channelMessageFromWorld(const char* pFrom, const char* pTo, uint8 pChannelNumber, uint32 pGuildDatabaseID, uint8 pLanguage, const char* pMessage);
+	void channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguage, const char* pMessage, ...);
+	void channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguage, uint8 pLanguageSkill, const char* pMessage, ...);
+	void channelMessageSend(Mob* pTo, uint8 pChannelNumber, uint8 pLanguage, const char* pMessage, ...);
+
 	void	SendZoneSpawns(Client*);
 	void	SendZonePVPUpdates(Client *);
 	void	SendZoneSpawnsBulk(Client* client);
@@ -278,6 +280,7 @@ public:
 	void	SendZoneAppearance(Client *c);
 	void	SendNimbusEffects(Client *c);
 	void	SendUntargetable(Client *c);
+
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
 	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);

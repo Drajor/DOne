@@ -1310,7 +1310,7 @@ XS(XS_EntityList_Message)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Message(to_guilddbid, type, message);
+		THIS->message(to_guilddbid, type, message);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1337,7 +1337,7 @@ XS(XS_EntityList_MessageStatus)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->MessageStatus(to_guilddbid, to_minstatus, type, message);
+		THIS->messageStatus(to_guilddbid, to_minstatus, type, message);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1374,7 +1374,7 @@ XS(XS_EntityList_MessageClose)
 		if(sender == nullptr)
 			Perl_croak(aTHX_ "sender is nullptr, avoiding crash.");
 
-		THIS->MessageClose(sender, skipsender, dist, type, message);
+		THIS->messageClose(sender, skipsender, dist, type, message);
 	}
 	XSRETURN_EMPTY;
 }

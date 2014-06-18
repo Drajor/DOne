@@ -171,7 +171,7 @@ void WorldServer::Process() {
 			if (!ZoneLoaded) break;
 			ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 			if (scm->deliverto[0] == 0) {
-				entity_list.ChannelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->message);
+				entity_list.channelMessageFromWorld(scm->from, scm->to, scm->chan_num, scm->guilddbid, scm->language, scm->message);
 			}
 			else {
 				Client* client;
@@ -399,7 +399,7 @@ void WorldServer::Process() {
 			ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
 			if (sem->to[0] != 0) {
 				if (strcasecmp(sem->to, zone->GetShortName()) == 0)
-					entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, (char*)sem->message);
+					entity_list.messageStatus(sem->guilddbid, sem->minstatus, sem->type, (char*)sem->message);
 				else {
 					Client* client = entity_list.getClientByName(sem->to);
 					if (client != 0){
@@ -416,10 +416,10 @@ void WorldServer::Process() {
 			else{
 				char* newmessage=0;
 				if(strstr(sem->message,"^")==0)
-					entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, sem->message);
+					entity_list.messageStatus(sem->guilddbid, sem->minstatus, sem->type, sem->message);
 				else{
 					for(newmessage = strtok((char*)sem->message,"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
-						entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, newmessage);
+						entity_list.messageStatus(sem->guilddbid, sem->minstatus, sem->type, newmessage);
 				}
 			}
 			break;
@@ -1884,7 +1884,7 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 	va_end(argptr);
 
 	if (!Connected() && to == 0) {
-		entity_list.MessageStatus(to_guilddbid, to_minstatus, type, buffer);
+		entity_list.messageStatus(to_guilddbid, to_minstatus, type, buffer);
 		return false;
 	}
 

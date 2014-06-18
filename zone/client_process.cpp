@@ -470,11 +470,11 @@ bool Client::process() {
 
 		if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 			if (!dead && !IsBerserk() && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
-				entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, getName());
+				entity_list.messageCloseStringID(this, false, 200, 0, BERSERK_START, getName());
 				berserk = true;
 			}
 			if (IsBerserk() && GetHPRatio() > RuleI(Combat, BerserkerFrenzyEnd)) {
-				entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, getName());
+				entity_list.messageCloseStringID(this, false, 200, 0, BERSERK_END, getName());
 				berserk = false;
 			}
 		}
@@ -584,7 +584,7 @@ bool Client::process() {
 			{
 				if (!CombatRange(shield_target))
 				{
-					entity_list.MessageClose_StringID(this, false, 100, 0,
+					entity_list.messageCloseStringID(this, false, 100, 0,
 						END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 					for (int y = 0; y < 2; y++)
 					{

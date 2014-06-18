@@ -544,7 +544,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 			&& other->isNPC()
 			&& MakeRandomFloat(0, 99) < chance // chance
 			) {
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, getName());
+			entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, ASSASSINATES, getName());
 			if(isClient())
 				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
 			RogueAssassinate(other);
@@ -2086,7 +2086,7 @@ bool Mob::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 				int DefenderChance = MakeRandomInt(0, 100);
 				if(AttackerChance > DefenderChance) {
 					mlog(COMBAT__ATTACKS, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, getName());
+					entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, getName());
 					defender->Damage(this, 32000, SPELL_UNKNOWN, skillInUse);
 					Result = true;
 				}

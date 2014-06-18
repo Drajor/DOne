@@ -1590,7 +1590,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if (MakeRandomInt(0, 99) > spells[spell_id].base[i]) {
 						castToClient()->SetFeigned(false);
-						entity_list.MessageClose_StringID(this, false, 200, 10, STRING_FEIGNFAILED, getName());
+						entity_list.messageCloseStringID(this, false, 200, 10, STRING_FEIGNFAILED, getName());
 						}
 					else
 						castToClient()->SetFeigned(true);
@@ -5435,9 +5435,9 @@ bool Mob::TryDeathSave() {
 				Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
 				if(spellbonuses.DeathSave[0] == 2)
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());
+					entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());
 				else
-					entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, DEATH_PACT, GetCleanName());
+					entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DEATH_PACT, GetCleanName());
 
 				SendHPUpdate();
 				BuffFadeBySlot(buffSlot);
@@ -5468,9 +5468,9 @@ bool Mob::TryDeathSave() {
 					Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
 					if(spellbonuses.DeathSave[0] == 2)
-						entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());
+						entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());
 					else
-						entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, DEATH_PACT, GetCleanName());
+						entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DEATH_PACT, GetCleanName());
 
 					SendHPUpdate();
 					BuffFadeBySlot(buffSlot);

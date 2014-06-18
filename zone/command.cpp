@@ -1677,10 +1677,10 @@ void command_emote(Client *c, const Seperator *sep)
 		if (strcasecmp(sep->arg[1], "zone") == 0){
 			char* newmessage=0;
 			if(strstr(sep->arg[3],"^")==0)
-				entity_list.Message(0, atoi(sep->arg[2]), sep->argplus[3]);
+				entity_list.message(0, atoi(sep->arg[2]), sep->argplus[3]);
 			else{
 				for(newmessage = strtok((char*)sep->arg[3],"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
-					entity_list.Message(0, atoi(sep->arg[2]), newmessage);
+					entity_list.message(0, atoi(sep->arg[2]), newmessage);
 			}
 		}
 		else if (!worldserver.Connected())
@@ -1879,7 +1879,7 @@ void command_weather(Client *c, const Seperator *sep)
 			}
 		}
 		else if(sep->arg[1][0] == '2')	{
-			entity_list.Message(0, 0, "Snowflakes begin to fall from the sky.");
+			entity_list.message(0, 0, "Snowflakes begin to fall from the sky.");
 			zone->zone_weather = 2;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[0] = 0x01;
@@ -1888,7 +1888,7 @@ void command_weather(Client *c, const Seperator *sep)
 			safe_delete(outapp);
 		}
 		else if(sep->arg[1][0] == '1')	{
-			entity_list.Message(0, 0, "Raindrops begin to fall from the sky.");
+			entity_list.message(0, 0, "Raindrops begin to fall from the sky.");
 			zone->zone_weather = 1;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[4] = 0x01; // This is how it's done in Fear, and you can see a decent distance with it at this value
@@ -1898,7 +1898,7 @@ void command_weather(Client *c, const Seperator *sep)
 	}
 	else {
 		if(zone->zone_weather == 1)	{ // Doing this because if you have rain/snow on, you can only turn one off.
-			entity_list.Message(0, 0, "The sky clears as the rain ceases to fall.");
+			entity_list.message(0, 0, "The sky clears as the rain ceases to fall.");
 			zone->zone_weather = 0;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
@@ -1906,7 +1906,7 @@ void command_weather(Client *c, const Seperator *sep)
 			safe_delete(outapp);
 		}
 		else if(zone->zone_weather == 2) {
-			entity_list.Message(0, 0, "The sky clears as the snow stops falling.");
+			entity_list.message(0, 0, "The sky clears as the snow stops falling.");
 			zone->zone_weather = 0;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
@@ -1915,7 +1915,7 @@ void command_weather(Client *c, const Seperator *sep)
 			safe_delete(outapp);
 		}
 		else {
-			entity_list.Message(0, 0, "The sky clears.");
+			entity_list.message(0, 0, "The sky clears.");
 			zone->zone_weather = 0;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
@@ -7811,7 +7811,7 @@ void command_aggro(Client *c, const Seperator *sep)
 		verbose = true;
 	}
 
-	entity_list.DescribeAggro(c, c->GetTarget()->castToNPC(), d, verbose);
+	entity_list.describeAggro(c, c->GetTarget()->castToNPC(), d, verbose);
 }
 
 void command_pf(Client *c, const Seperator *sep)

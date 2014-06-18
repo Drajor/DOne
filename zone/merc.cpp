@@ -2824,7 +2824,7 @@ int32 Merc::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value = (value * GetSpellScale() / 100);	
 				
-			entity_list.MessageClose_StringID(this, false, 100, MT_SpellCrits,
+			entity_list.messageCloseStringID(this, false, 100, MT_SpellCrits,
 					OTHER_CRIT_BLAST, getName(), itoa(-value));
 
 			return value;
@@ -2896,7 +2896,7 @@ int32 Merc::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += value*target->GetHealRate(spell_id, this)/100; 
 
 		if (Critical)
-			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", getName(), value);
+			entity_list.messageClose(this, false, 100, MT_SpellCrits, "%s performs an exceptional heal! (%d)", getName(), value);
 
 		return value;
 	}

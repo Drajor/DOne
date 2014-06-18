@@ -2313,7 +2313,7 @@ void NPC::DoNPCEmote(uint8 event_, uint16 emoteid)
 		else if(nes->type == 2)
 			this->Shout("%s",nes->text);
 		else if(nes->type == 3)
-			entity_list.MessageClose_StringID(this, true, 200, 10, GENERIC_STRING, nes->text);
+			entity_list.messageCloseStringID(this, true, 200, 10, GENERIC_STRING, nes->text);
 		else
 			this->Say("%s",nes->text);
 	}
