@@ -1215,7 +1215,7 @@ packet with the item number in it, but I cant seem to find it right now
 	char buffer3[150] = {0};
 	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
 	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->castToMOB(),outapp,true,200,0,false);
+	entity_list.queueCloseClients(this->castToMOB(),outapp,true,200,0,false);
 	safe_delete(outapp);
 }
 

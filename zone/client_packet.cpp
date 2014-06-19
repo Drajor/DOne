@@ -689,7 +689,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 
 	CreateSpawnPacket(outapp);
 	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
+	if (!GetHideMe()) entity_list.queueClients(this, outapp, true);
 	safe_delete(outapp);
 	if(GetPVP())	//force a PVP update until we fix the spawn struct
 		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
@@ -769,7 +769,7 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 
 	CreateSpawnPacket(outapp);
 	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
+	if (!GetHideMe()) entity_list.queueClients(this, outapp, true);
 	safe_delete(outapp);
 	if(GetPVP())	//force a PVP update until we fix the spawn struct
 		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
@@ -1037,7 +1037,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
-			entity_list.QueueCloseClients(boat,outapp,true,300,this,false);
+			entity_list.queueCloseClients(boat,outapp,true,300,this,false);
 			safe_delete(outapp);
 			// update the boat's position on the server, without sending an update
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ19toFloat(ppu->heading), false);
@@ -1248,7 +1248,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 				sa_out->spawn_id = getID();
 				sa_out->type = 0x03;
 				sa_out->parameter = 0;
-				entity_list.QueueClients(this, outapp, true);
+				entity_list.queueClients(this, outapp, true);
 				safe_delete(outapp);
 			}
 		}
@@ -1267,9 +1267,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 		MakeSpawnUpdate(ppu);
 		if (gmhideme)
-			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
+			entity_list.queueClientsStatus(this,outapp,true,Admin(),250);
 		else
-			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
+			entity_list.queueCloseClients(this,outapp,true,300,nullptr,false);
 		safe_delete(outapp);
 	}
 
@@ -2743,7 +2743,7 @@ void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
 {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_YellForHelp, 4);
 	*(uint32 *)outapp->pBuffer = getID();
-	entity_list.QueueCloseClients(this, outapp, true, 100.0);
+	entity_list.queueCloseClients(this, outapp, true, 100.0);
 	safe_delete(outapp);
 	return;
 }
@@ -2940,7 +2940,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		invisible = false;
 		hidden = false;
 		improved_hidden = false;
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 		return;
 	}
 	else if (sa->type == AT_Anim) {
@@ -2993,7 +2993,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			return;
 		}
 
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 	}
 	else if (sa->type == AT_Anon) {
 		// For Anon/Roleplay
@@ -3010,7 +3010,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			std::cerr << "Client " << name << " unknown Anon/Roleplay Switch " << (int)sa->parameter << std::endl;
 			return;
 		}
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 		UpdateWho();
 	}
 	else if ((sa->type == AT_HP) && (dead == 0)) {
@@ -3018,7 +3018,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_AFK) {
 		this->AFK = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 	}
 	else if (sa->type == AT_Split) {
 		m_pp.autosplit = (sa->parameter == 1);
@@ -3036,7 +3036,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			return;
 		}
 		this->sneaking = 0;
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 	}
 	else if (sa->type == AT_Size)
 	{
@@ -3047,7 +3047,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
-		entity_list.QueueClients(this, app, false);
+		entity_list.queueClients(this, app, false);
 	}
 	else if (sa->type == AT_Levitate)
 	{
@@ -3057,7 +3057,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_ShowHelm)
 	{
 		m_pp.showhelm = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		entity_list.queueClients(this, app, true);
 	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
@@ -3405,7 +3405,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 	else {
@@ -3462,7 +3462,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 1;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 		if(GetAA(aaShroudofStealth)){
 			improved_hidden = true;
@@ -3526,7 +3526,7 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 		return;
 
 	// we could maybe ignore this and just send our own from moveitem
-	entity_list.QueueClients(this, app, true);
+	entity_list.queueClients(this, app, true);
 	return;
 }
 
@@ -3547,7 +3547,7 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 	EntityId_Struct* eid = (EntityId_Struct*)outapp->pBuffer;
 	eid->entity_id = getID();
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 	safe_delete(outapp);
 
 	hate_list.clear(this->castToMOB());
@@ -3735,7 +3735,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 			sa_out->spawn_id = getID();
 			sa_out->type = 0x03;
 			sa_out->parameter = 0;
-			entity_list.QueueClients(this, outapp, true);
+			entity_list.queueClients(this, outapp, true);
 			safe_delete(outapp);
 		}
 		ent->castToCorpse()->MakeLootRequestPackets(this, app);
@@ -4339,7 +4339,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 			gm->guildeqid = GuildID();
 			strcpy(gm->member, gc->othername);
 			Message(0,"%s successfully removed from your guild.",gc->othername);
-			entity_list.QueueClientsGuild(this, outapp, false, GuildID());
+			entity_list.queueClientsGuild(this, outapp, false, GuildID());
 			safe_delete(outapp);
 		}
 		else
@@ -5003,7 +5003,7 @@ void Client::Handle_OP_RandomReq(const EQApplicationPacket *app)
 	rr->high=randHigh;
 	rr->result=randResult;
 	strcpy(rr->name, getName());
-	entity_list.QueueCloseClients(this, outapp, false, 400);
+	entity_list.queueCloseClients(this, outapp, false, 400);
 	safe_delete(outapp);
 	return;
 }
@@ -5090,7 +5090,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	gmn2->unknown[0] = 1;
 	gmn2->unknown[1] = 1;
 	gmn2->unknown[2] = 1;
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 	safe_delete(outapp);
 	UpdateWho();
 	return;
@@ -5112,7 +5112,7 @@ void Client::Handle_OP_GMKill(const EQApplicationPacket *app)
 	Client* client = entity_list.getClientByName(gmk->name);
 	if(obj!=0) {
 		if(client!=0) {
-			entity_list.QueueClients(this,app);
+			entity_list.queueClients(this,app);
 		}
 		else {
 			obj->Kill();
@@ -5163,7 +5163,7 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 		gmln->unknown[1] = 1;
 		gmln->unknown[2] = 1;
 		gmln->unknown[3] = 1;
-		entity_list.QueueClients(this, app, false);
+		entity_list.queueClients(this, app, false);
 	}
 	return;
 }
@@ -5238,7 +5238,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 	lfga->spawn_id = this->getID();
 	lfga->lfg = (uint8)LFG;
 
-	entity_list.QueueClients(this, outapp, true);
+	entity_list.queueClients(this, outapp, true);
 	safe_delete(outapp);
 	return;
 }
@@ -5543,7 +5543,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		delitem->npcid = mp->npcid;
 		delitem->playerid = mp->playerid;
 		delitempacket->priority = 6;
-		entity_list.QueueCloseClients(tmp,delitempacket); //que for anyone that could be using the merchant so they see the update
+		entity_list.queueCloseClients(tmp,delitempacket); //que for anyone that could be using the merchant so they see the update
 		safe_delete(delitempacket);
 		return;
 	}
@@ -5647,7 +5647,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			delitem->npcid = mp->npcid;
 			delitem->playerid = mp->playerid;
 			delitempacket->priority = 6;
-			entity_list.QueueClients(tmp,delitempacket); //que for anyone that could be using the merchant so they see the update
+			entity_list.queueClients(tmp,delitempacket); //que for anyone that could be using the merchant so they see the update
 			safe_delete(delitempacket);
 		}
 		else {
@@ -6220,7 +6220,7 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 	}
 
 	// Notify other clients in zone
-	entity_list.QueueClients(this, app, false);
+	entity_list.queueClients(this, app, false);
 
 	FaceChange_Struct* fc = (FaceChange_Struct*)app->pBuffer;
 	m_pp.haircolor	= fc->haircolor;
@@ -7369,7 +7369,7 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	}
 	else
 	*/
-	entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
+	entity_list.queueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
 
 	safe_delete(outapp);
 	return;
@@ -7457,7 +7457,7 @@ void Client::Handle_OP_GMKick(const EQApplicationPacket *app)
 		}
 	}
 	else {
-		entity_list.QueueClients(this,app);
+		entity_list.queueClients(this,app);
 		//client->Kick();
 	}
 	return;
@@ -7502,7 +7502,7 @@ void Client::Handle_OP_Illusion(const EQApplicationPacket *app)
 	race		= bnpc->race;
 	size		= 0;
 
-	entity_list.QueueClients(this,app);
+	entity_list.queueClients(this,app);
 	return;
 }
 
@@ -7685,7 +7685,7 @@ void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 	// Broadcast to other clients
 	CombatDamage_Struct* damage = (CombatDamage_Struct*)app->pBuffer;
 	//dont send to originator of falling damage packets
-	entity_list.QueueClients(this, app, (damage->type==DamageTypeFalling));
+	entity_list.queueClients(this, app, (damage->type==DamageTypeFalling));
 	return;
 }
 

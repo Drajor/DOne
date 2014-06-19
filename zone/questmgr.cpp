@@ -840,7 +840,7 @@ void QuestManager::rain(int weather) {
 	zone->zone_weather = weather;
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 	*((uint32*) &outapp->pBuffer[4]) = (uint32) weather; // Why not just use 0x01/2/3?
-	entity_list.QueueClients(owner, outapp);
+	entity_list.queueClients(owner, outapp);
 	safe_delete(outapp);
 }
 
@@ -850,7 +850,7 @@ void QuestManager::snow(int weather) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 	outapp->pBuffer[0] = 0x01;
 	*((uint32*) &outapp->pBuffer[4]) = (uint32)weather;
-	entity_list.QueueClients(initiator, outapp);
+	entity_list.queueClients(initiator, outapp);
 	safe_delete(outapp);
 }
 
@@ -1211,7 +1211,7 @@ void QuestManager::setsky(uint8 new_sky) {
 		zone->newzone_data.sky = new_sky;
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-	entity_list.QueueClients(initiator, outapp);
+	entity_list.queueClients(initiator, outapp);
 	safe_delete(outapp);
 }
 

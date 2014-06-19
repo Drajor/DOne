@@ -163,7 +163,7 @@ void Client::SummonHorse(uint16 spell_id) {
 	ns->spawn.walkspeed=npc_type->walkspeed;
 	ns->spawn.runspeed=npc_type->runspeed;
 */
-	entity_list.QueueClients(horse, &outapp);
+	entity_list.queueClients(horse, &outapp);
 
 
 	uint16 tmpID = horse->getID();

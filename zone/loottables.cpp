@@ -348,7 +348,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		safe_delete(item);
 
 	if(wearchange && outapp) {
-		entity_list.QueueClients(this, outapp);
+		entity_list.queueClients(this, outapp);
 		safe_delete(outapp);
 	}
 }

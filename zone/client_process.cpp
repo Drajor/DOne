@@ -1264,7 +1264,7 @@ void Client::BreakInvis()
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 		invisible = false;
 		invisible_undead = false;
@@ -2212,7 +2212,7 @@ void Client::ClearHover()
 	sze->player.spawn.NPC = 0;
 	sze->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 	safe_delete(outapp);
 
 	if(isClient() && castToClient()->GetClientVersionBit() & BIT_UnderfootAndLater)

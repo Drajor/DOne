@@ -1319,17 +1319,17 @@ bool Zone::Process() {
 					uint32 rem_time = Instance_Timer->GetRemainingTime();
 					if(rem_time < 60000 && rem_time > 55000)
 					{
-						entity_list.ExpeditionWarning(1);
+						entity_list.expeditionWarning(1);
 						Instance_Warning_timer = new Timer(10000);
 					}
 					else if(rem_time < 300000 && rem_time > 295000)
 					{
-						entity_list.ExpeditionWarning(5);
+						entity_list.expeditionWarning(5);
 						Instance_Warning_timer = new Timer(10000);
 					}
 					else if(rem_time < 900000 && rem_time > 895000)
 					{
-						entity_list.ExpeditionWarning(15);
+						entity_list.expeditionWarning(15);
 						Instance_Warning_timer = new Timer(10000);
 					}
 				}
@@ -1886,7 +1886,7 @@ void Zone::weatherSend()
 		outapp->pBuffer[0] = zone_weather-1;
 	if(zone_weather>0)
 		outapp->pBuffer[4] = zone->weather_intensity;
-	entity_list.QueueClients(0, outapp);
+	entity_list.queueClients(0, outapp);
 	safe_delete(outapp);
 }
 

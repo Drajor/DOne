@@ -79,7 +79,7 @@ void PerlPacket::SendToAll() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
-	entity_list.QueueClients(nullptr, outapp, false);
+	entity_list.queueClients(nullptr, outapp, false);
 	safe_delete(outapp);
 }
 

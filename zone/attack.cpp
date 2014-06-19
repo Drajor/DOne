@@ -1382,7 +1382,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 
@@ -1501,7 +1501,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	d->attack_skill = spell != SPELL_UNKNOWN ? 0xe7 : attack_skill;
 	d->damage = damage;
 	app.priority = 6;
-	entity_list.QueueClients(this, &app);
+	entity_list.queueClients(this, &app);
 
 	//
 	// #2: figure out things that affect the player dying and mark them dead
@@ -1537,7 +1537,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 				//if duel opponent killed us...
 				killerMob->castToClient()->SetDueling(false);
 				killerMob->castToClient()->SetDuelTarget(0);
-				entity_list.DuelMessage(killerMob,this,false);
+				entity_list.duelMessage(killerMob,this,false);
 
 				mod_client_death_duel(killerMob);
 
@@ -1552,7 +1552,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		}
 	}
 
-	entity_list.RemoveFromTargets(this);
+	entity_list.removeFromTargets(this);
 	hate_list.clear(this);
 	RemoveAutoXTargets();
 
@@ -1674,7 +1674,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 			setID(0);
 
 			//send the become corpse packet to everybody else in the zone.
-			entity_list.QueueClients(this, &app2, true);
+			entity_list.queueClients(this, &app2, true);
 
 			LeftCorpse = true;
 		}
@@ -1996,7 +1996,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 
@@ -2116,7 +2116,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	SetPet(0);
 	Mob* killer = GetHateDamageTop(this);
 
-	entity_list.RemoveFromTargets(this, p_depop);
+	entity_list.removeFromTargets(this, p_depop);
 
 	if(p_depop == true)
 		return false;
@@ -2134,7 +2134,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage = damage;
 	app->priority = 6;
-	entity_list.QueueClients(killerMob, app, false);
+	entity_list.queueClients(killerMob, app, false);
 
 	if(respawn2) {
 		respawn2->DeathReset(1);
@@ -2318,7 +2318,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			if(!killer->castToClient()->GetGM() && killer->isClient())
 				this->CheckMinMaxLevel(killer);
 		}
-		entity_list.RemoveFromAutoXTargets(this);
+		entity_list.removeFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
@@ -2406,7 +2406,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		}
 	}
 	else
-		entity_list.RemoveFromXTargets(this);
+		entity_list.removeFromXTargets(this);
 
 	// Parse quests even if we're killed by an NPC
 	if(oos) {
@@ -2637,7 +2637,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 		cds->type = spellbonuses.DamageShieldType;
 		cds->spellid = 0x0;
 		cds->damage = DS;
-		entity_list.QueueCloseClients(this, outapp);
+		entity_list.queueCloseClients(this, outapp);
 		safe_delete(outapp);
 	} else if (DS > 0 && !spell_ds) {
 		//we are healing the attacker...
@@ -3777,7 +3777,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		// If this is Damage Shield damage, the correct OP_Damage packets will be sent from Mob::DamageShield, so
 		// we don't send them here.
 		if(!FromDamageShield) {
-			entity_list.QueueCloseClients(this, outapp, true, 200, skip, true, filter);
+			entity_list.queueCloseClients(this, outapp, true, 200, skip, true, filter);
 			//send the damage to ourself if we are a client
 			if(isClient()) {
 				//I dont think any filters apply to damage affecting us

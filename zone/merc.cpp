@@ -4410,7 +4410,7 @@ bool Merc::TryHide() {
 	sa_out->spawn_id = getID();
 	sa_out->type = 0x03;
 	sa_out->parameter = 1;
-	entity_list.QueueClients(this, outapp, true);
+	entity_list.queueClients(this, outapp, true);
 	safe_delete(outapp);
 	hidden = true;
 

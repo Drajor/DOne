@@ -845,7 +845,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 }
@@ -1094,7 +1094,7 @@ void NPC::RangedAttack(Mob* other)
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 }
@@ -1239,7 +1239,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		sa_out->spawn_id = getID();
 		sa_out->type = 0x03;
 		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
+		entity_list.queueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
 }
@@ -1337,7 +1337,7 @@ void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skil
 	as->unknown088 = 125;
 	as->unknown092 = 16;
 
-	entity_list.QueueCloseClients(this, outapp);
+	entity_list.queueCloseClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -1400,7 +1400,7 @@ void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, f
 	as->unknown088 = 125;
 	as->unknown092 = 16;
 
-	entity_list.QueueCloseClients(this, outapp);
+	entity_list.queueCloseClients(this, outapp);
 	safe_delete(outapp);
 
 }

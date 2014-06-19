@@ -364,7 +364,7 @@ Client::~Client() {
 		if(entity != nullptr && entity->isClient()) {
 			entity->castToClient()->SetDueling(false);
 			entity->castToClient()->SetDuelTarget(0);
-			entity_list.DuelMessage(entity->castToClient(),this,true);
+			entity_list.duelMessage(entity->castToClient(),this,true);
 		}
 	}
 
@@ -1090,7 +1090,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		char *Buffer = (char *)es;
 		Buffer += 4;
 		snprintf(Buffer, sizeof(Emote_Struct) - 4, "%s %s", getName(), message);
-		entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
+		entity_list.queueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
 		safe_delete(outapp);
 		break;
 	}
@@ -1809,7 +1809,7 @@ void Client::SendManaUpdate()
 	mus->max_mana = GetMaxMana();
 	mus->spawn_id = getID();
 	QueuePacket(mana_app);
-	entity_list.QueueClientsByXTarget(this, mana_app, false);
+	entity_list.queueClientsByXTarget(this, mana_app, false);
 	safe_delete(mana_app);
 }
 
@@ -1822,7 +1822,7 @@ void Client::SendEnduranceUpdate()
 	eus->max_end = GetMaxEndurance();
 	eus->spawn_id = getID();
 	QueuePacket(end_app);
-	entity_list.QueueClientsByXTarget(this, end_app, false);
+	entity_list.queueClientsByXTarget(this, end_app, false);
 	safe_delete(end_app);
 }
 
@@ -1959,7 +1959,7 @@ void Client::ChangeLastName(const char* in_lastname) {
 	gmn->unknown[1]=1;
 	gmn->unknown[2]=1;
 	gmn->unknown[3]=1;
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 	// Send name update packet here... once know what it is
 	safe_delete(outapp);
 }
@@ -1991,7 +1991,7 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	gmn->unknown[0] = 1;
 	gmn->unknown[1] = 1;
 	gmn->unknown[2] = 1;
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 	safe_delete(outapp);
 
 	// finally, update the /who list
@@ -2929,7 +2929,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 	sms->unknown8=0;
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.queueCloseClients(this,outapp,false,distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -2995,7 +2995,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 
 
 	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+		entity_list.queueCloseClients(this,outapp,false,distance);
 	else
 		QueuePacket(outapp);
 	safe_delete(outapp);
@@ -3147,7 +3147,7 @@ void Client::SetHideMe(bool flag)
 	{
 		database.SetHideMe(AccountID(),true);
 		CreateDespawnPacket(&app, false);
-		entity_list.RemoveFromTargets(this);
+		entity_list.removeFromTargets(this);
 		trackable = false;
 	}
 	else
@@ -3157,7 +3157,7 @@ void Client::SetHideMe(bool flag)
 		trackable = true;
 	}
 
-	entity_list.QueueClientsStatus(this, &app, true, 0, Admin()-1);
+	entity_list.queueClientsStatus(this, &app, true, 0, Admin()-1);
 }
 
 void Client::SetLanguageSkill(int langid, int value)
@@ -3258,7 +3258,7 @@ uint8 Client::SlotConvert2(uint8 slot){
 
 void Client::Escape()
 {
-	entity_list.RemoveFromTargets(this, true);
+	entity_list.removeFromTargets(this, true);
 	SetInvisible(1);
 
 	Message_StringID(MT_Skills, ESCAPE);
@@ -3781,7 +3781,7 @@ void Client::Sacrifice(Client* caster)
 						d->attack_skill = 0xe7;
 						d->damage = 0;
 						app.priority = 6;
-						entity_list.QueueClients(this, &app);
+						entity_list.queueClients(this, &app);
 
 						BuffFadeAll();
 						UnmemSpellAll();
@@ -3798,7 +3798,7 @@ void Client::Sacrifice(Client* caster)
 							Corpse *new_corpse = new Corpse(this, 0);
 							entity_list.addCorpse(new_corpse, getID());
 							setID(0);
-							entity_list.QueueClients(this, &app2, true);
+							entity_list.queueClients(this, &app2, true);
 						}
 						save();
 						GoToDeath();

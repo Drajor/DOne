@@ -402,7 +402,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 										 strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
 										 gsrs->Banker = sgrus->Banker;
 
-										 entity_list.QueueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
+										 entity_list.queueClientsGuild(nullptr, outapp, false, sgrus->GuildID);
 
 										 safe_delete(outapp);
 									 }
@@ -448,7 +448,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 										   gmus->InstanceID = 0;	// I don't think we care what Instance they are in, for the Guild Management Window.
 										   gmus->LastSeen = sgmus->LastSeen;
 
-										   entity_list.QueueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
+										   entity_list.queueClientsGuild(nullptr, outapp, false, sgmus->GuildID);
 
 										   safe_delete(outapp);
 									   }
@@ -525,7 +525,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 									   gts->Toggle = Toggle;
 									   gts->TimePosted = TimePosted;
 									   gts->Name[0] = 0;
-									   entity_list.QueueClientsGuild(nullptr, outapp, false, GuildID);
+									   entity_list.queueClientsGuild(nullptr, outapp, false, GuildID);
 									   safe_delete(outapp);
 									   break;
 								   }
@@ -909,7 +909,7 @@ bool GuildBankManager::addItem(uint32 pGuildID, uint8 pArea, uint32 pItemID, int
 
 	strn0cpy(gbius.WhoFor, pWhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+	entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return true;
 }
@@ -981,11 +981,11 @@ int GuildBankManager::promote(uint32 pGuildID, int pSlotID)
 
 	strn0cpy(gbius.ItemName, Item->Name, sizeof(gbius.ItemName));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+	entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	gbius.Init(GuildBankItemUpdate, 1, pSlotID, GuildBankDepositArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+	entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return MainSlot;
 }
@@ -1045,7 +1045,7 @@ void GuildBankManager::setPermissions(uint32 pGuildID, uint16 pSlotID, uint32 pP
 
 	strn0cpy(gbius.WhoFor, bank->mItems.mMainArea[pSlotID].mWhoFor, sizeof(gbius.WhoFor));
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+	entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 }
 
 ItemInst* GuildBankManager::getItem(uint32 pGuildID, uint16 pArea, uint16 pSlotID, uint32 pQuantity)
@@ -1199,7 +1199,7 @@ bool GuildBankManager::deleteItem(uint32 pGuildID, uint16 pArea, uint16 pSlotID,
 	else
 		gbius.Init(GuildBankItemUpdate, 1, pSlotID, pArea, 0, 0, 0, 0, 0, 0, 0);
 
-	entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+	entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 
 	return true;
 
@@ -1288,7 +1288,7 @@ bool GuildBankManager::mergeStacks(uint32 pGuildID, uint16 pSlotID)
 
 			strn0cpy(gbius.WhoFor, BankArea[i].mWhoFor, sizeof(gbius.WhoFor));
 
-			entity_list.QueueClientsGuildBankItemUpdate(&gbius, pGuildID);
+			entity_list.queueClientsGuildBankItemUpdate(&gbius, pGuildID);
 		}
 
 	}

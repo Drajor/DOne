@@ -212,17 +212,17 @@ void Lua_EntityList::MessageClose(Lua_Mob sender, bool skip_sender, float dist, 
 
 void Lua_EntityList::RemoveFromTargets(Lua_Mob mob) {
 	Lua_Safe_Call_Void();
-	self->RemoveFromTargets(mob);
+	self->removeFromTargets(mob);
 }
 
 void Lua_EntityList::RemoveFromTargets(Lua_Mob mob, bool RemoveFromXTargets) {
 	Lua_Safe_Call_Void();
-	self->RemoveFromTargets(mob, RemoveFromXTargets);
+	self->removeFromTargets(mob, RemoveFromXTargets);
 }
 
 void Lua_EntityList::ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target) {
 	Lua_Safe_Call_Void();
-	self->ReplaceWithTarget(target, new_target);
+	self->replaceWithTarget(target, new_target);
 }
 
 void Lua_EntityList::OpenDoorsNear(Lua_NPC opener) {

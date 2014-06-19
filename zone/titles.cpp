@@ -344,7 +344,7 @@ void Client::SetAATitle(const char *Title)
 
 	strs->entity_id = getID();
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 
 	safe_delete(outapp);
 }
@@ -363,7 +363,7 @@ void Client::SetTitleSuffix(const char *Suffix)
 
 	strs->entity_id = getID();
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 
 	safe_delete(outapp);
 }

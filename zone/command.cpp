@@ -1625,7 +1625,7 @@ void command_timezone(Client* c, const Seperator *sep)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 		TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 		zone->zone_time.getEQTimeOfDay(time(0), tod);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -1636,7 +1636,7 @@ void command_synctod(Client* c, const Seperator *sep)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 	zone->zone_time.getEQTimeOfDay(time(0), tod);
-	entity_list.QueueClients(c, outapp);
+	entity_list.queueClients(c, outapp);
 	safe_delete(outapp);
 }
 
@@ -1756,7 +1756,7 @@ void command_zclip(Client* c, const Seperator *sep)
 			zone->newzone_data.fog_maxclip[1]=atof(sep->arg[6]);
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -1871,7 +1871,7 @@ void command_weather(Client* c, const Seperator *sep)
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 				outapp->pBuffer[0] = atoi(sep->arg[2]);
 				outapp->pBuffer[4] = atoi(sep->arg[3]); // This number changes in the packets, intensity?
-				entity_list.QueueClients(c, outapp);
+				entity_list.queueClients(c, outapp);
 				safe_delete(outapp);
 			}
 			else {
@@ -1884,7 +1884,7 @@ void command_weather(Client* c, const Seperator *sep)
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[0] = 0x01;
 			outapp->pBuffer[4] = 0x02; // This number changes in the packets, intensity?
-			entity_list.QueueClients(c, outapp);
+			entity_list.queueClients(c, outapp);
 			safe_delete(outapp);
 		}
 		else if(sep->arg[1][0] == '1')	{
@@ -1892,7 +1892,7 @@ void command_weather(Client* c, const Seperator *sep)
 			zone->zone_weather = 1;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[4] = 0x01; // This is how it's done in Fear, and you can see a decent distance with it at this value
-			entity_list.QueueClients(c, outapp);
+			entity_list.queueClients(c, outapp);
 			safe_delete(outapp);
 		}
 	}
@@ -1902,7 +1902,7 @@ void command_weather(Client* c, const Seperator *sep)
 			zone->zone_weather = 0;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
-			entity_list.QueueClients(c, outapp);
+			entity_list.queueClients(c, outapp);
 			safe_delete(outapp);
 		}
 		else if(zone->zone_weather == 2) {
@@ -1911,7 +1911,7 @@ void command_weather(Client* c, const Seperator *sep)
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			outapp->pBuffer[0] = 0x01; // Snow has it's own shutoff packet
-			entity_list.QueueClients(c, outapp);
+			entity_list.queueClients(c, outapp);
 			safe_delete(outapp);
 		}
 		else {
@@ -1919,7 +1919,7 @@ void command_weather(Client* c, const Seperator *sep)
 			zone->zone_weather = 0;
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
-			entity_list.QueueClients(c, outapp);
+			entity_list.queueClients(c, outapp);
 			safe_delete(outapp);
 		}
 	}
@@ -1941,7 +1941,7 @@ void command_zheader(Client* c, const Seperator *sep)
 			c->Message(0, "Failed to load zone header %s from database", sep->argplus[1]);
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -1957,7 +1957,7 @@ void command_zsky(Client* c, const Seperator *sep)
 		zone->newzone_data.sky = atoi(sep->arg[1]);
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -1981,7 +1981,7 @@ void command_zcolor(Client* c, const Seperator *sep)
 		}
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -4337,7 +4337,7 @@ void command_zuwcoords(Client* c, const Seperator *sep)
 		//memcpy(&zone->zone_header_data[130], &newdata, sizeof(float));
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -4369,7 +4369,7 @@ void command_zsafecoords(Client* c, const Seperator *sep)
 		//zone->SetSafeCoords();
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
+		entity_list.queueClients(c, outapp);
 		safe_delete(outapp);
 	}
 }
@@ -6034,7 +6034,7 @@ void command_d1(Client* c, const Seperator *sep)
 	a->spell = atoi(sep->arg[2]);
 	a->sequence = atoi(sep->arg[3]);
 	app.priority = 1;
-	entity_list.QueueCloseClients(c, &app);
+	entity_list.queueCloseClients(c, &app);
 }
 
 void command_summonitem(Client* c, const Seperator *sep)
@@ -8083,7 +8083,7 @@ void command_mlog(Client* c, const Seperator *sep) {
 		else if(off == sep->arg[2]) onoff = false;
 		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
 
-		entity_list.RadialSetLogging(c, onoff, true, true);
+		entity_list.radialSetLogging(c, onoff, true, true);
 
 		c->Message(0, "Logging has been enabled for all entities");
 	} else if(!strcasecmp(sep->arg[1], "mobs")) {
@@ -8091,7 +8091,7 @@ void command_mlog(Client* c, const Seperator *sep) {
 		else if(off == sep->arg[2]) onoff = false;
 		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
 
-		entity_list.RadialSetLogging(c, onoff, false, true);
+		entity_list.radialSetLogging(c, onoff, false, true);
 
 		c->Message(0, "Logging has been enabled for all mobs");
 	} else if(!strcasecmp(sep->arg[1], "clients")) {
@@ -8099,7 +8099,7 @@ void command_mlog(Client* c, const Seperator *sep) {
 		else if(off == sep->arg[2]) onoff = false;
 		else { c->Message(13, "Invalid argument '%s'. Expected on/off.", sep->arg[2]); return; }
 
-		entity_list.RadialSetLogging(c, onoff, true, false);
+		entity_list.radialSetLogging(c, onoff, true, false);
 
 		c->Message(0, "Logging has been enabled for all clients");
 	} else if(!strcasecmp(sep->arg[1], "radius")) {
@@ -8113,7 +8113,7 @@ void command_mlog(Client* c, const Seperator *sep) {
 			return;
 		}
 
-		entity_list.RadialSetLogging(c, onoff, false, true, radius);
+		entity_list.radialSetLogging(c, onoff, false, true, radius);
 
 		c->Message(0, "Logging has been enabled for all entities within %f", radius);
 	} else if(!strcasecmp(sep->arg[1], "list")) {
@@ -10008,12 +10008,12 @@ void command_object(Client* c, const Seperator *sep)
 			// Repop object to have it reflect the change.
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 
 			app = new EQApplicationPacket();
 			o->CreateSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 			break;
 		case 'm': // Move
@@ -10136,12 +10136,12 @@ void command_object(Client* c, const Seperator *sep)
 			// Despawn and respawn object to reflect change
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 
 			app = new EQApplicationPacket();
 			o->CreateSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 			break;
 		case 'r': // Rotate
@@ -10165,12 +10165,12 @@ void command_object(Client* c, const Seperator *sep)
 			// Despawn and respawn object to reflect change
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 
 			app = new EQApplicationPacket();
 			o->CreateSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			safe_delete(app);
 			break;
 		case 's': // Save
@@ -10366,7 +10366,7 @@ void command_object(Client* c, const Seperator *sep)
 
 				app = new EQApplicationPacket();
 				o->CreateDeSpawnPacket(app);
-				entity_list.QueueClients(0, app);
+				entity_list.queueClients(0, app);
 				safe_delete(app);
 
 				entity_list.removeObject(o->getID());
@@ -10430,7 +10430,7 @@ void command_object(Client* c, const Seperator *sep)
 				ds->unknown0052[9] = 1; // *ptr-1 and *ptr-3 from EntityList::MakeDoorSpawnPacket()
 				ds->unknown0052[11] = 1;
 
-				entity_list.QueueClients(0, app);
+				entity_list.queueClients(0, app);
 				safe_delete(app);
 
 				c->Message(0, "NOTE: Object %u is now a static object, and is unchangeable. To make future changes, use '#object Edit' to convert it to a changeable form, then zone out and back in.", id);
@@ -10569,7 +10569,7 @@ void command_object(Client* c, const Seperator *sep)
 
 				app = new EQApplicationPacket();
 				o->CreateDeSpawnPacket(app);
-				entity_list.QueueClients(nullptr, app);
+				entity_list.queueClients(nullptr, app);
 
 				entity_list.removeObject(o->getID());
 
@@ -10648,7 +10648,7 @@ void command_object(Client* c, const Seperator *sep)
 			// Despawn current item for reloading from database
 			app = new EQApplicationPacket();
 			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(0, app);
+			entity_list.queueClients(0, app);
 			entity_list.removeObject(o->getID());
 			safe_delete(app);
 

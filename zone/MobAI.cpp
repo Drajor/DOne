@@ -565,7 +565,7 @@ void Client::AI_Stop() {
 	ps->owner_id = 0;
 	ps->pet_id = this->getID();
 	ps->command = 0;
-	entity_list.QueueClients(this, app);
+	entity_list.queueClients(this, app);
 	safe_delete(app);
 
 	SetTarget(entity_list.getMOB(pClientSideTarget));

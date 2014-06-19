@@ -387,11 +387,11 @@ void EntityList::groupProcess()
 #endif
 }
 
-void EntityList::QueueToGroupsForNPCHealthAA(Mob *sender, const EQApplicationPacket *app)
+void EntityList::queueToGroupsForNPCHealthAA(Mob* pSender, const EQApplicationPacket* pApp)
 {
 	auto it = mGroups.begin();
 	while (it != mGroups.end()) {
-		(*it)->queueHPPacketsForNPCHealthAA(sender, app);
+		(*it)->queueHPPacketsForNPCHealthAA(pSender, pApp);
 		++it;
 	}
 }
@@ -616,7 +616,7 @@ void EntityList::addNPC(NPC* pNPC, bool pSendSpawnPacket, bool pDontQueue) {
 		if (pDontQueue) { // aka, SEND IT NOW BITCH!
 			EQApplicationPacket *app = new EQApplicationPacket;
 			pNPC->CreateSpawnPacket(app, pNPC);
-			QueueClients(pNPC, app);
+			queueClients(pNPC, app);
 			safe_delete(app);
 		}
 		else {
@@ -644,7 +644,7 @@ void EntityList::addMerc(Merc* pMerc, bool pSendSpawnPacket, bool pDontQueue) {
 				EQApplicationPacket *outapp = new EQApplicationPacket();
 				pMerc->CreateSpawnPacket(outapp);
 				outapp->priority = 6;
-				QueueClients(pMerc, outapp, true);
+				queueClients(pMerc, outapp, true);
 				safe_delete(outapp);
 			}
 			else {
@@ -673,7 +673,7 @@ void EntityList::addObject(Object* pObject, bool pSendSpawnPacket) {
 #if (EQDEBUG >= 6)
 		DumpPacket(&app);
 #endif
-		QueueClients(0, &app, false);
+		queueClients(0, &app, false);
 	}
 
 	mObjects.insert(std::pair<uint16, Object *>(pObject->getID(), pObject));
@@ -725,7 +725,7 @@ void EntityList::CheckSpawnQueue()
 		while (iterator.MoreElements()) {
 			outapp = new EQApplicationPacket;
 			Mob::CreateSpawnPacket(outapp, iterator.GetData());
-			QueueClients(0, outapp);
+			queueClients(0, outapp);
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
 		}
@@ -1155,54 +1155,50 @@ void EntityList::save() {
 	std::for_each(mClients.begin(), mClients.end(), [](_A(mClients)& pValue){ pValue.second->save(); });
 }
 
-void EntityList::ReplaceWithTarget(Mob* pOldMob, Mob* pNewTarget) {
+void EntityList::replaceWithTarget(Mob* pOldMOB, Mob* pNewTarget) {
 	if (!pNewTarget) return;
-	auto f = [pOldMob, pNewTarget](_A(mMOBs)& pValue) {
+	auto f = [pOldMOB, pNewTarget](_A(mMOBs)& pValue) {
 		auto mob = pValue.second;
-		if (mob->IsAIControlled() && mob->RemoveFromHateList(pOldMob))
+		if (mob->IsAIControlled() && mob->RemoveFromHateList(pOldMOB))
 			mob->AddToHateList(pNewTarget, 1, 0);
-
 	};
 	std::for_each(mMOBs.begin(), mMOBs.end(), f);
 }
 
-void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
-{
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		Mob *m = it->second;
-		++it;
+void EntityList::removeFromTargets(Mob* pMOB, bool pRemoveFromXTargets) {
+	auto i = mMOBs.begin();
+	while (i != mMOBs.end()) {
+		Mob *m = i->second;
+		++i;
 
 		if (!m)
 			continue;
 
-		m->RemoveFromHateList(mob);
+		m->RemoveFromHateList(pMOB);
 
-		if (RemoveFromXTargets) {
+		if (pRemoveFromXTargets) {
 			if (m->isClient())
-				m->castToClient()->RemoveXTarget(mob, false);
+				m->castToClient()->RemoveXTarget(pMOB, false);
 			// FadingMemories calls this function passing the client.
-			else if (mob->isClient())
-				mob->castToClient()->RemoveXTarget(m, false);
+			else if (pMOB->isClient())
+				pMOB->castToClient()->RemoveXTarget(m, false);
 		}
 	}
 }
 
-void EntityList::RemoveFromXTargets(Mob *mob)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		it->second->RemoveXTarget(mob, false);
-		++it;
+void EntityList::removeFromXTargets(Mob* pMOB) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		i->second->RemoveXTarget(pMOB, false);
+		++i;
 	}
 }
 
-void EntityList::RemoveFromAutoXTargets(Mob *mob)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		it->second->RemoveXTarget(mob, true);
-		++it;
+void EntityList::removeFromAutoXTargets(Mob* pMOB) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		i->second->RemoveXTarget(pMOB, true);
+		++i;
 	}
 }
 
@@ -1245,15 +1241,14 @@ void EntityList::RefreshClientXTargets(Client* c)
 	}
 }
 
-void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *app,
-	bool iSendToSender, Mob *SkipThisMob, bool ackreq, bool HoTT, uint32 ClientVersionBits)
+void EntityList::queueClientsByTarget(Mob* pSender, const EQApplicationPacket* pApp, bool pSendToSender, Mob* pSkipThisMOB, bool pAckReq, bool pHoTT, uint32 pClientVersionBits)
 {
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* c = it->second;
-		++it;
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* client = i->second;
+		++i; // TODO: This looks bad.
 
-		Mob *Target = c->GetTarget();
+		Mob *Target = client->GetTarget();
 
 		if (!Target)
 			continue;
@@ -1265,138 +1260,129 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 
 		bool Send = false;
 
-		if (c == SkipThisMob)
+		if (client == pSkipThisMOB)
 			continue;
 
-		if (iSendToSender)
-		if (c == sender)
+		if (pSendToSender)
+		if (client == pSender)
 			Send = true;
 
-		if (c != sender) {
-			if (Target == sender)
+		if (client != pSender) {
+			if (Target == pSender)
 				Send = true;
-			else if (HoTT)
-			if (TargetsTarget == sender)
+			else if (pHoTT)
+			if (TargetsTarget == pSender)
 				Send = true;
 		}
 
-		if (Send && (c->GetClientVersionBit() & ClientVersionBits))
-			c->QueuePacket(app, ackreq);
+		if (Send && (client->GetClientVersionBit() & pClientVersionBits))
+			client->QueuePacket(pApp, pAckReq);
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* c = it->second;
-		++it;
+void EntityList::queueClientsByXTarget(Mob* pSender, const EQApplicationPacket* pApp, bool pSendToSender) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* c = i->second;
+		++i;
 
-		if (!c || ((c == sender) && !iSendToSender))
+		if (!c || ((c == pSender) && !pSendToSender))
 			continue;
 
-		if (!c->IsXTarget(sender))
+		if (!c->IsXTarget(pSender))
 			continue;
 
-		c->QueuePacket(app);
+		c->QueuePacket(pApp);
 	}
 }
 
-void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
-	bool ignore_sender, float dist, Mob *SkipThisMob, bool ackreq, eqFilterType filter)
-{
-	if (sender == nullptr) {
-		QueueClients(sender, app, ignore_sender);
+void EntityList::queueCloseClients(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender, float pDistance, Mob* pSkipThisMob, bool pAckReq, eqFilterType pFilter) {
+	if (pSender == nullptr) {
+		queueClients(pSender, pApp, pIgnoreSender);
 		return;
 	}
 
-	if (dist <= 0)
-		dist = 600;
-	float dist2 = dist * dist; //pow(dist, 2);
+	if (pDistance <= 0)
+		pDistance = 600;
+	float dist2 = pDistance * pDistance; //pow(dist, 2);
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* ent = it->second;
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* ent = i->second;
 
-		if ((!ignore_sender || ent != sender) && (ent != SkipThisMob)) {
-			eqFilterMode filter2 = ent->GetFilter(filter);
+		if ((!pIgnoreSender || ent != pSender) && (ent != pSkipThisMob)) {
+			eqFilterMode filter2 = ent->GetFilter(pFilter);
 			if (ent->Connected() &&
-				(filter == FilterNone
+				(pFilter == FilterNone
 				|| filter2 == FilterShow
-				|| (filter2 == FilterShowGroupOnly && (sender == ent ||
-				(ent->GetGroup() && ent->GetGroup()->isGroupMember(sender))))
-				|| (filter2 == FilterShowSelfOnly && ent == sender))
-				&& (ent->DistNoRoot(*sender) <= dist2)) {
-				ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
+				|| (filter2 == FilterShowGroupOnly && (pSender == ent ||
+				(ent->GetGroup() && ent->GetGroup()->isGroupMember(pSender))))
+				|| (filter2 == FilterShowSelfOnly && ent == pSender))
+				&& (ent->DistNoRoot(*pSender) <= dist2)) {
+				ent->QueuePacket(pApp, pAckReq, Client::CLIENT_CONNECTED);
 			}
 		}
-		++it;
+		++i;
 	}
 }
 
 //sender can be null
-void EntityList::QueueClients(Mob *sender, const EQApplicationPacket *app,
-	bool ignore_sender, bool ackreq)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* ent = it->second;
+void EntityList::queueClients(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender, bool pAckReq) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* ent = i->second;
 
-		if ((!ignore_sender || ent != sender))
-			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
+		if ((!pIgnoreSender || ent != pSender))
+			ent->QueuePacket(pApp, pAckReq, Client::CLIENT_CONNECTED);
 
-		++it;
+		++i;
 	}
 }
 
-void EntityList::QueueManaged(Mob *sender, const EQApplicationPacket *app,
-	bool ignore_sender, bool ackreq)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* ent = it->second;
+void EntityList::queueManaged(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender, bool pAckReq) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* ent = i->second;
 
-		if ((!ignore_sender || ent != sender))
-			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
+		if ((!pIgnoreSender || ent != pSender))
+			ent->QueuePacket(pApp, pAckReq, Client::CLIENT_CONNECTED);
 
-		++it;
+		++i;
 	}
 }
 
 
-void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
-	bool ignore_sender, uint8 minstatus, uint8 maxstatus)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		if ((!ignore_sender || it->second != sender) &&
-			(it->second->Admin() >= minstatus && it->second->Admin() <= maxstatus))
-			it->second->QueuePacket(app);
+void EntityList::queueClientsStatus(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender , uint8 pMinStatus, uint8 pMaxStatus) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		if ((!pIgnoreSender || i->second != pSender) &&
+			(i->second->Admin() >= pMinStatus && i->second->Admin() <= pMaxStatus))
+			i->second->QueuePacket(pApp);
 
-		++it;
+		++i;
 	}
 }
 
-void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
+void EntityList::duelMessage(Mob* pWinner, Mob* pLoser, bool pFlee)
 {
-	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
+	if (pWinner->GetLevelCon(pWinner->GetLevel(), pLoser->GetLevel()) > 2) {
 		std::vector<void*> args;
-		args.push_back(winner);
-		args.push_back(loser);
+		args.push_back(pWinner);
+		args.push_back(pLoser);
 
-		parse->EventPlayer(EVENT_DUEL_WIN, winner->castToClient(), loser->getName(), loser->castToClient()->CharacterID(), &args);
-		parse->EventPlayer(EVENT_DUEL_LOSE, loser->castToClient(), winner->getName(), winner->castToClient()->CharacterID(), &args);
+		parse->EventPlayer(EVENT_DUEL_WIN, pWinner->castToClient(), pLoser->getName(), pLoser->castToClient()->CharacterID(), &args);
+		parse->EventPlayer(EVENT_DUEL_LOSE, pLoser->castToClient(), pWinner->getName(), pWinner->castToClient()->CharacterID(), &args);
 	}
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
 		Client* cur = it->second;
 		//might want some sort of distance check in here?
-		if (cur != winner && cur != loser) {
-			if (flee)
-				cur->Message_StringID(15, DUEL_FLED, winner->getName(), loser->getName(), loser->getName());
+		if (cur != pWinner && cur != pLoser) {
+			if (pFlee)
+				cur->Message_StringID(15, DUEL_FLED, pWinner->getName(), pLoser->getName(), pLoser->getName());
 			else
-				cur->Message_StringID(15, DUEL_FINISHED, winner->getName(), loser->getName());
+				cur->Message_StringID(15, DUEL_FINISHED, pWinner->getName(), pLoser->getName());
 		}
 		++it;
 	}
@@ -1627,40 +1613,37 @@ void EntityList::message(uint32 pGuildID, uint32 pType, const char* pMessage, ..
 	}
 }
 
-void EntityList::QueueClientsGuild(Mob *sender, const EQApplicationPacket *app,
-	bool ignore_sender, uint32 guild_id)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* client = it->second;
-		if (client->IsInGuild(guild_id))
-			client->QueuePacket(app);
-		++it;
+void EntityList::queueClientsGuild(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender, uint32 pGuildID) {
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* client = i->second;
+		if (client->IsInGuild(pGuildID))
+			client->QueuePacket(pApp);
+		++i;
 	}
 }
 
-void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID)
-{
+void EntityList::queueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct* pUpdate, uint32 pGuildID) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
 
 	GuildBankItemUpdate_Struct *outgbius = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
 
-	memcpy(outgbius, gbius, sizeof(GuildBankItemUpdate_Struct));
+	memcpy(outgbius, pUpdate, sizeof(GuildBankItemUpdate_Struct));
 
-	const Item_Struct *Item = database.GetItem(gbius->ItemID);
+	const Item_Struct *Item = database.GetItem(pUpdate->ItemID);
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* client = it->second;
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* client = i->second;
 
-		if (client->IsInGuild(GuildID)) {
-			if (Item && (gbius->Permissions == GuildBankPublicIfUsable))
+		if (client->IsInGuild(pGuildID)) {
+			if (Item && (pUpdate->Permissions == GuildBankPublicIfUsable))
 				outgbius->Useable = Item->IsEquipable(client->GetBaseRace(), client->GetBaseClass());
 
 			client->QueuePacket(outapp);
 		}
 
-		++it;
+		++i;
 	}
 	safe_delete(outapp);
 }
@@ -1783,7 +1766,7 @@ void EntityList::removeAllDoors() {
 
 void EntityList::despawnAllDoors() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
-	this->QueueClients(0, outapp);
+	this->queueClients(0, outapp);
 	safe_delete(outapp);
 }
 
@@ -2488,7 +2471,7 @@ void BulkZoneSpawnPacket::SendBuffer() {
 		pSendTo->FastQueuePacket(&outapp);
 	}
 	else {
-		entity_list.QueueClients(0, outapp);
+		entity_list.queueClients(0, outapp);
 		safe_delete(outapp);
 	}
 	memset(data, 0, sizeof(NewSpawn_Struct)* pMaxSpawnsPerPacket);
@@ -3246,10 +3229,10 @@ bool EntityList::LimitCheckName(const char *npc_name)
 	return true;
 }
 
-void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
-	bool non_clients, float range)
+void EntityList::radialSetLogging(Mob *pAround, bool pEnabled, bool pClients,
+	bool pNonClients, float pRange /*= 0*/)
 {
-	float range2 = range * range;
+	float range2 = pRange * pRange;
 
 	auto it = mMOBs.begin();
 	while (it != mMOBs.end()) {
@@ -3258,18 +3241,18 @@ void EntityList::RadialSetLogging(Mob *around, bool enabled, bool clients,
 		++it;
 
 		if (mob->isClient()) {
-			if (!clients)
+			if (!pClients)
 				continue;
 		}
 		else {
-			if (!non_clients)
+			if (!pNonClients)
 				continue;
 		}
 
-		if (around->DistNoRoot(*mob) > range2)
+		if (pAround->DistNoRoot(*mob) > range2)
 			continue;
 
-		if (enabled)
+		if (pEnabled)
 			mob->EnableLogging();
 		else
 			mob->DisableLogging();
@@ -3330,24 +3313,22 @@ bool Entity::checkCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	return false;
 }
 
-void EntityList::QuestJournalledSayClose(Mob *sender, Client* QuestInitiator,
-	float dist, const char* mobname, const char* message)
-{
+void EntityList::questJournalledSayClose(Mob *pSender, Client* pQuestIntiator, float pDistance, const char* pMobName, const char* pMessage) {
 	Client* c = nullptr;
-	float dist2 = dist * dist;
+	float dist2 = pDistance * pDistance;
 
 	// Send the message to the quest initiator such that the client will enter it into the NPC Quest Journal
-	if (QuestInitiator) {
-		char *buf = new char[strlen(mobname) + strlen(message) + 10];
-		sprintf(buf, "%s says, '%s'", mobname, message);
-		QuestInitiator->QuestJournalledMessage(mobname, buf);
+	if (pQuestIntiator) {
+		char *buf = new char[strlen(pMobName) + strlen(pMessage) + 10];
+		sprintf(buf, "%s says, '%s'", pMobName, pMessage);
+		pQuestIntiator->QuestJournalledMessage(pMobName, buf);
 		safe_delete_array(buf);
 	}
 	// Use the old method for all other nearby clients
 	for (auto it = mClients.begin(); it != mClients.end(); ++it) {
 		c = it->second;
-		if (c && (c != QuestInitiator) && c->DistNoRoot(*sender) <= dist2)
-			c->Message_StringID(10, GENERIC_SAY, mobname, message);
+		if (c && (c != pQuestIntiator) && c->DistNoRoot(*pSender) <= dist2)
+			c->Message_StringID(10, GENERIC_SAY, pMobName, pMessage);
 	}
 }
 
@@ -3455,16 +3436,15 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name)
 	}
 }
 
-void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
-{
+void EntityList::groupMessage(uint32 pGroupID, const char* pFrom, const char* pMessage) {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
 		if (it->second) {
 			Group *g = nullptr;
 			g = it->second->GetGroup();
 			if (g) {
-				if (g->GetID() == gid)
-					it->second->ChannelMessageSend(from, it->second->getName(), 2, 0, message);
+				if (g->GetID() == pGroupID)
+					it->second->ChannelMessageSend(pFrom, it->second->getName(), 2, 0, pMessage);
 			}
 		}
 		++it;
@@ -4145,7 +4125,7 @@ void EntityList::CameraEffect(uint32 duration, uint32 intensity)
 	Camera_Struct* cs = (Camera_Struct*)outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
 	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
-	entity_list.QueueClients(0, outapp);
+	entity_list.queueClients(0, outapp);
 	safe_delete(outapp);
 }
 
@@ -4173,15 +4153,14 @@ NPC *EntityList::GetClosestBanker(Mob *sender, uint32 &distance)
 	return nc;
 }
 
-void EntityList::ExpeditionWarning(uint32 minutes_left)
-{
+void EntityList::expeditionWarning(uint32 pMinutesRemaining) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_DzExpeditionEndsWarning, sizeof(ExpeditionExpireWarning));
 	ExpeditionExpireWarning *ew = (ExpeditionExpireWarning*)outapp->pBuffer;
-	ew->minutes_remaining = minutes_left;
+	ew->minutes_remaining = pMinutesRemaining;
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		it->second->Message_StringID(15, EXPEDITION_MIN_REMAIN, itoa((int)minutes_left));
+		it->second->Message_StringID(15, EXPEDITION_MIN_REMAIN, itoa((int)pMinutesRemaining));
 		it->second->QueuePacket(outapp);
 		++it;
 	}

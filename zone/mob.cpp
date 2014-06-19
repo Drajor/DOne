@@ -399,9 +399,9 @@ Mob::~Mob()
 	CreateDespawnPacket(&app, !isCorpse());
 	Corpse* corpse = entity_list.getCorpseByID(getID());
 	if(!corpse || (corpse && !corpse->isPlayerCorpse()))
-		entity_list.QueueClients(this, &app, true);
+		entity_list.queueClients(this, &app, true);
 
-	entity_list.RemoveFromTargets(this, true);
+	entity_list.removeFromTargets(this, true);
 
 	if(trade) {
 		Mob *with = trade->With();
@@ -1066,9 +1066,9 @@ void Mob::SendHPUpdate()
 	CreateHPPacket(&hp_app);
 
 	// send to people who have us targeted
-	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, BIT_AllClients);
-	entity_list.QueueClientsByXTarget(this, &hp_app, false);
-	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
+	entity_list.queueClientsByTarget(this, &hp_app, false, 0, false, true, BIT_AllClients);
+	entity_list.queueClientsByXTarget(this, &hp_app, false);
+	entity_list.queueToGroupsForNPCHealthAA(this, &hp_app);
 
 	// send to group
 	if(IsGrouped())
@@ -1165,7 +1165,7 @@ void Mob::SendPosition()
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
 	move_tic_count = 0;
-	entity_list.QueueClients(this, app, true);
+	entity_list.queueClients(this, app, true);
 	safe_delete(app);
 }
 
@@ -1183,12 +1183,12 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 	{
 		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
 		{
-			entity_list.QueueClients(this, app, (iSendToSelf==0), false);
+			entity_list.queueClients(this, app, (iSendToSelf==0), false);
 			move_tic_count = 0;
 		}
 		else
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
+			entity_list.queueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
 			move_tic_count++;
 		}
 	}
@@ -1287,7 +1287,7 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 		anim->action = animnum;
 		anim->value=type;
 	}
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
+	entity_list.queueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
 	safe_delete(outapp);
 }
 
@@ -1531,7 +1531,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	is->drakkin_details = this->drakkin_details;
 	is->size = this->size;
 
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 	mlog(CLIENT__SPELLS, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		this->race, this->gender, this->texture, this->helmtexture, this->haircolor, this->beardcolor, this->eyecolor1, this->eyecolor2, this->hairstyle, this->luclinface, this->drakkin_heritage, this->drakkin_tattoo, this->drakkin_details, this->size);
@@ -1574,7 +1574,7 @@ void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool i
 	appearance->type = type;
 	appearance->parameter = value;
 	if (WholeZone)
-		entity_list.QueueClients(this, outapp, iIgnoreSelf);
+		entity_list.queueClients(this, outapp, iIgnoreSelf);
 	else if(specific_target != nullptr)
 		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	else if (this->isClient())
@@ -1598,7 +1598,7 @@ void Mob::SendLevelAppearance(){
 	la->value4a = 1;
 	la->value4b = 1;
 	la->value5a = 2;
-	entity_list.QueueCloseClients(this,outapp);
+	entity_list.queueCloseClients(this,outapp);
 	safe_delete(outapp);
 }
 
@@ -1613,7 +1613,7 @@ void Mob::SendStunAppearance()
 	la->value1b = 0;
 	la->value2a = 2;
 	la->value2b = 0;
-	entity_list.QueueCloseClients(this,outapp);
+	entity_list.queueCloseClients(this,outapp);
 	safe_delete(outapp);
 }
 
@@ -1639,7 +1639,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->value5a = 1;
 	la->value5b = 1;
 	if(specific_target == nullptr) {
-		entity_list.QueueClients(this,outapp);
+		entity_list.queueClients(this,outapp);
 	}
 	else if (specific_target->isClient()) {
 		specific_target->castToClient()->QueuePacket(outapp, false);
@@ -1654,7 +1654,7 @@ void Mob::SendTargetable(bool on, Client* specific_target) {
 	ut->targetable_flag = on == true ? 1 : 0;
 
 	if(specific_target == nullptr) {
-		entity_list.QueueClients(this, outapp);
+		entity_list.queueClients(this, outapp);
 	}
 	else if (specific_target->isClient()) {
 		specific_target->castToClient()->QueuePacket(outapp, false);
@@ -1703,7 +1703,7 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client* c, bool global
 	if(c)
 		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	else
-		entity_list.QueueClients(this, outapp);
+		entity_list.queueClients(this, outapp);
 
 	safe_delete(outapp);
 }
@@ -1726,9 +1726,9 @@ void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay,
 	if(c)
 		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	else if(zone_wide)
-		entity_list.QueueClients(this, outapp);
+		entity_list.queueClients(this, outapp);
 	else
-		entity_list.QueueCloseClients(this, outapp);
+		entity_list.queueCloseClients(this, outapp);
 
 	safe_delete(outapp);
 
@@ -1770,7 +1770,7 @@ void Mob::TempName(const char *newname)
 	strn0cpy(mr->new_name, temp_name, 64);
 	mr->unknown192 = 0;
 	mr->unknown196 = 1;
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 
 	SetName(temp_name);
@@ -2501,7 +2501,7 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->color.color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -2524,7 +2524,7 @@ void Mob::SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model, uin
 	wc->unknown18 = unknown18;
 
 
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -2545,7 +2545,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -2561,7 +2561,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color)
 	wc->color.color = color;
 	wc->wear_slot_id = material_slot;
 
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -2698,7 +2698,7 @@ void Mob::Emote(const char *format, ...)
 
 void Mob::QuestJournalledSay(Client* QuestInitiator, const char *str)
 {
-		entity_list.QuestJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str);
+		entity_list.questJournalledSayClose(this, QuestInitiator, 200, GetCleanName(), str);
 }
 
 const char *Mob::GetCleanName()
@@ -4119,7 +4119,7 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		spu->animation = 0;
 		spu->delta_heading = NewFloatToEQ13(0);
 		outapp_push->priority = 6;
-		entity_list.QueueClients(this, outapp_push, true);
+		entity_list.queueClients(this, outapp_push, true);
 		castToClient()->FastQueuePacket(&outapp_push);
 	}
 }
@@ -4517,7 +4517,7 @@ void Mob::RemoveNimbusEffect(int effectid)
 	RemoveNimbusEffect_Struct* rne = (RemoveNimbusEffect_Struct*)outapp->pBuffer;
 	rne->spawnid = getID();
 	rne->nimbus_effect = effectid;
-	entity_list.QueueClients(this, outapp);
+	entity_list.queueClients(this, outapp);
 	safe_delete(outapp);
 }
 
@@ -4539,9 +4539,9 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 	if(needs_spawn_packet) {
 		EQApplicationPacket* app = new EQApplicationPacket;
 		CreateDespawnPacket(app, true);
-		entity_list.QueueClients(this, app);
+		entity_list.queueClients(this, app);
 		CreateSpawnPacket(app, this);
-		entity_list.QueueClients(this, app);
+		entity_list.queueClients(this, app);
 		safe_delete(app);
 	}
 }

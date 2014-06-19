@@ -436,7 +436,7 @@ void WorldServer::Process() {
 			memset(outapp->pBuffer,0,outapp->size);
 			strcpy((char*)outapp->pBuffer, tmp);
 
-			entity_list.QueueClients(0, outapp);
+			entity_list.queueClients(0, outapp);
 			safe_delete(outapp);
 
 			break;
@@ -753,7 +753,7 @@ void WorldServer::Process() {
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 				TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 				zone->zone_time.getEQTimeOfDay(time(0), tod);
-				entity_list.QueueClients(0, outapp, false);
+				entity_list.queueClients(0, outapp, false);
 				safe_delete(outapp);
 				//TEST
 				char timeMessage[255];
@@ -1060,7 +1060,7 @@ void WorldServer::Process() {
 				if(gcm->zoneid == zone->GetZoneID() && gcm->instanceid == zone->GetInstanceID())
 					break;
 
-				entity_list.GroupMessage(gcm->groupid, gcm->from, gcm->message);
+				entity_list.groupMessage(gcm->groupid, gcm->from, gcm->message);
 			}
 			break;
 		}

@@ -1407,7 +1407,7 @@ XS(XS_EntityList_RemoveFromTargets)
 		if(mob == nullptr)
 			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
-		THIS->RemoveFromTargets(mob);
+		THIS->removeFromTargets(mob);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1450,7 +1450,7 @@ XS(XS_EntityList_ReplaceWithTarget)
 		if(pNewTarget == nullptr)
 			Perl_croak(aTHX_ "pNewTarget is nullptr, avoiding crash.");
 
-		THIS->ReplaceWithTarget(pOldMob, pNewTarget);
+		THIS->replaceWithTarget(pOldMob, pNewTarget);
 	}
 	XSRETURN_EMPTY;
 }

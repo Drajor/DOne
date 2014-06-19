@@ -764,7 +764,7 @@ void Client::Trader_StartTrader() {
 
 	strn0cpy(bts->Name, getName(), sizeof(bts->Name));
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 
 	_pkt(TRADING__PACKETS, outapp);
 
@@ -816,7 +816,7 @@ void Client::Trader_EndTrader() {
 
 	strn0cpy(bts->Name, getName(), sizeof(bts->Name));
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 
 	_pkt(TRADING__PACKETS, outapp);
 
@@ -2574,7 +2574,7 @@ void Client::ToggleBuyerMode(bool TurnOn) {
 
 	VARSTRUCT_ENCODE_STRING(Buf, getName());
 
-	entity_list.QueueClients(this, outapp, false);
+	entity_list.queueClients(this, outapp, false);
 
 	_pkt(TRADING__BARTER, outapp);
 	safe_delete(outapp);

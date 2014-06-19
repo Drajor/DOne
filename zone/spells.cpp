@@ -472,7 +472,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	begincast->spell_id = spell_id;
 	begincast->cast_time = orgcasttime; // client calculates reduced time by itself
 	outapp->priority = 3;
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //isClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+	entity_list.queueCloseClients(this, outapp, false, 200, 0, true); //isClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 	safe_delete(outapp);
 	outapp = nullptr;
 
@@ -861,7 +861,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	ic->messageid = message_other;
 	ic->spawnid = getID();
 	strcpy(ic->message, GetCleanName());
-	entity_list.QueueCloseClients(this, outapp, true, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
+	entity_list.queueCloseClients(this, outapp, true, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
 	safe_delete(outapp);
 
 }
@@ -1896,7 +1896,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if(spells[spell_id].can_mgb && isClient() && castToClient()->CheckAAEffect(aaEffectMassGroupBuff))
 			{
 				SpellOnTarget(spell_id, this);
-				entity_list.MassGroupBuff(this, this, spell_id, true);
+				entity_list.massGroupBuff(this, this, spell_id, true);
 				castToClient()->DisableAAEffect(aaEffectMassGroupBuff);
 			}
 			else
@@ -2259,7 +2259,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->buff_unknown = 0;
 			action->level = buffs[buffs_i].casterlevel;
 			action->type = DamageTypeSpell;
-			entity_list.QueueCloseClients(this, packet, false, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
+			entity_list.queueCloseClients(this, packet, false, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
 
 			action->buff_unknown = 4;
 
@@ -2304,7 +2304,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						spu->animation = 0;
 						spu->delta_heading = NewFloatToEQ13(0);
 						outapp_push->priority = 6;
-						entity_list.QueueClients(this, outapp_push, true);
+						entity_list.queueClients(this, outapp_push, true);
 						castToClient()->FastQueuePacket(&outapp_push);
 					}
 				}
@@ -2330,7 +2330,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
-				entity_list.QueueCloseClients(this, message_packet, false, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
+				entity_list.queueCloseClients(this, message_packet, false, 200, 0, true, isClient() ? FilterPCSpells : FilterNPCSpells);
 			}
 			safe_delete(message_packet);
 			safe_delete(packet);
@@ -2928,7 +2928,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
+		entity_list.queueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 
 		if(GetTarget() == this)
 			castToClient()->QueuePacket(outapp);
@@ -3095,7 +3095,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(isClient())	// send to caster
 		castToClient()->QueuePacket(action_packet);
 	// send to people in the area, ignoring caster and target
-	entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->isClient() ? FilterPCSpells : FilterNPCSpells);
+	entity_list.queueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->isClient() ? FilterPCSpells : FilterNPCSpells);
 
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->isNPC())
@@ -3610,7 +3610,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 				spu->animation = 0;
 				spu->delta_heading = NewFloatToEQ13(0);
 				outapp_push->priority = 6;
-				entity_list.QueueClients(this, outapp_push, true);
+				entity_list.queueClients(this, outapp_push, true);
 				spelltar->castToClient()->FastQueuePacket(&outapp_push);
 			}
 		}
@@ -3644,7 +3644,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 	{
-		entity_list.QueueCloseClients(spelltar, message_packet, false, 200, 0, true, spelltar->isClient() ? FilterPCSpells : FilterNPCSpells);
+		entity_list.queueCloseClients(spelltar, message_packet, false, 200, 0, true, spelltar->isClient() ? FilterPCSpells : FilterNPCSpells);
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);

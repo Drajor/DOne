@@ -731,7 +731,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				}
 				InterruptSpell();
 				entity_list.RemoveDebuffs(this);
-				entity_list.RemoveFromTargets(this);
+				entity_list.removeFromTargets(this);
 				WipeHateList();
 
 				if (isClient() && caster->isClient()) {
@@ -768,7 +768,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					ps->owner_id = caster->getID();
 					ps->pet_id = this->getID();
 					ps->command = 1;
-					entity_list.QueueClients(this, app);
+					entity_list.queueClients(this, app);
 					safe_delete(app);
 					SendPetBuffsToClient();
 					SendAppearancePacket(AT_Pet, caster->getID(), true, true);
@@ -2082,7 +2082,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				spu->animation = 0;
 				spu->delta_heading = NewFloatToEQ13(0);
 				outapp_push->priority = 5;
-				entity_list.QueueClients(this, outapp_push, true);
+				entity_list.queueClients(this, outapp_push, true);
 				if(isClient())
 					castToClient()->FastQueuePacket(&outapp_push);
 
@@ -2187,7 +2187,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					caster->castToClient()->Escape();
 				else
 				{
-					entity_list.RemoveFromTargets(caster);
+					entity_list.removeFromTargets(caster);
 					SetInvisible(1);
 				}
 				break;
@@ -3747,7 +3747,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
-					entity_list.ReplaceWithTarget(this, tempmob);
+					entity_list.replaceWithTarget(this, tempmob);
 					WipeHateList();
 					if(tempmob)
 						AddToHateList(tempmob, 1, 0);
@@ -3760,7 +3760,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					ps->owner_id = tempmob->getID();
 					ps->pet_id = this->getID();
 					ps->command = 0;
-					entity_list.QueueClients(this, app);
+					entity_list.queueClients(this, app);
 					safe_delete(app);
 				}
 				if(isClient())
@@ -3931,7 +3931,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
+		entity_list.queueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
 		if(GetTarget() == this) {
 			castToClient()->QueuePacket(outapp);
 		}

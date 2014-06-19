@@ -415,7 +415,7 @@ bool Object::process(){
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
 		click_object->drop_id = getID();
-		entity_list.QueueClients(nullptr, outapp, false);
+		entity_list.queueClients(nullptr, outapp, false);
 		safe_delete(outapp);
 
 		// Remove object
@@ -440,7 +440,7 @@ void Object::RandomSpawn(bool send_packet) {
 	if(send_packet) {
 		EQApplicationPacket app;
 		CreateSpawnPacket(&app);
-		entity_list.QueueClients(nullptr, &app, true);
+		entity_list.queueClients(nullptr, &app, true);
 	}
 }
 
@@ -487,7 +487,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		// Send click to all clients (removes entity on client)
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
-		entity_list.QueueClients(nullptr, outapp, false);
+		entity_list.queueClients(nullptr, outapp, false);
 		safe_delete(outapp);
 
 		// Remove object
@@ -742,8 +742,8 @@ void Object::SetX(float pos)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -756,8 +756,8 @@ void Object::SetY(float pos)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -766,7 +766,7 @@ void Object::depop()
 {
 	EQApplicationPacket* app = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
-	entity_list.QueueClients(0, app);
+	entity_list.queueClients(0, app);
 	safe_delete(app);
 	entity_list.removeObject(this->getID());
 }
@@ -777,8 +777,8 @@ void Object::Repop()
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -793,8 +793,8 @@ void Object::SetZ(float pos)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -806,8 +806,8 @@ void Object::SetModelName(const char* modelname)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -892,8 +892,8 @@ void Object::SetLocation(float x, float y, float z)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }
@@ -913,8 +913,8 @@ void Object::SetHeading(float heading)
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
-	entity_list.QueueClients(0, app);
-	entity_list.QueueClients(0, app2);
+	entity_list.queueClients(0, app);
+	entity_list.queueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
 }

@@ -281,34 +281,33 @@ public:
 	void sendNimbusEffects(Client* pClient);
 	void sendUntargetable(Client* pClient);
 
-	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
-	void	QuestJournalledSayClose(Mob *sender, Client* QuestIntiator, float dist, const char* mobname, const char* message);
-	void	GroupMessage(uint32 gid, const char *from, const char *message);
-	void	ExpeditionWarning(uint32 minutes_left);
+	void duelMessage(Mob* pWinner, Mob* pLoser, bool pFlee);
+	void questJournalledSayClose(Mob *pSender, Client* pQuestIntiator, float pDistance, const char* pMobName, const char* pMessage);
+	void groupMessage(uint32 pGroupID, const char* pFrom, const char* pMessage);
+	void expeditionWarning(uint32 pMinutesRemaining);
 
-	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
-	void	RemoveFromXTargets(Mob* mob);
-	void	RemoveFromAutoXTargets(Mob* mob);
-	void	ReplaceWithTarget(Mob* pOldMob, Mob*pNewTarget);
-	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float dist=200, Mob* SkipThisMob = 0, bool ackreq = true,eqFilterType filter=FilterNone);
-	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
-	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = 0, uint8 maxstatus = 0);
-	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
-	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
-	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
-						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF);
+	void removeFromTargets(Mob* pMOB, bool pRemoveFromXTargets = false);
+	void removeFromXTargets(Mob* pMOB);
+	void removeFromAutoXTargets(Mob* pMOB);
+	void replaceWithTarget(Mob* pOldMOB, Mob* pNewTarget);
+	void queueCloseClients(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender = false, float pDistance = 200, Mob* pSkipThisMob = 0, bool pAckReq = true, eqFilterType pFilter = FilterNone);
+	void queueClients(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender = false, bool pAckReq = true);
+	void queueClientsStatus(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender = false, uint8 pMinStatus = 0, uint8 pMaxStatus = 0);
+	void queueClientsGuild(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender = false, uint32 pGuildID = 0);
+	void queueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct* pUpdate, uint32 pGuildID);
+	void queueClientsByTarget(Mob* pSender, const EQApplicationPacket* pApp, bool pSendToSender = true, Mob* pSkipThisMOB = 0, bool pAckReq = true, bool pHoTT = true, uint32 pClientVersionBits = 0xFFFFFFFF);
 
-	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true);
-	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
-	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
+	void queueClientsByXTarget(Mob* pSender, const EQApplicationPacket* pApp, bool pSendToSender = true);
+	void queueToGroupsForNPCHealthAA(Mob* pSender, const EQApplicationPacket* pApp);
+	void queueManaged(Mob* pSender, const EQApplicationPacket* pApp, bool pIgnoreSender = false, bool pAckReq = true);
 
-	void	AEAttack(Mob *attacker, float dist, int Hand = 13, int count = 0, bool IsFromSpell = false);
-	void	AETaunt(Client* caster, float range = 0);
-	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
-	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
-	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
+	void AEAttack(Mob* pAttacker, float pDistance, int pHand = 13, int pCount = 0, bool pIsFromSpell = false);
+	void AETaunt(Client* pCaster, float pRange = 100);
+	void AESpell(Mob* pCaster, Mob* pCenter, uint16 pSpellID, bool pAffectCaster = true, int16 pResistAdjust = 0);
+	void massGroupBuff(Mob* pCaster, Mob* pCenter, uint16 pSpellID, bool pAffectCaster = true);
+	void AEBardPulse(Mob* pCaster, Mob* pCenter, uint16 pSpellID, bool pAffectCaster = true);
 
-	void	RadialSetLogging(Mob *around, bool enabled, bool clients, bool non_clients, float range = 0);
+	void radialSetLogging(Mob* pAround, bool pEnabled, bool pClients, bool pNonClients, float pRange = 0);
 
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);

@@ -127,7 +127,7 @@ bool Doors::process()
 			MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 			md->doorid = door_id;
 			md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR;
-			entity_list.QueueClients(0, outapp);
+			entity_list.queueClients(0, outapp);
 			safe_delete(outapp);
 		}
 
@@ -361,7 +361,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 		}
 	}
 
-	entity_list.QueueClients(sender, outapp, false);
+	entity_list.queueClients(sender, outapp, false);
 	if(!IsDoorOpen() || (opentype == 58))
 	{
 		close_timer.Start();
@@ -462,7 +462,7 @@ void Doors::NPCOpen(NPC* sender, bool alt_mode)
 		MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 		md->doorid = door_id;
 		md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-		entity_list.QueueCloseClients(sender,outapp,false,200);
+		entity_list.queueCloseClients(sender,outapp,false,200);
 		safe_delete(outapp);
 
 		if(!alt_mode) { // original function
@@ -488,7 +488,7 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-	entity_list.QueueClients(sender,outapp,false);
+	entity_list.queueClients(sender,outapp,false);
 	safe_delete(outapp);
 
 	if(!alt_mode) { // original function
@@ -513,7 +513,7 @@ void Doors::ForceClose(Mob *sender, bool alt_mode)
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR; // change from original (open to close)
-	entity_list.QueueClients(sender,outapp,false);
+	entity_list.queueClients(sender,outapp,false);
 	safe_delete(outapp);
 
 	if(!alt_mode) { // original function
@@ -552,7 +552,7 @@ void Doors::ToggleState(Mob *sender)
 		isopen=false;
 	}
 
-	entity_list.QueueClients(sender,outapp,false);
+	entity_list.queueClients(sender,outapp,false);
 	safe_delete(outapp);
 }
 

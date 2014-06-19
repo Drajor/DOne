@@ -1426,7 +1426,7 @@ void Corpse::CompleteRezz(){
 void Corpse::Spawn() {
 	EQApplicationPacket* app = new EQApplicationPacket;
 	this->CreateSpawnPacket(app, this);
-	entity_list.QueueClients(this, app);
+	entity_list.queueClients(this, app);
 	safe_delete(app);
 }
 
