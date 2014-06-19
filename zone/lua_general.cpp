@@ -747,7 +747,7 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
 	luabind::object ret = luabind::newtable(L);
 
 	NPC *n = npc;
-	Client *c = client;
+	Client* c = client;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -763,7 +763,7 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_Client client) {
 	luabind::object ret = luabind::newtable(L);
 
 	NPC *n = nullptr;
-	Client *c = client;
+	Client* c = client;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -779,7 +779,7 @@ luabind::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
 	luabind::object ret = luabind::newtable(L);
 
 	NPC *n = npc;
-	Client *c = nullptr;
+	Client* c = nullptr;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -795,7 +795,7 @@ luabind::object lua_get_qglobals(lua_State *L) {
 	luabind::object ret = luabind::newtable(L);
 
 	NPC *n = nullptr;
-	Client *c = nullptr;
+	Client* c = nullptr;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);

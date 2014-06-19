@@ -199,7 +199,7 @@ struct ClientReward
 
 class ClientFactory {
 public:
-	Client *MakeClient(EQStream* ieqs);
+	Client* MakeClient(EQStream* ieqs);
 };
 
 class Client : public Mob
@@ -229,7 +229,7 @@ public:
 	void	AI_Process();
 	void	AI_SpellCast();
 	void	Trader_ShowItems();
-	void	Trader_CustomerBrowsing(Client *Customer);
+	void	Trader_CustomerBrowsing(Client* Customer);
 	void	Trader_EndTrader();
 	void	Trader_StartTrader();
 	uint8	WithCustomer(uint16 NewCustomer);
@@ -845,7 +845,7 @@ public:
 	void	SetZoneFlag(uint32 zone_id);
 	void	ClearZoneFlag(uint32 zone_id);
 	bool	HasZoneFlag(uint32 zone_id) const;
-	void	SendZoneFlagInfo(Client *to) const;
+	void	SendZoneFlagInfo(Client* to) const;
 	void	LoadZoneFlags();
 
 	void	ChangeSQLLog(const char *file);
@@ -1107,15 +1107,15 @@ public:
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
 	bool IsXTarget(const Mob *m) const;
-	bool IsClientXTarget(const Client *c) const;
-	void UpdateClientXTarget(Client *c);
+	bool IsClientXTarget(const Client* c) const;
+	void UpdateClientXTarget(Client* c);
 	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = nullptr);
 	void AddAutoXTarget(Mob *m);
 	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
 	void SendXTargetPacket(uint32 Slot, Mob *m);
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
-	void ShowXTargets(Client *c);
+	void ShowXTargets(Client* c);
 	void InitializeMercInfo();
 	bool CheckCanHireMerc(Mob* merchant, uint32 template_id);
 	bool CheckCanRetainMerc(uint32 upkeep);

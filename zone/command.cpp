@@ -79,11 +79,11 @@ int commandcount;								// how many commands we have
 
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
-int (*command_dispatch)(Client *,char const *)=command_notavail;
+int (*command_dispatch)(Client* ,char const *)=command_notavail;
 
 
-void command_bestz(Client *c, const Seperator *message);
-void command_pf(Client *c, const Seperator *message);
+void command_bestz(Client* c, const Seperator *message);
+void command_pf(Client* c, const Seperator *message);
 
 std::map<std::string, CommandRecord *> commandlist;
 
@@ -99,7 +99,7 @@ LinkedList<CommandRecord *> cleanup_commandlist;
  *	not used
  *
  */
-int command_notavail(Client *c, const char *message)
+int command_notavail(Client* c, const char *message)
 {
 	c->Message(13, "Commands not available.");
 	return -1;
@@ -564,7 +564,7 @@ int command_add(const char *command_string, const char *desc, int access, CmdFun
  *	message		- what the client typed
  *
  */
-int command_realdispatch(Client *c, const char *message)
+int command_realdispatch(Client* c, const char *message)
 {
 	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
@@ -599,7 +599,7 @@ int command_realdispatch(Client *c, const char *message)
 
 }
 
-void command_logcommand(Client *c, const char *message)
+void command_logcommand(Client* c, const char *message)
 {
 	int admin=c->Admin();
 
@@ -699,7 +699,7 @@ void command_resetaa(Client* c,const Seperator *sep){
 		c->Message(0,"Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
 }
 
-void command_sendop(Client *c,const Seperator *sep){
+void command_sendop(Client* c,const Seperator *sep){
 
 	int RezSpell = 0;
 
@@ -719,7 +719,7 @@ void command_sendop(Client *c,const Seperator *sep){
 	return;
 }
 
-void command_optest(Client *c, const Seperator *sep)
+void command_optest(Client* c, const Seperator *sep)
 {
 	if(sep->IsNumber(1))
 	{
@@ -770,7 +770,7 @@ void command_optest(Client *c, const Seperator *sep)
 	}
 }
 
-void command_help(Client *c, const Seperator *sep)
+void command_help(Client* c, const Seperator *sep)
 {
 	int commands_shown=0;
 
@@ -796,7 +796,7 @@ void command_help(Client *c, const Seperator *sep)
 
 }
 
-void command_version(Client *c, const Seperator *sep)
+void command_version(Client* c, const Seperator *sep)
 {
 	c->Message(0, "Current version information.");
 	c->Message(0, "	%s", CURRENT_VERSION);
@@ -804,7 +804,7 @@ void command_version(Client *c, const Seperator *sep)
 	c->Message(0, "	Last modified on: %s", LAST_MODIFIED);
 }
 
-void command_setfaction(Client *c, const Seperator *sep)
+void command_setfaction(Client* c, const Seperator *sep)
 {
 	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->isClient())))
 		c->Message(0, "Usage: #setfaction [faction number]");
@@ -819,7 +819,7 @@ void command_setfaction(Client *c, const Seperator *sep)
 	}
 }
 
-void command_serversidename(Client *c, const Seperator *sep)
+void command_serversidename(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget())
 		c->Message(0, c->GetTarget()->getName());
@@ -827,7 +827,7 @@ void command_serversidename(Client *c, const Seperator *sep)
 		c->Message(0, "Error: no target");
 }
 
-void command_testspawnkill(Client *c, const Seperator *sep)
+void command_testspawnkill(Client* c, const Seperator *sep)
 {
 /*	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)outapp->pBuffer;
@@ -842,7 +842,7 @@ void command_testspawnkill(Client *c, const Seperator *sep)
 	c->FastQueuePacket(&outapp);*/
 }
 
-void command_testspawn(Client *c, const Seperator *sep)
+void command_testspawn(Client* c, const Seperator *sep)
 {
 	if (sep->IsNumber(1)) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
@@ -871,7 +871,7 @@ void command_testspawn(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #testspawn [memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct");
 }
 
-void command_wc(Client *c, const Seperator *sep)
+void command_wc(Client* c, const Seperator *sep)
 {
 	if(sep->argnum < 2)
 	{
@@ -916,13 +916,13 @@ void command_wc(Client *c, const Seperator *sep)
 	}
 }
 
-void command_numauths(Client *c, const Seperator *sep)
+void command_numauths(Client* c, const Seperator *sep)
 {
 	c->Message(0, "NumAuths: %i", zone->CountAuth());
 	c->Message(0, "Your WID: %i", c->GetWID());
 }
 
-void command_setanim(Client *c, const Seperator *sep)
+void command_setanim(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && sep->IsNumber(1)) {
 		int num = atoi(sep->arg[1]);
@@ -934,7 +934,7 @@ void command_setanim(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #setanim [animnum]");
 }
 
-void command_connectworldserver(Client *c, const Seperator *sep)
+void command_connectworldserver(Client* c, const Seperator *sep)
 {
 	if(worldserver.Connected())
 		c->Message(0, "Error: Already connected to world server");
@@ -945,7 +945,7 @@ void command_connectworldserver(Client *c, const Seperator *sep)
 	}
 }
 
-void command_serverinfo(Client *c, const Seperator *sep)
+void command_serverinfo(Client* c, const Seperator *sep)
 {
 #ifdef _WINDOWS
 	char intbuffer [sizeof(unsigned long)];
@@ -961,14 +961,14 @@ char buffer[255];
 #endif
 }
 
-void command_crashtest(Client *c, const Seperator *sep)
+void command_crashtest(Client* c, const Seperator *sep)
 {
 	c->Message(0,"Alright, now we get an GPF ;) ");
 	char* gpf=0;
 	memcpy(gpf, "Ready to crash", 30);
 }
 
-void command_getvariable(Client *c, const Seperator *sep)
+void command_getvariable(Client* c, const Seperator *sep)
 {
 	char tmp[512];
 	if (database.GetVariable(sep->argplus[1], tmp, sizeof(tmp)))
@@ -977,7 +977,7 @@ void command_getvariable(Client *c, const Seperator *sep)
 		c->Message(0, "GetVariable(%s) returned false", sep->argplus[1]);
 }
 
-void command_chat(Client *c, const Seperator *sep)
+void command_chat(Client* c, const Seperator *sep)
 {
 	if (sep->arg[2][0] == 0)
 		c->Message(0, "Usage: #chat [channum] [message]");
@@ -986,7 +986,7 @@ void command_chat(Client *c, const Seperator *sep)
 			c->Message(0, "Error: World server disconnected");
 }
 
-void command_showpetspell(Client *c, const Seperator *sep)
+void command_showpetspell(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #ShowPetSpells [spellid | searchstring]");
@@ -1031,7 +1031,7 @@ void command_showpetspell(Client *c, const Seperator *sep)
 }
 
 #ifdef IPC
-void command_ipc(Client *c, const Seperator *sep)
+void command_ipc(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetTarget()->isNPC())
 	{
@@ -1051,7 +1051,7 @@ void command_ipc(Client *c, const Seperator *sep)
 }
 #endif /* IPC */
 
-void command_npcloot(Client *c, const Seperator *sep)
+void command_npcloot(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->Message(0, "Error: No target");
@@ -1132,7 +1132,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #npcloot [show/money/add/remove] [itemid/all/money: pp gp sp cp]");
 }
 
-void command_log(Client *c, const Seperator *sep)
+void command_log(Client* c, const Seperator *sep)
 {
 	if(strlen(sep->arg[4]) == 0 || strlen(sep->arg[1]) == 0 || strlen(sep->arg[2]) == 0 || (strlen(sep->arg[3]) == 0 && atoi(sep->arg[3]) == 0))
 	{
@@ -1185,10 +1185,10 @@ void command_log(Client *c, const Seperator *sep)
 	safe_delete(cel);
 }
 
-void command_gm(Client *c, const Seperator *sep)
+void command_gm(Client* c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -1208,7 +1208,7 @@ void command_gm(Client *c, const Seperator *sep)
 //To whoever wrote the above: And what about /kill, /zone, /zoneserver, etc?
 //There is a reason for the # commands: so that admins can specifically enable certain
 //commands for their users. Some might want users to #summon but not to /kill. Cant do that if they are a GM
-void command_summon(Client *c, const Seperator *sep)
+void command_summon(Client* c, const Seperator *sep)
 {
 	Mob *t;
 
@@ -1280,7 +1280,7 @@ void command_summon(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zone(Client *c, const Seperator *sep)
+void command_zone(Client* c, const Seperator *sep)
 {
 	if(c->Admin() < commandZoneToCoords &&
 		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
@@ -1330,7 +1330,7 @@ void command_zone(Client *c, const Seperator *sep)
 }
 
 //todo: fix this so it checks if you're in the instance set
-void command_zone_instance(Client *c, const Seperator *sep)
+void command_zone_instance(Client* c, const Seperator *sep)
 {
 	if(c->Admin() < commandZoneToCoords &&
 		(sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4))) {
@@ -1385,7 +1385,7 @@ void command_zone_instance(Client *c, const Seperator *sep)
 	}
 }
 
-void command_showbuffs(Client *c, const Seperator *sep)
+void command_showbuffs(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->castToMOB()->ShowBuffs(c);
@@ -1393,7 +1393,7 @@ void command_showbuffs(Client *c, const Seperator *sep)
 		c->GetTarget()->castToMOB()->ShowBuffs(c);
 }
 
-void command_peqzone(Client *c, const Seperator *sep)
+void command_peqzone(Client* c, const Seperator *sep)
 {
 	uint32 timeleft = c->GetPTimers().GetRemainingTime(pTimerPeqzoneReuse)/60;
 
@@ -1468,7 +1468,7 @@ void command_peqzone(Client *c, const Seperator *sep)
 	c->MovePC(zoneid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
 }
 
-void command_movechar(Client *c, const Seperator *sep)
+void command_movechar(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0]==0 || sep->arg[2][0] == 0)
 		c->Message(0, "Usage: #movechar [charactername] [zonename]");
@@ -1492,7 +1492,7 @@ void command_movechar(Client *c, const Seperator *sep)
 	}
 }
 
-void command_viewpetition(Client *c, const Seperator *sep)
+void command_viewpetition(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #viewpetition (petition number) Type #listpetition for a list");
@@ -1523,7 +1523,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
 	}
 }
 
-void command_petitioninfo(Client *c, const Seperator *sep)
+void command_petitioninfo(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #petitioninfo (petition number) Type #listpetition for a list");
@@ -1552,7 +1552,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
 	}
 }
 
-void command_delpetition(Client *c, const Seperator *sep)
+void command_delpetition(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0)
 		c->Message(0, "Usage: #delpetition (petition number) Type #listpetition for a list");
@@ -1567,7 +1567,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	}
 }
 
-void command_listnpcs(Client *c, const Seperator *sep)
+void command_listnpcs(Client* c, const Seperator *sep)
 {
 	if (strcasecmp(sep->arg[1], "all") == 0)
 		entity_list.ListNPCs(c,sep->arg[1],sep->arg[2],0);
@@ -1582,7 +1582,7 @@ void command_listnpcs(Client *c, const Seperator *sep)
 	}
 }
 
-void command_date(Client *c, const Seperator *sep)
+void command_date(Client* c, const Seperator *sep)
 {
 	//yyyy mm dd hh mm local
 	if(sep->arg[3][0]==0 || !sep->IsNumber(1) || !sep->IsNumber(2) || !sep->IsNumber(3)) {
@@ -1605,7 +1605,7 @@ void command_date(Client *c, const Seperator *sep)
 	}
 }
 
-void command_timezone(Client *c, const Seperator *sep)
+void command_timezone(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0]==0 && !sep->IsNumber(1)) {
 		c->Message(13, "Usage: #timezone HH [MM]");
@@ -1630,7 +1630,7 @@ void command_timezone(Client *c, const Seperator *sep)
 	}
 }
 
-void command_synctod(Client *c, const Seperator *sep)
+void command_synctod(Client* c, const Seperator *sep)
 {
 	c->Message(13, "Updating Time/Date for all clients in zone...");
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -1640,10 +1640,10 @@ void command_synctod(Client *c, const Seperator *sep)
 	safe_delete(outapp);
 }
 
-void command_invul(Client *c, const Seperator *sep)
+void command_invul(Client* c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -1656,7 +1656,7 @@ void command_invul(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #invulnerable [on/off]");
 }
 
-void command_hideme(Client *c, const Seperator *sep)
+void command_hideme(Client* c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
 
@@ -1669,7 +1669,7 @@ void command_hideme(Client *c, const Seperator *sep)
 	}
 }
 
-void command_emote(Client *c, const Seperator *sep)
+void command_emote(Client* c, const Seperator *sep)
 {
 	if (sep->arg[3][0] == 0)
 		c->Message(0, "Usage: #emote [name | world | zone] type# message");
@@ -1692,7 +1692,7 @@ void command_emote(Client *c, const Seperator *sep)
 	}
 }
 
-void command_fov(Client *c, const Seperator *sep)
+void command_fov(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget())
 		if(c->BehindMob(c->GetTarget(), c->GetX(), c->GetY()))
@@ -1703,7 +1703,7 @@ void command_fov(Client *c, const Seperator *sep)
 		c->Message(0, "I Need a target!");
 }
 
-void command_manastat(Client *c, const Seperator *sep)
+void command_manastat(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget()?c->GetTarget():c;
 
@@ -1712,7 +1712,7 @@ void command_manastat(Client *c, const Seperator *sep)
 	c->Message(0, "  Max Mana: %d",target->GetMaxMana());
 }
 
-void command_npcstats(Client *c, const Seperator *sep)
+void command_npcstats(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->Message(0, "ERROR: No target!");
@@ -1732,7 +1732,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zclip(Client *c, const Seperator *sep)
+void command_zclip(Client* c, const Seperator *sep)
 {
 	// modifys and resends zhdr packet
 	if(sep->arg[2][0]==0)
@@ -1761,7 +1761,7 @@ void command_zclip(Client *c, const Seperator *sep)
 	}
 }
 
-void command_npccast(Client *c, const Seperator *sep)
+void command_npccast(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetTarget()->isNPC() && !sep->IsNumber(1) && sep->arg[1] != 0 && sep->IsNumber(2)) {
 		Mob* spelltar = entity_list.getMOB(sep->arg[1]);
@@ -1781,7 +1781,7 @@ void command_npccast(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: (needs NPC targeted) #npccast targetname/entityid spellid");
 }
 
-void command_zstats(Client *c, const Seperator *sep)
+void command_zstats(Client* c, const Seperator *sep)
 {
 	c->Message(0, "Zone Header Data:");
 	c->Message(0, "Sky Type: %i", zone->newzone_data.sky);
@@ -1791,9 +1791,9 @@ void command_zstats(Client *c, const Seperator *sep)
 	c->Message(0, "Clip Plane: %f - %f", zone->newzone_data.minclip, zone->newzone_data.maxclip);
 }
 
-void command_permaclass(Client *c, const Seperator *sep)
+void command_permaclass(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -1812,9 +1812,9 @@ void command_permaclass(Client *c, const Seperator *sep)
 	}
 }
 
-void command_permarace(Client *c, const Seperator *sep)
+void command_permarace(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -1836,9 +1836,9 @@ void command_permarace(Client *c, const Seperator *sep)
 	}
 }
 
-void command_permagender(Client *c, const Seperator *sep)
+void command_permagender(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -1858,7 +1858,7 @@ void command_permagender(Client *c, const Seperator *sep)
 	}
 }
 
-void command_weather(Client *c, const Seperator *sep)
+void command_weather(Client* c, const Seperator *sep)
 {
 	if (!(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3')) {
 		c->Message(0, "Usage: #weather <0/1/2/3> - Off/Rain/Snow/Manual.");
@@ -1925,7 +1925,7 @@ void command_weather(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zheader(Client *c, const Seperator *sep)
+void command_zheader(Client* c, const Seperator *sep)
 {
 	// sends zhdr packet
 	if(sep->arg[1][0]==0) {
@@ -1946,7 +1946,7 @@ void command_zheader(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zsky(Client *c, const Seperator *sep)
+void command_zsky(Client* c, const Seperator *sep)
 {
 	// modifys and resends zhdr packet
 	if(sep->arg[1][0]==0)
@@ -1962,7 +1962,7 @@ void command_zsky(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zcolor(Client *c, const Seperator *sep)
+void command_zcolor(Client* c, const Seperator *sep)
 {
 	// modifys and resends zhdr packet
 	if (sep->arg[3][0]==0)
@@ -1986,12 +1986,12 @@ void command_zcolor(Client *c, const Seperator *sep)
 	}
 }
 
-void command_spon(Client *c, const Seperator *sep)
+void command_spon(Client* c, const Seperator *sep)
 {
 	c->MemorizeSpell(0, SPELLBAR_UNLOCK, memSpellSpellbar);
 }
 
-void command_spoff(Client *c, const Seperator *sep)
+void command_spoff(Client* c, const Seperator *sep)
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ManaChange, 0);
 	outapp->priority = 5;
@@ -1999,7 +1999,7 @@ void command_spoff(Client *c, const Seperator *sep)
 	safe_delete(outapp);
 }
 
-void command_itemtest(Client *c, const Seperator *sep)
+void command_itemtest(Client* c, const Seperator *sep)
 {
 	char chBuffer[8192] = {0};
 	//Using this to determine new item layout
@@ -2018,7 +2018,7 @@ void command_itemtest(Client *c, const Seperator *sep)
 	safe_delete(outapp);
 }
 
-void command_gassign(Client *c, const Seperator *sep)
+void command_gassign(Client* c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->isNPC())
 	{
@@ -2033,7 +2033,7 @@ void command_gassign(Client *c, const Seperator *sep)
 		c->Message(0,"Usage: #gassign [num] - must have an npc target!");
 }
 
-void command_ai(Client *c, const Seperator *sep)
+void command_ai(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 
@@ -2131,7 +2131,7 @@ void command_ai(Client *c, const Seperator *sep)
 	}
 }
 
-void command_worldshutdown(Client *c, const Seperator *sep)
+void command_worldshutdown(Client* c, const Seperator *sep)
 {
 	// GM command to shutdown world server and all zone servers
 	uint32 time=0;
@@ -2176,12 +2176,12 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		c->Message(0, "Error: World server disconnected");
 }
 
-void command_sendzonespawns(Client *c, const Seperator *sep)
+void command_sendzonespawns(Client* c, const Seperator *sep)
 {
-	entity_list.SendZoneSpawns(c);
+	entity_list.sendZoneSpawns(c);
 }
 
-void command_zsave(Client *c, const Seperator *sep)
+void command_zsave(Client* c, const Seperator *sep)
 {
 	if(zone->SaveZoneCFG())
 		c->Message(13, "Zone header saved successfully.");
@@ -2189,7 +2189,7 @@ void command_zsave(Client *c, const Seperator *sep)
 		c->Message(13, "ERROR: Zone header data was NOT saved.");
 }
 
-void command_dbspawn2(Client *c, const Seperator *sep)
+void command_dbspawn2(Client* c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
@@ -2208,7 +2208,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 	}
 }
 
-void command_copychar(Client *c, const Seperator *sep)
+void command_copychar(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0]==0 || sep->arg[2][0] == 0 || sep->arg[3][0] == 0)
 		c->Message(0, "Usage: #copychar [character name] [new character] [new account id]");
@@ -2230,12 +2230,12 @@ void command_copychar(Client *c, const Seperator *sep)
 	}
 }
 
-void command_shutdown(Client *c, const Seperator *sep)
+void command_shutdown(Client* c, const Seperator *sep)
 {
 	CatchSignal(2);
 }
 
-void command_delacct(Client *c, const Seperator *sep)
+void command_delacct(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == 0)
 		c->Message(0, "Format: #delacct accountname");
@@ -2246,7 +2246,7 @@ void command_delacct(Client *c, const Seperator *sep)
 			c->Message(0, "Unable to delete account.");
 }
 
-void command_setpass(Client *c, const Seperator *sep)
+void command_setpass(Client* c, const Seperator *sep)
 {
 	if(sep->argnum != 2)
 		c->Message(0, "Format: #setpass accountname password");
@@ -2264,7 +2264,7 @@ void command_setpass(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setlsinfo(Client *c, const Seperator *sep)
+void command_setlsinfo(Client* c, const Seperator *sep)
 {
 	if(sep->argnum != 2)
 		c->Message(0, "Format: #setlsinfo email password");
@@ -2280,7 +2280,7 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 	}
 }
 
-void command_grid(Client *c, const Seperator *sep)
+void command_grid(Client* c, const Seperator *sep)
 {
 	if (strcasecmp("max",sep->arg[1]) == 0)
 		c->Message(0, "Highest grid ID in this zone: %d", database.GetHighestGrid(zone->GetZoneID()));
@@ -2294,7 +2294,7 @@ void command_grid(Client *c, const Seperator *sep)
 	}
 }
 
-void command_wp(Client *c, const Seperator *sep)
+void command_wp(Client* c, const Seperator *sep)
 {
 	int wp = atoi(sep->arg[4]);
 
@@ -2314,7 +2314,7 @@ void command_wp(Client *c, const Seperator *sep)
 		c->Message(0,"Usage: #wp add/delete grid_num pause wp_num [-h]");
 }
 
-void command_iplookup(Client *c, const Seperator *sep)
+void command_iplookup(Client* c, const Seperator *sep)
 {
 	ServerPacket* pack = new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
 	ServerGenericWorldQuery_Struct* s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
@@ -2326,7 +2326,7 @@ void command_iplookup(Client *c, const Seperator *sep)
 	safe_delete(pack);
 }
 
-void command_size(Client *c, const Seperator *sep)
+void command_size(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -2364,7 +2364,7 @@ void command_size(Client *c, const Seperator *sep)
 	}
 }
 
-void command_mana(Client *c, const Seperator *sep)
+void command_mana(Client* c, const Seperator *sep)
 {
 	Mob *t;
 
@@ -2376,9 +2376,9 @@ void command_mana(Client *c, const Seperator *sep)
 		t->SetMana(t->CalcMaxMana());
 }
 
-void command_flymode(Client *c, const Seperator *sep)
+void command_flymode(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2'))
 		c->Message(0, "#flymode [0/1/2]");
@@ -2395,9 +2395,9 @@ void command_flymode(Client *c, const Seperator *sep)
 	}
 }
 
-void command_showskills(Client *c, const Seperator *sep)
+void command_showskills(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -2407,7 +2407,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		c->Message(0, "Skill [%d] is at [%d]", i, t->GetSkill(i));
 }
 
-void command_findspell(Client *c, const Seperator *sep)
+void command_findspell(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #FindSpell [spellname]");
@@ -2450,7 +2450,7 @@ void command_findspell(Client *c, const Seperator *sep)
 	}
 }
 
-void command_castspell(Client *c, const Seperator *sep)
+void command_castspell(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #CastSpell spellid");
@@ -2483,7 +2483,7 @@ void command_castspell(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setlanguage(Client *c, const Seperator *sep)
+void command_setlanguage(Client* c, const Seperator *sep)
 {
 	if ( strcasecmp( sep->arg[1], "list" ) == 0 )
 	{
@@ -2542,7 +2542,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setskill(Client *c, const Seperator *sep)
+void command_setskill(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == nullptr) {
 		c->Message(0, "Error: #setskill: No target.");
@@ -2568,7 +2568,7 @@ void command_setskill(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setskillall(Client *c, const Seperator *sep)
+void command_setskillall(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->Message(0, "Error: #setallskill: No target.");
@@ -2591,7 +2591,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 }
 
-void command_race(Client *c, const Seperator *sep)
+void command_race(Client* c, const Seperator *sep)
 {
 	Mob *t=c->castToMOB();
 
@@ -2605,7 +2605,7 @@ void command_race(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #race [0-724] (0 for back to normal)");
 }
 
-void command_gender(Client *c, const Seperator *sep)
+void command_gender(Client* c, const Seperator *sep)
 {
 	Mob *t=c->castToMOB();
 
@@ -2618,7 +2618,7 @@ void command_gender(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #gender [0/1/2]");
 }
 
-void command_makepet(Client *c, const Seperator *sep)
+void command_makepet(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == '\0')
 		c->Message(0, "Usage: #makepet pet_type_name (will not survive across zones)");
@@ -2626,7 +2626,7 @@ void command_makepet(Client *c, const Seperator *sep)
 		c->MakePet(0, sep->arg[1]);
 }
 
-void command_level(Client *c, const Seperator *sep)
+void command_level(Client* c, const Seperator *sep)
 {
 	uint16 level = atoi(sep->arg[1]);
 
@@ -2652,7 +2652,7 @@ void command_level(Client *c, const Seperator *sep)
 	}
 }
 
-void command_spawn(Client *c, const Seperator *sep)
+void command_spawn(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] != 0){
 		Client* client = entity_list.getClientByName(sep->arg[1]);
@@ -2673,7 +2673,7 @@ void command_spawn(Client *c, const Seperator *sep)
 	}
 }
 
-void command_texture(Client *c, const Seperator *sep)
+void command_texture(Client* c, const Seperator *sep)
 {
 
 	uint16 texture;
@@ -2718,7 +2718,7 @@ void command_texture(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #texture [texture] [helmtexture] (0-255, 255 for show equipment)");
 }
 
-void command_npctypespawn(Client *c, const Seperator *sep)
+void command_npctypespawn(Client* c, const Seperator *sep)
 {
 	if (sep->IsNumber(1)) {
 		const NPCType* tmp = 0;
@@ -2739,7 +2739,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 
 }
 
-void command_heal(Client *c, const Seperator *sep)
+void command_heal(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget()==0)
 		c->Message(0, "Error: #Heal: No Target.");
@@ -2747,7 +2747,7 @@ void command_heal(Client *c, const Seperator *sep)
 		c->GetTarget()->Heal();
 }
 
-void command_appearance(Client *c, const Seperator *sep)
+void command_appearance(Client* c, const Seperator *sep)
 {
 	Mob *t=c->castToMOB();
 
@@ -2763,7 +2763,7 @@ void command_appearance(Client *c, const Seperator *sep)
 	}
 }
 
-void command_charbackup(Client *c, const Seperator *sep)
+void command_charbackup(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -2842,7 +2842,7 @@ void command_charbackup(Client *c, const Seperator *sep)
 	}
 }
 
-void command_nukeitem(Client *c, const Seperator *sep)
+void command_nukeitem(Client* c, const Seperator *sep)
 {
 	int numitems, itemid;
 
@@ -2855,7 +2855,7 @@ void command_nukeitem(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: (targted) #nukeitem itemnum - removes the item from the player's inventory");
 }
 
-void command_peekinv(Client *c, const Seperator *sep)
+void command_peekinv(Client* c, const Seperator *sep)
 {
 	// Displays what the server thinks the user has in inventory
 	if (!c->GetTarget() || !c->GetTarget()->isClient()) {
@@ -3176,7 +3176,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 }
 
-void command_findnpctype(Client *c, const Seperator *sep)
+void command_findnpctype(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #findnpctype [search criteria]");
@@ -3241,7 +3241,7 @@ void command_findnpctype(Client *c, const Seperator *sep)
 	}
 }
 
-void command_findzone(Client *c, const Seperator *sep)
+void command_findzone(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #findzone [search criteria]");
@@ -3302,7 +3302,7 @@ void command_findzone(Client *c, const Seperator *sep)
 	}
 }
 
-void command_viewnpctype(Client *c, const Seperator *sep)
+void command_viewnpctype(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #viewnpctype [npctype id]");
@@ -3329,7 +3329,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloadqst(Client *c, const Seperator *sep)
+void command_reloadqst(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 	{
@@ -3346,7 +3346,7 @@ void command_reloadqst(Client *c, const Seperator *sep)
 
 }
 
-void command_reloadworld(Client *c, const Seperator *sep)
+void command_reloadworld(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 	{
@@ -3359,7 +3359,7 @@ void command_reloadworld(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloadlevelmods(Client *c, const Seperator *sep)
+void command_reloadlevelmods(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 	{
@@ -3372,13 +3372,13 @@ void command_reloadlevelmods(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloadzps(Client *c, const Seperator *sep)
+void command_reloadzps(Client* c, const Seperator *sep)
 {
 	database.LoadStaticZonePoints(&zone->zone_point_list, zone->GetShortName(), zone->GetInstanceVersion());
 	c->Message(0, "Reloading server zone_points.");
 }
 
-void command_zoneshutdown(Client *c, const Seperator *sep)
+void command_zoneshutdown(Client* c, const Seperator *sep)
 {
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
@@ -3397,7 +3397,7 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zonebootup(Client *c, const Seperator *sep)
+void command_zonebootup(Client* c, const Seperator *sep)
 {
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
@@ -3416,7 +3416,7 @@ void command_zonebootup(Client *c, const Seperator *sep)
 	}
 }
 
-void command_kick(Client *c, const Seperator *sep)
+void command_kick(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #kick [charname]");
@@ -3445,7 +3445,7 @@ void command_kick(Client *c, const Seperator *sep)
 	}
 }
 
-void command_attack(Client *c, const Seperator *sep)
+void command_attack(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1] != 0) {
 		Mob* sictar = entity_list.getMOB(sep->argplus[1]);
@@ -3458,7 +3458,7 @@ void command_attack(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: (needs NPC targeted) #attack targetname");
 }
 
-void command_lock(Client *c, const Seperator *sep)
+void command_lock(Client* c, const Seperator *sep)
 {
 	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
@@ -3468,7 +3468,7 @@ void command_lock(Client *c, const Seperator *sep)
 	safe_delete(outpack);
 }
 
-void command_unlock(Client *c, const Seperator *sep)
+void command_unlock(Client* c, const Seperator *sep)
 {
 	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
@@ -3478,7 +3478,7 @@ void command_unlock(Client *c, const Seperator *sep)
 	safe_delete(outpack);
 }
 
-void command_motd(Client *c, const Seperator *sep)
+void command_motd(Client* c, const Seperator *sep)
 {
 	ServerPacket* outpack = new ServerPacket(ServerOP_Motd, sizeof(ServerMotd_Struct));
 	ServerMotd_Struct* mss = (ServerMotd_Struct*) outpack->pBuffer;
@@ -3488,7 +3488,7 @@ void command_motd(Client *c, const Seperator *sep)
 	safe_delete(outpack);
 }
 
-void command_listpetition(Client *c, const Seperator *sep)
+void command_listpetition(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -3509,7 +3509,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	safe_delete_array(query);
 }
 
-void command_equipitem(Client *c, const Seperator *sep)
+void command_equipitem(Client* c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
 	if (sep->IsNumber(1) && (slot_id>=0) && (slot_id<=21)) {
@@ -3582,7 +3582,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #equipitem slotid[0-21] - equips the item on your cursor to the position");
 }
 
-void command_zonelock(Client *c, const Seperator *sep)
+void command_zonelock(Client* c, const Seperator *sep)
 {
 	ServerPacket* pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
 	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
@@ -3623,7 +3623,7 @@ void command_zonelock(Client *c, const Seperator *sep)
 	safe_delete(pack);
 }
 
-void command_corpse(Client *c, const Seperator *sep)
+void command_corpse(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 
@@ -3755,7 +3755,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(0, "Error, #corpse sub-command not found");
 }
 
-void command_fixmob(Client *c, const Seperator *sep)
+void command_fixmob(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	const char* Usage = "Usage: #fixmob [race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev]";
@@ -3978,10 +3978,10 @@ void command_fixmob(Client *c, const Seperator *sep)
 	}
 }
 
-void command_gmspeed(Client *c, const Seperator *sep)
+void command_gmspeed(Client* c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -3994,7 +3994,7 @@ void command_gmspeed(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #gmspeed [on/off]");
 }
 
-void command_title(Client *c, const Seperator *sep)
+void command_title(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0]==0)
 		c->Message(0, "Usage: #title [remove|text] [1 = Create row in title table] - remove or set title to 'text'");
@@ -4008,7 +4008,7 @@ void command_title(Client *c, const Seperator *sep)
 			c->Message(13, "#title only works on players.");
 			return;
 		}
-		Client *t = target_mob->castToClient();
+		Client* t = target_mob->castToClient();
 
 		if(strlen(sep->arg[1]) > 31) {
 			c->Message(13, "Title must be 31 characters or less.");
@@ -4044,7 +4044,7 @@ void command_title(Client *c, const Seperator *sep)
 }
 
 
-void command_titlesuffix(Client *c, const Seperator *sep)
+void command_titlesuffix(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0]==0)
 		c->Message(0, "Usage: #titlesuffix [remove|text] [1 = create row in title table] - remove or set title suffix to 'text'");
@@ -4058,7 +4058,7 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 			c->Message(13, "#titlesuffix only works on players.");
 			return;
 		}
-		Client *t = target_mob->castToClient();
+		Client* t = target_mob->castToClient();
 
 		if(strlen(sep->arg[1]) > 31) {
 			c->Message(13, "Title suffix must be 31 characters or less.");
@@ -4094,7 +4094,7 @@ void command_titlesuffix(Client *c, const Seperator *sep)
 	}
 }
 
-void command_spellinfo(Client *c, const Seperator *sep)
+void command_spellinfo(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #spellinfo [spell_id]");
@@ -4147,9 +4147,9 @@ void command_spellinfo(Client *c, const Seperator *sep)
 	}
 }
 
-void command_lastname(Client *c, const Seperator *sep)
+void command_lastname(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -4161,7 +4161,7 @@ void command_lastname(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #lastname <lastname> where <lastname> is less than 70 chars long");
 }
 
-void command_memspell(Client *c, const Seperator *sep)
+void command_memspell(Client* c, const Seperator *sep)
 {
 	uint32 slot;
 	uint16 spell_id;
@@ -4186,7 +4186,7 @@ void command_memspell(Client *c, const Seperator *sep)
 	}
 }
 
-void command_save(Client *c, const Seperator *sep)
+void command_save(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->Message(0, "Error: no target");
@@ -4206,7 +4206,7 @@ void command_save(Client *c, const Seperator *sep)
 		c->Message(0, "Error: target not a Client/PlayerCorpse");
 }
 
-void command_showstats(Client *c, const Seperator *sep)
+void command_showstats(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() != 0 )
 		c->GetTarget()->ShowStats(c);
@@ -4214,7 +4214,7 @@ void command_showstats(Client *c, const Seperator *sep)
 		c->ShowStats(c);
 }
 
-void command_mystats(Client *c, const Seperator *sep)
+void command_mystats(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && c->GetPet()) {
 		if (c->GetTarget()->IsPet() && c->GetTarget() == c->GetPet())
@@ -4226,12 +4226,12 @@ void command_mystats(Client *c, const Seperator *sep)
 		c->ShowStats(c);
 }
 
-void command_myskills(Client *c, const Seperator *sep)
+void command_myskills(Client* c, const Seperator *sep)
 {
 	c->ShowSkillsWindow();
 }
 
-void command_bind(Client *c, const Seperator *sep)
+void command_bind(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() != 0 ) {
 		if (c->GetTarget()->isClient())
@@ -4242,7 +4242,7 @@ void command_bind(Client *c, const Seperator *sep)
 		c->SetBindPoint();
 }
 
-void command_depop(Client *c, const Seperator *sep)
+void command_depop(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0 || !(c->GetTarget()->isNPC() || c->GetTarget()->isNPCCorpse()))
 		c->Message(0, "You must have a NPC target for this command. (maybe you meant #depopzone?)");
@@ -4252,13 +4252,13 @@ void command_depop(Client *c, const Seperator *sep)
 	}
 }
 
-void command_depopzone(Client *c, const Seperator *sep)
+void command_depopzone(Client* c, const Seperator *sep)
 {
 	zone->Depop();
 	c->Message(0, "Zone depoped.");
 }
 
-void command_repop(Client *c, const Seperator *sep)
+void command_repop(Client* c, const Seperator *sep)
 {
 	int timearg = 1;
 	if (sep->arg[1] && strcasecmp(sep->arg[1], "force") == 0) {
@@ -4287,7 +4287,7 @@ void command_repop(Client *c, const Seperator *sep)
 	}
 }
 
-void command_spawnstatus(Client *c, const Seperator *sep)
+void command_spawnstatus(Client* c, const Seperator *sep)
 {
 	if((sep->arg[1][0] == 'e') | (sep->arg[1][0] == 'E'))
 	{
@@ -4318,7 +4318,7 @@ void command_spawnstatus(Client *c, const Seperator *sep)
 	}
 }
 
-void command_nukebuffs(Client *c, const Seperator *sep)
+void command_nukebuffs(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->BuffFadeAll();
@@ -4326,7 +4326,7 @@ void command_nukebuffs(Client *c, const Seperator *sep)
 		c->GetTarget()->BuffFadeAll();
 }
 
-void command_zuwcoords(Client *c, const Seperator *sep)
+void command_zuwcoords(Client* c, const Seperator *sep)
 {
 	// modifys and resends zhdr packet
 	if(sep->arg[1][0]==0)
@@ -4342,7 +4342,7 @@ void command_zuwcoords(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zunderworld(Client *c, const Seperator *sep)
+void command_zunderworld(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0]==0)
 		c->Message(0, "Usage: #zunderworld <zcoord>");
@@ -4351,7 +4351,7 @@ void command_zunderworld(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zsafecoords(Client *c, const Seperator *sep)
+void command_zsafecoords(Client* c, const Seperator *sep)
 {
 	// modifys and resends zhdr packet
 	if(sep->arg[3][0]==0)
@@ -4374,7 +4374,7 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 	}
 }
 
-void command_freeze(Client *c, const Seperator *sep)
+void command_freeze(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() != 0)
 		c->GetTarget()->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
@@ -4382,7 +4382,7 @@ void command_freeze(Client *c, const Seperator *sep)
 		c->Message(0, "ERROR: Freeze requires a target.");
 }
 
-void command_unfreeze(Client *c, const Seperator *sep)
+void command_unfreeze(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() != 0)
 		c->GetTarget()->SendAppearancePacket(AT_Anim, ANIM_STAND);
@@ -4390,10 +4390,10 @@ void command_unfreeze(Client *c, const Seperator *sep)
 		c->Message(0, "ERROR: Unfreeze requires a target.");
 }
 
-void command_pvp(Client *c, const Seperator *sep)
+void command_pvp(Client* c, const Seperator *sep)
 {
 	bool state=atobool(sep->arg[1]);
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -4406,9 +4406,9 @@ void command_pvp(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #pvp [on/off]");
 }
 
-void command_setxp(Client *c, const Seperator *sep)
+void command_setxp(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -4423,9 +4423,9 @@ void command_setxp(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #setxp number");
 }
 
-void command_setpvppoints(Client *c, const Seperator *sep)
+void command_setpvppoints(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -4444,9 +4444,9 @@ void command_setpvppoints(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #setpvppoints number");
 }
 
-void command_name(Client *c, const Seperator *sep)
+void command_name(Client* c, const Seperator *sep)
 {
-	Client *target;
+	Client* target;
 
 	if( (strlen(sep->arg[1]) == 0) || (!(c->GetTarget() && c->GetTarget()->isClient())) )
 		c->Message(0, "Usage: #name newname (requires player target)");
@@ -4467,7 +4467,7 @@ void command_name(Client *c, const Seperator *sep)
 	}
 }
 
-void command_tempname(Client *c, const Seperator *sep)
+void command_tempname(Client* c, const Seperator *sep)
 {
 	Mob *target;
 	target = c->GetTarget();
@@ -4487,7 +4487,7 @@ void command_tempname(Client *c, const Seperator *sep)
 	}
 }
 
-void command_npcspecialattk(Client *c, const Seperator *sep)
+void command_npcspecialattk(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget()==0 || c->GetTarget()->isClient() || strlen(sep->arg[1]) <= 0 || strlen(sep->arg[2]) <= 0)
 		c->Message(0, "Usage: #npcspecialattk *flagchar* *permtag* (Flags are E(nrage) F(lurry) R(ampage) S(ummon), permtag is 1 = True, 0 = False).");
@@ -4497,7 +4497,7 @@ void command_npcspecialattk(Client *c, const Seperator *sep)
 	}
 }
 
-void command_kill(Client *c, const Seperator *sep)
+void command_kill(Client* c, const Seperator *sep)
 {
 	if (!c->GetTarget()) {
 		c->Message(0, "Error: #Kill: No target.");
@@ -4507,7 +4507,7 @@ void command_kill(Client *c, const Seperator *sep)
 			c->GetTarget()->Kill();
 }
 
-void command_haste(Client *c, const Seperator *sep)
+void command_haste(Client* c, const Seperator *sep)
 {
 	// #haste command to set client attack speed. Takes a percentage (100 = twice normal attack speed)
 	if(sep->arg[1][0] != 0) {
@@ -4523,7 +4523,7 @@ void command_haste(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #haste [percentage]");
 }
 
-void command_damage(Client *c, const Seperator *sep)
+void command_damage(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget()==0)
 		c->Message(0, "Error: #Damage: No Target.");
@@ -4539,7 +4539,7 @@ void command_damage(Client *c, const Seperator *sep)
 	}
 }
 
-void command_zonespawn(Client *c, const Seperator *sep)
+void command_zonespawn(Client* c, const Seperator *sep)
 {
 	c->Message(0, "This command is not yet implemented.");
 	return;
@@ -4577,7 +4577,7 @@ void command_zonespawn(Client *c, const Seperator *sep)
 	//		Message(0, "Usage: #zonespawn [add|edit|remove|remove all]");
 }
 
-void command_npcspawn(Client *c, const Seperator *sep)
+void command_npcspawn(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	uint32 extra = 0;
@@ -4628,7 +4628,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 		c->Message(0, "Error: #npcspawn: You must have a NPC targeted!");
 }
 
-void command_spawnfix(Client *c, const Seperator *sep) {
+void command_spawnfix(Client* c, const Seperator *sep) {
 	Mob *t = c->GetTarget();
 	if (!t || !t->isNPC())
 		c->Message(0, "Error: #spawnfix: Need an NPC target.");
@@ -4658,14 +4658,14 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_loc(Client *c, const Seperator *sep)
+void command_loc(Client* c, const Seperator *sep)
 {
 	Mob *t=c->GetTarget()?c->GetTarget():c->castToMOB();
 
 	c->Message(0, "%s's Location (XYZ): %1.1f, %1.1f, %1.1f; heading=%1.1f", t->getName(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
 }
 
-void command_goto(Client *c, const Seperator *sep)
+void command_goto(Client* c, const Seperator *sep)
 {
 	// goto function
 	if (sep->arg[1][0] == '\0' && c->GetTarget())
@@ -4676,7 +4676,7 @@ void command_goto(Client *c, const Seperator *sep)
 		c->MovePC(zone->GetZoneID(), zone->GetInstanceID(), atof(sep->arg[1]), atof(sep->arg[2]), atof(sep->arg[3]), 0.0f);
 }
 
-void command_iteminfo(Client *c, const Seperator *sep)
+void command_iteminfo(Client* c, const Seperator *sep)
 {
 	const ItemInst* inst = c->GetInv()[SLOT_CURSOR];
 
@@ -4705,7 +4705,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 	}
 }
 
-void command_uptime(Client *c, const Seperator *sep)
+void command_uptime(Client* c, const Seperator *sep)
 {
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
@@ -4721,7 +4721,7 @@ void command_uptime(Client *c, const Seperator *sep)
 	}
 }
 
-void command_flag(Client *c, const Seperator *sep)
+void command_flag(Client* c, const Seperator *sep)
 {
 	if(sep->arg[2][0] == 0) {
 		c->UpdateAdmin();
@@ -4754,7 +4754,7 @@ void command_flag(Client *c, const Seperator *sep)
 	}
 }
 
-void command_time(Client *c, const Seperator *sep)
+void command_time(Client* c, const Seperator *sep)
 {
 	char timeMessage[255];
 	int minutes=0;
@@ -4784,7 +4784,7 @@ void command_time(Client *c, const Seperator *sep)
 	}
 }
 
-void command_guild(Client *c, const Seperator *sep)
+void command_guild(Client* c, const Seperator *sep)
 {
 	int admin=c->Admin();
 	Mob *target=c->GetTarget();
@@ -5171,7 +5171,7 @@ void command_guild(Client *c, const Seperator *sep)
 	}
 }
 /*
-bool helper_guild_edit(Client *c, uint32 dbid, uint32 eqid, uint8 rank, const char* what, const char* value) {
+bool helper_guild_edit(Client* c, uint32 dbid, uint32 eqid, uint8 rank, const char* what, const char* value) {
 	struct GuildRankLevel_Struct grl;
 	strcpy(grl.rankname, guild_mgr.GetRankName(eqid, rank));
 	grl.demote = guilds[eqid].rank[rank].demote;
@@ -5220,7 +5220,7 @@ bool helper_guild_edit(Client *c, uint32 dbid, uint32 eqid, uint8 rank, const ch
 	return true;
 }*/
 
-void command_zonestatus(Client *c, const Seperator *sep)
+void command_zonestatus(Client* c, const Seperator *sep)
 {
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
@@ -5233,7 +5233,7 @@ void command_zonestatus(Client *c, const Seperator *sep)
 	}
 }
 
-void command_manaburn(Client *c, const Seperator *sep)
+void command_manaburn(Client* c, const Seperator *sep)
 {
 	Mob* target=c->GetTarget();
 
@@ -5263,7 +5263,7 @@ void command_manaburn(Client *c, const Seperator *sep)
 	}
 }
 
-void command_viewmessage(Client *c, const Seperator *sep)
+void command_viewmessage(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -5310,7 +5310,7 @@ void command_viewmessage(Client *c, const Seperator *sep)
 	}
 }
 
-void command_doanim(Client *c, const Seperator *sep)
+void command_doanim(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #DoAnim [number]");
@@ -5324,7 +5324,7 @@ void command_doanim(Client *c, const Seperator *sep)
 			c->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
 }
 
-void command_randomfeatures(Client *c, const Seperator *sep)
+void command_randomfeatures(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!target)
@@ -5517,7 +5517,7 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 	}
 }
 
-void command_face(Client *c, const Seperator *sep)
+void command_face(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5548,7 +5548,7 @@ void command_face(Client *c, const Seperator *sep)
 	}
 }
 
-void command_details(Client *c, const Seperator *sep)
+void command_details(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5579,7 +5579,7 @@ void command_details(Client *c, const Seperator *sep)
 	}
 }
 
-void command_heritage(Client *c, const Seperator *sep)
+void command_heritage(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5610,7 +5610,7 @@ void command_heritage(Client *c, const Seperator *sep)
 	}
 }
 
-void command_tattoo(Client *c, const Seperator *sep)
+void command_tattoo(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5641,7 +5641,7 @@ void command_tattoo(Client *c, const Seperator *sep)
 	}
 }
 
-void command_helm(Client *c, const Seperator *sep)
+void command_helm(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5672,7 +5672,7 @@ void command_helm(Client *c, const Seperator *sep)
 	}
 }
 
-void command_hair(Client *c, const Seperator *sep)
+void command_hair(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5703,7 +5703,7 @@ void command_hair(Client *c, const Seperator *sep)
 	}
 }
 
-void command_haircolor(Client *c, const Seperator *sep)
+void command_haircolor(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5734,7 +5734,7 @@ void command_haircolor(Client *c, const Seperator *sep)
 	}
 }
 
-void command_beard(Client *c, const Seperator *sep)
+void command_beard(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5765,7 +5765,7 @@ void command_beard(Client *c, const Seperator *sep)
 	}
 }
 
-void command_beardcolor(Client *c, const Seperator *sep)
+void command_beardcolor(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	if (!sep->IsNumber(1))
@@ -5796,11 +5796,11 @@ void command_beardcolor(Client *c, const Seperator *sep)
 	}
 }
 
-void command_scribespells(Client *c, const Seperator *sep)
+void command_scribespells(Client* c, const Seperator *sep)
 {
 	uint8 max_level, min_level;
 	uint16 book_slot, curspell, count;
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -5868,10 +5868,10 @@ void command_scribespells(Client *c, const Seperator *sep)
 	}
 }
 
-void command_scribespell(Client *c, const Seperator *sep) {
+void command_scribespell(Client* c, const Seperator *sep) {
 	uint16 spell_id = 0;
 	uint16 book_slot = -1;
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -5910,10 +5910,10 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		c->Message(13, "Spell ID: %i is an unknown spell and cannot be scribed.", spell_id);
 }
 
-void command_unscribespell(Client *c, const Seperator *sep) {
+void command_unscribespell(Client* c, const Seperator *sep) {
 	uint16 spell_id = 0;
 	uint16 book_slot = -1;
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -5947,9 +5947,9 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_unscribespells(Client *c, const Seperator *sep)
+void command_unscribespells(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -5957,7 +5957,7 @@ void command_unscribespells(Client *c, const Seperator *sep)
 	t->UnscribeSpellAll();
 }
 
-void command_wpinfo(Client *c, const Seperator *sep)
+void command_wpinfo(Client* c, const Seperator *sep)
 {
 	Mob *t=c->GetTarget();
 
@@ -5970,7 +5970,7 @@ void command_wpinfo(Client *c, const Seperator *sep)
 	n->DisplayWaypointInfo(c);
 }
 
-void command_wpadd(Client *c, const Seperator *sep)
+void command_wpadd(Client* c, const Seperator *sep)
 {
 	int	type1=0,
 		type2=0,
@@ -6012,7 +6012,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 }
 
 
-void command_interrupt(Client *c, const Seperator *sep)
+void command_interrupt(Client* c, const Seperator *sep)
 {
 	uint16 ci_message=0x01b7, ci_color=0x0121;
 
@@ -6024,7 +6024,7 @@ void command_interrupt(Client *c, const Seperator *sep)
 	c->InterruptSpell(ci_message, ci_color);
 }
 
-void command_d1(Client *c, const Seperator *sep)
+void command_d1(Client* c, const Seperator *sep)
 {
 	EQApplicationPacket app(OP_Action, sizeof(Action_Struct));
 	Action_Struct* a = (Action_Struct*)app.pBuffer;
@@ -6037,7 +6037,7 @@ void command_d1(Client *c, const Seperator *sep)
 	entity_list.QueueCloseClients(c, &app);
 }
 
-void command_summonitem(Client *c, const Seperator *sep)
+void command_summonitem(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #summonitem [item id] [charges], charges are optional");
@@ -6069,7 +6069,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	}
 }
 
-void command_giveitem(Client *c, const Seperator *sep)
+void command_giveitem(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1)) {
 		c->Message(13, "Usage: #summonitem [item id] [charges], charges are optional");
@@ -6078,7 +6078,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 	} else if(!c->GetTarget()->isClient()) {
 		c->Message(13, "You can only give items to players with this command.");
 	} else {
-		Client *t = c->GetTarget()->castToClient();
+		Client* t = c->GetTarget()->castToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
 		const Item_Struct* item = database.GetItem(itemid);
@@ -6106,7 +6106,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 	}
 }
 
-void command_givemoney(Client *c, const Seperator *sep)
+void command_givemoney(Client* c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1)) {	//as long as the first one is a number, we'll just let atoi convert the rest to 0 or a number
 		c->Message(13, "Usage: #Usage: #givemoney [pp] [gp] [sp] [cp]");
@@ -6124,7 +6124,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 	}
 }
 
-void command_itemsearch(Client *c, const Seperator *sep)
+void command_itemsearch(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #itemsearch [search string]");
@@ -6190,9 +6190,9 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setaaxp(Client *c, const Seperator *sep)
+void command_setaaxp(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -6206,9 +6206,9 @@ void command_setaaxp(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #setaaxp <new AA XP value> (<new Group AA XP value> <new Raid XP value>)");
 }
 
-void command_setaapts(Client *c, const Seperator *sep)
+void command_setaapts(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -6228,9 +6228,9 @@ void command_setaapts(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setcrystals(Client *c, const Seperator *sep)
+void command_setcrystals(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -6257,7 +6257,7 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	}
 }
 
-void command_stun(Client *c, const Seperator *sep)
+void command_stun(Client* c, const Seperator *sep)
 {
 	Mob *t=c->castToMOB();
 	uint32 duration;
@@ -6276,7 +6276,7 @@ void command_stun(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #stun [duration]");
 }
 
-void command_ban(Client *c, const Seperator *sep)
+void command_ban(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -6307,7 +6307,7 @@ void command_ban(Client *c, const Seperator *sep)
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
 
-			Client *client = nullptr;
+			Client* client = nullptr;
 			client = entity_list.getClientByName(sep->arg[1]);
 			if(client)
 			{
@@ -6337,7 +6337,7 @@ void command_ban(Client *c, const Seperator *sep)
 	}
 }
 
-void command_suspend(Client *c, const Seperator *sep)
+void command_suspend(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = nullptr;
@@ -6370,7 +6370,7 @@ void command_suspend(Client *c, const Seperator *sep)
 
 			safe_delete_array(query);
 
-			Client *BannedClient = entity_list.getClientByName(sep->arg[1]);
+			Client* BannedClient = entity_list.getClientByName(sep->arg[1]);
 
 			if(BannedClient)
 				BannedClient->WorldKick();
@@ -6395,7 +6395,7 @@ void command_suspend(Client *c, const Seperator *sep)
 	}
 }
 
-void command_ipban(Client *c, const Seperator *sep)
+void command_ipban(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1] == 0)
 	{
@@ -6409,7 +6409,7 @@ void command_ipban(Client *c, const Seperator *sep)
 	}
 }
 
-void command_revoke(Client *c, const Seperator *sep)
+void command_revoke(Client* c, const Seperator *sep)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -6457,7 +6457,7 @@ void command_revoke(Client *c, const Seperator *sep)
 	}
 }
 
-void command_oocmute(Client *c, const Seperator *sep)
+void command_oocmute(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == 0 || !(sep->arg[1][0] == '1' || sep->arg[1][0] == '0'))
 		c->Message(0, "Usage: #oocmute [1/0]");
@@ -6469,7 +6469,7 @@ void command_oocmute(Client *c, const Seperator *sep)
 	}
 }
 
-void command_checklos(Client *c, const Seperator *sep)
+void command_checklos(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget())
 	{
@@ -6485,9 +6485,9 @@ void command_checklos(Client *c, const Seperator *sep)
 	}
 }
 
-void command_set_adventure_points(Client *c, const Seperator *sep)
+void command_set_adventure_points(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t=c->GetTarget()->castToClient();
@@ -6508,7 +6508,7 @@ void command_set_adventure_points(Client *c, const Seperator *sep)
 	t->UpdateLDoNPoints(atoi(sep->arg[1]), atoi(sep->arg[2]));
 }
 
-void command_npcsay(Client *c, const Seperator *sep)
+void command_npcsay(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1][0])
 	{
@@ -6520,7 +6520,7 @@ void command_npcsay(Client *c, const Seperator *sep)
 	}
 }
 
-void command_npcshout(Client *c, const Seperator *sep)
+void command_npcshout(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1][0])
 	{
@@ -6532,12 +6532,12 @@ void command_npcshout(Client *c, const Seperator *sep)
 	}
 }
 
-void command_timers(Client *c, const Seperator *sep) {
+void command_timers(Client* c, const Seperator *sep) {
 	if(!c->GetTarget() || !c->GetTarget()->isClient()) {
 		c->Message(0,"Need a player target for timers.");
 		return;
 	}
-	Client *them = c->GetTarget()->castToClient();
+	Client* them = c->GetTarget()->castToClient();
 
 	std::vector< std::pair<pTimerType, PersistentTimer *> > res;
 	them->GetPTimers().ToVector(res);
@@ -6551,7 +6551,7 @@ void command_timers(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_npcemote(Client *c, const Seperator *sep)
+void command_npcemote(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1][0])
 	{
@@ -6563,7 +6563,7 @@ void command_npcemote(Client *c, const Seperator *sep)
 	}
 }
 
-void command_npcedit(Client *c, const Seperator *sep)
+void command_npcedit(Client* c, const Seperator *sep)
 {
 	if (!c->GetTarget() || !c->GetTarget()->isNPC())
 	{
@@ -7292,8 +7292,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 }
 
 #ifdef PACKET_PROFILER
-void command_packetprofile(Client *c, const Seperator *sep) {
-	Client *t = c;
+void command_packetprofile(Client* c, const Seperator *sep) {
+	Client* t = c;
 	if(c->GetTarget() && c->GetTarget()->isClient()) {
 		t = c->GetTarget()->castToClient();
 	}
@@ -7302,23 +7302,23 @@ void command_packetprofile(Client *c, const Seperator *sep) {
 #endif
 
 #ifdef EQPROFILE
-void command_profiledump(Client *c, const Seperator *sep) {
+void command_profiledump(Client* c, const Seperator *sep) {
 	DumpZoneProfile();
 }
 
-void command_profilereset(Client *c, const Seperator *sep) {
+void command_profilereset(Client* c, const Seperator *sep) {
 	ResetZoneProfile();
 }
 #endif
 
-void command_opcode(Client *c, const Seperator *sep) {
+void command_opcode(Client* c, const Seperator *sep) {
 	if(!strcasecmp( sep->arg[1], "reload" )) {
 		ReloadAllPatches();
 		c->Message(0, "Opcodes for all patches have been reloaded");
 	}
 }
 
-void command_logsql(Client *c, const Seperator *sep) {
+void command_logsql(Client* c, const Seperator *sep) {
 	if(!strcasecmp( sep->arg[1], "off" )) {
 		c->ChangeSQLLog(nullptr);
 	} else if(sep->arg[1][0] != '\0') {
@@ -7328,10 +7328,10 @@ void command_logsql(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_logs(Client *c, const Seperator *sep)
+void command_logs(Client* c, const Seperator *sep)
 {
 #ifdef CLIENT_LOGS
-	Client *t = c;
+	Client* t = c;
 	if(c->GetTarget() && c->GetTarget()->isClient()) {
 		t = c->GetTarget()->castToClient();
 	}
@@ -7360,10 +7360,10 @@ void command_logs(Client *c, const Seperator *sep)
 #endif
 }
 
-void command_nologs(Client *c, const Seperator *sep)
+void command_nologs(Client* c, const Seperator *sep)
 {
 #ifdef CLIENT_LOGS
-	Client *t = c;
+	Client* t = c;
 	if(c->GetTarget() && c->GetTarget()->isClient()) {
 		t = c;
 	}
@@ -7391,7 +7391,7 @@ void command_nologs(Client *c, const Seperator *sep)
 #endif
 }
 
-void command_qglobal(Client *c, const Seperator *sep) {
+void command_qglobal(Client* c, const Seperator *sep) {
 	//In-game switch for qglobal column
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -7445,7 +7445,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_path(Client *c, const Seperator *sep)
+void command_path(Client* c, const Seperator *sep)
 {
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
 	{
@@ -7769,7 +7769,7 @@ void Client::Undye() {
 	save(0);
 }
 
-void command_undye(Client *c, const Seperator *sep)
+void command_undye(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() && c->GetTarget()->isClient())
 	{
@@ -7781,7 +7781,7 @@ void command_undye(Client *c, const Seperator *sep)
 	}
 }
 
-void command_undyeme(Client *c, const Seperator *sep)
+void command_undyeme(Client* c, const Seperator *sep)
 {
 	if(c) {
 		c->Undye();
@@ -7789,13 +7789,13 @@ void command_undyeme(Client *c, const Seperator *sep)
 	}
 }
 
-void command_hp(Client *c, const Seperator *sep)
+void command_hp(Client* c, const Seperator *sep)
 {
 	c->SendHPUpdate();
 	c->SendManaUpdatePacket();
 }
 
-void command_aggro(Client *c, const Seperator *sep)
+void command_aggro(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() == nullptr || !c->GetTarget()->isNPC()) {
 		c->Message(0, "Error: you must have an NPC target.");
@@ -7814,7 +7814,7 @@ void command_aggro(Client *c, const Seperator *sep)
 	entity_list.describeAggro(c, c->GetTarget()->castToNPC(), d, verbose);
 }
 
-void command_pf(Client *c, const Seperator *sep)
+void command_pf(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget())
 	{
@@ -7830,7 +7830,7 @@ void command_pf(Client *c, const Seperator *sep)
 	}
 }
 
-void command_bestz(Client *c, const Seperator *sep) {
+void command_bestz(Client* c, const Seperator *sep) {
 	if (zone->zonemap == nullptr) {
 		c->Message(0,"Map not loaded for this zone");
 	} else {
@@ -7891,13 +7891,13 @@ void command_bestz(Client *c, const Seperator *sep) {
 }
 
 
-void command_reloadstatic(Client *c, const Seperator *sep) {
+void command_reloadstatic(Client* c, const Seperator *sep) {
 	c->Message(0, "Reloading zone static data...");
 	zone->ReloadStaticData();
 }
 
-void command_flags(Client *c, const Seperator *sep) {
-	Client *t = c;
+void command_flags(Client* c, const Seperator *sep) {
+	Client* t = c;
 
 	if(c->Admin() >= minStatusToSeeOthersZoneFlags) {
 		Mob *tgt = c->GetTarget();
@@ -7908,7 +7908,7 @@ void command_flags(Client *c, const Seperator *sep) {
 	t->SendZoneFlagInfo(c);
 }
 
-void command_flagedit(Client *c, const Seperator *sep) {
+void command_flagedit(Client* c, const Seperator *sep) {
 	//super-command for editing zone flags
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
@@ -8039,7 +8039,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_mlog(Client *c, const Seperator *sep) {
+void command_mlog(Client* c, const Seperator *sep) {
 	//super-command for managing log settings
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #mlog [subcommand].");
@@ -8198,12 +8198,12 @@ void command_mlog(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_serverrules(Client *c, const Seperator *sep)
+void command_serverrules(Client* c, const Seperator *sep)
 {
 	c->SendRules(c);
 }
 
-void command_acceptrules(Client *c, const Seperator *sep)
+void command_acceptrules(Client* c, const Seperator *sep)
 {
 	if(!database.GetAgreementFlag(c->AccountID()))
 	{
@@ -8213,7 +8213,7 @@ void command_acceptrules(Client *c, const Seperator *sep)
 	}
 }
 
-void command_guildcreate(Client *c, const Seperator *sep)
+void command_guildcreate(Client* c, const Seperator *sep)
 {
 	if(strlen(sep->argplus[1])>4 && strlen(sep->argplus[1])<16)
 	{
@@ -8225,12 +8225,12 @@ void command_guildcreate(Client *c, const Seperator *sep)
 	}
 }
 
-void command_guildapprove(Client *c, const Seperator *sep)
+void command_guildapprove(Client* c, const Seperator *sep)
 {
 	guild_mgr.addMemberApproval(atoi(sep->arg[1]),c);
 }
 
-void command_guildlist(Client *c, const Seperator *sep)
+void command_guildlist(Client* c, const Seperator *sep)
 {
 	GuildApproval* tmp = guild_mgr.getGuildApproval(atoi(sep->arg[1]));
 	if(tmp)
@@ -8241,7 +8241,7 @@ void command_guildlist(Client *c, const Seperator *sep)
 		c->Message(0,"Could not find reference id.");
 }
 
-void command_hatelist(Client *c, const Seperator *sep) {
+void command_hatelist(Client* c, const Seperator *sep) {
 	Mob *target = c->GetTarget();
 	if(target == nullptr) {
 		c->Message(0, "Error: you must have a target.");
@@ -8253,7 +8253,7 @@ void command_hatelist(Client *c, const Seperator *sep) {
 }
 
 
-void command_rules(Client *c, const Seperator *sep) {
+void command_rules(Client* c, const Seperator *sep) {
 	//super-command for managing rules settings
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #rules [subcommand].");
@@ -8441,7 +8441,7 @@ void command_rules(Client *c, const Seperator *sep) {
 }
 
 
-void command_task(Client *c, const Seperator *sep) {
+void command_task(Client* c, const Seperator *sep) {
 	//super-command for managing tasks
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(0, "Syntax: #task [subcommand].");
@@ -8523,7 +8523,7 @@ void command_task(Client *c, const Seperator *sep) {
 	c->Message(0, "Unable to interpret command. Type #task help");
 
 }
-void command_reloadtitles(Client *c, const Seperator *sep)
+void command_reloadtitles(Client* c, const Seperator *sep)
 {
 	ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 	worldserver.SendPacket(pack);
@@ -8532,7 +8532,7 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 }
 
-void command_altactivate(Client *c, const Seperator *sep){
+void command_altactivate(Client* c, const Seperator *sep){
 	if(sep->arg[1][0] == '\0'){
 		c->Message(10, "Invalid argument, usage:");
 		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
@@ -8582,7 +8582,7 @@ void command_altactivate(Client *c, const Seperator *sep){
 	}
 }
 
-void command_refundaa(Client *c, const Seperator *sep){
+void command_refundaa(Client* c, const Seperator *sep){
 	Client* refundee = nullptr;
 	if(c) {
 		if(c->GetTarget()){
@@ -8601,11 +8601,11 @@ void command_refundaa(Client *c, const Seperator *sep){
 	}
 }
 
-void command_traindisc(Client *c, const Seperator *sep)
+void command_traindisc(Client* c, const Seperator *sep)
 {
 	uint8 max_level, min_level;
 	uint16 curspell, count;
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -8677,11 +8677,11 @@ void command_traindisc(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setgraveyard(Client *c, const Seperator *sep)
+void command_setgraveyard(Client* c, const Seperator *sep)
 {
 	uint32 zoneid = 0;
 	uint32 graveyard_id = 0;
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t=c->GetTarget()->castToClient();
@@ -8717,7 +8717,7 @@ void command_setgraveyard(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_deletegraveyard(Client *c, const Seperator *sep)
+void command_deletegraveyard(Client* c, const Seperator *sep)
 {
 	uint32 zoneid = 0;
 	uint32 graveyard_id = 0;
@@ -8746,9 +8746,9 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
+void command_summonburriedplayercorpse(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t = c->GetTarget()->castToClient();
@@ -8765,9 +8765,9 @@ void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
+void command_getplayerburriedcorpsecount(Client* c, const Seperator *sep)
 {
-	Client *t=c;
+	Client* t=c;
 
 	if(c->GetTarget() && c->GetTarget()->isClient() && c->GetGM())
 		t = c->GetTarget()->castToClient();
@@ -8786,7 +8786,7 @@ void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_refreshgroup(Client *c, const Seperator *sep)
+void command_refreshgroup(Client* c, const Seperator *sep)
 {
 	if(!c)
 		return;
@@ -8800,7 +8800,7 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 	//g->SendUpdate(7, c);
 }
 
-void command_advnpcspawn(Client *c, const Seperator *sep)
+void command_advnpcspawn(Client* c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -9032,7 +9032,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		}
 }
 
-void command_aggrozone(Client *c, const Seperator *sep) {
+void command_aggrozone(Client* c, const Seperator *sep) {
 	if(!c)
 		return;
 
@@ -9046,7 +9046,7 @@ void command_aggrozone(Client *c, const Seperator *sep) {
 	c->Message(0, "Train to you! Last chance to go invulnerable...");
 }
 
-void command_modifynpcstat(Client *c, const Seperator *sep)
+void command_modifynpcstat(Client* c, const Seperator *sep)
 {
 	if(!c)
 		return;
@@ -9069,7 +9069,7 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 	c->GetTarget()->castToNPC()->ModifyNPCStat(sep->arg[1], sep->arg[2]);
 }
 
-void command_instance(Client *c, const Seperator *sep)
+void command_instance(Client* c, const Seperator *sep)
 {
 	if(!c)
 		return;
@@ -9254,7 +9254,7 @@ void command_instance(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setstartzone(Client *c, const Seperator *sep)
+void command_setstartzone(Client* c, const Seperator *sep)
 {
 	uint32 startzone = 0;
 	Client* target = nullptr;
@@ -9283,7 +9283,7 @@ void command_setstartzone(Client *c, const Seperator *sep)
 	target->SetStartZone(startzone);
 }
 
-void command_netstats(Client *c, const Seperator *sep)
+void command_netstats(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -9307,7 +9307,7 @@ void command_netstats(Client *c, const Seperator *sep)
 	}
 }
 
-void command_object(Client *c, const Seperator *sep)
+void command_object(Client* c, const Seperator *sep)
 {
 	if (!c)
 	{
@@ -10705,7 +10705,7 @@ void command_object(Client *c, const Seperator *sep)
 	}
 }
 
-void command_showspellslist(Client *c, const Seperator *sep)
+void command_showspellslist(Client* c, const Seperator *sep)
 {
 	Mob *target = c->GetTarget();
 
@@ -10726,7 +10726,7 @@ void command_showspellslist(Client *c, const Seperator *sep)
 
 // All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 
-void command_raidloot(Client *c, const Seperator *sep)
+void command_raidloot(Client* c, const Seperator *sep)
 {
 	if(!sep->arg[1][0]) {
 		c->Message(0, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
@@ -10782,7 +10782,7 @@ void command_raidloot(Client *c, const Seperator *sep)
 	}
 }
 
-void command_emoteview(Client *c, const Seperator *sep)
+void command_emoteview(Client* c, const Seperator *sep)
 {
 	if(!c->GetTarget() || !c->GetTarget()->isNPC())
 	{
@@ -10814,7 +10814,7 @@ void command_emoteview(Client *c, const Seperator *sep)
 	}
 }
 
-void command_emotesearch(Client *c, const Seperator *sep)
+void command_emotesearch(Client* c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #emotesearch [search string or emoteid]");
@@ -10877,14 +10877,14 @@ void command_emotesearch(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloademote(Client *c, const Seperator *sep)
+void command_reloademote(Client* c, const Seperator *sep)
 {
 	zone->NPCEmoteList.Clear();
 	zone->LoadNPCEmotes(&zone->NPCEmoteList);
 	c->Message(0, "NPC emotes reloaded.");
 }
 
-void command_globalview(Client *c, const Seperator *sep)
+void command_globalview(Client* c, const Seperator *sep)
 {
 	NPC * npcmob = nullptr;
 
@@ -10969,7 +10969,7 @@ void command_globalview(Client *c, const Seperator *sep)
 	}
 }
 
-void command_distance(Client *c, const Seperator *sep) {
+void command_distance(Client* c, const Seperator *sep) {
 	if(c && c->GetTarget()) {
 		Mob* target = c->GetTarget();
 
@@ -10977,7 +10977,7 @@ void command_distance(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_cvs(Client *c, const Seperator *sep)
+void command_cvs(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -10994,7 +10994,7 @@ void command_cvs(Client *c, const Seperator *sep)
 	}
 }
 
-void command_max_all_skills(Client *c, const Seperator *sep)
+void command_max_all_skills(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -11013,7 +11013,7 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 	}
 }
 
-void command_showbonusstats(Client *c, const Seperator *sep)
+void command_showbonusstats(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
 		c->Message(0, "ERROR: No target!");
@@ -11037,7 +11037,7 @@ void command_showbonusstats(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloadallrules(Client *c, const Seperator *sep)
+void command_reloadallrules(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -11049,7 +11049,7 @@ void command_reloadallrules(Client *c, const Seperator *sep)
 	}
 }
 
-void command_reloadworldrules(Client *c, const Seperator *sep)
+void command_reloadworldrules(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -11060,7 +11060,7 @@ void command_reloadworldrules(Client *c, const Seperator *sep)
 	}
 }
 
-void command_camerashake(Client *c, const Seperator *sep)
+void command_camerashake(Client* c, const Seperator *sep)
 {
 	if(c)
 	{
@@ -11082,7 +11082,7 @@ void command_camerashake(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_disarmtrap(Client *c, const Seperator *sep)
+void command_disarmtrap(Client* c, const Seperator *sep)
 {
 	Mob *target = c->GetTarget();
 
@@ -11108,7 +11108,7 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 	}
 }
 
-void command_sensetrap(Client *c, const Seperator *sep)
+void command_sensetrap(Client* c, const Seperator *sep)
 {
 	Mob * target = c->GetTarget();
 	if(!target)
@@ -11133,7 +11133,7 @@ void command_sensetrap(Client *c, const Seperator *sep)
 	}
 }
 
-void command_picklock(Client *c, const Seperator *sep)
+void command_picklock(Client* c, const Seperator *sep)
 {
 	Mob * target = c->GetTarget();
 	if(!target)
@@ -11158,7 +11158,7 @@ void command_picklock(Client *c, const Seperator *sep)
 	}
 }
 
-void command_qtest(Client *c, const Seperator *sep)
+void command_qtest(Client* c, const Seperator *sep)
 {
 
 
@@ -11180,7 +11180,7 @@ void command_qtest(Client *c, const Seperator *sep)
 	}
 }
 
-void command_mysql(Client *c, const Seperator *sep)
+void command_mysql(Client* c, const Seperator *sep)
 {
 	if(!sep->arg[1][0] || !sep->arg[2][0]) {
 		c->Message(0, "Usage: #mysql query \"Query here\"");
@@ -11269,9 +11269,9 @@ void command_mysql(Client *c, const Seperator *sep)
 	}
 }
 
-void command_xtargets(Client *c, const Seperator *sep)
+void command_xtargets(Client* c, const Seperator *sep)
 {
-	Client *t;
+	Client* t;
 
 	if(c->GetTarget() && c->GetTarget()->isClient())
 		t = c->GetTarget()->castToClient();
@@ -11294,7 +11294,7 @@ void command_xtargets(Client *c, const Seperator *sep)
 		t->ShowXTargets(c);
 }
 
-void command_zopp(Client *c, const Seperator *sep)
+void command_zopp(Client* c, const Seperator *sep)
 { // - Owner only command..non-targetable to eliminate malicious or mischievious activities.
 	if (!c)
 		return;
@@ -11347,7 +11347,7 @@ void command_zopp(Client *c, const Seperator *sep)
 	}
 }
 
-void command_augmentitem(Client *c, const Seperator *sep)
+void command_augmentitem(Client* c, const Seperator *sep)
 {
 	if (!c)
 		return;
@@ -11362,7 +11362,7 @@ void command_augmentitem(Client *c, const Seperator *sep)
 		safe_delete_array(in_augment);
 }
 
-void command_questerrors(Client *c, const Seperator *sep)
+void command_questerrors(Client* c, const Seperator *sep)
 {
 	std::list<std::string> err;
 	parse->GetErrors(err);
@@ -11382,7 +11382,7 @@ void command_questerrors(Client *c, const Seperator *sep)
 	}
 }
 
-void command_enablerecipe(Client *c, const Seperator *sep)
+void command_enablerecipe(Client* c, const Seperator *sep)
 {
 	uint32 recipe_id = 0;
 	bool success = false;
@@ -11409,7 +11409,7 @@ void command_enablerecipe(Client *c, const Seperator *sep)
 	}
 }
 
-void command_disablerecipe(Client *c, const Seperator *sep)
+void command_disablerecipe(Client* c, const Seperator *sep)
 {
 	uint32 recipe_id = 0;
 	bool success = false;
@@ -11436,7 +11436,7 @@ void command_disablerecipe(Client *c, const Seperator *sep)
 	}
 }
 
-void command_npctype_cache(Client *c, const Seperator *sep)
+void command_npctype_cache(Client* c, const Seperator *sep)
 {
 	if (sep->argnum > 0) {
 		for (int i = 0; i < sep->argnum; ++i) {
@@ -11461,7 +11461,7 @@ void command_npctype_cache(Client *c, const Seperator *sep)
 	}
 }
 
-void command_merchantopenshop(Client *c, const Seperator *sep)
+void command_merchantopenshop(Client* c, const Seperator *sep)
 {
 	Mob *merchant = c->GetTarget();
 	if (!merchant || merchant->GetClass() != MERCHANT) {
@@ -11472,7 +11472,7 @@ void command_merchantopenshop(Client *c, const Seperator *sep)
 	merchant->castToNPC()->MerchantOpenShop();
 }
 
-void command_merchantcloseshop(Client *c, const Seperator *sep)
+void command_merchantcloseshop(Client* c, const Seperator *sep)
 {
 	Mob *merchant = c->GetTarget();
 	if (!merchant || merchant->GetClass() != MERCHANT) {

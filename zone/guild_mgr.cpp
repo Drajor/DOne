@@ -353,7 +353,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 
 										_log(GUILDS__REFRESH, "Received guild member refresh from world for char %d from guild %d", s->char_id, s->guild_id);
 
-										Client *c = entity_list.getClientByCharacterID(s->char_id);
+										Client* c = entity_list.getClientByCharacterID(s->char_id);
 
 										if (c != nullptr) {
 											//this reloads the char's guild info from the database and sends appearance updates
@@ -461,7 +461,7 @@ void ZoneGuildManager::processWorldPacket(ServerPacket *pPacket) {
 
 			uint32 FromID = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 			uint32 Count = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
-			Client *c = entity_list.getClientByCharacterID(FromID);
+			Client* c = entity_list.getClientByCharacterID(FromID);
 
 			if (!c || !c->IsInAGuild())
 			{

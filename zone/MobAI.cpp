@@ -2520,7 +2520,7 @@ void NPC::RemoveSpellFromNPCList(int16 spell_id)
 	}
 }
 
-void NPC::AISpellsList(Client *c)
+void NPC::AISpellsList(Client* c)
 {
 	if (!c)
 		return;

@@ -505,7 +505,7 @@ OUT(OP_ZoneEntry, ServerZoneEntry_Struct);
 
 class OpcodeDispatcher {
 public:
-	virtual void dispatch(Client *on, const EQApplicationPacket *app) = 0;
+	virtual void dispatch(Client* on, const EQApplicationPacket *app) = 0;
 };
 
 class RawOpcodeDispatcher : public OpcodeDispatcher {
@@ -515,7 +515,7 @@ public:
 		d = p;
 	}
 
-	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
+	virtual void dispatch(Client* on, const EQApplicationPacket *app) {
 		(on->*d)(app);
 	}
 protected:
@@ -529,7 +529,7 @@ public:
 		d = p;
 	}
 
-	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
+	virtual void dispatch(Client* on, const EQApplicationPacket *app) {
 		if(app->size != 0) {
 			//error..
 			return;
@@ -549,7 +549,7 @@ public:
 		struct_name = sn;
 	}
 
-	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
+	virtual void dispatch(Client* on, const EQApplicationPacket *app) {
 		if(app->size != sizeof(T)) {
 			//error..
 			return;
@@ -572,7 +572,7 @@ public:
 		struct_name = sn;
 	}
 
-	virtual void dispatch(Client *on, const EQApplicationPacket *app) {
+	virtual void dispatch(Client* on, const EQApplicationPacket *app) {
 		if(app->size < sizeof(T)) {
 			//error..
 			return;

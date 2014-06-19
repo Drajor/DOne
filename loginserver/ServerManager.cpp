@@ -129,7 +129,7 @@ WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 	return nullptr;
 }
 
-EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
+EQApplicationPacket *ServerManager::CreateServerListPacket(Client* c)
 {
 	unsigned int packet_size = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;

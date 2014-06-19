@@ -233,7 +233,7 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 }
 
-static void ProcessMailTo(Client *c, std::string MailMessage) {
+static void ProcessMailTo(Client* c, std::string MailMessage) {
 
 	_log(UCS__TRACE, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
 
@@ -351,7 +351,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 	}
 }
 
-static void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message) {
+static void ProcessMailTo(Client* c, std::string from, std::string subject, std::string message) {
 }
 
 static void ProcessSetMessageStatus(std::string SetMessageCommand) {
@@ -397,7 +397,7 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 	}
 }
 
-static void ProcessCommandBuddy(Client *c, std::string Buddy) {
+static void ProcessCommandBuddy(Client* c, std::string Buddy) {
 
 	_log(UCS__TRACE, "Received buddy command with parameters %s", Buddy.c_str());
 	c->GeneralChannelMessage("Buddy list modified");
@@ -427,7 +427,7 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
 }
 
-static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
+static void ProcessCommandIgnore(Client* c, std::string Ignoree) {
 
 	_log(UCS__TRACE, "Received ignore command with parameters %s", Ignoree.c_str());
 	c->GeneralChannelMessage("Ignore list modified");
@@ -548,7 +548,7 @@ void Client::CloseConnection() {
 	ClientStream->ReleaseFromUse();
 }
 
-void Clientlist::CheckForStaleConnections(Client *c) {
+void Clientlist::CheckForStaleConnections(Client* c) {
 
 	if(!c) return;
 
@@ -589,7 +589,7 @@ void Clientlist::Process() {
 
 		eqs->SetOpcodeManager(&ChatOpMgr);
 
-		Client *c = new Client(eqs);
+		Client* c = new Client(eqs);
 
 		ClientChatConnections.push_back(c);
 	}
@@ -733,7 +733,7 @@ void Clientlist::Process() {
 
 }
 
-void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
+void Clientlist::ProcessOPMailCommand(Client* c, std::string CommandString)
 {
 
 	if(CommandString.length() == 0)
@@ -949,7 +949,7 @@ void Client::SendMailBoxes() {
 	safe_delete(outapp);
 }
 
-Client *Clientlist::FindCharacter(std::string CharacterName) {
+Client* Clientlist::FindCharacter(std::string CharacterName) {
 
 	std::list<Client*>::iterator Iterator;
 
@@ -1501,7 +1501,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 
 }
 
-void Client::SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender) {
+void Client::SendChannelMessage(std::string ChannelName, std::string Message, Client* Sender) {
 
 	if(!Sender) return;
 
@@ -1548,7 +1548,7 @@ void Client::ToggleAnnounce(std::string State)
 	GeneralChannelMessage(Message);
 }
 
-void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
+void Client::AnnounceJoin(ChatChannel *Channel, Client* c) {
 
 	if(!Channel || !c) return;
 
@@ -1568,7 +1568,7 @@ void Client::AnnounceJoin(ChatChannel *Channel, Client *c) {
 	safe_delete(outapp);
 }
 
-void Client::AnnounceLeave(ChatChannel *Channel, Client *c) {
+void Client::AnnounceLeave(ChatChannel *Channel, Client* c) {
 
 	if(!Channel || !c) return;
 
@@ -1799,7 +1799,7 @@ void Client::ChannelInvite(std::string CommandString) {
 
 	_log(UCS__TRACE, "[%s] invites [%s] to channel [%s]", getName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Invitee);
+	Client* RequiredClient = CL->FindCharacter(Invitee);
 
 	if(!RequiredClient) {
 
@@ -1926,7 +1926,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 
 	_log(UCS__TRACE, "[%s] gives [%s] moderator rights to channel [%s]", getName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Moderator);
+	Client* RequiredClient = CL->FindCharacter(Moderator);
 
 	if(!RequiredClient && (database.FindCharacter(Moderator.c_str()) < 0)) {
 
@@ -2007,7 +2007,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 
 	_log(UCS__TRACE, "[%s] gives [%s] voice to channel [%s]", getName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Voicee);
+	Client* RequiredClient = CL->FindCharacter(Voicee);
 
 	if(!RequiredClient && (database.FindCharacter(Voicee.c_str()) < 0)) {
 
@@ -2095,7 +2095,7 @@ void Client::ChannelKick(std::string CommandString) {
 
 	_log(UCS__TRACE, "[%s] kicks [%s] from channel [%s]", getName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Kickee);
+	Client* RequiredClient = CL->FindCharacter(Kickee);
 
 	if(!RequiredClient) {
 
@@ -2232,7 +2232,7 @@ void Client::SetConnectionType(char c) {
 	}
 }
 
-Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
+Client* Clientlist::IsCharacterOnline(std::string CharacterName) {
 
 	// This method is used to determine if the character we are a sending an email to is connected to the mailserver,
 	// so we can send them a new email notification.

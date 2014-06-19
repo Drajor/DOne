@@ -101,7 +101,7 @@ extern void log_raw_packet(LogType type, uint16 seq, const BasePacket *p);
 		#endif
 		#ifdef WORLD
 			class Client;
-			extern void log_message_client(LogType type, Client *who, const char *fmt, ...);
+			extern void log_message_client(LogType type, Client* who, const char *fmt, ...);
 			#define clog( type, format, ...) \
 				do { \
 					if(log_type_info[ type ].enabled) { \

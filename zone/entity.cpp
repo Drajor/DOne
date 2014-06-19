@@ -62,6 +62,8 @@ extern DBAsync *dbasync;
 extern char errorname[32];
 extern uint16 adverrornum;
 
+#define _A(container) decltype(*std::begin(container))
+
 Entity::Entity()
 {
 	mID = 0;
@@ -73,7 +75,7 @@ Entity::~Entity()
 	dbasync->CancelWork(mDBAsyncWorkID);
 }
 
-Client *Entity::castToClient()
+Client* Entity::castToClient()
 {
 	if (this == 0x00) {
 		std::cout << "castToClient error (nullptr)" << std::endl;
@@ -87,7 +89,7 @@ Client *Entity::castToClient()
 		return 0;
 	}
 #endif
-	return static_cast<Client *>(this);
+	return static_cast<Client* >(this);
 }
 
 NPC *Entity::castToNPC()
@@ -183,7 +185,7 @@ Beacon *Entity::castToBeacon()
 	return static_cast<Beacon *>(this);
 }
 
-const Client *Entity::castToClient() const
+const Client* Entity::castToClient() const
 {
 	if (this == 0x00) {
 		std::cout << "castToClient error (nullptr)" << std::endl;
@@ -197,7 +199,7 @@ const Client *Entity::castToClient() const
 		return 0;
 	}
 #endif
-	return static_cast<const Client *>(this);
+	return static_cast<const Client* >(this);
 }
 
 const NPC *Entity::castToNPC() const
@@ -319,7 +321,7 @@ bool EntityList::canAddHateForMOB(Mob *p)
 
 void EntityList::addClient(Client* pClient) {
 	pClient->setID(GetFreeID());
-	mClients.insert(std::pair<uint16, Client *>(pClient->getID(), pClient));
+	mClients.insert(std::pair<uint16, Client* >(pClient->getID(), pClient));
 	mMOBs.insert(std::pair<uint16, Mob *>(pClient->getID(), pClient));
 }
 
@@ -1035,7 +1037,7 @@ void EntityList::channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguag
 	va_end(argptr);
 
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
-		Client *client = i->second;
+		Client* client = i->second;
 		eqFilterType filter = FilterNone;
 		if (pChannelNumber == 3) //shout
 			filter = FilterShouts;
@@ -1061,45 +1063,42 @@ void EntityList::channelMessageSend(Mob* pTo, uint8 pChannelNumber, uint8 pLangu
 		mClients.at(pTo->getID())->ChannelMessageSend(0, 0, pChannelNumber, pLanguage, buffer);
 }
 
-void EntityList::SendZoneSpawns(Client *client)
-{
-	EQApplicationPacket *app;
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		Mob *ent = it->second;
+void EntityList::sendZoneSpawns(Client* pClient) {
+	EQApplicationPacket* app;
+	auto i = mMOBs.begin();
+	while (i != mMOBs.end()) {
+		Mob *ent = i->second;
 		if (!(ent->InZone()) || (ent->isClient())) {
-			if (ent->castToClient()->GMHideMe(client) ||
-				ent->castToClient()->IsHoveringForRespawn()) {
-				++it;
+			if (ent->castToClient()->GMHideMe(pClient) || ent->castToClient()->IsHoveringForRespawn()) {
+				++i;
 				continue;
 			}
 		}
 
 		app = new EQApplicationPacket;
-		it->second->castToMOB()->CreateSpawnPacket(app); // TODO: Use zonespawns opcode instead
-		client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+		i->second->castToMOB()->CreateSpawnPacket(app); // TODO: Use zonespawns opcode instead
+		pClient->QueuePacket(app, true, Client::CLIENT_CONNECTED);
 		safe_delete(app);
-		++it;
+		++i;
 	}
 }
 
-void EntityList::SendZoneSpawnsBulk(Client *client)
-{
+void EntityList::sendZoneSpawnsBulk(Client* pClient) {
 	NewSpawn_Struct ns;
 	Mob *spawn;
 	uint32 maxspawns = 100;
 
 	if (maxspawns > mMOBs.size())
 		maxspawns = mMOBs.size();
-	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
-	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
-		spawn = it->second;
+	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(pClient, maxspawns);
+	for (auto i = mMOBs.begin(); i != mMOBs.end(); i++) {
+		spawn = i->second;
 		if (spawn && spawn->InZone()) {
-			if (spawn->isClient() && (spawn->castToClient()->GMHideMe(client) ||
+			if (spawn->isClient() && (spawn->castToClient()->GMHideMe(pClient) ||
 				spawn->castToClient()->IsHoveringForRespawn()))
 				continue;
 			memset(&ns, 0, sizeof(NewSpawn_Struct));
-			spawn->FillSpawnStruct(&ns, client);
+			spawn->FillSpawnStruct(&ns, pClient);
 			bzsp->AddSpawn(&ns);
 		}
 	}
@@ -1107,83 +1106,64 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 }
 
 //this is a hack to handle a broken spawn struct
-void EntityList::SendZonePVPUpdates(Client *to)
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client *c = it->second;
-		if (c->GetPVP())
-			c->SendAppearancePacket(AT_PVP, c->GetPVP(), true, false, to);
-		++it;
+void EntityList::sendZonePVPUpdates(Client* pClient) {
+	for (auto i = mClients.begin(); i != mClients.end(); i++) {
+		Client* client = i->second;
+		if (client->GetPVP())
+			client->SendAppearancePacket(AT_PVP, client->GetPVP(), true, false, pClient);
 	}
 }
 
-void EntityList::SendZoneCorpses(Client *client)
-{
-	EQApplicationPacket *app;
-
-	for (auto it = mCorpses.begin(); it != mCorpses.end(); ++it) {
-		Corpse *ent = it->second;
-		app = new EQApplicationPacket;
+void EntityList::sendZoneCorpses(Client* pClient) {
+	EQApplicationPacket* app;
+	for (auto i = mCorpses.begin(); i != mCorpses.end(); i++) {
+		Corpse *ent = i->second;
+		app = new EQApplicationPacket();
 		ent->CreateSpawnPacket(app);
-		client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+		pClient->QueuePacket(app, true, Client::CLIENT_CONNECTED);
 		safe_delete(app);
 	}
 }
 
-void EntityList::SendZoneCorpsesBulk(Client *client)
-{
+void EntityList::sendZoneCorpsesBulk(Client* pClient) {
 	NewSpawn_Struct ns;
 	Corpse *spawn;
 	uint32 maxspawns = 100;
 
-	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+	BulkZoneSpawnPacket* bzsp = new BulkZoneSpawnPacket(pClient, maxspawns);
 
-	for (auto it = mCorpses.begin(); it != mCorpses.end(); ++it) {
-		spawn = it->second;
+	for (auto i = mCorpses.begin(); i != mCorpses.end(); ++i) {
+		spawn = i->second;
 		if (spawn && spawn->InZone()) {
 			memset(&ns, 0, sizeof(NewSpawn_Struct));
-			spawn->FillSpawnStruct(&ns, client);
+			spawn->FillSpawnStruct(&ns, pClient);
 			bzsp->AddSpawn(&ns);
 		}
 	}
 	safe_delete(bzsp);
 }
 
-void EntityList::SendZoneObjects(Client *client)
-{
-	auto it = mObjects.begin();
-	while (it != mObjects.end()) {
-		EQApplicationPacket *app = new EQApplicationPacket;
-		it->second->CreateSpawnPacket(app);
-		client->FastQueuePacket(&app);
-		++it;
+void EntityList::sendZoneObjects(Client* pClient) {
+	for (auto i = mObjects.begin(); i != mObjects.end(); i++) {
+		EQApplicationPacket* app = new EQApplicationPacket();
+		i->second->CreateSpawnPacket(app);
+		pClient->FastQueuePacket(&app);
 	}
 }
 
-void EntityList::Save()
-{
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		it->second->save();
-		++it;
-	}
+void EntityList::save() {
+	std::for_each(mClients.begin(), mClients.end(), [](_A(mClients)& pValue){ pValue.second->save(); });
 }
 
-void EntityList::ReplaceWithTarget(Mob *pOldMob, Mob *pNewTarget)
-{
-	if (!pNewTarget)
-		return;
+void EntityList::ReplaceWithTarget(Mob* pOldMob, Mob* pNewTarget) {
+	if (!pNewTarget) return;
+	auto f = [pOldMob, pNewTarget](_A(mMOBs)& pValue) {
+		auto mob = pValue.second;
+		if (mob->IsAIControlled() && mob->RemoveFromHateList(pOldMob))
+			mob->AddToHateList(pNewTarget, 1, 0);
 
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		if (it->second->IsAIControlled()) {
-			// replace the old mob with the new one
-			if (it->second->RemoveFromHateList(pOldMob))
-				it->second->AddToHateList(pNewTarget, 1, 0);
-		}
-		++it;
-	}
+	};
+	std::for_each(mMOBs.begin(), mMOBs.end(), f);
 }
 
 void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
@@ -1226,7 +1206,7 @@ void EntityList::RemoveFromAutoXTargets(Mob *mob)
 	}
 }
 
-void EntityList::RefreshAutoXTargets(Client *c)
+void EntityList::RefreshAutoXTargets(Client* c)
 {
 	if (!c)
 		return;
@@ -1247,14 +1227,14 @@ void EntityList::RefreshAutoXTargets(Client *c)
 	}
 }
 
-void EntityList::RefreshClientXTargets(Client *c)
+void EntityList::RefreshClientXTargets(Client* c)
 {
 	if (!c)
 		return;
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c2 = it->second;
+		Client* c2 = it->second;
 		++it;
 
 		if (!c2)
@@ -1270,7 +1250,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		++it;
 
 		Mob *Target = c->GetTarget();
@@ -1309,7 +1289,7 @@ void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *a
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		++it;
 
 		if (!c || ((c == sender) && !iSendToSender))
@@ -1336,7 +1316,7 @@ void EntityList::QueueCloseClients(Mob *sender, const EQApplicationPacket *app,
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *ent = it->second;
+		Client* ent = it->second;
 
 		if ((!ignore_sender || ent != sender) && (ent != SkipThisMob)) {
 			eqFilterMode filter2 = ent->GetFilter(filter);
@@ -1360,7 +1340,7 @@ void EntityList::QueueClients(Mob *sender, const EQApplicationPacket *app,
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *ent = it->second;
+		Client* ent = it->second;
 
 		if ((!ignore_sender || ent != sender))
 			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
@@ -1374,7 +1354,7 @@ void EntityList::QueueManaged(Mob *sender, const EQApplicationPacket *app,
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *ent = it->second;
+		Client* ent = it->second;
 
 		if ((!ignore_sender || ent != sender))
 			ent->QueuePacket(app, ackreq, Client::CLIENT_CONNECTED);
@@ -1410,7 +1390,7 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *cur = it->second;
+		Client* cur = it->second;
 		//might want some sort of distance check in here?
 		if (cur != winner && cur != loser) {
 			if (flee)
@@ -1422,7 +1402,7 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 	}
 }
 
-Client *EntityList::getClientByName(const char* pName) {
+Client* EntityList::getClientByName(const char* pName) {
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
 		if (strcasecmp(i->second->getName(), pName) == 0)
 			return i->second;
@@ -1615,7 +1595,7 @@ Client* EntityList::getClientByAccountID(uint32 pAccountID) {
 
 void EntityList::channelMessageFromWorld(const char* pFrom, const char* pTo, uint8 pChannelNumber, uint32 pGuildID, uint8 pLanguage, const char* pMessage) {
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
-		Client *client = i->second;
+		Client* client = i->second;
 		if (pChannelNumber == 0) {
 			if (!client->IsInGuild(pGuildID))
 				continue;
@@ -1641,7 +1621,7 @@ void EntityList::message(uint32 pGuildID, uint32 pType, const char* pMessage, ..
 	va_end(argptr);
 
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
-		Client *client = i->second;
+		Client* client = i->second;
 		if (pGuildID == 0 || client->IsInGuild(pGuildID))
 			client->Message(pType, buffer);
 	}
@@ -1652,7 +1632,7 @@ void EntityList::QueueClientsGuild(Mob *sender, const EQApplicationPacket *app,
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *client = it->second;
+		Client* client = it->second;
 		if (client->IsInGuild(guild_id))
 			client->QueuePacket(app);
 		++it;
@@ -1671,7 +1651,7 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *client = it->second;
+		Client* client = it->second;
 
 		if (client->IsInGuild(GuildID)) {
 			if (Item && (gbius->Permissions == GuildBankPublicIfUsable))
@@ -1694,7 +1674,7 @@ void EntityList::messageStatus(uint32 pGuildID, int pMinStatus, uint32 pType, co
 	va_end(argptr);
 
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
-		Client *client = i->second;
+		Client* client = i->second;
 		if ((pGuildID == 0 || client->IsInGuild(pGuildID)) && client->Admin() >= pMinStatus)
 			client->Message(pType, buffer);
 	}
@@ -1731,7 +1711,7 @@ void EntityList::messageStringID(Mob* pSender, bool pSkipSender, uint32 pType, u
 }
 
 void EntityList::filteredMessageStringID(Mob* pSender, bool pSkipSender, uint32 pType, eqFilterType pFilter, uint32 pStringID, const char* pMessage1, const char* pMessage2, const char* pMessage3, const char* pMessage4, const char* pMessage5, const char* pMessage6, const char* pMessage7, const char* pMessage8, const char* pMessage9) {
-	Client *client;
+	Client* client;
 	for (auto i = mClients.begin(); i != mClients.end(); ++i) {
 		client = i->second;
 		if (client && (!pSkipSender || client != pSender))
@@ -2151,7 +2131,7 @@ void EntityList::RemoveDebuffs(Mob *caster)
 // Currently, a new packet is sent per entity.
 // @todo: Come back and use FLAG_COMBINED to pack
 // all updates into one packet.
-void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
+void EntityList::SendPositionUpdates(Client* client, uint32 cLastUpdate,
 	float range, Entity *alwayssend, bool iSendEvenIfNotChanged)
 {
 	range = range * range;
@@ -2296,7 +2276,7 @@ void EntityList::ListNPCs(Client* client, const char *arg1, const char *arg2, ui
 	client->Message(0, "%d npcs listed. There is a total of %d npcs in this zone.", x, z);
 }
 
-void EntityList::ListNPCCorpses(Client *client)
+void EntityList::ListNPCCorpses(Client* client)
 {
 	uint32 x = 0;
 
@@ -2312,7 +2292,7 @@ void EntityList::ListNPCCorpses(Client *client)
 	client->Message(0, "%d npc corpses listed.", x);
 }
 
-void EntityList::ListPlayerCorpses(Client *client)
+void EntityList::ListPlayerCorpses(Client* client)
 {
 	uint32 x = 0;
 
@@ -2468,7 +2448,7 @@ void EntityList::WriteEntityIDs()
 	}
 }
 
-BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client *iSendTo, uint32 iMaxSpawnsPerPacket)
+BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client* iSendTo, uint32 iMaxSpawnsPerPacket)
 {
 	data = 0;
 	pSendTo = iSendTo;
@@ -2606,7 +2586,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 	}
 }
 
-void EntityList::ClearZoneFeignAggro(Client *targ)
+void EntityList::ClearZoneFeignAggro(Client* targ)
 {
 	auto it = mNPCs.begin();
 	while (it != mNPCs.end()) {
@@ -2875,7 +2855,7 @@ void EntityList::removeAllLocalities() {
 
 struct quest_proximity_event {
 	QuestEventID event_id;
-	Client *client;
+	Client* client;
 	NPC *npc;
 	int area_id;
 	int area_type;
@@ -3108,7 +3088,7 @@ void EntityList::SaveAllClientsTaskState()
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *client = it->second;
+		Client* client = it->second;
 		if (client->IsTaskStateLoaded())
 			client->SaveTaskState();
 
@@ -3123,7 +3103,7 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *client = it->second;
+		Client* client = it->second;
 		if (client->IsTaskStateLoaded()) {
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
@@ -3300,7 +3280,7 @@ void EntityList::UpdateHoTT(Mob *target)
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		if (c->GetTarget() == target) {
 			if (target->GetTarget())
 				c->SetHoTT(target->GetTarget()->getID());
@@ -3350,10 +3330,10 @@ bool Entity::checkCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	return false;
 }
 
-void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
+void EntityList::QuestJournalledSayClose(Mob *sender, Client* QuestInitiator,
 	float dist, const char* mobname, const char* message)
 {
-	Client *c = nullptr;
+	Client* c = nullptr;
 	float dist2 = dist * dist;
 
 	// Send the message to the quest initiator such that the client will enter it into the NPC Quest Journal
@@ -3422,7 +3402,7 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		if (c) {
 			Group *g = nullptr;
 			g = c->GetGroup();
@@ -3581,91 +3561,64 @@ Mob *EntityList::GetTargetForMez(Mob *caster)
 	return nullptr;
 }
 
-void EntityList::SendZoneAppearance(Client *c)
-{
-	if (!c)
-		return;
-
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		Mob *cur = it->second;
-
+void EntityList::sendZoneAppearance(Client* pClient) {
+	if (!pClient) return;
+	for (auto i = mMOBs.begin(); i != mMOBs.end(); i++) {
+		Mob *cur = i->second;
 		if (cur) {
-			if (cur == c) {
-				++it;
-				continue;
-			}
+			if (cur == pClient) continue;
 			if (cur->GetAppearance() != eaStanding) {
-				cur->SendAppearancePacket(AT_Anim, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
+				cur->SendAppearancePacket(AT_Anim, cur->GetAppearanceValue(cur->GetAppearance()), false, true, pClient);
 			}
 			if (cur->GetSize() != cur->GetBaseSize()) {
-				cur->SendAppearancePacket(AT_Size, (uint32)cur->GetSize(), false, true, c);
+				cur->SendAppearancePacket(AT_Size, (uint32)cur->GetSize(), false, true, pClient);
 			}
 		}
-		++it;
 	}
 }
 
-void EntityList::SendNimbusEffects(Client *c)
-{
-	if (!c)
-		return;
-
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		Mob *cur = it->second;
-
+void EntityList::sendNimbusEffects(Client* pClient) {
+	if (!pClient) return;
+	for (auto i = mMOBs.begin(); i != mMOBs.end(); i++) {
+		Mob *cur = i->second;
 		if (cur) {
-			if (cur == c) {
-				++it;
-				continue;
-			}
+			if (cur == pClient) continue;
 			if (cur->GetNimbusEffect1() != 0) {
-				cur->SendSpellEffect(cur->GetNimbusEffect1(), 1000, 0, 1, 3000, false, c);
+				cur->SendSpellEffect(cur->GetNimbusEffect1(), 1000, 0, 1, 3000, false, pClient);
 			}
 			if (cur->GetNimbusEffect2() != 0) {
-				cur->SendSpellEffect(cur->GetNimbusEffect2(), 2000, 0, 1, 3000, false, c);
+				cur->SendSpellEffect(cur->GetNimbusEffect2(), 2000, 0, 1, 3000, false, pClient);
 			}
 			if (cur->GetNimbusEffect3() != 0) {
-				cur->SendSpellEffect(cur->GetNimbusEffect3(), 3000, 0, 1, 3000, false, c);
+				cur->SendSpellEffect(cur->GetNimbusEffect3(), 3000, 0, 1, 3000, false, pClient);
 			}
 		}
-		++it;
 	}
 }
 
-void EntityList::SendUntargetable(Client *c)
-{
-	if (!c)
-		return;
-
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
-		Mob *cur = it->second;
-
+void EntityList::sendUntargetable(Client* pClient) {
+	if (!pClient) return;
+	for (auto i = mMOBs.begin(); i != mMOBs.end(); i++) {
+		Mob* cur = i->second;
 		if (cur) {
-			if (cur == c) {
-				++it;
-				continue;
-			}
+			if (cur == pClient) continue;
 			if (!cur->IsTargetable())
-				cur->SendTargetable(false, c);
+				cur->SendTargetable(false, pClient);
 		}
-		++it;
 	}
 }
 
-void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
+void EntityList::ZoneWho(Client* c, Who_All_Struct *Who)
 {
 	// This is only called for SoF clients, as regular /who is now handled server-side for that client.
 	uint32 PacketLength = 0;
 	uint32 Entries = 0;
 	uint8 WhomLength = strlen(Who->whom);
 
-	std::list<Client *> client_sub_list;
+	std::list<Client* > client_sub_list;
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *ClientEntry = it->second;
+		Client* ClientEntry = it->second;
 		++it;
 
 		if (ClientEntry) {
@@ -3731,7 +3684,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 
 	auto sit = client_sub_list.begin();
 	while (sit != client_sub_list.end()) {
-		Client *ClientEntry = *sit;
+		Client* ClientEntry = *sit;
 		++sit;
 
 		if (ClientEntry) {
@@ -3871,7 +3824,7 @@ void EntityList::GateAllClients()
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		if (c)
 			c->GoToBind();
 		++it;
@@ -3882,7 +3835,7 @@ void EntityList::SignalAllClients(uint32 data)
 {
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *ent = it->second;
+		Client* ent = it->second;
 		if (ent)
 			ent->Signal(data);
 		++it;
@@ -3909,7 +3862,7 @@ void EntityList::GetNPCList(std::list<NPC *> &n_list)
 	}
 }
 
-void EntityList::GetClientList(std::list<Client *> &c_list)
+void EntityList::GetClientList(std::list<Client* > &c_list)
 {
 	c_list.clear();
 	auto it = mClients.begin();
@@ -4010,7 +3963,7 @@ void EntityList::DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, ui
 	}
 }
 
-void EntityList::SendFindableNPCList(Client *c)
+void EntityList::SendFindableNPCList(Client* c)
 {
 	if (!c)
 		return;
@@ -4067,7 +4020,7 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 
 	auto it = mClients.begin();
 	while (it != mClients.end()) {
-		Client *c = it->second;
+		Client* c = it->second;
 		if (c && (c->GetClientVersion() >= EQClientSoD))
 			c->QueuePacket(outapp);
 
@@ -4077,13 +4030,13 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 	safe_delete(outapp);
 }
 
-void EntityList::HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode)
+void EntityList::HideCorpses(Client* c, uint8 CurrentMode, uint8 NewMode)
 {
 	if (!c)
 		return;
 
 	if (NewMode == HideCorpseNone) {
-		SendZoneCorpses(c);
+		sendZoneCorpses(c);
 		return;
 	}
 

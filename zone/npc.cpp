@@ -958,7 +958,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 	}
 }
 
-uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
+uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client* c, NPC* spawn, uint32 extra) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
@@ -1725,7 +1725,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	//Basic settings to make sure swarm pets work properly.
 	if  (GetSwarmOwner()) {
-		Client *c = entity_list.getClientByID(GetSwarmOwner());
+		Client* c = entity_list.getClientByID(GetSwarmOwner());
 			if(c) {
 				SetAllowBeneficial(1); //Allow client cast swarm pets to be heal/buffed.
 				//This is a hack to allow CLIENT swarm pets NOT to be targeted with F8. Warning: Will turn name 'Yellow'!
@@ -1742,7 +1742,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		if(GetOwnerID() || GetSwarmOwner()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.getClientByID(GetOwnerID());
+				Client* c = entity_list.getClientByID(GetOwnerID());
 				if(c)
 					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}
@@ -1750,7 +1750,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 				ns->spawn.bodytype = 11;
 				if(!IsCharmed())
 				{
-					Client *c = entity_list.getClientByID(GetSwarmOwner());
+					Client* c = entity_list.getClientByID(GetSwarmOwner());
 					if(c)
 						sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 				}
@@ -1760,7 +1760,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		if(GetOwnerID()) {
 			ns->spawn.is_pet = 1;
 			if (!IsCharmed() && GetOwnerID()) {
-				Client *c = entity_list.getClientByID(GetOwnerID());
+				Client* c = entity_list.getClientByID(GetOwnerID());
 				if(c)
 					sprintf(ns->spawn.lastName, "%s's Pet", c->getName());
 			}

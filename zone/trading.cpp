@@ -720,7 +720,7 @@ void Client::SendTraderPacket(Client* Trader, uint32 Unknown72)
 	safe_delete(outapp);
 }
 
-void Client::Trader_CustomerBrowsing(Client *Customer) {
+void Client::Trader_CustomerBrowsing(Client* Customer) {
 
 	EQApplicationPacket* outapp= new EQApplicationPacket(OP_Trader, sizeof(Trader_ShowItems_Struct));
 
@@ -2033,7 +2033,7 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 		}
 
 		uint32 LastCharID = 0;
-		Client *Buyer = nullptr;
+		Client* Buyer = nullptr;
 
 		while ((Row = mysql_fetch_row(Result))) {
 
@@ -2098,7 +2098,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 	BuyerInspectRequest_Struct* bir = ( BuyerInspectRequest_Struct*)app->pBuffer;
 
-	Client *Buyer = entity_list.getClientByID(bir->BuyerID);
+	Client* Buyer = entity_list.getClientByID(bir->BuyerID);
 
 	if(!Buyer) {
 		bir->Approval = 0; // Tell the client that the Buyer is unavailable
@@ -2220,7 +2220,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	}
 
 
-	Client *Buyer = entity_list.getClientByID(BuyerID);
+	Client* Buyer = entity_list.getClientByID(BuyerID);
 
 	if(!Buyer || !Buyer->IsBuyer()) {
 		Message(13, "The Buyer has gone away.");

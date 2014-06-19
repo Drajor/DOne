@@ -623,7 +623,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	safe_delete(outapp);
 
 	// Send Zone Objects
-	entity_list.SendZoneObjects(this);
+	entity_list.sendZoneObjects(this);
 	SendZonePoints();
 	// Live does this
 	outapp = new EQApplicationPacket(OP_SendAAStats, 0);
@@ -5452,7 +5452,7 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 
 		NewBazaarInspect_Struct *nbis = (NewBazaarInspect_Struct*)app->pBuffer;
 
-		Client *c = entity_list.getClientByName(nbis->Name);
+		Client* c = entity_list.getClientByName(nbis->Name);
 		if(c) {
 			ItemInst* inst = c->FindTraderItemBySerialNumber(nbis->SerialNumber);
 				if(inst)
@@ -8999,7 +8999,7 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 			GroupLeadershipAA_Struct GLAA;
 			memset(ln, 0, 64);
 			strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
-			Client *c = entity_list.getClientByName(ln);
+			Client* c = entity_list.getClientByName(ln);
 			if(c)
 				group->setLeader(c);
 
@@ -9139,9 +9139,9 @@ bool Client::FinishConnState2(DBAsyncWork* dbaw) {
 
 	////////////////////////////////////////////////////////////
 	// Zone Spawns Packet
-	entity_list.SendZoneSpawnsBulk(this);
-	entity_list.SendZoneCorpsesBulk(this);
-	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
+	entity_list.sendZoneSpawnsBulk(this);
+	entity_list.sendZoneCorpsesBulk(this);
+	entity_list.sendZonePVPUpdates(this);	//hack until spawn struct is fixed.
 
 
 
@@ -9451,12 +9451,12 @@ void Client::CompleteConnect()
 	}
 
 	//sends appearances for all mobs not doing anim_stand aka sitting, looting, playing dead
-	entity_list.SendZoneAppearance(this);
+	entity_list.sendZoneAppearance(this);
 
 	//sends the Nimbus particle effects (up to 3) for any mob using them
-	entity_list.SendNimbusEffects(this);
+	entity_list.sendNimbusEffects(this);
 
-	entity_list.SendUntargetable(this);
+	entity_list.sendUntargetable(this);
 
 	client_data_loaded = true;
 	int x;
@@ -9817,7 +9817,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 	{
 	case RaidCommandInviteIntoExisting:
 	case RaidCommandInvite: {
-		Client *i = entity_list.getClientByName(ri->player_name);
+		Client* i = entity_list.getClientByName(ri->player_name);
 		if(i){
 			Group *g = i->GetGroup();
 			if(g){
@@ -9852,7 +9852,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 		break;
 							}
 	case RaidCommandAcceptInvite: {
-		Client *i = entity_list.getClientByName(ri->player_name);
+		Client* i = entity_list.getClientByName(ri->player_name);
 		if(i){
 			if(IsRaidGrouped()){
 				i->Message_StringID(0, 5060); //group failed, must invite members not in raid...
@@ -9878,11 +9878,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				}
 				if(g){//add us all
 					uint32 freeGroup = r->GetFreeGroup();
-					Client *addClient = nullptr;
+					Client* addClient = nullptr;
 					for(int x = 0; x < 6; x++)
 					{
 						if(g->mMembers[x]){
-							Client *c = nullptr;
+							Client* c = nullptr;
 							if(g->mMembers[x]->isClient())
 								c = g->mMembers[x]->castToClient();
 							else
@@ -9931,7 +9931,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 
 					uint32 groupFree = r->GetFreeGroup(); //get a free group
 					if(ig){ //if we already have a group then cycle through adding us...
-						Client *addClientig = nullptr;
+						Client* addClientig = nullptr;
 						for(int x = 0; x < 6; x++)
 						{
 							if(ig->mMembers[x]){
@@ -9942,7 +9942,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									}
 								}
 								if(ig->isLeader(ig->mMembers[x])){
-									Client *c = nullptr;
+									Client* c = nullptr;
 									if(ig->mMembers[x]->isClient())
 										c = ig->mMembers[x]->castToClient();
 									else
@@ -9956,7 +9956,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 									}
 								}
 								else{
-									Client *c = nullptr;
+									Client* c = nullptr;
 									if(ig->mMembers[x]->isClient())
 										c = ig->mMembers[x]->castToClient();
 									else
@@ -9980,7 +9980,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						r->AddMember(i,0xFFFFFFFF, true, false, true);
 					}
 
-					Client *addClient = nullptr;
+					Client* addClient = nullptr;
 					//now add the existing group
 					for(int x = 0; x < 6; x++)
 					{
@@ -9994,7 +9994,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 							if(g->isLeader(g->mMembers[x]))
 							{
-								Client *c = nullptr;
+								Client* c = nullptr;
 								if(g->mMembers[x]->isClient())
 									c = g->mMembers[x]->castToClient();
 								else
@@ -10009,7 +10009,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 							else
 							{
-								Client *c = nullptr;
+								Client* c = nullptr;
 								if(g->mMembers[x]->isClient())
 									c = g->mMembers[x]->castToClient();
 								else
@@ -10033,7 +10033,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						r = new Raid(i);
 						entity_list.addRaid(r);
 						r->SetRaidDetails();
-						Client *addClientig = nullptr;
+						Client* addClientig = nullptr;
 						for(int x = 0; x < 6; x++)
 						{
 							if(ig->mMembers[x])
@@ -10046,7 +10046,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 								if(ig->isLeader(ig->mMembers[x]))
 								{
-									Client *c = nullptr;
+									Client* c = nullptr;
 									if(ig->mMembers[x]->isClient())
 										c = ig->mMembers[x]->castToClient();
 									else
@@ -10062,7 +10062,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 								else
 								{
-									Client *c = nullptr;
+									Client* c = nullptr;
 									if(ig->mMembers[x]->isClient())
 										c = ig->mMembers[x]->castToClient();
 									else
@@ -10139,7 +10139,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				}
 
 				r->RemoveMember(ri->leader_name);
-				Client *c = entity_list.getClientByName(ri->leader_name);
+				Client* c = entity_list.getClientByName(ri->leader_name);
 				if(c)
 					r->SendGroupDisband(c);
 				else{
@@ -10169,7 +10169,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 
 					if(grpcount < 6)
 					{
-						Client *c = entity_list.getClientByName(ri->leader_name);
+						Client* c = entity_list.getClientByName(ri->leader_name);
 						uint32 oldgrp = r->GetGroup(ri->leader_name);
 						if(ri->parameter == oldgrp) //don't rejoin grp if we order to join same group.
 							break;
@@ -10185,7 +10185,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 										if(strcmp(ri->leader_name, r->members[x].membername) != 0 && strlen(ri->leader_name) > 0)
 										{
 											r->SetGroupLeader(r->members[x].membername);
-											Client *cgl = entity_list.getClientByName(r->members[x].membername);
+											Client* cgl = entity_list.getClientByName(r->members[x].membername);
 											if(cgl){
 												r->SendRaidRemove(r->members[x].membername, cgl);
 												r->SendRaidCreate(cgl);
@@ -10242,7 +10242,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 				}
 				else //moving to ungrouped
 				{
-					Client *c = entity_list.getClientByName(ri->leader_name);
+					Client* c = entity_list.getClientByName(ri->leader_name);
 					uint32 oldgrp = r->GetGroup(ri->leader_name);
 					if(r->members[r->GetPlayerIndex(ri->leader_name)].IsGroupLeader){
 						r->SetGroupLeader(ri->leader_name, false);
@@ -10251,7 +10251,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							if(strlen(r->members[x].membername) > 0 && strcmp(r->members[x].membername, ri->leader_name) != 0)
 							{
 								r->SetGroupLeader(r->members[x].membername);
-								Client *cgl = entity_list.getClientByName(r->members[x].membername);
+								Client* cgl = entity_list.getClientByName(r->members[x].membername);
 								if(cgl){
 									r->SendRaidRemove(r->members[x].membername, cgl);
 									r->SendRaidCreate(cgl);
@@ -10441,7 +10441,7 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app) {
 	}
 
 	if(ss->Confirm) {
-		Client *Caster = entity_list.getClientByName(SacrificeCaster.c_str());
+		Client* Caster = entity_list.getClientByName(SacrificeCaster.c_str());
 		if(Caster) Sacrifice(Caster);
 	}
 	PendingSacrifice = false;
@@ -10780,7 +10780,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 		case Barter_BuyerInspectEnd:
 		{
 			BuyerInspectRequest_Struct* bir = ( BuyerInspectRequest_Struct*)app->pBuffer;
-			Client *Buyer = entity_list.getClientByID(bir->BuyerID);
+			Client* Buyer = entity_list.getClientByID(bir->BuyerID);
 			if(Buyer)
 				Buyer->WithCustomer(0);
 
@@ -12069,7 +12069,7 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 	}
 	GuildStatus_Struct *gss = (GuildStatus_Struct*)app->pBuffer;
 
-	Client *c = entity_list.getClientByName(gss->Name);
+	Client* c = entity_list.getClientByName(gss->Name);
 
 	if(!c)
 	{
@@ -12340,7 +12340,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 	if(!corpse || !corpse->isPlayerCorpse() || corpse->castToCorpse()->IsBeingLooted())
 		return;
 
-	Client *c = entity_list.findCorpseDragger(corpse->getID());
+	Client* c = entity_list.findCorpseDragger(corpse->getID());
 
 	if(c)
 	{
@@ -13053,7 +13053,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 			char Name[65];
 
 			app->ReadString(Name, 12, 64);
-			Client *c = entity_list.getClientByName(Name);
+			Client* c = entity_list.getClientByName(Name);
 			if(c)
 			{
 				XTargets[Slot].ID = c->getID();
@@ -13097,7 +13097,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.getClientByName(g->getMainTankName());
+				Client* c = entity_list.getClientByName(g->getMainTankName());
 
 				if(c)
 				{
@@ -13128,7 +13128,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.getClientByName(g->getMainAssistName());
+				Client* c = entity_list.getClientByName(g->getMainAssistName());
 
 				if(c)
 				{
@@ -13161,7 +13161,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 
 			if(g)
 			{
-				Client *c = entity_list.getClientByName(g->getPullerName());
+				Client* c = entity_list.getClientByName(g->getPullerName());
 
 				if(c)
 				{

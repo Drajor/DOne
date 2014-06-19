@@ -4752,7 +4752,7 @@ bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attac
 	save();
 
 	Mob *give_exp = hate_list.getHighestDamage(this);
-	Client *give_exp_client = nullptr;
+	Client* give_exp_client = nullptr;
 
 	if(give_exp && give_exp->isClient())
 		give_exp_client = give_exp->castToClient();
@@ -4958,7 +4958,7 @@ bool Merc::save() {
 	return Result;
 }
 
-Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB) {
+Merc* Merc::LoadMerc(Client* c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB) {
 
 	if(c) {
 		if(c->GetMercID()) {
@@ -5046,7 +5046,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 	return 0;
 }
 
-void Merc::UpdateMercInfo(Client *c) {
+void Merc::UpdateMercInfo(Client* c) {
 	snprintf(c->GetMercInfo().merc_name, 64, "%s", name);
 	c->GetMercInfo().mercid = GetMercID();
 	c->GetMercInfo().IsSuspended = IsSuspended();
@@ -5066,7 +5066,7 @@ void Merc::UpdateMercInfo(Client *c) {
 	c->GetMercInfo().drakkinDetails = drakkin_details;
 }
 
-void Merc::UpdateMercStats(Client *c) {
+void Merc::UpdateMercStats(Client* c) {
 	if(c->GetMercInfo().MercTemplateID >0)
 	{
 		const NPCType* npc_type = database.GetMercType( zone->GetMercTemplate(c->GetMercInfo().MercTemplateID)->MercNPCID, GetRace(), c->GetLevel());
@@ -5110,14 +5110,14 @@ void Merc::UpdateMercStats(Client *c) {
 	}
 }
 
-void Merc::UpdateMercAppearance(Client *c) {
+void Merc::UpdateMercAppearance(Client* c) {
 }
 
 void Merc::AddItem(uint8 slot, uint32 item_id) {
 	equipment[slot] = item_id;
 }
 
-bool Merc::Spawn(Client *owner) {
+bool Merc::Spawn(Client* owner) {
 	if(!RuleB(Mercs, AllowMercs))
 		return false;
 

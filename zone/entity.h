@@ -270,19 +270,19 @@ public:
 	void channelMessage(Mob* pFrom, uint8 pChannelNumber, uint8 pLanguage, uint8 pLanguageSkill, const char* pMessage, ...);
 	void channelMessageSend(Mob* pTo, uint8 pChannelNumber, uint8 pLanguage, const char* pMessage, ...);
 
-	void	SendZoneSpawns(Client*);
-	void	SendZonePVPUpdates(Client *);
-	void	SendZoneSpawnsBulk(Client* client);
-	void	Save();
-	void	SendZoneCorpses(Client*);
-	void	SendZoneCorpsesBulk(Client*);
-	void	SendZoneObjects(Client* client);
-	void	SendZoneAppearance(Client *c);
-	void	SendNimbusEffects(Client *c);
-	void	SendUntargetable(Client *c);
+	void sendZoneSpawns(Client* pClient);
+	void sendZonePVPUpdates(Client* pClient);
+	void sendZoneSpawnsBulk(Client* pClient);
+	void save();
+	void sendZoneCorpses(Client* pClient);
+	void sendZoneCorpsesBulk(Client* pClient);
+	void sendZoneObjects(Client* pClient);
+	void sendZoneAppearance(Client* pClient);
+	void sendNimbusEffects(Client* pClient);
+	void sendUntargetable(Client* pClient);
 
 	void	DuelMessage(Mob* winner, Mob* loser, bool flee);
-	void	QuestJournalledSayClose(Mob *sender, Client *QuestIntiator, float dist, const char* mobname, const char* message);
+	void	QuestJournalledSayClose(Mob *sender, Client* QuestIntiator, float dist, const char* mobname, const char* message);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
 
@@ -303,7 +303,7 @@ public:
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void	AEAttack(Mob *attacker, float dist, int Hand = 13, int count = 0, bool IsFromSpell = false);
-	void	AETaunt(Client *caster, float range = 0);
+	void	AETaunt(Client* caster, float range = 0);
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
@@ -361,7 +361,7 @@ public:
 	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
 	bool	LimitCheckName(const char* npc_name);
 
-	void	CheckClientAggro(Client *around);
+	void	CheckClientAggro(Client* around);
 	Mob*	AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int	GetHatedCount(Mob *attacker, Mob *exclude);
 	void	AIYellForHelp(Mob* sender, Mob* attacker);
@@ -384,16 +384,16 @@ public:
 	uint16	CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
 	uint16	CreateDoor(const char *model, float x, float y, float z, float heading, uint8 type = 0, uint16 size = 100);
-	void	ZoneWho(Client *c, Who_All_Struct* Who);
+	void	ZoneWho(Client* c, Who_All_Struct* Who);
 	void	UnMarkNPC(uint16 ID);
 
 	void	GateAllClients();
 	void	SignalAllClients(uint32 data);
 	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
 	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
-	void	SendFindableNPCList(Client *c);
+	void	SendFindableNPCList(Client* c);
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
-	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
+	void	HideCorpses(Client* c, uint8 CurrentMode, uint8 NewMode);
 
 	void GetMobList(std::list<Mob*> &m_list);
 	void GetNPCList(std::list<NPC*> &n_list);
@@ -408,8 +408,8 @@ public:
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
 	uint16 GetFreeID();
-	void RefreshAutoXTargets(Client *c);
-	void RefreshClientXTargets(Client *c);
+	void RefreshAutoXTargets(Client* c);
+	void RefreshClientXTargets(Client* c);
 
 protected:
 	friend class Zone;

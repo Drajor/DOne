@@ -70,7 +70,7 @@ bool Raid::Process()
 	return true;
 }
 
-void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bool looter){
+void Raid::AddMember(Client* c, uint32 group, bool rleader, bool groupleader, bool looter){
 	if(!c)
 		return;
 
@@ -109,7 +109,7 @@ void Raid::RemoveMember(const char *c)
 		mysql_free_result(result);
 	}
 
-	Client *m = entity_list.getClientByName(c);
+	Client* m = entity_list.getClientByName(c);
 	safe_delete_array(query);
 	disbandCheck = true;
 	SendRaidRemoveAll(c);
@@ -232,7 +232,7 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 
 	strn0cpy(leadername, name, 64);
 
-	Client *c = entity_list.getClientByName(name);
+	Client* c = entity_list.getClientByName(name);
 	if(c)
 		SetLeader(c);
 
@@ -341,7 +341,7 @@ uint32 Raid::GetGroup(const char *name)
 	return 0xFFFFFFFF;
 }
 
-uint32 Raid::GetGroup(Client *c)
+uint32 Raid::GetGroup(Client* c)
 {
 	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
 	{
@@ -351,7 +351,7 @@ uint32 Raid::GetGroup(Client *c)
 	return 0xFFFFFFFF;
 }
 
-void Raid::RaidSay(const char *msg, Client *c)
+void Raid::RaidSay(const char *msg, Client* c)
 {
 	if(!c)
 		return;
@@ -368,7 +368,7 @@ void Raid::RaidSay(const char *msg, Client *c)
 	safe_delete(pack);
 }
 
-void Raid::RaidGroupSay(const char *msg, Client *c)
+void Raid::RaidGroupSay(const char *msg, Client* c)
 {
 	if(!c)
 		return;
@@ -400,7 +400,7 @@ uint32 Raid::GetPlayerIndex(const char *name){
 	return 0; //should never get to here if we do everything else right, set it to 0 so we never crash things that rely on it.
 }
 
-Client *Raid::GetClientByIndex(uint16 index)
+Client* Raid::GetClientByIndex(uint16 index)
 {
 	if(index > MAX_RAID_MEMBERS)
 		return nullptr;
@@ -608,7 +608,7 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, int32 range, Mob* caster)
 }
 
 //basically the same as Group's version just with more people like a lot of non group specific raid stuff
-void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter){
+void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client* splitter){
 	//avoid unneeded work
 	if(copper == 0 && silver == 0 && gold == 0 && platinum == 0)
 		return;
@@ -887,7 +887,7 @@ uint32 Raid::GetLowestLevel()
 /*
  * Packet Functions Start
  */
-void Raid::SendRaidCreate(Client *to){
+void Raid::SendRaidCreate(Client* to){
 	if(!to)
 		return;
 
@@ -900,7 +900,7 @@ void Raid::SendRaidCreate(Client *to){
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidAdd(const char *who, Client *to)
+void Raid::SendRaidAdd(const char *who, Client* to)
 {
 	if(!to)
 		return;
@@ -947,7 +947,7 @@ void Raid::SendRaidAddAll(const char *who)
 	}
 }
 
-void Raid::SendRaidRemove(const char *who, Client *to)
+void Raid::SendRaidRemove(const char *who, Client* to)
 {
 	if(!to)
 		return;
@@ -988,7 +988,7 @@ void Raid::SendRaidRemoveAll(const char *who)
 	}
 }
 
-void Raid::SendRaidDisband(Client *to)
+void Raid::SendRaidDisband(Client* to)
 {
 	if(!to)
 		return;
@@ -1015,12 +1015,12 @@ void Raid::SendRaidDisbandAll()
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidMove(const char* who, Client *to)
+void Raid::SendRaidMove(const char* who, Client* to)
 {
 	if(!to)
 		return;
 
-	Client *c = entity_list.getClientByName(who);
+	Client* c = entity_list.getClientByName(who);
 	if(c && c == to){
 		SendRaidCreate(c);
 		SendMakeLeaderPacketTo(leadername, c);
@@ -1037,7 +1037,7 @@ void Raid::SendRaidMove(const char* who, Client *to)
 
 void Raid::SendRaidMoveAll(const char* who)
 {
-	Client *c = entity_list.getClientByName(who);
+	Client* c = entity_list.getClientByName(who);
 	SendRaidRemoveAll(who);
 	if(c)
 		SendRaidCreate(c);
@@ -1049,7 +1049,7 @@ void Raid::SendRaidMoveAll(const char* who)
 	}
 }
 
-void Raid::SendBulkRaid(Client *to)
+void Raid::SendBulkRaid(Client* to)
 {
 	if(!to)
 		return;
@@ -1086,7 +1086,7 @@ void Raid::SendMakeLeaderPacket(const char *who) //30
 	safe_delete(outapp);
 }
 
-void Raid::SendMakeLeaderPacketTo(const char *who, Client *to)
+void Raid::SendMakeLeaderPacketTo(const char *who, Client* to)
 {
 	if(!to)
 		return;
@@ -1110,13 +1110,13 @@ void Raid::SendMakeGroupLeaderPacket(const char *who) //13
 {
 }
 
-void Raid::SendMakeGroupLeaderPacketTo(const char *who, Client *to)
+void Raid::SendMakeGroupLeaderPacketTo(const char *who, Client* to)
 {
 	if(!to)
 		return;
 }
 
-void Raid::SendGroupUpdate(Client *to)
+void Raid::SendGroupUpdate(Client* to)
 {
 	if(!to)
 		return;
@@ -1205,7 +1205,7 @@ void Raid::SendRaidUnlock()
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidLockTo(Client *c)
+void Raid::SendRaidLockTo(Client* c)
 {
 	if(!c)
 		return;
@@ -1219,7 +1219,7 @@ void Raid::SendRaidLockTo(Client *c)
 	safe_delete(outapp);
 }
 
-void Raid::SendRaidUnlockTo(Client *c)
+void Raid::SendRaidUnlockTo(Client* c)
 {
 	if(!c)
 		return;
@@ -1233,7 +1233,7 @@ void Raid::SendRaidUnlockTo(Client *c)
 	safe_delete(outapp);
 }
 
-void Raid::SendGroupDisband(Client *to)
+void Raid::SendGroupDisband(Client* to)
 {
 	if(!to)
 		return;
@@ -1372,7 +1372,7 @@ void Raid::VerifyRaid()
 			members[x].member = nullptr;
 		}
 		else{
-			Client *c = entity_list.getClientByName(members[x].membername);
+			Client* c = entity_list.getClientByName(members[x].membername);
 			if(c){
 				members[x].member = c;
 			}
@@ -1389,7 +1389,7 @@ void Raid::VerifyRaid()
 	}
 }
 
-void Raid::MemberZoned(Client *c)
+void Raid::MemberZoned(Client* c)
 {
 	if(!c)
 		return;
@@ -1403,7 +1403,7 @@ void Raid::MemberZoned(Client *c)
 	}
 }
 
-void Raid::SendHPPacketsTo(Client *c)
+void Raid::SendHPPacketsTo(Client* c)
 {
 	if(!c)
 		return;

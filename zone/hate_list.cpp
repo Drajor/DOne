@@ -202,7 +202,7 @@ void HateList::DoFactionHits(int32 nfl_id) {
 	auto iterator = mEntries.begin();
 	while(iterator != mEntries.end())
 	{
-		Client *p;
+		Client* p;
 
 		if ((*iterator)->mMOB && (*iterator)->mMOB->isClient())
 			p = (*iterator)->mMOB->castToClient();
@@ -444,7 +444,7 @@ bool HateList::isEmpty() {
 }
 
 // Prints hate list to a client
-void HateList::PrintToClient(Client *c)
+void HateList::PrintToClient(Client* c)
 {
 	auto iterator = mEntries.begin();
 	while (iterator != mEntries.end())

@@ -191,7 +191,7 @@ void Group::splitMoney(uint32 pCopper, uint32 pSilver, uint32 pGold, uint32 pPla
 
 	for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (mMembers[i] != nullptr && mMembers[i]->isClient()) { // If Group Member is Client
-			Client *c = mMembers[i]->castToClient();
+			Client* c = mMembers[i]->castToClient();
 			//I could not get MoneyOnCorpse to work, so we use this
 			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
@@ -759,7 +759,7 @@ void Group::disbandGroup() {
 	GroupUpdate_Struct* gu = (GroupUpdate_Struct*)outapp->pBuffer;
 	gu->action = groupActDisband;
 
-	Client *Leader = nullptr;
+	Client* Leader = nullptr;
 
 	uint32 i;
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -1806,7 +1806,7 @@ void Group::setNPCMarker(const char *pNewNPCMarkerName)
 {
 	mNPCMarkerName = pNewNPCMarkerName;
 
-	Client *m = entity_list.getClientByName(mNPCMarkerName.c_str());
+	Client* m = entity_list.getClientByName(mNPCMarkerName.c_str());
 
 	if (!m)
 		mNPCMarkerID = 0;
@@ -2184,7 +2184,7 @@ void Group::splitExp(uint32 pExp, Mob* pOther) {
 	for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (mMembers[i] != nullptr && mMembers[i]->isClient()) // If Group Member is Client
 		{
-			Client *cmember = mMembers[i]->castToClient();
+			Client* cmember = mMembers[i]->castToClient();
 			// add exp + exp cap
 			int16 diff = cmember->GetLevel() - maxlevel;
 			int16 maxdiff = -(cmember->GetLevel() * 15 / 10 - cmember->GetLevel());

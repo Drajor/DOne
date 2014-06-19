@@ -165,7 +165,7 @@ public:
 	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true);
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
-	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
+	void	DescribeAggro(Client* towho, Mob *mob, bool verbose);
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckMinMaxLevel(Mob *them);
 	void	ClearItemList();
@@ -259,7 +259,7 @@ public:
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
-	void				DisplayWaypointInfo(Client *to);
+	void				DisplayWaypointInfo(Client* to);
 	void				CalculateNewWaypoint();
 	void				AssignWaypoints(int32 grid);
 	void				SetWaypointPause();
@@ -372,7 +372,7 @@ public:
 	int 	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
-	void AISpellsList(Client *c);
+	void AISpellsList(Client* c);
 
 protected:
 

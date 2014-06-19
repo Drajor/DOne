@@ -99,14 +99,14 @@ public:
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
 	void SendChannelMessage(std::string Message);
-	void SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender);
+	void SendChannelMessage(std::string ChannelName, std::string Message, Client* Sender);
 	void SendChannelMessageByNumber(std::string Message);
 	void SendChannelList();
 	void CloseConnection();
 	void ToggleAnnounce(std::string State);
 	bool IsAnnounceOn() { return (Announce == true); }
-	void AnnounceJoin(ChatChannel *Channel, Client *c);
-	void AnnounceLeave(ChatChannel *Channel, Client *c);
+	void AnnounceJoin(ChatChannel *Channel, Client* c);
+	void AnnounceLeave(ChatChannel *Channel, Client* c);
 	void GeneralChannelMessage(std::string Message);
 	void GeneralChannelMessage(const char *Characters);
 	void SetChannelPassword(std::string ChannelPassword);
@@ -178,10 +178,10 @@ public:
 	Clientlist(int MailPort);
 	void	Process();
 	void	CloseAllConnections();
-	Client *FindCharacter(std::string CharacterName);
-	void	CheckForStaleConnections(Client *c);
-	Client *IsCharacterOnline(std::string CharacterName);
-	void ProcessOPMailCommand(Client *c, std::string CommandString);
+	Client* FindCharacter(std::string CharacterName);
+	void	CheckForStaleConnections(Client* c);
+	Client* IsCharacterOnline(std::string CharacterName);
+	void ProcessOPMailCommand(Client* c, std::string CommandString);
 
 private:
 

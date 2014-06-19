@@ -442,7 +442,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ShutdownAll: {
-			entity_list.Save();
+			entity_list.save();
 			CatchSignal(2);
 			break;
 		}
@@ -947,7 +947,7 @@ void WorldServer::Process() {
 			//
 			ServerGroupFollowAck_Struct* sgfas = (ServerGroupFollowAck_Struct*)pack->pBuffer;
 
-			Client *c = entity_list.getClientByName(sgfas->Name);
+			Client* c = entity_list.getClientByName(sgfas->Name);
 
 			if(!c)
 				break;
@@ -998,7 +998,7 @@ void WorldServer::Process() {
 					GroupLeadershipAA_Struct GLAA;
 					memset(ln, 0, 64);
 					strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, &GLAA));
-					Client *lc = entity_list.getClientByName(ln);
+					Client* lc = entity_list.getClientByName(ln);
 					if(lc)
 						group->setLeader(lc);
 
@@ -1101,7 +1101,7 @@ void WorldServer::Process() {
 				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
 					r->SendRaidRemoveAll(rga->playername);
-					Client *rem = entity_list.getClientByName(rga->playername);
+					Client* rem = entity_list.getClientByName(rga->playername);
 					if(rem){
 						r->SendRaidDisband(rem);
 					}
@@ -1156,7 +1156,7 @@ void WorldServer::Process() {
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
-					Client *c = entity_list.getClientByName(rga->playername);
+					Client* c = entity_list.getClientByName(rga->playername);
 					if(c){
 						r->SendRaidDisband(c);
 						r->SendRaidRemoveAll(rga->playername);
@@ -1206,7 +1206,7 @@ void WorldServer::Process() {
 
 				Raid *r = entity_list.getRaidByID(rga->rid);
 				if(r){
-					Client *c = entity_list.getClientByName(rga->playername);
+					Client* c = entity_list.getClientByName(rga->playername);
 					strn0cpy(r->leadername, rga->playername, 64);
 					if(c){
 						r->SetLeader(c);
@@ -1241,7 +1241,7 @@ void WorldServer::Process() {
 				if(rga->zoneid == zone->GetZoneID() && rga->instance_id == zone->GetInstanceID())
 					break;
 
-				Client *c = entity_list.getClientByName(rga->playername);
+				Client* c = entity_list.getClientByName(rga->playername);
 				if(c)
 				{
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
@@ -1584,7 +1584,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureRequestAccept:
 		{
 			ServerAdventureRequestAccept_Struct *ars = (ServerAdventureRequestAccept_Struct*)pack->pBuffer;
-			Client *c = entity_list.getClientByName(ars->leader);
+			Client* c = entity_list.getClientByName(ars->leader);
 			if(c)
 			{
 				c->NewAdventure(ars->id, ars->theme, ars->text, ars->member_count, (const char*)(pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)));
@@ -1596,7 +1596,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureRequestDeny:
 		{
 			ServerAdventureRequestDeny_Struct *ars = (ServerAdventureRequestDeny_Struct*)pack->pBuffer;
-			Client *c = entity_list.getClientByName(ars->leader);
+			Client* c = entity_list.getClientByName(ars->leader);
 			if(c)
 			{
 				c->SendAdventureError(ars->reason);
@@ -1607,7 +1607,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureCreateDeny:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureData();
@@ -1618,7 +1618,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureData:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearAdventureData();
@@ -1634,7 +1634,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureDataClear:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				if(c->HasAdventureData())
@@ -1649,7 +1649,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureClickDoorReply:
 		{
 			ServerPlayerClickedAdventureDoorReply_Struct *adr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
-			Client *c = entity_list.getClientByName(adr->player);
+			Client* c = entity_list.getClientByName(adr->player);
 			if(c)
 			{
 				c->ClearPendingAdventureDoorClick();
@@ -1660,7 +1660,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureClickDoorError:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureDoorClick();
@@ -1671,7 +1671,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaveReply:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureLeave();
@@ -1682,7 +1682,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaveDeny:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				c->ClearPendingAdventureLeave();
@@ -1694,7 +1694,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureCountUpdate:
 		{
 			ServerAdventureCountUpdate_Struct *ac = (ServerAdventureCountUpdate_Struct*)pack->pBuffer;
-			Client *c = entity_list.getClientByName(ac->player);
+			Client* c = entity_list.getClientByName(ac->player);
 			if(c)
 			{
 				c->SendAdventureCount(ac->count, ac->total);
@@ -1717,7 +1717,7 @@ void WorldServer::Process() {
 		case ServerOP_AdventureFinish:
 		{
 			ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
-			Client *c = entity_list.getClientByName(af->player);
+			Client* c = entity_list.getClientByName(af->player);
 			if(c)
 			{
 				c->AdventureFinish(af->win, af->theme, af->points);
@@ -1727,7 +1727,7 @@ void WorldServer::Process() {
 
 		case ServerOP_AdventureLeaderboard:
 		{
-			Client *c = entity_list.getClientByName((const char*)pack->pBuffer);
+			Client* c = entity_list.getClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureLeaderboardReply, sizeof(AdventureLeaderboard_Struct));
@@ -1756,7 +1756,7 @@ void WorldServer::Process() {
 			char From[64];
 			pack->ReadString(From);
 
-			Client *c = entity_list.getClientByName(From);
+			Client* c = entity_list.getClientByName(From);
 
 			if(!c)
 				return;

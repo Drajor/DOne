@@ -775,7 +775,7 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 	return(zone_flags.find(zone_id) != zone_flags.end());
 }
 
-void Client::SendZoneFlagInfo(Client *to) const {
+void Client::SendZoneFlagInfo(Client* to) const {
 	if(zone_flags.empty()) {
 		to->Message(0, "%s has no zone flags.", getName());
 		return;

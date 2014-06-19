@@ -142,7 +142,7 @@ bool WorldServer::Process()
 
 				UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)app->pBuffer;
 				server_log->Log(log_client, "Trying to find client with user id of %u.", utwr->lsaccountid);
-				Client *c = server.CM->GetClient(utwr->lsaccountid);
+				Client* c = server.CM->GetClient(utwr->lsaccountid);
 				if(c)
 				{
 					server_log->Log(log_client, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());

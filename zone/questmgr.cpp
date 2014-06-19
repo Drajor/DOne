@@ -87,7 +87,7 @@ QuestManager quest_manager;
 
 #define QuestManagerCurrentQuestVars() \
 	Mob *owner = nullptr; \
-	Client *initiator = nullptr; \
+	Client* initiator = nullptr; \
 	ItemInst* questitem = nullptr; \
 	bool depop_npc = false; \
 	do { \
@@ -146,7 +146,7 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, ItemInst* _questitem) {
+void QuestManager::StartQuest(Mob *_owner, Client* _initiator, ItemInst* _questitem) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
@@ -1803,7 +1803,7 @@ bool QuestManager::buryplayercorpse(uint32 char_id)
 			}
 			else
 			{
-				Client *c = entity_list.getClientByCharacterID(char_id);
+				Client* c = entity_list.getClientByCharacterID(char_id);
 				c->DepopPlayerCorpse(PlayerCorpse);
 			}
 			Result = true;
@@ -2799,7 +2799,7 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 	QuestManagerCurrentQuestVars();
 	if(owner && str)
 	{
-		Client *c = entity_list.getClientByName(str);
+		Client* c = entity_list.getClientByName(str);
 
 		if(c)
 		{
@@ -2922,7 +2922,7 @@ void QuestManager::ClearNPCTypeCache(int npctype_id) {
 	}
 }
 
-Client *QuestManager::GetInitiator() const {
+Client* QuestManager::GetInitiator() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
 		return e.initiator;

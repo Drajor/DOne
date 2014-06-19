@@ -1037,7 +1037,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		} else {
 			if(reg_focus > 0)
 				mlog(SPELLS__CASTING, "Spell %d: Reagent focus item failed to prevent reagent consumption (%d chance)", spell_id, reg_focus);
-			Client *c = this->castToClient();
+			Client* c = this->castToClient();
 			int component, component_count, inv_slot_id;
 			bool missingreags = false;
 			for(int t_count = 0; t_count < 4; t_count++) {
@@ -1281,7 +1281,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	{
 		if(isClient())
 		{
-			Client *c = castToClient();
+			Client* c = castToClient();
 			SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
@@ -5146,7 +5146,7 @@ void Mob::SendPetBuffsToClient()
 	safe_delete(outapp);
 }
 
-void Mob::SendBuffsToClient(Client *c)
+void Mob::SendBuffsToClient(Client* c)
 {
 	if(!c)
 		return;

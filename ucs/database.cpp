@@ -102,7 +102,7 @@ Database::~Database()
 {
 }
 
-void Database::GetAccountStatus(Client *c) {
+void Database::GetAccountStatus(Client* c) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -139,7 +139,7 @@ void Database::GetAccountStatus(Client *c) {
 	mysql_free_result(result);
 }
 
-int Database::FindAccount(const char *CharacterName, Client *c) {
+int Database::FindAccount(const char *CharacterName, Client* c) {
 
 	_log(UCS__TRACE, "FindAccount for character %s", CharacterName);
 
@@ -374,7 +374,7 @@ void Database::SetChannelOwner(std::string ChannelName, std::string Owner) {
 	safe_delete_array(query);
 }
 
-void Database::SendHeaders(Client *c) {
+void Database::SendHeaders(Client* c) {
 
 	int UnknownField2 = 25015275;
 	int UnknownField3 = 1;
@@ -480,7 +480,7 @@ void Database::SendHeaders(Client *c) {
 
 }
 
-void Database::SendBody(Client *c, int MessageNumber) {
+void Database::SendBody(Client* c, int MessageNumber) {
 
 	int CharacterID = FindCharacter(c->MailBoxName().c_str());
 
@@ -601,7 +601,7 @@ bool Database::SendMail(std::string Recipient, std::string From, std::string Sub
 	safe_delete_array(EscBody);
 	safe_delete_array(query);
 
-	Client *c = CL->IsCharacterOnline(CharacterName);
+	Client* c = CL->IsCharacterOnline(CharacterName);
 
 	if(c) {
 		std::string FQN = GetMailPrefix() + From;

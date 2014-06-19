@@ -154,8 +154,8 @@ public:
 	void SendLevelAppearance();
 	void SendStunAppearance();
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
-		Client *specific_target=nullptr);
-	void SendTargetable(bool on, Client *specific_target = nullptr);
+		Client* specific_target=nullptr);
+	void SendTargetable(bool on, Client* specific_target = nullptr);
 	virtual void SendWearChange(uint8 material_slot);
 	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
 		uint32 unknown06 = 0, uint32 unknown18 = 0);
@@ -180,7 +180,7 @@ public:
 
 	//Spell
 	void SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide,
-		uint32 unk020, bool perm_effect = false, Client *c = nullptr);
+		uint32 unk020, bool perm_effect = false, Client* c = nullptr);
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
@@ -255,7 +255,7 @@ public:
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
-	void SendBuffsToClient(Client *c);
+	void SendBuffsToClient(Client* c);
 	inline Buffs_Struct* GetBuffs() { return buffs; }
 	void DoGravityEffect();
 	void DamageShield(Mob* other, bool spell_ds = false);
@@ -445,7 +445,7 @@ public:
 	void AddFeignMemory(Client* attacker);
 	void RemoveFromFeignMemory(Client* attacker);
 	void ClearFeignMemory();
-	void PrintHateListToClient(Client *who) { hate_list.PrintToClient(who); }
+	void PrintHateListToClient(Client* who) { hate_list.PrintToClient(who); }
 	std::list<HateEntry*>& GetHateList() { return hate_list.GetHateList(); }
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
@@ -453,8 +453,8 @@ public:
 	inline const uint32 LastChange() const { return pLastChange; }
 
 	//Quest
-	void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
-	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
+	void QuestReward(Client* c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
+	void CameraEffect(uint32 duration, uint32 intensity, Client* c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
 	//Other Packet
@@ -538,7 +538,7 @@ public:
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);
-	void QuestJournalledSay(Client *QuestInitiator, const char *str);
+	void QuestJournalledSay(Client* QuestInitiator, const char *str);
 	int32 GetItemStat(uint32 itemid, const char *identifier);
 
 	int16 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false);
@@ -620,7 +620,7 @@ public:
 	uint8 GetFlurryChance() { return GetSpecialAbilityParam(SPECATK_FLURRY, 0); }
 
 	static uint32 GetAppearanceValue(EmuAppearance iAppearance);
-	void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client *specific_target=nullptr);
+	void SendAppearancePacket(uint32 type, uint32 value, bool WholeZone = true, bool iIgnoreSelf = false, Client* specific_target=nullptr);
 	void SetAppearance(EmuAppearance app, bool iIgnoreSelf = true);
 	inline EmuAppearance GetAppearance() const { return _appearance; }
 	inline const uint8 GetRunAnimSpeed() const { return pRunAnimSpeed; }

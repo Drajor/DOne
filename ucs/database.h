@@ -42,16 +42,16 @@ public:
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	~Database();
 
-	int FindAccount(const char *CharacterName, Client *c);
+	int FindAccount(const char *CharacterName, Client* c);
 	int FindCharacter(const char *CharacterName);
 	bool VerifyMailKey(std::string CharacterName, int IPAddress, std::string MailKey);
 	bool GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
 	bool LoadChatChannels();
-	void GetAccountStatus(Client *c);
+	void GetAccountStatus(Client* c);
 	void SetChannelPassword(std::string ChannelName, std::string Password);
 	void SetChannelOwner(std::string ChannelName, std::string Owner);
-	void SendHeaders(Client *c);
-	void SendBody(Client *c, int MessageNumber);
+	void SendHeaders(Client* c);
+	void SendBody(Client* c, int MessageNumber);
 	bool SendMail(std::string Recipient, std::string From, std::string Subject, std::string Body, std::string RecipientsString);
 	void SetMessageStatus(int MessageNumber, int Status);
 	void ExpireMail();

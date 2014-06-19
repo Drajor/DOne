@@ -1348,7 +1348,7 @@ int PathManager::GetRandomPathNode()
 
 }
 
-void PathManager::ShowPathNodeNeighbours(Client *c)
+void PathManager::ShowPathNodeNeighbours(Client* c)
 {
 	if(!c || !c->GetTarget())
 		return;
@@ -1407,7 +1407,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 	c->Message(0, "Neighbours: %s", Neighbours.str().c_str());
 }
 
-void PathManager::NodeInfo(Client *c)
+void PathManager::NodeInfo(Client* c)
 {
 	if(!c)
 	{
@@ -1646,7 +1646,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 	}
 }
 
-bool PathManager::DeleteNode(Client *c)
+bool PathManager::DeleteNode(Client* c)
 {
 	if(!c)
 	{
@@ -1727,7 +1727,7 @@ bool PathManager::DeleteNode(int32 id)
 	return true;
 }
 
-void PathManager::ConnectNodeToNode(Client *c, int32 Node2, int32 teleport, int32 doorid)
+void PathManager::ConnectNodeToNode(Client* c, int32 Node2, int32 teleport, int32 doorid)
 {
 	if(!c)
 	{
@@ -1817,7 +1817,7 @@ void PathManager::ConnectNodeToNode(int32 Node1, int32 Node2, int32 teleport, in
 	}
 }
 
-void PathManager::ConnectNode(Client *c, int32 Node2, int32 teleport, int32 doorid)
+void PathManager::ConnectNode(Client* c, int32 Node2, int32 teleport, int32 doorid)
 {
 	if(!c)
 	{
@@ -1887,7 +1887,7 @@ void PathManager::ConnectNode(int32 Node1, int32 Node2, int32 teleport, int32 do
 	}
 }
 
-void PathManager::DisconnectNodeToNode(Client *c, int32 Node2)
+void PathManager::DisconnectNodeToNode(Client* c, int32 Node2)
 {
 	if(!c)
 	{
@@ -1971,7 +1971,7 @@ void PathManager::DisconnectNodeToNode(int32 Node1, int32 Node2)
 	}
 }
 
-void PathManager::MoveNode(Client *c)
+void PathManager::MoveNode(Client* c)
 {
 	if(!c)
 	{
@@ -2005,7 +2005,7 @@ void PathManager::MoveNode(Client *c)
 	}
 }
 
-void PathManager::DisconnectAll(Client *c)
+void PathManager::DisconnectAll(Client* c)
 {
 	if(!c)
 	{
@@ -2178,7 +2178,7 @@ void PathManager::ResortConnections()
 	}
 }
 
-void PathManager::QuickConnect(Client *c, bool set)
+void PathManager::QuickConnect(Client* c, bool set)
 {
 	if(!c)
 	{

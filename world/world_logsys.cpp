@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 
-void log_message_clientVA(LogType type, Client *who, const char *fmt, va_list args) {
+void log_message_clientVA(LogType type, Client* who, const char *fmt, va_list args) {
 
 	std::string prefix_buffer;
 	StringFormat(prefix_buffer,"[%s] %s: ", log_type_info[type].name, who->GetAccountName());
@@ -18,7 +18,7 @@ void log_message_clientVA(LogType type, Client *who, const char *fmt, va_list ar
 	LogFile->writePVA(EQEMuLog::Debug, prefix_buffer.c_str(), fmt, args);
 }
 
-void log_message_client(LogType type, Client *who, const char *fmt, ...) {
+void log_message_client(LogType type, Client* who, const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 	log_message_clientVA(type, who, fmt, args);

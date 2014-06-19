@@ -3726,7 +3726,7 @@ void Client::SetEndurance(int32 newEnd)
 	SendManaUpdatePacket();
 }
 
-void Client::SacrificeConfirm(Client *caster) {
+void Client::SacrificeConfirm(Client* caster) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
 	Sacrifice_Struct *ss = (Sacrifice_Struct*)outapp->pBuffer;
@@ -3754,7 +3754,7 @@ void Client::SacrificeConfirm(Client *caster) {
 }
 
 //Essentially a special case death function
-void Client::Sacrifice(Client *caster)
+void Client::Sacrifice(Client* caster)
 {
 				if(GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)){
 					int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
@@ -6983,7 +6983,7 @@ bool Client::IsXTarget(const Mob *m) const
 	return false;
 }
 
-bool Client::IsClientXTarget(const Client *c) const
+bool Client::IsClientXTarget(const Client* c) const
 {
 	if(!XTargettingAvailable() || !c)
 		return false;
@@ -6997,7 +6997,7 @@ bool Client::IsClientXTarget(const Client *c) const
 }
 
 
-void Client::UpdateClientXTarget(Client *c)
+void Client::UpdateClientXTarget(Client* c)
 {
 	if(!XTargettingAvailable() || !c)
 		return;
@@ -7177,7 +7177,7 @@ void Client::RemoveAutoXTargets()
 	}
 }
 
-void Client::ShowXTargets(Client *c)
+void Client::ShowXTargets(Client* c)
 {
 	if(!c)
 		return;

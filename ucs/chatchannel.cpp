@@ -86,7 +86,7 @@ ChatChannel* ChatChannelList::FindChannel(std::string Name) {
 	return nullptr;
 }
 
-void ChatChannelList::SendAllChannels(Client *c) {
+void ChatChannelList::SendAllChannels(Client* c) {
 
 	if(!c) return;
 
@@ -189,7 +189,7 @@ int ChatChannel::MemberCount(int Status) {
 
 	while(iterator.MoreElements()) {
 
-		Client *ChannelClient = iterator.GetData();
+		Client* ChannelClient = iterator.GetData();
 
 		if(ChannelClient && (!ChannelClient->GetHideMe() || (ChannelClient->GetAccountStatus() < Status)))
 			Count++;
@@ -219,7 +219,7 @@ void ChatChannel::SetOwner(std::string inOwner) {
 		database.SetChannelOwner(Name, Owner);
 }
 
-void ChatChannel::AddClient(Client *c) {
+void ChatChannel::AddClient(Client* c) {
 
 	if(!c) return;
 
@@ -244,7 +244,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	while(iterator.MoreElements()) {
 
-		Client *CurrentClient = iterator.GetData();
+		Client* CurrentClient = iterator.GetData();
 
 		if(CurrentClient && CurrentClient->IsAnnounceOn())
 			if(!HideMe || (CurrentClient->GetAccountStatus() > AccountStatus))
@@ -257,7 +257,7 @@ void ChatChannel::AddClient(Client *c) {
 
 }
 
-bool ChatChannel::RemoveClient(Client *c) {
+bool ChatChannel::RemoveClient(Client* c) {
 
 	if(!c) return false;
 
@@ -275,7 +275,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	while(iterator.MoreElements()) {
 
-		Client *CurrentClient = iterator.GetData();
+		Client* CurrentClient = iterator.GetData();
 
 		if(CurrentClient == c) {
 			iterator.RemoveCurrent(false);
@@ -306,7 +306,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 	return true;
 }
 
-void ChatChannel::SendOPList(Client *c) {
+void ChatChannel::SendOPList(Client* c) {
 
 	if(!c) return;
 
@@ -319,7 +319,7 @@ void ChatChannel::SendOPList(Client *c) {
 
 }
 
-void ChatChannel::SendChannelMembers(Client *c) {
+void ChatChannel::SendChannelMembers(Client* c) {
 
 	if(!c) return;
 
@@ -347,7 +347,7 @@ void ChatChannel::SendChannelMembers(Client *c) {
 
 	while(iterator.MoreElements()) {
 
-		Client *ChannelClient = iterator.GetData();
+		Client* ChannelClient = iterator.GetData();
 
 		// Don't list hidden characters with status higher or equal than the character requesting the list.
 		//
@@ -392,7 +392,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 	while(iterator.MoreElements()) {
 
-		Client *ChannelClient = iterator.GetData();
+		Client* ChannelClient = iterator.GetData();
 
 		if(ChannelClient)
 		{
@@ -415,7 +415,7 @@ void ChatChannel::SetModerated(bool inModerated) {
 
 	while(iterator.MoreElements()) {
 
-		Client *ChannelClient = iterator.GetData();
+		Client* ChannelClient = iterator.GetData();
 
 		if(ChannelClient) {
 
@@ -429,7 +429,7 @@ void ChatChannel::SetModerated(bool inModerated) {
 	}
 
 }
-bool ChatChannel::IsClientInChannel(Client *c) {
+bool ChatChannel::IsClientInChannel(Client* c) {
 
 	if(!c) return false;
 
@@ -448,7 +448,7 @@ bool ChatChannel::IsClientInChannel(Client *c) {
 	return false;
 }
 
-ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client *c) {
+ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client* c) {
 
 	if(!c) return nullptr;
 
@@ -519,7 +519,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 	return nullptr;
 }
 
-ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client *c) {
+ChatChannel *ChatChannelList::RemoveClientFromChannel(std::string inChannelName, Client* c) {
 
 	if(!c) return nullptr;
 

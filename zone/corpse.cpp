@@ -425,7 +425,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp)
 }
 
 // solar: helper function for client corpse constructor
-std::list<uint32> Corpse::MoveItemToCorpse(Client *client, ItemInst *item, int16 equipslot)
+std::list<uint32> Corpse::MoveItemToCorpse(Client* client, ItemInst *item, int16 equipslot)
 {
 	int bagindex;
 	int16 interior_slot;

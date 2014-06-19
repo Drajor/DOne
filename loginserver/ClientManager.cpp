@@ -102,7 +102,7 @@ void ClientManager::Process()
 		server_log->Log(log_network, "New Titanium client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
 
 		cur->SetOpcodeManager(&titanium_ops);
-		Client *c = new Client(cur, cv_titanium);
+		Client* c = new Client(cur, cv_titanium);
 		clients.push_back(c);
 		cur = titanium_stream->Pop();
 	}
@@ -115,7 +115,7 @@ void ClientManager::Process()
 		server_log->Log(log_network, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
 
 		cur->SetOpcodeManager(&sod_ops);
-		Client *c = new Client(cur, cv_sod);
+		Client* c = new Client(cur, cv_sod);
 		clients.push_back(c);
 		cur = sod_stream->Pop();
 	}
@@ -183,9 +183,9 @@ void ClientManager::RemoveExistingClient(unsigned int account_id)
 	}
 }
 
-Client *ClientManager::GetClient(unsigned int account_id)
+Client* ClientManager::GetClient(unsigned int account_id)
 {
-	Client *cur = nullptr;
+	Client* cur = nullptr;
 	int count = 0;
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())

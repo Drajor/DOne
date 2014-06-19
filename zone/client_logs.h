@@ -39,17 +39,17 @@ public:
 	static void EQEmuIO_fmt(EQEMuLog::LogIDs id, const char *fmt, va_list ap);
 	static void EQEmuIO_pva(EQEMuLog::LogIDs id, const char *prefix, const char *fmt, va_list ap);
 
-	void subscribe(EQEMuLog::LogIDs id, Client *c);
-	void unsubscribe(EQEMuLog::LogIDs id, Client *c);
-	void subscribeAll(Client *c);
-	void unsubscribeAll(Client *c);
+	void subscribe(EQEMuLog::LogIDs id, Client* c);
+	void unsubscribe(EQEMuLog::LogIDs id, Client* c);
+	void subscribeAll(Client* c);
+	void unsubscribeAll(Client* c);
 	void clear();	//unsubscribes everybody
 
 	void msg(EQEMuLog::LogIDs id, const char *buf);
 
 protected:
 
-	std::vector<Client *> entries[EQEMuLog::MaxLogID];
+	std::vector<Client* > entries[EQEMuLog::MaxLogID];
 
 	static char _buffer[MAX_CLIENT_LOG_MESSAGE_LENGTH+1];
 };

@@ -1632,7 +1632,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 	return npc;
 }
 
-bool ZoneDatabase::LoadMercInfo(Client *c) {
+bool ZoneDatabase::LoadMercInfo(Client* c) {
 	bool loaded = false;
 
 	if(c->GetEPP().merc_name[0] != 0) {
@@ -1691,7 +1691,7 @@ bool ZoneDatabase::LoadMercInfo(Client *c) {
 	return loaded;
 }
 
-bool ZoneDatabase::LoadCurrentMerc(Client *c) {
+bool ZoneDatabase::LoadCurrentMerc(Client* c) {
 	bool loaded = false;
 
 	if(c->GetEPP().merc_name[0] != 0) {
@@ -1748,7 +1748,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *c) {
 }
 
 bool ZoneDatabase::SaveMerc(Merc *merc) {
-	Client *owner = merc->GetMercOwner();
+	Client* owner = merc->GetMercOwner();
 	bool Result = false;
 	std::string errorMessage;
 
@@ -2263,7 +2263,7 @@ bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char*
 	return false;
 }
 
-void ZoneDatabase::RefreshGroupFromDB(Client *c){
+void ZoneDatabase::RefreshGroupFromDB(Client* c){
 	if(!c){
 		return;
 	}
@@ -2579,7 +2579,7 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 	safe_delete_array(query);
 }
 
-void ZoneDatabase::SaveBuffs(Client *c) {
+void ZoneDatabase::SaveBuffs(Client* c) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 
@@ -2604,7 +2604,7 @@ void ZoneDatabase::SaveBuffs(Client *c) {
 	safe_delete_array(query);
 }
 
-void ZoneDatabase::LoadBuffs(Client *c) {
+void ZoneDatabase::LoadBuffs(Client* c) {
 	Buffs_Struct *buffs = c->GetBuffs();
 	uint32 max_slots = c->GetMaxBuffSlots();
 	for(int i = 0; i < max_slots; ++i) {
@@ -2634,7 +2634,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 				continue;
 			}
 
-			Client *caster = entity_list.getClientByName(row[3]);
+			Client* caster = entity_list.getClientByName(row[3]);
 			uint32 caster_level = atoi(row[2]);
 			uint32 ticsremaining = atoul(row[4]);
 			uint32 counters = atoul(row[5]);
@@ -2711,7 +2711,7 @@ void ZoneDatabase::LoadBuffs(Client *c) {
 	}
 }
 
-void ZoneDatabase::SavePetInfo(Client *c) {
+void ZoneDatabase::SavePetInfo(Client* c) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	int i = 0;
@@ -2804,7 +2804,7 @@ void ZoneDatabase::SavePetInfo(Client *c) {
 
 }
 
-void ZoneDatabase::RemoveTempFactions(Client *c){
+void ZoneDatabase::RemoveTempFactions(Client* c){
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
@@ -2814,7 +2814,7 @@ void ZoneDatabase::RemoveTempFactions(Client *c){
 	safe_delete_array(query);
 }
 
-void ZoneDatabase::LoadPetInfo(Client *c) {
+void ZoneDatabase::LoadPetInfo(Client* c) {
 	// Load current pet and suspended pet
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
@@ -2889,7 +2889,7 @@ void ZoneDatabase::LoadPetInfo(Client *c) {
 			uint32 caster_level = atoi(row[3]);
 			int caster_id = 0;
 			// The castername field is currently unused
-			//Client *caster = entity_list.GetClientByName(row[4]);
+			//Client* caster = entity_list.GetClientByName(row[4]);
 			//if (caster) { caster_id = caster->GetID(); }
 			uint32 ticsremaining = atoul(row[5]);
 			uint32 counters = atoul(row[6]);

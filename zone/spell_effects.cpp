@@ -1140,7 +1140,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				if (!item) {
 					Message(13, "Unable to summon item %d. Item not found.", spell.base[i]);
 				} else if (isClient()) {
-					Client *c = castToClient();
+					Client* c = castToClient();
 					if (c->CheckLoreConflict(item)) {
 						c->DuplicateLoreMessage(spell.base[i]);
 					} else {
@@ -2907,7 +2907,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	CalcBonuses();
 
 	if (SummonedItem) {
-		Client *c=castToClient();
+		Client* c=castToClient();
 		c->PushItemOnCursor(*SummonedItem);
 		c->SendItemPacket(SLOT_CURSOR, SummonedItem, ItemPacketSummonItem);
 		safe_delete(SummonedItem);
@@ -3837,7 +3837,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				if(isClient())
 				{
-					Client *my_c = castToClient();
+					Client* my_c = castToClient();
 					uint32 cur_time = Timer::GetCurrentTime();
 					if((cur_time - my_c->m_TimeSinceLastPositionCheck) > 1000)
 					{

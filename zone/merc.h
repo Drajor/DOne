@@ -123,13 +123,13 @@ public:
 	virtual bool isMerc() const { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
-	void UpdateMercInfo(Client *c);
-	void UpdateMercStats(Client *c);
-	void UpdateMercAppearance(Client *c);
+	static Merc* LoadMerc(Client* c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
+	void UpdateMercInfo(Client* c);
+	void UpdateMercStats(Client* c);
+	void UpdateMercAppearance(Client* c);
 	void AddItem(uint8 slot, uint32 item_id);
 	static const char *GetRandomName();
-	bool Spawn(Client *owner);
+	bool Spawn(Client* owner);
 	bool Dismiss();
 	bool Suspend();
 	bool Unsuspend(bool setMaxStats);

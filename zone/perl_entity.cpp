@@ -239,7 +239,7 @@ XS(XS_EntityList_GetClientByName)
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientByName(THIS, name)");
 	{
 		EntityList *		THIS;
-		Client *		RETVAL;
+		Client* 		RETVAL;
 		char *		name = (char *)SvPV_nolen(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -266,7 +266,7 @@ XS(XS_EntityList_GetClientByAccID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, accid)");
 	{
 		EntityList *		THIS;
-		Client *		RETVAL;
+		Client* 		RETVAL;
 		uint32		accid = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -293,7 +293,7 @@ XS(XS_EntityList_GetClientByID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, id)");
 	{
 		EntityList *		THIS;
-		Client *		RETVAL;
+		Client* 		RETVAL;
 		uint16		id = (uint16)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -320,7 +320,7 @@ XS(XS_EntityList_GetClientByCharID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, iCharID)");
 	{
 		EntityList *		THIS;
-		Client *		RETVAL;
+		Client* 		RETVAL;
 		uint32		iCharID = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -347,7 +347,7 @@ XS(XS_EntityList_GetClientByWID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, iWID)");
 	{
 		EntityList *		THIS;
-		Client *		RETVAL;
+		Client* 		RETVAL;
 		uint32		iWID = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -586,7 +586,7 @@ XS(XS_EntityList_GetGroupByClient)
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
-			client = INT2PTR(Client *,tmp);
+			client = INT2PTR(Client* ,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
@@ -703,7 +703,7 @@ XS(XS_EntityList_GetRaidByClient)
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
-			client = INT2PTR(Client *,tmp);
+			client = INT2PTR(Client* ,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
@@ -739,7 +739,7 @@ XS(XS_EntityList_GetCorpseByOwner)
 
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
-			client = INT2PTR(Client *,tmp);
+			client = INT2PTR(Client* ,tmp);
 		}
 		else
 			Perl_croak(aTHX_ "client is not of type Client");
@@ -1852,7 +1852,7 @@ XS(XS_EntityList_GetRandomClient)
 		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, x, y, z, distance, excludeclient = nullptr)");
 	{
 		EntityList *THIS;
-		Client *RETVAL, *c = nullptr;
+		Client* RETVAL, *c = nullptr;
 		float x = (float)SvNV(ST(1));
 		float y = (float)SvNV(ST(2));
 		float z = (float)SvNV(ST(3));
@@ -1872,7 +1872,7 @@ XS(XS_EntityList_GetRandomClient)
 		{
 			if (sv_derived_from(ST(5), "Client")) {
 				IV tmp = SvIV((SV*)SvRV(ST(5)));
-				c = INT2PTR(Client *,tmp);
+				c = INT2PTR(Client* ,tmp);
 			}
 		}
 		RETVAL = entity_list.getRandomClient(x, y, z, d * d, c);
@@ -1945,7 +1945,7 @@ XS(XS_EntityList_GetClientList)
 
 		while(iter != client_list.end())
 		{
-			Client *entry = (*iter);
+			Client* entry = (*iter);
 			ST(0) = sv_newmortal();
 			sv_setref_pv(ST(0), "Client", (void*)entry);
 			XPUSHs(ST(0));

@@ -37,7 +37,7 @@ extern Clientlist *CL;
 extern const ucsconfig *Config;
 extern Database database;
 
-void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
+void ProcessMailTo(Client* c, std::string from, std::string subject, std::string message);
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str())
@@ -89,7 +89,7 @@ void WorldServer::Process()
 
 				_log(UCS__TRACE, "Player: %s, Sent Message: %s", From, Message.c_str());
 
-				Client *c = CL->FindCharacter(From);
+				Client* c = CL->FindCharacter(From);
 
 				safe_delete_array(From);
 

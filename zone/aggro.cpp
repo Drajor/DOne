@@ -32,7 +32,7 @@ extern Zone* zone;
 //#define LOSDEBUG 6
 
 //look around a client for things which might aggro the client.
-void EntityList::CheckClientAggro(Client *around)
+void EntityList::CheckClientAggro(Client* around)
 {
 	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
 		Mob *mob = it->second;
@@ -101,7 +101,7 @@ void EntityList::describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool
 	}
 }
 
-void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
+void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 	//this logic is duplicated from below, try to keep it up to date.
 	float iAggroRange = GetAggroRange();
 
@@ -487,7 +487,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 {
 
 	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2, *becomenpc;
+	Client* c1, *c2, *becomenpc;
 //	NPC *npc1, *npc2;
 	int reverse;
 
@@ -696,7 +696,7 @@ type', in which case, the answer is yes.
 bool Mob::IsBeneficialAllowed(Mob *target)
 {
 	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2;
+	Client* c1, *c2;
 	int reverse;
 
 	if(!target)

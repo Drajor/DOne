@@ -330,7 +330,7 @@ bool TaskManager::LoadTasks(int SingleTask) {
 	return true;
 }
 
-bool TaskManager::SaveClientState(Client *c, ClientTaskState *state) {
+bool TaskManager::SaveClientState(Client* c, ClientTaskState *state) {
 
 	// I am saving the slot in the ActiveTasks table, because unless a Task is cancelled/completed, the client doesn't
 	// seem to like tasks moving slots between zoning and you can end up with 'bogus' activities if the task previously
@@ -507,7 +507,7 @@ void Client::RemoveClientTaskState() {
 	}
 }
 
-bool TaskManager::LoadClientState(Client *c, ClientTaskState *state) {
+bool TaskManager::LoadClientState(Client* c, ClientTaskState *state) {
 
 	const char *TaskQuery = "SELECT `taskid`, `slot`, `acceptedtime` from `character_tasks` "
 							"WHERE `charid` = %i ORDER BY acceptedtime";
@@ -1058,7 +1058,7 @@ bool TaskManager::AppropriateLevel(int TaskID, int PlayerLevel) {
 
 }
 
-void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID) {
+void TaskManager::TaskSetSelector(Client* c, ClientTaskState *state, Mob *mob, int TaskSetID) {
 
 	unsigned int EnabledTaskIndex = 0;
 	unsigned int TaskSetIndex = 0;
@@ -1131,7 +1131,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 }
 
-void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
+void TaskManager::SendTaskSelector(Client* c, Mob *mob, int TaskCount, int *TaskList) {
 
 	if (c->GetClientVersion() >= EQClientRoF)
 	{
@@ -1262,7 +1262,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 }
 
-void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList) {
+void TaskManager::SendTaskSelectorNew(Client* c, Mob *mob, int TaskCount, int *TaskList) {
 
 	_log(TASKS__UPDATE, "TaskSelector for %i Tasks", TaskCount);
 
@@ -1603,19 +1603,19 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 }
 
 
-void ClientTaskState::UpdateTasksOnKill(Client *c, int NPCTypeID) {
+void ClientTaskState::UpdateTasksOnKill(Client* c, int NPCTypeID) {
 
 	UpdateTasksByNPC(c, ActivityKill, NPCTypeID);
 
 }
 
-bool ClientTaskState::UpdateTasksOnSpeakWith(Client *c, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnSpeakWith(Client* c, int NPCTypeID) {
 
 	return UpdateTasksByNPC(c, ActivitySpeakWith, NPCTypeID);
 
 }
 
-bool ClientTaskState::UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksByNPC(Client* c, int ActivityType, int NPCTypeID) {
 
 	int Ret = false;
 
@@ -1732,7 +1732,7 @@ int ClientTaskState::ActiveSpeakActivity(int NPCTypeID, int TaskID) {
 	}
 	return 0;
 }
-void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count) {
+void ClientTaskState::UpdateTasksForItem(Client* c, ActivityType Type, int ItemID, int Count) {
 
 	// This method updates the client's task activities of the specified type which relate
 	// to the specified item.
@@ -1790,7 +1790,7 @@ void ClientTaskState::UpdateTasksForItem(Client *c, ActivityType Type, int ItemI
 	return;
 }
 
-void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
+void ClientTaskState::UpdateTasksOnExplore(Client* c, int ExploreID) {
 
 	// If the client has no tasks, there is nothing further to check.
 
@@ -1844,7 +1844,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnDeliver(Client* c, uint32 *Items, int Cash, int NPCTypeID) {
 
 	bool Ret = false;
 
@@ -1913,7 +1913,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 	return Ret;
 }
 
-void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
+void ClientTaskState::UpdateTasksOnTouch(Client* c, int ZoneID) {
 
 	// If the client has no tasks, there is nothing further to check.
 
@@ -1950,7 +1950,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *c, int ZoneID) {
 
 	return;
 }
-void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count) {
+void ClientTaskState::IncrementDoneCount(Client* c, TaskInformation* Task, int TaskIndex, int ActivityID, int Count) {
 
 	_log(TASKS__UPDATE, "IncrementDoneCount");
 
@@ -2019,7 +2019,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 							TaskIndex, Task->Activity[ActivityID].Optional);
 }
 
-void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
+void ClientTaskState::RewardTask(Client* c, TaskInformation *Task) {
 
 	if(!Task || !c) return;
 
@@ -2138,7 +2138,7 @@ bool ClientTaskState::IsTaskActive(int TaskID) {
 	return false;
 }
 
-void ClientTaskState::FailTask(Client *c, int TaskID) {
+void ClientTaskState::FailTask(Client* c, int TaskID) {
 
 	_log(TASKS__UPDATE, "FailTask %i, ActiveTaskCount is %i", TaskID, ActiveTaskCount);
 	if(ActiveTaskCount == 0) return;
@@ -2191,7 +2191,7 @@ bool ClientTaskState::IsTaskActivityActive(int TaskID, int ActivityID) {
 
 }
 
-void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, int Count) {
+void ClientTaskState::UpdateTaskActivity(Client* c, int TaskID, int ActivityID, int Count) {
 
 	_log(TASKS__UPDATE, "ClientTaskState UpdateTaskActivity(%i, %i, %i).", TaskID, ActivityID, Count);
 
@@ -2225,7 +2225,7 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 
 }
 
-void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
+void ClientTaskState::ResetTaskActivity(Client* c, int TaskID, int ActivityID) {
 
 	_log(TASKS__UPDATE, "ClientTaskState UpdateTaskActivity(%i, %i, 0).", TaskID, ActivityID);
 
@@ -2266,7 +2266,7 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID) {
 						ActiveTaskIndex, Task->Activity[ActivityID].Optional);
 }
 
-void ClientTaskState::ShowClientTasks(Client *c) {
+void ClientTaskState::ShowClientTasks(Client* c) {
 
 	c->Message(0, "Task Information:");
 	//for(int i=0; i<ActiveTaskCount; i++) {
@@ -2357,7 +2357,7 @@ bool ClientTaskState::TaskOutOfTime(int Index) {
 
 }
 
-void ClientTaskState::TaskPeriodicChecks(Client *c) {
+void ClientTaskState::TaskPeriodicChecks(Client* c) {
 
 	if(ActiveTaskCount == 0) return;
 
@@ -2421,7 +2421,7 @@ void Client::SendTaskComplete(int TaskIndex) {
 }
 #endif
 
-void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
+void ClientTaskState::SendTaskHistory(Client* c, int TaskIndex) {
 
 	_log(TASKS__UPDATE, "Task History Requested for Completed Task Index %i", TaskIndex);
 
@@ -2561,7 +2561,7 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 	safe_delete(outapp);
 }
 
-void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) {
+void TaskManager::SendCompletedTasksToClient(Client* c, ClientTaskState *State) {
 
 	int PacketLength = 4;
 
@@ -2620,7 +2620,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 
 
 
-void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex)
+void TaskManager::SendTaskActivityShort(Client* c, int TaskID, int ActivityID, int ClientTaskIndex)
 {
 	// This Activity Packet is sent for activities that have not yet been unlocked and appear as ???
 	// in the client.
@@ -2662,7 +2662,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 
 
-void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
+void TaskManager::SendTaskActivityLong(Client* c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
 	if (c->GetClientVersion() >= EQClientRoF)
 	{
@@ -2750,7 +2750,7 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 }
 
 // Used only by RoF+ Clients
-void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
+void TaskManager::SendTaskActivityNew(Client* c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
 	uint32 String2Len = 3;
 	if(TaskComplete)
@@ -2828,7 +2828,7 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 
 }
 
-void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete) {
+void TaskManager::SendActiveTasksToClient(Client* c, bool TaskComplete) {
 
 	//for(int TaskIndex=0; TaskIndex<c->GetActiveTaskCount(); TaskIndex++) {
 	for(int TaskIndex=0; TaskIndex<MAXACTIVETASKS; TaskIndex++) {
@@ -2863,7 +2863,7 @@ void TaskManager::SendActiveTasksToClient(Client *c, bool TaskComplete) {
 }
 
 
-void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal) {
+void TaskManager::SendSingleActiveTaskToClient(Client* c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal) {
 
 	if((TaskIndex < 0) || (TaskIndex >= MAXACTIVETASKS)) return;
 
@@ -2895,7 +2895,7 @@ void TaskManager::SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool Ta
 	}
 }
 
-void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal) {
+void TaskManager::SendActiveTaskDescription(Client* c, int TaskID, int SequenceNumber, int StartTime, int Duration, bool BringUpTaskJournal) {
 
 
 	if((TaskID<1) || (TaskID>=MAXTASKS) || !Tasks[TaskID]) return;
@@ -3102,7 +3102,7 @@ int ClientTaskState::GetTaskStartTime(int index) {
 
 }
 
-void ClientTaskState::CancelAllTasks(Client *c) {
+void ClientTaskState::CancelAllTasks(Client* c) {
 
 	// This method exists solely to be called during #task reloadall
 	// It removes tasks from the in-game client state ready for them to be
@@ -3116,7 +3116,7 @@ void ClientTaskState::CancelAllTasks(Client *c) {
 
 
 }
-void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB) {
+void ClientTaskState::CancelTask(Client* c, int SequenceNumber, bool RemoveFromDB) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
 
@@ -3134,7 +3134,7 @@ void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromD
 		RemoveTask(c, SequenceNumber);
 }
 
-void ClientTaskState::RemoveTask(Client *c, int SequenceNumber) {
+void ClientTaskState::RemoveTask(Client* c, int SequenceNumber) {
 
 	int CharacterID = c->CharacterID();
 
@@ -3172,7 +3172,7 @@ void ClientTaskState::RemoveTask(Client *c, int SequenceNumber) {
 }
 
 
-void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
+void ClientTaskState::AcceptNewTask(Client* c, int TaskID, int NPCID) {
 
 	if(!taskmanager || TaskID<0 || TaskID>=MAXTASKS) {
 		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
@@ -3253,7 +3253,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 
 }
 
-void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {
+void ClientTaskState::ProcessTaskProximities(Client* c, float X, float Y, float Z) {
 
 	float LastX = c->ProximityX();
 	float LastY = c->ProximityY();

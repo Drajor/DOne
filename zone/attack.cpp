@@ -2165,7 +2165,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 	int PlayerCount = 0; // QueryServ Player Counting
 
-	Client *give_exp_client = nullptr;
+	Client* give_exp_client = nullptr;
 	if(give_exp && give_exp->isClient())
 		give_exp_client = give_exp->castToClient();
 
@@ -2208,7 +2208,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				QS->s1.Type = 2; // Raid Fight
 				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 					if (kr->members[i].member != nullptr) { // If Group Member is Client
-						Client *c = kr->members[i].member;
+						Client* c = kr->members[i].member;
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
 					}
@@ -2230,7 +2230,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if (kg->mMembers[i] != nullptr && kg->mMembers[i]->isClient()) { // If Group Member is Client
-					Client *c = kg->mMembers[i]->castToClient();
+					Client* c = kg->mMembers[i]->castToClient();
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
 					mod_npc_killed_merit(c);
@@ -2252,7 +2252,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				QS->s1.Type = 1; // Group Fight
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (kg->mMembers[i] != nullptr && kg->mMembers[i]->isClient()) { // If Group Member is Client
-						Client *c = kg->mMembers[i]->castToClient();
+						Client* c = kg->mMembers[i]->castToClient();
 						QS->Chars[PlayerCount].char_id = c->CharacterID();
 						PlayerCount++;
 					}
@@ -2292,7 +2292,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 				QS->s1.NPCID = this->GetNPCTypeID();
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 0; // Solo Fight
-				Client *c = give_exp_client;
+				Client* c = give_exp_client;
 				QS->Chars[0].char_id = c->CharacterID();
 				PlayerCount++;
 				worldserver.SendPacket(pack); // Send Packet to World

@@ -62,7 +62,7 @@ void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, floa
 	roambox_min_delay = iMinDelay;
 }
 
-void NPC::DisplayWaypointInfo(Client *c) {
+void NPC::DisplayWaypointInfo(Client* c) {
 
 	c->Message(0, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
 		GetGrid(),
@@ -1097,7 +1097,7 @@ bool ZoneDatabase::GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* 
 	return false;
 }
 
-void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
+void ZoneDatabase::AssignGrid(Client* client, float x, float y, uint32 grid)
 {
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1212,7 +1212,7 @@ void ZoneDatabase::AssignGrid(Client *client, float x, float y, uint32 grid)
 *	zoneid:		The ID number of the zone the grid is being created/deleted in
 */
 
-void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uint8 type2, uint16 zoneid) {
+void ZoneDatabase::ModifyGrid(Client* c, bool remove, uint32 id, uint8 type, uint8 type2, uint16 zoneid) {
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!remove)
@@ -1246,7 +1246,7 @@ void ZoneDatabase::ModifyGrid(Client *c, bool remove, uint32 id, uint8 type, uin
 * AddWP - Adds a new waypoint to a specific grid for a specific zone.
 */
 
-void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
+void ZoneDatabase::AddWP(Client* c, uint32 gridid, uint32 wpnum, float xpos, float ypos, float zpos, uint32 pause, uint16 zoneid, float heading)
 {
 	char *query = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1271,7 +1271,7 @@ void ZoneDatabase::AddWP(Client *c, uint32 gridid, uint32 wpnum, float xpos, flo
 *	zoneid:		The ID number of the zone that contains the waypoint being deleted
 */
 
-void ZoneDatabase::DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid)
+void ZoneDatabase::DeleteWaypoint(Client* c, uint32 grid_num, uint32 wp_num, uint16 zoneid)
 {
 	char *query=0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
@@ -1293,7 +1293,7 @@ void ZoneDatabase::DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uin
 * the created grid is returned.
 */
 
-uint32 ZoneDatabase::AddWPForSpawn(Client *c, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading) {
+uint32 ZoneDatabase::AddWPForSpawn(Client* c, uint32 spawn2id, float xpos, float ypos, float zpos, uint32 pause, int type1, int type2, uint16 zoneid, float heading) {
 	char	*query = 0;
 	uint32	grid_num,	// The grid number the spawn is assigned to (if spawn has no grid, will be the grid number we end up creating)
 		next_wp_num;	// The waypoint number we should be assigning to the new waypoint
