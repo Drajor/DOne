@@ -64,7 +64,7 @@ void NPC::AI_SetRoambox(float iDist, float iMaxX, float iMinX, float iMaxY, floa
 
 void NPC::DisplayWaypointInfo(Client* c) {
 
-	c->Message(0, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
+	c->message(0, "Mob is on grid %d, in spawn group %d, on waypoint %d/%d",
 		GetGrid(),
 		GetSp2(),
 		GetCurWp(),
@@ -75,7 +75,7 @@ void NPC::DisplayWaypointInfo(Client* c) {
 	cur = Waypoints.begin();
 	end = Waypoints.end();
 	for(; cur != end; ++cur) {
-		c->Message(0,"Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
+		c->message(0,"Waypoint %d: (%.2f,%.2f,%.2f,%.2f) pause %d",
 				cur->index,
 				cur->x,
 				cur->y,
@@ -1153,7 +1153,7 @@ void ZoneDatabase::AssignGrid(Client* client, float x, float y, uint32 grid)
 	{
 		if(matches > 1)
 		{
-			client->Message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
+			client->message(0, "ERROR: Unable to assign grid - multiple spawn2 rows match");
 			mysql_free_result(result);
 		}
 		else
@@ -1182,25 +1182,25 @@ void ZoneDatabase::AssignGrid(Client* client, float x, float y, uint32 grid)
 				{
 					float difference;
 					difference = sqrtf(pow(fabs(x-dbx),2) + pow(fabs(y-dby),2));
-					client->Message(0,
+					client->message(0,
 						"Grid assign: spawn2 id = %d updated - fuzzy match: deviation %f",
 						spawn2id, difference
 					);
 				}
 				else
 				{
-					client->Message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
+					client->message(0, "Grid assign: spawn2 id = %d updated - exact match", spawn2id);
 				}
 			}
 			else
 			{
-				client->Message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
+				client->message(0, "ERROR: found spawn2 id %d but the update query failed", spawn2id);
 			}
 		}
 	}
 	else
 	{
-		client->Message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
+		client->message(0, "ERROR: Unable to assign grid - can't find it in spawn2");
 	}
 }
 

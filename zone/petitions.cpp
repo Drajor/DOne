@@ -181,11 +181,11 @@ void PetitionList::UpdateGMQueue() {
 	uint32 total=0;
 	while(iterator.MoreElements()) {
 		total++;
-		entity_list.SendPetitionToAdmins(iterator.GetData());
+		entity_list.sendPetitionToAdmins(iterator.GetData());
 		iterator.Advance();
 	}
 	if(total==0)
-		entity_list.SendPetitionToAdmins();
+		entity_list.sendPetitionToAdmins();
 	return;
 }
 

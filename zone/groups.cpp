@@ -195,7 +195,7 @@ void Group::splitMoney(uint32 pCopper, uint32 pSilver, uint32 pGold, uint32 pPla
 			//I could not get MoneyOnCorpse to work, so we use this
 			c->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
-			c->Message(2, msg.c_str());
+			c->message(2, msg.c_str());
 		}
 	}
 }
@@ -1406,9 +1406,9 @@ void Group::notifyMainTank(Client* pClient, uint8 pToggle)
 	if (pClient->GetClientVersion() < EQClientSoD)
 	{
 		if (pToggle)
-			pClient->Message(0, "%s is now Main Tank.", mMainTankName.c_str());
+			pClient->message(0, "%s is now Main Tank.", mMainTankName.c_str());
 		else
-			pClient->Message(0, "%s is no longer Main Tank.", mMainTankName.c_str());
+			pClient->message(0, "%s is no longer Main Tank.", mMainTankName.c_str());
 	}
 	else
 	{
@@ -1501,9 +1501,9 @@ void Group::notifyPuller(Client* pClient, uint8 pToggle)
 	if (pClient->GetClientVersion() < EQClientSoD)
 	{
 		if (pToggle)
-			pClient->Message(0, "%s is now Puller.", mPullerName.c_str());
+			pClient->message(0, "%s is now Puller.", mPullerName.c_str());
 		else
-			pClient->Message(0, "%s is no longer Puller.", mPullerName.c_str());
+			pClient->message(0, "%s is no longer Puller.", mPullerName.c_str());
 	}
 	else
 	{

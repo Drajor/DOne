@@ -252,13 +252,13 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			{
 				strcpy(tmpmsg, "Door is locked by an unknown guild");
 			}
-			sender->Message(4, tmpmsg);
+			sender->message(4, tmpmsg);
 			// safe_delete(outapp);
 			// /\ possible missing line..all other 'fail' returns seem to have it
 			return;
 		}
 		// a key is required or the door is locked but can be picked or both
-		sender->Message(4, "This is locked...");		// debug spam - should probably go
+		sender->message(4, "This is locked...");		// debug spam - should probably go
 		if(sender->GetGM())		// GM can always open locks - should probably be changed to require a key
 		{
 			sender->Message_StringID(4,DOORS_GM);
@@ -279,7 +279,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				{
 					sender->KeyRingAdd(playerkey);
 				}
-				sender->Message(4, "You got it open!");
+				sender->message(4, "You got it open!");
 				if(!IsDoorOpen() || (opentype == 58))
 				{
 					md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
@@ -342,7 +342,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			if(sender->KeyRingCheck(keyneeded))
 			{
 				playerkey = keyneeded;
-				sender->Message(4, "You got it open!"); // more debug spam
+				sender->message(4, "You got it open!"); // more debug spam
 				if(!IsDoorOpen() || (opentype == 58))
 				{
 					md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;

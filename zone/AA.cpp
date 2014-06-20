@@ -197,17 +197,17 @@ void Client::ActivateAA(aaID activate){
 
 		if(aa2) {
 			if (aaremain_hr >= 1)	//1 hour or more
-				Message(13, "You can use the ability %s again in %u hour(s) %u minute(s) %u seconds",
+				message(13, "You can use the ability %s again in %u hour(s) %u minute(s) %u seconds",
 				aa2->name, aaremain_hr, aaremain_min, aaremain_sec);
 			else	//less than an hour
-				Message(13, "You can use the ability %s again in %u minute(s) %u seconds",
+				message(13, "You can use the ability %s again in %u minute(s) %u seconds",
 				aa2->name, aaremain_min, aaremain_sec);
 		} else {
 			if (aaremain_hr >= 1)	//1 hour or more
-				Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
+				message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
 				aaremain_hr, aaremain_min, aaremain_sec);
 			else	//less than an hour
-				Message(13, "You can use this ability again in %u minute(s) %u seconds",
+				message(13, "You can use this ability again in %u minute(s) %u seconds",
 				aaremain_min, aaremain_sec);
 		}
 		return;
@@ -221,7 +221,7 @@ void Client::ActivateAA(aaID activate){
 	const AA_DBAction *caa = &AA_Actions[aaid][activate_val];
 
 	if((aaid == aaImprovedHarmTouch || aaid == aaLeechTouch) && !p_timers.Expired(&database, pTimerHarmTouch)){
-		Message(13,"Ability recovery time not yet met.");
+		message(13,"Ability recovery time not yet met.");
 		return;
 	}
 
@@ -246,7 +246,7 @@ void Client::ActivateAA(aaID activate){
 			break;
 		case aaTargetPet:
 			if(GetPet() == nullptr) {
-				Message(0, "A pet is required for this skill.");
+				message(0, "A pet is required for this skill.");
 				return;
 			}
 			target_id = GetPetID();
@@ -449,19 +449,19 @@ void Client::HandleAAAction(aaID activate) {
 				}
 				//do we really need to cast a spell?
 
-				Message(0,"You call your pet to your side.");
+				message(0,"You call your pet to your side.");
 				GetPet()->WipeHateList();
 				GetPet()->GMMove(GetX(),GetY(),GetZ());
 				if (activate_val > 1)
 					entity_list.ClearFeignAggro(GetPet());
 			} else {
-				Message(0,"You have no pet to call.");
+				message(0,"You have no pet to call.");
 			}
 			break;
 
 		case aaActionProjectIllusion:
 			EnableAAEffect(aaEffectProjectIllusion, 3600);
-			Message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
+			message(10, "The power of your next illusion spell will flow to your grouped target in your place.");
 			break;
 
 
@@ -523,7 +523,7 @@ void Client::HandleAAAction(aaID activate) {
 			break;
 		case aaTargetPet:
 			if(GetPet() == nullptr) {
-				Message(0, "A pet is required for this skill.");
+				message(0, "A pet is required for this skill.");
 				return;
 			}
 			target_id = GetPetID();
@@ -560,7 +560,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
 		LogFile->write(EQEMuLog::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
-		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
+		message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
 
@@ -588,7 +588,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if(npc_type == nullptr) {
 		//log write
 		LogFile->write(EQEMuLog::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
-		Message(0,"Unable to find pet!");
+		message(0,"Unable to find pet!");
 		return;
 	}
 
@@ -681,7 +681,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	if(npc_type == nullptr) {
 		//log write
 		LogFile->write(EQEMuLog::Error, "Unknown npc type for swarm pet type id: %d", typesid);
-		Message(0,"Unable to find pet!");
+		message(0,"Unable to find pet!");
 		return;
 	}
 
@@ -1071,9 +1071,9 @@ void Client::BuyAA(AA_Action* action)
 		//we are building these messages ourself instead of using the stringID to work around patch discrepencies
 		//these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
 		if(cur_level<1)
-			Message(15,"You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1)?"points":"point");
+			message(15,"You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1)?"points":"point");
 		else
-			Message(15,"You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level+1, real_cost, (real_cost>1)?"points":"point");
+			message(15,"You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level+1, real_cost, (real_cost>1)?"points":"point");
 
 
 		SendAAStats();
@@ -1624,11 +1624,11 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 		if (buffs[i].spellid != SPELL_UNKNOWN)
 		{
 			if(Rank == 1)
-				Inspector->Message(0, "%s", spells[buffs[i].spellid].name);
+				Inspector->message(0, "%s", spells[buffs[i].spellid].name);
 			else
 			{
 				if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
-					Inspector->Message(0, "%s (Permanent)", spells[buffs[i].spellid].name);
+					Inspector->message(0, "%s (Permanent)", spells[buffs[i].spellid].name);
 				else {
 					char *TempString = nullptr;
 					MakeAnyLenString(&TempString, "%.1f", static_cast<float>(buffs[i].ticsremaining) / 10.0f);

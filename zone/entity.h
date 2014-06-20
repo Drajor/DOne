@@ -310,27 +310,24 @@ public:
 	void radialSetLogging(Mob* pAround, bool pEnabled, bool pClients, bool pNonClients, float pRange = 0);
 
 	//trap stuff
-	Mob*	GetTrapTrigger(Trap* trap);
-	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
-	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
+	Mob* getTrapTrigger(Trap* pTrap);
+	void sendAlarm(Trap* pTrap, Mob* pCurrentTarget, uint8 pKOS);
+	Trap* findNearbyTrap(Mob* pSearcher, float pMaxDistance);
 
-	void	AddHealAggro(Mob* target, Mob* caster, uint16 thedam);
-	Mob*	FindDefenseNPC(uint32 npcid);
-	void	OpenDoorsNear(NPC* opener);
-	void	UpdateWho(bool iSendFullUpdate = false);
-	void	SendPositionUpdates(Client* client, uint32 cLastUpdate = 0, float range = 0, Entity* alwayssend = 0, bool iSendEvenIfNotChanged = false);
-	char*	MakeNameUnique(char* name);
-	static char* RemoveNumbers(char* name);
-	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
-	void	CountNPC(uint32* NPCCount, uint32* NPCLootCount, uint32* gmspawntype_count);
-	void	RemoveEntity(uint16 id);
-	void	SendPetitionToAdmins(Petition* pet);
-	void	SendPetitionToAdmins();
-	void	AddLootToNPCS(uint32 item_id, uint32 count);
+	void addHealAggro(Mob* pTarget, Mob* pCaster, uint16 pDamage);
+	void openDoorsNear(NPC* pOpener);
+	void updateWho(bool pSendFullUpdate = false);
+	void sendPositionUpdates(Client* pClient, uint32 pLastUpdate = 0, float pRange = 0, Entity* pAlwaysSend = 0, bool pSendEvenIfNotChanged = false);
+	char* MakeNameUnique(char* pName);
+	static char* removeNumbers(char* pName);
+	void signalMOBsByNPCID(uint32 pNPCTypeID, int pSignalID);
+	void removeEntity(uint16 pID);
+	void sendPetitionToAdmins(Petition* pPetition);
+	void sendPetitionToAdmins();
+	void addLootToNPCs(uint32 pItemID, uint32 pCount);
 
-	void	ListNPCs(Client* client, const char* arg1 = 0, const char* arg2 = 0, uint8 searchtype = 0);
-	void	ListNPCCorpses(Client* client);
-	void	ListPlayerCorpses(Client* client);
+	void listNPCCorpses(Client* pClient);
+	void listPlayerCorpses(Client* pClient);
 	void	FindPathsToAllNPCs();
 	int32	DeleteNPCCorpses();
 	int32	DeletePlayerCorpses();

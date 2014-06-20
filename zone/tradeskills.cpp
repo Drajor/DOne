@@ -79,7 +79,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				if (itemsFound != 2)
 				{
-					user->Message(13, "Error: Too many/few items in augmentation container.");
+					user->message(13, "Error: Too many/few items in augmentation container.");
 					return;
 				}
 			}
@@ -89,7 +89,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	if(!container)
 	{
 		LogFile->write(EQEMuLog::Error, "Player tried to augment an item without a container set.");
-		user->Message(13, "Error: This item is not a container!");
+		user->message(13, "Error: This item is not a container!");
 		return;
 	}
 
@@ -114,7 +114,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		{
 			// Either 2 augmentable items found or none found
 			// This should never occur due to client restrictions, but prevent in case of a hack
-			user->Message(13, "Error: Must be 1 augmentable item in the sealer");
+			user->message(13, "Error: Must be 1 augmentable item in the sealer");
 			return;
 		}
 	}
@@ -123,11 +123,11 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		// This happens if the augment button is clicked more than once quickly while augmenting
 		if (!container->GetItem(0))
 		{
-			user->Message(13, "Error: No item in slot 0 of sealer");
+			user->message(13, "Error: No item in slot 0 of sealer");
 		}
 		if (!container->GetItem(1))
 		{
-			user->Message(13, "Error: No item in slot 1 of sealer");
+			user->message(13, "Error: No item in slot 1 of sealer");
 		}
 		return;
 	}
@@ -159,7 +159,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		}
 		else
 		{
-			user->Message(13, "Error: No available slot for augment");
+			user->message(13, "Error: No available slot for augment");
 		}
 	}
 	else
@@ -256,7 +256,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	if (in_combine->container_slot == SLOT_TRADESKILL) {
 		if(!worldo) {
-			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
+			user->message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;
 		}
 		c_type = worldo->m_type;
@@ -275,7 +275,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (!inst || !inst->IsType(ItemClassContainer)) {
-		user->Message(13, "Error: Server does not recognize specified tradeskill container");
+		user->message(13, "Error: Server does not recognize specified tradeskill container");
 		return;
 	}
 
@@ -298,7 +298,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// bit 6 (0x20): unlisted recipe flag
 	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
-		user->Message(4, "You need to learn how to combine these first.");
+		user->message(4, "You need to learn how to combine these first.");
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -307,7 +307,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// Character does not have the required skill.
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
 		// Notify client.
-		user->Message(4, "You are not skilled enough.");
+		user->message(4, "You are not skilled enough.");
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -317,23 +317,23 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == SkillAlchemy) {
 		if (user_pp.class_ != SHAMAN) {
-			user->Message(13, "This tradeskill can only be performed by a shaman.");
+			user->message(13, "This tradeskill can only be performed by a shaman.");
 			return;
 		}
 		else if (user_pp.level < MIN_LEVEL_ALCHEMY) {
-			user->Message(13, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
+			user->message(13, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
 			return;
 		}
 	}
 	else if (spec.tradeskill == SkillTinkering) {
 		if (user_pp.race != GNOME) {
-			user->Message(13, "Only gnomes can tinker.");
+			user->message(13, "Only gnomes can tinker.");
 			return;
 		}
 	}
 	else if (spec.tradeskill == SkillMakePoison) {
 		if (user_pp.class_ != ROGUE) {
-			user->Message(13, "Only rogues can mix poisons.");
+			user->message(13, "Only rogues can mix poisons.");
 			return;
 		}
 	}
@@ -415,7 +415,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	// This shouldn't happen.
 	if ((spec.must_learn&0xf) && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
-		user->Message(4, "You need to learn how to combine these first.");
+		user->message(4, "You need to learn how to combine these first.");
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;

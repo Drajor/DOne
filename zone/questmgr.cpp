@@ -138,7 +138,7 @@ void QuestManager::Process() {
 		if(!cur_iter->Timer_.Enabled()) {
 			cur_iter = STimerList.erase(cur_iter);
 		} else if(cur_iter->Timer_.Check()) {
-			entity_list.SignalMobsByNPCID(cur_iter->npc_id, cur_iter->signal_id);
+			entity_list.signalMOBsByNPCID(cur_iter->npc_id, cur_iter->signal_id);
 			cur_iter = STimerList.erase(cur_iter);
 		} else {
 			++cur_iter;
@@ -740,13 +740,13 @@ void QuestManager::changedeity(int diety_id) {
 		if(initiator->isClient())
 		{
 			initiator->SetDeity(diety_id);
-			initiator->Message(15,"Your Deity has been changed/set to: %i", diety_id);
+			initiator->message(15,"Your Deity has been changed/set to: %i", diety_id);
 			initiator->save(1);
 			initiator->Kick();
 		}
 		else
 		{
-			initiator->Message(15,"Error changing Deity");
+			initiator->message(15,"Error changing Deity");
 		}
 	}
 }
@@ -862,11 +862,11 @@ void QuestManager::surname(const char *name) {
 		if(initiator->isClient())
 		{
 			initiator->ChangeLastName(name);
-			initiator->Message(15,"Your surname has been changed/set to: %s", name);
+			initiator->message(15,"Your surname has been changed/set to: %s", name);
 		}
 		else
 		{
-			initiator->Message(15,"Error changing/setting surname");
+			initiator->message(15,"Error changing/setting surname");
 		}
 	}
 }
@@ -961,7 +961,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 				//we may want to come up with a function like Client::GetNextAvailableSpellBookSlot() to help speed this up a little
 				for(uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
 					if(initiator->GetPP().disciplines.values[r] == curspell) {
-						initiator->Message(13, "You already know this discipline.");
+						initiator->message(13, "You already know this discipline.");
 						break;	//continue the 1st loop
 					}
 					else if(initiator->GetPP().disciplines.values[r] == 0) {
@@ -971,7 +971,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 							if (SpellGlobalCheckResult) {
 								initiator->GetPP().disciplines.values[r] = curspell;
 								initiator->SendDisciplineUpdate();
-								initiator->Message(0, "You have learned a new discipline!");
+								initiator->message(0, "You have learned a new discipline!");
 								count++;	//success counter
 							}
 							break;	//continue the 1st loop
@@ -979,7 +979,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 						else {
 						initiator->GetPP().disciplines.values[r] = curspell;
 						initiator->SendDisciplineUpdate();
-						initiator->Message(0, "You have learned a new discipline!");
+						initiator->message(0, "You have learned a new discipline!");
 						count++;	//success counter
 						break;	//continue the 1st loop
 						}
@@ -1046,7 +1046,7 @@ void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
 		}
 		tmp += " pieces.";
 		if (initiator)
-			initiator->Message(MT_OOC, tmp.c_str());
+			initiator->message(MT_OOC, tmp.c_str());
 	}
 }
 
@@ -1261,7 +1261,7 @@ void QuestManager::itemlink(int item_id) {
 		const ItemInst* inst = database.CreateItem(item_id);
 		char* link = 0;
 		if (initiator->MakeItemLink(link, inst))
-			initiator->Message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
+			initiator->message(0, "%s tells you, %c%s%s%c", owner->GetCleanName(),
 					0x12, link, inst->GetItem()->Name, 0x12);
 		safe_delete_array(link);
 		safe_delete(inst);
@@ -2462,13 +2462,13 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 		uint16 id = 0;
 		if(!database.GetUnusedInstanceID(id))
 		{
-			initiator->Message(13, "Server was unable to find a free instance id.");
+			initiator->message(13, "Server was unable to find a free instance id.");
 			return 0;
 		}
 
 		if(!database.CreateInstance(id, zone_id, version, duration))
 		{
-			initiator->Message(13, "Server was unable to create a new instance.");
+			initiator->message(13, "Server was unable to create a new instance.");
 			return 0;
 		}
 		return id;
@@ -2533,9 +2533,9 @@ void QuestManager::RemoveFromInstance(uint16 instance_id)
 	QuestManagerCurrentQuestVars();
 	if(initiator) {
 		if(database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
-			initiator->Message(MT_Say, "Removed client from instance.");
+			initiator->message(MT_Say, "Removed client from instance.");
 		} else {
-			initiator->Message(MT_Say, "Failed to remove client from instance.");
+			initiator->message(MT_Say, "Failed to remove client from instance.");
 		}
 	}
 }
@@ -2557,10 +2557,10 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 			++iter;
 		}
 		if (removed_all) {
-			initiator->Message(MT_Say, "Removed all players from instance.");
+			initiator->message(MT_Say, "Removed all players from instance.");
 		} else {
 			// once the expedition system is in, this message it not relevant
-			initiator->Message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
+			initiator->message(MT_Say, "Failed to remove %i player(s) from instance.", fail_count);
 		}
 	}
 }

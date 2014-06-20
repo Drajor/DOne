@@ -1786,9 +1786,9 @@ bool ZoneDatabase::SaveMerc(Merc *merc) {
 
 	if(!errorMessage.empty() || (Result && affectedRows != 1)) {
 		if(owner && !errorMessage.empty())
-			owner->Message(13, errorMessage.c_str());
+			owner->message(13, errorMessage.c_str());
 		else if(owner)
-			owner->Message(13, std::string("Unable to save merc to the database.").c_str());
+			owner->message(13, std::string("Unable to save merc to the database.").c_str());
 
 		Result = false;
 	}
@@ -2517,10 +2517,10 @@ void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 
 		char name[64];
 		database.GetCharName(charid, name);
-		c->Message(0, "%s is part of the following instances:", name);
+		c->message(0, "%s is part of the following instances:", name);
 		while(row = mysql_fetch_row(result))
 		{
-			c->Message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
+			c->message(0, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
 		}
 

@@ -428,7 +428,7 @@ XS(XS_EntityList_GetDoorsByDBID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, id)");
 	{
 		EntityList *		THIS;
-		Doors *		RETVAL;
+		Doors* 		RETVAL;
 		uint32		id = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -455,7 +455,7 @@ XS(XS_EntityList_GetDoorsByDoorID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, id)");
 	{
 		EntityList *		THIS;
-		Doors *		RETVAL;
+		Doors* 		RETVAL;
 		uint32		id = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -482,7 +482,7 @@ XS(XS_EntityList_GetDoorsByID)
 		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, id)");
 	{
 		EntityList *		THIS;
-		Doors *		RETVAL;
+		Doors* 		RETVAL;
 		uint32		id = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -509,7 +509,7 @@ XS(XS_EntityList_FindDoor)
 		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, id)");
 	{
 		EntityList *		THIS;
-		Doors *		RETVAL;
+		Doors* 		RETVAL;
 		uint32		id = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "EntityList")) {
@@ -1483,7 +1483,7 @@ XS(XS_EntityList_OpenDoorsNear)
 		if(opener == nullptr)
 			Perl_croak(aTHX_ "opener is nullptr, avoiding crash.");
 
-		THIS->OpenDoorsNear(opener);
+		THIS->openDoorsNear(opener);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1526,7 +1526,7 @@ XS(XS_EntityList_RemoveNumbers)
 		dXSTARG;
 		char*		name = (char *)SvPV_nolen(ST(1));
 
-		RETVAL = EntityList::RemoveNumbers(name);
+		RETVAL = EntityList::removeNumbers(name);
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	}
 	XSRETURN(1);
@@ -1552,7 +1552,7 @@ XS(XS_EntityList_SignalMobsByNPCID)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->SignalMobsByNPCID(npc_type, signal_id);
+		THIS->signalMOBsByNPCID(npc_type, signal_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -1576,7 +1576,7 @@ XS(XS_EntityList_RemoveEntity)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->RemoveEntity(id);
+		THIS->removeEntity(id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2093,7 +2093,7 @@ XS(XS_EntityList_GetDoorsList)
 
 		while(iter != door_list.end())
 		{
-			Doors *entry = (*iter);
+			Doors* entry = (*iter);
 			ST(0) = sv_newmortal();
 			sv_setref_pv(ST(0), "Doors", (void*)entry);
 			XPUSHs(ST(0));

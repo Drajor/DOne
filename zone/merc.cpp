@@ -2335,7 +2335,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 							//check for taunt
 							if(CheckAETaunt()) {
 								if(MERC_DEBUG > 0)
-									GetOwner()->Message(7, "AE Taunting");
+									GetOwner()->message(7, "AE Taunting");
 								//get AE taunt
 								selectedMercSpell = GetBestMercSpellForAETaunt(this);
 							}
@@ -4367,7 +4367,7 @@ bool Merc::CheckAETaunt() {
 
 		if(result >= 1) {
 			if(MERC_DEBUG > 0)
-				Message(7, "%s: Attempting AE Taunt", GetCleanName());
+				message(7, "%s: Attempting AE Taunt", GetCleanName());
 			return true;
 		}
 	}
@@ -5359,7 +5359,7 @@ bool Client::CheckCanUnsuspendMerc() {
 	if(!GetPTimers().Expired(&database, pTimerMercSuspend, false))
 	{
 		SendMercMerchantResponsePacket(16);
-		Message(0, "You must wait %i seconds before unsuspending your mercenary.", GetPTimers().GetRemainingTime(pTimerMercSuspend)); //todo: find this packet response and tell them properly.
+		message(0, "You must wait %i seconds before unsuspending your mercenary.", GetPTimers().GetRemainingTime(pTimerMercSuspend)); //todo: find this packet response and tell them properly.
 		return false;
 	}
 	return true;
@@ -5367,12 +5367,12 @@ bool Client::CheckCanUnsuspendMerc() {
 
 bool Client::CheckCanDismissMerc() {
 	if(!GetMerc()) {
-		Message(7, "You have no mercenary to dismiss.");
+		message(7, "You have no mercenary to dismiss.");
 		return false;
 	}
 
 	if(GetMerc()->IsCasting()) {
-		Message(7, "Unable to dismiss mercenary.");
+		message(7, "Unable to dismiss mercenary.");
 		return false;
 	}
 
@@ -5581,7 +5581,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		}
 		else {
 			if(MERC_DEBUG > 0)
-				mercOwner->Message(7, "Mercenary failed to join the group - Suspending");
+				mercOwner->message(7, "Mercenary failed to join the group - Suspending");
 
 			Suspend();
 		}

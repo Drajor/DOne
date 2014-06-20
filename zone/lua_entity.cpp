@@ -104,7 +104,7 @@ Lua_Object Lua_Entity::CastToObject() {
 
 Lua_Door Lua_Entity::CastToDoor() {
 	void *d = GetLuaPtrData();
-	Doors *m = reinterpret_cast<Doors*>(d);
+	Doors* m = reinterpret_cast<Doors*>(d);
 	return Lua_Door(m);
 }
 

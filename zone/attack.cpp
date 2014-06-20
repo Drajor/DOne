@@ -3546,11 +3546,11 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
 			if (origdmg != damage && attacker && attacker->isClient()) {
 				if(attacker->castToClient()->GetFilter(FilterDamageShields) != FilterHide)
-					attacker->Message(15, "The Spellshield absorbed %d of %d points of damage", origdmg - damage, origdmg);
+					attacker->message(15, "The Spellshield absorbed %d of %d points of damage", origdmg - damage, origdmg);
 			}
 			if (damage == 0 && attacker && origdmg != damage && isClient()) {
 				//Kayen: Probably need to add a filter for this - Not sure if this msg is correct but there should be a message for spell negate/runes.
-				Message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
+				message(263, "%s tries to cast on YOU, but YOUR magical skin absorbs the spell.",attacker->GetCleanName());
 			}
 
 		}
@@ -3859,7 +3859,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 							YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
 		} else {
-			Message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
+			message(MT_NonMelee, "You have been healed for %d points of damage.", acthealed);
 		}
 	}
 

@@ -450,7 +450,7 @@ void HateList::PrintToClient(Client* c)
 	while (iterator != mEntries.end())
 	{
 		HateEntry *e = (*iterator);
-		c->Message(0, "- name: %s, damage: %d, hate: %d",
+		c->message(0, "- name: %s, damage: %d, hate: %d",
 			(e->mMOB && e->mMOB->getName()) ? e->mMOB->getName() : "(null)",
 			e->mDamage, e->mHate);
 

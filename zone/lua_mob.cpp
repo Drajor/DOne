@@ -709,7 +709,7 @@ double Lua_Mob::GetSize() {
 
 void Lua_Mob::Message(int type, const char *message) {
 	Lua_Safe_Call_Void();
-	self->Message(type, message);
+	self->message(type, message);
 }
 
 void Lua_Mob::Message_StringID(int type, int string_id, uint32 distance) {

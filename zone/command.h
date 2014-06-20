@@ -96,7 +96,6 @@ void command_movechar(Client* pClient, const Seperator* pSeperator);
 void command_viewpetition(Client* pClient, const Seperator* pSeperator);
 void command_petitioninfo(Client* pClient, const Seperator* pSeperator);
 void command_delpetition(Client* pClient, const Seperator* pSeperator);
-void command_listnpcs(Client* pClient, const Seperator* pSeperator);
 void command_date(Client* pClient, const Seperator* pSeperator);
 void command_timezone(Client* pClient, const Seperator* pSeperator);
 void command_synctod(Client* pClient, const Seperator* pSeperator);

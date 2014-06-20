@@ -135,7 +135,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
 void Client::SummonHorse(uint16 spell_id) {
 	if (GetHorseId() != 0) {
-		Message(13,"You already have a Horse. Get off, Fatbutt!");
+		message(13,"You already have a Horse. Get off, Fatbutt!");
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {

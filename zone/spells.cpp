@@ -518,17 +518,17 @@ bool Mob::DoCastingChecks()
 	}
 
 	if (IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()) {
-		Message(13, "You can't levitate in this zone.");
+		message(13, "You can't levitate in this zone.");
 		return false;
 	}
 
 	if (zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())) {
 		const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
 		if (msg) {
-			Message(13, msg);
+			message(13, msg);
 			return false;
 		} else {
-			Message(13, "You can't cast this spell here.");
+			message(13, "You can't cast this spell here.");
 			return false;
 		}
 	}
@@ -916,7 +916,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		if(delaytimer)
 		{
 			mlog(SPELLS__CASTING_ERR, "Casting of %d canceled: recast too quickly", spell_id);
-			Message(13, "You are unable to focus.");
+			message(13, "You are unable to focus.");
 			InterruptSpell();
 			return;
 		}
@@ -1095,7 +1095,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					if(!HasInstrument) {	// if the instrument is missing, log it and interrupt the song
 						mlog(SPELLS__CASTING_ERR, "Song %d: Canceled. Missing required instrument %s", spell_id, component);
 						if(c->GetGM())
-							c->Message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
+							c->message(0, "Your GM status allows you to finish casting even though you're missing a required instrument.");
 						else {
 							InterruptSpell();
 							return;
@@ -1129,7 +1129,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 			if (missingreags) {
 				if(c->GetGM())
-					c->Message(0, "Your GM status allows you to finish casting even though you're missing required components.");
+					c->message(0, "Your GM status allows you to finish casting even though you're missing required components.");
 				else {
 					InterruptSpell();
 					return;
@@ -1154,7 +1154,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 						}
 						else
 						{	// some kind of error in the code if this happens
-							c->Message(13, "ERROR: reagent item disappeared while processing?");
+							c->message(13, "ERROR: reagent item disappeared while processing?");
 						}
 					}
 				}
@@ -1228,7 +1228,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		else
 		{
 			mlog(SPELLS__CASTING_ERR, "Item used to cast spell %d was missing from inventory slot %d after casting!", spell_id, inventory_slot);
-			Message(13, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
+			message(13, "Casting Error: Active casting item not found in inventory slot %i", inventory_slot);
 			InterruptSpell();
 			return;
 		}
@@ -1689,7 +1689,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		default:
 		{
 			mlog(SPELLS__CASTING_ERR, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
-			Message(0, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
+			message(0, "I dont know Target Type: %d   Spell: (%d) %s", spells[spell_id].targettype, spell_id, spells[spell_id].name);
 			CastAction = CastActUnknown;
 			break;
 		}
@@ -1721,7 +1721,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	if(IsEffectInSpell(spell_id, SE_Levitate) && !zone->CanLevitate()){
 			if(isClient()){
 				if(!castToClient()->GetGM()){
-					Message(13, "You can't levitate in this zone.");
+					message(13, "You can't levitate in this zone.");
 					return false;
 				}
 			}
@@ -1732,11 +1732,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		if(zone->IsSpellBlocked(spell_id, GetX(), GetY(), GetZ())){
 			const char *msg = zone->GetSpellBlockedMessage(spell_id, GetX(), GetY(), GetZ());
 			if(msg){
-				Message(13, msg);
+				message(13, msg);
 				return false;
 			}
 			else{
-				Message(13, "You can't cast this spell here.");
+				message(13, "You can't cast this spell here.");
 				return false;
 			}
 
@@ -1757,7 +1757,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			IsEffectInSpell(spell_id, SE_Teleport)
 		)
 		{
-			Message(0, "The Gods brought you here, only they can send you away.");
+			message(0, "The Gods brought you here, only they can send you away.");
 			return false;
 		}
 	}
@@ -3015,7 +3015,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(!spelltar)
 	{
 		mlog(SPELLS__CASTING_ERR, "Unable to apply spell %d without a target", spell_id);
-		Message(13, "SOT: You must have a target for this spell.");
+		message(13, "SOT: You must have a target for this spell.");
 		return false;
 	}
 
@@ -3535,7 +3535,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		}
 	}
 	else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id))
-		entity_list.AddHealAggro(spelltar, this, CheckHealAggroAmount(spell_id, (spelltar->GetMaxHP() - spelltar->GetHP())));
+		entity_list.addHealAggro(spelltar, this, CheckHealAggroAmount(spell_id, (spelltar->GetMaxHP() - spelltar->GetHP())));
 
 	// make sure spelltar is high enough level for the buff
 	if(RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id))
@@ -3660,7 +3660,7 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 
 	if(isResurrected()){
 		if(Caster && Caster->isClient())
-			Caster->Message(13,"This character has already been resurrected.");
+			Caster->message(13,"This character has already been resurrected.");
 
 		return;
 	}
@@ -3909,7 +3909,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 		else if (isClient() && castToClient()->CheckAAEffect(aaEffectWarcry))
 		{
-			Message(13, "Your are immune to fear.");
+			message(13, "Your are immune to fear.");
 			mlog(SPELLS__RESISTS, "Clients has WarCry effect, immune to fear!");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
 			return true;
@@ -3934,7 +3934,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(this == caster)
 		{
 			mlog(SPELLS__RESISTS, "You are immune to your own charms.");
-			caster->Message(MT_Shout, "You cannot charm yourself.");
+			caster->message(MT_Shout, "You cannot charm yourself.");
 			return true;
 		}
 

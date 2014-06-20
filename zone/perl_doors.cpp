@@ -23,7 +23,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+	*/
 
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
@@ -47,17 +47,17 @@ XS(XS_Doors_GetDoorDBID)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetDoorDBID(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorDBID();
@@ -73,17 +73,17 @@ XS(XS_Doors_GetDoorID)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetDoorID(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorID();
@@ -99,17 +99,17 @@ XS(XS_Doors_GetID)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetID(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint16		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetEntityID();
@@ -125,17 +125,17 @@ XS(XS_Doors_GetX)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetX(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetX();
@@ -151,17 +151,17 @@ XS(XS_Doors_GetY)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetY(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetY();
@@ -177,17 +177,17 @@ XS(XS_Doors_GetZ)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetZ(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetZ();
@@ -203,17 +203,17 @@ XS(XS_Doors_GetHeading)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetHeading(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetHeading();
@@ -229,17 +229,17 @@ XS(XS_Doors_GetOpenType)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetOpenType(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetOpenType();
@@ -255,17 +255,17 @@ XS(XS_Doors_GetLockpick)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetLockpick(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetLockpick();
@@ -281,17 +281,17 @@ XS(XS_Doors_GetKeyItem)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetKeyItem(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetKeyItem();
@@ -307,16 +307,16 @@ XS(XS_Doors_GetNoKeyring)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::GetNoKeyring(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint8		type = (uint8)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->GetNoKeyring();
@@ -331,17 +331,17 @@ XS(XS_Doors_GetIncline)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetIncline(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetIncline();
@@ -357,17 +357,17 @@ XS(XS_Doors_GetSize)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetIncline(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSize();
@@ -385,16 +385,16 @@ XS(XS_Doors_SetOpenType)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetOpenType(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetOpenType(type);
@@ -409,16 +409,16 @@ XS(XS_Doors_SetLockpick)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetLockpick(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetLockpick(type);
@@ -433,16 +433,16 @@ XS(XS_Doors_SetKeyItem)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetKeyItem(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetKeyItem(type);
@@ -457,16 +457,16 @@ XS(XS_Doors_SetNoKeyring)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetNoKeyring(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint8		type = (uint8)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetNoKeyring(type);
@@ -481,16 +481,16 @@ XS(XS_Doors_SetIncline)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetIncline(THIS, type)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetIncline(type);
@@ -505,16 +505,16 @@ XS(XS_Doors_SetSize)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetSize(THIS, size)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		uint32		type = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetSize(type);
@@ -529,18 +529,18 @@ XS(XS_Doors_SetLocation)
 	if (items != 4)
 		Perl_croak(aTHX_ "Usage: Doors::SetLocation(THIS, x, y, z)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		x = (float)SvNV(ST(1));
 		float		y = (float)SvNV(ST(2));
 		float		z = (float)SvNV(ST(3));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetLocation(x, y, z);
@@ -555,16 +555,16 @@ XS(XS_Doors_SetX)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetX(THIS, XPos)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		pos = (float)SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetX(pos);
@@ -579,16 +579,16 @@ XS(XS_Doors_SetY)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetY(THIS, YPos)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		pos = (float)SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetY(pos);
@@ -603,16 +603,16 @@ XS(XS_Doors_SetZ)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetZ(THIS, ZPos)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		pos = (float)SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetZ(pos);
@@ -627,16 +627,16 @@ XS(XS_Doors_SetHeading)
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetHeading(THIS, heading)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		float		heading = (float)SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetHeading(heading);
@@ -651,19 +651,19 @@ XS(XS_Doors_SetModelName)
 	if (items < 1 || items > 2)
 		Perl_croak(aTHX_ "Usage: Doors::SetModelName(THIS, name)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		char *		name = nullptr;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
+		if (items > 1)	{ name = (char *)SvPV_nolen(ST(1)); }
 
 		THIS->SetDoorName(name);
 	}
@@ -676,17 +676,17 @@ XS(XS_Doors_GetModelName)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::GetModelName(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 		Const_char *		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetDoorName();
@@ -702,15 +702,15 @@ XS(XS_Doors_CreateDatabaseEntry)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Doors::InsertDoor(THIS)");
 	{
-		Doors *		THIS;
+		Doors* 		THIS;
 
 		if (sv_derived_from(ST(0), "Doors")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Doors *,tmp);
+			THIS = INT2PTR(Doors*, tmp);
 		}
 		else
 			Perl_croak(aTHX_ "THIS is not of type Doors");
-		if(THIS == nullptr)
+		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->CreateDatabaseEntry();
@@ -731,40 +731,40 @@ XS(boot_Doors)
 	strncpy(file, __FILE__, 256);
 	file[255] = 0;
 
-	if(items != 1)
+	if (items != 1)
 		fprintf(stderr, "boot_quest does not take any arguments.");
 	char buf[128];
 
 	//add the strcpy stuff to get rid of const warnings....
 
-	XS_VERSION_BOOTCHECK ;
-		newXSproto(strcpy(buf, "GetID"),XS_Doors_GetID, file, "$");
-		newXSproto(strcpy(buf, "SetModelName"),XS_Doors_SetModelName, file, "$$");
-		newXSproto(strcpy(buf, "GetModelName"),XS_Doors_GetModelName, file, "$");
-		newXSproto(strcpy(buf, "GetX"),XS_Doors_GetX, file, "$");
-		newXSproto(strcpy(buf, "GetY"),XS_Doors_GetY, file, "$");
-		newXSproto(strcpy(buf, "GetZ"),XS_Doors_GetZ, file, "$");
-		newXSproto(strcpy(buf, "GetHeading"),XS_Doors_GetHeading, file, "$");
-		newXSproto(strcpy(buf, "SetX"),XS_Doors_SetX, file, "$$");
-		newXSproto(strcpy(buf, "SetY"),XS_Doors_SetY, file, "$$");
-		newXSproto(strcpy(buf, "SetZ"),XS_Doors_SetZ, file, "$$");
-		newXSproto(strcpy(buf, "SetHeading"),XS_Doors_SetHeading, file, "$$");
-		newXSproto(strcpy(buf, "SetLocation"),XS_Doors_SetLocation, file, "$$$$");
-		newXSproto(strcpy(buf, "GetDoorDBID"),XS_Doors_GetDoorDBID, file, "$");
-		newXSproto(strcpy(buf, "GetDoorID"),XS_Doors_GetDoorID, file, "$");
-		newXSproto(strcpy(buf, "SetSize"),XS_Doors_SetSize, file, "$$");
-		newXSproto(strcpy(buf, "GetSize"),XS_Doors_GetSize, file, "$");
-		newXSproto(strcpy(buf, "SetIncline"),XS_Doors_SetIncline, file, "$$");
-		newXSproto(strcpy(buf, "GetIncline"),XS_Doors_GetIncline, file, "$");
-		newXSproto(strcpy(buf, "SetOpenType"),XS_Doors_SetOpenType, file, "$$");
-		newXSproto(strcpy(buf, "GetOpenType"),XS_Doors_GetOpenType, file, "$");
-		newXSproto(strcpy(buf, "SetLockPick"),XS_Doors_SetLockpick, file, "$$");
-		newXSproto(strcpy(buf, "GetLockPick"),XS_Doors_GetLockpick, file, "$");
-		newXSproto(strcpy(buf, "SetKeyItem"),XS_Doors_SetKeyItem, file, "$$");
-		newXSproto(strcpy(buf, "GetKeyItem"),XS_Doors_GetKeyItem, file, "$");
-		newXSproto(strcpy(buf, "SetNoKeyring"),XS_Doors_SetNoKeyring, file, "$$");
-		newXSproto(strcpy(buf, "GetNoKeyring"),XS_Doors_GetNoKeyring, file, "$");
-		newXSproto(strcpy(buf, "CreateDatabaseEntry"),XS_Doors_CreateDatabaseEntry, file, "$");
+	XS_VERSION_BOOTCHECK;
+	newXSproto(strcpy(buf, "GetID"), XS_Doors_GetID, file, "$");
+	newXSproto(strcpy(buf, "SetModelName"), XS_Doors_SetModelName, file, "$$");
+	newXSproto(strcpy(buf, "GetModelName"), XS_Doors_GetModelName, file, "$");
+	newXSproto(strcpy(buf, "GetX"), XS_Doors_GetX, file, "$");
+	newXSproto(strcpy(buf, "GetY"), XS_Doors_GetY, file, "$");
+	newXSproto(strcpy(buf, "GetZ"), XS_Doors_GetZ, file, "$");
+	newXSproto(strcpy(buf, "GetHeading"), XS_Doors_GetHeading, file, "$");
+	newXSproto(strcpy(buf, "SetX"), XS_Doors_SetX, file, "$$");
+	newXSproto(strcpy(buf, "SetY"), XS_Doors_SetY, file, "$$");
+	newXSproto(strcpy(buf, "SetZ"), XS_Doors_SetZ, file, "$$");
+	newXSproto(strcpy(buf, "SetHeading"), XS_Doors_SetHeading, file, "$$");
+	newXSproto(strcpy(buf, "SetLocation"), XS_Doors_SetLocation, file, "$$$$");
+	newXSproto(strcpy(buf, "GetDoorDBID"), XS_Doors_GetDoorDBID, file, "$");
+	newXSproto(strcpy(buf, "GetDoorID"), XS_Doors_GetDoorID, file, "$");
+	newXSproto(strcpy(buf, "SetSize"), XS_Doors_SetSize, file, "$$");
+	newXSproto(strcpy(buf, "GetSize"), XS_Doors_GetSize, file, "$");
+	newXSproto(strcpy(buf, "SetIncline"), XS_Doors_SetIncline, file, "$$");
+	newXSproto(strcpy(buf, "GetIncline"), XS_Doors_GetIncline, file, "$");
+	newXSproto(strcpy(buf, "SetOpenType"), XS_Doors_SetOpenType, file, "$$");
+	newXSproto(strcpy(buf, "GetOpenType"), XS_Doors_GetOpenType, file, "$");
+	newXSproto(strcpy(buf, "SetLockPick"), XS_Doors_SetLockpick, file, "$$");
+	newXSproto(strcpy(buf, "GetLockPick"), XS_Doors_GetLockpick, file, "$");
+	newXSproto(strcpy(buf, "SetKeyItem"), XS_Doors_SetKeyItem, file, "$$");
+	newXSproto(strcpy(buf, "GetKeyItem"), XS_Doors_GetKeyItem, file, "$");
+	newXSproto(strcpy(buf, "SetNoKeyring"), XS_Doors_SetNoKeyring, file, "$$");
+	newXSproto(strcpy(buf, "GetNoKeyring"), XS_Doors_GetNoKeyring, file, "$");
+	newXSproto(strcpy(buf, "CreateDatabaseEntry"), XS_Doors_CreateDatabaseEntry, file, "$");
 	XSRETURN_YES;
 }
 #endif //EMBPERL_XS_CLASSES

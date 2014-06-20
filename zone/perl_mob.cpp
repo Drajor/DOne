@@ -3766,7 +3766,7 @@ XS(XS_Mob_Message)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Message(type, message);
+		THIS->message(type, message);
 	}
 	XSRETURN_EMPTY;
 }

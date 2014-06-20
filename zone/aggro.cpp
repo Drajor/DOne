@@ -51,12 +51,12 @@ void EntityList::CheckClientAggro(Client* around)
 void EntityList::describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool pVerbose) {
 	float d2 = pDistance*pDistance;
 
-	pClient->Message(0, "Describing aggro for %s", pNPC->getName());
+	pClient->message(0, "Describing aggro for %s", pNPC->getName());
 
 	bool engaged = pNPC->IsEngaged();
 	if(engaged) {
 		Mob *top = pNPC->GetHateTop();
-		pClient->Message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->getName());
+		pClient->message(0, ".. I am currently fighting with %s", top == nullptr?"(nullptr)":top->getName());
 	}
 	bool check_npcs = pNPC->WillAggroNPCs();
 
@@ -76,7 +76,7 @@ void EntityList::describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool
 			if(!database.GetFactionName(my_primary, namebuf, sizeof(namebuf)))
 				strcpy(namebuf, "(Unknown)");
 		}
-		pClient->Message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
+		pClient->message(0, ".. I am on faction %s (%d)\n", namebuf, my_primary);
 	}
 
 	for (auto i = mMOBs.begin(); i != mMOBs.end(); ++i) {
@@ -90,11 +90,11 @@ void EntityList::describeAggro(Client* pClient, NPC* pNPC, float pDistance, bool
 		if (engaged) {
 			uint32 amm = pNPC->GetHateAmount(mob);
 			if (amm == 0)
-				pClient->Message(0, "... %s is not on my hate list.", mob->getName());
+				pClient->message(0, "... %s is not on my hate list.", mob->getName());
 			else
-				pClient->Message(0, "... %s is on my hate list with value %lu", mob->getName(), (unsigned long)amm);
+				pClient->message(0, "... %s is on my hate list with value %lu", mob->getName(), (unsigned long)amm);
 		} else if (!check_npcs && mob->isNPC()) {
-				pClient->Message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->getName());
+				pClient->message(0, "... %s is an NPC and my npc_aggro is disabled.", mob->getName());
 		} else {
 			pNPC->DescribeAggro(pClient, mob, pVerbose);
 		}
@@ -119,13 +119,13 @@ void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange) ) {
-		towho->Message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->getName(),
+		towho->message(0, "...%s is out of range (fast). distances (%.3f,%.3f,%.3f), range %.3f", mob->getName(),
 		t1, t2, t3, iAggroRange);
 		return;
 	}
 
 	if(mob->IsInvisible(this)) {
-		towho->Message(0, "...%s is invisible to me. ", mob->getName());
+		towho->message(0, "...%s is invisible to me. ", mob->getName());
 		return;
 	}
 	if((mob->isClient() &&
@@ -136,26 +136,26 @@ void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 		)
 		))
 	{
-		towho->Message(0, "...%s is my owner. ", mob->getName());
+		towho->message(0, "...%s is my owner. ", mob->getName());
 		return;
 	}
 
 
 	if(mob == GetOwner()) {
-		towho->Message(0, "...%s a GM or is not connected. ", mob->getName());
+		towho->message(0, "...%s a GM or is not connected. ", mob->getName());
 		return;
 	}
 
 	float dist2 = mob->DistNoRoot(*this);
 	float iAggroRange2 = iAggroRange*iAggroRange;
 	if( dist2 > iAggroRange2 ) {
-		towho->Message(0, "...%s is out of range. %.3f > %.3f ", mob->getName(),
+		towho->message(0, "...%s is out of range. %.3f > %.3f ", mob->getName(),
 		dist2, iAggroRange2);
 		return;
 	}
 
 	if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
-		towho->Message(0, "...%s is red to me (basically)", mob->getName(),
+		towho->message(0, "...%s is red to me (basically)", mob->getName(),
 		dist2, iAggroRange2);
 		return;
 	}
@@ -171,9 +171,9 @@ void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 			mob_primary = own->GetPrimaryFaction();
 
 		if(mob_primary == 0) {
-			towho->Message(0, "...%s has no primary faction", mob->getName());
+			towho->message(0, "...%s has no primary faction", mob->getName());
 		} else if(mob_primary < 0) {
-			towho->Message(0, "...%s is on special faction %d", mob->getName(), mob_primary);
+			towho->message(0, "...%s is on special faction %d", mob->getName(), mob_primary);
 		} else {
 			char namebuf[256];
 			if(!database.GetFactionName(mob_primary, namebuf, sizeof(namebuf)))
@@ -186,22 +186,22 @@ void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 				struct NPCFaction* fac = *cur;
 				if ((int32)fac->factionID == mob_primary) {
 					if (fac->npc_value > 0) {
-						towho->Message(0, "...%s is on ALLY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
+						towho->message(0, "...%s is on ALLY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
 						res = true;
 						break;
 					} else if (fac->npc_value < 0) {
-						towho->Message(0, "...%s is on ENEMY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
+						towho->message(0, "...%s is on ENEMY faction %s (%d) with %d", mob->getName(), namebuf, mob_primary, fac->npc_value);
 						res = true;
 						break;
 					} else {
-						towho->Message(0, "...%s is on NEUTRAL faction %s (%d) with 0", mob->getName(), namebuf, mob_primary);
+						towho->message(0, "...%s is on NEUTRAL faction %s (%d) with 0", mob->getName(), namebuf, mob_primary);
 						res = true;
 						break;
 					}
 				}
 			}
 			if(!res) {
-				towho->Message(0, "...%s is on faction %s (%d), which I have no entry for.", mob->getName(), namebuf, mob_primary);
+				towho->message(0, "...%s is on faction %s (%d), which I have no entry for.", mob->getName(), namebuf, mob_primary);
 			}
 		}
 	}
@@ -215,18 +215,18 @@ void NPC::DescribeAggro(Client* towho, Mob *mob, bool verbose) {
 			||
 			fv == FACTION_THREATENLY
 		)) {
-		towho->Message(0, "...%s faction not low enough. value='%s'", mob->getName(), FactionValueToString(fv));
+		towho->message(0, "...%s faction not low enough. value='%s'", mob->getName(), FactionValueToString(fv));
 		return;
 	}
 	if(fv == FACTION_THREATENLY) {
-		towho->Message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->getName());
+		towho->message(0, "...%s threatening to me, so they only have a %d chance per check of attacking.", mob->getName());
 	}
 
 	if(!CheckLosFN(mob)) {
-		towho->Message(0, "...%s is out of sight.", mob->getName());
+		towho->message(0, "...%s is out of sight.", mob->getName());
 	}
 
-	towho->Message(0, "...%s meets all conditions, I should be attacking them.", mob->getName());
+	towho->message(0, "...%s meets all conditions, I should be attacking them.", mob->getName());
 }
 
 /*

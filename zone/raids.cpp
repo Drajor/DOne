@@ -693,7 +693,7 @@ void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum
 		//I could not get MoneyOnCorpse to work, so we use this
 		members[i].member->AddMoneyToPP(cpsplit, spsplit, gpsplit, ppsplit, true);
 
-		members[i].member->Message(2, msg.c_str());
+		members[i].member->message(2, msg.c_str());
 		}
 	}
 }

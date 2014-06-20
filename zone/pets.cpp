@@ -248,7 +248,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	//lookup our pets table record for this type
 	PetRecord record;
 	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
-		Message(13, "Unable to find data for pet %s", pettype);
+		message(13, "Unable to find data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to find data for pet %s, check pets table.", pettype);
 		return;
 	}
@@ -256,7 +256,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	//find the NPC data for the specified NPC type
 	const NPCType *base = database.GetNPCType(record.npc_type);
 	if(base == nullptr) {
-		Message(13, "Unable to load NPC data for pet %s", pettype);
+		message(13, "Unable to load NPC data for pet %s", pettype);
 		LogFile->write(EQEMuLog::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
 		return;
 	}

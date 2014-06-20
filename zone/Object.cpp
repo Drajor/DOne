@@ -493,7 +493,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		// Remove object
 		database.DeleteObject(m_id);
 		if(!m_ground_spawn)
-			entity_list.RemoveEntity(this->getID());
+			entity_list.removeEntity(this->getID());
 	} else {
 		// Tradeskill item
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));

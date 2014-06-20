@@ -120,7 +120,7 @@ void WorldServer::OnConnected() {
 
 	if (ZoneLoaded) {
 		this->SetZone(zone->GetZoneID(), zone->GetInstanceID());
-		entity_list.UpdateWho(true);
+		entity_list.updateWho(true);
 		this->SendEmoteMessage(0, 0, 15, "Zone connect: %s", zone->GetLongName());
 			zone->GetTimeSync();
 	} else {
@@ -333,15 +333,15 @@ void WorldServer::Process() {
 				switch(ztz->response)
 				{
 				case -2: {
-					entity->castToClient()->Message(13,"You do not own the required locations to enter this zone.");
+					entity->castToClient()->message(13,"You do not own the required locations to enter this zone.");
 					break;
 				}
 				case -1: {
-					entity->castToClient()->Message(13,"The zone is currently full, please try again later.");
+					entity->castToClient()->message(13,"The zone is currently full, please try again later.");
 					break;
 				}
 				case 0:	{
-					entity->castToClient()->Message(13,"All zone servers are taken at this time, please try again later.");
+					entity->castToClient()->message(13,"All zone servers are taken at this time, please try again later.");
 					break;
 				}
 				}
@@ -405,10 +405,10 @@ void WorldServer::Process() {
 					if (client != 0){
 						char* newmessage=0;
 						if(strstr(sem->message,"^")==0)
-							client->Message(sem->type, (char*)sem->message);
+							client->message(sem->type, (char*)sem->message);
 						else{
 							for(newmessage = strtok((char*)sem->message,"^");newmessage!=nullptr;newmessage=strtok(nullptr, "^"))
-								client->Message(sem->type, newmessage);
+								client->message(sem->type, newmessage);
 						}
 					}
 				}
@@ -522,7 +522,7 @@ void WorldServer::Process() {
 			printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
 			if (client != 0) {
 				if (strcasecmp(szp->adminname, szp->name) == 0)
-					client->Message(0, "Zoning to: %s", szp->zone);
+					client->message(0, "Zoning to: %s", szp->zone);
 				else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
 					break;
 				else {
@@ -861,7 +861,7 @@ void WorldServer::Process() {
 					entity_list.addGroup(group);
 
 					if(group->GetID() == 0) {
-						Inviter->Message(13, "Unable to get new group id. Cannot create group.");
+						Inviter->message(13, "Unable to get new group id. Cannot create group.");
 						break;
 					}
 
@@ -1686,7 +1686,7 @@ void WorldServer::Process() {
 			if(c)
 			{
 				c->ClearPendingAdventureLeave();
-				c->Message(13, "You cannot leave this adventure at this time.");
+				c->message(13, "You cannot leave this adventure at this time.");
 			}
 			break;
 		}
@@ -1800,7 +1800,7 @@ void WorldServer::Process() {
 			CZMessagePlayer_Struct* CZCS = (CZMessagePlayer_Struct*) pack->pBuffer;
 			Client* client = entity_list.getClientByName(CZCS->CharName);
 			if (client != 0) {
-				client->Message(CZCS->Type, CZCS->Message);
+				client->message(CZCS->Type, CZCS->Message);
 			}
 			break;
 		}

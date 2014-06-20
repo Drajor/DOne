@@ -1668,7 +1668,7 @@ void NPC::AI_DoMovement() {
 					if(GetAppearance() != eaStanding)
 						SetAppearance(eaStanding, false);
 
-					entity_list.OpenDoorsNear(castToNPC());
+					entity_list.openDoorsNear(castToNPC());
 
 					if(!DistractedFromGrid) {
 						//kick off event_waypoint depart
@@ -1723,7 +1723,7 @@ void NPC::AI_DoMovement() {
 							tar_ndx = 20;
 
 						if(NodeReached)
-							entity_list.OpenDoorsNear(castToNPC());
+							entity_list.openDoorsNear(castToNPC());
 
 						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp, true);
 					}
@@ -1762,7 +1762,7 @@ void NPC::AI_DoMovement() {
 					tar_ndx = 20;
 
 				if(NodeReached)
-					entity_list.OpenDoorsNear(castToNPC());
+					entity_list.openDoorsNear(castToNPC());
 
 				CP2Moved = CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp);
 			}
@@ -2526,7 +2526,7 @@ void NPC::AISpellsList(Client* c)
 		return;
 
 	for (std::vector<AISpells_Struct>::iterator it = AIspells.begin(); it != AIspells.end(); ++it)
-		c->Message(0, "%s (%d): Type %d, Priority %d",
+		c->message(0, "%s (%d): Type %d, Priority %d",
 				spells[it->spellid].name, it->spellid, it->type, it->priority);
 
 	return;

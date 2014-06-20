@@ -227,7 +227,7 @@ void Lua_EntityList::ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target) {
 
 void Lua_EntityList::OpenDoorsNear(Lua_NPC opener) {
 	Lua_Safe_Call_Void();
-	self->OpenDoorsNear(opener);
+	self->openDoorsNear(opener);
 }
 
 std::string Lua_EntityList::MakeNameUnique(const char *name) {
@@ -243,12 +243,12 @@ std::string Lua_EntityList::RemoveNumbers(const char *name) {
 
 	char t_name[64];
 	strncpy(t_name, name, 64);
-	return self->RemoveNumbers(t_name);
+	return self->removeNumbers(t_name);
 }
 
 void Lua_EntityList::SignalMobsByNPCID(uint32 npc_id, int signal) {
 	Lua_Safe_Call_Void();
-	self->SignalMobsByNPCID(npc_id, signal);
+	self->signalMOBsByNPCID(npc_id, signal);
 }
 
 int Lua_EntityList::DeleteNPCCorpses() {

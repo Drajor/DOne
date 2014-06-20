@@ -89,7 +89,7 @@ void Trade::AddEntity(uint16 from_slot_id, uint16 trade_slot_id)
 	Client* client = owner->castToClient();
 	const ItemInst* inst = client->GetInv().GetItem(SLOT_CURSOR);
 	if (!inst) {
-		client->Message(13, "Error: Could not find item on your cursor!");
+		client->message(13, "Error: Could not find item on your cursor!");
 		return;
 	}
 
@@ -786,7 +786,7 @@ void Client::Trader_EndTrader() {
 			tdis->Unknown000 = 0;
 			tdis->TraderID = Customer->getID();
 			tdis->Unknown012 = 0;
-			Customer->Message(13, "The Trader is no longer open for business");
+			Customer->message(13, "The Trader is no longer open for business");
 
 			for(int i = 0; i < 80; i++) {
 				if(gis->Items[i] != 0) {
@@ -1227,8 +1227,8 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	_log(TRADING__CLIENT, "Actual quantity that will be traded is %i", outtbs->Quantity);
 
 	if((tbs->Price * outtbs->Quantity) <= 0) {
-		Message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
-		Trader->Message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
+		message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
+		Trader->message(13, "Internal error. Aborting trade. Please report this to the ServerOP. Error code is 1");
 		LogFile->write(EQEMuLog::Error, "Bazaar: Zero price transaction between %s and %s aborted."
 						"Item: %s, Charges: %i, TBS: Qty %i, Price: %i",
 						getName(), Trader->getName(),
@@ -1241,7 +1241,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs,Client* Trader,const EQApplicat
 	uint64 TotalTransactionValue = static_cast<uint64>(tbs->Price) * static_cast<uint64>(outtbs->Quantity);
 
 	if(TotalTransactionValue > MAX_TRANSACTION_VALUE) {
-		Message(13, "That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
+		message(13, "That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
 		TradeRequestFailed(app);
 		safe_delete(outapp);
 		return;
@@ -1355,7 +1355,7 @@ void Client::SendBazaarWelcome(){
 
 			row = mysql_fetch_row(result);
 
-			Message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them,"
+			message(10, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them,"
 					" or use /buyer to set up your own Buy Lines.", atoi(row[0]));
 		}
 		mysql_free_result(result);
@@ -1567,7 +1567,7 @@ void Client::SendBazaarResults(uint32 TraderID, uint32 Class_, uint32 Race, uint
 		uint32 ID = 0;
 
 		if(mysql_num_rows(Result) == static_cast<unsigned long>(RuleI(Bazaar, MaxSearchResults)))
-			Message(15, "Your search reached the limit of %i results. Please narrow your search down by selecting more options.",
+			message(15, "Your search reached the limit of %i results. Please narrow your search down by selecting more options.",
 					RuleI(Bazaar, MaxSearchResults));
 
 		if(mysql_num_rows(Result) == 0){
@@ -1693,7 +1693,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	if(!inst) return;
 
-	Customer->Message(13, "The Trader has put up %s for sale.", item->Name);
+	Customer->message(13, "The Trader has put up %s for sale.", item->Name);
 
 	for(int i = 0; i < 80; i++) {
 
@@ -1741,7 +1741,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		tdis->Unknown000 = 0;
 		tdis->TraderID = Customer->getID();
 		tdis->Unknown012 = 0;
-		Customer->Message(13, "The Trader has withdrawn the %s from sale.", item->Name);
+		Customer->message(13, "The Trader has withdrawn the %s from sale.", item->Name);
 
 		for(int i = 0; i < 80; i++) {
 
@@ -1775,7 +1775,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		inst->SetMerchantCount(Charges);
 
 	// Let the customer know the price in the window has suddenly just changed on them.
-	Customer->Message(13, "The Trader has changed the price of %s.", item->Name);
+	Customer->message(13, "The Trader has changed the price of %s.", item->Name);
 
 	for(int i = 0; i < 80; i++) {
 		if((gis->ItemID[i] != ItemID) ||
@@ -1914,7 +1914,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 			}
 
 			if(SameItemWithDifferingCharges)
-				Message(13, "Warning: You have more than one %s with different charges. They have all been added for sale "
+				message(13, "Warning: You have more than one %s with different charges. They have all been added for sale "
 						"at the same price.", item->Name);
 		}
 
@@ -1961,8 +1961,8 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 		tpus->SubAction = BazaarPriceChange_Fail;
 		QueuePacket(app);
 		Trader_EndTrader();
-		Message(13, "You must remove the item from sale before you can increase the price while a customer is browsing.");
-		Message(13, "Click 'Begin Trader' to restart Trader mode with the increased price for this item.");
+		message(13, "You must remove the item from sale before you can increase the price while a customer is browsing.");
+		message(13, "Click 'Begin Trader' to restart Trader mode with the increased price for this item.");
 		safe_delete(gis);
 		return;
 	}
@@ -2017,12 +2017,12 @@ void Client::SendBuyerResults(char* SearchString, uint32 SearchID) {
 		int NumberOfRows = mysql_num_rows(Result);
 
 		if(NumberOfRows == RuleI(Bazaar, MaxBarterSearchResults))
-			Message(15, "Your search found too many results; some are not displayed.");
+			message(15, "Your search found too many results; some are not displayed.");
 		else {
 			if(strlen(SearchString) == 0)
-				Message(10, "There are %i Buy Lines.", NumberOfRows);
+				message(10, "There are %i Buy Lines.", NumberOfRows);
 			else
-				Message(10, "There are %i Buy Lines that match the search string '%s'.",
+				message(10, "There are %i Buy Lines that match the search string '%s'.",
 						NumberOfRows, SearchString);
 		}
 
@@ -2103,7 +2103,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	if(!Buyer) {
 		bir->Approval = 0; // Tell the client that the Buyer is unavailable
 		QueuePacket(app);
-		Message(13, "The Buyer has gone away.");
+		message(13, "The Buyer has gone away.");
 		return;
 	}
 
@@ -2119,7 +2119,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 	const char *WelcomeMessagePointer = Buyer->GetBuyerWelcomeMessage();
 
 	if(strlen(WelcomeMessagePointer) > 0)
-		Message(10, "%s greets you, '%s'.", Buyer->getName(), WelcomeMessagePointer);
+		message(10, "%s greets you, '%s'.", Buyer->getName(), WelcomeMessagePointer);
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Barter, sizeof(BuyerBrowsing_Struct));
 
@@ -2215,7 +2215,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
 
 	if(m_inv.HasItem(ItemID, Quantity, invWhereWorn|invWherePersonal|invWhereCursor) == SLOT_INVALID) {
-		Message(13, "You do not have %i %s on you.", Quantity, item->Name);
+		message(13, "You do not have %i %s on you.", Quantity, item->Name);
 		return;
 	}
 
@@ -2223,37 +2223,37 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	Client* Buyer = entity_list.getClientByID(BuyerID);
 
 	if(!Buyer || !Buyer->IsBuyer()) {
-		Message(13, "The Buyer has gone away.");
+		message(13, "The Buyer has gone away.");
 		return;
 	}
 
 	// For Stackable items, HasSpaceForItem will try check if there is space to stack with existing stacks in
 	// the buyer inventory.
 	if(!(Buyer->GetInv().HasSpaceForItem(item, Quantity))) {
-		Message(13, "The Buyer does not have space for %i %s", Quantity, item->Name);
+		message(13, "The Buyer does not have space for %i %s", Quantity, item->Name);
 		return;
 	}
 
 	if((static_cast<uint64>(Quantity) * static_cast<uint64>(Price)) > MAX_TRANSACTION_VALUE) {
-		Message(13, "That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
+		message(13, "That would exceed the single transaction limit of %u platinum.", MAX_TRANSACTION_VALUE / 1000);
 		return;
 	}
 
 	if(!Buyer->HasMoney(Quantity * Price)) {
-		Message(13, "The Buyer does not have sufficient money to purchase that quantity of %s.", item->Name);
-		Buyer->Message(13, "%s tried to sell you %i %s, but you have insufficient funds.", getName(), Quantity, item->Name);
+		message(13, "The Buyer does not have sufficient money to purchase that quantity of %s.", item->Name);
+		Buyer->message(13, "%s tried to sell you %i %s, but you have insufficient funds.", getName(), Quantity, item->Name);
 		return;
 	}
 
 	if(Buyer->CheckLoreConflict(item)) {
-		Message(13, "That item is LORE and the Buyer already has one.");
-		Buyer->Message(13, "%s tried to sell you %s but this item is LORE and you already have one.",
+		message(13, "That item is LORE and the Buyer already has one.");
+		Buyer->message(13, "%s tried to sell you %s but this item is LORE and you already have one.",
 					getName(), item->Name);
 		return;
 	}
 
 	if(item->NoDrop == 0) {
-		Message(13, "That item is NODROP.");
+		message(13, "That item is NODROP.");
 		return;
 	}
 
@@ -2272,7 +2272,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 					break;
 				}
 				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-				Message(13, "Internal error while processing transaction.");
+				message(13, "Internal error while processing transaction.");
 				return;
 			}
 
@@ -2280,7 +2280,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 			if(!ItemToTransfer || !Buyer->MoveItemToInventory(ItemToTransfer, true)) {
 				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-				Message(13, "Internal error while processing transaction.");
+				message(13, "Internal error while processing transaction.");
 
 				if(ItemToTransfer)
 					safe_delete(ItemToTransfer);
@@ -2318,7 +2318,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 			if(SellerSlot == SLOT_INVALID) {
 				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-				Message(13, "Internal error while processing transaction.");
+				message(13, "Internal error while processing transaction.");
 				return;
 			}
 
@@ -2326,7 +2326,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 			if(!ItemToTransfer) {
 				_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-				Message(13, "Internal error while processing transaction.");
+				message(13, "Internal error while processing transaction.");
 				return;
 			}
 
@@ -2338,7 +2338,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
 					_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-					Message(13, "Internal error while processing transaction.");
+					message(13, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;
 				}
@@ -2373,7 +2373,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 				if(!Buyer->MoveItemToInventory(ItemToTransfer, true)) {
 					_log(TRADING__BARTER, "Unexpected error while moving item from seller to buyer.");
-					Message(13, "Internal error while processing transaction.");
+					message(13, "Internal error while processing transaction.");
 					safe_delete(ItemToTransfer);
 					return;
 				}
@@ -2621,19 +2621,19 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 	}
 	else {
 		if(ItemCount > 0)
-			Message(13, "Buy line %s disabled as Item Compensation is not currently supported.", ItemName);
+			message(13, "Buy line %s disabled as Item Compensation is not currently supported.", ItemName);
 
 		else if(Quantity <= 0)
-			Message(13, "Buy line %s disabled as the quantity is invalid.", ItemName);
+			message(13, "Buy line %s disabled as the quantity is invalid.", ItemName);
 
 		else if(LoreConflict)
-			Message(13, "Buy line %s disabled as the item is LORE and you have one already.", ItemName);
+			message(13, "Buy line %s disabled as the item is LORE and you have one already.", ItemName);
 
 		else if(item->NoDrop == 0)
-			Message(13, "Buy line %s disabled as the item is NODROP.", ItemName);
+			message(13, "Buy line %s disabled as the item is NODROP.", ItemName);
 
 		else if(ToggleOnOff)
-			Message(13, "Buy line %s disabled due to insufficient funds.", ItemName);
+			message(13, "Buy line %s disabled due to insufficient funds.", ItemName);
 
 		else
 			database.RemoveBuyLine(CharacterID(), BuySlot);
@@ -2704,7 +2704,7 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 			break;
 	}
 	if (Count == MAX_BUYER_ITEMSEARCH_RESULTS)
-		Message(15, "Your search returned more than %i results. Only the first %i are displayed.",
+		message(15, "Your search returned more than %i results. Only the first %i are displayed.",
 				MAX_BUYER_ITEMSEARCH_RESULTS, MAX_BUYER_ITEMSEARCH_RESULTS);
 
 	bisr->Action = Barter_BuyerSearch;

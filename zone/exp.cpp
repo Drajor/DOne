@@ -199,7 +199,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	//max_AAXP = GetEXPForLevel(52) - GetEXPForLevel(51);	//GetEXPForLevel() doesn't depend on class/race, just level, so it shouldn't change between Clients
 	max_AAXP = RuleI(AA, ExpPerPoint);	//this may be redundant since we're doing this in Client::FinishConnState2()
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
-		Message(13, "Error in Client::SetEXP. EXP not set.");
+		message(13, "Error in Client::SetEXP. EXP not set.");
 		return; // Must be invalid class/race
 	}
 
@@ -217,7 +217,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		}
 	}
 	else if((set_exp + set_aaxp) < (m_pp.exp+m_pp.expAA)){ //only loss message if you lose exp, no message if you gained/lost nothing.
-		Message(15, "You have lost experience.");
+		message(15, "You have lost experience.");
 	}
 
 	//check_level represents the level we should be when we have
@@ -325,7 +325,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 			//Message(15, "You lost a level! You are now level %i!", check_level);
 		}
 		else
-			Message(15, "Welcome to level %i!", check_level);
+			message(15, "Welcome to level %i!", check_level);
 
 		SetLevel(check_level);
 	}
@@ -409,7 +409,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	m_pp.level = set_level;
 	if (command){
 		m_pp.exp = GetEXPForLevel(set_level);
-		Message(15, "Welcome to level %i!", set_level);
+		message(15, "Welcome to level %i!", set_level);
 		lu->exp = 0;
 	}
 	else {

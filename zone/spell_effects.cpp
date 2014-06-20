@@ -117,10 +117,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	}
 
 #ifdef SPELL_EFFECT_SPAM
-		Message(0, "You are affected by spell '%s' (id %d)", spell.name, spell_id);
+		message(0, "You are affected by spell '%s' (id %d)", spell.name, spell_id);
 		if(buffslot >= 0)
 		{
-			Message(0, "Buff slot:  %d  Duration:  %d tics", buffslot, buffs[buffslot].ticsremaining);
+			message(0, "Buff slot:  %d  Duration:  %d tics", buffslot, buffs[buffslot].ticsremaining);
 		}
 #endif
 
@@ -329,7 +329,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				uint32 buff_count = GetMaxTotalSlots();
 				for(i = 0; i < buff_count; i++) {
 					if(buffs[i].spellid == spell_id && i != buffslot) {
-						Message(0, "You must wait before you can be affected by this spell again.");
+						message(0, "You must wait before you can be affected by this spell again.");
 						inuse = true;
 						break;
 					}
@@ -363,7 +363,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (effect_value < 0)
 							TryTriggerOnValueAmount(false, true);
 #ifdef SPELL_EFFECT_SPAM
-						caster->Message(0, "You have gained %+i mana!", effect_value);
+						caster->message(0, "You have gained %+i mana!", effect_value);
 #endif
 					}
 				}
@@ -611,11 +611,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 								castToClient()->SummonItem(13073, fcharges);
 							}
 							else{
-								Message(13, "You can only transmute flesh to bone.");
+								message(13, "You can only transmute flesh to bone.");
 							}
 						}
 					else{
-						Message(13, "You can only transmute flesh to bone.");
+						message(13, "You can only transmute flesh to bone.");
 					}
 				}
 				break;
@@ -648,9 +648,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							{
 								g->mMembers[gi]->castToClient()->EnableAAEffect(aaEffectWarcry , time);
 								if (g->mMembers[gi]->getID() != caster->getID())
-									g->mMembers[gi]->Message(13, "You hear the war cry.");
+									g->mMembers[gi]->message(13, "You hear the war cry.");
 								else
-									Message(13, "You let loose a fierce war cry.");
+									message(13, "You let loose a fierce war cry.");
 							}
 						}
 					}
@@ -658,7 +658,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				else{
 					castToClient()->EnableAAEffect(aaEffectWarcry , time);
-					Message(13, "You let loose a fierce war cry.");
+					message(13, "You let loose a fierce war cry.");
 				}
 
 				break;
@@ -735,19 +735,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				WipeHateList();
 
 				if (isClient() && caster->isClient()) {
-					caster->Message(0, "Unable to cast charm on a fellow player.");
+					caster->message(0, "Unable to cast charm on a fellow player.");
 					BuffFadeByEffect(SE_Charm);
 					break;
 				} else if(isCorpse()) {
-					caster->Message(0, "Unable to cast charm on a corpse.");
+					caster->message(0, "Unable to cast charm on a corpse.");
 					BuffFadeByEffect(SE_Charm);
 					break;
 				} else if(caster->GetPet() != nullptr && caster->isClient()) {
-					caster->Message(0, "You cannot charm something when you already have a pet.");
+					caster->message(0, "You cannot charm something when you already have a pet.");
 					BuffFadeByEffect(SE_Charm);
 					break;
 				} else if(GetOwner()) {
-					caster->Message(0, "You cannot charm someone else's pet!");
+					caster->message(0, "You cannot charm someone else's pet!");
 					BuffFadeByEffect(SE_Charm);
 					break;
 				}
@@ -1138,7 +1138,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				snprintf(effect_desc, _EDLEN, "Summon Item: %s (id %d)", itemname, spell.base[i]);
 #endif
 				if (!item) {
-					Message(13, "Unable to summon item %d. Item not found.", spell.base[i]);
+					message(13, "Unable to summon item %d. Item not found.", spell.base[i]);
 				} else if (isClient()) {
 					Client* c = castToClient();
 					if (c->CheckLoreConflict(item)) {
@@ -1177,10 +1177,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 				if (!SummonedItem || !SummonedItem->IsType(ItemClassContainer)) {
 					if (caster)
-						caster->Message(13, "SE_SummonItemIntoBag but no bag has been summoned!");
+						caster->message(13, "SE_SummonItemIntoBag but no bag has been summoned!");
 				} else if ((slot = SummonedItem->FirstOpenSlot()) == 0xff) {
 					if (caster)
-						caster->Message(13, "SE_SummonItemIntoBag but no room in summoned bag!");
+						caster->message(13, "SE_SummonItemIntoBag but no room in summoned bag!");
 				} else if (isClient()) {
 					if (castToClient()->CheckLoreConflict(item)) {
 						castToClient()->DuplicateLoreMessage(spell.base[i]);
@@ -1488,7 +1488,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					{
 						WipeHateList();
 					}
-					Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
+					message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
 				}
 				break;
 			}
@@ -1705,7 +1705,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					Group* group = entity_list.getGroupByClient(TargetClient);
 					if(group) {
 						if(!group->isGroupMember(TargetClient)) {
-							Message(13, "Your target must be a group member for this spell.");
+							message(13, "Your target must be a group member for this spell.");
 							break;
 						}
 					}
@@ -1718,13 +1718,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							if(gid < 11)
 							{
 								if(r->GetGroup(TargetClient->getName()) != gid) {
-									Message(13, "Your target must be a group member for this spell.");
+									message(13, "Your target must be a group member for this spell.");
 									break;
 								}
 							}
 						} else {
 							if(TargetClient != this->castToClient()) {
-								Message(13, "Your target must be a group member for this spell.");
+								message(13, "Your target must be a group member for this spell.");
 								break;
 							}
 						}
@@ -1895,7 +1895,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= buffs[j].counters) {
 							if (caster)
-								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
+								caster->message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
 							effect_value -= buffs[j].counters;
@@ -1928,7 +1928,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (effect_value >= buffs[j].counters)
 						{
 							if (caster)
-								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
+								caster->message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
 							effect_value -= buffs[j].counters;
@@ -1963,7 +1963,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (effect_value >= buffs[j].counters)
 						{
 							if (caster)
-								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
+								caster->message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
 							effect_value -= buffs[j].counters;
@@ -1997,7 +1997,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							continue;
 						if (effect_value >= buffs[j].counters) {
 							if (caster)
-								caster->Message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
+								caster->message(MT_Spells,"You have cured your target of %s!",spells[buffs[j].spellid].name);
 								caster->CastOnCurer(buffs[j].spellid);
 								CastOnCure(buffs[j].spellid);
 							effect_value -= buffs[j].counters;
@@ -2022,7 +2022,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					if(GetLevel() <= 52)
 						castToNPC()->depop();
 					else
-						Message(13, "Your target is too high level to be affected by this spell.");
+						message(13, "Your target is too high level to be affected by this spell.");
 				}
 				break;
 			}
@@ -2116,11 +2116,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			{
 			if(isClient()){
 					castToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(), caster->GetY(), caster->GetZ(), caster->GetHeading(), 2, SummonPC);
-					Message(15, "You have been summoned!");
+					message(15, "You have been summoned!");
 					entity_list.ClearAggro(this);
 				}
 				else
-					caster->Message(13, "This spell can only be cast on players.");
+					caster->message(13, "This spell can only be cast on players.");
 
 				break;
 			}
@@ -2895,12 +2895,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Unknown Effect ID %d", effect);
 #else
-				Message(0, "Unknown spell effect %d in spell %s (id %d)", effect, spell.name, spell_id);
+				message(0, "Unknown spell effect %d in spell %s (id %d)", effect, spell.name, spell_id);
 #endif
 			}
 		}
 #ifdef SPELL_EFFECT_SPAM
-		Message(0, ". . . Effect #%i: %s", i + 1, (effect_desc && effect_desc[0]) ? effect_desc : "Unknown");
+		message(0, ". . . Effect #%i: %s", i + 1, (effect_desc && effect_desc[0]) ? effect_desc : "Unknown");
 #endif
 	}
 
@@ -3367,7 +3367,7 @@ void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caste
 					{
 						WipeHateList();
 					}
-					Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
+					message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
 				}
 				break;
 			}
@@ -5432,7 +5432,7 @@ bool Mob::TryDeathSave() {
 					HealAmt = GetMaxHP() - GetHP();
 
 				SetHP((GetHP()+HealAmt));
-				Message(263, "The gods have healed you for %i points of damage.", HealAmt);
+				message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
 				if(spellbonuses.DeathSave[0] == 2)
 					entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());
@@ -5465,7 +5465,7 @@ bool Mob::TryDeathSave() {
 						HealAmt = GetMaxHP() - GetHP();
 
 					SetHP((GetHP()+HealAmt));
-					Message(263, "The gods have healed you for %i points of damage.", HealAmt);
+					message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
 					if(spellbonuses.DeathSave[0] == 2)
 						entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, DIVINE_INTERVENTION, GetCleanName());

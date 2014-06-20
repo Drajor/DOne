@@ -118,7 +118,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	//What is the point of this, since the names get mangled..
 	Mob* mob = entity_list.getMOB(name);
 	if(mob != 0)
-		entity_list.RemoveEntity(mob->getID());
+		entity_list.removeEntity(mob->getID());
 
 	int moblevel=GetLevel();
 
@@ -249,7 +249,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	attack_speed = d->attack_speed;
 	slow_mitigation = d->slow_mitigation;
 
-	EntityList::RemoveNumbers(name);
+	EntityList::removeNumbers(name);
 	entity_list.MakeNameUnique(name);
 
 	npc_aggro = d->npc_aggro;
@@ -493,7 +493,7 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to) {
 	int x = 0;
-	to->Message(0, "Coin: %ip %ig %is %ic", platinum, gold, silver, copper);
+	to->message(0, "Coin: %ip %ig %is %ic", platinum, gold, silver, copper);
 
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -503,21 +503,21 @@ void NPC::QueryLoot(Client* to) {
 		if (item)
 			if (to->GetClientVersion() >= EQClientRoF)
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->message(0, "minlvl: %i maxlvl: %i %i: %c%06X0000000000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 			else if (to->GetClientVersion() >= EQClientSoF)
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->message(0, "minlvl: %i maxlvl: %i %i: %c%06X00000000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 			else
 			{
-				to->Message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
+				to->message(0, "minlvl: %i maxlvl: %i %i: %c%06X000000000000000000000000000000000000000%s%c",(*cur)->minlevel, (*cur)->maxlevel, (int) item->ID,0x12, item->ID, item->Name, 0x12);
 			}
 		else
 			LogFile->write(EQEMuLog::Error, "Database error, invalid item");
 		x++;
 	}
-	to->Message(0, "%i items on %s.", x, getName());
+	to->message(0, "%i items on %s.", x, getName());
 }
 
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
@@ -941,17 +941,17 @@ NPC* NPC::SpawnNPC(const char* spawncommand, float in_x, float in_y, float in_z,
 
 		if (client) {
 			// Notify client of spawn data
-			client->Message(0, "New spawn:");
-			client->Message(0, "Name: %s", npc->name);
-			client->Message(0, "Race: %u", npc->race);
-			client->Message(0, "Level: %u", npc->level);
-			client->Message(0, "Material: %u", npc->texture);
-			client->Message(0, "Current/Max HP: %i", npc->max_hp);
-			client->Message(0, "Gender: %u", npc->gender);
-			client->Message(0, "Class: %u", npc->class_);
-			client->Message(0, "Weapon Item Number: %u/%u", npc->d_meele_texture1, npc->d_meele_texture2);
-			client->Message(0, "MerchantID: %u", npc->MerchantType);
-			client->Message(0, "Bodytype: %u", npc->bodytype);
+			client->message(0, "New spawn:");
+			client->message(0, "Name: %s", npc->name);
+			client->message(0, "Race: %u", npc->race);
+			client->message(0, "Level: %u", npc->level);
+			client->message(0, "Material: %u", npc->texture);
+			client->message(0, "Current/Max HP: %i", npc->max_hp);
+			client->message(0, "Gender: %u", npc->gender);
+			client->message(0, "Class: %u", npc->class_);
+			client->message(0, "Weapon Item Number: %u/%u", npc->d_meele_texture1, npc->d_meele_texture2);
+			client->message(0, "MerchantID: %u", npc->MerchantType);
+			client->message(0, "Bodytype: %u", npc->bodytype);
 		}
 
 		return npc;
@@ -999,7 +999,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 				}
 			}
 			char tmpstr[64];
-			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
+			EntityList::removeNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
 			if (npc_type_id)
 			{
 				if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (id, name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(%i,\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
@@ -1182,14 +1182,14 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 		case 6: { // add npc_type
 			uint32 npc_type_id;
 			char tmpstr[64];
-			EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
+			EntityList::removeNumbers(strn0cpy(tmpstr, spawn->getName(), sizeof(tmpstr)));
 			if (!RunQuery(query, MakeAnyLenString(&query, "INSERT INTO npc_types (name, level, race, class, hp, gender, texture, helmtexture, size, loottable_id, merchant_id, face, runspeed, prim_melee_type, sec_melee_type) values(\"%s\",%i,%i,%i,%i,%i,%i,%i,%f,%i,%i,%i,%f,%i,%i)", tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28), errbuf, 0, 0, &npc_type_id)) {
 				safe_delete(query);
 				return false;
 			}
 			if(c) c->LogSQL(query);
 			safe_delete_array(query);
-			if(c) c->Message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
+			if(c) c->message(0, "%s npc_type ID %i created successfully!", tmpstr, npc_type_id);
 			return true;
 			break;
 		}
@@ -1246,7 +1246,7 @@ void NPC::PickPocket(Client* thief) {
 	//make sure were allowed to targte them:
 	int olevel = GetLevel();
 	if(olevel > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
-		thief->Message(13, "You are too inexperienced to pick pocket this target");
+		thief->message(13, "You are too inexperienced to pick pocket this target");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		//should we check aggro
 		return;
@@ -1255,7 +1255,7 @@ void NPC::PickPocket(Client* thief) {
 	if(MakeRandomInt(0, 100) > 95){
 		AddToHateList(thief, 50);
 		Say("Stop thief!");
-		thief->Message(13, "You are noticed trying to steal!");
+		thief->message(13, "You are noticed trying to steal!");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		return;
 	}
@@ -1340,7 +1340,7 @@ void NPC::PickPocket(Client* thief) {
 		}
 		else
 		{
-			thief->Message(0, "This target's pockets are empty");
+			thief->message(0, "This target's pockets are empty");
 			thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		}
 	}

@@ -83,7 +83,7 @@ bool Trap::process()
 	if (chkarea_timer.Enabled() && chkarea_timer.Check()
 		/*&& zone->GetClientCount() > 0*/ )
 	{
-		Mob* trigger = entity_list.GetTrapTrigger(this);
+		Mob* trigger = entity_list.getTrapTrigger(this);
 		if (trigger && !(trigger->isClient() && trigger->castToClient()->GetGM()))
 		{
 			Trigger(trigger);
@@ -128,7 +128,7 @@ void Trap::Trigger(Mob* trigger)
 				entity_list.messageClose(trigger,false,effectvalue,13,"%s",message.c_str());
 			}
 
-			entity_list.SendAlarm(this,trigger,effectvalue);
+			entity_list.sendAlarm(this,trigger,effectvalue);
 			break;
 		case trapTypeMysticSpawn:
 			if (message.empty())
@@ -202,22 +202,21 @@ void Trap::Trigger(Mob* trigger)
 	disarmed = true;
 }
 
-Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
+Trap* EntityList::findNearbyTrap(Mob* pSearcher, float pMaxDistance) {
 	float dist = 999999;
 	Trap* current_trap = nullptr;
 
-	float max_dist2 = max_dist*max_dist;
+	float max_dist2 = pMaxDistance*pMaxDistance;
 	Trap *cur;
-	auto it = mTraps.begin();
-	while (it != mTraps.end()) {
-		cur = it->second;
+	for (auto i = mTraps.begin(); i != mTraps.end(); i++) {
+		cur = i->second;
 		if(!cur->disarmed) {
 			float curdist = 0;
-			float tmp = searcher->GetX() - cur->x;
+			float tmp = pSearcher->GetX() - cur->x;
 			curdist += tmp*tmp;
-			tmp = searcher->GetY() - cur->y;
+			tmp = pSearcher->GetY() - cur->y;
 			curdist += tmp*tmp;
-			tmp = searcher->GetZ() - cur->z;
+			tmp = pSearcher->GetZ() - cur->z;
 			curdist += tmp*tmp;
 
 			if (curdist < max_dist2 && curdist < dist)
@@ -226,36 +225,35 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist) {
 				current_trap = cur;
 			}
 		}
-		++it;
 	}
 	return current_trap;
 }
 
-Mob* EntityList::GetTrapTrigger(Trap* trap) {
+Mob* EntityList::getTrapTrigger(Trap* pTrap) {
 	Mob* savemob = 0;
 
 	float xdiff, ydiff, zdiff;
 
-	float maxdist = trap->radius * trap->radius;
+	float maxdist = pTrap->radius * pTrap->radius;
 
-	auto it = mClients.begin();
-	while (it != mClients.end()) {
-		Client* cur = it->second;
-		zdiff = cur->GetZ() - trap->z;
+	auto i = mClients.begin();
+	while (i != mClients.end()) {
+		Client* cur = i->second;
+		zdiff = cur->GetZ() - pTrap->z;
 		if(zdiff < 0)
 			zdiff = 0 - zdiff;
 
-		xdiff = cur->GetX() - trap->x;
-		ydiff = cur->GetY() - trap->y;
+		xdiff = cur->GetX() - pTrap->x;
+		ydiff = cur->GetY() - pTrap->y;
 		if ((xdiff*xdiff + ydiff*ydiff) <= maxdist
-			&& zdiff < trap->maxzdiff)
+			&& zdiff < pTrap->maxzdiff)
 		{
-			if (MakeRandomInt(0,100) < trap->chance)
+			if (MakeRandomInt(0,100) < pTrap->chance)
 				return(cur);
 			else
 				savemob = cur;
 		}
-		++it;
+		++i;
 	}
 	return savemob;
 }

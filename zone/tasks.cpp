@@ -775,7 +775,7 @@ bool TaskManager::LoadClientState(Client* c, ClientTaskState *state) {
 		int TaskID = state->ActiveTasks[i].TaskID;
 		if(TaskID==TASKSLOTEMPTY) continue;
 		if(!Tasks[TaskID]) {
-			c->Message(13, "Active Task Slot %i, references a task (%i), that does not exist. "
+			c->message(13, "Active Task Slot %i, references a task (%i), that does not exist. "
 						"Removing from memory. Contact a GM to resolve this.",i, TaskID);
 
 			LogFile->write(EQEMuLog::Error, ERR_NOTASK2, CharacterID, TaskID);
@@ -786,7 +786,7 @@ bool TaskManager::LoadClientState(Client* c, ClientTaskState *state) {
 		for(int j=0; j<Tasks[TaskID]->ActivityCount; j++) {
 
 			if(state->ActiveTasks[i].Activity[j].ActivityID != j) {
-				c->Message(13, "Active Task %i, %s. Activity count does not match expected value."
+				c->message(13, "Active Task %i, %s. Activity count does not match expected value."
 							"Removing from memory. Contact a GM to resolve this.",
 							TaskID, Tasks[TaskID]->Title);
 
@@ -1383,18 +1383,18 @@ void TaskManager::ExplainTask(Client*c, int TaskID) {
 	if(!c) return;
 
 	if((TaskID<=0) || (TaskID>=MAXTASKS)) {
-		c->Message(0, "TaskID out-of-range.");
+		c->message(0, "TaskID out-of-range.");
 		return;
 	}
 
 	if(Tasks[TaskID] == nullptr) {
-		c->Message(0, "Task does not exist.");
+		c->message(0, "Task does not exist.");
 		return;
 	}
 
 	char Explanation[1000], *ptr;
-	c->Message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description);
-	c->Message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
+	c->message(0, "Task %4i: Title: %s", TaskID, Tasks[TaskID]->Description);
+	c->message(0, "%3i Activities", Tasks[TaskID]->ActivityCount);
 	ptr = Explanation;
 	for(int i=0; i<Tasks[TaskID]->ActivityCount; i++) {
 
@@ -1982,7 +1982,7 @@ void ClientTaskState::IncrementDoneCount(Client* c, TaskInformation* Task, int T
 		// Send the updated task/activity list to the client
 		taskmanager->SendSingleActiveTaskToClient(c, TaskIndex, TaskComplete, false);
 		// Inform the client the task has been updated, both by a chat message
-		c->Message(0, "Your task '%s' has been updated.", Task->Title);
+		c->message(0, "Your task '%s' has been updated.", Task->Title);
 		
 		if(Task->Activity[ActivityID].GoalMethod != METHODQUEST)
 		{
@@ -2034,7 +2034,7 @@ void ClientTaskState::RewardTask(Client* c, TaskInformation *Task) {
 				c->SummonItem(Task->RewardID);
 				Item = database.GetItem(Task->RewardID);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->message(15, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2045,7 +2045,7 @@ void ClientTaskState::RewardTask(Client* c, TaskInformation *Task) {
 				c->SummonItem(RewardList[i]);
 				Item = database.GetItem(RewardList[i]);
 				if(Item)
-					c->Message(15, "You receive %s as a reward.", Item->Name);
+					c->message(15, "You receive %s as a reward.", Item->Name);
 			}
 			break;
 		}
@@ -2106,7 +2106,7 @@ void ClientTaskState::RewardTask(Client* c, TaskInformation *Task) {
 			CashMessage += " copper";
 		}
 		CashMessage += " pieces.";
-		c->Message(15,CashMessage.c_str());
+		c->message(15,CashMessage.c_str());
 	}
 	int32 EXPReward = Task->XPReward;
 	if(EXPReward > 0) {
@@ -2268,16 +2268,16 @@ void ClientTaskState::ResetTaskActivity(Client* c, int TaskID, int ActivityID) {
 
 void ClientTaskState::ShowClientTasks(Client* c) {
 
-	c->Message(0, "Task Information:");
+	c->message(0, "Task Information:");
 	//for(int i=0; i<ActiveTaskCount; i++) {
 	for(int i=0; i<MAXACTIVETASKS; i++) {
 		if(ActiveTasks[i].TaskID==TASKSLOTEMPTY)
 			continue;
 
-		c->Message(0, "Task: %i %s", ActiveTasks[i].TaskID, taskmanager->Tasks[ActiveTasks[i].TaskID]->Title);
-		c->Message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTasks[i].TaskID]->Description);
+		c->message(0, "Task: %i %s", ActiveTasks[i].TaskID, taskmanager->Tasks[ActiveTasks[i].TaskID]->Title);
+		c->message(0, "  Description: [%s]\n", taskmanager->Tasks[ActiveTasks[i].TaskID]->Description);
 		for(int j=0; j<taskmanager->GetActivityCount(ActiveTasks[i].TaskID); j++) {
-			c->Message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+			c->message(0, "  Activity: %2d, DoneCount: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
 					ActiveTasks[i].Activity[j].ActivityID,
 					ActiveTasks[i].Activity[j].DoneCount,
 					ActiveTasks[i].Activity[j].State);
@@ -3175,24 +3175,24 @@ void ClientTaskState::RemoveTask(Client* c, int SequenceNumber) {
 void ClientTaskState::AcceptNewTask(Client* c, int TaskID, int NPCID) {
 
 	if(!taskmanager || TaskID<0 || TaskID>=MAXTASKS) {
-		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
+		c->message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
 		return;
 
 	}
 
 	if(taskmanager->Tasks[TaskID] == nullptr) {
-		c->Message(13, "Invalid TaskID %i", TaskID);
+		c->message(13, "Invalid TaskID %i", TaskID);
 		return;
 	}
 
 	if(ActiveTaskCount==MAXACTIVETASKS) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVETASKS);
+		c->message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVETASKS);
 		return;
 	}
 
 	for(int i=0; i<MAXACTIVETASKS; i++) {
 		if(ActiveTasks[i].TaskID==TaskID) {
-			c->Message(13, "You have already been assigned this task.");
+			c->message(13, "You have already been assigned this task.");
 			return;
 		}
 	}
@@ -3216,7 +3216,7 @@ void ClientTaskState::AcceptNewTask(Client* c, int TaskID, int NPCID) {
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if(FreeSlot == -1) {
-		c->Message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVETASKS);
+		c->message(13, "You already have the maximum allowable number of active tasks (%i)", MAXACTIVETASKS);
 		return;
 	}
 
@@ -3235,15 +3235,15 @@ void ClientTaskState::AcceptNewTask(Client* c, int TaskID, int NPCID) {
 	UnlockActivities(c->CharacterID(), FreeSlot);
 	ActiveTaskCount++;
 	taskmanager->SendSingleActiveTaskToClient(c, FreeSlot, false, true);
-	c->Message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title);
+	c->message(0, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title);
 
 	char *buf = 0;
 	MakeAnyLenString(&buf, "%d", TaskID);
 
 	NPC *npc = entity_list.getID(NPCID)->castToNPC();
 	if(!npc) {
-		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
-		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTD to. Report this bug.");
+		c->message(clientMessageYellow, "Task Giver ID is %i", NPCID);
+		c->message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTD to. Report this bug.");
 		safe_delete_array(buf);
 		return;
 	}

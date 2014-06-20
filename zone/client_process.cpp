@@ -544,7 +544,7 @@ bool Client::process() {
 			// Send a position packet every 8 seconds - if not done, other clients
 			// see this char disappear after 10-12 seconds of inactivity
 			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
-				entity_list.SendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
+				entity_list.sendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
 				pLastUpdate = Timer::GetCurrentTime();
 				pLastUpdateWZ = pLastUpdate;
 				position_timer_counter = 0;
@@ -764,7 +764,7 @@ bool Client::process() {
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
 		entity_list.ClearZoneFeignAggro(this);
-		Message(0, "Your enemies have forgotten you!");
+		message(0, "Your enemies have forgotten you!");
 	}
 
 	return ret;
@@ -1130,7 +1130,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 	if(PendingRezzXP < 0) {
 		// pendingrezexp is set to -1 if we are not expecting an OP_RezzAnswer
 		_log(SPELLS__REZ, "Unexpected OP_RezzAnswer. Ignoring it.");
-		Message(13, "You have already been resurrected.\n");
+		message(13, "You have already been resurrected.\n");
 		return;
 	}
 
@@ -1198,7 +1198,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 
 	if(!IsValidSpell(memspell->spell_id))
 	{
-		Message(13, "Unexpected error: spell id out of range");
+		message(13, "Unexpected error: spell id out of range");
 		return;
 	}
 
@@ -1229,10 +1229,10 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 					DeleteItemInInventory(SLOT_CURSOR, 1, true);
 				}
 				else
-					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");
+					message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");
 			}
 			else
-				Message(0,"Scribing a spell without an inst on your cursor?");
+				message(0,"Scribing a spell without an inst on your cursor?");
 			break;
 		}
 		case memSpellMemorize:	{	// memming spell
@@ -1561,8 +1561,8 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			with->trade->state = Trading;
 
 		Client* recipient = trader->castToClient();
-		recipient->Message(15, "%s adds some coins to the trade.", getName());
-		recipient->Message(15, "The total trade is: %i PP, %i GP, %i SP, %i CP",
+		recipient->message(15, "%s adds some coins to the trade.", getName());
+		recipient->message(15, "The total trade is: %i PP, %i GP, %i SP, %i CP",
 			trade->pp, trade->gp,
 			trade->sp, trade->cp
 		);
@@ -1832,7 +1832,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 		}
 		if(st)
 		{
-			Message(0, "Local: Summoning %s to %f, %f, %f", gms->charname, gms->x, gms->y, gms->z);
+			message(0, "Local: Summoning %s to %f, %f, %f", gms->charname, gms->x, gms->y, gms->z);
 			if (st->isClient() && (st->castToClient()->GetAnon() != 1 || this->Admin() >= st->castToClient()->Admin()))
 				st->castToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), (float)gms->x, (float)gms->y, (float)gms->z, this->GetHeading(), true);
 			else
@@ -1843,7 +1843,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 			uint8 tmp = gms->charname[strlen(gms->charname)-1];
 			if (!worldserver.Connected())
 			{
-				Message(0, "Error: World server disconnected");
+				message(0, "Error: World server disconnected");
 			}
 			else if (tmp < '0' || tmp > '9') // dont send to world if it's not a player's name
 			{

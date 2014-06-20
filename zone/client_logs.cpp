@@ -100,7 +100,7 @@ void ClientLogs::msg(EQEMuLog::LogIDs id, const char *buf) {
 	for(; cur != end; ++cur) {
 		if(!(*cur)->InZone())
 			continue;
-		(*cur)->Message(CLIENT_LOG_CHANNEL, buf);
+		(*cur)->message(CLIENT_LOG_CHANNEL, buf);
 	}
 }
 

@@ -331,7 +331,7 @@ void Client::GoFish()
 
 						entity_list.addNPC(npc);
 
-						Message(MT_Emote, "You fish up a little more than you bargained for...");
+						message(MT_Emote, "You fish up a little more than you bargained for...");
 					}
 				}
 			}
