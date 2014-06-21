@@ -62,7 +62,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 		d->gender,
 		d->race,
 		d->class_,
-		(bodyType)d->bodytype,
+		(BodyType)d->bodytype,
 		d->deity,
 		d->level,
 		d->npc_id,

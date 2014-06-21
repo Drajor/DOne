@@ -420,7 +420,7 @@ int main(int argc, char** argv) {
 				if(net.raid_timer.Enabled() && net.raid_timer.Check())
 					entity_list.raidProcess();
 
-				entity_list.Process();
+				entity_list.process();
 
 				entity_list.MOBProcess();
 

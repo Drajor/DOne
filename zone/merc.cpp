@@ -1514,7 +1514,7 @@ void Merc::AI_Process() {
 		if(DivineAura())
 			return;
 
-		int hateCount = entity_list.GetHatedCount(this, nullptr);
+		int hateCount = entity_list.getHatedCount(this, nullptr);
 		if(GetHatedCount() < hateCount) {
 			SetHatedCount(hateCount);
 
@@ -1962,9 +1962,9 @@ bool Merc::AI_IdleCastCheck() {
 	return result;
 }
 
-bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
+bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* pCaster, uint8 pChance, float pRange, uint32 pSpellTypes) {
 
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((pSpellTypes&SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -1974,41 +1974,41 @@ bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, 
 		return(false);
 	}
 
-	if(!caster)
+	if(!pCaster)
 		return false;
 
-	if(!caster->AI_HasSpells())
+	if(!pCaster->AI_HasSpells())
 		return false;
 
-	if (iChance < 100) {
+	if (pChance < 100) {
 		int8 tmp = MakeRandomInt(1, 100);
-		if (tmp > iChance)
+		if (tmp > pChance)
 			return false;
 	}
 
-	int8 mercCasterClass = caster->GetClass();
+	int8 mercCasterClass = pCaster->GetClass();
 
-	if(caster->HasGroup()) {
+	if(pCaster->HasGroup()) {
 		if( mercCasterClass == HEALER) {
-			if( iSpellTypes == SpellType_Heal )	{
-				if(caster->AICastSpell(100, SpellType_Heal))
+			if( pSpellTypes == SpellType_Heal )	{
+				if(pCaster->AICastSpell(100, SpellType_Heal))
 					return true;
 			}
 
-			if( iSpellTypes == SpellType_Cure )	{
-				if(caster->AICastSpell(100, SpellType_Cure))
+			if( pSpellTypes == SpellType_Cure )	{
+				if(pCaster->AICastSpell(100, SpellType_Cure))
 					return true;
 			}
 
-			if( iSpellTypes == SpellType_Resurrect )	{
-				if(caster->AICastSpell(100, SpellType_Resurrect))
+			if( pSpellTypes == SpellType_Resurrect )	{
+				if(pCaster->AICastSpell(100, SpellType_Resurrect))
 					return true;
 			}
 		}
 
 		//Ok for the buffs..
-		if( iSpellTypes == SpellType_Buff) {
-			if(caster->AICastSpell(100, SpellType_Buff))
+		if( pSpellTypes == SpellType_Buff) {
+			if(pCaster->AICastSpell(100, SpellType_Buff))
 				return true;
 		}
 	}
@@ -2539,7 +2539,8 @@ void Merc::CheckHateList() {
 				}
 				else {
 					std::list<NPC*> npc_list;
-					entity_list.GetNPCList(npc_list);
+					// TODO: Removed GetNPCList from EntityList so a different method will need to added.
+					//entity_list.GetNPCList(npc_list);
 
 					for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 						NPC* npc = *itr;
@@ -2592,7 +2593,8 @@ bool Merc::HasOrMayGetAggro() {
 
 bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTargets) {
 	std::list<NPC*> npc_list;
-	entity_list.GetNPCList(npc_list);
+	// TODO: Removed GetNPCList from EntityList so a different method will need to added.
+	//entity_list.GetNPCList(npc_list);
 
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
@@ -4339,7 +4341,8 @@ bool Merc::CheckAETaunt() {
 	if(mercSpell.spellid != 0) {
 
 		std::list<NPC*> npc_list;
-		entity_list.GetNPCList(npc_list);
+		// TODO: Removed GetNPCList from EntityList so a different method will need to added.
+		//entity_list.GetNPCList(npc_list);
 
 		for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 			NPC* npc = *itr;
@@ -4425,7 +4428,8 @@ bool Merc::CheckConfidence() {
 	int ConfidenceRating = 2 * GetProficiencyID();
 
 	std::list<NPC*> npc_list;
-	entity_list.GetNPCList(npc_list);
+	// TODO: Removed GetNPCList from EntityList so a different method will need to added.
+	//entity_list.GetNPCList(npc_list);
 
 	for(std::list<NPC*>::iterator itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* mob = *itr;
@@ -5629,7 +5633,7 @@ void Merc::Zone() {
 void Merc::depop() {
 	WipeHateList();
 	entity_list.removeMerc(this->getID());
-	entity_list.RemoveFromHateLists(this);
+	entity_list.removeFromHateLists(this);
 
 	if(HasGroup())
 		Merc::RemoveMercFromGroup(this, GetGroup());

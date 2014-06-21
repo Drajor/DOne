@@ -2321,10 +2321,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		entity_list.removeFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
 		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
-		entity_list.LimitRemoveNPC(this);
+		entity_list.limitRemoveNPC(this);
 		entity_list.addCorpse(corpse, getID());
 
-		entity_list.UnMarkNPC(getID());
+		entity_list.unMarkNPC(getID());
 		entity_list.removeNPC(getID());
 		this->setID(0);
 		if(killer != 0 && emoteid != 0)
@@ -2430,7 +2430,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(killerMob && killerMob->GetTarget() == this) //we can kill things without having them targeted
 		killerMob->SetTarget(nullptr); //via AE effects and such..
 
-	entity_list.UpdateFindableNPCState(this, true);
+	entity_list.updateFindableNPCState(this, true);
 
 	char buffer[48] = { 0 };
 	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->getID() : 0, damage, spell, static_cast<int>(attack_skill));

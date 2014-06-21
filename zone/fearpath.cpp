@@ -96,7 +96,7 @@ void Mob::CheckFlee() {
 	{
 		if (RuleB(Combat, FleeIfNotAlone) ||
 			GetSpecialAbility(ALWAYS_FLEE) ||
-			(!RuleB(Combat, FleeIfNotAlone) && (entity_list.GetHatedCount(hate_top, this) == 0)))
+			(!RuleB(Combat, FleeIfNotAlone) && (entity_list.getHatedCount(hate_top, this) == 0)))
 			StartFleeing();
 	}
 }

@@ -155,7 +155,7 @@ bool Client::process() {
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				entity_list.MessageGroup(this,true,15,"%s died.", getName());
+				entity_list.messageGroup(this,true,15,"%s died.", getName());
 				mygroup->memberZoned(this);
 			}
 			Raid *myraid = entity_list.getRaidByClient(this);
@@ -709,7 +709,7 @@ bool Client::process() {
 	//place, now check to see if anybody wants to aggro us.
 	// only if client is not feigned
 	if(ret && !GetFeigned() && scanarea_timer.Check()) {
-		entity_list.CheckClientAggro(this);
+		entity_list.checkClientAggro(this);
 	}
 #endif
 
@@ -731,10 +731,10 @@ bool Client::process() {
 			if (mygroup)
 			{
 				if (!zoning) {
-					entity_list.MessageGroup(this, true, 15, "%s logged out.", getName());
+					entity_list.messageGroup(this, true, 15, "%s logged out.", getName());
 					mygroup->delMember(this);
 				} else {
-					entity_list.MessageGroup(this, true, 15, "%s left the zone.", getName());
+					entity_list.messageGroup(this, true, 15, "%s left the zone.", getName());
 					mygroup->memberZoned(this);
 				}
 
@@ -763,7 +763,7 @@ bool Client::process() {
 	// Feign Death 2 minutes and zone forgets you
 	if (forget_timer.Check()) {
 		forget_timer.Disable();
-		entity_list.ClearZoneFeignAggro(this);
+		entity_list.clearZoneFeignAggro(this);
 		message(0, "Your enemies have forgotten you!");
 	}
 
@@ -1167,7 +1167,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		//Was sending the packet back to initiate client zone...
 		//but that could be abusable, so lets go through proper channels
 		MovePC(ZoneID, InstanceID, x, y, z, GetHeading(), 0, ZoneSolicited);
-		entity_list.RefreshClientXTargets(this);
+		entity_list.refreshClientXTargets(this);
 	}
 	PendingRezzXP = -1;
 	PendingRezzSpellID = 0;
@@ -1357,7 +1357,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		case 2:	// bank
 		{
 			uint32 distance = 0;
-			NPC *banker = entity_list.GetClosestBanker(this, distance);
+			NPC *banker = entity_list.getClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
 				char *hacked_string = nullptr;
@@ -1389,7 +1389,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		case 4:	// shared bank
 		{
 			uint32 distance = 0;
-			NPC *banker = entity_list.GetClosestBanker(this, distance);
+			NPC *banker = entity_list.getClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
 				char *hacked_string = nullptr;
@@ -1445,7 +1445,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		case 2:	// bank
 		{
 			uint32 distance = 0;
-			NPC *banker = entity_list.GetClosestBanker(this, distance);
+			NPC *banker = entity_list.getClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
 				char *hacked_string = nullptr;
@@ -1489,7 +1489,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		case 4:	// shared bank
 		{
 			uint32 distance = 0;
-			NPC *banker = entity_list.GetClosestBanker(this, distance);
+			NPC *banker = entity_list.getClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
 				char *hacked_string = nullptr;
@@ -2161,7 +2161,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			heading = chosen->heading;
 
 			ClearHover();
-			entity_list.RefreshClientXTargets(this);
+			entity_list.refreshClientXTargets(this);
 			SendHPUpdate();
 		}
 
@@ -2202,7 +2202,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 void Client::ClearHover()
 {
 	// Our Entity ID is currently zero, set in Client::Death
-	setID(entity_list.GetFreeID());
+	setID(entity_list.getFreeID());
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
 	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;

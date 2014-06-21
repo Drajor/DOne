@@ -64,7 +64,7 @@ public:
 		uint8		in_gender,
 		uint16		in_race,
 		uint8		in_class,
-		bodyType	in_bodytype,
+		BodyType	in_bodytype,
 		uint8		in_deity,
 		uint8		in_level,
 		uint32		in_npctype_id,
@@ -651,9 +651,9 @@ public:
 	void TempPets(bool i) { hasTempPet = i; }
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
 
-	inline const bodyType GetBodyType() const { return bodytype; }
-	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
-	void SetBodyType(bodyType new_body, bool overwrite_orig);
+	inline const BodyType GetBodyType() const { return bodytype; }
+	inline const BodyType GetOrigBodyType() const { return orig_bodytype; }
+	void SetBodyType(BodyType new_body, bool overwrite_orig);
 
 	uint8 invisible, see_invis;
 	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
@@ -956,8 +956,8 @@ protected:
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;
-	bodyType bodytype;
-	bodyType orig_bodytype;
+	BodyType bodytype;
+	BodyType orig_bodytype;
 	uint16 deity;
 	uint8 level;
 	uint32 npctype_id;

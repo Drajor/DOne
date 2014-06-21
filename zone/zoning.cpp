@@ -323,10 +323,10 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	SendLogoutPackets();
 
 	//dont clear aggro until the zone is successful
-	entity_list.RemoveFromHateLists(this);
+	entity_list.removeFromHateLists(this);
 
 	if(this->GetPet())
-		entity_list.RemoveFromHateLists(this->GetPet());
+		entity_list.removeFromHateLists(this->GetPet());
 
 	LogFile->write(EQEMuLog::Status, "Zoning '%s' to: %s (%i) - (%i) x=%f, y=%f, z=%f",
 		m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id,

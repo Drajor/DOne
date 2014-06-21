@@ -1346,9 +1346,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	// during this switch, this variable gets set to one of these things
 	// and that causes the spell to be executed differently
 
-	bodyType target_bt = BT_Humanoid;
+	BodyType target_bt = BT_Humanoid;
 	SpellTargetType targetType = spells[spell_id].targettype;
-	bodyType mob_body = spell_target ? spell_target->GetBodyType() : BT_Humanoid;
+	BodyType mob_body = spell_target ? spell_target->GetBodyType() : BT_Humanoid;
 
 	if(IsPlayerIllusionSpell(spell_id)
 		&& spell_target != nullptr // null ptr crash safeguard
@@ -1973,7 +1973,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			std::list<Mob*> targets_in_range;
 			std::list<Mob*>::iterator iter;
 
-			entity_list.GetTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
+			entity_list.getTargetsForConeArea(this, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
 			iter = targets_in_range.begin();
 			while(iter != targets_in_range.end())
 			{
@@ -3134,7 +3134,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	//cannot hurt untargetable mobs
-	bodyType bt = spelltar->GetBodyType();
+	BodyType bt = spelltar->GetBodyType();
 	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (spelltar->isNPC()) {

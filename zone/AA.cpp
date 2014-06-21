@@ -453,7 +453,7 @@ void Client::HandleAAAction(aaID activate) {
 				GetPet()->WipeHateList();
 				GetPet()->GMMove(GetX(),GetY(),GetZ());
 				if (activate_val > 1)
-					entity_list.ClearFeignAggro(GetPet());
+					entity_list.clearFeignAggro(GetPet());
 			} else {
 				message(0,"You have no pet to call.");
 			}
@@ -756,7 +756,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 {
 	Corpse *CorpseToUse = nullptr;
-	CorpseToUse = entity_list.GetClosestCorpse(this, nullptr);
+	CorpseToUse = entity_list.getClosestCorpse(this, nullptr);
 
 	if(!CorpseToUse)
 		return;

@@ -253,12 +253,12 @@ void Lua_EntityList::SignalMobsByNPCID(uint32 npc_id, int signal) {
 
 int Lua_EntityList::DeleteNPCCorpses() {
 	Lua_Safe_Call_Int();
-	return self->DeleteNPCCorpses();
+	return self->deleteNPCCorpses();
 }
 
 int Lua_EntityList::DeletePlayerCorpses() {
 	Lua_Safe_Call_Int();
-	return self->DeletePlayerCorpses();
+	return self->deletePlayerCorpses();
 }
 
 void Lua_EntityList::HalveAggro(Lua_Mob who) {
@@ -268,32 +268,32 @@ void Lua_EntityList::HalveAggro(Lua_Mob who) {
 
 void Lua_EntityList::DoubleAggro(Lua_Mob who) {
 	Lua_Safe_Call_Void();
-	self->DoubleAggro(who);
+	self->doubleAggro(who);
 }
 
 void Lua_EntityList::ClearFeignAggro(Lua_Mob who) {
 	Lua_Safe_Call_Void();
-	self->ClearFeignAggro(who);
+	self->clearFeignAggro(who);
 }
 
 bool Lua_EntityList::Fighting(Lua_Mob who) {
 	Lua_Safe_Call_Bool();
-	return self->Fighting(who);
+	return self->isFighting(who);
 }
 
 void Lua_EntityList::RemoveFromHateLists(Lua_Mob who) {
 	Lua_Safe_Call_Void();
-	self->RemoveFromHateLists(who);
+	self->removeFromHateLists(who);
 }
 
 void Lua_EntityList::RemoveFromHateLists(Lua_Mob who, bool set_to_one) {
 	Lua_Safe_Call_Void();
-	self->RemoveFromHateLists(who, set_to_one);
+	self->removeFromHateLists(who, set_to_one);
 }
 
 void Lua_EntityList::MessageGroup(Lua_Mob who, bool skip_close, uint32 type, const char *message) {
 	Lua_Safe_Call_Void();
-	self->MessageGroup(who, skip_close, type, message);
+	self->messageGroup(who, skip_close, type, message);
 }
 
 Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist) {
@@ -413,7 +413,7 @@ Lua_Spawn_List Lua_EntityList::GetSpawnList() {
 
 void Lua_EntityList::SignalAllClients(int signal) {
 	Lua_Safe_Call_Void();
-	self->SignalAllClients(signal);
+	self->signalAllClients(signal);
 }
 
 luabind::scope lua_register_entity_list() {

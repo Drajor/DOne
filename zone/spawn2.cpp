@@ -191,7 +191,7 @@ bool Spawn2::Process() {
 
 		if(tmp->unique_spawn_by_name)
 		{
-			if(!entity_list.LimitCheckName(tmp->name))
+			if(!entity_list.limitCheckName(tmp->name))
 			{
 				_log(SPAWNS__MAIN, "Spawn2 %d: Spawn group %d yeilded NPC type %d, which is unique and one already exists.", spawn2_id, spawngroup_id_, npcid);
 				timer.Start(5000);	//try again in five seconds.
@@ -200,7 +200,7 @@ bool Spawn2::Process() {
 		}
 
 		if(tmp->spawn_limit > 0) {
-			if(!entity_list.LimitCheckType(npcid, tmp->spawn_limit)) {
+			if(!entity_list.limitCheckType(npcid, tmp->spawn_limit)) {
 				_log(SPAWNS__MAIN, "Spawn2 %d: Spawn group %d yeilded NPC type %d, which is over its spawn limit (%d)", spawn2_id, spawngroup_id_, npcid, tmp->spawn_limit);
 				timer.Start(5000);	//try again in five seconds.
 				return(true);
@@ -228,7 +228,7 @@ bool Spawn2::Process() {
 		npc->SetAppearance((EmuAppearance)anim);
 		entity_list.addNPC(npc);
 		//this limit add must be done after the AddNPC since we need the entity ID.
-		entity_list.LimitAddNPC(npc);
+		entity_list.limitAddNPC(npc);
 			if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
 		npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
 		if(zone->InstantGrids()) {

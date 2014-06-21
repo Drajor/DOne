@@ -3577,7 +3577,7 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 	Who_All_Struct* whoall = (Who_All_Struct*) app->pBuffer;
 
 	if(whoall->type == 0) // SoF only, for regular /who
-		entity_list.ZoneWho(this, whoall);
+		entity_list.zoneWho(this, whoall);
 	else
 		WhoAll(whoall);
 	return;
@@ -9552,7 +9552,7 @@ void Client::CompleteConnect()
 		GuildBanks->sendGuildBank(this);
 
 	if(GetClientVersion() >= EQClientSoD)
-		entity_list.SendFindableNPCList(this);
+		entity_list.sendFindableNPCList(this);
 
 	if(IsInAGuild())
 	{
@@ -9573,7 +9573,7 @@ void Client::CompleteConnect()
 		castToClient()->FastQueuePacket(&outapp);
 	}
 
-	entity_list.RefreshClientXTargets(this);
+	entity_list.refreshClientXTargets(this);
 }
 
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
@@ -9708,7 +9708,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 	}
 
 	uint32 distance = 0;
-	NPC *banker = entity_list.GetClosestBanker(this, distance);
+	NPC *banker = entity_list.getClosestBanker(this, distance);
 
 	if(!banker || distance > USE_NPC_RANGE2)
 	{
@@ -12021,7 +12021,7 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 	if((HideCorpseMode == HideCorpseNone) && (hcs->Action == HideCorpseNone))
 		return;
 
-	entity_list.HideCorpses(this, HideCorpseMode, hcs->Action);
+	entity_list.hideCorpses(this, HideCorpseMode, hcs->Action);
 
 	HideCorpseMode = hcs->Action;
 }

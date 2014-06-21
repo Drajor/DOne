@@ -328,96 +328,82 @@ public:
 
 	void listNPCCorpses(Client* pClient);
 	void listPlayerCorpses(Client* pClient);
-	void	FindPathsToAllNPCs();
-	int32	DeleteNPCCorpses();
-	int32	DeletePlayerCorpses();
-	void	WriteEntityIDs();
-	void	HalveAggro(Mob* who);
-	void	DoubleAggro(Mob* who);
-	void	Evade(Mob *who);
-	void	UpdateHoTT(Mob* target);
+	int32 deleteNPCCorpses();
+	int32 deletePlayerCorpses();
+	void updateHoTT(Mob* pTarget);
 
-	void	Process();
-	void	ClearAggro(Mob* targ);
-	void	ClearFeignAggro(Mob* targ);
-	void	ClearZoneFeignAggro(Client* targ);
-	void	AggroZone(Mob* who, int hate = 0);
+	void process();
+	void clearAggro(Mob* pTarget);
+	void clearFeignAggro(Mob* pTarget);
+	void clearZoneFeignAggro(Client* pTarget);
+	void aggroZone(Mob* pTarget, int pHate = 0);
 
-	bool	Fighting(Mob* targ);
-	void	RemoveFromHateLists(Mob* mob, bool settoone = false);
-	void	RemoveDebuffs(Mob* caster);
+	bool isFighting(Mob* pTarget);
+	void removeFromHateLists(Mob* pMOB, bool pSetToOne = false); // TODO: Remove pSetToOne - this is a different function entirely.
+	void removeDebuffs(Mob* pCaster);
 
 
-	void	MessageGroup(Mob* sender, bool skipclose, uint32 type, const char* message, ...);
+	void messageGroup(Mob* pSender, bool pSkipClose, uint32 pType, const char* pMessage, ...);
 
-	void	LimitAddNPC(NPC *npc);
-	void	LimitRemoveNPC(NPC *npc);
-	bool	LimitCheckType(uint32 npc_type, int count);
-	bool	LimitCheckGroup(uint32 spawngroup_id, int count);
-	bool	LimitCheckBoth(uint32 npc_type, uint32 spawngroup_id, int group_count, int type_count);
-	bool	LimitCheckName(const char* npc_name);
+	void limitAddNPC(NPC* pNPC);
+	void limitRemoveNPC(NPC *pNPC);
+	bool limitCheckType(uint32 pNPCTypeID, int pCount);
+	bool limitCheckGroup(uint32 pSpawnGroupID, int pCount);
+	bool limitCheckName(const char* pName);
 
-	void	CheckClientAggro(Client* around);
-	Mob*	AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange);
-	int	GetHatedCount(Mob *attacker, Mob *exclude);
-	void	AIYellForHelp(Mob* sender, Mob* attacker);
-	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes);
-	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
-	Mob*	GetTargetForMez(Mob* caster);
-	uint32	CheckNPCsClose(Mob *center);
+	void checkClientAggro(Client* pClient);
+	Mob* AICheckCloseAggro(Mob* pSender);
+	int getHatedCount(Mob* pAttacker, Mob* pExclude);
+	void AIYellForHelp(Mob* pSender, Mob* pAttacker);
+	bool AICheckCloseBeneficialSpells(NPC* pCaster, uint8 pChance, float pRange, uint16 pSpellTypes);
+	bool Merc_AICheckCloseBeneficialSpells(Merc* pCaster, uint8 pChance, float pRange, uint32 pSpellTypes);
+	Mob* getTargetForMez(Mob* pCaster);
+	uint32 checkNPCsClose(Mob *pCenter);
 
-	Corpse* GetClosestCorpse(Mob* sender, const char *Name);
-	NPC* GetClosestBanker(Mob* sender, uint32 &distance);
-	void	CameraEffect(uint32 duration, uint32 intensity);
-	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType);
-	void	ForceGroupUpdate(uint32 gid);
-	void	SendGroupLeave(uint32 gid, const char *name);
-	void	SendGroupJoin(uint32 gid, const char *name);
+	Corpse* getClosestCorpse(Mob* pSender, const char* pName);
+	NPC* getClosestBanker(Mob* pSender, uint32& pDistance);
+	void cameraEffect(uint32 pDuration, uint32 pIntensity);
+	Mob* getClosestMobByBodyType(Mob* pSender, BodyType pBodyType);
+	void forceGroupUpdate(uint32 pGroupID);
+	void sendGroupLeave(uint32 pGroupID, const char* pName);
+	void sendGroupJoin(uint32 pGroupID, const char* pName);
 
-	void	SaveAllClientsTaskState();
-	void	ReloadAllClientsTaskState(int TaskID=0);
+	void saveAllClientsTaskState();
+	void reloadAllClientsTaskState(int pTaskID = 0);
 
-	uint16	CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time = 300000);
-	uint16	CreateGroundObjectFromModel(const char *model, float x, float y, float z, float heading, uint8 type = 0x00, uint32 decay_time = 0);
-	uint16	CreateDoor(const char *model, float x, float y, float z, float heading, uint8 type = 0, uint16 size = 100);
-	void	ZoneWho(Client* c, Who_All_Struct* Who);
-	void	UnMarkNPC(uint16 ID);
+	uint16 createGroundObject(uint32 pItemID, float pX, float pY, float pZ, float pHeading, uint32 pDecayTime = 300000);
+	uint16 createGroundObjectFromModel(const char* pModel, float pX, float pY, float pZ, float pHeading, uint8 pType = 0x00, uint32 pDecayTime = 0);
+	uint16 createDoor(const char* pModel, float pX, float pY, float pZ, float pHeading, uint8 pType = 0, uint16 pSize = 100);
+	void zoneWho(Client* pClient, Who_All_Struct* pWho);
+	void unMarkNPC(uint16 pID);
 
-	void	GateAllClients();
-	void	SignalAllClients(uint32 data);
-	void	UpdateQGlobal(uint32 qid, QGlobal newGlobal);
-	void	DeleteQGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID);
-	void	SendFindableNPCList(Client* c);
-	void	UpdateFindableNPCState(NPC *n, bool Remove);
-	void	HideCorpses(Client* c, uint8 CurrentMode, uint8 NewMode);
+	void gateAllClients();
+	void signalAllClients(uint32 pData);
+	void updateQGlobal(uint32 pID, QGlobal pNewGlobal);
+	void deleteQGlobal(std::string pName, uint32 pNPCID, uint32 pCharacterID, uint32 pZoneID);
+	void sendFindableNPCList(Client* pClient);
+	void updateFindableNPCState(NPC *pNPC, bool pRemove);
+	void hideCorpses(Client* pClient, uint8 pCurrentMode, uint8 pNewMode);
+	
+	void getTargetsForConeArea(Mob *pStart, uint32 pRadius, uint32 pHeight, std::list<Mob*>&pMOBs);
 
-	void GetMobList(std::list<Mob*> &m_list);
-	void GetNPCList(std::list<NPC*> &n_list);
-	void GetMercList(std::list<Merc*> &n_list);
-	void GetClientList(std::list<Client*> &c_list);
-	void GetCorpseList(std::list<Corpse*> &c_list);
-	void GetObjectList(std::list<Object*> &o_list);
-	void GetDoorsList(std::list<Doors*> &d_list);
-	void GetSpawnList(std::list<Spawn2*> &d_list);
-	void GetTargetsForConeArea(Mob *start, uint32 radius, uint32 height, std::list<Mob*> &m_list);
+	void depopAll(int pNPCTypeID, bool pStartSpawnTimer = true);
 
-	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
-
-	uint16 GetFreeID();
-	void RefreshAutoXTargets(Client* c);
-	void RefreshClientXTargets(Client* c);
+	uint16 getFreeID();
+	void refreshAutoXTargets(Client* pClient);
+	void refreshClientXTargets(Client* pClient);
 
 protected:
 	friend class Zone;
-	void	Depop(bool StartSpawnTimer = false);
+	void depop(bool pStartSpawnTimer = false);
 
 private:
-	void	AddToSpawnQueue(uint16 entityid, NewSpawn_Struct** app);
-	void	CheckSpawnQueue();
+	void addToSpawnQueue(uint16 pEntityID, NewSpawn_Struct** pApp);
+	void checkSpawnQueue();
 
 	//used for limiting spawns
-	class SpawnLimitRecord { public: uint32 spawngroup_id; uint32 npc_type; };
-	std::map<uint16, SpawnLimitRecord> npc_limit_list;		//entity id -> npc type
+	class SpawnLimitRecord { public: uint32 mSpawnGroupID; uint32 mNPCTypeID; };
+	std::map<uint16, SpawnLimitRecord> mNPCLimits;		//entity id -> npc type
 
 	uint32	tsFirstSpawnOnQueue; // timestamp that the top spawn on the spawnqueue was added, should be 0xFFFFFFFF if queue is empty
 	uint32	NumSpawnsOnQueue;
@@ -433,8 +419,8 @@ private:
 	std::unordered_map<uint16, Trap*> mTraps;
 	std::unordered_map<uint16, Beacon*> mBeacons;
 	std::list<NPC*> mProximities;
-	std::list<Group *> mGroups;
-	std::list<Raid *> mRaids;
+	std::list<Group*> mGroups;
+	std::list<Raid*> mRaids;
 	std::list<Area> mAreas;
 	std::queue<uint16> mFreeIDs;
 

@@ -58,7 +58,7 @@ uint32 SpawnGroup::GetNPCType() {
 	int totalchance = 0;
 
 	//check limits on this spawn group and npc type
-	if(!entity_list.LimitCheckGroup(id, group_spawn_limit))
+	if(!entity_list.limitCheckGroup(id, group_spawn_limit))
 		return(0);
 
 	std::list<SpawnEntry*>::iterator cur,end;
@@ -69,7 +69,7 @@ uint32 SpawnGroup::GetNPCType() {
 		SpawnEntry *se = *cur;
 
 		//check limits on this spawn group and npc type
-		if(!entity_list.LimitCheckType(se->NPCType, se->npc_spawn_limit))
+		if(!entity_list.limitCheckType(se->NPCType, se->npc_spawn_limit))
 			continue;
 
 		totalchance += se->chance;

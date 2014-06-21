@@ -1698,7 +1698,7 @@ void Lua_Mob::SetRunning(bool running) {
 
 void Lua_Mob::SetBodyType(int new_body, bool overwrite_orig) {
 	Lua_Safe_Call_Void();
-	self->SetBodyType(static_cast<bodyType>(new_body), overwrite_orig);
+	self->SetBodyType(static_cast<BodyType>(new_body), overwrite_orig);
 }
 
 void Lua_Mob::SetTargetable(bool on) {

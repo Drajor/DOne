@@ -231,7 +231,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 						if(MakeRandomInt(0, 99) < 20)
 						{
 							Mob * mezTar = nullptr;
-							mezTar = entity_list.GetTargetForMez(this);
+							mezTar = entity_list.getTargetForMez(this);
 
 							if(mezTar && mezTar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0)
 							{
@@ -348,8 +348,8 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	return CastSpell(AIspells[i].spellid, tar->getID(), 1, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, 0, &(AIspells[i].resist_adjust));
 }
 
-bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+bool EntityList::AICheckCloseBeneficialSpells(NPC* pCaster, uint8 pChance, float pRange, uint16 pSpellTypes) {
+	if((pSpellTypes&SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -359,24 +359,24 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		return(false);
 	}
 
-	if(!caster)
+	if(!pCaster)
 		return false;
 
-	if(caster->AI_HasSpells() == false)
+	if(pCaster->AI_HasSpells() == false)
 		return false;
 
-	if(caster->GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS))
+	if(pCaster->GetSpecialAbility(NPC_NO_BUFFHEAL_FRIENDS))
 		return false;
 
-	if (iChance < 100) {
+	if (pChance < 100) {
 		uint8 tmp = MakeRandomInt(0, 99);
-		if (tmp >= iChance)
+		if (tmp >= pChance)
 			return false;
 	}
-	if (caster->GetPrimaryFaction() == 0 )
+	if (pCaster->GetPrimaryFaction() == 0 )
 		return(false); // well, if we dont have a faction set, we're gonna be indiff to everybody
 
-	float iRange2 = iRange*iRange;
+	float iRange2 = pRange*pRange;
 
 	float t1, t2, t3;
 
@@ -388,9 +388,9 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		//Since >90% of mobs will always be out of range, try to
 		//catch them with simple bounding box checks first. These
 		//checks are about 6X faster than DistNoRoot on my athlon 1Ghz
-		t1 = mob->GetX() - caster->GetX();
-		t2 = mob->GetY() - caster->GetY();
-		t3 = mob->GetZ() - caster->GetZ();
+		t1 = mob->GetX() - pCaster->GetX();
+		t2 = mob->GetY() - pCaster->GetY();
+		t3 = mob->GetZ() - pCaster->GetZ();
 		//cheap ABS()
 		if(t1 < 0)
 			t1 = 0 - t1;
@@ -398,13 +398,13 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 			t2 = 0 - t2;
 		if(t3 < 0)
 			t3 = 0 - t3;
-		if (t1 > iRange
-			|| t2 > iRange
-			|| t3 > iRange
-			|| mob->DistNoRoot(*caster) > iRange2
+		if (t1 > pRange
+			|| t2 > pRange
+			|| t3 > pRange
+			|| mob->DistNoRoot(*pCaster) > iRange2
 				//this call should seem backwards:
-			|| !mob->CheckLosFN(caster)
-			|| mob->GetReverseFactionCon(caster) >= FACTION_KINDLY
+			|| !mob->CheckLosFN(pCaster)
+			|| mob->GetReverseFactionCon(pCaster) >= FACTION_KINDLY
 		) {
 			continue;
 		}
@@ -412,12 +412,12 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 		//since we assume these are beneficial spells, which do not
 		//require LOS, we just go for it.
 		// we have a winner!
-		if((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)){
-			if (mob != caster)
-				iSpellTypes = SpellType_Heal;
+		if((pSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)){
+			if (mob != pCaster)
+				pSpellTypes = SpellType_Heal;
 		}
 
-		if (caster->AICastSpell(mob, 100, iSpellTypes))
+		if (pCaster->AICastSpell(mob, 100, pSpellTypes))
 			return true;
 	}
 	return false;
@@ -664,7 +664,7 @@ void Client::AI_SpellCast()
 
 	if(IsMezSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
 	{
-		Mob *tar = entity_list.GetTargetForMez(this);
+		Mob *tar = entity_list.getTargetForMez(this);
 		if(!tar)
 		{
 			tar = GetTarget();
@@ -1431,7 +1431,7 @@ void Mob::AI_Process() {
 			*
 			*/
 
-			Mob* tmptar = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
+			Mob* tmptar = entity_list.AICheckCloseAggro(this);
 			if (tmptar)
 				AddToHateList(tmptar);
 		}

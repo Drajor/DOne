@@ -39,7 +39,7 @@ Mob::Mob(const char* in_name,
 		uint8		in_gender,
 		uint16		in_race,
 		uint8		in_class,
-		bodyType	in_bodytype,
+		BodyType	in_bodytype,
 		uint8		in_deity,
 		uint8		in_level,
 		uint32		in_npctype_id,
@@ -415,7 +415,7 @@ Mob::~Mob()
 	if(HadTempPets()){
 		entity_list.destroyTempPets(this);
 	}
-	entity_list.UnMarkNPC(getID());
+	entity_list.unMarkNPC(getID());
 	safe_delete(PathingLOSCheckTimer);
 	safe_delete(PathingRouteUpdateTimerShort);
 	safe_delete(PathingRouteUpdateTimerLong);
@@ -2926,7 +2926,7 @@ int Mob::GetHaste() {
 void Mob::SetTarget(Mob* mob) {
 	if (target == mob) return;
 	target = mob;
-	entity_list.UpdateHoTT(this);
+	entity_list.updateHoTT(this);
 	if(isNPC())
 		parse->EventNPC(EVENT_TARGET_CHANGE, castToNPC(), mob, "", 0);
 	else if (isClient())
@@ -3934,7 +3934,7 @@ void Mob::DelGlobal(const char *varname) {
 		qgu->zone_id = qgZoneid;
 		strcpy(qgu->name, varname);
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+		entity_list.deleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 
 		worldserver.SendPacket(pack);
@@ -3985,7 +3985,7 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 		qgd->from_instance_id = zone->GetInstanceID();
 		strcpy(qgd->name, varname);
 
-		entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+		entity_list.deleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 
 		worldserver.SendPacket(pack);
@@ -4018,7 +4018,7 @@ void Mob::InsertQuestGlobal(int charid, int npcid, int zoneid, const char *varna
 		temp.expdate = qgu->expdate;
 		temp.name.assign(qgu->name);
 		temp.value.assign(qgu->value);
-		entity_list.UpdateQGlobal(qgu->id, temp);
+		entity_list.updateQGlobal(qgu->id, temp);
 		zone->UpdateQGlobal(qgu->id, temp);
 
 		worldserver.SendPacket(pack);
@@ -4525,7 +4525,7 @@ bool Mob::IsBoat() const {
 	return (race == 72 || race == 73 || race == 114 || race == 404 || race == 550 || race == 551 || race == 552);
 }
 
-void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
+void Mob::SetBodyType(BodyType new_body, bool overwrite_orig) {
 	bool needs_spawn_packet = false;
 	if(bodytype == 11 || bodytype >= 65 || new_body == 11 || new_body >= 65) {
 		needs_spawn_packet = true;

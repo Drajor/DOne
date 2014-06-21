@@ -1307,7 +1307,7 @@ bool Zone::Process() {
 		{
 			if(Instance_Timer->Check())
 			{
-				entity_list.GateAllClients();
+				entity_list.gateAllClients();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
 			}
@@ -1516,7 +1516,7 @@ void Zone::StartShutdownTimer(uint32 set_time) {
 
 bool Zone::Depop(bool StartSpawnTimer) {
 	std::map<uint32,NPCType *>::iterator itr;
-	entity_list.Depop(StartSpawnTimer);
+	entity_list.depop(StartSpawnTimer);
 
 #ifdef DEPOP_INVALIDATES_NPC_TYPES_CACHE
 	// Refresh npctable, getting current info from database.

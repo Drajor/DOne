@@ -819,7 +819,7 @@ void WorldServer::Process() {
 				if(gl->zoneid == zone->GetZoneID() && gl->instance_id == zone->GetInstanceID())
 					break;
 
-				entity_list.SendGroupLeave(gl->gid, gl->member_name);
+				entity_list.sendGroupLeave(gl->gid, gl->member_name);
 			}
 			break;
 		}
@@ -1038,7 +1038,7 @@ void WorldServer::Process() {
 				if(g)
 					g->addMember(gj->member_name);
 
-				entity_list.SendGroupJoin(gj->gid, gj->member_name);
+				entity_list.sendGroupJoin(gj->gid, gj->member_name);
 			}
 			break;
 		}
@@ -1049,7 +1049,7 @@ void WorldServer::Process() {
 				if(fgu->origZoneID == zone->GetZoneID()	&& fgu->instance_id == zone->GetInstanceID())
 					break;
 
-				entity_list.ForceGroupUpdate(fgu->gid);
+				entity_list.forceGroupUpdate(fgu->gid);
 			}
 			break;
 		}
@@ -1555,7 +1555,7 @@ void WorldServer::Process() {
 					temp.expdate = qgu->expdate;
 					temp.name.assign(qgu->name);
 					temp.value.assign(qgu->value);
-					entity_list.UpdateQGlobal(qgu->id, temp);
+					entity_list.updateQGlobal(qgu->id, temp);
 					zone->UpdateQGlobal(qgu->id, temp);
 				}
 			}
@@ -1574,7 +1574,7 @@ void WorldServer::Process() {
 				ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
 				if(qgd->from_zone_id != zone->GetZoneID() || qgd->from_instance_id != zone->GetInstanceID())
 				{
-					entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+					entity_list.deleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 					zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 				}
 			}
@@ -1746,7 +1746,7 @@ void WorldServer::Process() {
 			if(zone)
 			{
 					ServerCameraShake_Struct *scss = (ServerCameraShake_Struct*)pack->pBuffer;
-					entity_list.CameraEffect(scss->duration, scss->intensity);
+					entity_list.cameraEffect(scss->duration, scss->intensity);
 			}
 			break;
 		}
@@ -1981,7 +1981,7 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 	switch(rts->Command) {
 		case RELOADTASKS:
-			entity_list.SaveAllClientsTaskState();
+			entity_list.saveAllClientsTaskState();
 
 			if(rts->Parameter == 0) {
 				_log(TASKS__GLOBALLOAD, "Reload ALL tasks");
@@ -1990,12 +1990,12 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				taskmanager->LoadTasks();
 				if(zone)
 					taskmanager->LoadProximities(zone->GetZoneID());
-				entity_list.ReloadAllClientsTaskState();
+				entity_list.reloadAllClientsTaskState();
 			}
 			else {
 				_log(TASKS__GLOBALLOAD, "Reload only task %i", rts->Parameter);
 				taskmanager->LoadTasks(rts->Parameter);
-				entity_list.ReloadAllClientsTaskState(rts->Parameter);
+				entity_list.reloadAllClientsTaskState(rts->Parameter);
 			}
 
 			break;

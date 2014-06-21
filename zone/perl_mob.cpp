@@ -7601,7 +7601,7 @@ XS(XS_Mob_SetBodyType)
 			overwrite_orig = (bool)SvTRUE(ST(2));
 		}
 
-		THIS->SetBodyType((bodyType)type, overwrite_orig);
+		THIS->SetBodyType((BodyType)type, overwrite_orig);
 	}
 	XSRETURN_EMPTY;
 }

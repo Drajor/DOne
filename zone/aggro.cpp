@@ -32,18 +32,17 @@ extern Zone* zone;
 //#define LOSDEBUG 6
 
 //look around a client for things which might aggro the client.
-void EntityList::CheckClientAggro(Client* around)
-{
-	for (auto it = mMOBs.begin(); it != mMOBs.end(); ++it) {
-		Mob *mob = it->second;
+void EntityList::checkClientAggro(Client* pClient) {
+	for (auto& i : mMOBs) {
+		Mob* mob = i.second;
 		if (mob->isClient())	//also ensures that mob != around
 			continue;
 
-		if (mob->CheckWillAggro(around)) {
+		if (mob->CheckWillAggro(pClient)) {
 			if (mob->IsEngaged())
-				mob->AddToHateList(around);
+				mob->AddToHateList(pClient);
 			else
-				mob->AddToHateList(around, mob->GetLevel());
+				mob->AddToHateList(pClient, mob->GetLevel());
 		}
 	}
 }
@@ -356,74 +355,63 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return(false);
 }
 
-Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
-	if (!sender || !sender->isNPC())
+Mob* EntityList::AICheckCloseAggro(Mob* pSender)
+{
+	if (!pSender || !pSender->isNPC())
 		return(nullptr);
 
 #ifdef REVERSE_AGGRO
 	//with reverse aggro, npc->client is checked elsewhere, no need to check again
-	auto it = mNPCs.begin();
-	while (it != mNPCs.end()) {
+	for (auto& i : mNPCs) {
 #else
-	auto it = mMOBs.begin();
-	while (it != mMOBs.end()) {
+	for (auto& i : mNPCs) {
 #endif
-		Mob *mob = it->second;
-
-		if (sender->CheckWillAggro(mob))
+		Mob* mob = i.second;
+		if (pSender->CheckWillAggro(mob))
 			return mob;
-		++it;
 	}
-	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
 	return nullptr;
 }
 
-int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
-{
+int EntityList::getHatedCount(Mob* pAttacker, Mob* pExclude) {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
-	if (!attacker)
-		return 0;
+	if (!pAttacker) return 0;
 
-	int Count = 0;
-
-	for (auto it = mNPCs.begin(); it != mNPCs.end(); ++it) {
-		NPC *mob = it->second;
-		if (!mob || (mob == exclude))
+	int count = 0;
+	for (auto& i : mNPCs) {
+		NPC* npc = i.second;
+		if (!npc || (npc == pExclude))
 			continue;
 
-		if (!mob->IsEngaged())
+		if (!npc->IsEngaged())
 			continue;
 
-		if (mob->IsFeared() || mob->IsMezzed())
+		if (npc->IsFeared() || npc->IsMezzed())
 			continue;
 
-		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GREEN)
+		if (pAttacker->GetLevelCon(npc->GetLevel()) == CON_GREEN)
 			continue;
 
-		if (!mob->CheckAggro(attacker))
+		if (!npc->CheckAggro(pAttacker))
 			continue;
 
-		float AggroRange = mob->GetAggroRange();
+		float AggroRange = npc->GetAggroRange();
 
 		// Square it because we will be using DistNoRoot
 
 		AggroRange *= AggroRange;
 
-		if (mob->DistNoRoot(*attacker) > AggroRange)
+		if (npc->DistNoRoot(*pAttacker) > AggroRange)
 			continue;
 
-		Count++;
+		count++;
 	}
-
-	return Count;
-
+	return count;
 }
 
-void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
-	if(!sender || !attacker)
-		return;
-	if (sender->GetPrimaryFaction() == 0 )
-		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
+void EntityList::AIYellForHelp(Mob* pSender, Mob* pAttacker) {
+	if(!pSender || !pAttacker) return;
+	if (pSender->GetPrimaryFaction() == 0 ) return; // No primary faction therefore Indifferent
 
 	for (auto it = mNPCs.begin(); it != mNPCs.end(); ++it) {
 		NPC *mob = it->second;
@@ -434,12 +422,12 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		r = r * r;
 
 		if (
-			mob != sender
-			&& mob != attacker
+			mob != pSender
+			&& mob != pAttacker
 //			&& !mob->IsCorpse()
 //			&& mob->IsAIControlled()
 			&& mob->GetPrimaryFaction() != 0
-			&& mob->DistNoRoot(*sender) <= r
+			&& mob->DistNoRoot(*pSender) <= r
 			&& !mob->IsEngaged()
 			&& ((!mob->IsPet()) || (mob->IsPet() && mob->GetOwner() && !mob->GetOwner()->isClient()))
 				// If we're a pet we don't react to any calls for help if our owner is a client
@@ -447,10 +435,10 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		{
 			//if they are in range, make sure we are not green...
 			//then jump in if they are our friend
-			if(attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
+			if(pAttacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
 			{
 				bool useprimfaction = false;
-				if(mob->GetPrimaryFaction() == sender->castToNPC()->GetPrimaryFaction())
+				if(mob->GetPrimaryFaction() == pSender->castToNPC()->GetPrimaryFaction())
 				{
 					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->GetNPCFactionID());
 					if(cf){
@@ -459,16 +447,16 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					}
 				}
 
-				if(useprimfaction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE )
+				if(useprimfaction || pSender->GetReverseFactionCon(mob) <= FACTION_AMIABLE )
 				{
 					//attacking someone on same faction, or a friend
 					//Father Nitwit: make sure we can see them.
-					if(mob->CheckLosFN(sender)) {
+					if(mob->CheckLosFN(pSender)) {
 #if (EQDEBUG>=5)
 						LogFile->write(EQEMuLog::Debug, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
-						sender->getName(), attacker->getName(), mob->getName(), attacker->getName(), mob->DistNoRoot(*sender), fabs(sender->GetZ()+mob->GetZ()));
+						pSender->getName(), pAttacker->getName(), mob->getName(), pAttacker->getName(), mob->DistNoRoot(*pSender), fabs(pSender->GetZ()+mob->GetZ()));
 #endif
-						mob->AddToHateList(attacker, 1, 0, false);
+						mob->AddToHateList(pAttacker, 1, 0, false);
 					}
 				}
 			}
@@ -522,7 +510,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		target_owner = nullptr;
 
 	//cannot hurt untargetable mobs
-	bodyType bt = target->GetBodyType();
+	BodyType bt = target->GetBodyType();
 
 	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {

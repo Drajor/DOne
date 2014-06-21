@@ -58,7 +58,7 @@ typedef enum {
 	//					...
 	BT_InvisMan			= 66,	//no name, seen on 'InvisMan', can be /targeted
 	BT_Special			= 67
-} bodyType;
+} BodyType;
 /* bodytypes above 64 make the mob not show up */
 
 #endif

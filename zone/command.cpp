@@ -3612,7 +3612,7 @@ void command_corpse(Client* c, const Seperator *sep)
 	Mob *target=c->GetTarget();
 
 	if (strcasecmp(sep->arg[1], "DeletePlayerCorpses") == 0 && c->Admin() >= commandEditPlayerCorpses) {
-		int32 tmp = entity_list.DeletePlayerCorpses();
+		int32 tmp = entity_list.deletePlayerCorpses();
 		if (tmp >= 0)
 			c->message(0, "%i corpses deleted.", tmp);
 		else
@@ -3640,7 +3640,7 @@ void command_corpse(Client* c, const Seperator *sep)
 		entity_list.listPlayerCorpses(c);
 	}
 	else if (strcasecmp(sep->arg[1], "DeleteNPCCorpses") == 0) {
-		int32 tmp = entity_list.DeleteNPCCorpses();
+		int32 tmp = entity_list.deleteNPCCorpses();
 		if (tmp >= 0)
 			c->message(0, "%d corpses deleted.", tmp);
 		else
@@ -7701,16 +7701,6 @@ void command_path(Client* c, const Seperator *sep)
 		}
 	}
 
-	if(!strcasecmp(sep->arg[1], "allspawns"))
-	{
-		if(zone->pathing)
-		{
-			c->message(0, "You may go linkdead. Results will be in the log file.");
-			entity_list.FindPathsToAllNPCs();
-			return;
-		}
-	}
-
 	if(!strcasecmp(sep->arg[1], "nearest"))
 	{
 		if(!c->GetTarget() || !c->GetTarget()->isMOB())
@@ -9026,7 +9016,7 @@ void command_aggrozone(Client* c, const Seperator *sep) {
 		return;
 
 	int hate = atoi(sep->arg[1]); //should default to 0 if we don't enter anything
-	entity_list.AggroZone(m,hate);
+	entity_list.aggroZone(m,hate);
 	c->message(0, "Train to you! Last chance to go invulnerable...");
 }
 

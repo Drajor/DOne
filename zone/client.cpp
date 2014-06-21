@@ -2543,7 +2543,7 @@ void Client::SetFeigned(bool in_feigned) {
 			SetPet(0);
 		}
 		SetHorseId(0);
-		entity_list.ClearFeignAggro(this);
+		entity_list.clearFeignAggro(this);
 		forget_timer.Start(FeignMemoryDuration);
 	} else {
 		forget_timer.Disable();
@@ -3184,7 +3184,7 @@ void Client::LinkDead()
 {
 	if (GetGroup())
 	{
-		entity_list.MessageGroup(this,true,15,"%s has gone linkdead.",getName());
+		entity_list.messageGroup(this,true,15,"%s has gone linkdead.",getName());
 		GetGroup()->delMember(this);
 	}
 	Raid *raid = entity_list.getRaidByClient(this);
@@ -5631,7 +5631,7 @@ void Client::SuspendMinion()
 
 				return;
 			}
-			else if(entity_list.Fighting(CurrentPet))
+			else if(entity_list.isFighting(CurrentPet))
 			{
 				Message_StringID(clientMessageBlue,SUSPEND_MINION_HAS_AGGRO);
 			}
@@ -6004,7 +6004,7 @@ void Client::CheckLDoNHail(Mob *target)
 		return;
 	}
 
-	if(entity_list.CheckNPCsClose(target) != 0)
+	if(entity_list.checkNPCsClose(target) != 0)
 	{
 		target->Say("You're here to save me? I couldn't possibly risk leaving yet. There are "
 			"far too many of those horrid things out there waiting to recapture me! Please get"
@@ -6133,11 +6133,11 @@ void Client::LocateCorpse()
 {
 	Corpse *ClosestCorpse = nullptr;
 	if(!GetTarget())
-		ClosestCorpse = entity_list.GetClosestCorpse(this, nullptr);
+		ClosestCorpse = entity_list.getClosestCorpse(this, nullptr);
 	else if(GetTarget()->isCorpse())
-		ClosestCorpse = entity_list.GetClosestCorpse(this, GetTarget()->castToCorpse()->GetOwnerName());
+		ClosestCorpse = entity_list.getClosestCorpse(this, GetTarget()->castToCorpse()->GetOwnerName());
 	else
-		ClosestCorpse = entity_list.GetClosestCorpse(this, GetTarget()->GetCleanName());
+		ClosestCorpse = entity_list.getClosestCorpse(this, GetTarget()->GetCleanName());
 
 	if(ClosestCorpse)
 	{
@@ -7068,7 +7068,7 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 	}
 	// If there are more mobs aggro on us than we had auto-hate slots, add one of those haters into the slot(s) we just freed up.
 	if(!HadFreeAutoSlotsBefore && FreedAutoSlots)
-		entity_list.RefreshAutoXTargets(this);
+		entity_list.refreshAutoXTargets(this);
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)

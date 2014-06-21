@@ -1078,7 +1078,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			item = database.GetItem(itr->first);
 			if (this->GetGroup())
 			{
-				entity_list.MessageGroup(this,true,MT_Skills,"%s has successfully fashioned %s!",getName(),item->Name);
+				entity_list.messageGroup(this,true,MT_Skills,"%s has successfully fashioned %s!",getName(),item->Name);
 			}
 			if(RuleB(TaskSystem, EnableTaskSystem))
 				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
@@ -1096,7 +1096,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		_log(TRADESKILLS__TRACE, "Tradeskill failed");
 			if (this->GetGroup())
 		{
-			entity_list.MessageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",getName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
+			entity_list.messageGroup(this,true,MT_Skills,"%s was unsuccessful in %s tradeskill attempt.",getName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
 		}
 
 		itr = spec->onfail.begin();

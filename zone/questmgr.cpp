@@ -316,7 +316,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 
 		if(tmp->unique_spawn_by_name)
 		{
-			if(!entity_list.LimitCheckName(tmp->name))
+			if(!entity_list.limitCheckName(tmp->name))
 			{
 				return nullptr;
 			}
@@ -324,7 +324,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 
 		if(tmp->spawn_limit > 0)
 		{
-			if(!entity_list.LimitCheckType(npcid, tmp->spawn_limit))
+			if(!entity_list.limitCheckType(npcid, tmp->spawn_limit))
 			{
 				return nullptr;
 			}
@@ -340,7 +340,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		npc->AddLootTable();
 		npc->SetSp2(found_spawn->SpawnGroupID());
 		entity_list.addNPC(npc);
-		entity_list.LimitAddNPC(npc);
+		entity_list.limitAddNPC(npc);
 
 		if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
 			npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
@@ -676,7 +676,7 @@ void QuestManager::depop_withtimer(int npc_type) {
 void QuestManager::depopall(int npc_type) {
 	QuestManagerCurrentQuestVars();
 	if(owner && owner->isNPC() && (npc_type > 0)) {
-		entity_list.DepopAll(npc_type);
+		entity_list.depopAll(npc_type);
 	}
 	else {
 		LogFile->write(EQEMuLog::Quest, "QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
@@ -1372,7 +1372,7 @@ int QuestManager::InsertQuestGlobal(
 		qgd->from_instance_id = zone->GetInstanceID();
 		strcpy(qgd->name, varname);
 
-		entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+		entity_list.deleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 
 		worldserver.SendPacket(pack);
@@ -1405,7 +1405,7 @@ int QuestManager::InsertQuestGlobal(
 		temp.expdate = qgu->expdate;
 		temp.name.assign(qgu->name);
 		temp.value.assign(qgu->value);
-		entity_list.UpdateQGlobal(qgu->id, temp);
+		entity_list.updateQGlobal(qgu->id, temp);
 		zone->UpdateQGlobal(qgu->id, temp);
 
 		worldserver.SendPacket(pack);
@@ -1456,7 +1456,7 @@ void QuestManager::delglobal(const char *varname) {
 		qgu->zone_id = qgZoneid;
 		strcpy(qgu->name, varname);
 
-		entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+		entity_list.deleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 		zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 
 		worldserver.SendPacket(pack);
@@ -2286,14 +2286,14 @@ int QuestManager::getlevel(uint8 type)
 uint16 QuestManager::CreateGroundObject(uint32 itemid, float x, float y, float z, float heading, uint32 decay_time)
 {
 	uint16 entid = 0; //safety check
-	entid = entity_list.CreateGroundObject(itemid, x, y, z, heading, decay_time);
+	entid = entity_list.createGroundObject(itemid, x, y, z, heading, decay_time);
 	return entid;
 }
 
 uint16 QuestManager::CreateGroundObjectFromModel(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time)
 {
 	uint16 entid = 0; //safety check
-	entid = entity_list.CreateGroundObjectFromModel(model, x, y, z, heading, type, decay_time);
+	entid = entity_list.createGroundObjectFromModel(model, x, y, z, heading, type, decay_time);
 	return entid;
 }
 
@@ -2852,7 +2852,7 @@ void QuestManager::SendMail(const char *to, const char *from, const char *subjec
 uint16 QuestManager::CreateDoor(const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size)
 {
 	uint16 entid = 0; //safety check
-	entid = entity_list.CreateDoor(model, x, y, z, heading, opentype, size);
+	entid = entity_list.createDoor(model, x, y, z, heading, opentype, size);
 	return entid;
 }
 

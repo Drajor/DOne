@@ -1323,7 +1323,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		IsBankSlot(dst_slot_check))
 	{
 		uint32 distance = 0;
-		NPC *banker = entity_list.GetClosestBanker(this, distance);
+		NPC *banker = entity_list.getClosestBanker(this, distance);
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{

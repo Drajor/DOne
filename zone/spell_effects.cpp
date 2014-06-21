@@ -730,7 +730,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 					castToNPC()->SaveGuardSpotCharm();
 				}
 				InterruptSpell();
-				entity_list.RemoveDebuffs(this);
+				entity_list.removeDebuffs(this);
 				entity_list.removeFromTargets(this);
 				WipeHateList();
 
@@ -819,7 +819,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 					if(castToClient()->GetClientVersionBit() & BIT_SoDAndLater)
 					{
-						bodyType bt = BT_Undead;
+						BodyType bt = BT_Undead;
 
 						int MessageID = SENSE_UNDEAD;
 
@@ -834,7 +834,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							MessageID = SENSE_ANIMAL;
 						}
 
-						Mob *ClosestMob = entity_list.GetClosestMobByBodyType(this, bt);
+						Mob *ClosestMob = entity_list.getClosestMobByBodyType(this, bt);
 
 						if(ClosestMob)
 						{
@@ -2117,7 +2117,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			if(isClient()){
 					castToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(), caster->GetY(), caster->GetZ(), caster->GetHeading(), 2, SummonPC);
 					message(15, "You have been summoned!");
-					entity_list.ClearAggro(this);
+					entity_list.clearAggro(this);
 				}
 				else
 					caster->message(13, "This spell can only be cast on players.");
@@ -2561,7 +2561,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_SetBodyType:
 			{
-				SetBodyType((bodyType)spell.base[i], false);
+				SetBodyType((BodyType)spell.base[i], false);
 				break;
 			}
 
