@@ -824,9 +824,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		safe_delete(pack);
 	}
 
-	//Return true to proceed, false to return
-	if (!mod_client_message(msg, chan_num)) { return; }
-
 	// Garble the message based on drunkness
 	if (m_pp.intoxication > 0) {
 		GarbleMessage(msg, (int)(m_pp.intoxication / 3));
@@ -2318,8 +2315,7 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->isClient() ||
 			GetLevelCon(against_who->GetLevel()) == CON_GREEN)
 		{
-			//false by default
-			if( !mod_can_increase_skill(skillid, against_who) ) { return(false); }
+			return false;
 		}
 	}
 
@@ -2330,10 +2326,8 @@ bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int cha
 		int16 Chance = 10 + chancemodi + ((252 - skillval) / 20);
 		if (Chance < 1)
 			Chance = 1; // Make it always possible
+
 		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
-
-		Chance = mod_increase_skill_chance(Chance, against_who);
-
 		if(MakeRandomFloat(0, 99) < Chance)
 		{
 			SetSkill(skillid, GetRawSkill(skillid) + 1);
@@ -2703,8 +2697,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
-					max_percent = mod_bindwound_percent(max_percent, bindmob);
-
 					int max_hp = bindmob->GetMaxHP()*max_percent/100;
 
 					// send bindmob new hp's
@@ -2723,8 +2715,6 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 						int bindBonus = spellbonuses.BindWound + itembonuses.BindWound + aabonuses.BindWound;
 
 						bindhps += bindhps*bindBonus / 100;
-
-						bindhps = mod_bindwound_hp(bindhps, bindmob);
 
 						//if the bind takes them above the max bindable
 						//cap it at that value. Dont know if live does it this way
@@ -8149,8 +8139,6 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
    if(type == ItemTypeFood)
    {
        int hchange = item->CastTime * cons_mod;
-       hchange = mod_food_value(item, hchange);
-
        if(hchange < 0) { return; }
 
        m_pp.hunger_level += hchange;
@@ -8166,8 +8154,6 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
    else
    {
        int tchange = item->CastTime * cons_mod;
-       tchange = mod_drink_value(item, tchange);
-
        if(tchange < 0) { return; }
 
         m_pp.thirst_level += tchange;

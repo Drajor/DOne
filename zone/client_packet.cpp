@@ -62,7 +62,6 @@
 #include "map.h"
 #include "TitleManager.h"
 #include "pets.h"
-#include "ZoneConfig.h"
 #include "guild_mgr.h"
 #include "pathing.h"
 #include "water_map.h"
@@ -2588,8 +2587,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		con->faction = FACTION_DUBIOUS;
 	}
 
-	mod_consider(tmob, con);
-
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	return;
@@ -3179,8 +3176,6 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if((response).size() > 0)
 			{
-				if( !mod_saylink(response, silentsaylink) ) { return; }
-
 				if(GetTarget() && GetTarget()->isNPC())
 				{
 					if(silentsaylink)
@@ -7665,8 +7660,6 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 	if(GetHP() <= 0)
 	{
-		mod_client_death_env();
-
 		Death(0, 32000, SPELL_UNKNOWN, SkillHandtoHand);
 	}
 	SendHPUpdate();

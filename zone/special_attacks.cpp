@@ -41,10 +41,7 @@ int Mob::GetKickDamage() {
 
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(SkillKick, dmg,mindmg);
-
-	dmg = mod_kick_damage(dmg);
-
-	return(dmg);
+	return dmg;
 }
 
 int Mob::GetBashDamage() {
@@ -57,8 +54,6 @@ int Mob::GetBashDamage() {
 
 	int32 mindmg = 1;
 	ApplySpecialAttackMod(SkillBash, dmg, mindmg);
-
-	dmg = mod_bash_damage(dmg);
 
 	return(dmg);
 }
@@ -283,8 +278,6 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
 
-		max_dmg = mod_frenzy_damage(max_dmg);
-
 		if (GetLevel() < 51)
 			min_dmg = 1;
 		else
@@ -491,8 +484,6 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 	}
 
 	//This can potentially stack with changes to kick damage
-	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
-
 	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
 
 	return(reuse);
@@ -666,8 +657,6 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	else{
 		ndamage = -5;
 	}
-
-	ndamage = mod_backstab_damage(ndamage);
 
 	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime);
 	DoAnim(animPiercing);
@@ -892,9 +881,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 				if(GetClass() == RANGER && GetLevel() > 50)
 				{
 					int bonuschance = RuleI(Combat, ArcheryBonusChance);
-
-					bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
-
 					if( !RuleB(Combat, UseArcheryBonusRoll) || (MakeRandomInt(1, 100) < bonuschance) )
 					{
 						if(RuleB(Combat, ArcheryBonusRequiresStationary))
@@ -914,7 +900,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					{
 						MaxDmg *= (float)2;
 						hate *= (float)2;
-						MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
 
 						mlog(COMBAT__RANGED, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
 						Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
@@ -946,8 +931,6 @@ void Mob::DoArcheryAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item
 					ApplyMeleeDamageBonus(SkillArchery, TotalDmg);
 					TotalDmg += other->GetFcDamageAmtIncoming(this, 0, true, SkillArchery);
 					TotalDmg += (itembonuses.HeroicDEX / 10) + (TotalDmg * other->GetSkillDmgTaken(SkillArchery) / 100) + GetSkillDmgAmt(SkillArchery);
-
-					TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
 
 					TryCriticalHit(other, SkillArchery, TotalDmg);
 					other->AddToHateList(this, hate, 0, false);
@@ -1122,8 +1105,6 @@ uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg)
 
 	if(MaxDmg < minDmg)
 		MaxDmg = minDmg;
-
-	MaxDmg = mod_throwing_damage(MaxDmg);
 
 	return MaxDmg;
 }

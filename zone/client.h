@@ -1172,28 +1172,6 @@ public:
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
-	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
-	bool mod_client_message(char* message, uint8 chan_num);
-	bool mod_can_increase_skill(SkillUseTypes skillid, Mob* against_who);
-	int16 mod_increase_skill_chance(int16 chance, Mob* against_who);
-	int mod_bindwound_percent(int max_percent, Mob* bindmob);
-	int mod_bindwound_hp(int bindhps, Mob* bindmob);
-	int mod_client_haste(int h);
-	void mod_consider(Mob* tmob, Consider_Struct* con);
-	bool mod_saylink(const std::string&, bool silentsaylink);
-	int16 mod_pet_power(int16 act_power, uint16 spell_id);
-	float mod_tradeskill_chance(float chance, DBTradeskillRecipe_Struct *spec);
-	float mod_tradeskill_skillup(float chance_stage2);
-	int32 mod_tribute_item_value(int32 pts, const ItemInst* item);
-	void mod_client_death_npc(Mob* killerMob);
-	void mod_client_death_duel(Mob* killerMob);
-	void mod_client_death_env();
-	int32 mod_client_xp(int32 in_exp, NPC *npc);
-	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
-	int mod_client_haste_cap(int cap);
-    int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
-    int mod_food_value(const Item_Struct *item, int change);
-    int mod_drink_value(const Item_Struct *item, int change);
 
 protected:
 	friend class Mob;

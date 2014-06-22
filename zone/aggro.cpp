@@ -341,7 +341,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 			#if EQDEBUG>=6
 				LogFile->write(EQEMuLog::Debug, "Check aggro for %s target %s.", getName(), mob->getName());
 			#endif
-			return( mod_will_aggro(mob, this) );
+				return true;
 		}
 	}
 #if EQDEBUG >= 6

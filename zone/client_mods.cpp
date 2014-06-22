@@ -1359,8 +1359,6 @@ int Client::CalcHaste() {
 	else // 1-50
 		cap = level + 25;
 
-	cap = mod_client_haste_cap(cap);
-
 	if (h > cap)
 		h = cap;
 
@@ -1372,8 +1370,6 @@ int Client::CalcHaste() {
 
 	h += overhaste;
 	h += ExtraHaste;	//GM granted haste.
-
-	h = mod_client_haste(h);
 
 	if (spellbonuses.inhibitmelee) {
 		if (h >= 0)

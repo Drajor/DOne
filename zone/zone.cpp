@@ -1087,9 +1087,6 @@ bool Zone::Init(bool iStaticZone) {
 
 	LoadTickItems();
 
-	//MODDING HOOK FOR ZONE INIT
-	mod_init();
-
 	return true;
 }
 
@@ -1570,9 +1567,6 @@ void Zone::Repop(uint32 delay) {
 		LogFile->write(EQEMuLog::Debug, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
 
 	initgrids_timer.Start();
-
-	//MODDING HOOK FOR REPOP
-	mod_repop();
 }
 
 void Zone::GetTimeSync()

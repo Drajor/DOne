@@ -219,8 +219,6 @@ bool Spawn2::Process() {
 		currentnpcid = npcid;
 		NPC* npc = new NPC(tmp, this, x, y, z, heading, FlyMode3);
 
-		npc->mod_prespawn(this);
-
 		npcthis = npc;
 		npc->AddLootTable();
 		npc->SetSp2(spawngroup_id_);

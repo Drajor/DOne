@@ -106,6 +106,13 @@ int32 SPDAT_RECORDS = -1;
 void Shutdown();
 extern void MapOpcodes();
 
+void CatchSignal(int sig_num) {
+#ifdef _WINDOWS
+	_log(ZONE__INIT, "Recieved signal: %i", sig_num);
+#endif
+	RunLoops = false;
+}
+
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone);
 	set_exception_handler();
@@ -173,24 +180,6 @@ int main(int argc, char** argv) {
 #endif
 
 	_log(ZONE__INIT, "CURRENT_VERSION: %s", CURRENT_VERSION);
-
-	/*
-	* Setup nice signal handlers
-	*/
-	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
-	}
-	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
-	}
-	#ifndef WIN32
-	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		_log(ZONE__INIT_ERR, "Could not set signal handler");
-		return 1;
-	}
-	#endif
 
 	const char *log_ini_file = "./log.ini";
 	if(!load_log_settings(log_ini_file))
@@ -507,13 +496,6 @@ int main(int argc, char** argv) {
 	CheckEQEMuErrorAndPause();
 	_log(ZONE__INIT, "Proper zone shutdown complete.");
 	return 0;
-}
-
-void CatchSignal(int sig_num) {
-#ifdef _WINDOWS
-	_log(ZONE__INIT, "Recieved signal: %i", sig_num);
-#endif
-	RunLoops = false;
 }
 
 void Shutdown()

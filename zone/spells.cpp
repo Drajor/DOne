@@ -448,8 +448,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		return(true);
 	}
 
-	cast_time = mod_cast_time(cast_time);
-
 	// ok we know it has a cast time so we can start the timer now
 	spellend_timer.Start(cast_time);
 
@@ -2379,8 +2377,6 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	int res = CalcBuffDuration_formula(castlevel, formula, duration);
 
-	res = mod_buff_duration(res, caster, target, spell_id);
-
 	mlog(SPELLS__CASTING, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
 		spell_id, castlevel, formula, duration, res);
 
@@ -2487,9 +2483,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			return -1;
 		}
 	}
-
-	int modval = mod_spell_stack(spellid1, caster_level1, caster1, spellid2, caster_level2, caster2);
-	if(modval < 2) { return(modval); }
 
 	//resurrection effects wont count for overwrite/block stacking
 	switch(spellid1)
@@ -3104,8 +3097,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		sprintf(temp1, "%d", spell_id);
 		parse->EventNPC(EVENT_CAST_ON, spelltar->castToNPC(), this, temp1, 0);
 	}
-
-	mod_spell_cast(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
 
 	// now check if the spell is allowed to land
 	if (RuleB(Spells, EnableBlockedBuffs)) {
@@ -4259,8 +4250,6 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	resist_chance += level_mod;
 	resist_chance += resist_modifier;
 	resist_chance += target_resist;
-
-	resist_chance = mod_spell_resist(resist_chance, level_mod, resist_modifier, target_resist, resist_type, spell_id, caster);
 
 	//Do our min and max resist checks.
 	if(resist_chance > spells[spell_id].MaxResist && spells[spell_id].MaxResist != 0)

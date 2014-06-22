@@ -68,7 +68,6 @@ SET(zone_sources
 	merc.cpp
 	mob.cpp
 	MobAI.cpp
-	mod_functions.cpp
 	net.cpp
 	npc.cpp
 	NpcAI.cpp

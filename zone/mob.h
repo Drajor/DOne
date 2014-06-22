@@ -854,30 +854,6 @@ public:
 	inline uint16 GetEmoteID() { return emoteid; }
 
 	bool 	HasSpellEffect(int effectid);
-	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster);
-	float 	mod_hit_chance(float chancetohit, SkillUseTypes skillinuse, Mob* attacker);
-	float 	mod_riposte_chance(float ripostchance, Mob* attacker);
-	float	mod_block_chance(float blockchance, Mob* attacker);
-	float	mod_parry_chance(float parrychance, Mob* attacker);
-	float	mod_dodge_chance(float dodgechance, Mob* attacker);
-	float	mod_monk_weight(float monkweight, Mob* attacker);
-	float	mod_mitigation_rating(float mitigation_rating, Mob* attacker);
-	float	mod_attack_rating(float attack_rating, Mob* defender);
-	int32	mod_kick_damage(int32 dmg);
-	int32	mod_bash_damage(int32 dmg);
-	int32	mod_frenzy_damage(int32 dmg);
-	int32	mod_monk_special_damage(int32 ndamage, SkillUseTypes skill_type);
-	int32	mod_backstab_damage(int32 ndamage);
-	int		mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon);
-	uint32	mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon);
-	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon);
-	uint16	mod_throwing_damage(uint16 MaxDmg);
-	int32	mod_cast_time(int32 cast_time);
-	int		mod_buff_duration(int res, Mob* caster, Mob* target, uint16 spell_id);
-	int		mod_spell_stack(uint16 spellid1, int caster_level1, Mob* caster1, uint16 spellid2, int caster_level2, Mob* caster2);
-	int		mod_spell_resist(int resist_chance, int level_mod, int resist_modifier, int target_resist, uint8 resist_type, uint16 spell_id, Mob* caster);
-	void	mod_spell_cast(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc);
-	bool    mod_will_aggro(Mob *attacker, Mob *on);
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);

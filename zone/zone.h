@@ -269,10 +269,6 @@ public:
     void    UpdateHotzone();
 	std::unordered_map<int, item_tick_struct> tick_items;
 
-	//MODDING HOOKS
-	void mod_init();
-	void mod_repop();
-
 private:
 	uint32	zoneid;
 	uint32	instanceid;
