@@ -94,7 +94,6 @@ char errorname[32];
 uint16 adverrornum = 0;
 extern Zone* zone;
 EQStreamFactory eqsf(ZoneStream);
-TitleManager title_manager;
 DBAsyncFinishedQueue MTdbafq;
 DBAsync *dbasync = nullptr;
 TaskManager *taskmanager = 0;
@@ -246,7 +245,7 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading factions");
 	database.LoadFactionData();
 	_log(ZONE__INIT, "Loading titles");
-	title_manager.LoadTitles();
+	TitleManager::getSingleton()->initialise();
 	_log(ZONE__INIT, "Loading AA effects");
 	database.LoadAAEffects();
 	_log(ZONE__INIT, "Loading tributes");

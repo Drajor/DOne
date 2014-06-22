@@ -1079,7 +1079,7 @@ void Client::BuyAA(AA_Action* action)
 		SendAAStats();
 
 		CalcBonuses();
-		if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
+		if(TitleManager::getSingleton()->isNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
 			NotifyNewTitlesAvailable();
 	}
 }

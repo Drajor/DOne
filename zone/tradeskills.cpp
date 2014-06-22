@@ -1159,7 +1159,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
 
-		if(title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
+		if(TitleManager::getSingleton()->isNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
 			NotifyNewTitlesAvailable();
 	}
 

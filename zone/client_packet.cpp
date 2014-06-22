@@ -9679,12 +9679,12 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 	if(!sts->is_suffix)
 	{
-		Title = title_manager.GetPrefix(sts->title_id);
+		Title = TitleManager::getSingleton()->getPrefix(sts->title_id);
 		SetAATitle(Title.c_str());
 	}
 	else
 	{
-		Title = title_manager.GetSuffix(sts->title_id);
+		Title = TitleManager::getSingleton()->getSuffix(sts->title_id);
 		SetTitleSuffix(Title.c_str());
 	}
 }
@@ -9692,7 +9692,7 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 {
 
-	EQApplicationPacket *outapp = title_manager.MakeTitlesPacket(this);
+	EQApplicationPacket *outapp = TitleManager::getSingleton()->makeTitlesPacket(this);
 
 	if(outapp != nullptr)
 		FastQueuePacket(&outapp);

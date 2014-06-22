@@ -398,7 +398,7 @@ void Client::GoFish()
 
 	if(CheckIncreaseSkill(SkillFishing, nullptr, 5))
 	{
-		if(title_manager.IsNewTradeSkillTitleAvailable(SkillFishing, GetRawSkill(SkillFishing)))
+		if(TitleManager::getSingleton()->isNewTradeSkillTitleAvailable(SkillFishing, GetRawSkill(SkillFishing)))
 			NotifyNewTitlesAvailable();
 	}
 }

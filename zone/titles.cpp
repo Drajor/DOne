@@ -14,7 +14,7 @@
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+	*/
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
 #include "masterentity.h"
@@ -24,312 +24,156 @@
 
 extern WorldServer worldserver;
 
-TitleManager::TitleManager() {
+TitleManager::TitleManager() {}
+TitleManager::~TitleManager() {}
+
+TitleManager* TitleManager::getSingleton() {
+	static TitleManager* titleManager = nullptr;
+	if (titleManager == nullptr)
+		titleManager = new TitleManager;
+
+	return titleManager;
 }
 
-bool TitleManager::LoadTitles()
-{
-	Titles.clear();
 
-	TitleEntry Title;
+bool TitleManager::initialise() {
+	mTitles.clear();
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
+	char* query = nullptr;
+	MYSQL_RES* result;
 	MYSQL_ROW row;
 
-	if (!database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, `min_aa_points`, `max_aa_points`, `class`, `gender`, "
-		"`char_id`, `status`, `item_id`, `prefix`, `suffix`, `title_set` from titles"), errbuf, &result))
-	{
+	// SQL:
+	if (!database.RunQuery(query, MakeAnyLenString(&query, "SELECT `id`, `skill_id`, `min_skill_value`, `max_skill_value`, `min_aa_points`, `max_aa_points`, `class`, `gender`, `char_id`, `status`, `item_id`, `prefix`, `suffix`, `title_set` from titles"), errbuf, &result)) {
 		LogFile->write(EQEMuLog::Error, "Unable to load titles: %s : %s", query, errbuf);
 		safe_delete_array(query);
-		return(false);
+		return false;
 	}
-
 	safe_delete_array(query);
 
+	TitleData title;
 	while ((row = mysql_fetch_row(result))) {
-		Title.TitleID = atoi(row[0]);
-		Title.SkillID = (SkillUseTypes) atoi(row[1]);
-		Title.MinSkillValue = atoi(row[2]);
-		Title.MaxSkillValue = atoi(row[3]);
-		Title.MinAAPoints = atoi(row[4]);
-		Title.MaxAAPoints = atoi(row[5]);
-		Title.Class = atoi(row[6]);
-		Title.Gender = atoi(row[7]);
-		Title.CharID = atoi(row[8]);
-		Title.Status = atoi(row[9]);
-		Title.ItemID = atoi(row[10]);
-		Title.Prefix = row[11];
-		Title.Suffix = row[12];
-		Title.TitleSet = atoi(row[13]);
-		Titles.push_back(Title);
+		title.mID = atoi(row[0]);
+		title.mSkillID = (SkillUseTypes)atoi(row[1]);
+		title.mMinSkillValue = atoi(row[2]);
+		title.mMaxSkillValue = atoi(row[3]);
+		title.mMinAAPoints = atoi(row[4]);
+		title.mMaxAAPoints = atoi(row[5]);
+		title.mClass = atoi(row[6]);
+		title.mGender = atoi(row[7]);
+		title.mCharacterID = atoi(row[8]);
+		title.mStatus = atoi(row[9]);
+		title.mItemID = atoi(row[10]);
+		title.mPrefix = row[11];
+		title.mSuffix = row[12];
+		title.mTitleSetID = atoi(row[13]);
+		mTitles.push_back(title);
 	}
 	mysql_free_result(result);
 
 	return(true);
 }
 
-EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
-{
-	std::vector<TitleEntry>::iterator Iterator;
+EQApplicationPacket* TitleManager::makeTitlesPacket(Client* pClient) {
+	std::vector<TitleData> eligibleTitles;
 
-	std::vector<TitleEntry> AvailableTitles;
-
-	uint32 Length = 4;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(!IsClientEligibleForTitle(c, Iterator))
-		{
-			++Iterator;
+	// Determine which titles pClient is eligible for and calculate string length.
+	uint32 length = 4;
+	for (auto& i : mTitles) {
+		if (!isEligible(pClient, i))
 			continue;
-		}
 
-		AvailableTitles.push_back((*Iterator));
-
-		Length += Iterator->Prefix.length() + Iterator->Suffix.length() + 6;
-
-		++Iterator;
-
+		eligibleTitles.push_back(i);
+		length += i.mPrefix.length() + i.mSuffix.length() + 6;
 	}
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendTitleList, Length);
+	// Prepare packet.
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendTitleList, length);
+	char* buffer = (char*)outapp->pBuffer;
+	VARSTRUCT_ENCODE_TYPE(uint32, buffer, eligibleTitles.size());
 
-	char *Buffer = (char *)outapp->pBuffer;
-
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, AvailableTitles.size());
-
-	Iterator = AvailableTitles.begin();
-
-	while(Iterator != AvailableTitles.end())
-	{
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, Iterator->TitleID);
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Prefix.c_str());
-
-		VARSTRUCT_ENCODE_STRING(Buffer, Iterator->Suffix.c_str());
-
-		++Iterator;
+	for (auto& i : eligibleTitles) {
+		VARSTRUCT_ENCODE_TYPE(uint32, buffer, i.mID);
+		VARSTRUCT_ENCODE_STRING(buffer, i.mPrefix.c_str());
+		VARSTRUCT_ENCODE_STRING(buffer, i.mSuffix.c_str());
 	}
-	return(outapp);
+	return outapp;
 }
 
-int TitleManager::NumberOfAvailableTitles(Client *c)
-{
-	int Count = 0;
-
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(IsClientEligibleForTitle(c, Iterator))
-			++Count;
-
-		++Iterator;
+std::string TitleManager::getPrefix(int pTitleID) {
+	for (auto& i : mTitles) {
+		if (i.mID == pTitleID) return i.mPrefix;
 	}
 
-	return Count;
-}
-
-std::string TitleManager::GetPrefix(int TitleID)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if((*Iterator).TitleID == TitleID)
-			return (*Iterator).Prefix;
-
-		++Iterator;
-	}
-
+	// TODO: Logging here, this falls outside regular operation.
 	return "";
 }
 
-std::string TitleManager::GetSuffix(int TitleID)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if((*Iterator).TitleID == TitleID)
-			return (*Iterator).Suffix;
-
-		++Iterator;
+std::string TitleManager::getSuffix(int pTitleID) {
+	for (auto& i : mTitles) {
+		if (i.mID == pTitleID) return i.mSuffix;
 	}
 
+	// TODO: Logging here, this falls outside regular operation.
 	return "";
 }
 
-bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::iterator Title)
-{
-		if((Title->CharID >= 0) && (c->CharacterID() != static_cast<uint32>(Title->CharID)))
+bool TitleManager::isEligible(Client* pClient, TitleData& pTitle) {
+	// Character ID constraint.
+	if (pTitle.mCharacterID >= 0 && pClient->CharacterID() != static_cast<uint32>(pTitle.mCharacterID)) return false;
+	
+	// Status constraint.
+	if (pTitle.mStatus >= 0 && pClient->Admin() < pTitle.mStatus) return false;
+	
+	// Gender constraint.
+	if (pTitle.mGender >= 0 && pClient->GetBaseGender() != pTitle.mGender) return false;
+	
+	// Class constraint.
+	if (pTitle.mClass >= 0 && pClient->GetBaseClass() != pTitle.mClass) return false;
+	
+	// Minimum AA constraint.
+	if (pTitle.mMinAAPoints >= 0 && pClient->GetAAPointsSpent() < static_cast<uint32>(pTitle.mMinAAPoints)) return false;
+	
+	// Maximum AA constraint.
+	if (pTitle.mMaxAAPoints >= 0 && pClient->GetAAPointsSpent() > static_cast<uint32>(pTitle.mMaxAAPoints)) return false;
+	
+	// Skill constraint.
+	if (pTitle.mSkillID >= 0) {
+		// Minimum skill constraint.
+		if (pTitle.mMinSkillValue >= 0 && pClient->GetRawSkill(static_cast<SkillUseTypes>(pTitle.mSkillID)) < static_cast<uint32>(pTitle.mMinSkillValue))
 			return false;
 
-		if((Title->Status >= 0) && (c->Admin() < Title->Status))
+		// Maximum skill constraint.
+		if (pTitle.mMaxSkillValue >= 0 && pClient->GetRawSkill(static_cast<SkillUseTypes>(pTitle.mSkillID)) > static_cast<uint32>(pTitle.mMaxSkillValue))
 			return false;
-
-		if((Title->Gender >= 0) && (c->GetBaseGender() != Title->Gender))
-			return false;
-
-		if((Title->Class >= 0) && (c->GetBaseClass() != Title->Class))
-			return false;
-
-		if((Title->MinAAPoints >= 0) && (c->GetAAPointsSpent() < static_cast<uint32>(Title->MinAAPoints)))
-			return false;
-
-		if((Title->MaxAAPoints >= 0) && (c->GetAAPointsSpent() > static_cast<uint32>(Title->MaxAAPoints)))
-			return false;
-
-		if(Title->SkillID >= 0)
-		{
-			if((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillUseTypes>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
-				return false;
-
-			if((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillUseTypes>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
-				return false;
-
-		}
-
-		if((Title->ItemID >= 1) && (c->GetInv().HasItem(Title->ItemID, 0, 0xFF) == SLOT_INVALID))
-			return false;
-
-		if((Title->TitleSet > 0) && (!c->CheckTitle(Title->TitleSet)))
-			return false;
-
-		return true;
-}
-
-bool TitleManager::IsNewAATitleAvailable(int AAPoints, int Class)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if((((*Iterator).Class == -1) || ((*Iterator).Class == Class)) && ((*Iterator).MinAAPoints == AAPoints))
-			return true;
-
-		++Iterator;
 	}
 
+	// Item ID constraint.
+	if ((pTitle.mItemID >= 1) && (pClient->GetInv().HasItem(pTitle.mItemID, 0, 0xFF) == SLOT_INVALID))
+		return false;
+
+	// Title Set constraint.
+	if ((pTitle.mTitleSetID > 0) && (!pClient->CheckTitle(pTitle.mTitleSetID)))
+		return false;
+
+	return true;
+}
+
+bool TitleManager::isNewAATitleAvailable(int pAAPoints, int pClass) {
+	for (auto& i : mTitles) {
+		if (((i.mClass == -1) || (i.mClass == pClass)) && (i.mMinAAPoints == pAAPoints))
+			return true;
+	}
 	return false;
 }
 
-bool TitleManager::IsNewTradeSkillTitleAvailable(int SkillID, int SkillValue)
-{
-	std::vector<TitleEntry>::iterator Iterator;
-
-	Iterator = Titles.begin();
-
-	while(Iterator != Titles.end())
-	{
-		if(((*Iterator).SkillID == SkillID) && ((*Iterator).MinSkillValue == SkillValue))
+bool TitleManager::isNewTradeSkillTitleAvailable(int pSkillID, int pSkillValue) {
+	for (auto& i : mTitles) {
+		if (i.mSkillID == pSkillID && i.mMinSkillValue == pSkillValue)
 			return true;
-
-		++Iterator;
 	}
-
 	return false;
-}
-
-void TitleManager::CreateNewPlayerTitle(Client *c, const char *Title)
-{
-	if(!c || !Title)
-		return;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
-
-	char *EscTitle = new char[strlen(Title) * 2 + 1];
-
-	c->SetAATitle(Title);
-
-	database.DoEscapeString(EscTitle, Title, strlen(Title));
-
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `prefix` = '%s' and char_id = %i", EscTitle, c->CharacterID()), errbuf, &result))
-	{
-		if(mysql_num_rows(result) > 0)
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscTitle);
-			return;
-		}
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `prefix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscTitle), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title: %s %s", query, errbuf);
-	else
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	safe_delete_array(query);
-	safe_delete_array(EscTitle);
-
-}
-
-void TitleManager::CreateNewPlayerSuffix(Client *c, const char *Suffix)
-{
-	if(!c || !Suffix)
-		return;
-
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = nullptr;
-	MYSQL_RES *result;
-
-	char *EscSuffix = new char[strlen(Suffix) * 2 + 1];
-
-	c->SetTitleSuffix(Suffix);
-
-	database.DoEscapeString(EscSuffix, Suffix, strlen(Suffix));
-
-	if (database.RunQuery(query, MakeAnyLenString(&query,
-		"SELECT `id` from titles where `suffix` = '%s' and char_id = %i", EscSuffix, c->CharacterID()), errbuf, &result))
-	{
-		if(mysql_num_rows(result) > 0)
-		{
-			mysql_free_result(result);
-			safe_delete_array(query);
-			safe_delete_array(EscSuffix);
-			return;
-		}
-		mysql_free_result(result);
-	}
-
-	safe_delete_array(query);
-
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT into titles (`char_id`, `suffix`) VALUES(%i, '%s')",
-							c->CharacterID(), EscSuffix), errbuf))
-		LogFile->write(EQEMuLog::Error, "Error adding title suffix: %s %s", query, errbuf);
-	else
-	{
-		ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-	safe_delete_array(query);
-	safe_delete_array(EscSuffix);
-
 }
 
 void Client::SetAATitle(const char *Title)
@@ -377,7 +221,7 @@ void Client::EnableTitle(int titleset) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 
-	if(!database.RunQuery(query,MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
+	if (!database.RunQuery(query, MakeAnyLenString(&query, "INSERT INTO player_titlesets (char_id, title_set) VALUES (%i, %i)", CharacterID(), titleset), errbuf)) {
 		LogFile->write(EQEMuLog::Error, "Error in EnableTitle query for titleset %i and charid %i", titleset, CharacterID());
 		safe_delete_array(query);
 		return;

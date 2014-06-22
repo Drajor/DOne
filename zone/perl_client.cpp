@@ -3831,8 +3831,6 @@ XS(XS_Client_SetAATitle)
 
 		if(!SaveTitle)
 			THIS->SetAATitle(txt);
-		else
-			title_manager.CreateNewPlayerTitle(THIS, txt);
 	}
 	XSRETURN_EMPTY;
 }
@@ -3916,8 +3914,6 @@ XS(XS_Client_SetTitleSuffix) {
 
 		if(!SaveSuffix)
 			THIS->SetTitleSuffix(txt);
-		else
-			title_manager.CreateNewPlayerSuffix(THIS, txt);
 	}
 	XSRETURN_EMPTY;
 }

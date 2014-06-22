@@ -1498,7 +1498,7 @@ void WorldServer::Process() {
 
 		case ServerOP_ReloadTitles:
 		{
-			title_manager.LoadTitles();
+			TitleManager::getSingleton()->initialise();
 			break;
 		}
 
