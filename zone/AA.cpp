@@ -29,7 +29,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "doors.h"
 #include "beacon.h"
 #include "corpse.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/eq_packet_structs.h"

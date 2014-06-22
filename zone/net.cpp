@@ -50,7 +50,7 @@
 #include "zone.h"
 #include "command.h"
 #include "ZoneConfig.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "guild_mgr.h"
 #include "tasks.h"
 

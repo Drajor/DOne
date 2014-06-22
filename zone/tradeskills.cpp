@@ -28,7 +28,7 @@
 #include "zonedb.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"

@@ -29,7 +29,7 @@
 #include "masterentity.h"
 #include "npc.h"
 #include "water_map.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"

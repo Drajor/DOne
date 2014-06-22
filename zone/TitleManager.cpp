@@ -15,10 +15,10 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	*/
+#include "TitleManager.h"
 #include "../common/debug.h"
 #include "../common/eq_packet_structs.h"
 #include "masterentity.h"
-#include "titles.h"
 #include "../common/StringUtil.h"
 #include "worldserver.h"
 

@@ -60,7 +60,7 @@
 #include "../common/crc32.h"
 #include "StringIDs.h"
 #include "map.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "pets.h"
 #include "ZoneConfig.h"
 #include "guild_mgr.h"

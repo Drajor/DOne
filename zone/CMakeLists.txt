@@ -102,7 +102,7 @@ SET(zone_sources
 	spell_effects.cpp
 	spells.cpp
 	tasks.cpp
-	titles.cpp
+	TitleManager.cpp
 	tradeskills.cpp
 	trading.cpp
 	trap.cpp
@@ -187,7 +187,7 @@ SET(zone_headers
 	spawngroup.h
 	StringIDs.h
 	tasks.h
-	titles.h
+	TitleManager.h
 	trap.h
 	water_map.h
 	water_map_v1.h

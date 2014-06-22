@@ -49,7 +49,7 @@
 #include "StringIDs.h"
 #include "guild_mgr.h"
 #include "../common/rulesys.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "QGlobals.h"
 
 

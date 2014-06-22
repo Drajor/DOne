@@ -35,7 +35,7 @@
 #endif
 
 #include "client.h"
-#include "titles.h"
+#include "TitleManager.h"
 
 #ifdef THIS		/* this macro seems to leak out on some systems */
 #undef THIS

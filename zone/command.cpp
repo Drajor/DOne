@@ -60,7 +60,7 @@
 #include "pathing.h"
 #include "client_logs.h"
 #include "guild_mgr.h"
-#include "titles.h"
+#include "TitleManager.h"
 #include "../common/patches/patches.h"
 
 // these should be in the headers...
