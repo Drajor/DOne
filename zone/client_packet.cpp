@@ -2592,82 +2592,6 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Begging(const EQApplicationPacket *app)
-{
-	if(!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
-	{
-		message(13,"Ability recovery time not yet met.");
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
-		BeggingResponse_Struct *brs = (BeggingResponse_Struct*) outapp->pBuffer;
-		brs->Result = 0;
-		FastQueuePacket(&outapp);
-		return;
-	}
-
-	if(!HasSkill(SkillBegging) || !GetTarget())
-		return;
-
-	if(GetTarget()->GetClass() == LDON_TREASURE)
-		return;
-
-	p_timers.Start(pTimerBeggingPickPocket, 8);
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
-	BeggingResponse_Struct *brs = (BeggingResponse_Struct*) outapp->pBuffer;
-
-	brs->Result = 0; // Default, Fail.
-	if(GetTarget() == this)
-	{
-		FastQueuePacket(&outapp);
-		return;
-	}
-
-	int RandomChance = MakeRandomInt(0 ,100);
-
-	int ChanceToAttack = 0;
-
-	if(GetLevel() > GetTarget()->GetLevel())
-		ChanceToAttack = MakeRandomInt(0, 15);
-	else
-		ChanceToAttack = MakeRandomInt(((this->GetTarget()->GetLevel() - this->GetLevel())*10)-5,((this->GetTarget()->GetLevel() - this->GetLevel())*10));
-
-	if(ChanceToAttack < 0)
-		ChanceToAttack = -ChanceToAttack;
-
-	if(RandomChance < ChanceToAttack)
-	{
-		GetTarget()->Attack(this);
-		QueuePacket(outapp);
-		safe_delete(outapp);
-		return;
-	}
-
-	uint16 CurrentSkill = GetSkill(SkillBegging);
-
-	float ChanceToBeg=((float)(CurrentSkill/700.0f) + 0.15f) * 100;
-
-	if(RandomChance < ChanceToBeg)
-	{
-		brs->Amount = MakeRandomInt(1, 10);
-		// This needs some work to determine how much money they can beg, based on skill level etc.
-		if(CurrentSkill < 50)
-		{
-			brs->Result = 4;	// Copper
-			AddMoneyToPP(brs->Amount, false);
-		}
-		else
-		{
-			brs->Result = 3;	// Silver
-			AddMoneyToPP(brs->Amount * 10, false);
-		}
-
-	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
-	CheckIncreaseSkill(SkillBegging, nullptr, -10);
-}
-
 void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
 {
 }
@@ -13785,3 +13709,12 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app) {
 
 void Client::Handle_OP_Fishing(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
 void Client::Handle_OP_Forage(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
+void Client::Handle_OP_Begging(const EQApplicationPacket *app){
+	message(13, "Feature Unavailable.");
+	
+	// Client requires a response or it breaks.
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
+	BeggingResponse_Struct *brs = (BeggingResponse_Struct*)outapp->pBuffer;
+	brs->Result = 0;
+	FastQueuePacket(&outapp);
+}

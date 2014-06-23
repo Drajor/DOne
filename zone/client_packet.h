@@ -38,7 +38,6 @@
 	void Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app);
 	void Handle_OP_ConsiderCorpse(const EQApplicationPacket *app);
 	void Handle_OP_Consider(const EQApplicationPacket *app);
-	void Handle_OP_Begging(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_Surname(const EQApplicationPacket *app);
 	void Handle_OP_ClearSurname(const EQApplicationPacket *app);
@@ -290,3 +289,4 @@
 
 	void Handle_OP_Forage(const EQApplicationPacket *app);
 	void Handle_OP_Fishing(const EQApplicationPacket *app);
+	void Handle_OP_Begging(const EQApplicationPacket *app);
