@@ -7530,25 +7530,6 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
-{
-	if(!p_timers.Expired(&database, pTimerFishing, false)) {
-		message(13,"Ability recovery time not yet met.");
-		return;
-	}
-
-	if (CanFish()) {
-		parse->EventPlayer(EVENT_FISH_START, this, "", 0);
-
-		//these will trigger GoFish() after a delay if we're able to actually fish, and if not, we won't stop the client from trying again immediately (although we may need to tell it to repop the button)
-		p_timers.Start(pTimerFishing, FishingReuseTime-1);
-		fishing_timer.Start();
-	}
-	return;
-}
-
-void Client::Handle_OP_Forage(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
-
 void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 {
 	if(!HasSkill(SkillMend))
@@ -13801,3 +13782,6 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app) {
 	// SideNote: Watching the slot translations, Unknown1 is showing '141' as well on certain item swaps.
 	// Manually looting a corpse results in a from '34' to '68' value for equipment items, '0' to '0' for inventory.
 }
+
+void Client::Handle_OP_Fishing(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
+void Client::Handle_OP_Forage(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }

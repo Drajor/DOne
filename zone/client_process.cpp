@@ -626,10 +626,6 @@ bool Client::process() {
 				ToggleTribute(true);	//re-activate the tribute.
 			}
 
-			if (fishing_timer.Check()) {
-				GoFish();
-			}
-
 			if (autosave_timer.Check()) {
 				save(0);
 			}

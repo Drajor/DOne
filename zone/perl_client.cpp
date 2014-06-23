@@ -3501,29 +3501,6 @@ XS(XS_Client_RemoveNoRent)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_GoFish); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GoFish)
-{
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)");
-	{
-		Client *		THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->GoFish();
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_CalcPriceMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CalcPriceMod)
 {
@@ -6076,7 +6053,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 		newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 		newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
-		newXSproto(strcpy(buf, "GoFish"), XS_Client_GoFish, file, "$");
 		newXSproto(strcpy(buf, "CalcPriceMod"), XS_Client_CalcPriceMod, file, "$;$$");
 		newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 		newXSproto(strcpy(buf, "UseDiscipline"), XS_Client_UseDiscipline, file, "$$$");

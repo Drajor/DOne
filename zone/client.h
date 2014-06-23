@@ -850,8 +850,7 @@ public:
 
 	void	ChangeSQLLog(const char *file);
 	void	LogSQL(const char *fmt, ...);
-	bool	CanFish();
-	void	GoFish();
+
 	//Calculate vendor price modifier based on CHA: (reverse==selling)
 	float	CalcPriceMod(Mob* other = 0, bool reverse = false);
 	void	ResetTrade();
@@ -1366,7 +1365,6 @@ private:
 	Timer	dead_timer;
 	Timer	global_channel_timer;
 	Timer	shield_timer;
-	Timer	fishing_timer;
 	Timer	endupkeep_timer;
 	Timer	forget_timer;	// our 2 min everybody forgets you timer
 	Timer	autosave_timer;

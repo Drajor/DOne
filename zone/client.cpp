@@ -139,7 +139,6 @@ Client::Client(EQStreamInterface* ieqs)
 	dead_timer(2000),
 	global_channel_timer(1000),
 	shield_timer(500),
-	fishing_timer(8000),
 	endupkeep_timer(1000),
 	forget_timer(0),
 	autosave_timer(RuleI(Character, AutosaveIntervalS)*1000),
@@ -219,7 +218,6 @@ Client::Client(EQStreamInterface* ieqs)
 	npclevel = 0;
 	pQueuedSaveWorkID = 0;
 	position_timer_counter = 0;
-	fishing_timer.Disable();
 	shield_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
