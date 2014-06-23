@@ -299,7 +299,7 @@ bool Client::process() {
 				if(ranged->GetItem() && ranged->GetItem()->ItemType == ItemTypeBow){
 					if(ranged_timer.Check(false)){
 						if(GetTarget() && (GetTarget()->isNPC() || GetTarget()->isClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
+							if(GetTarget()->isInfrontMOB(this, GetTarget()->GetX(), GetTarget()->GetY())){
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
@@ -319,7 +319,7 @@ bool Client::process() {
 				else if(ranged->GetItem() && (ranged->GetItem()->ItemType == ItemTypeLargeThrowing || ranged->GetItem()->ItemType == ItemTypeSmallThrowing)){
 					if(ranged_timer.Check(false)){
 						if(GetTarget() && (GetTarget()->isNPC() || GetTarget()->isClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
+							if(GetTarget()->isInfrontMOB(this, GetTarget()->GetX(), GetTarget()->GetY())){
 								if(CheckLosFN(GetTarget())){
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());

@@ -1064,7 +1064,7 @@ void EntityList::sendZoneSpawns(Client* pClient) {
 	auto i = mMOBs.begin();
 	while (i != mMOBs.end()) {
 		Mob *ent = i->second;
-		if (!(ent->InZone()) || (ent->isClient())) {
+		if (!(ent->isInZone()) || (ent->isClient())) {
 			if (ent->castToClient()->GMHideMe(pClient) || ent->castToClient()->IsHoveringForRespawn()) {
 				++i;
 				continue;
@@ -1089,7 +1089,7 @@ void EntityList::sendZoneSpawnsBulk(Client* pClient) {
 	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(pClient, maxspawns);
 	for (auto i = mMOBs.begin(); i != mMOBs.end(); i++) {
 		spawn = i->second;
-		if (spawn && spawn->InZone()) {
+		if (spawn && spawn->isInZone()) {
 			if (spawn->isClient() && (spawn->castToClient()->GMHideMe(pClient) ||
 				spawn->castToClient()->IsHoveringForRespawn()))
 				continue;
@@ -1130,7 +1130,7 @@ void EntityList::sendZoneCorpsesBulk(Client* pClient) {
 
 	for (auto i = mCorpses.begin(); i != mCorpses.end(); ++i) {
 		spawn = i->second;
-		if (spawn && spawn->InZone()) {
+		if (spawn && spawn->isInZone()) {
 			memset(&ns, 0, sizeof(NewSpawn_Struct));
 			spawn->FillSpawnStruct(&ns, pClient);
 			bzsp->AddSpawn(&ns);
@@ -1963,7 +1963,7 @@ void EntityList::updateWho(bool pSendFullUpdate) {
 	}
 
 	for (auto i = mClients.begin(); i != mClients.end(); i++) {
-		if (i->second->InZone()) {
+		if (i->second->isInZone()) {
 			if (pSendFullUpdate) {
 				i->second->UpdateWho();
 			}

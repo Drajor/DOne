@@ -30,22 +30,22 @@ void Lua_Mob::Depop(bool start_spawn_timer) {
 
 bool Lua_Mob::BehindMob() {
 	Lua_Safe_Call_Bool();
-	return self->BehindMob();
+	return self->isBehindMOB();
 }
 
 bool Lua_Mob::BehindMob(Lua_Mob other) {
 	Lua_Safe_Call_Bool();
-	return self->BehindMob(other);
+	return self->isBehindMOB(other);
 }
 
 bool Lua_Mob::BehindMob(Lua_Mob other, float x) {
 	Lua_Safe_Call_Bool();
-	return self->BehindMob(other, x);
+	return self->isBehindMOB(other, x);
 }
 
 bool Lua_Mob::BehindMob(Lua_Mob other, float x, float y) {
 	Lua_Safe_Call_Bool();
-	return self->BehindMob(other, x, y);
+	return self->isBehindMOB(other, x, y);
 }
 
 void Lua_Mob::SetLevel(int level) {

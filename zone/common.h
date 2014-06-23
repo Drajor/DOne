@@ -398,12 +398,12 @@ struct StatBonuses {
 	int8	CriticalMend;						// chance critical monk mend
 };
 
-typedef struct
-{
-	uint16 spellID;
-	uint16 chance;
-	uint16 base_spellID;
-} tProc;
+#define MAX_PROCS 4
+struct Proc {
+	uint16 mSpellID;
+	uint16 mChance;
+	uint16 mBaseSpellID;
+} ;
 
 struct Shielders_Struct {
 	uint32 shielder_id;

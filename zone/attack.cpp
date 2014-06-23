@@ -373,7 +373,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	//////////////////////////////////////////////////////////
 	// make enrage same as riposte
 	/////////////////////////////////////////////////////////
-	if (IsEnraged() && other->InFrontMob(this, other->GetX(), other->GetY())) {
+	if (IsEnraged() && other->isInfrontMOB(this, other->GetX(), other->GetY())) {
 		damage = -3;
 		mlog(COMBAT__DAMAGE, "I am enraged, riposting frontal attack.");
 	}
@@ -382,7 +382,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// riposte
 	/////////////////////////////////////////////////////////
 	float riposte_chance = 0.0f;
-	if (CanRiposte && damage > 0 && CanThisClassRiposte() && other->InFrontMob(this, other->GetX(), other->GetY()))
+	if (CanRiposte && damage > 0 && CanThisClassRiposte() && other->isInfrontMOB(this, other->GetX(), other->GetY()))
 	{
 		riposte_chance = (100.0f + (float)defender->aabonuses.RiposteChance + (float)defender->spellbonuses.RiposteChance + (float)defender->itembonuses.RiposteChance) / 100.0f;
 		skill = GetSkill(SkillRiposte);
@@ -422,7 +422,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	float block_chance = 0.0f;
-	if (damage > 0 && CanThisClassBlock() && (other->InFrontMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
+	if (damage > 0 && CanThisClassBlock() && (other->isInfrontMOB(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
 		block_chance = (100.0f + (float)spellbonuses.IncreaseBlockChance + (float)itembonuses.IncreaseBlockChance) / 100.0f;
 		skill = castToClient()->GetSkill(SkillBlock);
 		if (isClient()) {
@@ -439,7 +439,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
-		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+		&& (other->isInfrontMOB(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
 
 		float bonusShieldBlock = 0.0f;
 		bonusShieldBlock = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
@@ -447,7 +447,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
-		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+		&& (other->isInfrontMOB(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
 		bool equiped2 = castToClient()->m_inv.GetItem(13);
 		if(equiped2) {
 			uint8 TwoHandBlunt = castToClient()->m_inv.GetItem(13)->GetItem()->ItemType;
@@ -464,7 +464,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// parry
 	//////////////////////////////////////////////////////
 	float parry_chance = 0.0f;
-	if (damage > 0 && CanThisClassParry() && other->InFrontMob(this, other->GetX(), other->GetY()))
+	if (damage > 0 && CanThisClassParry() && other->isInfrontMOB(this, other->GetX(), other->GetY()))
 	{
 		parry_chance = (100.0f + (float)defender->spellbonuses.ParryChance + (float)defender->itembonuses.ParryChance) / 100.0f;
 		skill = castToClient()->GetSkill(SkillParry);
@@ -486,7 +486,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// dodge
 	////////////////////////////////////////////////////////
 	float dodge_chance = 0.0f;
-	if (damage > 0 && CanThisClassDodge() && other->InFrontMob(this, other->GetX(), other->GetY()))
+	if (damage > 0 && CanThisClassDodge() && other->isInfrontMOB(this, other->GetX(), other->GetY()))
 	{
 		dodge_chance = (100.0f + (float)defender->spellbonuses.DodgeChance + (float)defender->itembonuses.DodgeChance) / 100.0f;
 		skill = castToClient()->GetSkill(SkillDodge);
@@ -3348,7 +3348,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 bool Mob::HasProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++)
-		if (PermaProcs[i].spellID != SPELL_UNKNOWN || SpellProcs[i].spellID != SPELL_UNKNOWN)
+		if (mPermanentProcs[i].mSpellID != SPELL_UNKNOWN || mSpellProcs[i].mSpellID != SPELL_UNKNOWN)
 			return true;
 	return false;
 }
@@ -3356,7 +3356,7 @@ bool Mob::HasProcs() const
 bool Mob::HasDefensiveProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++)
-		if (DefensiveProcs[i].spellID != SPELL_UNKNOWN)
+		if (mDefensiveProcs[i].mSpellID != SPELL_UNKNOWN)
 			return true;
 	return false;
 }
@@ -3364,7 +3364,7 @@ bool Mob::HasDefensiveProcs() const
 bool Mob::HasSkillProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++)
-		if (SkillProcs[i].spellID != SPELL_UNKNOWN)
+		if (mSkillProcs[i].mSpellID != SPELL_UNKNOWN)
 			return true;
 	return false;
 }
@@ -3372,7 +3372,7 @@ bool Mob::HasSkillProcs() const
 bool Mob::HasRangedProcs() const
 {
 	for (int i = 0; i < MAX_PROCS; i++)
-		if (RangedProcs[i].spellID != SPELL_UNKNOWN)
+		if (mRangedProcs[i].mSpellID != SPELL_UNKNOWN)
 			return true;
 	return false;
 }
@@ -3615,7 +3615,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 				// frontal stun check for ogres/bonuses
 				if (((GetBaseRace() == OGRE && isClient()) ||
 						(frontal_stun_resist && MakeRandomInt(0, 99) < frontal_stun_resist)) &&
-						!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())) {
+						!attacker->isBehindMOB(this, attacker->GetX(), attacker->GetY())) {
 					mlog(COMBAT__HITS, "Frontal stun resisted. %d chance.", frontal_stun_resist);
 				} else {
 					// Normal stun resist check.
@@ -3936,11 +3936,11 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand, int dam
 
 		if (bDefensiveProc){
 			for (int i = 0; i < MAX_PROCS; i++) {
-				if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
-					int chance = ProcChance * (DefensiveProcs[i].chance);
+				if (mDefensiveProcs[i].mSpellID != SPELL_UNKNOWN) {
+					int chance = ProcChance * (mDefensiveProcs[i].mChance);
 					if ((MakeRandomInt(0, 100) < chance)) {
-						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(10,0,DefensiveProcs[i].base_spellID);
+						ExecWeaponProc(nullptr, mDefensiveProcs[i].mSpellID, on);
+						CheckNumHitsRemaining(10,0,mDefensiveProcs[i].mBaseSpellID);
 					}
 				}
 			}
@@ -4106,48 +4106,48 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 		// Not ranged
 		if (!rangedattk) {
 			// Perma procs (AAs)
-			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
-				if (MakeRandomInt(0, 99) < PermaProcs[i].chance) { // TODO: Do these get spell bonus?
+			if (mPermanentProcs[i].mSpellID != SPELL_UNKNOWN) {
+				if (MakeRandomInt(0, 99) < mPermanentProcs[i].mChance) { // TODO: Do these get spell bonus?
 					mlog(COMBAT__PROCS,
 							"Permanent proc %d procing spell %d (%d percent chance)",
-							i, PermaProcs[i].spellID, PermaProcs[i].chance);
-					ExecWeaponProc(nullptr, PermaProcs[i].spellID, on);
+							i, mPermanentProcs[i].mSpellID, mPermanentProcs[i].mChance);
+					ExecWeaponProc(nullptr, mPermanentProcs[i].mSpellID, on);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Permanent proc %d failed to proc %d (%d percent chance)",
-							i, PermaProcs[i].spellID, PermaProcs[i].chance);
+							i, mPermanentProcs[i].mSpellID, mPermanentProcs[i].mChance);
 				}
 			}
 
 			// Spell procs (buffs)
-			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
-				float chance = ProcChance * (SpellProcs[i].chance / 100.0f);
+			if (mSpellProcs[i].mSpellID != SPELL_UNKNOWN) {
+				float chance = ProcChance * (mSpellProcs[i].mChance / 100.0f);
 				if (MakeRandomFloat(0, 1) <= chance) {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
-							i, SpellProcs[i].spellID, chance);
-					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, SpellProcs[i].base_spellID);
+							i, mSpellProcs[i].mSpellID, chance);
+					ExecWeaponProc(nullptr, mSpellProcs[i].mSpellID, on);
+					CheckNumHitsRemaining(11, 0, mSpellProcs[i].mBaseSpellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Spell proc %d failed to proc %d (%.2f percent chance)",
-							i, SpellProcs[i].spellID, chance);
+							i, mSpellProcs[i].mSpellID, chance);
 				}
 			}
 		} else if (rangedattk) { // ranged only
 			// ranged spell procs (buffs)
-			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
-				float chance = ProcChance * (RangedProcs[i].chance / 100.0f);
+			if (mRangedProcs[i].mSpellID != SPELL_UNKNOWN) {
+				float chance = ProcChance * (mRangedProcs[i].mChance / 100.0f);
 				if (MakeRandomFloat(0, 1) <= chance) {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d procing spell %d (%.2f percent chance)",
-							i, RangedProcs[i].spellID, chance);
-					ExecWeaponProc(nullptr, RangedProcs[i].spellID, on);
-					CheckNumHitsRemaining(11, 0, RangedProcs[i].base_spellID);
+							i, mRangedProcs[i].mSpellID, chance);
+					ExecWeaponProc(nullptr, mRangedProcs[i].mSpellID, on);
+					CheckNumHitsRemaining(11, 0, mRangedProcs[i].mBaseSpellID);
 				} else {
 					mlog(COMBAT__PROCS,
 							"Ranged proc %d failed to proc %d (%.2f percent chance)",
-							i, RangedProcs[i].spellID, chance);
+							i, mRangedProcs[i].mSpellID, chance);
 				}
 			}
 		}
@@ -4318,7 +4318,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 
 			bool deadlySuccess = false;
 			if (deadlyChance && MakeRandomFloat(0, 1) < static_cast<float>(deadlyChance) / 100.0f) {
-				if (BehindMob(defender, GetX(), GetY())) {
+				if (isBehindMOB(defender, GetX(), GetY())) {
 					damage *= deadlyMod;
 					deadlySuccess = true;
 				}
@@ -4492,12 +4492,12 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, float chance)
 	}
 
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (SkillProcs[i].spellID != SPELL_UNKNOWN){
-			if (PassLimitToSkill(SkillProcs[i].base_spellID,skill)){
-				int ProcChance = chance * (float)SkillProcs[i].chance;
+		if (mSkillProcs[i].mSpellID != SPELL_UNKNOWN){
+			if (PassLimitToSkill(mSkillProcs[i].mBaseSpellID,skill)){
+				int ProcChance = chance * (float)mSkillProcs[i].mChance;
 				if ((MakeRandomInt(0, 100) < ProcChance)) {
-					ExecWeaponProc(nullptr, SkillProcs[i].spellID, on);
-					CheckNumHitsRemaining(11,0, SkillProcs[i].base_spellID);
+					ExecWeaponProc(nullptr, mSkillProcs[i].mSpellID, on);
+					CheckNumHitsRemaining(11,0, mSkillProcs[i].mBaseSpellID);
 				}
 			}
 		}

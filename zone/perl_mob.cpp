@@ -519,7 +519,7 @@ XS(XS_Mob_RogueAssassinate)
 		if(other == nullptr)
 			Perl_croak(aTHX_ "other is nullptr, avoiding crash.");
 
-		THIS->RogueAssassinate(other);
+		THIS->rogueAssassinate(other);
 	}
 	XSRETURN_EMPTY;
 }
@@ -571,7 +571,7 @@ XS(XS_Mob_BehindMob)
 			playery = (float)SvNV(ST(3));
 		}
 
-		RETVAL = THIS->BehindMob(other, playerx, playery);
+		RETVAL = THIS->isBehindMOB(other, playerx, playery);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

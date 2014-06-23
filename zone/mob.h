@@ -35,8 +35,7 @@ class EGNode;
 class MobFearState;
 class Mob : public Entity {
 public:
-	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD,
-						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
+	enum CLIENT_CONN_STATUS { CLIENT_CONNECTING, CLIENT_CONNECTED, CLIENT_LINKDEAD, CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
 	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard };
 
 	struct SpecialAbility {
@@ -111,20 +110,22 @@ public:
 	virtual ~Mob();
 
 	inline virtual bool isMOB() const { return true; }
-	inline virtual bool InZone() const { return true; }
+	inline virtual bool isInZone() const { return true; }
 
 	//Somewhat sorted: needs documenting!
 
 	//Attack
-	virtual void RogueBackstab(Mob* other, bool min_damage = false, int ReuseTime = 10);
-	virtual void RogueAssassinate(Mob* other); // solar
-	float MobAngle(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const;
+	virtual void rogueBackstab(Mob* pOther, bool pMinDamage = false, int pReuseTime = 10);
+	virtual void rogueAssassinate(Mob* pOther);
+
+	float mobAngle(Mob *pOther, float pX, float pY) const;
+
 	// greater than 90 is behind
-	inline bool BehindMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
-		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) > 90.0f; }
+	inline bool isBehindMOB(Mob* pOther, float pX, float pY) const { return (!pOther || pOther == this) ? true : mobAngle(pOther, pX, pY) > 90.0f; }
+
 	// less than 56 is in front, greater than 56 is usually where the client generates the messages
-	inline bool InFrontMob(Mob *other = 0, float ourx = 0.0f, float oury = 0.0f) const
-		{ return (!other || other == this) ? true : MobAngle(other, ourx, oury) < 56.0f; }
+	inline bool isInfrontMOB(Mob* pOther, float pX, float pY) const { return (!pOther || pOther == this) ? true : mobAngle(pOther, pX, pY) < 56.0f; }
+
 	bool IsFacingMob(Mob *other); // kind of does the same as InFrontMob, but derived from client
 	float HeadingAngleToMob(Mob *other); // to keep consistent with client generated messages
 	virtual void RangedAttack(Mob* other) { }
@@ -974,12 +975,11 @@ protected:
 
 	virtual float GetSympatheticProcChances(float &ProcBonus, float &ProcChance, int32 cast_time, int16 ProcRateMod);
 
-	enum {MAX_PROCS = 4};
-	tProc PermaProcs[MAX_PROCS];
-	tProc SpellProcs[MAX_PROCS];
-	tProc DefensiveProcs[MAX_PROCS];
-	tProc RangedProcs[MAX_PROCS];
-	tProc SkillProcs[MAX_PROCS];
+	Proc mPermanentProcs[MAX_PROCS]; // Offensive Procs (auto attack)
+	Proc mSpellProcs[MAX_PROCS]; // Offensive Procs (From buffs, abilities etc).
+	Proc mDefensiveProcs[MAX_PROCS];
+	Proc mRangedProcs[MAX_PROCS];
+	Proc mSkillProcs[MAX_PROCS];
 
 	char name[64];
 	char orig_name[64];

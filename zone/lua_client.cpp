@@ -42,7 +42,7 @@ bool Lua_Client::Connected() {
 
 bool Lua_Client::InZone() {
 	Lua_Safe_Call_Bool();
-	return self->InZone();
+	return self->isInZone();
 }
 
 void Lua_Client::Kick() {

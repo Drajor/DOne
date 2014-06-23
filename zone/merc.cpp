@@ -1610,7 +1610,7 @@ void Merc::AI_Process() {
 			}
 
 			if(AImovement_timer->Check()) {
-				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY())) {
+				if(!IsMoving() && GetClass() == ROGUE && !isBehindMOB(GetTarget(), GetX(), GetY())) {
 					// Move the rogue to behind the mob
 					float newX = 0;
 					float newY = 0;
@@ -1642,7 +1642,7 @@ void Merc::AI_Process() {
 			if(!IsMercCaster() && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead)) {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
-				if(IsEngaged() && !BehindMob(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged())
+				if(IsEngaged() && !isBehindMOB(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged())
 					return;
 				//TODO: Implement Stances.
 				/*if(GetBotStance() == BotStancePassive)

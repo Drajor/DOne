@@ -4891,8 +4891,8 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 	{
 
 		for (int i = 0; i < MAX_PROCS; i++){
-			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id 
-				|| SkillProcs[i].spellID == spell_id || RangedProcs[i].spellID == spell_id){
+			if (mPermanentProcs[i].mSpellID == spell_id || mSpellProcs[i].mSpellID == spell_id 
+				|| mSkillProcs[i].mSpellID == spell_id || mRangedProcs[i].mSpellID == spell_id){
 				return true;
 			}
 		}
@@ -4908,10 +4908,10 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 	int i;
 	if (bPerma) {
 		for (i = 0; i < MAX_PROCS; i++) {
-			if (PermaProcs[i].spellID == SPELL_UNKNOWN) {
-				PermaProcs[i].spellID = spell_id;
-				PermaProcs[i].chance = iChance;
-				PermaProcs[i].base_spellID = base_spell_id;
+			if (mPermanentProcs[i].mSpellID == SPELL_UNKNOWN) {
+				mPermanentProcs[i].mSpellID = spell_id;
+				mPermanentProcs[i].mChance = iChance;
+				mPermanentProcs[i].mBaseSpellID = base_spell_id;
 				mlog(SPELLS__PROCS, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 
 				return true;
@@ -4920,10 +4920,10 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 		mlog(SPELLS__PROCS, "Too many perma procs for %s", getName());
 	} else {
 		for (i = 0; i < MAX_PROCS; i++) {
-			if (SpellProcs[i].spellID == SPELL_UNKNOWN) {
-				SpellProcs[i].spellID = spell_id;
-				SpellProcs[i].chance = iChance;
-				SpellProcs[i].base_spellID = base_spell_id;;
+			if (mSpellProcs[i].mSpellID == SPELL_UNKNOWN) {
+				mSpellProcs[i].mSpellID = spell_id;
+				mSpellProcs[i].mChance = iChance;
+				mSpellProcs[i].mBaseSpellID = base_spell_id;;
 				mlog(SPELLS__PROCS, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 				return true;
 			}
@@ -4935,10 +4935,10 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 
 bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (bAll || SpellProcs[i].spellID == spell_id) {
-			SpellProcs[i].spellID = SPELL_UNKNOWN;
-			SpellProcs[i].chance = 0;
-			SpellProcs[i].base_spellID = SPELL_UNKNOWN;
+		if (bAll || mSpellProcs[i].mSpellID == spell_id) {
+			mSpellProcs[i].mSpellID = SPELL_UNKNOWN;
+			mSpellProcs[i].mChance = 0;
+			mSpellProcs[i].mBaseSpellID = SPELL_UNKNOWN;
 			mlog(SPELLS__PROCS, "Removed proc %d from slot %d", spell_id, i);
 		}
 	}
@@ -4952,10 +4952,10 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
-		if (DefensiveProcs[i].spellID == SPELL_UNKNOWN) {
-			DefensiveProcs[i].spellID = spell_id;
-			DefensiveProcs[i].chance = iChance;
-			DefensiveProcs[i].base_spellID = base_spell_id;
+		if (mDefensiveProcs[i].mSpellID == SPELL_UNKNOWN) {
+			mDefensiveProcs[i].mSpellID = spell_id;
+			mDefensiveProcs[i].mChance = iChance;
+			mDefensiveProcs[i].mBaseSpellID = base_spell_id;
 			mlog(SPELLS__PROCS, "Added spell-granted defensive proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 			return true;
 		}
@@ -4967,10 +4967,10 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (bAll || DefensiveProcs[i].spellID == spell_id) {
-			DefensiveProcs[i].spellID = SPELL_UNKNOWN;
-			DefensiveProcs[i].chance = 0;
-			DefensiveProcs[i].base_spellID = SPELL_UNKNOWN;
+		if (bAll || mDefensiveProcs[i].mSpellID == spell_id) {
+			mDefensiveProcs[i].mSpellID = SPELL_UNKNOWN;
+			mDefensiveProcs[i].mChance = 0;
+			mDefensiveProcs[i].mBaseSpellID = SPELL_UNKNOWN;
 			mlog(SPELLS__PROCS, "Removed defensive proc %d from slot %d", spell_id, i);
 		}
 	}
@@ -4984,10 +4984,10 @@ bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
-		if (SkillProcs[i].spellID == SPELL_UNKNOWN) {
-			SkillProcs[i].spellID = spell_id;
-			SkillProcs[i].chance = iChance;
-			SkillProcs[i].base_spellID = base_spell_id;
+		if (mSkillProcs[i].mSpellID == SPELL_UNKNOWN) {
+			mSkillProcs[i].mSpellID = spell_id;
+			mSkillProcs[i].mChance = iChance;
+			mSkillProcs[i].mBaseSpellID = base_spell_id;
 			mlog(SPELLS__PROCS, "Added spell-granted skill proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 			return true;
 		}
@@ -4998,10 +4998,10 @@ bool Mob::AddSkillProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 bool Mob::RemoveSkillProc(uint16 spell_id, bool bAll)
 {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (bAll || SkillProcs[i].spellID == spell_id) {
-			SkillProcs[i].spellID = SPELL_UNKNOWN;
-			SkillProcs[i].chance = 0;
-			SkillProcs[i].base_spellID = SPELL_UNKNOWN;
+		if (bAll || mSkillProcs[i].mSpellID == spell_id) {
+			mSkillProcs[i].mSpellID = SPELL_UNKNOWN;
+			mSkillProcs[i].mChance = 0;
+			mSkillProcs[i].mBaseSpellID = SPELL_UNKNOWN;
 			mlog(SPELLS__PROCS, "Removed Skill proc %d from slot %d", spell_id, i);
 		}
 	}
@@ -5015,10 +5015,10 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 
 	int i;
 	for (i = 0; i < MAX_PROCS; i++) {
-		if (RangedProcs[i].spellID == SPELL_UNKNOWN) {
-			RangedProcs[i].spellID = spell_id;
-			RangedProcs[i].chance = iChance;
-			RangedProcs[i].base_spellID = base_spell_id;
+		if (mRangedProcs[i].mSpellID == SPELL_UNKNOWN) {
+			mRangedProcs[i].mSpellID = spell_id;
+			mRangedProcs[i].mChance = iChance;
+			mRangedProcs[i].mBaseSpellID = base_spell_id;
 			mlog(SPELLS__PROCS, "Added spell-granted ranged proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 			return true;
 		}
@@ -5030,10 +5030,10 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
 {
 	for (int i = 0; i < MAX_PROCS; i++) {
-		if (bAll || RangedProcs[i].spellID == spell_id) {
-			RangedProcs[i].spellID = SPELL_UNKNOWN;
-			RangedProcs[i].chance = 0;
-			RangedProcs[i].base_spellID = SPELL_UNKNOWN;;
+		if (bAll || mRangedProcs[i].mSpellID == spell_id) {
+			mRangedProcs[i].mSpellID = SPELL_UNKNOWN;
+			mRangedProcs[i].mChance = 0;
+			mRangedProcs[i].mBaseSpellID = SPELL_UNKNOWN;;
 			mlog(SPELLS__PROCS, "Removed ranged proc %d from slot %d", spell_id, i);
 		}
 	}

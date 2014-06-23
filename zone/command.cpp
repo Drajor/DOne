@@ -1677,7 +1677,7 @@ void command_emote(Client* c, const Seperator *sep)
 void command_fov(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget())
-		if(c->BehindMob(c->GetTarget(), c->GetX(), c->GetY()))
+		if(c->isBehindMOB(c->GetTarget(), c->GetX(), c->GetY()))
 			c->message(0, "You are behind mob %s, it is looking to %d", c->GetTarget()->getName(), c->GetTarget()->GetHeading());
 		else
 			c->message(0, "You are NOT behind mob %s, it is looking to %d", c->GetTarget()->getName(), c->GetTarget()->GetHeading());

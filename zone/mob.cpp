@@ -223,21 +223,21 @@ Mob::Mob(const char* in_name,
 	int j;
 	for (j = 0; j < MAX_PROCS; j++)
 	{
-		PermaProcs[j].spellID = SPELL_UNKNOWN;
-		PermaProcs[j].chance = 0;
-		PermaProcs[j].base_spellID = SPELL_UNKNOWN;
-		SpellProcs[j].spellID = SPELL_UNKNOWN;
-		SpellProcs[j].chance = 0;
-		SpellProcs[j].base_spellID = SPELL_UNKNOWN;
-		DefensiveProcs[j].spellID = SPELL_UNKNOWN;
-		DefensiveProcs[j].chance = 0;
-		DefensiveProcs[j].base_spellID = SPELL_UNKNOWN;
-		RangedProcs[j].spellID = SPELL_UNKNOWN;
-		RangedProcs[j].chance = 0;
-		RangedProcs[j].base_spellID = SPELL_UNKNOWN;
-		SkillProcs[j].spellID = SPELL_UNKNOWN;
-		SkillProcs[j].chance = 0;
-		SkillProcs[j].base_spellID = SPELL_UNKNOWN;
+		mPermanentProcs[j].mSpellID = SPELL_UNKNOWN;
+		mPermanentProcs[j].mChance = 0;
+		mPermanentProcs[j].mBaseSpellID = SPELL_UNKNOWN;
+		mSpellProcs[j].mSpellID = SPELL_UNKNOWN;
+		mSpellProcs[j].mChance = 0;
+		mSpellProcs[j].mBaseSpellID = SPELL_UNKNOWN;
+		mDefensiveProcs[j].mSpellID = SPELL_UNKNOWN;
+		mDefensiveProcs[j].mChance = 0;
+		mDefensiveProcs[j].mBaseSpellID = SPELL_UNKNOWN;
+		mRangedProcs[j].mSpellID = SPELL_UNKNOWN;
+		mRangedProcs[j].mChance = 0;
+		mRangedProcs[j].mBaseSpellID = SPELL_UNKNOWN;
+		mSkillProcs[j].mSpellID = SPELL_UNKNOWN;
+		mSkillProcs[j].mChance = 0;
+		mSkillProcs[j].mBaseSpellID = SPELL_UNKNOWN;
 	}
 
 	for (i = 0; i < _MaterialCount; i++)
@@ -502,7 +502,7 @@ bool Mob::IsInvisible(Mob* other) const
 
 	//handle sneaking
 	if(sneaking) {
-		if(BehindMob(other, GetX(), GetY()) )
+		if(isBehindMOB(other, GetX(), GetY()) )
 			return true;
 	}
 
@@ -1884,14 +1884,14 @@ void Mob::SetOwnerID(uint16 NewOwnerID) {
 }
 
 // used in checking for behind (backstab) and checking in front (melee LoS)
-float Mob::MobAngle(Mob *other, float ourx, float oury) const {
-	if (!other || other == this)
+float Mob::mobAngle(Mob *pOther, float pX, float pY) const {
+	if (!pOther || pOther == this)
 		return 0.0f;
 
 	float angle, lengthb, vectorx, vectory, dotp;
-	float mobx = -(other->GetX());	// mob xloc (inverse because eq)
-	float moby = other->GetY();		// mob yloc
-	float heading = other->GetHeading();	// mob heading
+	float mobx = -(pOther->GetX());	// mob xloc (inverse because eq)
+	float moby = pOther->GetY();		// mob yloc
+	float heading = pOther->GetHeading();	// mob heading
 	heading = (heading * 360.0f) / 256.0f;	// convert to degrees
 	if (heading < 270)
 		heading += 90;
@@ -1903,12 +1903,12 @@ float Mob::MobAngle(Mob *other, float ourx, float oury) const {
 	vectory = moby + (10.0f * sinf(heading));	// of mob length 10
 
 	// length of mob to player vector
-	lengthb = (float) sqrtf(((-ourx - mobx) * (-ourx - mobx)) + ((oury - moby) * (oury - moby)));
+	lengthb = (float) sqrtf(((-pX - mobx) * (-pX - mobx)) + ((pY - moby) * (pY - moby)));
 
 	// calculate dot product to get angle
 	// Handle acos domain errors due to floating point rounding errors
-	dotp = ((vectorx - mobx) * (-ourx - mobx) +
-			(vectory - moby) * (oury - moby)) / (10 * lengthb);
+	dotp = ((vectorx - mobx) * (-pX - mobx) +
+			(vectory - moby) * (pY - moby)) / (10 * lengthb);
 	// I haven't seen any errors that  cause problems that weren't slightly
 	// larger/smaller than 1/-1, so only handle these cases for now
 	if (dotp > 1)
@@ -5089,3 +5089,291 @@ float Mob::HeadingAngleToMob(Mob *other)
 		return (90.0 - angle + 270.0) * 511.5 * 0.0027777778;
 }
 
+//returns the reuse time in sec for the special attack used.
+int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
+{
+	if (!other)
+		return 0;
+
+	int32 ndamage = 0;
+	int32 max_dmg = 0;
+	int32 min_dmg = 1;
+	int reuse = 0;
+	SkillUseTypes skill_type;	//to avoid casting... even though it "would work"
+	uint8 itemslot = SLOT_FEET;
+
+	switch (unchecked_type)
+	{
+	case SkillFlyingKick:{
+							 skill_type = SkillFlyingKick;
+							 max_dmg = ((GetSTR() + GetSkill(skill_type)) * RuleI(Combat, FlyingKickBonus) / 100) + 35;
+							 min_dmg = ((level * 8) / 10);
+							 ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+							 DoAnim(animFlyingKick);
+							 reuse = FlyingKickReuseTime;
+							 break;
+	}
+	case SkillDragonPunch:{
+							  skill_type = SkillDragonPunch;
+							  max_dmg = ((GetSTR() + GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
+							  itemslot = SLOT_HANDS;
+							  ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+							  DoAnim(animTailRake);
+							  reuse = TailRakeReuseTime;
+							  break;
+	}
+
+	case SkillEagleStrike:{
+							  skill_type = SkillEagleStrike;
+							  max_dmg = ((GetSTR() + GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
+							  itemslot = SLOT_HANDS;
+							  ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+							  DoAnim(animEagleStrike);
+							  reuse = EagleStrikeReuseTime;
+							  break;
+	}
+
+	case SkillTigerClaw:{
+							skill_type = SkillTigerClaw;
+							max_dmg = ((GetSTR() + GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
+							itemslot = SLOT_HANDS;
+							ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+							DoAnim(animTigerClaw);
+							reuse = TigerClawReuseTime;
+							break;
+	}
+
+	case SkillRoundKick:{
+							skill_type = SkillRoundKick;
+							max_dmg = ((GetSTR() + GetSkill(skill_type)) * RuleI(Combat, RoundKickBonus) / 100) + 10;
+							ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+							DoAnim(animRoundKick);
+							reuse = RoundKickReuseTime;
+							break;
+	}
+
+	case SkillKick:{
+					   skill_type = SkillKick;
+					   max_dmg = GetKickDamage();
+					   DoAnim(animKick);
+					   reuse = KickReuseTime;
+					   break;
+	}
+	default:
+		mlog(CLIENT__ERROR, "Invalid special attack type %d attempted", unchecked_type);
+		return(1000); /* nice long delay for them, the caller depends on this! */
+	}
+
+	if (isClient()){
+		if (GetWeaponDamage(other, castToClient()->GetInv().GetItem(itemslot)) <= 0){
+			ndamage = -5;
+		}
+	}
+	else{
+		if (GetWeaponDamage(other, (const Item_Struct*)nullptr) <= 0){
+			ndamage = -5;
+		}
+	}
+
+	int32 ht = 0;
+	if (ndamage == 0){
+		if (other->CheckHitChance(this, skill_type, 0)){
+			if (RuleB(Combat, UseIntervalAC))
+				ht = ndamage = max_dmg;
+			else
+				ht = ndamage = MakeRandomInt(min_dmg, max_dmg);
+		}
+		else
+		{
+			ht = max_dmg;
+		}
+	}
+
+	//This can potentially stack with changes to kick damage
+	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
+
+	return(reuse);
+}
+
+void Mob::TryBackstab(Mob *other, int ReuseTime) {
+	if (!other)
+		return;
+
+	bool bIsBehind = false;
+	bool bCanFrontalBS = false;
+
+	//make sure we have a proper weapon if we are a client.
+	if (isClient()) {
+		const ItemInst *wpn = castToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		if (!wpn || (wpn->GetItem()->ItemType != ItemType1HPiercing)){
+			Message_StringID(13, BACKSTAB_WEAPON);
+			return;
+		}
+	}
+
+	//Live AA - Triple Backstab
+	int tripleChance = itembonuses.TripleBackstab + spellbonuses.TripleBackstab + aabonuses.TripleBackstab;
+
+	if (isBehindMOB(other, GetX(), GetY()))
+		bIsBehind = true;
+
+	else {
+		//Live AA - Seized Opportunity
+		int FrontalBSChance = itembonuses.FrontalBackstabChance + spellbonuses.FrontalBackstabChance + aabonuses.FrontalBackstabChance;
+
+		if (FrontalBSChance && (FrontalBSChance > MakeRandomInt(0, 100)))
+			bCanFrontalBS = true;
+	}
+
+	if (bIsBehind || bCanFrontalBS){ // Player is behind other OR can do Frontal Backstab
+
+		if (bCanFrontalBS) {
+			castToClient()->message(0, "Your fierce attack is executed with such grace, your target did not see it coming!");
+		}
+
+		// solar - chance to assassinate
+		int chance = 10 + (GetDEX() / 10) + (itembonuses.HeroicDEX / 10); //18.5% chance at 85 dex 40% chance at 300 dex
+		if (
+			level >= 60 && // player is 60 or higher
+			other->GetLevel() <= 45 && // mob 45 or under
+			!other->castToNPC()->IsEngaged() && // not aggro
+			other->GetHP() <= 32000
+			&& other->isNPC()
+			&& MakeRandomFloat(0, 99) < chance // chance
+			) {
+			entity_list.messageCloseStringID(this, false, 200, MT_CritMelee, ASSASSINATES, getName());
+			if (isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+			rogueAssassinate(other);
+		}
+		else {
+			rogueBackstab(other);
+			if (level > 54) {
+				float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
+				// Check for double attack with main hand assuming maxed DA Skill (MS)
+
+				if (MakeRandomFloat(0, 1) < DoubleAttackProbability)	// Max 62.4 % chance of DA
+				{
+					if (other->GetHP() > 0)
+						rogueBackstab(other, false, ReuseTime);
+
+					if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
+						rogueBackstab(other, false, ReuseTime);
+				}
+			}
+			if (isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+		}
+	}
+	//Live AA - Chaotic Backstab
+	else if (aabonuses.FrontalBackstabMinDmg || itembonuses.FrontalBackstabMinDmg || spellbonuses.FrontalBackstabMinDmg) {
+
+		//we can stab from any angle, we do min damage though.
+		rogueBackstab(other, true);
+		if (level > 54) {
+			float DoubleAttackProbability = (GetSkill(SkillDoubleAttack) + GetLevel()) / 500.0f; // 62.4 max
+			if (isClient())
+				castToClient()->CheckIncreaseSkill(SkillBackstab, other, 10);
+			// Check for double attack with main hand assuming maxed DA Skill (MS)
+			if (MakeRandomFloat(0, 1) < DoubleAttackProbability)		// Max 62.4 % chance of DA
+			if (other->GetHP() > 0)
+				rogueBackstab(other, true, ReuseTime);
+
+			if (tripleChance && other->GetHP() > 0 && tripleChance > MakeRandomInt(0, 100))
+				rogueBackstab(other, false, ReuseTime);
+		}
+	}
+	else { //We do a single regular attack if we attack from the front without chaotic stab
+		Attack(other, 13);
+	}
+}
+
+void Mob::rogueBackstab(Mob* pOther, bool pMinDamage, int pReuseTime) {
+	int32 ndamage = 0;
+	int32 max_hit = 0;
+	int32 min_hit = 0;
+	int32 hate = 0;
+	int32 primaryweapondamage = 0;
+	int32 backstab_dmg = 0;
+
+	if (isClient()){
+		const ItemInst *wpn = nullptr;
+		wpn = castToClient()->GetInv().GetItem(SLOT_PRIMARY);
+		if (wpn) {
+			primaryweapondamage = GetWeaponDamage(pOther, wpn);
+			backstab_dmg = wpn->GetItem()->BackstabDmg;
+			for (int i = 0; i < MAX_AUGMENT_SLOTS; ++i)
+			{
+				ItemInst *aug = wpn->GetAugment(i);
+				if (aug)
+				{
+					backstab_dmg += aug->GetItem()->BackstabDmg;
+				}
+			}
+		}
+	}
+	else{
+		primaryweapondamage = (GetLevel() / 7) + 1; // fallback incase it's a npc without a weapon, 2 dmg at 10, 10 dmg at 65
+		backstab_dmg = primaryweapondamage;
+	}
+
+	if (primaryweapondamage > 0){
+		if (level > 25){
+			max_hit = (((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + ((level - 25) / 3) + 1;
+			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
+		}
+		else{
+			max_hit = (((2 * backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + 1;;
+			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
+		}
+
+		// determine minimum hits
+		if (level < 51)
+		{
+			min_hit = (level * 15 / 10);
+		}
+		else
+		{
+			// Trumpcard: Replaced switch statement with formula calc. This will give minhit increases all the way to 65.
+			min_hit = (level * (level * 5 - 105)) / 100;
+		}
+
+		if (!pOther->CheckHitChance(this, SkillBackstab, 0))	{
+			ndamage = 0;
+		}
+		else{
+			if (pMinDamage){
+				ndamage = min_hit;
+			}
+			else
+			{
+				if (max_hit < min_hit)
+					max_hit = min_hit;
+
+				if (RuleB(Combat, UseIntervalAC))
+					ndamage = max_hit;
+				else
+					ndamage = MakeRandomInt(min_hit, max_hit);
+
+			}
+		}
+	}
+	else{
+		ndamage = -5;
+	}
+
+	DoSpecialAttackDamage(pOther, SkillBackstab, ndamage, min_hit, hate, pReuseTime);
+	DoAnim(animPiercing);
+}
+
+void Mob::rogueAssassinate(Mob* pOther) {
+	//can you dodge, parry, etc.. an assassinate??
+	//if so, use DoSpecialAttackDamage(other, BACKSTAB, 32000); instead
+	if (GetWeaponDamage(pOther, isClient() ? castToClient()->GetInv().GetItem(SLOT_PRIMARY) : (const ItemInst*)nullptr) > 0){
+		pOther->Damage(this, 32000, SPELL_UNKNOWN, SkillBackstab);
+	}
+	else{
+		pOther->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
+	}
+	DoAnim(animPiercing);	//piercing animation
+}
