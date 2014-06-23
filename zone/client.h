@@ -852,7 +852,6 @@ public:
 	void	LogSQL(const char *fmt, ...);
 	bool	CanFish();
 	void	GoFish();
-	void	ForageItem(bool guarantee = false);
 	//Calculate vendor price modifier based on CHA: (reverse==selling)
 	float	CalcPriceMod(Mob* other = 0, bool reverse = false);
 	void	ResetTrade();

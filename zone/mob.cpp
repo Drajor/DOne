@@ -1884,7 +1884,7 @@ void Mob::SetOwnerID(uint16 NewOwnerID) {
 }
 
 // used in checking for behind (backstab) and checking in front (melee LoS)
-float Mob::mobAngle(Mob *pOther, float pX, float pY) const {
+float Mob::mobAngle(Mob* pOther, float pX, float pY) const {
 	if (!pOther || pOther == this)
 		return 0.0f;
 
@@ -5041,11 +5041,10 @@ void Mob::ProcessSpecialAbilities(const std::string str) {
 
 // derived from client to keep these functions more consistent
 // if anything seems weird, blame SoE
-bool Mob::IsFacingMob(Mob *other)
-{
-	if (!other)
-		return false;
-	float angle = HeadingAngleToMob(other);
+bool Mob::isFacingMob(Mob *pOther) {
+	if (!pOther) return false;
+
+	float angle = headingAngleToMob(pOther);
 	// what the client uses appears to be 2x our internal heading
 	float heading = GetHeading() * 2.0;
 
@@ -5061,10 +5060,9 @@ bool Mob::IsFacingMob(Mob *other)
 }
 
 // All numbers derived from the client
-float Mob::HeadingAngleToMob(Mob *other)
-{
-	float mob_x = other->GetX();
-	float mob_y = other->GetY();
+float Mob::headingAngleToMob(Mob* pOther) {
+	float mob_x = pOther->GetX();
+	float mob_y = pOther->GetY();
 	float this_x = GetX();
 	float this_y = GetY();
 

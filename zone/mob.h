@@ -118,7 +118,7 @@ public:
 	virtual void rogueBackstab(Mob* pOther, bool pMinDamage = false, int pReuseTime = 10);
 	virtual void rogueAssassinate(Mob* pOther);
 
-	float mobAngle(Mob *pOther, float pX, float pY) const;
+	float mobAngle(Mob* pOther, float pX, float pY) const;
 
 	// greater than 90 is behind
 	inline bool isBehindMOB(Mob* pOther, float pX, float pY) const { return (!pOther || pOther == this) ? true : mobAngle(pOther, pX, pY) > 90.0f; }
@@ -126,8 +126,10 @@ public:
 	// less than 56 is in front, greater than 56 is usually where the client generates the messages
 	inline bool isInfrontMOB(Mob* pOther, float pX, float pY) const { return (!pOther || pOther == this) ? true : mobAngle(pOther, pX, pY) < 56.0f; }
 
-	bool IsFacingMob(Mob *other); // kind of does the same as InFrontMob, but derived from client
-	float HeadingAngleToMob(Mob *other); // to keep consistent with client generated messages
+	bool isFacingMob(Mob* pOther); // kind of does the same as InFrontMob, but derived from client
+
+	float headingAngleToMob(Mob* pOther); // to keep consistent with client generated messages
+
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);

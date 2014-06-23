@@ -1327,7 +1327,7 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 			aa_los_them.y = aa_los_them_mob->GetY();
 			aa_los_them.z = aa_los_them_mob->GetZ();
 			los_status = CheckLosFN(aa_los_them_mob);
-			los_status_facing = IsFacingMob(aa_los_them_mob);
+			los_status_facing = isFacingMob(aa_los_them_mob);
 		}
 		else
 		{
@@ -7545,23 +7545,9 @@ void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
 		fishing_timer.Start();
 	}
 	return;
-// Changes made based on Bobs work on foraging. Now can set items in the forage database table to
-// forage for.
 }
 
-void Client::Handle_OP_Forage(const EQApplicationPacket *app)
-{
-
-	if(!p_timers.Expired(&database, pTimerForaging, false)) {
-		message(13,"Ability recovery time not yet met.");
-		return;
-	}
-	p_timers.Start(pTimerForaging, ForagingReuseTime-1);
-
-	ForageItem();
-
-	return;
-}
+void Client::Handle_OP_Forage(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
 
 void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 {

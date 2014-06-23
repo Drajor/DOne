@@ -175,7 +175,6 @@
 	void Handle_OP_Illusion(const EQApplicationPacket *app);
 	void Handle_OP_GMBecomeNPC(const EQApplicationPacket *app);
 	void Handle_OP_Fishing(const EQApplicationPacket *app);
-	void Handle_OP_Forage(const EQApplicationPacket *app);
 	void Handle_OP_Mend(const EQApplicationPacket *app);
 	void Handle_OP_EnvDamage(const EQApplicationPacket *app);
 	void Handle_OP_Damage(const EQApplicationPacket *app);
@@ -288,3 +287,5 @@
 	void Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app);
 	void Handle_OP_OpenInventory(const EQApplicationPacket *app);
 	void Handle_OP_OpenContainer(const EQApplicationPacket *app);
+
+	void Handle_OP_Forage(const EQApplicationPacket *app);
