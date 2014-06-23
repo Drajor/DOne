@@ -67,7 +67,6 @@
 	void Handle_OP_LDoNPickLock(const EQApplicationPacket *app);
 	void Handle_OP_FeignDeath(const EQApplicationPacket *app);
 	void Handle_OP_Sneak(const EQApplicationPacket *app);
-	void Handle_OP_Hide(const EQApplicationPacket *app);
 	void Handle_OP_ChannelMessage(const EQApplicationPacket *app);
 	void Handle_OP_WearChange(const EQApplicationPacket *app);
 	void Handle_OP_ZoneChange(const EQApplicationPacket *app);
@@ -290,3 +289,4 @@
 	void Handle_OP_Forage(const EQApplicationPacket *app);
 	void Handle_OP_Fishing(const EQApplicationPacket *app);
 	void Handle_OP_Begging(const EQApplicationPacket *app);
+	void Handle_OP_Hide(const EQApplicationPacket *app);

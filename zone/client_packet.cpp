@@ -3357,65 +3357,6 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_Hide(const EQApplicationPacket *app)
-{
-	if(!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
-	{
-		//Can not be able to train hide but still have it from racial though
-		return; //You cannot hide if you do not have hide
-	}
-
-	if(!p_timers.Expired(&database, pTimerHide, false)) {
-		message(13,"Ability recovery time not yet met.");
-		return;
-	}
-	int reuse = HideReuseTime - GetAA(209);
-	p_timers.Start(pTimerHide, reuse-1);
-
-	float hidechance = ((GetSkill(SkillHide)/250.0f) + .25) * 100;
-	float random = MakeRandomFloat(0, 100);
-	CheckIncreaseSkill(SkillHide, nullptr, 5);
-	if (random < hidechance) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = getID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 1;
-		entity_list.queueClients(this, outapp, true);
-		safe_delete(outapp);
-		if(GetAA(aaShroudofStealth)){
-			improved_hidden = true;
-			hidden = true;
-		}
-		else
-			hidden = true;
-	}
-	if(GetClass() == ROGUE){
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage,sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
-		msg->color = 0x010E;
-		Mob *evadetar = GetTarget();
-		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
-					&& evadetar->isNPC())) {
-			if (MakeRandomInt(0, 260) < (int)GetSkill(SkillHide)) {
-				msg->string_id = EVADE_SUCCESS;
-				RogueEvade(evadetar);
-			} else {
-				msg->string_id = EVADE_FAIL;
-			}
-		} else {
-			if (hidden){
-				msg->string_id = HIDE_SUCCESS;
-			}
-			else {
-				msg->string_id = HIDE_FAIL;
-			}
-		}
-		FastQueuePacket(&outapp);
-	}
-	return;
-}
-
 void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 {
 	ChannelMessage_Struct* cm=(ChannelMessage_Struct*)app->pBuffer;
@@ -13718,3 +13659,4 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app){
 	brs->Result = 0;
 	FastQueuePacket(&outapp);
 }
+void Client::Handle_OP_Hide(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
