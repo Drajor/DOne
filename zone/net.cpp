@@ -56,7 +56,6 @@
 
 #include "QuestParserCollection.h"
 #include "embparser.h"
-#include "lua_parser.h"
 #include "client_logs.h"
 #include "questmgr.h"
 
@@ -270,11 +269,6 @@ int main(int argc, char** argv) {
 	}
 
 	parse = new QuestParserCollection();
-#ifdef LUA_EQEMU
-	LuaParser *lua_parser = new LuaParser();
-	parse->RegisterQuestInterface(lua_parser, "lua");
-#endif
-
 #ifdef EMBPERL
 	PerlembParser *perl_parser = new PerlembParser();
 	parse->RegisterQuestInterface(perl_parser, "pl");
@@ -474,10 +468,6 @@ int main(int argc, char** argv) {
 
 #ifdef EMBPERL
  	safe_delete(perl_parser);
-#endif
-
-#ifdef LUA_EQEMU
-	safe_delete(lua_parser);
 #endif
 
 	safe_delete(mmf);

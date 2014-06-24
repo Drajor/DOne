@@ -30,27 +30,6 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
-	lua_bit.cpp
-	lua_corpse.cpp
-	lua_client.cpp
-	lua_door.cpp
-	lua_entity.cpp
-	lua_entity_list.cpp
-	lua_general.cpp
-	lua_group.cpp
-	lua_hate_list.cpp
-	lua_inventory.cpp
-	lua_item.cpp
-	lua_iteminst.cpp
-	lua_mob.cpp
-	lua_npc.cpp
-	lua_object.cpp
-	lua_packet.cpp
-	lua_parser.cpp
-	lua_parser_events.cpp
-	lua_raid.cpp
-	lua_spawn.cpp
-	lua_spell.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -140,27 +119,6 @@ SET(zone_headers
 	guild_mgr.h
 	hate_list.h
 	horse.h
-	lua_bit.h
-	lua_client.h
-	lua_corpse.h
-	lua_entity.h
-	lua_entity_list.h
-	lua_general.h
-	lua_group.h
-	lua_hate_list.h
-	lua_inventory.h
-	lua_item.h
-	lua_iteminst.h
-	lua_mob.h
-	lua_npc.h
-	lua_object.h
-	lua_packet.h
-	lua_parser.h
-	lua_parser_events.h
-	lua_ptr.h
-	lua_raid.h
-	lua_spawn.h
-	lua_spell.h
 	map.h
 	masterentity.h
 	merc.h
@@ -214,11 +172,6 @@ TARGET_LINK_LIBRARIES(zone Common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL
 IF(EQEMU_BUILD_PERL)
 	TARGET_LINK_LIBRARIES(zone ${PERL_LIBRARY})
 ENDIF(EQEMU_BUILD_PERL)
-
-IF(EQEMU_BUILD_LUA)
-	TARGET_LINK_LIBRARIES(zone luabind ${LUA_LIBRARY})
-ENDIF(EQEMU_BUILD_LUA)
-
 
 IF(MSVC)
 	SET_TARGET_PROPERTIES(zone PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
