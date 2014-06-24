@@ -7,7 +7,6 @@
 #include <iostream>
 #include "dbasync.h"
 #include "database.h"
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include "dbcore.h"

@@ -55,7 +55,6 @@ extern volatile bool RunLoops;
 #include "../common/breakdowns.h"
 #include "../common/rulesys.h"
 #include "../common/StringUtil.h"
-#include "forage.h"
 #include "command.h"
 #include "StringIDs.h"
 #include "NpcAI.h"

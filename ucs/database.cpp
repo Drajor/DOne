@@ -23,7 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include <ctype.h>

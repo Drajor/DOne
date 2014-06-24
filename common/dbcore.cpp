@@ -5,7 +5,6 @@
 #endif
 
 #include <iostream>
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include "dbcore.h"
@@ -58,6 +57,9 @@ void DBcore::ping() {
 	MDatabase.unlock();
 }
 
+// Taken from errmsg.h 
+#define CR_SERVER_GONE_ERROR 2006
+#define CR_SERVER_LOST 2013
 bool DBcore::RunQuery(const char* query, uint32 querylen, char* errbuf, MYSQL_RES** result, uint32* affected_rows, uint32* last_insert_id, uint32* errnum, bool retry) {
 	if (errnum)
 		*errnum = 0;

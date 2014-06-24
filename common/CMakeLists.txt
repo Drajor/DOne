@@ -125,7 +125,6 @@ SET(common_headers
 	EQStreamProxy.h
 	EQStreamType.h
 	eqtime.h
-	errmsg.h
 	extprofile.h
 	faction.h
 	features.h

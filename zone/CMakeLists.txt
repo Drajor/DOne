@@ -22,7 +22,6 @@ SET(zone_sources
 	entity.cpp
 	exp.cpp
 	fearpath.cpp
-	forage.cpp
 	groups.cpp
 	guild.cpp
 	guild_mgr.cpp
@@ -35,7 +34,6 @@ SET(zone_sources
 	entity.cpp
 	exp.cpp
 	fearpath.cpp
-	forage.cpp
 	groups.cpp
 	guild.cpp
 	guild_mgr.cpp
@@ -112,9 +110,7 @@ SET(zone_headers
 	embperl.h
 	embxs.h
 	entity.h
-	errmsg.h
 	event_codes.h
-	forage.h
 	groups.h
 	guild_mgr.h
 	hate_list.h

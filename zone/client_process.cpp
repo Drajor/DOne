@@ -52,7 +52,6 @@
 #include "petitions.h"
 #include "NpcAI.h"
 #include "../common/skills.h"
-#include "forage.h"
 #include "zone.h"
 #include "event_codes.h"
 #include "../common/faction.h"
