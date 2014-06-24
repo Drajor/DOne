@@ -175,11 +175,6 @@ bool Client::process() {
 
 		if(linkdead_timer.Check()){
 			save();
-			if (GetMerc())
-			{
-				GetMerc()->save();
-				GetMerc()->depop();
-			}
 			LeaveGroup();
 			Raid *myraid = entity_list.getRaidByClient(this);
 			if (myraid)
@@ -192,11 +187,6 @@ bool Client::process() {
 		if (camp_timer.Check()) {
 			LeaveGroup();
 			save();
-			if (GetMerc())
-			{
-				GetMerc()->save();
-				GetMerc()->depop();
-			}
 			instalog = true;
 		}
 
@@ -227,18 +217,6 @@ bool Client::process() {
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 //				SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
 			}
-		}
-
-		if(GetMerc())
-		{
-				UpdateMercTimer();
-		}
-
-		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
-		{
-			if(p_timers.Expired(&database, pTimerMercSuspend, false)) {
-					CheckMercSuspendTimer();
-				}
 		}
 
 		if(IsAIControlled())
@@ -672,11 +650,6 @@ bool Client::process() {
 		std::cout << "Client linkdead: " << name << std::endl;
 
 		if (GetGM()) {
-			if (GetMerc())
-			{
-				GetMerc()->save();
-				GetMerc()->depop();
-			}
 			return false;
 		}
 		else if(!linkdead_timer.Enabled()){
@@ -713,10 +686,6 @@ bool Client::process() {
 		//ResetTrade();
 		if (client_state != CLIENT_KICKED) {
 			save();
-		}
-		if (GetMerc())
-		{
-			GetMerc()->depop();
 		}
 
 		client_state = CLIENT_LINKDEAD;

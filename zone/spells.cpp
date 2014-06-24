@@ -2916,8 +2916,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	if (IsPet() && GetOwner() && GetOwner()->isClient())
 		SendPetBuffsToClient();
 
-	if((isClient() && !castToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()) ||
-				(isMerc() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()))
+	if((isClient() && !castToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 

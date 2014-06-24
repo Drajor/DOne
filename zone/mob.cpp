@@ -891,7 +891,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= isClient() ? 0 : 1;
-	ns->spawn.IsMercenary = (isMerc() || no_target_hotkey) ? 1 : 0;
+	ns->spawn.IsMercenary = 0;
 		
 	ns->spawn.petOwnerId	= ownerid;
 

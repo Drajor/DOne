@@ -42,7 +42,6 @@ SET(zone_sources
 	inventory.cpp
 	loottables.cpp
 	map.cpp
-	merc.cpp
 	mob.cpp
 	MobAI.cpp
 	net.cpp
@@ -117,7 +116,6 @@ SET(zone_headers
 	horse.h
 	map.h
 	masterentity.h
-	merc.h
 	mob.h
 	net.h
 	npc.h

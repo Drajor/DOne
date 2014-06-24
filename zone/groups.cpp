@@ -222,16 +222,6 @@ bool Group::addMember(Mob* pNewMember, const char *pNewMemberName, uint32 pChara
 
 		if (pNewMember->isClient())
 			pCharacterID = pNewMember->castToClient()->CharacterID();
-		if (pNewMember->isMerc())
-		{
-			Client* owner = pNewMember->castToMerc()->GetMercOwner();
-			if (owner)
-			{
-				pCharacterID = owner->castToClient()->CharacterID();
-				pNewMemberName = pNewMember->getName();
-				ismerc = true;
-			}
-		}
 	}
 
 	uint32 i = 0;
@@ -273,14 +263,7 @@ bool Group::addMember(Mob* pNewMember, const char *pNewMemberName, uint32 pChara
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
 		if (mMembers[i] != nullptr && mMembers[i] != pNewMember) {
 			//fill in group join & send it
-			if (mMembers[i]->isMerc())
-			{
-				strcpy(gj->yourname, mMembers[i]->getName());
-			}
-			else
-			{
-				strcpy(gj->yourname, mMembers[i]->GetCleanName());
-			}
+			strcpy(gj->yourname, mMembers[i]->GetCleanName());
 			if (mMembers[i]->isClient()) {
 				mMembers[i]->castToClient()->QueuePacket(outapp);
 
@@ -315,15 +298,6 @@ bool Group::addMember(Mob* pNewMember, const char *pNewMemberName, uint32 pChara
 			notifyMainTank(pNewMember->castToClient(), 1);
 			notifyMainAssist(pNewMember->castToClient(), 1);
 			notifyPuller(pNewMember->castToClient(), 1);
-		}
-
-		if (pNewMember->isMerc())
-		{
-			Client* owner = pNewMember->castToMerc()->GetMercOwner();
-			if (owner)
-			{
-				database.SetGroupID(pNewMember->getName(), GetID(), owner->CharacterID(), true);
-			}
 		}
 	}
 	else

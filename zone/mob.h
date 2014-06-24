@@ -648,7 +648,7 @@ public:
 	void SetOwnerID(uint16 NewOwnerID);
 	inline uint16 GetOwnerID() const { return ownerid; }
 	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.getMOB(GetOwnerID()) != 0); }
-	inline virtual bool IsPet() { return(HasOwner() && !isMerc()); }
+	inline virtual bool IsPet() { return(HasOwner()); }
 	inline bool HasPet() const { if(GetPetID()==0){return false;} return (entity_list.getMOB(GetPetID()) != 0);}
 	bool HadTempPets() const { return(hasTempPet); }
 	void TempPets(bool i) { hasTempPet = i; }

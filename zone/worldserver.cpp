@@ -314,12 +314,6 @@ void WorldServer::Process() {
 					zc2->instanceID=ztz->requested_instance_id;
 					zc2->success = 1;
 
-					// This block is necessary to clean up any merc objects owned by a Client. Maybe we should do this for bots, too?
-					if(entity->castToClient()->GetMerc() != nullptr)
-					{
-					entity->castToClient()->GetMerc()->ProcessClientZoneChange(entity->castToClient());
-					}
-
 					entity->castToMOB()->SetZone(ztz->requested_zone_id, ztz->requested_instance_id);
 
 					if(ztz->ignorerestrictions == 3)
@@ -974,8 +968,6 @@ void WorldServer::Process() {
 					group->updatePlayer(c);
 				else
 				{
-					if(c->GetMerc())
-						database.SetGroupID(c->GetMerc()->GetCleanName(), 0, c->CharacterID(), true);
 					database.SetGroupID(c->getName(), 0, c->CharacterID());	//cannot re-establish group, kill it
 				}
 

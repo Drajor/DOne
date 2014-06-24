@@ -36,7 +36,6 @@ class EQApplicationPacket;
 class Client;
 class Mob;
 class NPC;
-class Merc;
 class Corpse;
 class Beacon;
 class Petition;
@@ -59,7 +58,6 @@ public:
 	virtual bool isClient() const { return false; }
 	virtual bool isNPC() const { return false; }
 	virtual bool isMOB() const { return false; }
-	virtual bool isMerc() const { return false; }
 	virtual bool isCorpse() const { return false; }
 	virtual bool isPlayerCorpse() const { return false; }
 	virtual bool isNPCCorpse() const { return false; }
@@ -78,8 +76,6 @@ public:
 	const NPC* castToNPC() const;
 	Mob* castToMOB();
 	const Mob* castToMOB() const;
-	Merc* castToMerc();
-	const Merc* castToMerc() const;
 	Corpse* castToCorpse();
 	const Corpse* castToCorpse() const;
 	Object* castToObject();
@@ -137,7 +133,6 @@ public:
 
 	NPC* getNPCByNPCTypeID(uint32 pNPCTypeID);
 	inline NPC* getNPCByID(uint16 pID) { return mNPCs.count(pID) ? mNPCs.at(pID) : nullptr; }
-	inline Merc* getMercByID(uint16 pID) { return mMercs.count(pID) ? mMercs.at(pID) : nullptr; }
 
 	// Search for Client
 	Client* getClientByName(const char* pName);
@@ -206,7 +201,6 @@ public:
 	void sendTraders(Client* pClient);
 	void addClient(Client* pClient);
 	void addNPC(NPC* pNPC, bool pSendSpawnPacket = true, bool pDontQueue = false);
-	void addMerc(Merc* pMerc, bool pSendSpawnPacket = true, bool pDontQueue = false);
 	void addCorpse(Corpse* pCorpse, uint32 pID = 0xFFFFFFFF);
 	void addObject(Object* pObject, bool pSendSpawnPacket = true);
 	void addGroup(Group* pGroup);
@@ -223,7 +217,6 @@ public:
 	bool removeClient(uint16 pID);
 	bool removeClient(Client* pClient);
 	bool removeNPC(uint16 pID);
-	bool removeMerc(uint16 pID);
 	bool removeGroup(uint32 pID);
 	bool removeRaid(uint32 pID);
 	bool removeCorpse(uint16 pID);
@@ -234,7 +227,6 @@ public:
 	void removeAllMobs();
 	void removeAllClients();
 	void removeAllNPCs();
-	void removeAllMercs();
 	void removeAllGroups();
 	void removeAllCorpses();
 	void removeAllDoors();
@@ -246,7 +238,6 @@ public:
 	void removeAllRaids();
 	void destroyTempPets(Mob* pOwner);
 	Entity* getEntityMOB(uint16 pID);
-	Entity* getEntityMerc(uint16 pID);
 	Entity* getEntityDoor(uint16 pID);
 	Entity* getEntityObject(uint16 pID);
 	Entity* getEntityCorpse(uint16 pID);
@@ -356,7 +347,6 @@ public:
 	int getHatedCount(Mob* pAttacker, Mob* pExclude);
 	void AIYellForHelp(Mob* pSender, Mob* pAttacker);
 	bool AICheckCloseBeneficialSpells(NPC* pCaster, uint8 pChance, float pRange, uint16 pSpellTypes);
-	bool Merc_AICheckCloseBeneficialSpells(Merc* pCaster, uint8 pChance, float pRange, uint32 pSpellTypes);
 	Mob* getTargetForMez(Mob* pCaster);
 	uint32 checkNPCsClose(Mob *pCenter);
 
@@ -412,7 +402,6 @@ private:
 	std::unordered_map<uint16, Client*> mClients;
 	std::unordered_map<uint16, Mob*> mMOBs;
 	std::unordered_map<uint16, NPC*> mNPCs;
-	std::unordered_map<uint16, Merc*> mMercs;
 	std::unordered_map<uint16, Corpse*> mCorpses;
 	std::unordered_map<uint16, Object*> mObjects;
 	std::unordered_map<uint16, Doors*> mDoors;

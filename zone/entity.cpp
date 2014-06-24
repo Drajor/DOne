@@ -116,19 +116,6 @@ Mob *Entity::castToMOB()
 	return static_cast<Mob *>(this);
 }
 
-Merc *Entity::castToMerc()
-{
-#ifdef _EQDEBUG
-	if (!isMerc()) {
-		std::cout << "CastToMerc error" << std::endl;
-		DebugBreak();
-		return 0;
-	}
-#endif
-	return static_cast<Merc *>(this);
-}
-
-
 Trap *Entity::castToTrap()
 {
 #ifdef DEBUG
@@ -224,18 +211,6 @@ const Mob *Entity::castToMOB() const
 	}
 #endif
 	return static_cast<const Mob *>(this);
-}
-
-const Merc *Entity::castToMerc() const
-{
-#ifdef _EQDEBUG
-	if (!isMerc()) {
-		std::cout << "CastToMerc error" << std::endl;
-		DebugBreak();
-		return 0;
-	}
-#endif
-	return static_cast<const Merc *>(this);
 }
 
 const Trap *Entity::castToTrap() const
@@ -494,9 +469,6 @@ void EntityList::MOBProcess()
 			if (mob->isNPC()) {
 				entity_list.removeNPC(mob->castToNPC()->getID());
 			}
-			else if (mob->isMerc()) {
-				entity_list.removeMerc(mob->castToMerc()->getID());
-			}
 			else {
 #ifdef _WINDOWS
 				struct in_addr in;
@@ -632,36 +604,6 @@ void EntityList::addNPC(NPC* pNPC, bool pSendSpawnPacket, bool pDontQueue) {
 
 	mNPCs.insert(std::pair<uint16, NPC *>(pNPC->getID(), pNPC));
 	mMOBs.insert(std::pair<uint16, Mob *>(pNPC->getID(), pNPC));
-}
-
-void EntityList::addMerc(Merc* pMerc, bool pSendSpawnPacket, bool pDontQueue) {
-	if (pMerc) {
-		pMerc->setID(getFreeID());
-
-		if (pSendSpawnPacket) {
-			if (pDontQueue) {
-				// Send immediately
-				EQApplicationPacket *outapp = new EQApplicationPacket();
-				pMerc->CreateSpawnPacket(outapp);
-				outapp->priority = 6;
-				queueClients(pMerc, outapp, true);
-				safe_delete(outapp);
-			}
-			else {
-				// Queue the packet
-				NewSpawn_Struct *ns = new NewSpawn_Struct;
-				memset(ns, 0, sizeof(NewSpawn_Struct));
-				pMerc->FillSpawnStruct(ns, pMerc);
-				addToSpawnQueue(pMerc->getID(), &ns);
-				safe_delete(ns);
-			}
-
-			//parse->EventMERC(EVENT_SPAWN, merc, nullptr, "", 0);
-		}
-
-		mMercs.insert(std::pair<uint16, Merc *>(pMerc->getID(), pMerc));
-		mMOBs.insert(std::pair<uint16, Mob *>(pMerc->getID(), pMerc));
-	}
 }
 
 void EntityList::addObject(Object* pObject, bool pSendSpawnPacket) {
@@ -834,10 +776,6 @@ bool EntityList::makeDoorSpawnPacket(EQApplicationPacket* pApp, Client* pClient)
 
 Entity* EntityList::getEntityMOB(uint16 pID) {
 	return mMOBs.count(pID) ? mMOBs.at(pID) : nullptr;
-}
-
-Entity* EntityList::getEntityMerc(uint16 pID) {
-	return mMercs.count(pID) ? mMercs.at(pID) : nullptr;
 }
 
 Entity* EntityList::getEntityMOB(const char* pName) {
@@ -1720,10 +1658,6 @@ void EntityList::removeAllNPCs() {
 	mNPCLimits.clear();
 }
 
-void EntityList::removeAllMercs() {
-	mMercs.clear();
-}
-
 void EntityList::removeAllGroups() {
 	while (mGroups.size())
 		mGroups.pop_front();
@@ -1838,15 +1772,6 @@ bool EntityList::removeNPC(uint16 pID) {
 		// remove from limit list if needed
 		if (mNPCLimits.count(pID))
 			mNPCLimits.erase(pID);
-		return true;
-	}
-	return false;
-}
-
-bool EntityList::removeMerc(uint16 pID) {
-	auto it = mMercs.find(pID);
-	if (it != mMercs.end()) {
-		mMercs.erase(it); // Already Deleted
 		return true;
 	}
 	return false;
@@ -2001,8 +1926,6 @@ void EntityList::removeEntity(uint16 pID) {
 	else if (entity_list.removeGroup(pID))
 		return;
 	else if (entity_list.removeTrap(pID))
-		return;
-	else if (entity_list.removeMerc(pID))
 		return;
 	else
 		entity_list.removeObject(pID);

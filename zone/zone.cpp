@@ -552,80 +552,6 @@ void Zone::GetMerchantDataForZoneLoad(){
 	}
 }
 
-void Zone::LoadMercTemplates(){
-
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
-	std::list<MercStanceInfo> merc_stances;
-	merc_templates.clear();
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT `class_id`, `proficiency_id`, `stance_id`, `isdefault` FROM `merc_stance_entries` order by `class_id`, `proficiency_id`, `stance_id`"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			MercStanceInfo tempMercStanceInfo;
-
-			tempMercStanceInfo.ClassID = atoi(DataRow[0]);
-			tempMercStanceInfo.ProficiencyID = atoi(DataRow[1]);
-			tempMercStanceInfo.StanceID = atoi(DataRow[2]);
-			tempMercStanceInfo.IsDefault = atoi(DataRow[3]);
-
-			merc_stances.push_back(tempMercStanceInfo);
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, MTem.dbstring AS merc_subtype_id, MTyp.race_id, MS.class_id, MTyp.proficiency_id, MS.tier_id, 0 AS CostFormula, MTem.clientversion, MTem.merc_npc_type_id FROM merc_types MTyp, merc_templates MTem, merc_subtypes MS WHERE MTem.merc_type_id = MTyp.merc_type_id AND MTem.merc_subtype_id = MS.merc_subtype_id ORDER BY MTyp.race_id, MS.class_id, MTyp.proficiency_id;"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			int stanceIndex = 0;
-			MercTemplate tempMercTemplate;
-
-			tempMercTemplate.MercTemplateID = atoi(DataRow[0]);
-			tempMercTemplate.MercType = atoi(DataRow[1]);
-			tempMercTemplate.MercSubType = atoi(DataRow[2]);
-			tempMercTemplate.RaceID = atoi(DataRow[3]);
-			tempMercTemplate.ClassID = atoi(DataRow[4]);
-			tempMercTemplate.ProficiencyID = atoi(DataRow[5]);
-			tempMercTemplate.TierID = atoi(DataRow[6]);
-			tempMercTemplate.CostFormula = atoi(DataRow[7]);
-			tempMercTemplate.ClientVersion = atoi(DataRow[8]);
-			tempMercTemplate.MercNPCID = atoi(DataRow[9]);
-
-			for(int i = 0; i < MaxMercStanceID; i++) {
-				tempMercTemplate.Stances[i] = 0;
-			}
-
-			for (std::list<MercStanceInfo>::iterator mercStanceListItr = merc_stances.begin(); mercStanceListItr != merc_stances.end(); ++mercStanceListItr) {
-				if(mercStanceListItr->ClassID == tempMercTemplate.ClassID && mercStanceListItr->ProficiencyID == tempMercTemplate.ProficiencyID) {
-					zone->merc_stance_list[tempMercTemplate.MercTemplateID].push_back((*mercStanceListItr));
-					tempMercTemplate.Stances[stanceIndex] = mercStanceListItr->StanceID;
-					stanceIndex++;
-				}
-			}
-
-			merc_templates[tempMercTemplate.MercTemplateID] = tempMercTemplate;
-		}
-
-		mysql_free_result(DatasetResult);
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadMercTemplates()");
-	}
-}
-
-
 void Zone::LoadLevelEXPMods(){
 	std::string errorMessage;
 	char* Query = 0;
@@ -653,49 +579,6 @@ void Zone::LoadLevelEXPMods(){
 
 	if(!errorMessage.empty()) {
 		LogFile->write(EQEMuLog::Error, "Error in ZoneDatabase::LoadEXPLevelMods()");
-	}
-}
-void Zone::LoadMercSpells(){
-
-	std::string errorMessage;
-	char* Query = 0;
-	char TempErrorMessageBuffer[MYSQL_ERRMSG_SIZE];
-	MYSQL_RES* DatasetResult;
-	MYSQL_ROW DataRow;
-	merc_spells_list.clear();
-
-	if(!database.RunQuery(Query, MakeAnyLenString(&Query, "SELECT msl.class_id, msl.proficiency_id, msle.spell_id, msle.spell_type, msle.stance_id, msle.minlevel, msle.maxlevel, msle.slot, msle.procChance FROM merc_spell_lists msl, merc_spell_list_entries msle WHERE msle.merc_spell_list_id = msl.merc_spell_list_id ORDER BY msl.class_id, msl.proficiency_id, msle.spell_type, msle.minlevel, msle.slot;"), TempErrorMessageBuffer, &DatasetResult)) {
-		errorMessage = std::string(TempErrorMessageBuffer);
-	}
-	else {
-		while(DataRow = mysql_fetch_row(DatasetResult)) {
-			uint32 classid;
-			MercSpellEntry tempMercSpellEntry;
-
-			classid = atoi(DataRow[0]);
-			tempMercSpellEntry.proficiencyid = atoi(DataRow[1]);
-			tempMercSpellEntry.spellid = atoi(DataRow[2]);
-			tempMercSpellEntry.type = atoi(DataRow[3]);
-			tempMercSpellEntry.stance = atoi(DataRow[4]);
-			tempMercSpellEntry.minlevel = atoi(DataRow[5]);
-			tempMercSpellEntry.maxlevel = atoi(DataRow[6]);
-			tempMercSpellEntry.slot = atoi(DataRow[7]);
-			tempMercSpellEntry.proc_chance = atoi(DataRow[8]);
-
-			merc_spells_list[classid].push_back(tempMercSpellEntry);
-		}
-
-		mysql_free_result(DatasetResult);
-
-		if(MERC_DEBUG > 0)
-			LogFile->write(EQEMuLog::Debug, "Mercenary Debug: Loaded %i merc spells.", merc_spells_list[1].size() + merc_spells_list[2].size() + merc_spells_list[9].size() + merc_spells_list[12].size());
-	}
-
-	safe_delete_array(Query);
-	Query = 0;
-
-	if(!errorMessage.empty()) {
-		LogFile->write(EQEMuLog::Error, "Error in Zone::LoadMercSpells()");
 	}
 }
 
@@ -1054,12 +937,6 @@ bool Zone::Init(bool iStaticZone) {
 	adverrornum = 502;
 	zone->LoadTempMerchantData();
 
-	// Merc data
-	if (RuleB(Mercs, AllowMercs)) {
-		zone->LoadMercTemplates();
-		zone->LoadMercSpells();
-	}
-
 	if (RuleB(Zone, LevelBasedEXPMods))
 		zone->LoadLevelEXPMods();
 
@@ -1142,7 +1019,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 	{
 		map_name = nullptr;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, zone_type, default_ruleset, &map_name))
 		{
 			LogFile->write(EQEMuLog::Error, "Error loading the Zone Config.");
 			return false;
@@ -1153,11 +1030,11 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDe
 		//Fall back to base zone if we don't find the instance version.
 		map_name = nullptr;
 		if(!database.GetZoneCFG(database.GetZoneID(filename), instance_id, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, zone_type, default_ruleset, &map_name))
 		{
 			safe_delete_array(map_name);
 			if(!database.GetZoneCFG(database.GetZoneID(filename), 0, &newzone_data, can_bind,
-			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, allow_mercs, zone_type, default_ruleset, &map_name))
+			can_combat, can_levitate, can_castoutdoor, is_city, is_hotzone, zone_type, default_ruleset, &map_name))
 			{
 				LogFile->write(EQEMuLog::Error, "Error loading the Zone Config.");
 				return false;

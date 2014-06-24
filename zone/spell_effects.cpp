@@ -3923,8 +3923,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	if(IsPet() && GetOwner() && GetOwner()->isClient()) {
 		SendPetBuffsToClient();
 	}
-	if((isClient() && !castToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()) ||
-				(isMerc() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()))
+	if((isClient() && !castToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->isClient() && !GetOwner()->castToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 

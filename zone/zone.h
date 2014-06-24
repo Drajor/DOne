@@ -177,10 +177,7 @@ public:
 	void	LoadTempMerchantData_result(MYSQL_RES* result);
 	void	LoadMerchantData_result(MYSQL_RES* result);
 	int		SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold=false);
-	void LoadMercTemplates();
-	void LoadMercSpells();
 	void LoadLevelEXPMods();
-	MercTemplate* GetMercTemplate( uint32 template_id );
 
 	void SetInstanceTimer(uint32 new_duration);
 	void LoadLDoNTraps();
@@ -195,7 +192,6 @@ public:
 	std::map<uint32,LDoNTrapTemplate*> ldon_trap_list;
 	std::map<uint32,std::list<LDoNTrapTemplate*> > ldon_trap_entry_list;
 	std::map<uint32,std::list<MercStanceInfo> > merc_stance_list;
-	std::map<uint32, MercTemplate> merc_templates;
 	std::map<uint32,std::list<MercSpellEntry> > merc_spells_list;
 	std::map<uint32, ZoneEXPModInfo> level_exp_mod;
 	std::list<InternalVeteranReward> VeteranRewards;
@@ -227,9 +223,8 @@ public:
 	bool	CanBind() const { return(can_bind); }
 	bool	IsCity() const { return(is_city); }
 	bool	CanDoCombat() const { return(can_combat); }
-	bool	CanLevitate() const {return(can_levitate); } // Magoth78
-	bool	CanCastOutdoor() const {return(can_castoutdoor);} //qadar
-	bool	AllowMercs() const {return(allow_mercs);}
+	bool	CanLevitate() const {return(can_levitate); }
+	bool	CanCastOutdoor() const {return(can_castoutdoor);}
 	bool	IsHotzone() const { return(is_hotzone); }
 	inline	bool BuffTimersSuspended() const { return newzone_data.SuspendBuffs != 0; };
 
@@ -287,7 +282,6 @@ private:
 	bool	can_levitate;
 	bool	is_hotzone;
 	uint8	zone_type;
-	bool	allow_mercs;
 	uint32	pgraveyard_id, pgraveyard_zoneid;
 	float	pgraveyard_x, pgraveyard_y, pgraveyard_z, pgraveyard_heading;
 	int		default_ruleset;

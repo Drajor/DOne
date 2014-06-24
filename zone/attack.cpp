@@ -1498,10 +1498,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	SetHorseId(0);
 	dead = true;
 
-	if(GetMerc()) {
-		GetMerc()->Suspend();
-	}
-
 	if (killerMob != nullptr)
 	{
 		if (killerMob->isNPC()) {
@@ -2275,7 +2271,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp_client)
 		hate_list.DoFactionHits(GetNPCFactionID());
 
-	if (!HasOwner() && !isMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
+	if (!HasOwner() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->isClient() || (killer->HasOwner() && killer->GetUltimateOwner()->isClient()) ||
 		(killer->isNPC() && killer->castToNPC()->GetSwarmInfo() && killer->castToNPC()->GetSwarmInfo()->GetOwner() && killer->castToNPC()->GetSwarmInfo()->GetOwner()->isClient())))
 	{
@@ -2497,17 +2493,6 @@ void Mob::AddToHateList(Mob* other, int32 hate, int32 damage, bool iYellForHelp,
 
 	if(other->isClient())
 		other->castToClient()->AddAutoXTarget(this);
-
-	// if other is a merc, add the merc client to the hate list
-	if(other->isMerc()) {
-		if(other->castToMerc()->GetMercOwner() && other->castToMerc()->GetMercOwner()->castToClient()->GetFeigned()) {
-			AddFeignMemory(other->castToMerc()->GetMercOwner()->castToClient());
-		}
-		else {
-			if(!hate_list.isHated(other->castToMerc()->GetMercOwner()))
-				hate_list.add(other->castToMerc()->GetMercOwner(), 0, 0, false, true);
-		}
-	} //MERC
 
 	// then add pet owner if there's one
 	if (owner) { // Other is a pet, add him and it

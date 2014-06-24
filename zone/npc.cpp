@@ -233,12 +233,6 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 	HasAISpell = false;
 	HasAISpellEffects = false;
 
-	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
-	{
-		LoadMercTypes();
-		LoadMercs();
-	}
-
 	SpellFocusDMG = 0;
 	SpellFocusHeal = 0;
 
@@ -254,8 +248,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, float x, float y, float z, float 
 
 	npc_aggro = d->npc_aggro;
 
-	if(!isMerc())
-		AI_Start();
+	AI_Start();
 
 	d_meele_texture1 = d->d_meele_texture1;
 	d_meele_texture2 = d->d_meele_texture2;

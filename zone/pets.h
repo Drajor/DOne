@@ -42,11 +42,11 @@ static const uint32 PET_FOCUS_OFF = 26;
 static const uint32 PET_HOLD_ON = 27;
 static const uint32 PET_HOLD_OFF = 28;
 
-	class Pet : public NPC {
-	public:
-		Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power);
+class Pet : public NPC {
+public:
+	Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 power);
 
-	};
+};
 
 #endif
 
