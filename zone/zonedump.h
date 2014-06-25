@@ -57,7 +57,7 @@ struct NPCType
 	int32	npc_faction_id;
 	uint32	merchanttype;
 	uint32	alt_currency_type;
-	uint32	adventure_template;
+	uint32	adventure_template; // TODO: Remove later.
 	uint32	trap_template;
 	uint8	light;		//not loaded from DB
 	uint16	AC;

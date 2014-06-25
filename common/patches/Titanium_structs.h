@@ -61,14 +61,6 @@ struct DuelResponse_Struct
 	uint32 entity_id;
 	uint32 unknown;
 };
-/*
-	Cofruben:
-	Adventure stuff,not a net one,just one for our use
-*/
-static const uint32 ADVENTURE_COLLECT		= 0;
-static const uint32 ADVENTURE_MASSKILL		= 1;
-static const uint32 ADVENTURE_NAMED			= 2;
-static const uint32 ADVENTURE_RESCUE		= 3;
 
 struct AdventureInfo {
 	uint32 QuestID;

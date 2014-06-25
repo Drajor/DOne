@@ -3357,24 +3357,6 @@ void EntityList::unMarkNPC(uint16 pID) {
 	}
 }
 
-uint32 EntityList::checkNPCsClose(Mob *pCenter) {
-	uint32 count = 0;
-	for (auto& i : mNPCs) {
-		NPC* npc = i.second;
-		if (!npc || npc == pCenter || npc->IsPet() || npc->GetClass() == LDON_TREASURE || npc->GetBodyType() == BT_NoTarget || npc->GetBodyType() == BT_Special)
-			continue;
-
-		float xDiff = npc->GetX() - pCenter->GetX();
-		float yDiff = npc->GetY() - pCenter->GetY();
-		float zDiff = npc->GetZ() - pCenter->GetZ();
-		float dist = ((xDiff * xDiff) + (yDiff * yDiff) + (zDiff * zDiff));
-
-		if (dist <= RuleR(Adventure, DistanceForRescueAccept))
-			count++;
-	}
-	return count;
-}
-
 void EntityList::gateAllClients() {
 	for (auto& i : mClients)
 		i.second->GoToBind();

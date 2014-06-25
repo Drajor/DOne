@@ -348,7 +348,6 @@ public:
 	void AIYellForHelp(Mob* pSender, Mob* pAttacker);
 	bool AICheckCloseBeneficialSpells(NPC* pCaster, uint8 pChance, float pRange, uint16 pSpellTypes);
 	Mob* getTargetForMez(Mob* pCaster);
-	uint32 checkNPCsClose(Mob *pCenter);
 
 	Corpse* getClosestCorpse(Mob* pSender, const char* pName);
 	NPC* getClosestBanker(Mob* pSender, uint32& pDistance);

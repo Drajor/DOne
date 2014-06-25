@@ -2016,25 +2016,6 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 	if (!IsEngaged())
 		zone->AddAggroMob();
 
-	if(GetClass() == LDON_TREASURE)
-	{
-		if(IsLDoNLocked() && GetLDoNLockedSkill() != LDoNTypeMechanical)
-		{
-			damage = -5;
-		}
-		else
-		{
-			if(IsLDoNTrapped())
-			{
-				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				SpellFinished(GetLDoNTrapSpellID(), other, 10, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
-				SetLDoNTrapSpellID(0);
-				SetLDoNTrapped(false);
-				SetLDoNTrapDetected(false);
-			}
-		}
-	}
-
 	//do a majority of the work...
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
 
@@ -2346,26 +2327,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 							break;
 						}
 					}
-				}
-			}
-		}
-
-		if(zone && zone->adv_data)
-		{
-			ServerZoneAdventureDataReply_Struct *sr = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(sr->type == Adventure_Kill)
-			{
-				zone->DoAdventureCountIncrease();
-			}
-			else if(sr->type == Adventure_Assassinate)
-			{
-				if(sr->data_id == GetNPCTypeID())
-				{
-					zone->DoAdventureCountIncrease();
-				}
-				else
-				{
-					zone->DoAdventureAssassinationCountIncrease();
 				}
 			}
 		}
