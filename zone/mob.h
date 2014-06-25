@@ -557,7 +557,6 @@ public:
 	inline void Amnesia(bool newval) { amnesiad = newval; }
 	void TemporaryPets(uint16 spell_id, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0);
 	void TypesTemporaryPets(uint32 typesid, Mob *target, const char *name_override = nullptr, uint32 duration_override = 0, bool followme = false);
-	void WakeTheDead(uint16 spell_id, Mob *target, uint32 duration);
 	void Spin();
 	void Kill();
 	bool PassCharismaCheck(Mob* caster, Mob* spellTarget, uint16 spell_id);

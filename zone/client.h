@@ -1048,7 +1048,6 @@ public:
 	uint32 GetCorpseID(int corpse) { return database.GetPlayerCorpseID(CharacterID(), corpse); }
 	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetPlayerCorpseItemAt(corpse_id, slot_id); }
 	void SuspendMinion();
-	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();
 	void Signal(uint32 data);
 	Mob *GetBindSightTarget() { return bind_sight_target; }

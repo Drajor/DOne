@@ -446,8 +446,8 @@ typedef enum {
 #define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage
 #define SE_FcDamageAmtIncoming			297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
 #define SE_ChangeHeight					298	// implemented
-#define SE_WakeTheDead					299	// implemented
-#define SE_Doppelganger					300	// implemented
+#define SE_WakeTheDead					299	// Removed
+#define SE_Doppelganger					300	// Removed
 #define SE_ArcheryDamageModifier		301	// implemented[AA] - increase archery damage by percent
 #define SE_FcDamagePctCrit				302	// implemented - spell focus that is applied after critical hits has been calculated.
 #define SE_FcDamageAmtCrit				303	// implemented - adds direct spell damage

@@ -2274,32 +2274,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_WakeTheDead:
 			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Wake The Dead");
-#endif
-				//meh dupe issue with npc casting this
-				if(caster->isClient()){
-					//this spell doesn't appear to actually contain the information on duration inside of it oddly
-					int dur = 60;
-					if(spell_id == 3269)
-						dur += 15;
-					else if(spell_id == 3270)
-						dur += 30;
-
-					caster->WakeTheDead(spell_id, caster->GetTarget(), dur);
-				}
 				break;
 			}
 
 			case SE_Doppelganger:
 			{
-				if(caster && caster->isClient()) {
-					char pet_name[64];
-					snprintf(pet_name, sizeof(pet_name), "%s`s doppelganger", caster->GetCleanName());
-					int pet_count = spells[spell_id].base[i];
-					int pet_duration = spells[spell_id].max[i];
-					caster->castToClient()->Doppelganger(spell_id, this, pet_name, pet_count, pet_duration);
-				}
 				break;
 			}
 
