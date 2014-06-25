@@ -21,7 +21,7 @@
 #include "../common/packet_dump.h"
 #include "../common/moremath.h"
 #include "../common/Item.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "worldserver.h"
 #include "../common/skills.h"
 #include "../common/bodytypes.h"

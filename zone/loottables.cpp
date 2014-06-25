@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "npc.h"
 #include "masterentity.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/MiscFunctions.h"
 #ifdef _WINDOWS
 #define snprintf	_snprintf

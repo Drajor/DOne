@@ -20,7 +20,7 @@
 
 #include "../common/linked_list.h"
 #include "../common/types.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "client.h"
 #include "../common/Mutex.h"
 #include "../common/MiscFunctions.h"

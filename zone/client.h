@@ -37,7 +37,7 @@ class Client;
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "errno.h"
 #include "mob.h"
 #include "npc.h"

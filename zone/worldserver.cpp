@@ -37,7 +37,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/MiscFunctions.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "zone.h"
 #include "entity.h"
 #include "masterentity.h"

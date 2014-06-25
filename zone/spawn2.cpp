@@ -23,7 +23,7 @@
 #include "masterentity.h"
 #include "zone.h"
 #include "spawngroup.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "worldserver.h"
 
 extern EntityList entity_list;

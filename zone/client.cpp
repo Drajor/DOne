@@ -42,7 +42,7 @@ extern volatile bool RunLoops;
 #include "masterentity.h"
 #include "worldserver.h"
 #include "../common/misc.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/spdat.h"
 #include "net.h"
 #include "../common/packet_dump.h"

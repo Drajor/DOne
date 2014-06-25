@@ -36,7 +36,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"
 #include "../common/logsys.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "StringIDs.h"
 
 //static data arrays, really not big enough to warrant shared mem.

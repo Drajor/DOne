@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "../common/types.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"
 

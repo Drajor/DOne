@@ -3,7 +3,7 @@
 #include "QGlobals.h"
 #include "masterentity.h"
 #include "zone.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 
 void QGlobalCache::AddGlobal(uint32 id, QGlobal global)
 {

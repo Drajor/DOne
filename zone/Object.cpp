@@ -21,7 +21,7 @@
 #include <stdlib.h>
 
 #include "masterentity.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "../common/MiscFunctions.h"

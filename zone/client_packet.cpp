@@ -39,7 +39,7 @@
 #endif
 
 #include "masterentity.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/packet_functions.h"
 #include "../common/packet_dump.h"
 #include "worldserver.h"

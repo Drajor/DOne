@@ -90,7 +90,7 @@ SET(zone_sources
 	zone.cpp
 	zone_logsys.cpp
 	ZoneConfig.cpp
-	zonedb.cpp
+	ZoneDatabase.cpp
 	zonedbasync.cpp
 	zoning.cpp
 )
@@ -146,7 +146,7 @@ SET(zone_headers
 	worldserver.h
 	zone.h
 	ZoneConfig.h
-	zonedb.h
+	ZoneDatabase.h
 	zonedbasync.h
 	zonedump.h
 )

@@ -64,7 +64,7 @@ And then at then end of embparser.cpp, add:
 #include "../common/skills.h"
 #include "../common/classes.h"
 #include "../common/races.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/spdat.h"
 #include "../common/packet_functions.h"
 #include "../common/StringUtil.h"

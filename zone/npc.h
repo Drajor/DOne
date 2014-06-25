@@ -19,7 +19,7 @@
 #define NPC_H
 
 class NPC;
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "mob.h"
 //#include "spawn.h"
 

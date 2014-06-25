@@ -28,7 +28,7 @@
 #include "../common/logsys.h"
 #include "masterentity.h"
 #include "worldserver.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "petitions.h"
 #include "StringIDs.h"
 #include "NpcAI.h"

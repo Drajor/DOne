@@ -26,7 +26,7 @@
 #include "../common/bodytypes.h"
 #include "../common/eq_constants.h"
 
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "zonedump.h"
 #include "zonedbasync.h"
 #include "QGlobals.h"

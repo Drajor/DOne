@@ -17,7 +17,7 @@
 	*/
 #include "../common/debug.h"
 #include "guild_mgr.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "worldserver.h"
 #include "../common/servertalk.h"
 #include "../common/StringUtil.h"

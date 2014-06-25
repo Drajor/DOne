@@ -19,7 +19,7 @@
 #include "masterentity.h"
 #include "worldserver.h"
 #include "net.h"
-#include "zonedb.h"
+#include "ZoneDatabase.h"
 #include "../common/spdat.h"
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"
