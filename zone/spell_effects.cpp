@@ -1800,73 +1800,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			}
 			case SE_AppraiseLDonChest:
 			{
-				if(isNPC())
-				{
-					int check = spell.max[0];
-					int target = spell.targettype;
-					if(target == ST_LDoNChest_Cursed)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNSenseTraps(castToNPC(), check, LDoNTypeCursed);
-						}
-					}
-					else if(target == ST_Target)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNSenseTraps(castToNPC(), check, LDoNTypeMagical);
-						}
-					}
-				}
+										 // removed.
 				break;
 			}
 
 			case SE_DisarmLDoNTrap:
 			{
-				if(isNPC())
-				{
-					int check = spell.max[0];
-					int target = spell.targettype;
-					if(target == ST_LDoNChest_Cursed)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNDisarm(castToNPC(), check, LDoNTypeCursed);
-						}
-					}
-					else if(target == ST_Target)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNDisarm(castToNPC(), check, LDoNTypeMagical);
-						}
-					}
-				}
+									  // removed.
 				break;
 			}
 
 			case SE_UnlockLDoNChest:
 			{
-				if(isNPC())
-				{
-					int check = spell.max[0];
-					int target = spell.targettype;
-					if(target == ST_LDoNChest_Cursed)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNPickLock(castToNPC(), check, LDoNTypeCursed);
-						}
-					}
-					else if(target == ST_Target)
-					{
-						if(caster && caster->isClient())
-						{
-							caster->castToClient()->HandleLDoNPickLock(castToNPC(), check, LDoNTypeMagical);
-						}
-					}
-				}
+									   // removed.
 				break;
 			}
 

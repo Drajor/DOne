@@ -377,7 +377,6 @@ int command_init(void) {
 		command_add("revoke","[charname] [1/0] - Makes charname unable to talk on OOC",200,command_revoke) ||
 		command_add("checklos","- Check for line of sight to your target",50,command_checklos) ||
 		command_add("los",nullptr,0,command_checklos) ||
-		command_add("setadventurepoints","- Set your or your player target's available adventure points",150,command_set_adventure_points) ||
 		command_add("npcsay","[message] - Make your NPC target say a message.",150,command_npcsay) ||
 		command_add("npcshout","[message] - Make your NPC target shout a message.",150,command_npcshout) ||
 		command_add("timers","- Display persistent timers for target",200,command_timers) ||
@@ -429,9 +428,6 @@ int command_init(void) {
 		command_add("reloadallrules","Executes a reload of all rules.",80, command_reloadallrules) ||
 		command_add("reloadrulesworld","Executes a reload of all rules in world specifically.",80, command_reloadworldrules) ||
 		command_add("camerashake", "Shakes the camera on everyone's screen globally.", 80, command_camerashake) ||
-		command_add("disarmtrap", "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 0, command_disarmtrap) ||
-		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", 0, command_sensetrap) ||
-		command_add("picklock", "Analog for ldon pick lock for the newer clients since we still don't have it working.", 0, command_picklock) ||
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
 		command_add("xtargets", "Show your targets Extended Targets and optionally set how many xtargets they can have.", 250, command_xtargets) ||
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", 250, command_zopp) ||
@@ -6367,29 +6363,6 @@ void command_checklos(Client* c, const Seperator *sep)
 	}
 }
 
-void command_set_adventure_points(Client* c, const Seperator *sep)
-{
-	Client* t=c;
-
-	if(c->GetTarget() && c->GetTarget()->isClient())
-		t=c->GetTarget()->castToClient();
-
-	if(!sep->arg[1][0])
-	{
-		c->message(0, "Usage: #setadventurepoints [points] [theme]");
-		return;
-	}
-
-	if(!sep->IsNumber(1) || !sep->IsNumber(2))
-	{
-		c->message(0, "Usage: #setadventurepoints [points] [theme]");
-		return;
-	}
-
-	c->message(0, "Updating adventure points for %s", t->getName());
-	t->UpdateLDoNPoints(atoi(sep->arg[1]), atoi(sep->arg[2]));
-}
-
 void command_npcsay(Client* c, const Seperator *sep)
 {
 	if(c->GetTarget() && c->GetTarget()->isNPC() && sep->arg[1][0])
@@ -10952,82 +10925,6 @@ void command_camerashake(Client* c, const Seperator *sep)
 		}
 	}
 	return;
-}
-
-void command_disarmtrap(Client* c, const Seperator *sep)
-{
-	Mob *target = c->GetTarget();
-
-	if(!target)
-	{
-		c->message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->isNPC())
-	{
-		if(c->HasSkill(SkillDisarmTraps))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNDisarm(target->castToNPC(), c->GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
-		}
-		else
-			c->message(13, "You do not have the disarm trap skill.");
-	}
-}
-
-void command_sensetrap(Client* c, const Seperator *sep)
-{
-	Mob * target = c->GetTarget();
-	if(!target)
-	{
-		c->message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->isNPC())
-	{
-		if(c->HasSkill(SkillSenseTraps))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNSenseTraps(target->castToNPC(), c->GetSkill(SkillSenseTraps), LDoNTypeMechanical);
-		}
-		else
-			c->message(13, "You do not have the sense traps skill.");
-	}
-}
-
-void command_picklock(Client* c, const Seperator *sep)
-{
-	Mob * target = c->GetTarget();
-	if(!target)
-	{
-		c->message(13, "You must have a target.");
-		return;
-	}
-
-	if(target->isNPC())
-	{
-		if(c->HasSkill(SkillPickLock))
-		{
-			if(c->DistNoRootNoZ(*target) > RuleI(Adventure, LDoNTrapDistanceUse))
-			{
-				c->message(13, "%s is too far away.", target->GetCleanName());
-				return;
-			}
-			c->HandleLDoNPickLock(target->castToNPC(), c->GetSkill(SkillPickLock), LDoNTypeMechanical);
-		}
-		else
-			c->message(13, "You do not have the pick locks skill.");
-	}
 }
 
 void command_qtest(Client* c, const Seperator *sep)

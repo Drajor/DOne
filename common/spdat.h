@@ -814,7 +814,6 @@ bool IsSuccorSpell(uint16 spell_id);
 bool IsTeleportSpell(uint16 spell_id);
 bool IsGateSpell(uint16 spell_id);
 bool IsPlayerIllusionSpell(uint16 spell_id); // seveian 2008-09-23
-bool IsLDoNObjectSpell(uint16 spell_id);
 int32 GetSpellResistType(uint16 spell_id);
 int32 GetSpellTargetType(uint16 spell_id);
 bool IsHealOverTimeSpell(uint16 spell_id);
