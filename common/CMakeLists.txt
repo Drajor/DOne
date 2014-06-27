@@ -37,7 +37,6 @@ SET(common_sources
 	memory_mapped_file.cpp
 	misc.cpp
 	MiscFunctions.cpp
-	moremath.cpp
 	Mutex.cpp
 	opcode_map.cpp
 	opcodemgr.cpp
@@ -146,7 +145,6 @@ SET(common_headers
 	memory_mapped_file.h
 	misc.h
 	MiscFunctions.h
-	moremath.h
 	Mutex.h
 	op_codes.h
 	opcode_dispatch.h

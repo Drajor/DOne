@@ -70,7 +70,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/spdat.h"
 #include "masterentity.h"
 #include "../common/packet_dump.h"
-#include "../common/moremath.h"
 #include "../common/Item.h"
 #include "worldserver.h"
 #include "../common/skills.h"

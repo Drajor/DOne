@@ -20,7 +20,6 @@
 #include <string>
 #include <cctype>
 #include <math.h>
-#include "../common/moremath.h"
 #include <stdio.h>
 #include "../common/packet_dump_file.h"
 #include "zone.h"

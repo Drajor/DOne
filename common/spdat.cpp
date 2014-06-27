@@ -73,7 +73,6 @@
 #include "debug.h"
 #include "spdat.h"
 #include "packet_dump.h"
-#include "moremath.h"
 #include "Item.h"
 #include "skills.h"
 #include "bodytypes.h"

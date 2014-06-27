@@ -25,7 +25,6 @@
 #include "masterentity.h"
 #include "NpcAI.h"
 #include "map.h"
-#include "../common/moremath.h"
 #include "StringIDs.h"
 #include "../common/MiscFunctions.h"
 #include "../common/StringUtil.h"

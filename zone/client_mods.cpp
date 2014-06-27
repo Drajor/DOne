@@ -23,7 +23,6 @@
 #include "../common/packet_functions.h"
 #include "../common/serverinfo.h"
 #include "../common/ZoneNumbers.h"
-#include "../common/moremath.h"
 #include "../common/guilds.h"
 #include "../common/logsys.h"
 #include "masterentity.h"
