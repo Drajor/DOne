@@ -71,7 +71,6 @@
 #include "console.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"
-#include "EQWHTTPHandler.h"
 #include "../common/dbasync.h"
 #include "../common/EmuTCPServer.h"
 #include "WorldConfig.h"
@@ -92,7 +91,6 @@ ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
 LoginServerList loginserverlist;
-EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
@@ -265,13 +263,6 @@ int main(int argc, char** argv) {
 			std::cerr << "Error, unknown command line option" << std::endl;
 			return 1;
 		}
-	}
-
-	if(Config->WorldHTTPEnabled) {
-		_log(WORLD__INIT, "Starting HTTP world service...");
-		http_server.Start(Config->WorldHTTPPort, Config->WorldHTTPMimeFile.c_str());
-	} else {
-		_log(WORLD__INIT, "HTTP world service disabled.");
 	}
 
 	_log(WORLD__INIT, "Loading variables..");
@@ -472,9 +463,7 @@ int main(int argc, char** argv) {
 	_log(WORLD__SHUTDOWN,"Client (UDP) listener stopped.");
 	eqsf.Close();
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
-	http_server.Stop();
 
-	//CheckEQEMuErrorAndPause();
 	return 0;
 }
 

@@ -7,19 +7,12 @@ SET(world_sources
 	CMakeLists.txt
 	console.cpp
 	EQLConfig.cpp
-	EQW.cpp
-	EQWHTTPHandler.cpp
-	EQWParser.cpp
-	HTTPRequest.cpp
 	LauncherLink.cpp
 	LauncherList.cpp
 	lfplist.cpp
 	LoginServer.cpp
 	LoginServerList.cpp
 	net.cpp
-	perl_EQLConfig.cpp
-	perl_EQW.cpp
-	perl_HTTPRequest.cpp
 	queryserv.cpp
 	ucs.cpp
 	wguild_mgr.cpp
@@ -37,10 +30,6 @@ SET(world_headers
 	CMakeLists.txt
 	console.h
 	EQLConfig.h
-	EQW.h
-	EQWHTTPHandler.h
-	EQWParser.h
-	HTTPRequest.h
 	LauncherLink.h
 	LauncherList.h
 	lfplist.h
