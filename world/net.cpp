@@ -35,7 +35,6 @@
 #include "../common/version.h"
 #include "../common/eqtime.h"
 #include "../common/timeoutmgr.h"
-#include "../common/EQEMuError.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/EQStreamIdent.h"
@@ -475,7 +474,7 @@ int main(int argc, char** argv) {
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 	http_server.Stop();
 
-	CheckEQEMuErrorAndPause();
+	//CheckEQEMuErrorAndPause();
 	return 0;
 }
 

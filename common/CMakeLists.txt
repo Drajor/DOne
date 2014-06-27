@@ -18,7 +18,6 @@ SET(common_sources
 	EQDBRes.cpp
 	eqemu_exception.cpp
 	EQEmuConfig.cpp
-	EQEMuError.cpp
 	EQPacket.cpp
 	EQStream.cpp
 	EQStreamFactory.cpp
@@ -114,7 +113,6 @@ SET(common_headers
 	eqemu_exception.h
 	EQEmuConfig.h
 	EQEmuConfig_elements.h
-	EQEMuError.h
 	EQPacket.h
 	EQStream.h
 	EQStreamFactory.h

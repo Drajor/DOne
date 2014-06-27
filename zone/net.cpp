@@ -27,7 +27,6 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/Mutex.h"
 #include "../common/version.h"
-#include "../common/EQEMuError.h"
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
@@ -201,19 +200,16 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading npc faction lists");
 	if (!database.LoadNPCFactionLists()) {
 		_log(ZONE__INIT_ERR, "Loading npcs faction lists FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	_log(ZONE__INIT, "Loading loot tables");
 	if (!database.LoadLoot()) {
 		_log(ZONE__INIT_ERR, "Loading loot FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 	_log(ZONE__INIT, "Loading skill caps");
 	if (!database.LoadSkillCaps()) {
 		_log(ZONE__INIT_ERR, "Loading skill caps FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
@@ -224,7 +220,6 @@ int main(int argc, char** argv) {
 	_log(ZONE__INIT, "Loading base data");
 	if (!database.LoadBaseData()) {
 		_log(ZONE__INIT_ERR, "Loading base data FAILED!");
-		CheckEQEMuErrorAndPause();
 		return 1;
 	}
 
@@ -483,7 +478,6 @@ int main(int argc, char** argv) {
 	safe_delete(taskmanager);
 	command_deinit();
 	safe_delete(parse);
-	CheckEQEMuErrorAndPause();
 	_log(ZONE__INIT, "Proper zone shutdown complete.");
 	return 0;
 }
