@@ -83,22 +83,6 @@ void CoutTimestamp(bool ms) {
 	std::cout << " GMT";
 }
 
-
-int32 filesize(FILE* fp) {
-#ifdef _WINDOWS
-	return _filelength(_fileno(fp));
-#else
-	struct stat file_stat;
-	fstat(fileno(fp), &file_stat);
-	return (int32) file_stat.st_size;
-/*	uint32 tmp = 0;
-	while (!feof(fp)) {
-		fseek(fp, tmp++, SEEK_SET);
-	}
-	return tmp;*/
-#endif
-}
-
 uint32 ResolveIP(const char* hostname, char* errbuf) {
 #ifdef _WINDOWS
 	static InitWinsock ws;
