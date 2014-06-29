@@ -13,7 +13,6 @@ SET(world_sources
 	LoginServer.cpp
 	LoginServerList.cpp
 	net.cpp
-	queryserv.cpp
 	ucs.cpp
 	wguild_mgr.cpp
 	world_logsys.cpp
@@ -36,7 +35,6 @@ SET(world_headers
 	LoginServer.h
 	LoginServerList.h
 	net.h
-	queryserv.h
 	SoFCharCreateData.h
 	ucs.h
 	wguild_mgr.h

@@ -506,17 +506,6 @@ RULE_CATEGORY( Console )
 RULE_INT ( Console, SessionTimeOut, 600000 )	// Amount of time in ms for the console session to time out
 RULE_CATEGORY_END()
 
-RULE_CATEGORY( QueryServ )
-RULE_BOOL( QueryServ, PlayerChatLogging, false) // Logs Player Chat
-RULE_BOOL( QueryServ, PlayerLogTrades, false) // Logs Player Trades
-RULE_BOOL( QueryServ, PlayerLogHandins, false) // Logs Player Handins
-RULE_BOOL( QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
-RULE_BOOL( QueryServ, PlayerLogDeletes, false) // Logs Player Deletes
-RULE_BOOL( QueryServ, PlayerLogMoves, false) // Logs Player Moves
-RULE_BOOL( QueryServ, MerchantLogTransactions, false) // Logs Merchant Transactions
-RULE_BOOL( QueryServ, PlayerLogPCCoordinates, false) // Logs Player Coordinates with certain events
-RULE_CATEGORY_END()
-
 RULE_CATEGORY( Inventory )
 RULE_BOOL ( Inventory, EnforceAugmentRestriction, true) // Forces augment slot restrictions
 RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item usability

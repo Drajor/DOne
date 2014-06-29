@@ -34,7 +34,6 @@
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "ucs.h"
-#include "queryserv.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -43,7 +42,6 @@ extern ConsoleList console_list;
 extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
 extern UCSConnection UCSLink;
-extern QueryServConnection QSLink;
 void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(EmuTCPConnection* itcpc)
@@ -1246,37 +1244,8 @@ bool ZoneServer::Process() {
 				UCSLink.SendPacket(pack);
 				break;
 			}
-
-			case ServerOP_QueryServGeneric:
 			case ServerOP_Speech:
-			case ServerOP_QSPlayerLogTrades:
 			{
-				QSLink.SendPacket(pack);
-				break;
-			}
-			case ServerOP_QSPlayerLogHandins:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
-			case ServerOP_QSPlayerLogNPCKills:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
-			case ServerOP_QSPlayerLogDeletes:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
-			case ServerOP_QSPlayerLogMoves:
-			{
-				QSLink.SendPacket(pack);
-				break;
-			}
-			case ServerOP_QSMerchantLogTransactions:
-			{
-				QSLink.SendPacket(pack);
 				break;
 			}
 			case ServerOP_CZSignalClientByName:

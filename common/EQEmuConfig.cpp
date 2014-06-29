@@ -192,31 +192,6 @@ void EQEmuConfig::do_database(TiXmlElement *ele) {
 		DatabaseDB=text;
 }
 
-
-void EQEmuConfig::do_qsdatabase(TiXmlElement *ele) {
-	const char *text;
-
-	text=ParseTextBlock(ele,"host",true);
-	if (text)
-		QSDatabaseHost=text;
-
-	text=ParseTextBlock(ele,"port",true);
-	if (text)
-		QSDatabasePort=atoi(text);
-
-	text=ParseTextBlock(ele,"username",true);
-	if (text)
-		QSDatabaseUsername=text;
-
-	text=ParseTextBlock(ele,"password",true);
-	if (text)
-		QSDatabasePassword=text;
-
-	text=ParseTextBlock(ele,"db",true);
-	if (text)
-		QSDatabaseDB=text;
-}
-
 void EQEmuConfig::do_zones(TiXmlElement *ele) {
 	const char *text;
 	TiXmlElement *sub_ele;
@@ -362,16 +337,6 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const {
 		return(DatabaseDB);
 	if(var_name == "DatabasePort")
 		return(itoa(DatabasePort));
-	if(var_name == "QSDatabaseHost")
-		return(QSDatabaseHost);
-	if(var_name == "QSDatabaseUsername")
-		return(QSDatabaseUsername);
-	if(var_name == "QSDatabasePassword")
-		return(QSDatabasePassword);
-	if(var_name == "QSDatabaseDB")
-		return(QSDatabaseDB);
-	if(var_name == "QSDatabasePort")
-		return(itoa(QSDatabasePort));
 	if(var_name == "SpellsFile")
 		return(SpellsFile);
 	if(var_name == "OpCodesFile")
@@ -402,47 +367,3 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const {
 //		return(itoa(DynamicCount));
 	return("");
 }
-
-void EQEmuConfig::Dump() const
-{
-	std::cout << "ShortName = " << ShortName << std::endl;
-	std::cout << "LongName = " << LongName << std::endl;
-	std::cout << "WorldAddress = " << WorldAddress << std::endl;
-	std::cout << "LoginHost = " << LoginHost << std::endl;
-	std::cout << "LoginAccount = " << LoginAccount << std::endl;
-	std::cout << "LoginPassword = " << LoginPassword << std::endl;
-	std::cout << "LoginPort = " << LoginPort << std::endl;
-	std::cout << "Locked = " << Locked << std::endl;
-	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
-	std::cout << "WorldIP = " << WorldIP << std::endl;
-	std::cout << "TelnetEnabled = " << TelnetEnabled << std::endl;
-	std::cout << "WorldHTTPPort = " << WorldHTTPPort << std::endl;
-	std::cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << std::endl;
-	std::cout << "WorldHTTPEnabled = " << WorldHTTPEnabled << std::endl;
-	std::cout << "ChatHost = " << ChatHost << std::endl;
-	std::cout << "ChatPort = " << ChatPort << std::endl;
-	std::cout << "MailHost = " << MailHost << std::endl;
-	std::cout << "MailPort = " << MailPort << std::endl;
-	std::cout << "DatabaseHost = " << DatabaseHost << std::endl;
-	std::cout << "DatabaseUsername = " << DatabaseUsername << std::endl;
-	std::cout << "DatabasePassword = " << DatabasePassword << std::endl;
-	std::cout << "DatabaseDB = " << DatabaseDB << std::endl;
-	std::cout << "DatabasePort = " << DatabasePort << std::endl;
-	std::cout << "QSDatabaseHost = " << QSDatabaseHost << std::endl;
-	std::cout << "QSDatabaseUsername = " << QSDatabaseUsername << std::endl;
-	std::cout << "QSDatabasePassword = " << QSDatabasePassword << std::endl;
-	std::cout << "QSDatabaseDB = " << QSDatabaseDB << std::endl;
-	std::cout << "QSDatabasePort = " << QSDatabasePort << std::endl;
-	std::cout << "SpellsFile = " << SpellsFile << std::endl;
-	std::cout << "OpCodesFile = " << OpCodesFile << std::endl;
-	std::cout << "EQTimeFile = " << EQTimeFile << std::endl;
-	std::cout << "LogSettingsFile = " << LogSettingsFile << std::endl;
-	std::cout << "MapDir = " << MapDir << std::endl;
-	std::cout << "QuestDir = " << QuestDir << std::endl;
-	std::cout << "PluginDir = " << PluginDir << std::endl;
-	std::cout << "ZonePortLow = " << ZonePortLow << std::endl;
-	std::cout << "ZonePortHigh = " << ZonePortHigh << std::endl;
-	std::cout << "DefaultStatus = " << (int)DefaultStatus << std::endl;
-//	std::cout << "DynamicCount = " << DynamicCount << std::endl;
-}
-

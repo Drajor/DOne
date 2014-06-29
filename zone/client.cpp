@@ -752,31 +752,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		}
 	}
 
-
-	if(RuleB(QueryServ, PlayerChatLogging)) {
-		ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(msg) + 1);
-		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
-
-		if(chan_num == 0)
-			sem->guilddbid = GuildID();
-		else
-			sem->guilddbid = 0;
-
-		strcpy(sem->message, msg);
-		sem->minstatus = this->Admin();
-		sem->type = chan_num;
-		if(targetname != 0)
-			strcpy(sem->to, targetname);
-
-		if(getName() != 0)
-			strcpy(sem->from, getName());
-
-		pack->Deflate();
-		if(worldserver.Connected())
-			worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-
 	// Garble the message based on drunkness
 	if (m_pp.intoxication > 0) {
 		GarbleMessage(msg, (int)(m_pp.intoxication / 3));
@@ -5772,15 +5747,6 @@ void Client::ProcessAlternateCurrencyQueue() {
 
 		alternate_currency_queued_operations.pop();
 	}
-}
-
-void Client::OpenLFGuildWindow()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, 8);
-
-	outapp->WriteUInt32(6);
-
-	FastQueuePacket(&outapp);
 }
 
 bool Client::IsXTarget(const Mob *m) const

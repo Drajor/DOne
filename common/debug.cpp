@@ -87,8 +87,6 @@ bool EQEMuLog::open(LogIDs id) {
 		snprintf(exename, sizeof(exename), "_launch");
 	} else if(platform == ExePlatformUCS) {
 		snprintf(exename, sizeof(exename), "_ucs");
-	} else if(platform == ExePlatformQueryServ) {
-		snprintf(exename, sizeof(exename), "_queryserv");
 	} else if(platform == ExePlatformSharedMemory) {
 		snprintf(exename, sizeof(exename), "_shared_memory");
 	} else if(platform == ExePlatformClientImport) {

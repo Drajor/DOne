@@ -68,13 +68,6 @@ public:
 	std::string DatabaseDB;
 	uint16 DatabasePort;
 
-	// From <qsdatabase> // QueryServ
-	std::string QSDatabaseHost;
-	std::string QSDatabaseUsername;
-	std::string QSDatabasePassword;
-	std::string QSDatabaseDB;
-	uint16 QSDatabasePort;
-
 	// From <files/>
 	std::string SpellsFile;
 	std::string OpCodesFile;
@@ -151,13 +144,6 @@ protected:
 		DatabasePassword="eq";
 		DatabaseDB="eq";
 
-		// QueryServ Database
-		QSDatabaseHost="localhost";
-		QSDatabasePort=3306;
-		QSDatabaseUsername="eq";
-		QSDatabasePassword="eq";
-		QSDatabaseDB="eq";
-
 		// Files
 		SpellsFile="spells_us.txt";
 		OpCodesFile="opcodes.conf";
@@ -220,8 +206,6 @@ public:
 
 		return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(),"server");
 	}
-
-	void Dump() const;
 };
 
 #endif

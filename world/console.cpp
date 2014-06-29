@@ -45,7 +45,6 @@
 #include "clientlist.h"
 #include "LauncherList.h"
 #include "ucs.h"
-#include "queryserv.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -59,7 +58,6 @@ extern LoginServerList loginserverlist;
 extern ClientList client_list;
 extern LauncherList launcher_list;
 extern UCSConnection UCSLink;
-extern QueryServConnection QSLink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;
@@ -256,12 +254,7 @@ bool Console::Process() {
 			UCSLink.SetConnection(tcpc);
 			tcpc = 0;
 		}
-			else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ)
-		{
-			_log(WORLD__CONSOLE,"New QS Connection from %s:%d", inet_ntoa(in), GetPort());
-			QSLink.SetConnection(tcpc);
-			tcpc = 0;
-		} else {
+		else {
 			_log(WORLD__CONSOLE,"Unsupported packet mode from %s:%d", inet_ntoa(in), GetPort());
 		}
 		return false;

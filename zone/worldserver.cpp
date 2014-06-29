@@ -1653,29 +1653,6 @@ void WorldServer::Process() {
 		}
 		case ServerOP_QueryServGeneric:
 		{
-			pack->SetReadPosition(8);
-			char From[64];
-			pack->ReadString(From);
-
-			Client* c = entity_list.getClientByName(From);
-
-			if(!c)
-				return;
-
-			uint32 Type = pack->ReadUInt32();;
-
-			switch(Type)
-			{
-				case QSG_LFGuild:
-				{
-					c->HandleLFGuildResponse(pack);
-					break;
-				}
-
-				default:
-					break;
-			}
-
 			break;
 		}
 		case ServerOP_CZSignalClient:

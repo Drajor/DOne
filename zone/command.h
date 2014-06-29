@@ -310,7 +310,6 @@ void command_camerashake(Client* pClient, const Seperator* pSeperator);
 void command_disarmtrap(Client* pClient, const Seperator* pSeperator);
 void command_sensetrap(Client* pClient, const Seperator* pSeperator);
 void command_picklock(Client* pClient, const Seperator* pSeperator);
-void command_qtest(Client* pClient, const Seperator* pSeperator);
 void command_mysql(Client* pClient, const Seperator* pSeperator);
 void command_xtargets(Client* pClient, const Seperator* pSeperator);
 void command_zopp(Client* pClient, const Seperator* pSeperator);

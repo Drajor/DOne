@@ -82,7 +82,6 @@
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "ucs.h"
-#include "queryserv.h"
 
 TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
@@ -92,7 +91,6 @@ GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
 LoginServerList loginserverlist;
 UCSConnection UCSLink;
-QueryServConnection QSLink;
 LauncherList launcher_list;
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
@@ -425,8 +423,6 @@ int main(int argc, char** argv) {
 		launcher_list.Process();
 
 		UCSLink.Process();
-
-		QSLink.Process();
 
 		LFPGroupList.Process();
 

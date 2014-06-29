@@ -735,9 +735,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 		SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
-		SendGuildLFGuildStatus();
 	}
-	SendLFGuildStatus();
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
@@ -806,9 +804,7 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 		SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
-		SendGuildLFGuildStatus();
 	}
-	SendLFGuildStatus();
 
 	//No idea why live sends this if even were not in a guild
 	SendGuildMOTD();
@@ -4175,32 +4171,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				other->trade->LogTrade();
 				trade->LogTrade();
 
-				// start QS code
-				if(RuleB(QueryServ, PlayerLogTrades)) {
-					uint16 trade_count = 0;
-
-					// Item trade count for packet sizing
-					for(int16 slot_id=3000; slot_id<=3007; slot_id++) {
-						if(other->GetInv().GetItem(slot_id)) { trade_count += other->GetInv().GetItem(slot_id)->GetTotalItemCount(); }
-						if(m_inv[slot_id]) { trade_count += m_inv[slot_id]->GetTotalItemCount(); }
-					}
-
-					ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct) + (sizeof(QSTradeItems_Struct) * trade_count));
-
-					// Perform actual trade
-					this->FinishTrade(other, qspack, true);
-					other->FinishTrade(this, qspack, false);
-
-					qspack->Deflate();
-					if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-					safe_delete(qspack);
-					// end QS code
-				}
-				else {
-					this->FinishTrade(other);
-					other->FinishTrade(this);
-				}
-
+				this->FinishTrade(other);
+				other->FinishTrade(this);
 				other->trade->Reset();
 				trade->Reset();
 			}
@@ -4216,25 +4188,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		if(with->isNPC()) {
-			// Audit trade to database for player trade stream
-			if(RuleB(QueryServ, PlayerLogHandins)) {
-				uint16 handin_count = 0;
-
-				for(int16 slot_id=3000; slot_id<=3003; slot_id++) {
-					if(m_inv[slot_id]) { handin_count += m_inv[slot_id]->GetTotalItemCount(); }
-				}
-
-				ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct) + (sizeof(QSHandinItems_Struct) * handin_count));
-
-				FinishTrade(with->castToNPC(), qspack);
-
-				qspack->Deflate();
-				if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-				safe_delete(qspack);
-			}
-			else {
-				FinishTrade(with->castToNPC());
-			}
+			FinishTrade(with->castToNPC());
 		}
 		trade->Reset();
 	}
@@ -4974,40 +4928,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	safe_delete(inst);
 	safe_delete(outapp);
 
-	// start QS code
-	if(RuleB(QueryServ, MerchantLogTransactions)) {
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSMerchantLogTransactions, sizeof(QSMerchantLogTransaction_Struct) + sizeof(QSTransactionItems_Struct));
-		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
-
-		qsaudit->zone_id					= zone->GetZoneID();
-		qsaudit->merchant_id				= tmp->castToNPC()->MerchantType;
-		qsaudit->merchant_money.platinum	= 0;
-		qsaudit->merchant_money.gold		= 0;
-		qsaudit->merchant_money.silver		= 0;
-		qsaudit->merchant_money.copper		= 0;
-		qsaudit->merchant_count				= 1;
-		qsaudit->char_id					= character_id;
-		qsaudit->char_money.platinum		= (mpo->price / 1000);
-		qsaudit->char_money.gold			= (mpo->price / 100) % 10;
-		qsaudit->char_money.silver			= (mpo->price / 10) % 10;
-		qsaudit->char_money.copper			= mpo->price % 10;
-		qsaudit->char_count					= 0;
-
-		qsaudit->items[0].char_slot		= freeslotid;
-		qsaudit->items[0].item_id		= m_inv[freeslotid]->GetID();
-		qsaudit->items[0].charges		= mpo->quantity;
-		qsaudit->items[0].aug_1			= m_inv[freeslotid]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2			= m_inv[freeslotid]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3			= m_inv[freeslotid]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4			= m_inv[freeslotid]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5			= m_inv[freeslotid]->GetAugmentItemID(5);
-
-		qspack->Deflate();
-		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-		safe_delete(qspack);
-	}
-	// end QS code
-
 	if (RuleB(EventLog, RecordBuyFromMerchant))
 		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
 
@@ -5109,40 +5029,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		SendItemPacket(freeslot-1, inst2, ItemPacketMerchant);
 		safe_delete(inst2);
 	}
-
-	// start QS code
-	if(RuleB(QueryServ, MerchantLogTransactions)) {
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSMerchantLogTransactions, sizeof(QSMerchantLogTransaction_Struct) + sizeof(QSTransactionItems_Struct));
-		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
-
-		qsaudit->zone_id					= zone->GetZoneID();
-		qsaudit->merchant_id				= vendor->castToNPC()->MerchantType;
-		qsaudit->merchant_money.platinum	= (price / 1000);
-		qsaudit->merchant_money.gold		= (price / 100) % 10;
-		qsaudit->merchant_money.silver		= (price / 10) % 10;
-		qsaudit->merchant_money.copper		= price % 10;
-		qsaudit->merchant_count				= 0;
-		qsaudit->char_id					= character_id;
-		qsaudit->char_money.platinum		= 0;
-		qsaudit->char_money.gold			= 0;
-		qsaudit->char_money.silver			= 0;
-		qsaudit->char_money.copper			= 0;
-		qsaudit->char_count					= 1;
-
-		qsaudit->items[0].char_slot		= mp->itemslot;
-		qsaudit->items[0].item_id		= itemid;
-		qsaudit->items[0].charges		= charges;
-		qsaudit->items[0].aug_1			= m_inv[mp->itemslot]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2			= m_inv[mp->itemslot]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3			= m_inv[mp->itemslot]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4			= m_inv[mp->itemslot]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5			= m_inv[mp->itemslot]->GetAugmentItemID(5);
-
-		qspack->Deflate();
-		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-		safe_delete(qspack);
-	}
-	// end QS code
 
 	// Now remove the item from the player, this happens regardless of outcome
 	if (!inst->IsStackable())
@@ -11895,139 +11781,7 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app) {
 	}
 }
 
-void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
-{
-	if(app->size < 4)
-		return;
 
-	uint32 Command = *((uint32 *) app->pBuffer);
-
-	switch(Command)
-	{
-		case 0:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
-			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
-
-#ifdef DARWIN
-#if __DARWIN_C_LEVEL < 200809L
-			if (strlen(pts->Comment) > 256)
-#else
-			if(strnlen(pts->Comment, 256) > 256)
-#endif // __DARWIN_C_LEVEL
-#else
-			if(strnlen(pts->Comment, 256) > 256)
-#endif // DARWIN
-				return;
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(getName()) + strlen(pts->Comment) + 38);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(getName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_UpdatePlayerInfo);
-			pack->WriteUInt32(GetBaseClass());
-			pack->WriteUInt32(GetLevel());
-			pack->WriteUInt32(GetAAPointsSpent());
-			pack->WriteString(pts->Comment);
-			pack->WriteUInt32(pts->Toggle);
-			pack->WriteUInt32(pts->TimeZone);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 1:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_GuildToggle_Struct);
-			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)app->pBuffer;
-
-#ifdef DARWIN
-#if __DARWIN_C_LEVEL < 200809L
-                        if (strlen(gts->Comment) > 256)
-#else
-                        if(strnlen(gts->Comment, 256) > 256)
-#endif // __DARWIN_C_LEVEL
-#else
-                        if(strnlen(gts->Comment, 256) > 256)
-#endif // __DARWIN
-				return;
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(getName()) + strlen(gts->Comment) + strlen(guild_mgr.getGuildName(GuildID())) + 43);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(getName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_UpdateGuildInfo);
-			pack->WriteString(guild_mgr.getGuildName(GuildID()));
-			pack->WriteString(gts->Comment);
-			pack->WriteUInt32(gts->FromLevel);
-			pack->WriteUInt32(gts->ToLevel);
-			pack->WriteUInt32(gts->Classes);
-			pack->WriteUInt32(gts->AACount);
-			pack->WriteUInt32(gts->Toggle);
-			pack->WriteUInt32(gts->TimeZone);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 3:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_SearchPlayer_Struct);
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(getName()) + 37);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(getName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_PlayerMatches);
-
-			LFGuild_SearchPlayer_Struct *sps = (LFGuild_SearchPlayer_Struct *)app->pBuffer;
-			pack->WriteUInt32(sps->FromLevel);
-			pack->WriteUInt32(sps->ToLevel);
-			pack->WriteUInt32(sps->MinAA);
-			pack->WriteUInt32(sps->TimeZone);
-			pack->WriteUInt32(sps->Classes);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		case 4:
-		{
-				VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_SearchGuild_Struct);
-
-			ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(getName()) + 33);
-
-			pack->WriteUInt32(zone->GetZoneID());
-			pack->WriteUInt32(zone->GetInstanceID());
-			pack->WriteString(getName());
-			pack->WriteUInt32(QSG_LFGuild);
-			pack->WriteUInt32(QSG_LFGuild_GuildMatches);
-
-			LFGuild_SearchGuild_Struct *sgs = (LFGuild_SearchGuild_Struct *)app->pBuffer;
-
-			pack->WriteUInt32(sgs->Level);
-			pack->WriteUInt32(sgs->AAPoints);
-			pack->WriteUInt32(sgs->TimeZone);
-			pack->WriteUInt32(sgs->Class);
-
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-
-			break;
-		}
-		default:
-			break;
-	}
-}
 
 void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 {
@@ -12509,3 +12263,4 @@ void Client::Handle_OP_Begging(const EQApplicationPacket *app){
 	FastQueuePacket(&outapp);
 }
 void Client::Handle_OP_Hide(const EQApplicationPacket *app) { message(13, "Feature Unavailable."); }
+void Client::Handle_OP_LFGuild(const EQApplicationPacket *app) { }

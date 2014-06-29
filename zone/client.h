@@ -791,7 +791,6 @@ public:
 	void	DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
 	bool	SwapItem(MoveItem_Struct* move_in);
 	void	SwapItemResync(MoveItem_Struct* move_slots);
-	void	QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void	PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool	AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
 	bool	SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1=0, uint32 aug2=0, uint32 aug3=0, uint32 aug4=0, uint32 aug5=0, bool attuned=false, uint16 to_slot=SLOT_CURSOR);
@@ -1053,10 +1052,6 @@ public:
 	void SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null = true);
 	uint32 GetAlternateCurrencyValue(uint32 currency_id) const;
 	void ProcessAlternateCurrencyQueue();
-	void OpenLFGuildWindow();
-	void HandleLFGuildResponse(ServerPacket *pack);
-	void SendLFGuildStatus();
-	void SendGuildLFGuildStatus();
 	inline bool XTargettingAvailable() const { return ((ClientVersionBit & BIT_UnderfootAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);

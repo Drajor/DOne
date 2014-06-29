@@ -7,7 +7,6 @@ enum EQEmuExePlatform
 	ExePlatformZone,
 	ExePlatformWorld,
 	ExePlatformLogin,
-	ExePlatformQueryServ,
 	ExePlatformUCS,
 	ExePlatformLaunch,
 	ExePlatformSharedMemory,
