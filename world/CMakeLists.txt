@@ -5,6 +5,7 @@ SET(world_sources
 	cliententry.cpp
 	clientlist.cpp
 	CMakeLists.txt
+	console.cpp
 	EQLConfig.cpp
 	LauncherLink.cpp
 	LauncherList.cpp
@@ -27,6 +28,7 @@ SET(world_headers
 	cliententry.h
 	clientlist.h
 	CMakeLists.txt
+	console.h
 	EQLConfig.h
 	LauncherLink.h
 	LauncherList.h
