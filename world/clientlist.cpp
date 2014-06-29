@@ -20,7 +20,6 @@
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "client.h"
-#include "console.h"
 #include "worlddb.h"
 #include "../common/StringUtil.h"
 #include "../common/guilds.h"
@@ -31,7 +30,7 @@
 
 #include <set>
 
-extern ConsoleList		console_list;
+//extern ConsoleList		console_list;
 extern ZSList			zoneserver_list;
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
@@ -968,155 +967,155 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 	safe_delete(Pack);
 }
 
-void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* whom, WorldTCPConnection* connection) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	ClientListEntry* cle = 0;
-	char tmpgm[25] = "";
-	char accinfo[150] = "";
-	char line[300] = "";
-	char tmpguild[50] = "";
-	char LFG[10] = "";
-	uint32 x = 0;
-	int whomlen = 0;
-	if (whom)
-		whomlen = strlen(whom->whom);
-
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
-	AppendAnyLenString(&output, &outsize, &outlen, "Players on server:");
-	if (connection->IsConsole())
-		AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
-	else
-		AppendAnyLenString(&output, &outsize, &outlen, "\n");
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		cle = iterator.GetData();
-		const char* tmpZone = database.GetZoneName(cle->zone());
-		if (
-	(cle->Online() >= CLE_Status_Zoning)
-	&& (whom == 0 || (
-		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
-		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
-		(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
-		(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
-		(whomlen == 0 || (
-			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
-			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
-			(strncasecmp(guild_mgr.getGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
-			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
-		))
-	))
-) {
-			line[0] = 0;
-// MYRA - use new (5.x) Status labels in who for telnet connection
-			if (cle->Admin() >=250)
-				strcpy(tmpgm, "* GM-Impossible * ");
-			else if (cle->Admin() >= 200)
-				strcpy(tmpgm, "* GM-Mgmt * ");
-			else if (cle->Admin() >= 180)
-				strcpy(tmpgm, "* GM-Coder * ");
-			else if (cle->Admin() >= 170)
-				strcpy(tmpgm, "* GM-Areas * ");
-			else if (cle->Admin() >= 160)
-				strcpy(tmpgm, "* QuestMaster * ");
-			else if (cle->Admin() >= 150)
-				strcpy(tmpgm, "* GM-Lead Admin * ");
-			else if (cle->Admin() >= 100)
-				strcpy(tmpgm, "* GM-Admin * ");
-			else if (cle->Admin() >= 95)
-				strcpy(tmpgm, "* GM-Staff * ");
-			else if (cle->Admin() >= 90)
-				strcpy(tmpgm, "* EQ Support * ");
-			else if (cle->Admin() >= 85)
-				strcpy(tmpgm, "* GM-Tester * ");
-			else if (cle->Admin() >= 81)
-				strcpy(tmpgm, "* Senior Guide * ");
-			else if (cle->Admin() >= 80)
-				strcpy(tmpgm, "* QuestTroupe * ");
-			else if (cle->Admin() >= 50)
-				strcpy(tmpgm, "* Guide * ");
-			else if (cle->Admin() >= 20)
-				strcpy(tmpgm, "* Apprentice Guide * ");
-			else if (cle->Admin() >= 10)
-				strcpy(tmpgm, "* Steward * ");
-			else
-				tmpgm[0] = 0;
-// end Myra
-
-			if (guild_mgr.guildExists(cle->GuildID())) {
-				snprintf(tmpguild, 36, " <%s>", guild_mgr.getGuildName(cle->GuildID()));
-			} else
-				tmpguild[0] = 0;
-
-			if (cle->LFG())
-				strcpy(LFG, " LFG");
-			else
-				LFG[0] = 0;
-
-			if (admin >= 150 && admin >= cle->Admin()) {
-				sprintf(accinfo, " AccID: %i AccName: %s LSID: %i Status: %i", cle->AccountID(), cle->AccountName(), cle->LSAccountID(), cle->Admin());
-			}
-			else
-				accinfo[0] = 0;
-
-			if (cle->Anon() == 2) { // Roleplay
-				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
-				else if (cle->Admin() >= 80 && admin < 80 && cle->GetGM()) {
-					iterator.Advance();
-					continue;
-				}
-				else
-					sprintf(line, "  %s[ANONYMOUS] %s%s%s%s", tmpgm, cle->name(), tmpguild, LFG, accinfo);
-			}
-			else if (cle->Anon() == 1) { // Anon
-				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
-				else if (cle->Admin() >= 80 && cle->GetGM()) {
-					iterator.Advance();
-					continue;
-				}
-				else
-					sprintf(line, "  %s[ANONYMOUS] %s%s%s", tmpgm, cle->name(), LFG, accinfo);
-			}
-			else
-				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
-
-			AppendAnyLenString(&output, &outsize, &outlen, line);
-			if (outlen >= 3584) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
-			}
-			else {
-				if (connection->IsConsole())
-					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
-				else
-					AppendAnyLenString(&output, &outsize, &outlen, "\n");
-			}
-			x++;
-			if (x >= 20 && admin < 80)
-				break;
-		}
-		iterator.Advance();
-	}
-
-	if (x >= 20 && admin < 80)
-		AppendAnyLenString(&output, &outsize, &outlen, "too many results...20 players shown");
-	else
-		AppendAnyLenString(&output, &outsize, &outlen, "%i players online", x);
-	if (admin >= 150 && (whom == 0 || whom->gmlookup != 0xFFFF)) {
-		if (connection->IsConsole())
-			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
-		else
-			AppendAnyLenString(&output, &outsize, &outlen, "\n");
-		console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
-	}
-	if (output)
-		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-	safe_delete(output);
-}
+//void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* whom, WorldTCPConnection* connection) {
+//	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+//	ClientListEntry* cle = 0;
+//	char tmpgm[25] = "";
+//	char accinfo[150] = "";
+//	char line[300] = "";
+//	char tmpguild[50] = "";
+//	char LFG[10] = "";
+//	uint32 x = 0;
+//	int whomlen = 0;
+//	if (whom)
+//		whomlen = strlen(whom->whom);
+//
+//	char* output = 0;
+//	uint32 outsize = 0, outlen = 0;
+//	AppendAnyLenString(&output, &outsize, &outlen, "Players on server:");
+//	if (connection->IsConsole())
+//		AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+//	else
+//		AppendAnyLenString(&output, &outsize, &outlen, "\n");
+//	iterator.Reset();
+//	while(iterator.MoreElements()) {
+//		cle = iterator.GetData();
+//		const char* tmpZone = database.GetZoneName(cle->zone());
+//		if (
+//	(cle->Online() >= CLE_Status_Zoning)
+//	&& (whom == 0 || (
+//		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+//		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
+//		(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
+//		(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
+//		(whomlen == 0 || (
+//			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
+//			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
+//			(strncasecmp(guild_mgr.getGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
+//			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
+//		))
+//	))
+//) {
+//			line[0] = 0;
+//// MYRA - use new (5.x) Status labels in who for telnet connection
+//			if (cle->Admin() >=250)
+//				strcpy(tmpgm, "* GM-Impossible * ");
+//			else if (cle->Admin() >= 200)
+//				strcpy(tmpgm, "* GM-Mgmt * ");
+//			else if (cle->Admin() >= 180)
+//				strcpy(tmpgm, "* GM-Coder * ");
+//			else if (cle->Admin() >= 170)
+//				strcpy(tmpgm, "* GM-Areas * ");
+//			else if (cle->Admin() >= 160)
+//				strcpy(tmpgm, "* QuestMaster * ");
+//			else if (cle->Admin() >= 150)
+//				strcpy(tmpgm, "* GM-Lead Admin * ");
+//			else if (cle->Admin() >= 100)
+//				strcpy(tmpgm, "* GM-Admin * ");
+//			else if (cle->Admin() >= 95)
+//				strcpy(tmpgm, "* GM-Staff * ");
+//			else if (cle->Admin() >= 90)
+//				strcpy(tmpgm, "* EQ Support * ");
+//			else if (cle->Admin() >= 85)
+//				strcpy(tmpgm, "* GM-Tester * ");
+//			else if (cle->Admin() >= 81)
+//				strcpy(tmpgm, "* Senior Guide * ");
+//			else if (cle->Admin() >= 80)
+//				strcpy(tmpgm, "* QuestTroupe * ");
+//			else if (cle->Admin() >= 50)
+//				strcpy(tmpgm, "* Guide * ");
+//			else if (cle->Admin() >= 20)
+//				strcpy(tmpgm, "* Apprentice Guide * ");
+//			else if (cle->Admin() >= 10)
+//				strcpy(tmpgm, "* Steward * ");
+//			else
+//				tmpgm[0] = 0;
+//// end Myra
+//
+//			if (guild_mgr.guildExists(cle->GuildID())) {
+//				snprintf(tmpguild, 36, " <%s>", guild_mgr.getGuildName(cle->GuildID()));
+//			} else
+//				tmpguild[0] = 0;
+//
+//			if (cle->LFG())
+//				strcpy(LFG, " LFG");
+//			else
+//				LFG[0] = 0;
+//
+//			if (admin >= 150 && admin >= cle->Admin()) {
+//				sprintf(accinfo, " AccID: %i AccName: %s LSID: %i Status: %i", cle->AccountID(), cle->AccountName(), cle->LSAccountID(), cle->Admin());
+//			}
+//			else
+//				accinfo[0] = 0;
+//
+//			if (cle->Anon() == 2) { // Roleplay
+//				if (admin >= 100 && admin >= cle->Admin())
+//					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+//				else if (cle->Admin() >= 80 && admin < 80 && cle->GetGM()) {
+//					iterator.Advance();
+//					continue;
+//				}
+//				else
+//					sprintf(line, "  %s[ANONYMOUS] %s%s%s%s", tmpgm, cle->name(), tmpguild, LFG, accinfo);
+//			}
+//			else if (cle->Anon() == 1) { // Anon
+//				if (admin >= 100 && admin >= cle->Admin())
+//					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+//				else if (cle->Admin() >= 80 && cle->GetGM()) {
+//					iterator.Advance();
+//					continue;
+//				}
+//				else
+//					sprintf(line, "  %s[ANONYMOUS] %s%s%s", tmpgm, cle->name(), LFG, accinfo);
+//			}
+//			else
+//				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+//
+//			AppendAnyLenString(&output, &outsize, &outlen, line);
+//			if (outlen >= 3584) {
+//				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
+//				safe_delete(output);
+//				outsize = 0;
+//				outlen = 0;
+//			}
+//			else {
+//				if (connection->IsConsole())
+//					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+//				else
+//					AppendAnyLenString(&output, &outsize, &outlen, "\n");
+//			}
+//			x++;
+//			if (x >= 20 && admin < 80)
+//				break;
+//		}
+//		iterator.Advance();
+//	}
+//
+//	if (x >= 20 && admin < 80)
+//		AppendAnyLenString(&output, &outsize, &outlen, "too many results...20 players shown");
+//	else
+//		AppendAnyLenString(&output, &outsize, &outlen, "%i players online", x);
+//	if (admin >= 150 && (whom == 0 || whom->gmlookup != 0xFFFF)) {
+//		if (connection->IsConsole())
+//			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+//		else
+//			AppendAnyLenString(&output, &outsize, &outlen, "\n");
+//		console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
+//	}
+//	if (output)
+//		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
+//	safe_delete(output);
+//}
 
 void ClientList::Add(Client* client) {
 	list.Insert(client);

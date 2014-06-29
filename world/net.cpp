@@ -68,7 +68,6 @@
 #endif
 
 #include "zoneserver.h"
-#include "console.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"
 #include "../common/dbasync.h"
@@ -100,8 +99,6 @@ uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
 
-
-extern ConsoleList console_list;
 
 void CatchSignal(int sig_num);
 
@@ -405,7 +402,7 @@ int main(int argc, char** argv) {
 			struct in_addr in;
 			in.s_addr = tcpc->GetrIP();
 			_log(WORLD__ZONE, "New TCP connection from %s:%d", inet_ntoa(in),tcpc->GetrPort());
-			console_list.Add(new Console(tcpc));
+			//console_list.Add(new Console(tcpc));
 		}
 
 		if(PurgeInstanceTimer.Check())
@@ -418,7 +415,7 @@ int main(int argc, char** argv) {
 
 		loginserverlist.Process();
 
-		console_list.Process();
+		//console_list.Process();
 
 		zoneserver_list.Process();
 
@@ -455,7 +452,7 @@ int main(int argc, char** argv) {
 	}
 	_log(WORLD__SHUTDOWN,"World main loop completed.");
 	_log(WORLD__SHUTDOWN,"Shutting down console connections (if any).");
-	console_list.KillAll();
+	//console_list.KillAll();
 	_log(WORLD__SHUTDOWN,"Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
 	_log(WORLD__SHUTDOWN,"Zone (TCP) listener stopped.");

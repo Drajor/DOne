@@ -20,14 +20,12 @@
 #include "zoneserver.h"
 #include "WorldTCPConnection.h"
 #include "worlddb.h"
-#include "console.h"
 #include "WorldConfig.h"
 #include "../common/servertalk.h"
 #include "../common/StringUtil.h"
 
 extern uint32			numzones;
 extern bool holdzones;
-extern ConsoleList		console_list;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -400,10 +398,10 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	ServerPacket* pack = new ServerPacket;
 
 	pack->opcode = ServerOP_ChannelMessage;
-	pack->size = sizeof(ServerChannelMessage_Struct)+strlen(message)+1;
+	pack->size = sizeof(ServerChannelMessage_Struct)+strlen(message) + 1;
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
-	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
+	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*)pack->pBuffer;
 	if (from == 0) {
 		strcpy(scm->from, "WServer");
 		scm->noreply = true;
@@ -415,8 +413,8 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	else
 		strcpy(scm->from, from);
 	if (to != 0) {
-		strcpy((char *) scm->to, to);
-		strcpy((char *) scm->deliverto, to);
+		strcpy((char *)scm->to, to);
+		strcpy((char *)scm->deliverto, to);
 	}
 	else {
 		scm->to[0] = 0;
@@ -427,7 +425,7 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	scm->chan_num = chan_num;
 	strcpy(&scm->message[0], message);
 	if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
-		console_list.SendChannelMessage(scm);
+		//console_list.SendChannelMessage(scm);
 	}
 	pack->Deflate();
 	SendPacket(pack);
@@ -454,20 +452,20 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 	ServerPacket* pack = new ServerPacket;
 
 	pack->opcode = ServerOP_EmoteMessage;
-	pack->size = sizeof(ServerEmoteMessage_Struct)+strlen(message)+1;
+	pack->size = sizeof(ServerEmoteMessage_Struct)+strlen(message) + 1;
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
-	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
+	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*)pack->pBuffer;
 
 	if (to) {
-		if (to[0] == '*') {
-			Console* con = console_list.FindByAccountName(&to[1]);
-			if (con)
-				con->SendEmoteMessageRaw(to, to_guilddbid, to_minstatus, type, message);
-			delete pack;
-			return;
-		}
-		strcpy((char *) sem->to, to);
+		//if (to[0] == '*') {
+		//	Console* con = console_list.FindByAccountName(&to[1]);
+		//	if (con)
+		//		con->SendEmoteMessageRaw(to, to_guilddbid, to_minstatus, type, message);
+		//	delete pack;
+		//	return;
+		//}
+		//strcpy((char *)sem->to, to);
 	}
 	else {
 		sem->to[0] = 0;
@@ -477,14 +475,12 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 	sem->minstatus = to_minstatus;
 	sem->type = type;
 	strcpy(&sem->message[0], message);
-	char tempto[64]={0};
-	if(to)
-		strn0cpy(tempto,to,64);
+	char tempto[64] = { 0 };
+	if (to)
+		strn0cpy(tempto, to, 64);
 	pack->Deflate();
 	if (tempto[0] == 0) {
 		SendPacket(pack);
-		if (to_guilddbid == 0)
-			console_list.SendEmoteMessageRaw(type, message);
 	}
 	else {
 		ZoneServer* zs = FindByName(to);
