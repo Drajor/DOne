@@ -15,51 +15,22 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-#include <iostream>
-#include <string.h>
-#include <stdio.h>
-#include <iomanip>
-#include <stdlib.h>
-#include "../common/version.h"
-
-#include "../common/servertalk.h"
-#include "LoginServer.h"
 #include "LoginServerList.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
-#include "zoneserver.h"
-#include "worlddb.h"
-#include "zonelist.h"
-#include "clientlist.h"
-#include "WorldConfig.h"
+#include "LoginServer.h"
+#include "../common/servertalk.h"
 
-extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
-extern ClientList client_list;
-extern uint32 numzones;
-extern uint32 numplayers;
-extern volatile bool	RunLoops;
 
-LoginServerList::LoginServerList() {
-}
+LoginServerList::LoginServerList() { }
+LoginServerList::~LoginServerList() { }
 
-LoginServerList::~LoginServerList() {
-}
-
-void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
-{
-	LoginServer* loginserver = new LoginServer(iAddress, iPort, Account, Password);
-	list.Insert(loginserver);
+void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password) {
+	mLoginServers.push_back(new LoginServer(iAddress, iPort, Account, Password));
 }
 
 bool LoginServerList::Process() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->Process();
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		i->Process();
 	}
 	return true;
 }
@@ -76,57 +47,35 @@ void *AutoInitLoginServer(void *tmp) {
 }
 
 void LoginServerList::InitLoginServer() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->InitLoginServer();
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		i->InitLoginServer();
 	}
 }
 
 bool LoginServerList::SendStatus() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendStatus();
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		i->SendStatus();
 	}
 	return true;
 }
 
 bool LoginServerList::SendPacket(ServerPacket* pack) {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendPacket(pack);
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		i->SendPacket(pack);
 	}
 	return true;
 }
 
 bool LoginServerList::Connected() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->Connected())
-			return true;
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		if (i->Connected()) return true;
 	}
 	return false;
 }
 
 bool LoginServerList::AllConnected() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->Connected() == false)
-			return false;
-		iterator.Advance();
+	for (auto i : mLoginServers) {
+		if (!i->Connected()) return false;
 	}
 	return true;
 }

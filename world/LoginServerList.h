@@ -1,13 +1,8 @@
 #ifndef LOGINSERVERLIST_H_
 #define LOGINSERVERLIST_H_
 
-#include "../common/servertalk.h"
-#include "../common/linked_list.h"
-#include "../common/timer.h"
-#include "../common/queue.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/types.h"
+#include <list>
 
 #ifdef _WINDOWS
 	void AutoInitLoginServer(void *tmp);
@@ -16,6 +11,7 @@
 #endif
 
 class LoginServer;
+class ServerPacket;
 
 class LoginServerList{
 public:
@@ -33,7 +29,7 @@ public:
 	bool	AllConnected();
 
 protected:
-	LinkedList<LoginServer*> list;
+	std::list<LoginServer*> mLoginServers;
 };
 
 

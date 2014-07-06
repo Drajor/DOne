@@ -18,14 +18,10 @@
 #ifndef LOGINSERVER_H
 #define LOGINSERVER_H
 
-#include "../common/servertalk.h"
-#include "../common/linked_list.h"
 #include "../common/timer.h"
-#include "../common/queue.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/Mutex.h"
-#include "../common/EmuTCPConnection.h"
+#include "../common/types.h"
 
+class EmuTCPConnection;
 class LoginServer{
 public:
 	LoginServer(const char*, uint16, const char*, const char*);
@@ -39,10 +35,9 @@ public:
 	void SendNewInfo();
 	void SendStatus();
 
-	void SendPacket(ServerPacket* pack) { tcpc->SendPacket(pack); }
-	bool ConnectReady() { return tcpc->ConnectReady(); }
-	bool Connected() { return tcpc->Connected(); }
-	bool CanUpdate() { return CanAccountUpdate; }
+	void SendPacket(ServerPacket* pack);
+	bool ConnectReady();
+	bool Connected();
 
 private:
 	EmuTCPConnection* tcpc;
@@ -51,7 +46,6 @@ private:
 	uint16	LoginServerPort;
 	char	LoginAccount[32];
 	char	LoginPassword[32];
-	bool	CanAccountUpdate;
 
 	Timer statusupdate_timer;
 };

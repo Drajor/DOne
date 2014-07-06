@@ -75,7 +75,6 @@ LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account
 	LoginServerPort = iPort;
 	strn0cpy(LoginAccount,Account,31);
 	strn0cpy(LoginPassword,Password,31);
-	CanAccountUpdate = false;
 	tcpc = new EmuTCPConnection(true);
 	tcpc->SetPacketMode(EmuTCPConnection::packetModeLogin);
 }
@@ -280,4 +279,19 @@ void LoginServer::SendStatus() {
 	lss->num_players = numplayers;
 	SendPacket(pack);
 	delete pack;
+}
+
+void LoginServer::SendPacket(ServerPacket* pack)
+{
+	tcpc->SendPacket(pack);
+}
+
+bool LoginServer::ConnectReady()
+{
+	return tcpc->ConnectReady();
+}
+
+bool LoginServer::Connected()
+{
+	return tcpc->Connected();
 }
