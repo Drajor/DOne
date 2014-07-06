@@ -230,8 +230,6 @@ public:
 	/*
 	* General Character Related Stuff
 	*/
-	bool	SetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
-	uint32	GetServerFilters(char* name, ServerSideFilters_Struct *ssfs);
 	bool	GetAccountInfoForLogin(uint32 account_id, int16* admin = 0, char* account_name = 0,
 				uint32* lsaccountid = 0, uint8* gmspeed = 0, bool* revoked = 0, bool* gmhideme = 0);
 	bool	GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin = 0, char* account_name = 0,
@@ -465,11 +463,6 @@ public:
 	void	GetEventLogs(const char* name,char* target,uint32 account_id=0,uint8 eventid=0,char* detail=0,char* timestamp=0, CharacterEventLog_Struct* cel=0);
 	uint32	GetKarma(uint32 acct_id);
 	void	UpdateKarma(uint32 acct_id, uint32 amount);
-
-	/*
-	* Things which really dont belong here...
-	*/
-	int16	CommandRequirement(const char* commandname);
 
 protected:
 	void ZDBInitVars();
