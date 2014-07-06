@@ -36,8 +36,7 @@
 #include <zlib.h>
 #include <limits.h>
 
-//FatherNitwit: uncomment to enable my IP based authentication hack
-//#define IPBASED_AUTH_HACK
+#include "Utility.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -364,17 +363,22 @@ void Client::SendPostEnterWorld() {
 }
 
 bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
-	if (app->size != sizeof(LoginInfo_Struct)) {
-		return false;
-	}
+	if (app->size != sizeof(LoginInfo_Struct)) return false;
 
-	LoginInfo_Struct *li=(LoginInfo_Struct *)app->pBuffer;
+	/*
+	OP_SendLoginInfo is sent;
+		- Transitioning from Server Select to Character Select
+		- Zoning
+		- Camping
+	*/
+
+	LoginInfo_Struct* loginInfo = (LoginInfo_Struct*)app->pBuffer;
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19] = {0};
 	char password[16] = {0};
-	strn0cpy(name, (char*)li->login_info,18);
-	strn0cpy(password, (char*)&(li->login_info[strlen(name)+1]), 15);
+	strn0cpy(name, (char*)loginInfo->login_info,18);
+	strn0cpy(password, (char*)&(loginInfo->login_info[strlen(name)+1]), 15);
 
 	if (strlen(password) <= 1) {
 		// TODO: Find out how to tell the client wrong username/password
@@ -382,68 +386,29 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	pZoning=(li->zoning==1);
+	pZoning=(loginInfo->zoning==1);
 
-#ifdef IPBASED_AUTH_HACK
-	struct in_addr tmpip;
-	tmpip.s_addr = ip;
-#endif
-	uint32 id=0;
-	bool minilogin = loginserverlist.MiniLogin();
-	if(minilogin){
-		struct in_addr miniip;
-		miniip.s_addr = ip;
-		id = database.GetMiniLoginAccount(inet_ntoa(miniip));
-	}
-	else if(strncasecmp(name, "LS#", 3) == 0)
+	uint32 id = 0;
+	if(strncasecmp(name, "LS#", 3) == 0)
 		id=atoi(&name[3]);
 	else
 		id=atoi(name);
-#ifdef IPBASED_AUTH_HACK
-	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
-#else
+
 	if (loginserverlist.Connected() == false && !pZoning) {
 		clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
 		return false;
 	}
-	if ((minilogin && (cle = client_list.CheckAuth(id,password,ip))) || (cle = client_list.CheckAuth(id, password)))
-#endif
-	{
-		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			clog(WORLD__CLIENT_ERR,"ID is 0. Is this server connected to minilogin?");
-			if(!minilogin)
-				clog(WORLD__CLIENT_ERR,"If so you forget the minilogin variable...");
-			else
-				clog(WORLD__CLIENT_ERR,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
+
+	cle = client_list.CheckAuth(id, password);
+	if (cle) {
+		if (cle->AccountID() == 0) {
 			return false;
 		}
 
 		cle->SetOnline();
 
 		clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-
-		if(minilogin){
-			WorldConfig::DisableStats();
-			clog(WORLD__CLIENT,"MiniLogin Account #%d",cle->AccountID());
-		}
-		else {
-			clog(WORLD__CLIENT,"LS Account #%d",cle->LSID());
-		}
-
-		const WorldConfig *Config=WorldConfig::get();
-
-		if(Config->UpdateStats){
-			ServerPacket* pack = new ServerPacket;
-			pack->opcode = ServerOP_LSPlayerJoinWorld;
-			pack->size = sizeof(ServerLSPlayerJoinWorld_Struct);
-			pack->pBuffer = new uchar[pack->size];
-			memset(pack->pBuffer,0,pack->size);
-			ServerLSPlayerJoinWorld_Struct* join =(ServerLSPlayerJoinWorld_Struct*)pack->pBuffer;
-			strcpy(join->key,GetLSKey());
-			join->lsaccount_id = GetLSID();
-			loginserverlist.SendPacket(pack);
-			safe_delete(pack);
-		}
+		clog(WORLD__CLIENT, "LS Account #%d", cle->LSID());
 
 		if (!pZoning)
 			SendGuildList();
@@ -464,10 +429,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	if (!cle)
-		return true;
-
 	cle->SetIP(GetIP());
+
 	return true;
 }
 
@@ -926,7 +889,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	// Voidd: Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
+	// Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
 	if (RuleB(World, GMAccountIPList) && this->GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
 		if(!database.CheckGMIPs(long2ip(this->GetIP()).c_str(), this->GetAccountID())) {
 			clog(WORLD__CLIENT,"GM Account not permited from source address %s and accountid %i", long2ip(this->GetIP()).c_str(), this->GetAccountID());

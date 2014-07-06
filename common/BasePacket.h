@@ -24,6 +24,7 @@
 #include <string>
 
 #ifdef WIN32
+	#define _WINSOCKAPI_
 	#include <time.h>
 	#include <windows.h>
 	#include <winsock2.h>

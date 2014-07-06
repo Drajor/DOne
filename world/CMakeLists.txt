@@ -20,6 +20,10 @@ SET(world_sources
 	worlddb.cpp
 	zonelist.cpp
 	zoneserver.cpp
+	Utility.cpp
+	ZoneManager.cpp
+	Zone.cpp
+	Character.cpp
 )
 
 SET(world_headers
@@ -43,6 +47,10 @@ SET(world_headers
 	WorldTCPConnection.h
 	zonelist.h
 	zoneserver.h
+	Utility.h
+	ZoneManager.h
+	Zone.h
+	Character.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

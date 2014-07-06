@@ -39,7 +39,6 @@ public:
 	~Client();
 
 	bool	process();
-	void	ReceiveData(uchar* buf, int len);
 	void	SendCharInfo();
 	void	SendMaxCharCreate(int max_chars);
 	void	SendMembership();

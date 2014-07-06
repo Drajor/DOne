@@ -17,8 +17,9 @@
 */
 #ifndef MYMUTEX_H
 #define MYMUTEX_H
+
 #ifdef _WINDOWS
-	#include <winsock.h>
+	#define _WINSOCKAPI_
 	#include <windows.h>
 #else
 	#include <pthread.h>

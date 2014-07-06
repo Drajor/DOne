@@ -82,6 +82,7 @@
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "ucs.h"
+#include "ZoneManager.h"
 
 TimeoutManager timeout_manager;
 EQStreamFactory eqsf(WorldStream,9000);
@@ -104,6 +105,8 @@ extern ConsoleList console_list;
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
+	ZoneManager* zoneManager = new ZoneManager();
+
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
@@ -171,97 +174,6 @@ int main(int argc, char** argv) {
 	}
 	dbasync = new DBAsync(&database);
 	guild_mgr.setDatabase(&database);
-
-	if (argc >= 2) {
-		char tmp[2];
-		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
-			std::cout << "Worldserver command line commands:" << std::endl;
-			std::cout << "adduser username password flag    - adds a user account" << std::endl;
-			std::cout << "flag username flag    - sets GM flag on the account" << std::endl;
-			std::cout << "startzone zoneshortname    - sets the starting zone" << std::endl;
-			std::cout << "-holdzones    - reboots lost zones" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "-holdzones") == 0) {
-			std::cout << "Reboot Zones mode ON" << std::endl;
-			holdzones = true;
-		}
-		else if (database.GetVariable("disablecommandline", tmp, 2)) {
-			if (strlen(tmp) == 1) {
-				if (tmp[0] == '1') {
-					std::cerr << "Command line disabled in database... exiting" << std::endl;
-					return 1;
-				}
-			}
-		}
-		else if (strcasecmp(argv[1], "adduser") == 0) {
-			if (argc == 5) {
-				if (Seperator::IsNumber(argv[4])) {
-					if (atoi(argv[4]) >= 0 && atoi(argv[4]) <= 255) {
-						if (database.CreateAccount(argv[2], argv[3], atoi(argv[4])) == 0) {
-							std::cerr << "database.CreateAccount failed." << std::endl;
-							return 1;
-						}
-						else {
-							std::cout << "Account created: Username='" << argv[2] << "', Password='" << argv[3] << "', status=" << argv[4] << std::endl;
-							return 0;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world adduser username password flag" << std::endl;
-			std::cout << "flag = 0, 1 or 2" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "flag") == 0) {
-			if (argc == 4) {
-				if (Seperator::IsNumber(argv[3])) {
-
-					if (atoi(argv[3]) >= 0 && atoi(argv[3]) <= 255) {
-						if (database.SetAccountStatus(argv[2], atoi(argv[3]))) {
-							std::cout << "Account flagged: Username='" << argv[2] << "', status=" << argv[3] << std::endl;
-							return 0;
-						}
-						else {
-							std::cerr << "database.SetAccountStatus failed." << std::endl;
-							return 1;
-						}
-					}
-				}
-			}
-			std::cout << "Usage: world flag username flag" << std::endl;
-			std::cout << "flag = 0-200" << std::endl;
-			return 0;
-		}
-		else if (strcasecmp(argv[1], "startzone") == 0) {
-			if (argc == 3) {
-				if (strlen(argv[2]) < 3) {
-					std::cerr << "Error: zone name too short" << std::endl;
-					return 1;
-				}
-				else if (strlen(argv[2]) > 15) {
-					std::cerr << "Error: zone name too long" << std::endl;
-					return 1;
-				}
-				else {
-					if (database.SetVariable("startzone", argv[2])) {
-						std::cout << "Starting zone changed: '" << argv[2] << "'" << std::endl;
-						return 0;
-					}
-					else {
-						std::cerr << "database.SetVariable failed." << std::endl;
-						return 1;
-					}
-				}
-			}
-			std::cout << "Usage: world startzone zoneshortname" << std::endl;
-			return 0;
-		}
-		else {
-			std::cerr << "Error, unknown command line option" << std::endl;
-			return 1;
-		}
-	}
 
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
@@ -377,22 +289,20 @@ int main(int argc, char** argv) {
 			//now that we know what patch they are running, start up their client object
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
-			if (RuleB(World, UseBannedIPsTable)){ //Lieka: Check to see if we have the responsibility for blocking IPs.
+			if (RuleB(World, UseBannedIPsTable)){ // Check to see if we have the responsibility for blocking IPs.
 				_log(WORLD__CLIENT, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
 				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
 					_log(WORLD__CLIENT, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
 					Client* client = new Client(eqsi);
-					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
 				} else {
 					_log(WORLD__CLIENT, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
-					eqsi->Close(); //Lieka: If the inbound IP is on the banned table, close the EQStream.
+					eqsi->Close(); // If the inbound IP is on the banned table, close the EQStream.
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)){
 					_log(WORLD__CLIENT, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 					Client* client = new Client(eqsi);
-					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
 			}
 		}
@@ -410,6 +320,8 @@ int main(int argc, char** argv) {
 		{
 			database.PurgeExpiredInstances();
 		}
+
+		zoneManager->update();
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();

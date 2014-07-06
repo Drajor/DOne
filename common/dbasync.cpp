@@ -1,5 +1,6 @@
 #include "debug.h"
 #ifdef _WINDOWS
+#define _WINSOCKAPI_
 	#include <windows.h>
 	#include <process.h>
 	#include <winsock2.h>

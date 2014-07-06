@@ -3,6 +3,7 @@
 
 //this is the only part of an EQStream that is seen by the application.
 
+#include "types.h"
 #include <string>
 #include "clientversions.h"
 
