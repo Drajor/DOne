@@ -716,8 +716,6 @@ bool ZoneServer::Process() {
 							ztz->response = 0;
 						}
 					}
-					if(ztz->response!=0 && client)
-						client->LSZoneChange(ztz);
 					SendPacket(pack);	// send back to egress server
 					if(ingress_server)	// if we couldn't boot one, this is 0
 					{

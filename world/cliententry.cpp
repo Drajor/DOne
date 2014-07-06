@@ -118,43 +118,14 @@ void ClientListEntry::SetOnline(int8 iOnline) {
 	if (pOnline >= CLE_Status_Online)
 		stale = 0;
 }
-void ClientListEntry::LSUpdate(ZoneServer* iZS){
-	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
-		pack->opcode = ServerOP_LSZoneInfo;
-		pack->size = sizeof(ZoneInfo_Struct);
-		pack->pBuffer = new uchar[pack->size];
-		ZoneInfo_Struct* zone =(ZoneInfo_Struct*)pack->pBuffer;
-		zone->count=iZS->NumPlayers();
-		zone->zone = iZS->GetZoneID();
-		zone->zone_wid = iZS->GetID();
-		loginserverlist.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-void ClientListEntry::LSZoneChange(ZoneToZone_Struct* ztz){
-	if(WorldConfig::get()->UpdateStats){
-		ServerPacket* pack = new ServerPacket;
-		pack->opcode = ServerOP_LSPlayerZoneChange;
-		pack->size = sizeof(ServerLSPlayerZoneChange_Struct);
-		pack->pBuffer = new uchar[pack->size];
-		ServerLSPlayerZoneChange_Struct* zonechange =(ServerLSPlayerZoneChange_Struct*)pack->pBuffer;
-		zonechange->lsaccount_id = LSID();
-		zonechange->from = ztz->current_zone_id;
-		zonechange->to = ztz->requested_zone_id;
-		loginserverlist.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
+
 void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline) {
 	if (pzoneserver != iZS) {
 		if (pzoneserver){
 			pzoneserver->RemovePlayer();
-			LSUpdate(pzoneserver);
 		}
 		if (iZS){
 			iZS->AddPlayer();
-			LSUpdate(iZS);
 		}
 	}
 	pzoneserver = iZS;
@@ -200,7 +171,6 @@ void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
 
 	if (pzoneserver){
 		pzoneserver->RemovePlayer();
-		LSUpdate(pzoneserver);
 	}
 	pzoneserver = 0;
 	pzone = 0;
@@ -240,7 +210,6 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 		return;
 	if (pzoneserver){
 		pzoneserver->RemovePlayer();
-		LSUpdate(pzoneserver);
 	}
 
 	ClearVars();
