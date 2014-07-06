@@ -49,8 +49,6 @@ public:
 	void	ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl);
 	void	CLERemoveZSRef(ZoneServer* iZS);
 	ClientListEntry* CheckAuth(uint32 iLSID, const char* iKey);
-	ClientListEntry* CheckAuth(const char* iName, const char* iPassword);
-	ClientListEntry* CheckAuth(uint32 id, const char* iKey, uint32 ip);
 	ClientListEntry* FindCharacter(const char* name);
 	ClientListEntry* FindCLEByAccountID(uint32 iAccID);
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);

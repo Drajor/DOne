@@ -388,18 +388,6 @@ void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 	}
 }
 
-
-ClientListEntry* ClientList::CheckAuth(uint32 id, const char* iKey, uint32 ip ) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(id, iKey, ip))
-			return iterator.GetData();
-		iterator.Advance();
-	}
-	return 0;
-}
 ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -408,29 +396,6 @@ ClientListEntry* ClientList::CheckAuth(uint32 iLSID, const char* iKey) {
 		if (iterator.GetData()->CheckAuth(iLSID, iKey))
 			return iterator.GetData();
 		iterator.Advance();
-	}
-	return 0;
-}
-
-ClientListEntry* ClientList::CheckAuth(const char* iName, const char* iPassword) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	MD5 tmpMD5(iPassword);
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->CheckAuth(iName, tmpMD5))
-			return iterator.GetData();
-		iterator.Advance();
-	}
-	int16 tmpadmin;
-
-	_log(WORLD__ZONELIST,"Login with '%s' and '%s'", iName, iPassword);
-
-	uint32 accid = database.CheckLogin(iName, iPassword, &tmpadmin);
-	if (accid) {
-		ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), accid, iName, tmpMD5, tmpadmin);
-		clientlist.Append(tmp);
-		return tmp;
 	}
 	return 0;
 }
