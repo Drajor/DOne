@@ -207,7 +207,6 @@ void command_bug(Client* pClient, const Seperator* pSeperator);
 #endif
 void command_iteminfo(Client* pClient, const Seperator* pSeperator);
 void command_uptime(Client* pClient, const Seperator* pSeperator);
-void command_flag(Client* pClient, const Seperator* pSeperator);
 void command_time(Client* pClient, const Seperator* pSeperator);
 void command_guild(Client* pClient, const Seperator* pSeperator);
 bool helper_guild_edit(Client* pClient, uint32 dbid, uint32 eqid, uint8 rank, const char* what, const char* value);

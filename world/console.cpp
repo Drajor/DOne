@@ -583,22 +583,6 @@ void Console::ProcessCommand(const char* command) {
 						SendMessage(1, "Character Does Not Exist");
 				}
 			}
-			else if (strcasecmp(sep.arg[0], "flag") == 0 && this->Admin() >= consoleFlagStatus) {
-// SCORPIOUS2K - reversed parameter order for flag
-				if(sep.arg[2][0]==0 || !sep.IsNumber(1))
-					SendMessage(1, "Usage: flag [status] [accountname]");
-				else
-				{
-					if (atoi(sep.arg[1]) > this->Admin())
-						SendMessage(1, "You cannot set people's status to higher than your own");
-					else if (atoi(sep.arg[1]) < 0 && this->Admin() < consoleFlagStatus)
-							SendMessage(1, "You have too low of status to change flags");
-					else if (!database.SetAccountStatus(sep.arg[2], atoi(sep.arg[1])))
-							SendMessage(1, "Unable to flag account!");
-					else
-							SendMessage(1, "Account Flaged");
-				}
-			}
 			else if (strcasecmp(sep.arg[0], "kick") == 0 && admin >= consoleKickStatus) {
 				char tmpname[64];
 				tmpname[0] = '*';

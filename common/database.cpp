@@ -306,26 +306,6 @@ uint32 Database::CreateAccount(const char* name, int16 status, uint32 lsaccount_
 	return last_insert_id;
 }
 
-bool Database::SetAccountStatus(const char* name, int16 status) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-
-	std::cout << "Account being GM Flagged:" << name << ", Level: " << (int16) status << std::endl;
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET status=%i WHERE name='%s';", status, name), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-		return false;
-	}
-	safe_delete_array(query);
-
-	if (affected_rows == 0) {
-		std::cout << "Account: " << name << " does not exist, therefore it cannot be flagged\n";
-		return false;
-	}
-
-	return true;
-}
-
 bool Database::ReserveName(uint32 account_id, char* name)
 {
 	char errbuf[MYSQL_ERRMSG_SIZE];

@@ -319,7 +319,6 @@ int command_init(void) {
 		command_add("goto","[x] [y] [z] - Teleport to the provided coordinates or to your target",10,command_goto) ||
 		command_add("iteminfo","- Get information about the item on your cursor",10,command_iteminfo) ||
 		command_add("uptime","[zone server id] - Get uptime of worldserver, or zone server if argument provided",10,command_uptime) ||
-		command_add("flag","[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided",0,command_flag) ||
 		command_add("guild","- Guild manipulation commands. Use argument help for more info.",10,command_guild) ||
 		command_add("guilds",nullptr,0,command_guild) ||
 		command_add("zonestatus","- Show connected zoneservers, synonymous with /servers",150,command_zonestatus) ||
@@ -4546,39 +4545,6 @@ void command_uptime(Client* c, const Seperator *sep)
 			sus->zoneserverid = atoi(sep->arg[1]);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
-	}
-}
-
-void command_flag(Client* c, const Seperator *sep)
-{
-	if(sep->arg[2][0] == 0) {
-		c->UpdateAdmin();
-		c->message(0, "Refreshed your admin flag from DB.");
-	}
-	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
-		c->message(0, "Usage: #flag [status] [acctname]");
-
-	else if (c->Admin() < commandChangeFlags) {
-//this check makes banning players by less than this level
-//impossible, but i'll leave it in anyways
-		c->message(0, "You may only refresh your own flag, doing so now.");
-		c->UpdateAdmin();
-	}
-	else {
-		if (atoi(sep->arg[1]) > c->Admin())
-			c->message(0, "You cannot set people's status to higher than your own");
-		else if (atoi(sep->arg[1]) < 0 && c->Admin() < commandBanPlayers)
-			c->message(0, "You have too low of status to suspend/ban");
-		else if (!database.SetAccountStatus(sep->argplus[2], atoi(sep->arg[1])))
-			c->message(0, "Unable to set GM Flag.");
-		else {
-			c->message(0, "Set GM Flag on account.");
-			ServerPacket* pack = new ServerPacket(ServerOP_FlagUpdate, 6);
-			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
-			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
-			worldserver.SendPacket(pack);
-			delete pack;
-		}
 	}
 }
 
