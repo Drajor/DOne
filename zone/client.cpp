@@ -250,10 +250,8 @@ Client::Client(EQStreamInterface* ieqs)
 	PendingSacrifice = false;
 	BoatID = 0;
 
-	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 	AttemptedMessages = 0;
-	TotalKarma = 0;
 	ClientVersion = EQClientUnknown;
 	ClientVersionBit = 0;
 	AggroCount = 0;
@@ -374,7 +372,6 @@ Client::~Client() {
 	save(2); // This fails when database destructor is called first on shutdown
 
 	safe_delete(taskstate);
-	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);
 
@@ -721,7 +718,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					}
 				}
 
-				uint32 AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval) + TotalKarma;
+				uint32 AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval);
 				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages;
 
 				if(RuleI(Chat, MinStatusToBypassAntiSpam) <= Admin())
@@ -807,13 +804,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					return;
 			}
 
-			if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit))
+			if (GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
 			{
-				if(GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
-				{
-					message(0, "You do not have permission to talk in Auction at this time.");
-					return;
-				}
+				message(0, "You do not have permission to talk in Auction at this time.");
+				return;
 			}
 
 			if (!worldserver.SendChannelMessage(this, 0, 4, 0, language, msg))
@@ -845,13 +839,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				return;
 			}
 
-			if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit))
+			if (GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
 			{
-				if(GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
-				{
-					message(0, "You do not have permission to talk in OOC at this time.");
-					return;
-				}
+				message(0, "You do not have permission to talk in OOC at this time.");
+				return;
 			}
 
 			if (!worldserver.SendChannelMessage(this, 0, 5, 0, language, msg))
@@ -887,13 +878,10 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					return;
 			}
 
-			if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit))
+			if (GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
 			{
-				if(GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
-				{
-					message(0, "You do not have permission to send tells at this time.");
-					return;
-				}
+				message(0, "You do not have permission to send tells at this time.");
+				return;
 			}
 
 			char target_name[64];

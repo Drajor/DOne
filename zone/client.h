@@ -1319,9 +1319,6 @@ private:
 	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff
-	Timer *KarmaUpdateTimer;
-	uint32 TotalKarma;
-
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	uint32 AttemptedMessages;
 

@@ -12,6 +12,5 @@ struct AccountData {
 	int32 mStatus;
 	int mLoginServerAccountID;
 	bool mGMSpeed;
-	uint32 mKarma;
 	bool mHidden;
 };

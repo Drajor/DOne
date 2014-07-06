@@ -117,10 +117,8 @@ public:
 	inline int GetAccountID() { return AccountID; }
 	inline void SetAccountStatus(int inStatus) { Status = inStatus; }
 	inline void SetHideMe(bool inHideMe) { HideMe = inHideMe; }
-	inline void SetKarma(uint32 inKarma) { TotalKarma = inKarma; }
 	inline int GetAccountStatus() { return Status; }
 	inline bool GetHideMe() { return HideMe; }
-	inline uint32 GetKarma() { return TotalKarma; }
 	void SetChannelOwner(std::string CommandString);
 	void OPList(std::string CommandString);
 	void ChannelInvite(std::string CommandString);
@@ -160,7 +158,6 @@ private:
 
 	//Anti Spam Stuff
 	Timer *AccountGrabUpdateTimer;
-	uint32 TotalKarma;
 
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	int AttemptedMessages;

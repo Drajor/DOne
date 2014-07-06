@@ -507,7 +507,6 @@ Client::Client(EQStream *eqs) {
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++)
 		JoinedChannels[i] = nullptr;
 
-	TotalKarma = 0;
 	AttemptedMessages = 0;
 	ForceDisconnect = false;
 
@@ -1300,24 +1299,21 @@ void Client::SendChannelMessage(std::string Message)
 
 	if(ChannelName.compare("Newplayers") != 0)
 	{
-		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
+		CharacterEntry *char_ent = nullptr;
+		for (int x = 0; x < Characters.size(); ++x)
 		{
-			CharacterEntry *char_ent = nullptr;
-			for(int x = 0; x < Characters.size(); ++x)
+			if (Characters[x].Name.compare(getName()) == 0)
 			{
-				if(Characters[x].Name.compare(getName()) == 0)
-				{
-					char_ent = &Characters[x];
-					break;
-				}
+				char_ent = &Characters[x];
+				break;
 			}
-			if(char_ent)
+		}
+		if (char_ent)
+		{
+			if (char_ent->Level < RuleI(Chat, GlobalChatLevelLimit))
 			{
-				if(char_ent->Level < RuleI(Chat, GlobalChatLevelLimit))
-				{
-					GeneralChannelMessage("You are either not high enough level or high enough karma to talk in this channel right now.");
-					return;
-				}
+				GeneralChannelMessage("You are not high enough level to talk in this channel right now.");
+				return;
 			}
 		}
 	}
@@ -1336,7 +1332,7 @@ void Client::SendChannelMessage(std::string Message)
 						AttemptedMessages = 0;
 					}
 				}
-				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval) + GetKarma();
+				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval);
 				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages;
 
 				if(RuleI(Chat, MinStatusToBypassAntiSpam) <= Status)
@@ -1407,24 +1403,21 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 
 	if(RequiredChannel->GetName().compare("Newplayers") != 0)
 	{
-		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
+		CharacterEntry *char_ent = nullptr;
+		for (int x = 0; x < Characters.size(); ++x)
 		{
-			CharacterEntry *char_ent = nullptr;
-			for(int x = 0; x < Characters.size(); ++x)
+			if (Characters[x].Name.compare(getName()) == 0)
 			{
-				if(Characters[x].Name.compare(getName()) == 0)
-				{
-					char_ent = &Characters[x];
-					break;
-				}
+				char_ent = &Characters[x];
+				break;
 			}
-			if(char_ent)
+		}
+		if (char_ent)
+		{
+			if (char_ent->Level < RuleI(Chat, GlobalChatLevelLimit))
 			{
-				if(char_ent->Level < RuleI(Chat, GlobalChatLevelLimit))
-				{
-					GeneralChannelMessage("You are either not high enough level or high enough karma to talk in this channel right now.");
-					return;
-				}
+				GeneralChannelMessage("You are not high enough level to talk in this channel right now.");
+				return;
 			}
 		}
 	}
@@ -1445,7 +1438,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 						AttemptedMessages = 0;
 					}
 				}
-				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval) + GetKarma();
+				int AllowedMessages = RuleI(Chat, MinimumMessagesPerInterval);
 				AllowedMessages = AllowedMessages > RuleI(Chat, MaximumMessagesPerInterval) ? RuleI(Chat, MaximumMessagesPerInterval) : AllowedMessages;
 				if(RuleI(Chat, MinStatusToBypassAntiSpam) <= Status)
 					AllowedMessages = 10000;

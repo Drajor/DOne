@@ -1666,45 +1666,6 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 	return (RuleI(Zone, AutoShutdownDelay));
 }
 
-uint32 ZoneDatabase::GetKarma(uint32 acct_id)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32 ret_val = 0;
-
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `karma` from `account` where `id`='%i' limit 1",
-		acct_id),errbuf,&result))
-	{
-		safe_delete_array(query);
-		return 0;
-	}
-
-	safe_delete_array(query);
-	row = mysql_fetch_row(result);
-
-	ret_val = atoi(row[0]);
-
-	mysql_free_result(result);
-
-	return ret_val;
-}
-
-void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32 affected_rows = 0;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "UPDATE account set karma=%i where id=%i", amount, acct_id), errbuf, 0, &affected_rows)){
-		safe_delete_array(query);}
-	else {
-		std::cerr << "Error in UpdateKarma query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-	}
-}
-
 void ZoneDatabase::ListAllInstances(Client* c, uint32 charid)
 {
 	if(!c)

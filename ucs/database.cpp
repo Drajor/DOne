@@ -108,7 +108,7 @@ void Database::GetAccountStatus(Client* c) {
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	if (!RunQuery(query,MakeAnyLenString(&query, "select `status`, `hideme`, `karma`, from `account` where `id`='%i' limit 1",
+	if (!RunQuery(query,MakeAnyLenString(&query, "select `status`, `hideme`, from `account` where `id`='%i' limit 1",
 						c->GetAccountID()),errbuf,&result)){
 
 		_log(UCS__ERROR, "Unable to get account status for character %s, error %s", c->getName().c_str(), errbuf);
@@ -131,9 +131,8 @@ void Database::GetAccountStatus(Client* c) {
 
 	c->SetAccountStatus(atoi(row[0]));
 	c->SetHideMe(atoi(row[1]) != 0);
-	c->SetKarma(atoi(row[2]));
 
-	_log(UCS__TRACE, "Set account status to %i, hideme to %i and karma to %i for %s", c->GetAccountStatus(), c->GetHideMe(), c->GetKarma(), c->getName().c_str());
+	_log(UCS__TRACE, "Set account status to %i, hideme to %i for %s", c->GetAccountStatus(), c->GetHideMe(), c->getName().c_str());
 	mysql_free_result(result);
 }
 

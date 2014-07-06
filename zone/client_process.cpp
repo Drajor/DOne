@@ -178,15 +178,6 @@ bool Client::process() {
 			BindWound(bindwound_target, false);
 		}
 
-		if(KarmaUpdateTimer)
-		{
-			if(KarmaUpdateTimer->Check(false))
-			{
-				KarmaUpdateTimer->Start(RuleI(Chat, KarmaUpdateIntervalMS));
-				database.UpdateKarma(AccountID(), ++TotalKarma);
-			}
-		}
-
 		if(qGlobals)
 		{
 			if(qglobal_purge_timer.Check())
