@@ -126,7 +126,6 @@ void command_zsave(Client* pClient, const Seperator* pSeperator);
 void command_dbspawn2(Client* pClient, const Seperator* pSeperator);
 void command_copychar(Client* pClient, const Seperator* pSeperator);
 void command_shutdown(Client* pClient, const Seperator* pSeperator);
-void command_setlsinfo(Client* pClient, const Seperator* pSeperator);
 void command_grid(Client* pClient, const Seperator* pSeperator);
 void command_wp(Client* pClient, const Seperator* pSeperator);
 void command_size(Client* pClient, const Seperator* pSeperator);

@@ -223,7 +223,6 @@ int command_init(void) {
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
 		command_add("copychar","[character name] [new character] [new account id] - Create a copy of a character",100,command_copychar) ||
 		command_add("shutdown","- Shut this zone process down",150,command_shutdown) ||
-		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("grid","[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid",170,command_grid) ||
 		command_add("wp","[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid",170,command_wp) ||
 		command_add("wpadd","[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path",170,command_wpadd) ||
@@ -2201,22 +2200,6 @@ void command_copychar(Client* c, const Seperator *sep)
 void command_shutdown(Client* c, const Seperator *sep)
 {
 	CatchSignal(2);
-}
-
-void command_setlsinfo(Client* c, const Seperator *sep)
-{
-	if(sep->argnum != 2)
-		c->message(0, "Format: #setlsinfo email password");
-	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
-		ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
-		s->useraccountid = c->LSAccountID();
-		strn0cpy(s->useraccount, c->AccountName(), 30);
-		strn0cpy(s->useremail, sep->arg[1], 100);
-		strn0cpy(s->userpassword, sep->arg[2], 50);
-		worldserver.SendPacket(pack);
-		c->message(0, "Login Server update packet sent.");
-	}
 }
 
 void command_grid(Client* c, const Seperator *sep)

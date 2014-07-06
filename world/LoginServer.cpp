@@ -201,9 +201,6 @@ bool LoginServer::Process() {
 			}
 			case ServerOP_LSAccountUpdate:
 			{
-				Utility::print("ServerOP_LSAccountUpdate");
-				_log(WORLD__LS, "Received ServerOP_LSAccountUpdate packet from loginserver");
-				CanAccountUpdate = true;
 				break;
 			}
 			default:
@@ -324,14 +321,3 @@ void LoginServer::SendStatus() {
 	SendPacket(pack);
 	delete pack;
 }
-
-void LoginServer::SendAccountUpdate(ServerPacket* pack) {
-	ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
-	if(CanUpdate()) {
-		_log(WORLD__LS, "Sending ServerOP_LSAccountUpdate packet to loginserver: %s:%d",LoginServerAddress,LoginServerPort);
-		strn0cpy(s->worldaccount, LoginAccount, 30);
-		strn0cpy(s->worldpassword, LoginPassword, 30);
-		SendPacket(pack);
-	}
-}
-

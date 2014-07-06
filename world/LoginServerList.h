@@ -32,7 +32,6 @@ public:
 	bool	SendStatus();
 
 	bool	SendPacket(ServerPacket *pack);
-	bool	SendAccountUpdate(ServerPacket *pack);
 	bool	Connected();
 	bool	AllConnected();
 	bool	CanUpdate();

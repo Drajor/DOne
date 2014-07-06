@@ -131,20 +131,6 @@ bool LoginServerList::SendPacket(ServerPacket* pack) {
 	return true;
 }
 
-bool LoginServerList::SendAccountUpdate(ServerPacket* pack) {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	_log(WORLD__LS, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->CanUpdate()) {
-			iterator.GetData()->SendAccountUpdate(pack);
-		}
-		iterator.Advance();
-	}
-	return true;
-}
-
 bool LoginServerList::Connected() {
 	LinkedListIterator<LoginServer*> iterator(list);
 

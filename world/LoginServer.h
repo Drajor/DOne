@@ -41,7 +41,6 @@ public:
 	void SendStatus();
 
 	void SendPacket(ServerPacket* pack) { tcpc->SendPacket(pack); }
-	void SendAccountUpdate(ServerPacket* pack);
 	bool ConnectReady() { return tcpc->ConnectReady(); }
 	bool Connected() { return tcpc->Connected(); }
 	bool CanUpdate() { return CanAccountUpdate; }

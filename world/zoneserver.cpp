@@ -1217,8 +1217,6 @@ bool ZoneServer::Process() {
 
 			case ServerOP_LSAccountUpdate:
 			{
-				zlog(WORLD__ZONE, "Received ServerOP_LSAccountUpdate packet from zone");
-				loginserverlist.SendAccountUpdate(pack);
 				break;
 			}
 
