@@ -283,17 +283,13 @@ int16 Database::CheckStatus(uint32 account_id)
 	return 0;
 }
 
-uint32 Database::CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id) {
+uint32 Database::CreateAccount(const char* name, int16 status, uint32 lsaccount_id) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	uint32 querylen;
 	uint32 last_insert_id;
 
-	if (password)
-		querylen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', password='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name,password,status, lsaccount_id);
-	else
-		querylen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
-
+	querylen = MakeAnyLenString(&query, "INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();", name, status, lsaccount_id);
 	std::cerr << "Account Attempting to be created:" << name << " " << (int16) status << std::endl;
 	if (!RunQuery(query, querylen, errbuf, 0, 0, &last_insert_id)) {
 		std::cerr << "Error in CreateAccount query '" << query << "' " << errbuf << std::endl;
@@ -308,20 +304,6 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	}
 
 	return last_insert_id;
-}
-
-bool Database::SetLocalPassword(uint32 accid, const char* password) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET password=MD5('%s') where id=%i;", password, accid), errbuf)) {
-		std::cerr << "Error in SetLocalPassword query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	safe_delete_array(query);
-	return true;
 }
 
 bool Database::SetAccountStatus(const char* name, int16 status) {

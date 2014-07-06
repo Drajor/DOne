@@ -192,7 +192,7 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 	if (strncmp(mLoginServerKey, iKey,10) == 0) {
 		if (paccountid == 0 && getLoginServerAccountID()>0) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
-			paccountid = database.CreateAccount(mLoginServerAccountName, 0, tmpStatus, getLoginServerAccountID());
+			paccountid = database.CreateAccount(mLoginServerAccountName, tmpStatus, getLoginServerAccountID());
 			if (!paccountid) {
 				_log(WORLD__CLIENTLIST_ERR,"Error adding local account for LS login: '%s', duplicate name?" ,mLoginServerAccountName);
 				return false;
@@ -208,19 +208,19 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 	}
 	return false;
 }
-
-bool ClientListEntry::CheckAuth(const char* iName, MD5& iMD5Password) {
-	if (getLoginServerAccountID() == 0 && strcmp(paccountname, iName) == 0 && pMD5Pass == iMD5Password)
-		return true;
-	return false;
-}
-
-bool ClientListEntry::CheckAuth(uint32 id, const char* iKey, uint32 ip) {
-	if (mIP==ip && strncmp(mLoginServerKey, iKey,10) == 0){
-		paccountid = id;
-		database.GetAccountFromID(id,paccountname,&padmin);
-		return true;
-	}
-	return false;
-}
+//
+//bool ClientListEntry::CheckAuth(const char* iName, MD5& iMD5Password) {
+//	if (getLoginServerAccountID() == 0 && strcmp(paccountname, iName) == 0 && pMD5Pass == iMD5Password)
+//		return true;
+//	return false;
+//}
+//
+//bool ClientListEntry::CheckAuth(uint32 id, const char* iKey, uint32 ip) {
+//	if (mIP==ip && strncmp(mLoginServerKey, iKey,10) == 0){
+//		paccountid = id;
+//		database.GetAccountFromID(id,paccountname,&padmin);
+//		return true;
+//	}
+//	return false;
+//}
 

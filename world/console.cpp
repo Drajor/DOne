@@ -476,23 +476,6 @@ void Console::ProcessCommand(const char* command) {
 				zoneserver_list.SendPacket(pack);
 				safe_delete(pack);
 			}
-			else if (strcasecmp(sep.arg[0], "setpass") == 0 && admin >= consolePassStatus) {
-				if (sep.argnum != 2)
-					SendMessage(1, "Format: setpass accountname password");
-				else {
-
-					int16 tmpstatus = 0;
-					uint32 tmpid = database.GetAccountIDByName(sep.arg[1], &tmpstatus);
-					if (!tmpid)
-						SendMessage(1, "Error: Account not found");
-					else if (tmpstatus > admin)
-						SendMessage(1, "Cannot change password: Account's status is higher than yours");
-					else if (database.SetLocalPassword(tmpid, sep.arg[2]))
-						SendMessage(1, "Password changed.");
-					else
-						SendMessage(1, "Error changing password.");
-				}
-			}
 			else if (strcasecmp(sep.arg[0], "uptime") == 0) {
 				if (sep.IsNumber(1) && atoi(sep.arg[1]) > 0) {
 					ServerPacket* pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));

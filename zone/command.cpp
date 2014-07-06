@@ -223,7 +223,6 @@ int command_init(void) {
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
 		command_add("copychar","[character name] [new character] [new account id] - Create a copy of a character",100,command_copychar) ||
 		command_add("shutdown","- Shut this zone process down",150,command_shutdown) ||
-		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
 		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("grid","[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid",170,command_grid) ||
 		command_add("wp","[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid",170,command_wp) ||
@@ -2203,24 +2202,6 @@ void command_copychar(Client* c, const Seperator *sep)
 void command_shutdown(Client* c, const Seperator *sep)
 {
 	CatchSignal(2);
-}
-
-void command_setpass(Client* c, const Seperator *sep)
-{
-	if(sep->argnum != 2)
-		c->message(0, "Format: #setpass accountname password");
-	else {
-		int16 tmpstatus = 0;
-		uint32 tmpid = database.GetAccountIDByName(sep->arg[1], &tmpstatus);
-		if (!tmpid)
-			c->message(0, "Error: Account not found");
-		else if (tmpstatus > c->Admin())
-			c->message(0, "Cannot change password: Account's status is higher than yours");
-		else if (database.SetLocalPassword(tmpid, sep->arg[2]))
-			c->message(0, "Password changed.");
-		else
-			c->message(0, "Error changing password.");
-	}
 }
 
 void command_setlsinfo(Client* c, const Seperator *sep)
