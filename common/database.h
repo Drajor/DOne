@@ -164,7 +164,6 @@ public:
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
 	int16	CheckStatus(uint32 account_id);
 	uint32	CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id = 0);
-	bool	DeleteAccount(const char* name);
 	bool	SetAccountStatus(const char* name, int16 status);
 	bool	SetLocalPassword(uint32 accid, const char* password);
 	uint32	GetAccountIDFromLSID(uint32 iLSID, char* oAccountName = 0, int16* oStatus = 0);

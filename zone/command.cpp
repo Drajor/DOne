@@ -223,7 +223,6 @@ int command_init(void) {
 		command_add("dbspawn2","[spawngroup] [respawn] [variance] - Spawn an NPC from a predefined row in the spawn2 table",100,command_dbspawn2) ||
 		command_add("copychar","[character name] [new character] [new account id] - Create a copy of a character",100,command_copychar) ||
 		command_add("shutdown","- Shut this zone process down",150,command_shutdown) ||
-		command_add("delacct","[accountname] - Delete an account",150,command_delacct) ||
 		command_add("setpass","[accountname] [password] - Set local password for accountname",150,command_setpass) ||
 		command_add("setlsinfo","[email] [password] - Set login server email address and password (if supported by login server)",10,command_setlsinfo) ||
 		command_add("grid","[add/delete] [grid_num] [wandertype] [pausetype] - Create/delete a wandering grid",170,command_grid) ||
@@ -2204,17 +2203,6 @@ void command_copychar(Client* c, const Seperator *sep)
 void command_shutdown(Client* c, const Seperator *sep)
 {
 	CatchSignal(2);
-}
-
-void command_delacct(Client* c, const Seperator *sep)
-{
-	if(sep->arg[1][0] == 0)
-		c->message(0, "Format: #delacct accountname");
-	else
-		if (database.DeleteAccount(sep->arg[1]))
-			c->message(0, "The account was deleted.");
-		else
-			c->message(0, "Unable to delete account.");
 }
 
 void command_setpass(Client* c, const Seperator *sep)
