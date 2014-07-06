@@ -155,23 +155,15 @@ int command_init(void) {
 		command_add("incstat","- Increases or Decreases a client's stats permanently.",200,command_incstat) ||
 		command_add("help","[search term] - List available commands and their description, specify partial command as argument to search",0,command_help) ||
 		command_add("version","- Display current version of EQEmu server",0,command_version) ||
-		command_add("setfaction","[faction number] - Sets targeted NPC's faction in the database",170,command_setfaction) ||
-		command_add("serversidename","- Prints target's server side name",0,command_serversidename) ||
 		command_add("testspawn","[memloc] [value] - spawns a NPC for you only, with the specified values set in the spawn struct",200,command_testspawn) ||
 		command_add("testspawnkill","- Sends an OP_Death packet for spawn made with #testspawn",200,command_testspawnkill) ||
 		command_add("wc","[wear slot] [material] - Sends an OP_WearChange for your target",200,command_wc) ||
-		command_add("numauths","- TODO: describe this command",200,command_numauths) ||
 		command_add("setanim","[animnum] - Set target's appearance to animnum",200,command_setanim) ||
 		command_add("connectworldserver","- Make zone attempt to connect to worldserver",200,command_connectworldserver) ||
 		command_add("connectworld",nullptr,0,command_connectworldserver) ||
 		command_add("serverinfo","- Get OS info about server host",200,command_serverinfo) ||
-		command_add("crashtest","- Crash the zoneserver",200,command_crashtest) ||
-		command_add("getvariable","[varname] - Get the value of a variable from the database",200,command_getvariable) ||
 		command_add("chat","[channel num] [message] - Send a channel message to all zones",200,command_chat) ||
 		command_add("showpetspell","[spellid/searchstring] - search pet summoning spells",200,command_showpetspell) ||
-	#ifdef IPC
-		command_add("ipc","- Toggle an NPC's interactive flag",200,command_ipc) ||
-	#endif
 		command_add("npcloot","[show/money/add/remove] [itemid/all/money: pp gp sp cp] - Manipulate the loot an NPC is carrying",80,command_npcloot) ||
 		command_add("log","- Search character event log",80,command_log) ||
 		command_add("gm","- Turn player target's or your GM flag on or off",80,command_gm) ||
@@ -214,7 +206,6 @@ int command_init(void) {
 		command_add("zunderworld","[zcoord] - Sets the underworld using zcoord",80,command_zunderworld) ||
 		command_add("spon","- Sends OP_MemorizeSpell",80,command_spon) ||
 		command_add("spoff","- Sends OP_ManaChange",80,command_spoff) ||
-		command_add("itemtest","- merth's test function",250,command_itemtest) ||
 		command_add("gassign","[id] - Assign targetted NPC to predefined wandering grid id",100,command_gassign) ||
 		command_add("ai","[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target",100,command_ai) ||
 		command_add("showspellslist","Shows spell list of targeted NPC",100,command_showspellslist) ||
@@ -422,8 +413,6 @@ int command_init(void) {
 		command_add("zopp", "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", 250, command_zopp) ||
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", 250, command_augmentitem) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
-		command_add("enablerecipe", "[recipe_id] - Enables a recipe using the recipe id.", 80, command_enablerecipe) ||
-		command_add("disablerecipe", "[recipe_id] - Disables a recipe using the recipe id.", 80, command_disablerecipe) ||
 		command_add("npctype_cache", "[id] or all - Clears the npc type cache for either the id or all npcs.", 250, command_npctype_cache) ||
 		command_add("merchant_open_shop", "Opens a merchants shop", 100, command_merchantopenshop) ||
 		command_add("open_shop", nullptr, 100, command_merchantopenshop) ||
@@ -786,29 +775,6 @@ void command_version(Client* c, const Seperator *sep)
 	c->message(0, "	Last modified on: %s", LAST_MODIFIED);
 }
 
-void command_setfaction(Client* c, const Seperator *sep)
-{
-	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->isClient())))
-		c->message(0, "Usage: #setfaction [faction number]");
-	else
-	{
-		char errbuf[MYSQL_ERRMSG_SIZE];
-		char *query = 0;
-		c->message(15,"Setting NPC %u to faction %i",c->GetTarget()->castToNPC()->GetNPCTypeID(),atoi(sep->argplus[1]));
-		database.RunQuery(query, MakeAnyLenString(&query, "update npc_types set npc_faction_id=%i where id=%i",atoi(sep->argplus[1]),c->GetTarget()->castToNPC()->GetNPCTypeID()), errbuf);
-		c->LogSQL(query);
-		safe_delete_array(query);
-	}
-}
-
-void command_serversidename(Client* c, const Seperator *sep)
-{
-	if(c->GetTarget())
-		c->message(0, c->GetTarget()->getName());
-	else
-		c->message(0, "Error: no target");
-}
-
 void command_testspawnkill(Client* c, const Seperator *sep)
 {
 /*	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
@@ -898,12 +864,6 @@ void command_wc(Client* c, const Seperator *sep)
 	}
 }
 
-void command_numauths(Client* c, const Seperator *sep)
-{
-	c->message(0, "NumAuths: %i", zone->CountAuth());
-	c->message(0, "Your WID: %i", c->GetWID());
-}
-
 void command_setanim(Client* c, const Seperator *sep)
 {
 	if (c->GetTarget() && sep->IsNumber(1)) {
@@ -941,22 +901,6 @@ void command_serverinfo(Client* c, const Seperator *sep)
 char buffer[255];
 	c->message(0, "Operating system information: %s",GetOS(buffer));
 #endif
-}
-
-void command_crashtest(Client* c, const Seperator *sep)
-{
-	c->message(0,"Alright, now we get an GPF ;) ");
-	char* gpf=0;
-	memcpy(gpf, "Ready to crash", 30);
-}
-
-void command_getvariable(Client* c, const Seperator *sep)
-{
-	char tmp[512];
-	if (database.GetVariable(sep->argplus[1], tmp, sizeof(tmp)))
-		c->message(0, "%s = %s", sep->argplus[1], tmp);
-	else
-		c->message(0, "GetVariable(%s) returned false", sep->argplus[1]);
 }
 
 void command_chat(Client* c, const Seperator *sep)
@@ -1011,27 +955,6 @@ void command_showpetspell(Client* c, const Seperator *sep)
 			c->message(0, "%i spells found.", count);
 	}
 }
-
-#ifdef IPC
-void command_ipc(Client* c, const Seperator *sep)
-{
-	if (c->GetTarget() && c->GetTarget()->isNPC())
-	{
-		if (c->GetTarget()->castToNPC()->IsInteractive())
-		{
-			c->GetTarget()->castToNPC()->interactive = false;
-			c->message(0, "Disabling IPC");
-		}
-		else
-		{
-			c->GetTarget()->castToNPC()->interactive = true;
-			c->message(0, "Enabling IPC");
-		}
-	}
-	else
-		c->message(0, "Error: You must target an NPC");
-}
-#endif /* IPC */
 
 void command_npcloot(Client* c, const Seperator *sep)
 {
@@ -1962,25 +1885,6 @@ void command_spoff(Client* c, const Seperator *sep)
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ManaChange, 0);
 	outapp->priority = 5;
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void command_itemtest(Client* c, const Seperator *sep)
-{
-	char chBuffer[8192] = {0};
-	//Using this to determine new item layout
-	FILE* f = nullptr;
-	if (!(f = fopen("c:\\EQEMUcvs\\ItemDump.txt", "rb"))) {
-		c->message(13, "Error: Could not open c:\\EQEMUcvs\\ItemDump.txt");
-		return;
-	}
-
-	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
-	fclose(f);
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer)+5);
-	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -10962,60 +10866,6 @@ void command_questerrors(Client* c, const Seperator *sep)
 		c->message(0, iter->c_str());
 		++i;
 		++iter;
-	}
-}
-
-void command_enablerecipe(Client* c, const Seperator *sep)
-{
-	uint32 recipe_id = 0;
-	bool success = false;
-	if (c) {
-		if (sep->argnum == 1) {
-			recipe_id = atoi(sep->arg[1]);
-		}
-		else {
-			c->message(0, "Invalid number of arguments.\nUsage: #enablerecipe recipe_id");
-			return;
-		}
-		if (recipe_id > 0) {
-			success = database.EnableRecipe(recipe_id);
-			if (success) {
-				c->message(0, "Recipe enabled.");
-			}
-			else {
-				c->message(0, "Recipe not enabled.");
-			}
-		}
-		else {
-			c->message(0, "Invalid recipe id.\nUsage: #enablerecipe recipe_id");
-		}
-	}
-}
-
-void command_disablerecipe(Client* c, const Seperator *sep)
-{
-	uint32 recipe_id = 0;
-	bool success = false;
-	if (c) {
-		if (sep->argnum == 1) {
-			recipe_id = atoi(sep->arg[1]);
-		}
-		else {
-			c->message(0, "Invalid number of arguments.\nUsage: #disablerecipe recipe_id");
-			return;
-		}
-		if (recipe_id > 0) {
-			success = database.DisableRecipe(recipe_id);
-			if (success) {
-				c->message(0, "Recipe disabled.");
-			}
-			else {
-				c->message(0, "Recipe not disabled.");
-			}
-		}
-		else {
-			c->message(0, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");
-		}
 	}
 }
 

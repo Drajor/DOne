@@ -386,8 +386,6 @@ public:
 	bool	GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
 	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, uint32 char_id, DBTradeskillRecipe_Struct *spec);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
-	bool    EnableRecipe(uint32 recipe_id);
-	bool    DisableRecipe(uint32 recipe_id);
 
 	/*
 	* Tribute

@@ -3201,46 +3201,6 @@ XS(XS__crosszonemessageplayerbyname)
 	XSRETURN_EMPTY;
 }
 
-XS(XS__enablerecipe);
-XS(XS__enablerecipe)
-{
-	dXSARGS;
-	bool success = false;
-
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: enablerecipe(recipe_id)");
-	}
-	else {
-		uint32 recipe_id = (uint32)SvIV(ST(0));
-		success = quest_manager.EnableRecipe(recipe_id);
-	}
-	if (!success) {
-		XSRETURN_NO;
-	}
-
-	XSRETURN_YES;
-}
-
-XS(XS__disablerecipe);
-XS(XS__disablerecipe)
-{
-	dXSARGS;
-	bool success = false;
-
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: disablerecipe(recipe_id)");
-	}
-	else {
-		uint32 recipe_id = (uint32)SvIV(ST(0));
-		success = quest_manager.DisableRecipe(recipe_id);
-	}
-	if (!success) {
-		XSRETURN_NO;
-	}
-
-	XSRETURN_YES;
-}
-
 XS(XS__clear_npctype_cache);
 XS(XS__clear_npctype_cache)
 {
@@ -3464,8 +3424,6 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
-		newXS(strcpy(buf, "enablerecipe"), XS__enablerecipe, file);
-		newXS(strcpy(buf, "disablerecipe"), XS__disablerecipe, file);
 		newXS(strcpy(buf, "clear_npctype_cache"), XS__clear_npctype_cache, file);
 		XSRETURN_YES;
 }

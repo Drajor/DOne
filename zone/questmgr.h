@@ -239,8 +239,6 @@ public:
 	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
-	bool EnableRecipe(uint32 recipe_id);
-	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
 
 	Client *GetInitiator() const;
