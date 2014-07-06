@@ -30,7 +30,6 @@ ZoneDatabase::ZoneDatabase(const char* host, const char* user, const char* passw
 }
 
 void ZoneDatabase::ZDBInitVars() {
-	memset(door_isopen_array, 0, sizeof(door_isopen_array));
 	npc_spells_maxid = 0;
 	npc_spellseffects_maxid = 0;
 	npc_spells_cache = 0;
@@ -417,23 +416,6 @@ bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 	}
 
 	return true;
-}
-
-bool ZoneDatabase::DoorIsOpen(uint8 door_id,const char* zone_name)
-{
-	if(door_isopen_array[door_id] == 0) {
-		SetDoorPlace(1,door_id,zone_name);
-		return false;
-	}
-	else {
-		SetDoorPlace(0,door_id,zone_name);
-		return true;
-	}
-}
-
-void ZoneDatabase::SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name)
-{
-	door_isopen_array[door_id] = value;
 }
 
 void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,uint8 eventid,char* detail,char* timestamp, CharacterEventLog_Struct* cel)
