@@ -245,7 +245,6 @@ void command_ban(Client* pClient, const Seperator* pSeperator);
 void command_suspend(Client* pClient, const Seperator* pSeperator);
 void command_ipban(Client* pClient, const Seperator* pSeperator);
 void command_oocmute(Client* pClient, const Seperator* pSeperator);
-void command_revoke(Client* pClient, const Seperator* pSeperator);
 void command_checklos(Client* pClient, const Seperator* pSeperator);
 void command_set_adventure_points(Client* pClient, const Seperator* pSeperator);
 void command_npcsay(Client* pClient, const Seperator* pSeperator);

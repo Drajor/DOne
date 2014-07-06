@@ -131,8 +131,6 @@ public:
 	std::string ChannelSlotName(int ChannelNumber);
 	void ToggleInvites();
 	bool InvitesAllowed() { return AllowInvites; }
-	bool IsRevoked() { return Revoked; }
-	void SetRevoked(bool r) { Revoked = r; }
 	inline bool IsChannelAdmin() { return (Status >= RuleI(Channels, RequiredStatusAdmin)); }
 	inline bool CanListAllChannels() { return (Status >= RuleI(Channels, RequiredStatusListAll)); }
 	void SendHelp();
@@ -159,7 +157,6 @@ private:
 	int Status;
 	bool HideMe;
 	bool AllowInvites;
-	bool Revoked;
 
 	//Anti Spam Stuff
 	Timer *AccountGrabUpdateTimer;

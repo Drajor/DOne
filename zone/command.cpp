@@ -51,7 +51,6 @@
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
 #include "../common/StringUtil.h"
-//#include "../common/servertalk.h" // for oocmute and revoke
 #include "worldserver.h"
 #include "masterentity.h"
 #include "map.h"
@@ -372,7 +371,6 @@ int command_init(void) {
 		command_add("suspend","[name][days] - Suspend by character name and for specificed number of days",150,command_suspend) ||
 		command_add("ipban","[IP address] - Ban IP by character name",200,command_ipban) ||
 		command_add("oocmute","[1/0] - Mutes OOC chat",200,command_oocmute) ||
-		command_add("revoke","[charname] [1/0] - Makes charname unable to talk on OOC",200,command_revoke) ||
 		command_add("checklos","- Check for line of sight to your target",50,command_checklos) ||
 		command_add("los",nullptr,0,command_checklos) ||
 		command_add("npcsay","[message] - Make your NPC target say a message.",150,command_npcsay) ||
@@ -6266,54 +6264,6 @@ void command_ipban(Client* c, const Seperator *sep)
 			c->message(0, "%s has been successfully added to the Banned_IPs table by %s",sep->arg[1], c->getName());
 		} else {
 			c->message(0, "IPBan Failed (IP address is possibly already in the table?)");
-		}
-	}
-}
-
-void command_revoke(Client* c, const Seperator *sep)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	if(sep->arg[1][0] == 0 || sep->arg[2][0] == 0)
-	{
-		c->message(0, "Usage: #revoke [charname] [1/0]");
-	}
-	else
-	{
-		uint32 tmp = database.GetAccountIDByChar(sep->arg[1]);
-		if(tmp)
-		{
-			int flag = sep->arg[2][0] == '1' ? true : false;
-			database.RunQuery(query, MakeAnyLenString(&query, "UPDATE account set revoked=%d where id = %i", flag, tmp), errbuf, 0);
-			c->message(13,"%s account number %i with the character %s.", flag?"Revoking":"Unrevoking", tmp, sep->arg[1]);
-			Client* revokee = entity_list.getClientByAccountID(tmp);
-			if(revokee)
-			{
-				c->message(0, "Found %s in this zone.", revokee->getName());
-				revokee->SetRevoked(flag);
-			}
-			else
-			{
-#if EQDEBUG >= 6
-				c->message(0, "Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
-#endif
-				ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
-				RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
-				strn0cpy(revoke->adminname, c->getName(), 64);
-				strn0cpy(revoke->name, sep->arg[1], 64);
-				revoke->toggle = flag;
-				worldserver.SendPacket(outapp);
-				safe_delete(outapp);
-			}
-		}
-		else {
-			c->message(13,"Character does not exist.");
-		}
-		if(query)
-		{
-			safe_delete_array(query);
-			query=nullptr;
 		}
 	}
 }

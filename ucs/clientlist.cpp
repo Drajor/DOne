@@ -503,7 +503,6 @@ Client::Client(EQStream *eqs) {
 	AccountID = 0;
 
 	AllowInvites = true;
-	Revoked = false;
 
 	for(int i = 0; i < MAX_JOINED_CHANNELS ; i++)
 		JoinedChannels[i] = nullptr;
@@ -1299,12 +1298,6 @@ void Client::SendChannelMessage(std::string Message)
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
-	if(IsRevoked())
-	{
-		GeneralChannelMessage("You are Revoked, you cannot chat in global channels.");
-		return;
-	}
-
 	if(ChannelName.compare("Newplayers") != 0)
 	{
 		if(GetKarma() < RuleI(Chat, KarmaGlobalChatLimit))
@@ -1409,12 +1402,6 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 
 		GeneralChannelMessage("Invalid channel name/number specified.");
 
-		return;
-	}
-
-	if(IsRevoked())
-	{
-		GeneralChannelMessage("You are Revoked, you cannot chat in global channels.");
 		return;
 	}
 

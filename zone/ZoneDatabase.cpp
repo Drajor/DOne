@@ -366,7 +366,7 @@ void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 }
 
 
-bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme, uint32* account_creation) {
+bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* gmhideme, uint32* account_creation) {
 	MYSQL_ROW row;
 	if (mysql_num_rows(result) == 1) {
 		row = mysql_fetch_row(result);
@@ -385,12 +385,10 @@ bool ZoneDatabase::GetAccountInfoForLogin_result(MYSQL_RES* result, int16* admin
 		}
 		if (gmspeed)
 			*gmspeed = atoi(row[3]);
-		if (revoked)
-			*revoked = atoi(row[4]);
 		if(gmhideme)
-			*gmhideme = atoi(row[5]);
+			*gmhideme = atoi(row[4]);
 		if(account_creation)
-			*account_creation = atoul(row[6]);
+			*account_creation = atoul(row[5]);
 
 		return true;
 	}
@@ -1451,14 +1449,14 @@ bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
  solar: this is never actually called, client_process starts an async query
  instead and uses GetAccountInfoForLogin_result to process it..
  */
-bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* revoked,bool* gmhideme) {
+bool ZoneDatabase::GetAccountInfoForLogin(uint32 account_id, int16* admin, char* account_name, uint32* lsaccountid, uint8* gmspeed, bool* gmhideme) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char *query = 0;
 	MYSQL_RES *result;
 
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status, name, lsaccount_id, gmspeed, revoked, hideme FROM account WHERE id=%i", account_id), errbuf, &result)) {
+	if (RunQuery(query, MakeAnyLenString(&query, "SELECT status, name, lsaccount_id, gmspeed, hideme FROM account WHERE id=%i", account_id), errbuf, &result)) {
 		safe_delete_array(query);
-		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, revoked,gmhideme);
+		bool ret = GetAccountInfoForLogin_result(result, admin, account_name, lsaccountid, gmspeed, gmhideme);
 		mysql_free_result(result);
 		return ret;
 	}

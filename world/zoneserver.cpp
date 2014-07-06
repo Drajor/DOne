@@ -998,12 +998,6 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_Revoke: {
-				RevokeStruct* rev = (RevokeStruct*)pack->pBuffer;
-				ClientListEntry* cle = client_list.FindCharacter(rev->name);
-				if (cle != 0 && cle->Server() != 0)
-				{
-					cle->Server()->SendPacket(pack);
-				}
 				break;
 			}
 			case ServerOP_SpawnPlayerCorpse: {

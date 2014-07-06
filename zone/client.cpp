@@ -807,12 +807,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					return;
 			}
 
-			if(GetRevoked())
-			{
-				message(0, "You have been revoked. You may not talk on Auction.");
-				return;
-			}
-
 			if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit))
 			{
 				if(GetLevel() < RuleI(Chat, GlobalChatLevelLimit))
@@ -848,12 +842,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			if(worldserver.IsOOCMuted() && admin < 100)
 			{
 				message(0,"OOC has been muted. Try again later.");
-				return;
-			}
-
-			if(GetRevoked())
-			{
-				message(0, "You have been revoked. You may not talk on OOC.");
 				return;
 			}
 
@@ -897,12 +885,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					ChannelMessageReceived(7, language, lang_skill, msg, "discard"); //Fast typer or spammer??
 				else
 					return;
-			}
-
-			if(GetRevoked())
-			{
-				message(0, "You have been revoked. You may not send tells.");
-				return;
 			}
 
 			if(TotalKarma < RuleI(Chat, KarmaGlobalChatLimit))

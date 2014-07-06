@@ -297,8 +297,6 @@ public:
 
 	EQApplicationPacket*	ReturnItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
 
-	bool			GetRevoked() const { return revoked; }
-	void			SetRevoked(bool rev) { revoked = rev; }
 	inline uint32	GetIP()			const { return ip; }
 	inline bool		GetHideMe()			const { return gmhideme; }
 	void			SetHideMe(bool hm);
@@ -1202,7 +1200,6 @@ private:
 	uint8				gmspeed;
 	bool				medding;
 	uint16				horseId;
-	bool				revoked;
 	uint32				pQueuedSaveWorkID;
 	uint16				pClientSideTarget;
 	uint32				weight;

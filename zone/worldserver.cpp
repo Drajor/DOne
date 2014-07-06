@@ -785,17 +785,6 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_Revoke: {
-			RevokeStruct* rev = (RevokeStruct*) pack->pBuffer;
-			Client* client = entity_list.getClientByName(rev->name);
-			if (client)
-			{
-				SendEmoteMessage(rev->adminname, 0, 0, "%s: %srevoking %s", zone->GetShortName(), rev->toggle?"":"un", client->getName());
-				client->SetRevoked(rev->toggle);
-			}
-#if EQDEBUG >= 6
-			else
-				SendEmoteMessage(rev->adminname, 0, 0, "%s: Can't find %s", zone->GetShortName(), rev->name);
-#endif
 			break;
 		}
 		case ServerOP_GroupIDReply: {
