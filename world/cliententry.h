@@ -19,9 +19,8 @@ struct ServerClientList_Struct;
 class ClientListEntry {
 public:
 	ClientListEntry(uint32 id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin = 0, uint32 ip = 0, uint8 local=0);
-	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
-	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline);
 	~ClientListEntry();
+
 	bool	CheckStale();
 	void	Update(ZoneServer* zoneserver, ServerClientList_Struct* scl, int8 iOnline = CLE_Status_InZone);
 	bool	CheckAuth(uint32 iLSID, const char* key);
@@ -30,21 +29,21 @@ public:
 	void	SetOnline(ZoneServer* iZS, int8 iOnline);
 	void	SetOnline(int8 iOnline = CLE_Status_Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
-	inline int8		Online()		{ return pOnline; }
+	inline int8		Online()		{ return mOnline; }
 	inline const uint32	GetID() const	{ return id; }
-	inline const uint32	GetIP() const	{ return pIP; }
-	inline void			SetIP(const uint32& iIP) { pIP = iIP; }
-	inline void			KeepAlive()		{ stale = 0; }
-	inline uint8			GetStaleCounter() const { return stale; }
+	inline const uint32	GetIP() const	{ return mIP; }
+	inline void			SetIP(const uint32& iIP) { mIP = iIP; }
+	inline void			KeepAlive()		{ mStale = 0; }
+	inline uint8			GetStaleCounter() const { return mStale; }
 	void	LeavingZone(ZoneServer* iZS = 0, int8 iOnline = CLE_Status_Offline);
 	void	Camp(ZoneServer* iZS = 0);
 
-	// Login Server stuff
-	inline uint32		LSID()	const		{ return pLSID; }
-	inline uint32		LSAccountID() const	{ return pLSID; }
-	inline const char*	LSName() const		{ return plsname; }
-	inline int16		WorldAdmin() const	{ return pworldadmin; }
-	inline const char*	GetLSKey() const	{ return plskey; }
+	// Login Server
+	inline uint32 getLoginServerAccountID() const { return mLoginServerID; }
+	inline const char* getLoginServerAccountName() const { return mLoginServerAccountName; }
+	inline const char* getLoginServerKey() const { return mLoginServerKey; }
+	inline int16 getWorldAdminStatus() const { return mWorldAdminStatus; } // TODO: Not really used as far as I can tell.
+	
 
 	// Account stuff
 	inline uint32		AccountID() const		{ return paccountid; }
@@ -80,16 +79,16 @@ public:
 private:
 	void	ClearVars(bool iAll = false);
 
-	const uint32	id;
-	uint32	pIP;
-	int8	pOnline;
-	uint8	stale;
+	const uint32 id; // Internal (unique) ID, non-persistent. (referred to as WID or WorldID outside)
+	uint32 mIP;
+	int8 mOnline;
+	uint8 mStale;
 
 	// Login Server stuff
-	uint32	pLSID;
-	char	plsname[32];
-	char	plskey[16];
-	int16	pworldadmin;		// Login server's suggested admin status setting
+	uint32 mLoginServerID; // Provided by Login Server.
+	char	mLoginServerAccountName[32];
+	char	mLoginServerKey[16];
+	int16	mWorldAdminStatus;		// Login server's suggested admin status setting
 	bool	plocal;
 
 	// Account stuff

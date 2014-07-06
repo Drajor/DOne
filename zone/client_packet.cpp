@@ -8338,7 +8338,6 @@ void Client::CompleteConnect()
 	SetDuelTarget(0);
 	SetDueling(false);
 
-	EnteringMessages(this);
 	LoadZoneFlags();
 
 	// Sets GM Flag if needed & Sends Petition Queue

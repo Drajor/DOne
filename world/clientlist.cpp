@@ -107,7 +107,7 @@ void ClientList::EnforceSessionLimit(uint32 iLSAccountID) {
 
 		ClientEntry = iterator.GetData();
 
-		if ((ClientEntry->LSAccountID() == iLSAccountID) &&
+		if ((ClientEntry->getLoginServerAccountID() == iLSAccountID) &&
 			((ClientEntry->Admin() <= (RuleI(World, ExemptAccountLimitStatus))) || (RuleI(World, ExemptAccountLimitStatus) < 0))) {
 
 			CharacterCount++;
@@ -279,54 +279,6 @@ ClientListEntry* ClientList::FindCLEByCharacterID(uint32 iCharID) {
 	return 0;
 }
 
-void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
-	int x = 0, y = 0;
-	int namestrlen = iName == 0 ? 0 : strlen(iName);
-	bool addnewline = false;
-	char newline[3];
-	if (connection->IsConsole())
-		strcpy(newline, "\r\n");
-	else
-		strcpy(newline, "^");
-
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		ClientListEntry* cle = iterator.GetData();
-		if (admin >= cle->Admin() && (iName == 0 || namestrlen == 0 || strncasecmp(cle->name(), iName, namestrlen) == 0 || strncasecmp(cle->AccountName(), iName, namestrlen) == 0 || strncasecmp(cle->LSName(), iName, namestrlen) == 0)) {
-			struct in_addr in;
-			in.s_addr = cle->GetIP();
-			if (addnewline) {
-				AppendAnyLenString(&output, &outsize, &outlen, newline);
-			}
-			AppendAnyLenString(&output, &outsize, &outlen, "ID: %i  Acc# %i  AccName: %s  IP: %s", cle->GetID(), cle->AccountID(), cle->AccountName(), inet_ntoa(in));
-			AppendAnyLenString(&output, &outsize, &outlen, "%s  Stale: %i  Online: %i  Admin: %i", newline, cle->GetStaleCounter(), cle->Online(), cle->Admin());
-			if (cle->LSID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  LSID: %i  LSName: %s  WorldAdmin: %i", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
-			if (cle->CharID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), database.GetZoneName(cle->zone()), cle->zone());
-			if (outlen >= 3072) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
-				addnewline = false;
-			}
-			else
-				addnewline = true;
-			y++;
-		}
-		iterator.Advance();
-		x++;
-	}
-	AppendAnyLenString(&output, &outsize, &outlen, "%s%i CLEs in memory. %i CLEs listed. numplayers = %i.", newline, x, y, numplayers);
-	connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-	safe_delete(output);
-}
-
-
 void ClientList::CLEAdd(uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local) {
 	ClientListEntry* tmp = new ClientListEntry(GetNextCLEID(), iLSID, iLoginName, iLoginKey, iWorldAdmin, ip, local);
 
@@ -346,33 +298,33 @@ void ClientList::CLCheckStale() {
 	}
 }
 
-void ClientList::ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	ClientListEntry* cle;
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		if (iterator.GetData()->GetID() == scl->wid) {
-			cle = iterator.GetData();
-			if (scl->remove == 2){
-				cle->LeavingZone(zoneserver, CLE_Status_Offline);
-			}
-			else if (scl->remove == 1)
-				cle->LeavingZone(zoneserver, CLE_Status_Zoning);
-			else
-				cle->Update(zoneserver, scl);
-			return;
-		}
-		iterator.Advance();
-	}
-	if (scl->remove == 2)
-		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_Online);
-	else if (scl->remove == 1)
-		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_Zoning);
-	else
-		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_InZone);
-	clientlist.Insert(cle);
-	zoneserver->ChangeWID(scl->charid, cle->GetID());
-}
+//void ClientList::ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl) {
+//	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+//	ClientListEntry* cle;
+//	iterator.Reset();
+//	while(iterator.MoreElements()) {
+//		if (iterator.GetData()->GetID() == scl->wid) {
+//			cle = iterator.GetData();
+//			if (scl->remove == 2){
+//				cle->LeavingZone(zoneserver, CLE_Status_Offline);
+//			}
+//			else if (scl->remove == 1)
+//				cle->LeavingZone(zoneserver, CLE_Status_Zoning);
+//			else
+//				cle->Update(zoneserver, scl);
+//			return;
+//		}
+//		iterator.Advance();
+//	}
+//	if (scl->remove == 2)
+//		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_Online);
+//	else if (scl->remove == 1)
+//		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_Zoning);
+//	else
+//		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status_InZone);
+//	clientlist.Insert(cle);
+//	zoneserver->ChangeWID(scl->charid, cle->GetID());
+//}
 
 void ClientList::CLEKeepAlive(uint32 numupdates, uint32* wid) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
@@ -1019,7 +971,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 				LFG[0] = 0;
 
 			if (admin >= 150 && admin >= cle->Admin()) {
-				sprintf(accinfo, " AccID: %i AccName: %s LSID: %i Status: %i", cle->AccountID(), cle->AccountName(), cle->LSAccountID(), cle->Admin());
+				sprintf(accinfo, " AccID: %i AccName: %s LSID: %i Status: %i", cle->AccountID(), cle->AccountName(), cle->getLoginServerAccountID(), cle->Admin());
 			}
 			else
 				accinfo[0] = 0;

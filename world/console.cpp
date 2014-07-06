@@ -395,7 +395,8 @@ void Console::ProcessCommand(const char* command) {
 				state = CONSOLE_STATE_CLOSED;
 				return;
 			}
-			paccountid = database.CheckLogin(paccountname,command);
+			//paccountid = database.CheckLogin(paccountname,command);
+			paccountid = 0;
 			if (paccountid == 0) {
 				SendMessage(1, 0);
 				SendMessage(2, "Login failed.");
@@ -779,9 +780,6 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "Usage: Serverinfo [type]");
 					SendMessage(1, "  OS - Operating system version information.");
 				}
-			}
-			else if (strcasecmp(sep.arg[0], "IPLookup") == 0 && admin >= 201) {
-				client_list.SendCLEList(admin, 0, this, sep.argplus[1]);
 			}
 			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= 100) {
 				#ifdef _WINDOWS

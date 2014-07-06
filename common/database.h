@@ -163,7 +163,6 @@ public:
 	*/
 	uint32	GetMiniLoginAccount(char* ip);
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
-	uint32	CheckLogin(const char* name, const char* password, int16* oStatus = 0);
 	int16	CheckStatus(uint32 account_id);
 	uint32	CreateAccount(const char* name, const char* password, int16 status, uint32 lsaccount_id = 0);
 	bool	DeleteAccount(const char* name);
@@ -172,8 +171,6 @@ public:
 	uint32	GetAccountIDFromLSID(uint32 iLSID, char* oAccountName = 0, int16* oStatus = 0);
 	bool	UpdateLiveChar(char* charname,uint32 lsaccount_id);
 	bool	GetLiveChar(uint32 account_id, char* cname);
-	uint8	GetAgreementFlag(uint32 acctid);
-	void	SetAgreementFlag(uint32 acctid);
 
 	/*
 	* Groups

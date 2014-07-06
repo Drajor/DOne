@@ -231,7 +231,6 @@ int command_init(void) {
 		command_add("wp","[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid",170,command_wp) ||
 		command_add("wpadd","[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path",170,command_wpadd) ||
 		command_add("wpinfo","- Show waypoint info about your NPC target",170,command_wpinfo) ||
-		command_add("iplookup","[charname] - Look up IP address of charname",200,command_iplookup) ||
 		command_add("size","[size] - Change size of you or your target",50,command_size) ||
 		command_add("mana","- Fill your or your target's mana",50,command_mana) ||
 		command_add("flymode","[0/1/2] - Set your or your player target's flymode to off/on/levitate",50,command_flymode) ||
@@ -391,9 +390,6 @@ int command_init(void) {
 		command_add("hatelist"," - Display hate list for target.", 80,command_hatelist) ||
 		command_add("aggrozone","[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.",100,command_aggrozone) ||
 		command_add("npcemote","[message] - Make your NPC target emote a message.",150,command_npcemote) ||
-		command_add("serverrules","- Read this server's rules",0,command_serverrules) ||
-		command_add("acceptrules","[acceptrules] - Accept the EQEmu Agreement",0,command_acceptrules) ||
-		command_add("rules","(subcommand) - Manage server rules", 250, command_rules) ||
 		command_add("task","(subcommand) - Task system commands", 150, command_task) ||
 		command_add("reloadtitles","- Reload player titles from the database", 150, command_reloadtitles) ||
 		command_add("guildcreate","[guildname] - Creates an approval setup for guild name specified",0,command_guildcreate) ||
@@ -2289,18 +2285,6 @@ void command_wp(Client* c, const Seperator *sep)
 		database.DeleteWaypoint(c, atoi(sep->arg[2]),wp,zone->GetZoneID());
 	else
 		c->message(0,"Usage: #wp add/delete grid_num pause wp_num [-h]");
-}
-
-void command_iplookup(Client* c, const Seperator *sep)
-{
-	ServerPacket* pack = new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
-	ServerGenericWorldQuery_Struct* s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
-	strcpy(s->from, c->getName());
-	s->admin = c->Admin();
-	if (sep->argplus[1][0] != 0)
-		strcpy(s->query, sep->argplus[1]);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
 }
 
 void command_size(Client* c, const Seperator *sep)
@@ -8039,21 +8023,6 @@ void command_mlog(Client* c, const Seperator *sep) {
 		}
 	} else {
 		c->message(15, "Invalid action specified. use '#mlog help' for help");
-	}
-}
-
-void command_serverrules(Client* c, const Seperator *sep)
-{
-	c->SendRules(c);
-}
-
-void command_acceptrules(Client* c, const Seperator *sep)
-{
-	if(!database.GetAgreementFlag(c->AccountID()))
-	{
-		database.SetAgreementFlag(c->AccountID());
-		c->SendAppearancePacket(AT_Anim, ANIM_STAND);
-		c->message(0,"It is recorded you have agreed to the rules.");
 	}
 }
 

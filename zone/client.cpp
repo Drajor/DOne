@@ -3122,44 +3122,6 @@ void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
 	memcpy(into, &m_pp.leader_abilities, sizeof(GroupLeadershipAA_Struct));
 }
 
-void Client::EnteringMessages(Client* client)
-{
-	//server rules
-	char *rules;
-	rules = new char [4096];
-
-	if(database.GetVariable("Rules", rules, 4096))
-	{
-		uint8 flag = database.GetAgreementFlag(client->AccountID());
-		if(!flag)
-		{
-			client->message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->message(13,"You must agree to the Rules, before you can move. (type #serverrules to view the rules)");
-			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
-		}
-	}
-	safe_delete_array(rules);
-}
-
-void Client::SendRules(Client* client)
-{
-	char *rules;
-	rules = new char [4096];
-	char *ptr;
-
-	database.GetVariable("Rules", rules, 4096);
-
-	ptr = strtok(rules, "\n");
-	while(ptr != nullptr)
-	{
-
-		client->message(0,"%s",ptr);
-		ptr = strtok(nullptr, "\n");
-	}
-	safe_delete_array(rules);
-}
-
 void Client::SetEndurance(int32 newEnd)
 {
 	/*Endurance can't be less than 0 or greater than max*/

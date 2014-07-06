@@ -62,6 +62,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "WorldConfig.h"
+#include "Utility.h"
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
@@ -102,11 +103,15 @@ bool LoginServer::Process() {
 		switch(pack->opcode) {
 			case 0:
 				break;
-			case ServerOP_KeepAlive: {
+			case ServerOP_KeepAlive:
+			{
+				Utility::print("ServerOP_KeepAlive");
 				// ignore this
 				break;
 			}
-			case ServerOP_UsertoWorldReq: {
+			case ServerOP_UsertoWorldReq:
+			{
+				Utility::print("ServerOP_UsertoWorldReq");
 				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
 				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
 				int16 status = database.CheckStatus(id);
@@ -120,11 +125,17 @@ bool LoginServer::Process() {
 				utwrs->lsaccountid = utwr->lsaccountid;
 				utwrs->ToID = utwr->FromID;
 
-				if(Config->Locked == true)
+				//utwrs->response = 1; // Normal, everything is OK.
+				//utwrs->response = 0; // 'That server currently unavailable. Please check the EverQuest webpage for current server status and try again later'.
+				//utwrs->response = -1; // 'This account is currently suspended. Please contact customer service for more information.'
+				//utwrs->response = -2; // 'This account is currently banned. Please contact customer service for more information.'
+				//utwrs->response = -3; // 'The world server has denied your login request. Please try again later.'
+
+				if (Config->Locked == true)
 				{
-					if((status == 0 || status < 100) && (status != -2 || status != -1))
+					if ((status == 0 || status < 100) && (status != -2 || status != -1))
 						utwrs->response = 0;
-					if(status >= 100)
+					if (status >= 100)
 						utwrs->response = 1;
 				}
 				else {
@@ -132,12 +143,12 @@ bool LoginServer::Process() {
 				}
 
 				int32 x = Config->MaxClients;
-				if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+				if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
 					utwrs->response = -3;
 
-				if(status == -1)
+				if (status == -1)
 					utwrs->response = -1;
-				if(status == -2)
+				if (status == -2)
 					utwrs->response = -2;
 
 				utwrs->worldid = utwr->worldid;
@@ -145,7 +156,9 @@ bool LoginServer::Process() {
 				delete outpack;
 				break;
 			}
-			case ServerOP_LSClientAuth: {
+			case ServerOP_LSClientAuth:
+			{
+				Utility::print("ServerOP_LSClientAuth");
 				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
 
 				if (RuleI(World, AccountSessionLimit) >= 0) {
@@ -158,6 +171,7 @@ bool LoginServer::Process() {
 				break;
 			}
 			case ServerOP_LSFatalError: {
+				Utility::print("ServerOP_LSFatalError");
 	#ifndef IGNORE_LS_FATAL_ERROR
 				WorldConfig::DisableLoginserver();
 				_log(WORLD__LS_ERR, "Login server responded with FatalError. Disabling reconnect.");
@@ -169,19 +183,25 @@ bool LoginServer::Process() {
 				}
 				break;
 			}
-			case ServerOP_SystemwideMessage: {
+			case ServerOP_SystemwideMessage:
+			{
+				Utility::print("ServerOP_SystemwideMessage");
 				ServerSystemwideMessage* swm = (ServerSystemwideMessage*) pack->pBuffer;
 				zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
 				break;
 			}
-			case ServerOP_LSRemoteAddr: {
+			case ServerOP_LSRemoteAddr:
+			{
+				Utility::print("ServerOP_LSRemoteAddr");
 				if (!Config->WorldAddress.length()) {
 					WorldConfig::SetWorldAddress((char *)pack->pBuffer);
 					_log(WORLD__LS, "Loginserver provided %s as world address",pack->pBuffer);
 				}
 				break;
 			}
-			case ServerOP_LSAccountUpdate: {
+			case ServerOP_LSAccountUpdate:
+			{
+				Utility::print("ServerOP_LSAccountUpdate");
 				_log(WORLD__LS, "Received ServerOP_LSAccountUpdate packet from loginserver");
 				CanAccountUpdate = true;
 				break;

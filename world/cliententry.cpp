@@ -36,56 +36,16 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 {
 	ClearVars(true);
 
-	pIP = ip;
-	pLSID = iLSID;
+	mIP = ip;
+	mLoginServerID = iLSID;
 	if(iLSID > 0)
 		paccountid = database.GetAccountIDFromLSID(iLSID, paccountname, &padmin);
-	strn0cpy(plsname, iLoginName, sizeof(plsname));
-	strn0cpy(plskey, iLoginKey, sizeof(plskey));
-	pworldadmin = iWorldAdmin;
+	strn0cpy(mLoginServerAccountName, iLoginName, sizeof(mLoginServerAccountName));
+	strn0cpy(mLoginServerKey, iLoginKey, sizeof(mLoginServerKey));
+	mWorldAdminStatus = iWorldAdmin;
 	plocal=(local==1);
 
 	pinstance = 0;
-}
-
-ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin)
-: id(in_id)
-{
-	ClearVars(true);
-
-	pIP = 0;
-	pLSID = 0;
-	pworldadmin = 0;
-
-	paccountid = iAccID;
-	strn0cpy(paccountname, iAccName, sizeof(paccountname));
-	pMD5Pass = iMD5Pass;
-	padmin = iAdmin;
-
-	pinstance = 0;
-}
-
-ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline)
-: id(in_id)
-{
-	ClearVars(true);
-
-	pIP = 0;
-	pLSID = scl->LSAccountID;
-	strn0cpy(plsname, scl->name, sizeof(plsname));
-	strn0cpy(plskey, scl->lskey, sizeof(plskey));
-	pworldadmin = 0;
-
-	paccountid = scl->AccountID;
-	strn0cpy(paccountname, scl->AccountName, sizeof(paccountname));
-	padmin = scl->Admin;
-
-	pinstance = 0;
-
-	if (iOnline >= CLE_Status_Zoning)
-		Update(iZS, scl, iOnline);
-	else
-		SetOnline(iOnline);
 }
 
 ClientListEntry::~ClientListEntry() {
@@ -106,17 +66,17 @@ void ClientListEntry::SetOnline(ZoneServer* iZS, int8 iOnline) {
 }
 
 void ClientListEntry::SetOnline(int8 iOnline) {
-	if (iOnline >= CLE_Status_Online && pOnline < CLE_Status_Online)
+	if (iOnline >= CLE_Status_Online && mOnline < CLE_Status_Online)
 		numplayers++;
-	else if (iOnline < CLE_Status_Online && pOnline >= CLE_Status_Online) {
+	else if (iOnline < CLE_Status_Online && mOnline >= CLE_Status_Online) {
 		numplayers--;
 	}
-	if (iOnline != CLE_Status_Online || pOnline < CLE_Status_Online)
-		pOnline = iOnline;
+	if (iOnline != CLE_Status_Online || mOnline < CLE_Status_Online)
+		mOnline = iOnline;
 	if (iOnline < CLE_Status_Zoning)
 		Camp();
-	if (pOnline >= CLE_Status_Online)
-		stale = 0;
+	if (mOnline >= CLE_Status_Online)
+		mStale = 0;
 }
 
 void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline) {
@@ -137,10 +97,10 @@ void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8
 	if (paccountid == 0) {
 		paccountid = scl->AccountID;
 		strcpy(paccountname, scl->AccountName);
-		strcpy(plsname, scl->AccountName);
-		pIP = scl->IP;
-		pLSID = scl->LSAccountID;
-		strn0cpy(plskey, scl->lskey, sizeof(plskey));
+		strcpy(mLoginServerAccountName, scl->AccountName);
+		mIP = scl->IP;
+		mLoginServerID = scl->LSAccountID;
+		strn0cpy(mLoginServerKey, scl->lskey, sizeof(mLoginServerKey));
 	}
 	padmin = scl->Admin;
 	plevel = scl->level;
@@ -178,13 +138,13 @@ void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
 
 void ClientListEntry::ClearVars(bool iAll) {
 	if (iAll) {
-		pOnline = CLE_Status_Never;
-		stale = 0;
+		mOnline = CLE_Status_Never;
+		mStale = 0;
 
-		pLSID = 0;
-		memset(plsname, 0, sizeof(plsname));
-		memset(plskey, 0, sizeof(plskey));
-		pworldadmin = 0;
+		mLoginServerID = 0;
+		memset(mLoginServerAccountName, 0, sizeof(mLoginServerAccountName));
+		memset(mLoginServerKey, 0, sizeof(mLoginServerKey));
+		mWorldAdminStatus = 0;
 
 		paccountid = 0;
 		memset(paccountname, 0, sizeof(paccountname));
@@ -214,13 +174,13 @@ void ClientListEntry::Camp(ZoneServer* iZS) {
 
 	ClearVars();
 
-	stale = 0;
+	mStale = 0;
 }
 
 bool ClientListEntry::CheckStale() {
-	stale++;
-	if (stale > 20) {
-		if (pOnline > CLE_Status_Offline)
+	mStale++;
+	if (mStale > 20) {
+		if (mOnline > CLE_Status_Offline)
 			SetOnline(CLE_Status_Offline);
 		else
 			return true;
@@ -229,34 +189,34 @@ bool ClientListEntry::CheckStale() {
 }
 
 bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
-	if (strncmp(plskey, iKey,10) == 0) {
-		if (paccountid == 0 && LSID()>0) {
+	if (strncmp(mLoginServerKey, iKey,10) == 0) {
+		if (paccountid == 0 && getLoginServerAccountID()>0) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
-			paccountid = database.CreateAccount(plsname, 0, tmpStatus, LSID());
+			paccountid = database.CreateAccount(mLoginServerAccountName, 0, tmpStatus, getLoginServerAccountID());
 			if (!paccountid) {
-				_log(WORLD__CLIENTLIST_ERR,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
+				_log(WORLD__CLIENTLIST_ERR,"Error adding local account for LS login: '%s', duplicate name?" ,mLoginServerAccountName);
 				return false;
 			}
-			strn0cpy(paccountname, plsname, sizeof(paccountname));
+			strn0cpy(paccountname, mLoginServerAccountName, sizeof(paccountname));
 			padmin = tmpStatus;
 		}
 		char lsworldadmin[15] = "0";
 		database.GetVariable("honorlsworldadmin", lsworldadmin, sizeof(lsworldadmin));
-		if (atoi(lsworldadmin) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
-			padmin = pworldadmin;
+		if (atoi(lsworldadmin) == 1 && mWorldAdminStatus != 0 && (padmin < mWorldAdminStatus || padmin == 0))
+			padmin = mWorldAdminStatus;
 		return true;
 	}
 	return false;
 }
 
 bool ClientListEntry::CheckAuth(const char* iName, MD5& iMD5Password) {
-	if (LSAccountID() == 0 && strcmp(paccountname, iName) == 0 && pMD5Pass == iMD5Password)
+	if (getLoginServerAccountID() == 0 && strcmp(paccountname, iName) == 0 && pMD5Pass == iMD5Password)
 		return true;
 	return false;
 }
 
 bool ClientListEntry::CheckAuth(uint32 id, const char* iKey, uint32 ip) {
-	if (pIP==ip && strncmp(plskey, iKey,10) == 0){
+	if (mIP==ip && strncmp(mLoginServerKey, iKey,10) == 0){
 		paccountid = id;
 		database.GetAccountFromID(id,paccountname,&padmin);
 		return true;

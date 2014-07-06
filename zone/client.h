@@ -859,8 +859,6 @@ public:
 	void	EnableTitle(int titleset);
 	void	RemoveTitle(int titleset);
 
-	void	EnteringMessages(Client* client);
-	void	SendRules(Client* client);
 	std::list<std::string> consent_list;
 
 	//Anti-Cheat Stuff

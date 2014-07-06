@@ -140,58 +140,6 @@ Database::~Database()
 	}
 }
 
-
-/*
-Check if there is an account with name "name" and password "password"
-Return the account id or zero if no account matches.
-Zero will also be returned if there is a database error.
-*/
-uint32 Database::CheckLogin(const char* name, const char* password, int16* oStatus) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if(strlen(name) >= 50 || strlen(password) >= 50)
-		return(0);
-
-	char tmpUN[100];
-	char tmpPW[100];
-	DoEscapeString(tmpUN, name, strlen(name));
-	DoEscapeString(tmpPW, password, strlen(password));
-
-	if (RunQuery(query, MakeAnyLenString(&query,
-		"SELECT id, status FROM account WHERE name='%s' AND password is not null "
-		"and length(password) > 0 and (password='%s' or password=MD5('%s'))",
-		tmpUN, tmpPW, tmpPW), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint32 id = atoi(row[0]);
-			if (oStatus)
-				*oStatus = atoi(row[1]);
-			mysql_free_result(result);
-			return id;
-		}
-		else
-		{
-			mysql_free_result(result);
-			return 0;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in CheckLogin query '" << query << "' " << errbuf << std::endl;
-		safe_delete_array(query);
-		return false;
-	}
-
-	return 0;
-}
-
-
 //Lieka: Get Banned IP Address List - Only return false if the incoming connection's IP address is not present in the banned_ips table.
 bool Database::CheckBannedIPs(const char* loginIP)
 {
@@ -2123,43 +2071,6 @@ bool retval=false;
 	}
 
 	return retval;
-}
-
-uint8 Database::GetAgreementFlag(uint32 acctid)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES* result;
-	MYSQL_ROW row;
-
-	if (RunQuery(query, MakeAnyLenString(&query, "SELECT rulesflag FROM account WHERE id=%i",acctid), errbuf, &result)) {
-		safe_delete_array(query);
-		if (mysql_num_rows(result) == 1)
-		{
-			row = mysql_fetch_row(result);
-			uint8 flag = atoi(row[0]);
-			mysql_free_result(result);
-			return flag;
-		}
-	}
-	else
-	{
-		safe_delete_array(query);
-	}
-	return 0;
-}
-
-void Database::SetAgreementFlag(uint32 acctid)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	uint32	affected_rows = 0;
-
-	if (!RunQuery(query, MakeAnyLenString(&query, "UPDATE account SET rulesflag=1 where id=%i",acctid), errbuf, 0, &affected_rows)) {
-		safe_delete_array(query);
-	}
-	else
-	safe_delete_array(query);
 }
 
 void Database::ClearRaid(uint32 rid) {

@@ -64,8 +64,8 @@ public:
 	inline int16		GetAdmin()			{ if (cle) { return cle->Admin(); } return 0; }
 	inline uint32		GetAccountID()		{ if (cle) { return cle->AccountID(); } return 0; }
 	inline uint32		GetWID()			{ if (cle) { return cle->GetID(); } return 0; }
-	inline uint32		GetLSID()			{ if (cle) { return cle->LSID(); } return 0; }
-	inline const char*	GetLSKey()			{ if (cle) { return cle->GetLSKey(); } return "NOKEY"; }
+	inline uint32		GetLSID()			{ if (cle) { return cle->getLoginServerAccountID(); } return 0; }
+	inline const char*	GetLSKey()			{ if (cle) { return cle->getLoginServerKey(); } return "NOKEY"; }
 	inline uint32		GetCharID()			{ return charid; }
 	inline const char*	GetCharName()		{ return char_name; }
 	inline ClientListEntry* GetCLE()		{ return cle; }

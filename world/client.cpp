@@ -408,7 +408,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		cle->SetOnline();
 
 		clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-		clog(WORLD__CLIENT, "LS Account #%d", cle->LSID());
+		clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
 
 		if (!pZoning)
 			SendGuildList();
@@ -1325,7 +1325,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		cc->WIS + cc->INT + cc->CHA;
 
 	in.s_addr = GetIP();
-	clog(WORLD__CLIENT,"Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->LSName(), GetCLE()->LSID(), inet_ntoa(in), GetPort());
+	clog(WORLD__CLIENT, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->getLoginServerAccountName(), GetCLE()->getLoginServerAccountID(), inet_ntoa(in), GetPort());
 	clog(WORLD__CLIENT,"Name: %s", name);
 	clog(WORLD__CLIENT,"Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
 		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone);

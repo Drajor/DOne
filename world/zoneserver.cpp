@@ -744,11 +744,11 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_ClientList: {
-				if (pack->size != sizeof(ServerClientList_Struct)) {
-					zlog(WORLD__ZONE_ERR,"Wrong size on ServerOP_ClientList. Got: %d, Expected: %d",pack->size,sizeof(ServerClientList_Struct));
-					break;
-				}
-				client_list.ClientUpdate(this, (ServerClientList_Struct*) pack->pBuffer);
+				//if (pack->size != sizeof(ServerClientList_Struct)) {
+				//	zlog(WORLD__ZONE_ERR,"Wrong size on ServerOP_ClientList. Got: %d, Expected: %d",pack->size,sizeof(ServerClientList_Struct));
+				//	break;
+				//}
+				//client_list.ClientUpdate(this, (ServerClientList_Struct*) pack->pBuffer);
 				break;
 			}
 			case ServerOP_ClientListKA: {
@@ -962,15 +962,6 @@ bool ZoneServer::Process() {
 				break;
 			}
 			case ServerOP_IPLookup: {
-				if (pack->size < sizeof(ServerGenericWorldQuery_Struct)) {
-					zlog(WORLD__ZONE_ERR,"Wrong size on ServerOP_IPLookup. Got: %d, Expected (at least): %d",pack->size,sizeof(ServerGenericWorldQuery_Struct));
-					break;
-				}
-				ServerGenericWorldQuery_Struct* sgwq = (ServerGenericWorldQuery_Struct*) pack->pBuffer;
-				if (pack->size == sizeof(ServerGenericWorldQuery_Struct))
-					client_list.SendCLEList(sgwq->admin, sgwq->from, this);
-				else
-					client_list.SendCLEList(sgwq->admin, sgwq->from, this, sgwq->query);
 				break;
 			}
 			case ServerOP_LockZone: {
