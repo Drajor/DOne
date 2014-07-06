@@ -49,8 +49,6 @@
 	extern int errno;
 #endif
 
-#define IGNORE_LS_FATAL_ERROR
-
 #include "../common/servertalk.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"
@@ -103,14 +101,12 @@ bool LoginServer::Process() {
 		switch(pack->opcode) {
 			case 0:
 				break;
-			case ServerOP_KeepAlive:
-			{
+			case ServerOP_KeepAlive: {
+				// Ignored.
 				Utility::print("ServerOP_KeepAlive");
-				// ignore this
 				break;
 			}
-			case ServerOP_UsertoWorldReq:
-			{
+			case ServerOP_UsertoWorldReq: {
 				Utility::print("ServerOP_UsertoWorldReq");
 				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
 				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
@@ -156,8 +152,7 @@ bool LoginServer::Process() {
 				delete outpack;
 				break;
 			}
-			case ServerOP_LSClientAuth:
-			{
+			case ServerOP_LSClientAuth: {
 				Utility::print("ServerOP_LSClientAuth");
 				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
 
@@ -171,42 +166,25 @@ bool LoginServer::Process() {
 				break;
 			}
 			case ServerOP_LSFatalError: {
+				// Ignored. Public LS may or may not send this, local LS does not.
 				Utility::print("ServerOP_LSFatalError");
-	#ifndef IGNORE_LS_FATAL_ERROR
-				WorldConfig::DisableLoginserver();
-				_log(WORLD__LS_ERR, "Login server responded with FatalError. Disabling reconnect.");
-	#else
-			_log(WORLD__LS_ERR, "Login server responded with FatalError.");
-	#endif
-				if (pack->size > 1) {
-					_log(WORLD__LS_ERR, "     %s",pack->pBuffer);
-				}
 				break;
 			}
-			case ServerOP_SystemwideMessage:
-			{
-				Utility::print("ServerOP_SystemwideMessage");
-				ServerSystemwideMessage* swm = (ServerSystemwideMessage*) pack->pBuffer;
-				zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+			case ServerOP_SystemwideMessage: {
+				// Ignored.
 				break;
 			}
-			case ServerOP_LSRemoteAddr:
-			{
-				Utility::print("ServerOP_LSRemoteAddr");
-				if (!Config->WorldAddress.length()) {
-					WorldConfig::SetWorldAddress((char *)pack->pBuffer);
-					_log(WORLD__LS, "Loginserver provided %s as world address",pack->pBuffer);
-				}
+			case ServerOP_LSRemoteAddr: {
+				// Ignored. I am unsure if this is required or not. Local LS does not send this but the public LS may.
 				break;
 			}
-			case ServerOP_LSAccountUpdate:
-			{
+			case ServerOP_LSAccountUpdate: {
+				// Ignored.
 				break;
 			}
-			default:
-			{
+			default: {
 				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
-	DumpPacket(pack->pBuffer, pack->size);
+				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}
 		}
@@ -252,24 +230,6 @@ bool LoginServer::Connect() {
 		_log(WORLD__LS_ERR, "Could not connect to login server: %s:%d %s",LoginServerAddress,LoginServerPort,errbuf);
 		return false;
 	}
-}
-void LoginServer::SendInfo() {
-	const WorldConfig *Config=WorldConfig::get();
-
-	ServerPacket* pack = new ServerPacket;
-	pack->opcode = ServerOP_LSInfo;
-	pack->size = sizeof(ServerLSInfo_Struct);
-	pack->pBuffer = new uchar[pack->size];
-	memset(pack->pBuffer, 0, pack->size);
-	ServerLSInfo_Struct* lsi = (ServerLSInfo_Struct*) pack->pBuffer;
-	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, LOGIN_VERSION);
-	strcpy(lsi->name, Config->LongName.c_str());
-	strcpy(lsi->account, LoginAccount);
-	strcpy(lsi->password, LoginPassword);
-	strcpy(lsi->address, Config->WorldAddress.c_str());
-	SendPacket(pack);
-	delete pack;
 }
 
 void LoginServer::SendNewInfo() {

@@ -36,7 +36,6 @@ public:
 	bool Process();
 	bool Connect();
 
-	void SendInfo();
 	void SendNewInfo();
 	void SendStatus();
 

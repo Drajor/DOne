@@ -23,8 +23,6 @@
 #include <stdlib.h>
 #include "../common/version.h"
 
-#define IGNORE_LS_FATAL_ERROR
-
 #include "../common/servertalk.h"
 #include "LoginServer.h"
 #include "LoginServerList.h"
@@ -87,28 +85,6 @@ void LoginServerList::InitLoginServer() {
 	}
 }
 
-bool LoginServerList::SendInfo() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendInfo();
-		iterator.Advance();
-	}
-	return true;
-}
-
-bool LoginServerList::SendNewInfo() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendNewInfo();
-		iterator.Advance();
-	}
-	return true;
-}
-
 bool LoginServerList::SendStatus() {
 	LinkedListIterator<LoginServer*> iterator(list);
 
@@ -154,16 +130,3 @@ bool LoginServerList::AllConnected() {
 	}
 	return true;
 }
-
-bool LoginServerList::CanUpdate() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->CanUpdate())
-			return true;
-		iterator.Advance();
-	}
-	return false;
-}
-

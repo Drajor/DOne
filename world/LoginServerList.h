@@ -26,15 +26,11 @@ public:
 	void	InitLoginServer();
 
 	bool	Process();
-
-	bool	SendInfo();
-	bool	SendNewInfo();
 	bool	SendStatus();
 
 	bool	SendPacket(ServerPacket *pack);
 	bool	Connected();
 	bool	AllConnected();
-	bool	CanUpdate();
 
 protected:
 	LinkedList<LoginServer*> list;
