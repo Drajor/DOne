@@ -5400,64 +5400,6 @@ XS(XS_Client_HasSpellScribed)
     XSRETURN(1);
 }
 
-XS(XS_Client_SetAccountFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SetAccountFlag)
-{
-    dXSARGS;
-    if (items != 3)
-        Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, flag, value)");
-    {
-        Client *        THIS;
-        //char*     flag = (char *)SvPV_nolen(ST(1));
-        //char*       value = (char *)SvTRUE(ST(2));
-
-        std::string     flag(  (char *)SvPV_nolen(ST(1)) );
-        std::string     value( (char *)SvTRUE(ST(2)) );
-
-        if (sv_derived_from(ST(0), "Client")) {
-            IV tmp = SvIV((SV*)SvRV(ST(0)));
-            THIS = INT2PTR(Client *,tmp);
-        }
-        else
-            Perl_croak(aTHX_ "THIS is not of type Client");
-        if(THIS == NULL)
-            Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
-        THIS->SetAccountFlag(flag, value);
-    }
-    XSRETURN_EMPTY;
-}
-
-XS(XS_Client_GetAccountFlag); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetAccountFlag)
-{
-    dXSARGS;
-    if (items != 2)
-        Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, flag)");
-    {
-        Client *        THIS;
-        //char*     flag = (char *)SvPV_nolen(ST(1));
-        //char*       value = (char *)SvTRUE(ST(2));
-
-        std::string     flag(  (char *)SvPV_nolen(ST(1)) );
-        dXSTARG;
-
-        if (sv_derived_from(ST(0), "Client")) {
-            IV tmp = SvIV((SV*)SvRV(ST(0)));
-            THIS = INT2PTR(Client *,tmp);
-        }
-        else
-            Perl_croak(aTHX_ "THIS is not of type Client");
-        if(THIS == NULL)
-            Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
-        std::string value = THIS->GetAccountFlag(flag);
-
-        sv_setpv(TARG, value.c_str()); XSprePUSH; PUSHTARG;
-    }
-    XSRETURN(1);
-}
-
 XS(XS_Client_GetHunger); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetHunger)
 {
@@ -5939,8 +5881,6 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 		newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
         newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
-        newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
-        newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
         newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
         newXSproto(strcpy(buf, "GetThirst"), XS_Client_GetThirst, file, "$$");
         newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");

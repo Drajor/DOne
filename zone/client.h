@@ -1085,9 +1085,6 @@ public:
 	int16 GetActINT() { return( std::min(GetMaxINT(), GetINT()) ); }
 	int16 GetActWIS() { return( std::min(GetMaxWIS(), GetWIS()) ); }
 	int16 GetActCHA() { return( std::min(GetMaxCHA(), GetCHA()) ); }
-	void LoadAccountFlags();
-	void SetAccountFlag(std::string flag, std::string val);
-	std::string GetAccountFlag(std::string flag);    float GetDamageMultiplier(SkillUseTypes);
 	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
@@ -1380,7 +1377,6 @@ private:
 
 	Timer ItemTickTimer;
 	Timer ItemQuestTimer;
-	std::map<std::string,std::string> accountflags;
 
 	uint8 initial_respawn_selection;
 };

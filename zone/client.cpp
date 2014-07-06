@@ -298,7 +298,6 @@ Client::Client(EQStreamInterface* ieqs)
 	}
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
-	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
@@ -6335,52 +6334,6 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 totalval
 		Message_StringID(0, FACTION_WORST, name);
 
 	return;
-}
-
-void Client::LoadAccountFlags()
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	accountflags.clear();
-	MakeAnyLenString(&query, "SELECT p_flag, p_value FROM account_flags WHERE p_accid = '%d'", account_id);
-	if(database.RunQuery(query, strlen(query), errbuf, &result))
-	{
-		while(row = mysql_fetch_row(result))
-		{
-			std::string fname(row[0]);
-			std::string fval(row[1]);
-			accountflags[fname] = fval;
-		}
-		mysql_free_result(result);
-	}
-	else
-	{
-		std::cerr << "Error in LoadAccountFlags query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
-}
-
-void Client::SetAccountFlag(std::string flag, std::string val)
-{
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char *query = 0;
-
-	MakeAnyLenString(&query, "REPLACE INTO account_flags (p_accid, p_flag, p_value) VALUES( '%d', '%s', '%s')", account_id, flag.c_str(), val.c_str());
-	if(!database.RunQuery(query, strlen(query), errbuf))
-	{
-		std::cerr << "Error in SetAccountFlags query '" << query << "' " << errbuf << std::endl;
-	}
-	safe_delete_array(query);
-
-	accountflags[flag] = val;
-}
-
-std::string Client::GetAccountFlag(std::string flag)
-{
-	return(accountflags[flag]);
 }
 
 void Client::TickItemCheck()
