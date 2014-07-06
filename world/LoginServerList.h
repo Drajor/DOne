@@ -35,7 +35,6 @@ public:
 	bool	SendAccountUpdate(ServerPacket *pack);
 	bool	Connected();
 	bool	AllConnected();
-	bool	MiniLogin();
 	bool	CanUpdate();
 
 protected:

@@ -233,19 +233,6 @@ bool LoginServer::InitLoginServer() {
 }
 
 bool LoginServer::Connect() {
-	char tmp[25];
-	if(database.GetVariable("loginType",tmp,sizeof(tmp)) && strcasecmp(tmp,"MinILogin") == 0){
-		minilogin = true;
-		_log(WORLD__LS, "Setting World to MiniLogin Server type");
-	}
-	else
-		minilogin = false;
-
-	if (minilogin && WorldConfig::get()->WorldAddress.length()==0) {
-		_log(WORLD__LS_ERR, "**** For minilogin to work, you need to set the <address> element in the <world> section.");
-		return false;
-	}
-
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
 		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",LoginServerAddress);
@@ -259,10 +246,7 @@ bool LoginServer::Connect() {
 
 	if (tcpc->ConnectIP(LoginServerIP, LoginServerPort, errbuf)) {
 		_log(WORLD__LS, "Connected to Loginserver: %s:%d",LoginServerAddress,LoginServerPort);
-		if (minilogin)
-			SendInfo();
-		else
-			SendNewInfo();
+		SendNewInfo();
 		SendStatus();
 		zoneserver_list.SendLSZones();
 		return true;
