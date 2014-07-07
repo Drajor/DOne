@@ -33,8 +33,8 @@ public:
 	inline void			SetIP(const uint32& iIP) { mIP = iIP; }
 	inline void			KeepAlive()		{ mStale = 0; }
 	inline uint8			GetStaleCounter() const { return mStale; }
-	void	LeavingZone(ZoneServer* iZS = 0, int8 iOnline = CLE_Status_Offline);
-	void	Camp(ZoneServer* iZS = 0);
+	//void	LeavingZone(ZoneServer* iZS = 0, int8 iOnline = CLE_Status_Offline);
+	//void	Camp(ZoneServer* iZS = 0);
 
 	// Login Server
 	inline uint32 getLoginServerAccountID() const { return mLoginServerID; }

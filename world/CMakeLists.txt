@@ -4,20 +4,12 @@ SOURCE_GROUP(Data FILES DataStore.h DataStore.cpp DataProvider.h MySQLDataProvid
 SET(world_sources
 	client.cpp
 	cliententry.cpp
-	clientlist.cpp
 	CMakeLists.txt
-	EQLConfig.cpp
-	LauncherLink.cpp
-	LauncherList.cpp
-	lfplist.cpp
 	LoginServerConnection.cpp
 	net.cpp
 	UCSConnection.cpp
-	wguild_mgr.cpp
 	WorldConfig.cpp
 	worlddb.cpp
-	zonelist.cpp
-	zoneserver.cpp
 	Utility.cpp
 	ZoneManager.cpp
 	Zone.cpp
@@ -30,21 +22,13 @@ SET(world_sources
 SET(world_headers
 	client.h
 	cliententry.h
-	clientlist.h
 	CMakeLists.txt
-	EQLConfig.h
-	LauncherLink.h
-	LauncherList.h
-	lfplist.h
 	LoginServerConnection.h
 	SoFCharCreateData.h
 	UCSConnection.h
-	wguild_mgr.h
 	WorldConfig.h
 	worlddb.h
 	WorldTCPConnection.h
-	zonelist.h
-	zoneserver.h
 	Utility.h
 	ZoneManager.h
 	Zone.h

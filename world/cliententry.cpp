@@ -17,15 +17,12 @@
 */
 #include "../common/debug.h"
 #include "cliententry.h"
-#include "clientlist.h"
 #include "worlddb.h"
-#include "zoneserver.h"
 #include "WorldConfig.h"
 #include "../common/guilds.h"
 #include "../common/StringUtil.h"
 
 extern uint32 numplayers;
-extern ClientList		client_list;
 extern volatile bool RunLoops;
 
 ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginName, const char* iLoginKey, int16 iWorldAdmin, uint32 ip, uint8 local)
@@ -47,8 +44,8 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 
 ClientListEntry::~ClientListEntry() {
 	if (RunLoops) {
-		Camp(); // updates zoneserver's numplayers
-		client_list.RemoveCLEReferances(this);
+		//Camp(); // updates zoneserver's numplayers
+		//client_list.RemoveCLEReferances(this);
 	}
 }
 
@@ -70,20 +67,20 @@ void ClientListEntry::SetOnline(int8 iOnline) {
 	}
 	if (iOnline != CLE_Status_Online || mOnline < CLE_Status_Online)
 		mOnline = iOnline;
-	if (iOnline < CLE_Status_Zoning)
-		Camp();
+	//if (iOnline < CLE_Status_Zoning)
+	//	Camp();
 	if (mOnline >= CLE_Status_Online)
 		mStale = 0;
 }
 
 void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline) {
 	if (pzoneserver != iZS) {
-		if (pzoneserver){
-			pzoneserver->RemovePlayer();
-		}
-		if (iZS){
-			iZS->AddPlayer();
-		}
+		//if (pzoneserver){
+		//	pzoneserver->RemovePlayer();
+		//}
+		//if (iZS){
+		//	iZS->AddPlayer();
+		//}
 	}
 	pzoneserver = iZS;
 	pzone = scl->zone;
@@ -121,17 +118,17 @@ void ClientListEntry::Update(ZoneServer* iZS, ServerClientList_Struct* scl, int8
 	SetOnline(iOnline);
 }
 
-void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
-	if (iZS != 0 && iZS != pzoneserver)
-		return;
-	SetOnline(iOnline);
-
-	if (pzoneserver){
-		pzoneserver->RemovePlayer();
-	}
-	pzoneserver = 0;
-	pzone = 0;
-}
+//void ClientListEntry::LeavingZone(ZoneServer* iZS, int8 iOnline) {
+//	if (iZS != 0 && iZS != pzoneserver)
+//		return;
+//	SetOnline(iOnline);
+//
+//	//if (pzoneserver){
+//	//	pzoneserver->RemovePlayer();
+//	//}
+//	pzoneserver = 0;
+//	pzone = 0;
+//}
 
 void ClientListEntry::ClearVars(bool iAll) {
 	if (iAll) {
@@ -162,17 +159,17 @@ void ClientListEntry::ClearVars(bool iAll) {
 	pClientVersion = 0;
 }
 
-void ClientListEntry::Camp(ZoneServer* iZS) {
-	if (iZS != 0 && iZS != pzoneserver)
-		return;
-	if (pzoneserver){
-		pzoneserver->RemovePlayer();
-	}
-
-	ClearVars();
-
-	mStale = 0;
-}
+//void ClientListEntry::Camp(ZoneServer* iZS) {
+//	if (iZS != 0 && iZS != pzoneserver)
+//		return;
+//	if (pzoneserver){
+//		pzoneserver->RemovePlayer();
+//	}
+//
+//	ClearVars();
+//
+//	mStale = 0;
+//}
 
 bool ClientListEntry::CheckStale() {
 	mStale++;

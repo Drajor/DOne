@@ -9,9 +9,7 @@
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
 
-#include "clientlist.h"
 #include "Client.h"
-extern ClientList client_list;
 
 World::World(DataStore* pDataStore) :
 	mInitialised(false),
@@ -97,8 +95,8 @@ void World::_handleIncomingConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
 		// TEMP HACK
-		Client* client = new Client(incomingStreamInterface, this);
-		client_list.Add(client);
+		WorldClientConnection* client = new WorldClientConnection(incomingStreamInterface, this);
+		//client_list.Add(client);
 	}
 }
 

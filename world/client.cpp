@@ -15,14 +15,11 @@
 #include "../common/extprofile.h"
 #include "../common/StringUtil.h"
 #include "../common/clientversions.h"
+#include "../common/MiscFunctions.h"
 
 #include "client.h"
 #include "worlddb.h"
 #include "WorldConfig.h"
-#include "zoneserver.h"
-#include "zonelist.h"
-#include "clientlist.h"
-#include "wguild_mgr.h"
 #include "SoFCharCreateData.h"
 
 #include <iostream>
@@ -50,14 +47,12 @@
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
-extern ZSList zoneserver_list;
-extern ClientList client_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 
 
 
-Client::Client(EQStreamInterface* ieqs, World* pWorld)
+WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWorld)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
 	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
@@ -84,7 +79,7 @@ Client::Client(EQStreamInterface* ieqs, World* pWorld)
 	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
 }
 
-Client::~Client() {
+WorldClientConnection::~WorldClientConnection() {
 	if (RunLoops && cle && zoneID == 0)
 		cle->SetOnline(CLE_Status_Offline);
 
@@ -95,7 +90,7 @@ Client::~Client() {
 	eqs->ReleaseFromUse();
 }
 
-void Client::SendLogServer()
+void WorldClientConnection::SendLogServer()
 {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
 	LogServer_Struct *l=(LogServer_Struct *)outapp->pBuffer;
@@ -120,7 +115,7 @@ void Client::SendLogServer()
 	safe_delete(outapp);
 }
 
-void Client::SendEnterWorld(std::string name)
+void WorldClientConnection::SendEnterWorld(std::string name)
 {
 char char_name[32]= { 0 };
 	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
@@ -138,7 +133,7 @@ char char_name[32]= { 0 };
 	safe_delete(outapp);
 }
 
-void Client::SendExpansionInfo() {
+void WorldClientConnection::SendExpansionInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	eis->Expansions = (RuleI(World, ExpansionSettings));
@@ -146,7 +141,7 @@ void Client::SendExpansionInfo() {
 	safe_delete(outapp);
 }
 
-void Client::SendCharInfo() {
+void WorldClientConnection::SendCharInfo() {
 	if (cle) {
 		cle->SetOnline(CLE_Status_CharSelect);
 	}
@@ -172,7 +167,7 @@ void Client::SendCharInfo() {
 	safe_delete(outapp);
 }
 
-void Client::SendMaxCharCreate(int max_chars) {
+void WorldClientConnection::SendMaxCharCreate(int max_chars) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
@@ -182,7 +177,7 @@ void Client::SendMaxCharCreate(int max_chars) {
 	safe_delete(outapp);
 }
 
-void Client::SendMembership() {
+void WorldClientConnection::SendMembership() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
 	Membership_Struct* mc = (Membership_Struct*)outapp->pBuffer;
 
@@ -239,7 +234,7 @@ void Client::SendMembership() {
 	safe_delete(outapp);
 }
 
-void Client::SendMembershipSettings() {
+void WorldClientConnection::SendMembershipSettings() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMembershipDetails, sizeof(Membership_Details_Struct));
 	Membership_Details_Struct* mds = (Membership_Details_Struct*)outapp->pBuffer;
 
@@ -348,14 +343,14 @@ void Client::SendMembershipSettings() {
 	safe_delete(outapp);
 }
 
-void Client::SendPostEnterWorld() {
+void WorldClientConnection::SendPostEnterWorld() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outapp->size=0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
-bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	if (app->size != sizeof(LoginInfo_Struct)) return false;
 
 	/*
@@ -392,7 +387,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	cle = client_list.CheckAuth(id, password);
+	//cle = client_list.CheckAuth(id, password);
 	if (cle) {
 		if (cle->AccountID() == 0) {
 			return false;
@@ -427,7 +422,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 
 	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
@@ -471,13 +466,13 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 	// creates up to a 10 char name
 	char vowels[18]="aeiouyaeiouaeioe";
 	char cons[48]="bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkd";
 	char rndname[17]="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 	char paircons[33]="ngrkndstshthphsktrdrbrgrfrclcr";
-	int rndnum=MakeRandomInt(0, 75),n=1;
+	int rndnum = MakeRandomInt(0, 75),n=1;
 	bool dlc=false;
 	bool vwl=false;
 	bool dbl=false;
@@ -550,7 +545,7 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
 	// New OpCode in SoF
 	uint32 allocs = character_create_allocations.size();
 	uint32 combos = character_create_race_class_combos.size();
@@ -597,7 +592,7 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 	return true;
 }
 
-bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	if (GetAccountID() == 0)
 	{
 		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
@@ -631,7 +626,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	if (GetAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Enter world with no logged in account");
@@ -646,9 +641,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if (RuleI(World, MaxClientsPerIP) >= 0) {
-		client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
-	}
+	//if (RuleI(World, MaxClientsPerIP) >= 0) {
+	//	client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
+	//}
 
 	EnterWorld_Struct *ew=(EnterWorld_Struct *)app->pBuffer;
 	strn0cpy(char_name, ew->name, 64);
@@ -848,7 +843,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
 	if(char_acct_id == GetAccountID())
@@ -861,7 +856,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	// HoT sends this to world while zoning and wants it echoed back.
 	if(ClientVersionBit & BIT_RoFAndLater)
 	{
@@ -870,7 +865,7 @@ bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandlePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 
 	EmuOpcode opcode = app->GetOpcode();
 
@@ -972,7 +967,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::process() {
+bool WorldClientConnection::process() {
 	bool ret = true;
 	//bool sendguilds = true;
 	sockaddr_in to;
@@ -1025,23 +1020,23 @@ bool Client::process() {
 	return ret;
 }
 
-void Client::EnterWorld(bool TryBootup) {
+void WorldClientConnection::EnterWorld(bool TryBootup) {
 	if (zoneID == 0)
 		return;
 
-	ZoneServer* zs = nullptr;
+	//ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
 		if(database.VerifyInstanceAlive(instanceID, GetCharID()))
 		{
 			if(database.VerifyZoneInstance(zoneID, instanceID))
 			{
-				zs = zoneserver_list.FindByInstanceID(instanceID);
+				//zs = zoneserver_list.FindByInstanceID(instanceID);
 			}
 			else
 			{
 				instanceID = 0;
-				zs = nullptr;
+//				zs = nullptr;
 				database.MoveCharacterToBind(GetCharID());
 				ZoneUnavail();
 				return;
@@ -1050,34 +1045,35 @@ void Client::EnterWorld(bool TryBootup) {
 		else
 		{
 			instanceID = 0;
-			zs = nullptr;
+			//zs = nullptr;
 			database.MoveCharacterToBind(GetCharID());
 			ZoneUnavail();
 			return;
 		}
 	}
 	else
-		zs = zoneserver_list.FindByZoneID(zoneID);
+		//zs = zoneserver_list.FindByZoneID(zoneID);
 
 
 	const char *zone_name=database.GetZoneName(zoneID, true);
-	if (zs) {
+	//if (zs) {
+	if (0) {
 		// warn the world we're comming, so it knows not to shutdown
-		zs->IncommingClient(this);
+		//zs->IncommingClient(this);
 	}
 	else {
 		if (TryBootup) {
-			clog(WORLD__CLIENT,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
+			//clog(WORLD__CLIENT,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
 			autobootup_timeout.Start();
-			pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
+			/*pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
 			if (pwaitingforbootup == 0) {
 				clog(WORLD__CLIENT_ERR,"No zoneserver available to boot up.");
 				ZoneUnavail();
-			}
+			}*/
 			return;
 		}
 		else {
-			clog(WORLD__CLIENT_ERR,"Requested zone %s is no running.",zone_name);
+			//clog(WORLD__CLIENT_ERR,"Requested zone %s is no running.",zone_name);
 			ZoneUnavail();
 			return;
 		}
@@ -1086,15 +1082,15 @@ void Client::EnterWorld(bool TryBootup) {
 
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
-	clog(WORLD__CLIENT,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
+	//clog(WORLD__CLIENT,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
 //	database.SetAuthentication(account_id, char_name, zone_name, ip);
 
 	if (seencharsel) {
-		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-			clog(WORLD__CLIENT_ERR,"Enter world failed. Zone is locked.");
-			ZoneUnavail();
-			return;
-		}
+		//if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
+		//	clog(WORLD__CLIENT_ERR,"Enter world failed. Zone is locked.");
+		//	ZoneUnavail();
+		//	return;
+		//}
 
 		ServerPacket* pack = new ServerPacket;
 		pack->opcode = ServerOP_AcceptWorldEntrance;
@@ -1104,7 +1100,7 @@ void Client::EnterWorld(bool TryBootup) {
 		WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
 		wtz->account_id = GetAccountID();
 		wtz->response = 0;
-		zs->SendPacket(pack);
+		//zs->SendPacket(pack);
 		delete pack;
 	}
 	else {	// if they havent seen character select screen, we can assume this is a zone
@@ -1113,69 +1109,62 @@ void Client::EnterWorld(bool TryBootup) {
 	}
 }
 
-void Client::Clearance(int8 response)
+void WorldClientConnection::Clearance(int8 response)
 {
-	ZoneServer* zs = nullptr;
-	if(instanceID > 0)
-	{
-		zs = zoneserver_list.FindByInstanceID(instanceID);
-	}
-	else
-	{
-		zs = zoneserver_list.FindByZoneID(zoneID);
-	}
+	//ZoneServer* zs = nullptr;
+	//if(instanceID > 0)
+	//{
+	//	zs = zoneserver_list.FindByInstanceID(instanceID);
+	//}
+	//else
+	//{
+	//	zs = zoneserver_list.FindByZoneID(zoneID);
+	//}
 
-	if(zs == 0 || response == -1 || response == 0)
-	{
-		if (zs == 0)
-		{
-			clog(WORLD__CLIENT_ERR,"Unable to find zoneserver in Client::Clearance!!");
-		} else {
-			clog(WORLD__CLIENT_ERR, "Invalid response %d in Client::Clearance", response);
-		}
+	//if(zs == 0 || response == -1 || response == 0)
+	//{
+	//	if (zs == 0)
+	//	{
+	//		clog(WORLD__CLIENT_ERR,"Unable to find zoneserver in Client::Clearance!!");
+	//	} else {
+	//		clog(WORLD__CLIENT_ERR, "Invalid response %d in Client::Clearance", response);
+	//	}
 
-		ZoneUnavail();
-		return;
-	}
+	//	ZoneUnavail();
+	//	return;
+	//}
 
 	EQApplicationPacket* outapp;
 
-	if (zs->GetCAddress() == nullptr) {
-		clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
-		ZoneUnavail();
-		return;
-	}
+	//if (zs->GetCAddress() == nullptr) {
+	//	clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
+	//	ZoneUnavail();
+	//	return;
+	//}
 
-	if (zoneID == 0) {
-		clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
-		ZoneUnavail();
-		return;
-	}
+	//if (zoneID == 0) {
+	//	clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
+	//	ZoneUnavail();
+	//	return;
+	//}
 
-	const char* zonename = database.GetZoneName(zoneID);
-	if (zonename == 0) {
-		clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
-		ZoneUnavail();
-		return;
-	}
-
-	// @bp This is the chat server
-	/*
-	char packetData[] = "64.37.148.34.9876,MyServer,Testchar,23cd2c95";
-	outapp = new EQApplicationPacket(OP_0x0282, sizeof(packetData));
-	strcpy((char*)outapp->pBuffer, packetData);
-	QueuePacket(outapp);
-	delete outapp;
-	*/
+	//const char* zonename = database.GetZoneName(zoneID);
+	//if (zonename == 0) {
+	//	clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
+	//	ZoneUnavail();
+	//	return;
+	//}
 
 	// Send zone server IP data
 	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
-	const char *zs_addr=zs->GetCAddress();
+	//const char *zs_addr=zs->GetCAddress();
+	const char *zs_addr = "127.0.0.1";
 	if (!zs_addr[0]) {
 		if (cle->IsLocalClient()) {
 			struct in_addr in;
-			in.s_addr = zs->GetIP();
+			//in.s_addr = zs->GetIP();
+			//in.s_addr = zs->GetIP();
 			zs_addr=inet_ntoa(in);
 			if (!strcmp(zs_addr,"127.0.0.1"))
 				zs_addr=WorldConfig::get()->LocalAddress.c_str();
@@ -1183,9 +1172,9 @@ void Client::Clearance(int8 response)
 			zs_addr=WorldConfig::get()->WorldAddress.c_str();
 		}
 	}
-	strcpy(zsi->ip, zs_addr);
-	zsi->port =zs->GetCPort();
-	clog(WORLD__CLIENT,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
+//	strcpy(zsi->ip, zs_addr);
+	//zsi->port =zs->GetCPort();
+	//clog(WORLD__CLIENT,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1193,7 +1182,7 @@ void Client::Clearance(int8 response)
 		cle->SetOnline(CLE_Status_Zoning);
 }
 
-void Client::ZoneUnavail() {
+void WorldClientConnection::ZoneUnavail() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
 	ZoneUnavail_Struct* ua = (ZoneUnavail_Struct*)outapp->pBuffer;
 	const char* zonename = database.GetZoneName(zoneID);
@@ -1207,7 +1196,7 @@ void Client::ZoneUnavail() {
 	autobootup_timeout.Disable();
 }
 
-bool Client::GenPassKey(char* key) {
+bool WorldClientConnection::GenPassKey(char* key) {
 	char* passKey=nullptr;
 	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
 	*passKey += ((char)('A'+((int)MakeRandomInt(0, 25))));
@@ -1215,7 +1204,7 @@ bool Client::GenPassKey(char* key) {
 	return true;
 }
 
-void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
+void WorldClientConnection::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
 	clog(WORLD__CLIENT_TRACE, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
 	_pkt(WORLD__CLIENT_TRACE, app);
 
@@ -1223,25 +1212,25 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
 	eqs->QueuePacket(app, ack_req);
 }
 
-void Client::SendGuildList() {
-	EQApplicationPacket *outapp;
-	outapp = new EQApplicationPacket(OP_GuildsList);
-
-	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.makeGuildList("", outapp->size);
-	if(outapp->pBuffer == nullptr) {
-		clog(GUILDS__ERROR, "Unable to make guild list!");
-		return;
-	}
-
-	clog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
-//	_pkt(GUILDS__OUT_PACKET_TRACE, outapp);
-
-	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
+void WorldClientConnection::SendGuildList() {
+//	EQApplicationPacket *outapp;
+//	outapp = new EQApplicationPacket(OP_GuildsList);
+//
+//	//ask the guild manager to build us a nice guild list packet
+//	outapp->pBuffer = guild_mgr.makeGuildList("", outapp->size);
+//	if(outapp->pBuffer == nullptr) {
+//		clog(GUILDS__ERROR, "Unable to make guild list!");
+//		return;
+//	}
+//
+//	clog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
+////	_pkt(GUILDS__OUT_PACKET_TRACE, outapp);
+//
+//	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
 }
 
 // @merth: I have no idea what this struct is for, so it's hardcoded for now
-void Client::SendApproveWorld()
+void WorldClientConnection::SendApproveWorld()
 {
 	EQApplicationPacket* outapp;
 
@@ -1304,7 +1293,7 @@ void Client::SendApproveWorld()
 	safe_delete(outapp);
 }
 
-bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
+bool WorldClientConnection::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
@@ -1788,7 +1777,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	return Charerrors == 0;
 }
 
-void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
+void WorldClientConnection::SetClassStartingSkills( PlayerProfile_Struct *pp )
 {
 	for(uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
 		if(pp->skills[i] == 0) {
@@ -1816,7 +1805,7 @@ void Client::SetClassStartingSkills( PlayerProfile_Struct *pp )
 	}
 }
 
-void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
+void WorldClientConnection::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 {
 	switch( pp->race )
 	{
@@ -1875,7 +1864,7 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	}
 }
 
-void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
+void WorldClientConnection::SetRacialLanguages( PlayerProfile_Struct *pp )
 {
 	switch( pp->race )
 	{

@@ -66,31 +66,18 @@
 
 #endif
 
-#include "zoneserver.h"
 #include "../common/dbasync.h"
-#include "../common/EmuTCPServer.h"
 #include "WorldConfig.h"
-#include "../common/patches/patches.h"
-#include "zoneserver.h"
-#include "zonelist.h"
-#include "clientlist.h"
-#include "LauncherList.h"
-#include "wguild_mgr.h"
-#include "lfplist.h"
-//#include "ucs.h"
-
 #include "World.h"
 #include "DataStore.h"
 #include "MySQLDataProvider.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
-ClientList client_list;
-GroupLFPList LFPGroupList;
-ZSList zoneserver_list;
-LauncherList launcher_list;
+
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
+uint32 numplayers = 0;
 uint32 numzones = 0;
 bool holdzones = false;
 
@@ -155,7 +142,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	dbasync = new DBAsync(&database);
-	guild_mgr.setDatabase(&database);
 
 	_log(WORLD__INIT, "Loading variables..");
 	database.LoadVariables();
@@ -171,7 +157,7 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR, "Error: Could not load item data. But ignoring");
 	}
 	_log(WORLD__INIT, "Loading guilds..");
-	guild_mgr.loadGuilds();
+	//guild_mgr.loadGuilds();
 	//rules:
 	{
 		char tmp[64];
@@ -192,11 +178,7 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT, "Clearing temporary merchant lists..");
 		database.ClearMerchantTemp();
 	}
-	_log(WORLD__INIT, "Loading EQ time of day..");
-	if (!zoneserver_list.worldclock.loadFile(Config->EQTimeFile.c_str()))
-		_log(WORLD__INIT_ERR, "Unable to load %s", Config->EQTimeFile.c_str());
-	_log(WORLD__INIT, "Loading launcher list..");
-	launcher_list.LoadList();
+
 
 	char tmp[20];
 	tmp[0] = '\0';
@@ -220,10 +202,6 @@ int main(int argc, char** argv) {
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
-	zoneserver_list.shutdowntimer = new Timer(60000);
-	zoneserver_list.shutdowntimer->Disable();
-	zoneserver_list.reminder = new Timer(20000);
-	zoneserver_list.reminder->Disable();
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 	InterserverTimer.Trigger();
 	uint8 ReconnectCounter = 100;
@@ -231,8 +209,6 @@ int main(int argc, char** argv) {
 	while(RunLoops) {
 		Timer::SetCurrentTime();
 		world->update();
-
-		client_list.Process();
 
 		if(PurgeInstanceTimer.Check())
 		{
@@ -243,12 +219,6 @@ int main(int argc, char** argv) {
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-
-		zoneserver_list.Process();
-
-		launcher_list.Process();
-
-		LFPGroupList.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
@@ -275,9 +245,6 @@ int main(int argc, char** argv) {
 	}
 	_log(WORLD__SHUTDOWN,"World main loop completed.");
 
-	_log(WORLD__SHUTDOWN,"Shutting down zone connections (if any).");
-	zoneserver_list.KillAll();
-
 	delete world;
 	delete dataStore;
 	delete dataProvider;
@@ -286,9 +253,6 @@ int main(int argc, char** argv) {
 }
 
 void CatchSignal(int sig_num) {
-	_log(WORLD__SHUTDOWN,"Caught signal %d",sig_num);
-	if(zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str())==false)
-		_log(WORLD__SHUTDOWN,"Failed to save time file.");
 	RunLoops = false;
 }
 

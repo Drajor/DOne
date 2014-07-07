@@ -11,6 +11,6 @@ void ZoneManager::update() {
 	}
 }
 
-void ZoneManager::clientConnect(Client* pClient)
+void ZoneManager::clientConnect(WorldClientConnection* pClient)
 {
 }

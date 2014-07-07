@@ -34,10 +34,10 @@ class EQApplicationPacket;
 class EQStreamInterface;
 class World;
 
-class Client {
+class WorldClientConnection {
 public:
-	Client(EQStreamInterface* ieqs, World* pWorld);
-	~Client();
+	WorldClientConnection(EQStreamInterface* ieqs, World* pWorld);
+	~WorldClientConnection();
 
 	bool	process();
 	void	SendCharInfo();

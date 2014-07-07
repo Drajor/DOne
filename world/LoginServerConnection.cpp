@@ -47,20 +47,16 @@
 #endif
 
 #include "LoginServerConnection.h"
+#include "../common/EmuTCPConnection.h"
 #include "../common/servertalk.h"
 
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"
-#include "zoneserver.h"
 #include "worlddb.h"
-#include "zonelist.h"
-#include "clientlist.h"
 #include "WorldConfig.h"
 #include "Utility.h"
 
-extern ZSList zoneserver_list;
-extern ClientList client_list;
 extern uint32 numzones;
 extern uint32 numplayers;
 extern volatile bool	RunLoops;
@@ -155,13 +151,14 @@ void LoginServerConnection::update() {
 				Utility::print("ServerOP_LSClientAuth");
 				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
 
-				if (RuleI(World, AccountSessionLimit) >= 0) {
-					// Enforce the limit on the number of characters on the same account that can be
-					// online at the same time.
-					client_list.EnforceSessionLimit(slsca->lsaccount_id);
-				}
+				//if (RuleI(World, AccountSessionLimit) >= 0) {
+				//	// Enforce the limit on the number of characters on the same account that can be
+				//	// online at the same time.
+				//	//client_list.EnforceSessionLimit(slsca->lsaccount_id);
+				//}
 
-				client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
+				// TODO LOL
+				//client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
 				break;
 			}
 			case ServerOP_LSFatalError: {
@@ -219,7 +216,6 @@ bool LoginServerConnection::connect() {
 		_log(WORLD__LS, "Connected to Loginserver: %s:%d",mLoginServerAddress,mLoginServerPort);
 		sendNewInfo();
 		sendStatus();
-		zoneserver_list.SendLSZones();
 		return true;
 	}
 	else {
