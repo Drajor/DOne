@@ -2,7 +2,7 @@
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "LoginServerConnection.h"
-#include "ucs.h"
+#include "UCSConnection.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"

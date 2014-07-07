@@ -23,6 +23,7 @@
 */
 
 #ifdef _WINDOWS
+	#include <WinSock2.h>
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp

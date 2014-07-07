@@ -31,14 +31,12 @@
 #include "cliententry.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "ucs.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern ConsoleList console_list;
 extern volatile bool RunLoops;
-//extern UCSConnection UCSLink;
 void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(EmuTCPConnection* itcpc)

@@ -42,7 +42,6 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "LauncherList.h"
-#include "ucs.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -54,7 +53,6 @@ extern ZSList	zoneserver_list;
 extern uint32	numzones;
 extern ClientList client_list;
 extern LauncherList launcher_list;
-//extern UCSConnection UCSLink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;

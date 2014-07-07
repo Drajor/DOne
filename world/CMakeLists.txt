@@ -13,7 +13,7 @@ SET(world_sources
 	lfplist.cpp
 	LoginServerConnection.cpp
 	net.cpp
-	ucs.cpp
+	UCSConnection.cpp
 	wguild_mgr.cpp
 	WorldConfig.cpp
 	worlddb.cpp
@@ -40,7 +40,7 @@ SET(world_headers
 	lfplist.h
 	LoginServerConnection.h
 	SoFCharCreateData.h
-	ucs.h
+	UCSConnection.h
 	wguild_mgr.h
 	WorldConfig.h
 	worlddb.h
