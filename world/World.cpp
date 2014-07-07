@@ -74,7 +74,7 @@ bool World::initialise()
 void World::update()
 {
 	_checkUCSConnection();
-	mUCSConnection->Process();
+	mUCSConnection->update();
 
 	mLoginServerConnection->update();
 
@@ -110,7 +110,7 @@ void World::_checkUCSConnection() {
 	EmuTCPConnection* tcpConnection = 0;
 	while ((tcpConnection = mTCPServer->NewQueuePop())) {
 		if (tcpConnection->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
-			mUCSConnection->SetConnection(tcpConnection);
+			mUCSConnection->setConnection(tcpConnection);
 		}
 	}
 }

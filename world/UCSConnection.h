@@ -2,22 +2,21 @@
 #define UCS_H
 
 #include "../common/types.h"
-#include "../common/EmuTCPConnection.h"
-#include "../common/servertalk.h"
 
-class UCSConnection
-{
+class EmuTCPConnection;
+class ServerPacket;
+
+class UCSConnection {
 public:
 	UCSConnection();
-	void SetConnection(EmuTCPConnection *inStream);
-	bool Process();
-	bool SendPacket(ServerPacket* pack);
-	void Disconnect() { if(Stream) Stream->Disconnect(); }
-	void SendMessage(const char *From, const char *Message);
+	void setConnection(EmuTCPConnection* pConnection);
+	bool update();
+	bool sendPacket(ServerPacket* pPacket);
+	void disconnect();
 private:
-	inline uint32 GetIP() const { return Stream ? Stream->GetrIP() : 0; }
-	EmuTCPConnection *Stream;
-	bool authenticated;
+	uint32 getIP() const;
+	EmuTCPConnection* mTCPConnection;
+	bool mAuthenticated;
 };
 
-#endif /*UCS_H_*/
+#endif
