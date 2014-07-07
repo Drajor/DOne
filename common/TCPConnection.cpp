@@ -27,9 +27,6 @@
 #include "../common/timer.h"
 #include "../common/packet_dump.h"
 
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#define MSG_NOSIGNAL 0
-#endif
 #ifdef DARWIN
 	#define MSG_NOSIGNAL SO_NOSIGPIPE // Corysia Taware - Sept. 27, 2013
 	// See http://lists.apple.com/archives/macnetworkprog/2002/Dec/msg00091.html
@@ -140,11 +137,7 @@ bool TCPConnection::GetSockName(char *host, uint16 *port)
 #ifdef _WINDOWS
 	int addrlen;
 #else
-#ifdef FREEBSD
-	socklen_t addrlen;
-#else
 	size_t addrlen;
-#endif
 #endif
 	addrlen=sizeof(struct sockaddr_in);
 #ifdef _WINDOWS

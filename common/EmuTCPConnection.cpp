@@ -35,10 +35,6 @@ tremendously.
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#define MSG_NOSIGNAL 0
-#endif
-
 #define TCPN_DEBUG				0
 #define TCPN_DEBUG_Console		0
 #define TCPN_DEBUG_Memory		0

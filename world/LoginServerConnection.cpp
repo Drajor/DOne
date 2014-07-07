@@ -31,11 +31,8 @@
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
-#else // fix for linux
+#else
 	#include <sys/socket.h>
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#include <sys/types.h>
-#endif
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <pthread.h>

@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "LoginServerConnection.h"
+#include "ucs.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
@@ -19,6 +20,7 @@ World::World(DataStore* pDataStore) :
 	mZoneManager(0),
 	mTCPServer(0),
 	mLoginServerConnection(0),
+	mUCSConnection(0),
 	mDataStore(pDataStore)
 {
 
@@ -59,12 +61,21 @@ bool World::initialise()
 
 	mZoneManager = new ZoneManager(mDataStore);
 
+	mTCPServer = new EmuTCPServer();
+	char errbuf[TCPConnection_ErrorBufferSize];
+	mTCPServer->Open(9000, errbuf);
+
+	mUCSConnection = new UCSConnection();
+
 	mInitialised = true;
 	return true;
 }
 
 void World::update()
 {
+	_checkUCSConnection();
+	mUCSConnection->Process();
+
 	mLoginServerConnection->update();
 
 	// Check if any new clients are connecting.
@@ -91,7 +102,15 @@ void World::_handleIncomingConnections() {
 	}
 }
 
-bool World::isLoginServerConnected()
-{
+bool World::isLoginServerConnected() {
 	return mLoginServerConnection->isConnected();
+}
+
+void World::_checkUCSConnection() {
+	EmuTCPConnection* tcpConnection = 0;
+	while ((tcpConnection = mTCPServer->NewQueuePop())) {
+		if (tcpConnection->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
+			mUCSConnection->SetConnection(tcpConnection);
+		}
+	}
 }

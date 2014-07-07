@@ -79,18 +79,16 @@
 #include "LauncherList.h"
 #include "wguild_mgr.h"
 #include "lfplist.h"
-#include "ucs.h"
+//#include "ucs.h"
 
 #include "World.h"
 #include "DataStore.h"
 #include "MySQLDataProvider.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
-EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
-UCSConnection UCSLink;
 LauncherList launcher_list;
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
@@ -150,23 +148,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	#endif
-
-	//// add login server config to list
-	//if (Config->LoginCount == 0) {
-	//	if (Config->LoginHost.length()) {
-	//		loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str());
-	//		_log(WORLD__INIT, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
-	//	}
-	//} else {
-	//	LinkedList<LoginConfig*> loginlist=Config->loginlist;
-	//	LinkedListIterator<LoginConfig*> iterator(loginlist);
-	//	iterator.Reset();
-	//	while(iterator.MoreElements()) {
-	//		loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str());
-	//		_log(WORLD__INIT, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
-	//		iterator.Advance();
-	//	}
-	//}
 
 	_log(WORLD__INIT, "Connecting to MySQL...");
 	if (!database.Connect(
@@ -244,15 +225,6 @@ int main(int argc, char** argv) {
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
-	char errbuf[TCPConnection_ErrorBufferSize];
-	if (tcps.Open(Config->WorldTCPPort, errbuf)) {
-		_log(WORLD__INIT,"Zone (TCP) listener started.");
-	} else {
-		_log(WORLD__INIT_ERR,"Failed to start zone (TCP) listener on port %d:",Config->WorldTCPPort);
-		_log(WORLD__INIT_ERR,"        %s",errbuf);
-		return 1;
-	}
-
 	zoneserver_list.shutdowntimer = new Timer(60000);
 	zoneserver_list.shutdowntimer->Disable();
 	zoneserver_list.reminder = new Timer(20000);
@@ -260,22 +232,12 @@ int main(int argc, char** argv) {
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 	InterserverTimer.Trigger();
 	uint8 ReconnectCounter = 100;
-	EQStream* eqs;
-	EmuTCPConnection* tcpc;
-	EQStreamInterface *eqsi;
 
 	while(RunLoops) {
 		Timer::SetCurrentTime();
 		world->update();
 
 		client_list.Process();
-
-		while ((tcpc = tcps.NewQueuePop())) {
-			struct in_addr in;
-			in.s_addr = tcpc->GetrIP();
-			_log(WORLD__ZONE, "New TCP connection from %s:%d", inet_ntoa(in),tcpc->GetrPort());
-			console_list.Add(new Console(tcpc));
-		}
 
 		if(PurgeInstanceTimer.Check())
 		{
@@ -287,15 +249,11 @@ int main(int argc, char** argv) {
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
 
-		//loginserverlist.Process();
-
 		console_list.Process();
 
 		zoneserver_list.Process();
 
 		launcher_list.Process();
-
-		UCSLink.Process();
 
 		LFPGroupList.Process();
 
@@ -328,7 +286,7 @@ int main(int argc, char** argv) {
 	_log(WORLD__SHUTDOWN,"Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
 	_log(WORLD__SHUTDOWN,"Zone (TCP) listener stopped.");
-	tcps.Close();
+	//tcps.Close();
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 
 	delete world;

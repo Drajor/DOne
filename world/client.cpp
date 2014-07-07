@@ -37,16 +37,10 @@
 #include "World.h"
 #include "Utility.h"
 
-// Disgrace: for windows compile
 #ifdef _WINDOWS
 	#include <windows.h>
 	#include <winsock.h>
 #else
-	
-	#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-		#include <sys/types.h>
-	#endif
-
 	#include <sys/socket.h>
 	#include <netinet/in.h>
 	#include <arpa/inet.h>

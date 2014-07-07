@@ -2,6 +2,7 @@
 
 class EmuTCPServer;
 class LoginServerConnection;
+class UCSConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
 class ZoneManager;
@@ -14,6 +15,8 @@ public:
 	bool initialise();
 	void update();
 
+	void _checkUCSConnection();
+
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
 private:
@@ -22,6 +25,7 @@ private:
 	bool mInitialised;
 	EmuTCPServer* mTCPServer;
 	LoginServerConnection* mLoginServerConnection;
+	UCSConnection* mUCSConnection;
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 	ZoneManager* mZoneManager;

@@ -54,7 +54,7 @@ extern ZSList	zoneserver_list;
 extern uint32	numzones;
 extern ClientList client_list;
 extern LauncherList launcher_list;
-extern UCSConnection UCSLink;
+//extern UCSConnection UCSLink;
 extern volatile bool	RunLoops;
 
 ConsoleList console_list;
@@ -245,12 +245,12 @@ bool Console::Process() {
 			_log(WORLD__CONSOLE,"New launcher from %s:%d", inet_ntoa(in), GetPort());
 			launcher_list.Add(tcpc);
 			tcpc = 0;
-		} else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS)
+		}/* else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS)
 		{
 			_log(WORLD__CONSOLE,"New UCS Connection from %s:%d", inet_ntoa(in), GetPort());
 			UCSLink.SetConnection(tcpc);
 			tcpc = 0;
-		}
+		}*/
 		else {
 			_log(WORLD__CONSOLE,"Unsupported packet mode from %s:%d", inet_ntoa(in), GetPort());
 		}

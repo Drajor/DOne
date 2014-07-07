@@ -38,7 +38,7 @@ extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern ConsoleList console_list;
 extern volatile bool RunLoops;
-extern UCSConnection UCSLink;
+//extern UCSConnection UCSLink;
 void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(EmuTCPConnection* itcpc)
@@ -422,7 +422,7 @@ bool ZoneServer::Process() {
 				ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 				if(scm->chan_num == 20)
 				{
-					UCSLink.SendMessage(scm->from, scm->message);
+					//UCSLink.SendMessage(scm->from, scm->message); // UCSTODO
 					break;
 				}
 				if (scm->chan_num == 7 || scm->chan_num == 14) {
@@ -1194,7 +1194,7 @@ bool ZoneServer::Process() {
 
 			case ServerOP_UCSMailMessage:
 			{
-				UCSLink.SendPacket(pack);
+				//UCSLink.SendPacket(pack); //UCSTODO
 				break;
 			}
 			case ServerOP_Speech:

@@ -44,10 +44,6 @@
 	#include <stdarg.h>
 	#include <sys/types.h>
 	#include <sys/time.h>
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-#endif
 	#include <sys/stat.h>
 	#include <unistd.h>
 	#include <netdb.h>
