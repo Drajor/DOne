@@ -1,7 +1,7 @@
 #include "World.h"
 #include "Utility.h"
 #include "ZoneManager.h"
-#include "LoginServer.h"
+#include "LoginServerConnection.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"

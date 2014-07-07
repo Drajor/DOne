@@ -31,7 +31,6 @@
 #include "../common/seperator.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/EQPacket.h"
-#include "LoginServer.h"
 #include "../common/serverinfo.h"
 #include "../common/md5.h"
 #include "../common/opcodemgr.h"

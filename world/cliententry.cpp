@@ -18,7 +18,6 @@
 #include "../common/debug.h"
 #include "cliententry.h"
 #include "clientlist.h"
-#include "LoginServer.h"
 #include "worlddb.h"
 #include "zoneserver.h"
 #include "WorldConfig.h"

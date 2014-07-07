@@ -11,7 +11,7 @@ SET(world_sources
 	LauncherLink.cpp
 	LauncherList.cpp
 	lfplist.cpp
-	LoginServer.cpp
+	LoginServerConnection.cpp
 	net.cpp
 	ucs.cpp
 	wguild_mgr.cpp
@@ -38,7 +38,7 @@ SET(world_headers
 	LauncherLink.h
 	LauncherList.h
 	lfplist.h
-	LoginServer.h
+	LoginServerConnection.h
 	SoFCharCreateData.h
 	ucs.h
 	wguild_mgr.h

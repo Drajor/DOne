@@ -19,7 +19,6 @@
 #include "client.h"
 #include "worlddb.h"
 #include "WorldConfig.h"
-#include "LoginServer.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"

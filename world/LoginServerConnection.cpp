@@ -49,8 +49,9 @@
 	extern int errno;
 #endif
 
+#include "LoginServerConnection.h"
 #include "../common/servertalk.h"
-#include "LoginServer.h"
+
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"

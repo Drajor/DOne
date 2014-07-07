@@ -69,7 +69,6 @@
 
 #include "zoneserver.h"
 #include "console.h"
-#include "LoginServer.h"
 #include "../common/dbasync.h"
 #include "../common/EmuTCPServer.h"
 #include "WorldConfig.h"
