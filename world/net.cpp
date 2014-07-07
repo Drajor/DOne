@@ -38,7 +38,6 @@
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/EQStreamIdent.h"
-//#include "../common/patches/Client62.h"
 #include "../common/rulesys.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
@@ -68,7 +67,6 @@
 #endif
 
 #include "zoneserver.h"
-#include "console.h"
 #include "../common/dbasync.h"
 #include "../common/EmuTCPServer.h"
 #include "WorldConfig.h"
@@ -95,9 +93,6 @@ volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
-
-
-extern ConsoleList console_list;
 
 void CatchSignal(int sig_num);
 
@@ -249,8 +244,6 @@ int main(int argc, char** argv) {
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
 
-		console_list.Process();
-
 		zoneserver_list.Process();
 
 		launcher_list.Process();
@@ -281,13 +274,9 @@ int main(int argc, char** argv) {
 		Sleep(20);
 	}
 	_log(WORLD__SHUTDOWN,"World main loop completed.");
-	_log(WORLD__SHUTDOWN,"Shutting down console connections (if any).");
-	console_list.KillAll();
+
 	_log(WORLD__SHUTDOWN,"Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
-	_log(WORLD__SHUTDOWN,"Zone (TCP) listener stopped.");
-	//tcps.Close();
-	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 
 	delete world;
 	delete dataStore;

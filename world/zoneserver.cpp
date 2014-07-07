@@ -20,7 +20,6 @@
 #include "clientlist.h"
 #include "zonelist.h"
 #include "worlddb.h"
-#include "console.h"
 #include "client.h"
 #include "../common/md5.h"
 #include "WorldConfig.h"
@@ -35,7 +34,6 @@
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
-extern ConsoleList console_list;
 extern volatile bool RunLoops;
 void CatchSignal(int sig_num);
 
@@ -425,10 +423,10 @@ bool ZoneServer::Process() {
 				}
 				if (scm->chan_num == 7 || scm->chan_num == 14) {
 					if (scm->deliverto[0] == '*') {
-						Console* con = 0;
-						con = console_list.FindByAccountName(&scm->deliverto[1]);
-						if (((!con) || (!con->SendChannelMessage(scm))) && (!scm->noreply))
-							zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
+						//Console* con = 0;
+						////con = console_list.FindByAccountName(&scm->deliverto[1]);
+						//if (((!con) || (!con->SendChannelMessage(scm))) && (!scm->noreply))
+						//	zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not online at this time'", scm->to, scm->to);
 						break;
 					}
 					ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
@@ -473,9 +471,9 @@ bool ZoneServer::Process() {
 						cle->Server()->SendPacket(pack);
 				}
 				else {
-					if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
-						console_list.SendChannelMessage(scm);
-					}
+					//if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
+					//	console_list.SendChannelMessage(scm);
+					//}
 					zoneserver_list.SendPacket(pack);
 				}
 				break;

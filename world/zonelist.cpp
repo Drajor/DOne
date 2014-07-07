@@ -20,14 +20,12 @@
 #include "zoneserver.h"
 #include "WorldTCPConnection.h"
 #include "worlddb.h"
-#include "console.h"
 #include "WorldConfig.h"
 #include "../common/servertalk.h"
 #include "../common/StringUtil.h"
 
 extern uint32			numzones;
 extern bool holdzones;
-extern ConsoleList		console_list;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -426,9 +424,9 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	scm->language = language;
 	scm->chan_num = chan_num;
 	strcpy(&scm->message[0], message);
-	if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
+	/*if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
 		console_list.SendChannelMessage(scm);
-	}
+	}*/
 	pack->Deflate();
 	SendPacket(pack);
 	delete pack;
@@ -461,9 +459,9 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 
 	if (to) {
 		if (to[0] == '*') {
-			Console* con = console_list.FindByAccountName(&to[1]);
-			if (con)
-				con->SendEmoteMessageRaw(to, to_guilddbid, to_minstatus, type, message);
+			//Console* con = console_list.FindByAccountName(&to[1]);
+			//if (con)
+			//	con->SendEmoteMessageRaw(to, to_guilddbid, to_minstatus, type, message);
 			delete pack;
 			return;
 		}
@@ -483,8 +481,8 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 	pack->Deflate();
 	if (tempto[0] == 0) {
 		SendPacket(pack);
-		if (to_guilddbid == 0)
-			console_list.SendEmoteMessageRaw(type, message);
+		//if (to_guilddbid == 0)
+		//	console_list.SendEmoteMessageRaw(type, message);
 	}
 	else {
 		ZoneServer* zs = FindByName(to);
