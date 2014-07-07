@@ -23,6 +23,7 @@ SET(world_sources
 	ZoneManager.cpp
 	Zone.cpp
 	Character.cpp
+	World.cpp
 )
 
 SET(world_headers
@@ -49,6 +50,7 @@ SET(world_headers
 	ZoneManager.h
 	Zone.h
 	Character.h
+	World.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

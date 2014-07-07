@@ -4,4 +4,5 @@
 
 namespace Utility {
 	void print(std::string pMessage);
+	void criticalError(std::string pMessage);
 }

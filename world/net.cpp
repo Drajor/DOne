@@ -82,10 +82,9 @@
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "ucs.h"
-#include "ZoneManager.h"
+#include "World.h"
 
-TimeoutManager timeout_manager;
-EQStreamFactory eqsf(WorldStream,9000);
+TimeoutManager timeout_manager; // Can't remove this for now...
 EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -105,7 +104,9 @@ extern ConsoleList console_list;
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
-	ZoneManager* zoneManager = new ZoneManager();
+
+	World* world = new World();
+	world->initialise();
 
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
@@ -246,16 +247,7 @@ int main(int argc, char** argv) {
 		_log(WORLD__INIT_ERR,"        %s",errbuf);
 		return 1;
 	}
-	if (eqsf.Open()) {
-		_log(WORLD__INIT,"Client (UDP) listener started.");
-	} else {
-		_log(WORLD__INIT_ERR,"Failed to start client (UDP) listener (port 9000)");
-		return 1;
-	}
 
-	//register all the patches we have avaliable with the stream identifier.
-	EQStreamIdentifier stream_identifier;
-	RegisterAllPatches(stream_identifier);
 	zoneserver_list.shutdowntimer = new Timer(60000);
 	zoneserver_list.shutdowntimer->Disable();
 	zoneserver_list.reminder = new Timer(20000);
@@ -269,43 +261,7 @@ int main(int argc, char** argv) {
 
 	while(RunLoops) {
 		Timer::SetCurrentTime();
-
-		//check the factory for any new incoming streams.
-		while ((eqs = eqsf.Pop())) {
-			//pull the stream out of the factory and give it to the stream identifier
-			//which will figure out what patch they are running, and set up the dynamic
-			//structures and opcodes for that patch.
-			struct in_addr	in;
-			in.s_addr = eqs->GetRemoteIP();
-			_log(WORLD__CLIENT, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
-			stream_identifier.AddStream(eqs);	//takes the stream
-		}
-
-		//give the stream identifier a chance to do its work....
-		stream_identifier.Process();
-
-		//check the stream identifier for any now-identified streams
-		while((eqsi = stream_identifier.PopIdentified())) {
-			//now that we know what patch they are running, start up their client object
-			struct in_addr	in;
-			in.s_addr = eqsi->GetRemoteIP();
-			if (RuleB(World, UseBannedIPsTable)){ // Check to see if we have the responsibility for blocking IPs.
-				_log(WORLD__CLIENT, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
-				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
-					_log(WORLD__CLIENT, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
-					Client* client = new Client(eqsi);
-					client_list.Add(client);
-				} else {
-					_log(WORLD__CLIENT, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
-					eqsi->Close(); // If the inbound IP is on the banned table, close the EQStream.
-				}
-			}
-			if (!RuleB(World, UseBannedIPsTable)){
-					_log(WORLD__CLIENT, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
-					Client* client = new Client(eqsi);
-					client_list.Add(client);
-			}
-		}
+		world->update();
 
 		client_list.Process();
 
@@ -321,7 +277,7 @@ int main(int argc, char** argv) {
 			database.PurgeExpiredInstances();
 		}
 
-		zoneManager->update();
+		
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
@@ -368,10 +324,9 @@ int main(int argc, char** argv) {
 	zoneserver_list.KillAll();
 	_log(WORLD__SHUTDOWN,"Zone (TCP) listener stopped.");
 	tcps.Close();
-	_log(WORLD__SHUTDOWN,"Client (UDP) listener stopped.");
-	eqsf.Close();
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 
+	delete world;
 	return 0;
 }
 
