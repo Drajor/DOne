@@ -3,10 +3,11 @@
 class EQStreamFactory;
 class EQStreamIdentifier;
 class ZoneManager;
+class DataStore;
 
 class World {
 public:
-	World();
+	World(DataStore* pDataStore);
 	~World();
 	bool initialise();
 	void update();
@@ -16,4 +17,5 @@ private:
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 	ZoneManager* mZoneManager;
+	DataStore* mDataStore;
 };

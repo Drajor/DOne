@@ -9,7 +9,13 @@
 #include "Client.h"
 extern ClientList client_list;
 
-World::World() : mInitialised(false), mStreamIdentifier(0), mStreamFactory(0), mZoneManager(0) {
+World::World(DataStore* pDataStore) :
+	mInitialised(false),
+	mStreamIdentifier(0),
+	mStreamFactory(0),
+	mZoneManager(0),
+	mDataStore(pDataStore)
+{
 
 }
 
@@ -18,6 +24,7 @@ World::~World() {
 
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
+	safe_delete(mZoneManager);
 }
 
 bool World::initialise()
@@ -34,6 +41,8 @@ bool World::initialise()
 
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
+
+	mZoneManager = new ZoneManager(mDataStore);
 
 	mInitialised = true;
 	return true;

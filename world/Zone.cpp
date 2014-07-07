@@ -5,8 +5,12 @@
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
 
-Zone::Zone() : mInitialised(false), mStreamFactory(nullptr), mStreamIdentifier(nullptr) {
-
+Zone::Zone(DataStore* pDataStore) :
+	mDataStore(pDataStore),
+	mInitialised(false),
+	mStreamFactory(nullptr),
+	mStreamIdentifier(nullptr)
+{
 }
 
 Zone::~Zone() {

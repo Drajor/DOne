@@ -24,6 +24,8 @@ SET(world_sources
 	Zone.cpp
 	Character.cpp
 	World.cpp
+	DataStore.cpp
+	MySQLDataProvider.cpp
 )
 
 SET(world_headers
@@ -51,6 +53,9 @@ SET(world_headers
 	Zone.h
 	Character.h
 	World.h
+	DataStore.h
+	DataProvider.h
+	MySQLDataProvider.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -82,7 +82,10 @@
 #include "wguild_mgr.h"
 #include "lfplist.h"
 #include "ucs.h"
+
 #include "World.h"
+#include "DataStore.h"
+#include "MySQLDataProvider.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
 EmuTCPServer tcps;
@@ -104,8 +107,13 @@ extern ConsoleList console_list;
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
+	
+	MySQLDataProvider* dataProvider = new MySQLDataProvider();
+	dataProvider->initialise();
+	DataStore* dataStore = new DataStore();
+	dataStore->setProvider(dataProvider);
 
-	World* world = new World();
+	World* world = new World(dataStore);
 	world->initialise();
 
 	RegisterExecutablePlatform(ExePlatformWorld);
@@ -327,6 +335,9 @@ int main(int argc, char** argv) {
 	_log(WORLD__SHUTDOWN,"Signaling HTTP service to stop...");
 
 	delete world;
+	delete dataStore;
+	delete dataProvider;
+
 	return 0;
 }
 
