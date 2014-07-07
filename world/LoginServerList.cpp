@@ -21,6 +21,17 @@
 
 extern LoginServerList loginserverlist;
 
+#ifdef _WINDOWS
+void AutoInitLoginServer(void *tmp) {
+#else
+void *AutoInitLoginServer(void *tmp) {
+#endif
+	loginserverlist.InitLoginServer();
+#ifndef WIN32
+	return 0;
+#endif
+}
+
 LoginServerList::LoginServerList() { }
 LoginServerList::~LoginServerList() { }
 
@@ -33,17 +44,6 @@ bool LoginServerList::Process() {
 		i->Process();
 	}
 	return true;
-}
-
-#ifdef _WINDOWS
-void AutoInitLoginServer(void *tmp) {
-#else
-void *AutoInitLoginServer(void *tmp) {
-#endif
-	loginserverlist.InitLoginServer();
-#ifndef WIN32
-	return 0;
-#endif
 }
 
 void LoginServerList::InitLoginServer() {

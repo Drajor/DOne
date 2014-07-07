@@ -38,7 +38,6 @@ SET(world_headers
 	lfplist.h
 	LoginServer.h
 	LoginServerList.h
-	net.h
 	SoFCharCreateData.h
 	ucs.h
 	wguild_mgr.h
