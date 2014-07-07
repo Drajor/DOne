@@ -20,7 +20,6 @@
 #include "worlddb.h"
 #include "WorldConfig.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"
@@ -36,6 +35,7 @@
 #include <zlib.h>
 #include <limits.h>
 
+#include "World.h"
 #include "Utility.h"
 
 // Disgrace: for windows compile
@@ -58,18 +58,18 @@ std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
 extern ZSList zoneserver_list;
-extern LoginServerList loginserverlist;
 extern ClientList client_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 
 
 
-Client::Client(EQStreamInterface* ieqs)
+Client::Client(EQStreamInterface* ieqs, World* pWorld)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
 	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
-	eqs(ieqs)
+	eqs(ieqs),
+	mWorld(pWorld)
 {
 	// Live does not send datarate as of 3/11/2005
 	//eqs->SetDataRate(7);
@@ -394,8 +394,8 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	else
 		id=atoi(name);
 
-	if (loginserverlist.Connected() == false && !pZoning) {
-		clog(WORLD__CLIENT_ERR,"Error: Login server login while not connected to login server.");
+	if (!mWorld->isLoginServerConnected()) {
+		clog(WORLD__CLIENT_ERR, "Error: Login server login while not connected to login server.");
 		return false;
 	}
 
@@ -1012,6 +1012,7 @@ bool Client::process() {
 	}
 
 	if (!eqs->CheckState(ESTABLISHED)) {
+		Utility::print("In Client::process()");
 		if(WorldConfig::get()->UpdateStats){
 			ServerPacket* pack = new ServerPacket;
 			pack->opcode = ServerOP_LSPlayerLeftWorld;
@@ -1021,7 +1022,7 @@ bool Client::process() {
 			ServerLSPlayerLeftWorld_Struct* logout =(ServerLSPlayerLeftWorld_Struct*)pack->pBuffer;
 			strcpy(logout->key,GetLSKey());
 			logout->lsaccount_id = GetLSID();
-			loginserverlist.SendPacket(pack);
+			//loginserverlist.SendPacket(pack);
 			safe_delete(pack);
 		}
 		clog(WORLD__CLIENT,"Client disconnected (not active in process)");

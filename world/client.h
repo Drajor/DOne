@@ -32,10 +32,11 @@
 
 class EQApplicationPacket;
 class EQStreamInterface;
+class World;
 
 class Client {
 public:
-	Client(EQStreamInterface* ieqs);
+	Client(EQStreamInterface* ieqs, World* pWorld);
 	~Client();
 
 	bool	process();
@@ -108,6 +109,7 @@ private:
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* const eqs;
+	World* mWorld;
 };
 
 bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);

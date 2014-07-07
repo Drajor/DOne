@@ -70,7 +70,6 @@
 #include "zoneserver.h"
 #include "console.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "../common/dbasync.h"
 #include "../common/EmuTCPServer.h"
 #include "WorldConfig.h"
@@ -92,7 +91,6 @@ EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
-LoginServerList loginserverlist;
 UCSConnection UCSLink;
 LauncherList launcher_list;
 DBAsync *dbasync = nullptr;
@@ -154,22 +152,22 @@ int main(int argc, char** argv) {
 	}
 	#endif
 
-	// add login server config to list
-	if (Config->LoginCount == 0) {
-		if (Config->LoginHost.length()) {
-			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str());
-			_log(WORLD__INIT, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
-		}
-	} else {
-		LinkedList<LoginConfig*> loginlist=Config->loginlist;
-		LinkedListIterator<LoginConfig*> iterator(loginlist);
-		iterator.Reset();
-		while(iterator.MoreElements()) {
-			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str());
-			_log(WORLD__INIT, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
-			iterator.Advance();
-		}
-	}
+	//// add login server config to list
+	//if (Config->LoginCount == 0) {
+	//	if (Config->LoginHost.length()) {
+	//		loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str());
+	//		_log(WORLD__INIT, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
+	//	}
+	//} else {
+	//	LinkedList<LoginConfig*> loginlist=Config->loginlist;
+	//	LinkedListIterator<LoginConfig*> iterator(loginlist);
+	//	iterator.Reset();
+	//	while(iterator.MoreElements()) {
+	//		loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str());
+	//		_log(WORLD__INIT, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
+	//		iterator.Advance();
+	//	}
+	//}
 
 	_log(WORLD__INIT, "Connecting to MySQL...");
 	if (!database.Connect(
@@ -290,7 +288,7 @@ int main(int argc, char** argv) {
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
 
-		loginserverlist.Process();
+		//loginserverlist.Process();
 
 		console_list.Process();
 
@@ -307,17 +305,17 @@ int main(int argc, char** argv) {
 			database.ping();
 			// AsyncLoadVariables(dbasync, &database);
 			ReconnectCounter++;
-			if (ReconnectCounter >= 12) { // only create thread to reconnect every 10 minutes. previously we were creating a new thread every 10 seconds
-				ReconnectCounter = 0;
-				if (loginserverlist.AllConnected() == false) {
-#ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, nullptr);
-#else
-					pthread_t thread;
-					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
-#endif
-				}
-			}
+//			if (ReconnectCounter >= 12) { // only create thread to reconnect every 10 minutes. previously we were creating a new thread every 10 seconds
+//				ReconnectCounter = 0;
+//				if (loginserverlist.AllConnected() == false) {
+//#ifdef _WINDOWS
+//					_beginthread(AutoInitLoginServer, 0, nullptr);
+//#else
+//					pthread_t thread;
+//					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
+//#endif
+//				}
+//			}
 		}
 		if (numclients == 0) {
 			Sleep(50);

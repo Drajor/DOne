@@ -2,6 +2,13 @@
 #define EmuTCPSERVER_H_
 
 #include "TCPServer.h"
+#include "Mutex.h"
+
+#ifdef _WINDOWS
+	#define _WINSOCKAPI_
+	#include <windows.h>
+	#include <winsock2.h>
+#endif
 
 class EmuTCPConnection;
 struct EmuTCPNetPacket_Struct;

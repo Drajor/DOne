@@ -1,7 +1,15 @@
 #ifndef TCPSERVER_H_
 #define TCPSERVER_H_
 
+#ifdef _WINDOWS
+	#define _WINSOCKAPI_
+	#include <windows.h>
+	#include <winsock2.h>
+#endif
+
 #include "types.h"
+#include "Mutex.h"
+#include "EmuTCPConnection.h"
 
 #include <vector>
 #include <queue>

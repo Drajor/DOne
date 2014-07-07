@@ -19,7 +19,6 @@
 #include "cliententry.h"
 #include "clientlist.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "worlddb.h"
 #include "zoneserver.h"
 #include "WorldConfig.h"
@@ -27,7 +26,6 @@
 #include "../common/StringUtil.h"
 
 extern uint32 numplayers;
-extern LoginServerList loginserverlist;
 extern ClientList		client_list;
 extern volatile bool RunLoops;
 

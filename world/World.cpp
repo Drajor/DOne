@@ -1,6 +1,9 @@
 #include "World.h"
 #include "Utility.h"
 #include "ZoneManager.h"
+#include "LoginServer.h"
+
+#include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
@@ -14,6 +17,8 @@ World::World(DataStore* pDataStore) :
 	mStreamIdentifier(0),
 	mStreamFactory(0),
 	mZoneManager(0),
+	mTCPServer(0),
+	mLoginServerConnection(0),
 	mDataStore(pDataStore)
 {
 
@@ -21,7 +26,10 @@ World::World(DataStore* pDataStore) :
 
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
+	if (mTCPServer) mTCPServer->Close();
 
+	safe_delete(mTCPServer);
+	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
 	safe_delete(mZoneManager);
@@ -31,6 +39,10 @@ bool World::initialise()
 {
 	// Prevent multiple initialisation.
 	if (mInitialised) return false;
+
+	// Create our connection to the Login Server
+	mLoginServerConnection = new LoginServerConnection("127.0.0.1", 5998, "Admin", "Password");
+	mLoginServerConnection->InitLoginServer();
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(WorldStream, 9000); // [Client Limitation] World must use port 9000
@@ -50,6 +62,8 @@ bool World::initialise()
 
 void World::update()
 {
+	mLoginServerConnection->Process();
+
 	// Check if any new clients are connecting.
 	_handleIncomingConnections();
 }
@@ -69,7 +83,12 @@ void World::_handleIncomingConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
 		// TEMP HACK
-		Client* client = new Client(incomingStreamInterface);
+		Client* client = new Client(incomingStreamInterface, this);
 		client_list.Add(client);
 	}
+}
+
+bool World::isLoginServerConnected()
+{
+	return mLoginServerConnection->Connected();
 }

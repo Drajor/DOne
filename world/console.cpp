@@ -32,7 +32,6 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/EQPacket.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "../common/serverinfo.h"
 #include "../common/md5.h"
 #include "../common/opcodemgr.h"
@@ -54,7 +53,6 @@
 
 extern ZSList	zoneserver_list;
 extern uint32	numzones;
-extern LoginServerList loginserverlist;
 extern ClientList client_list;
 extern LauncherList launcher_list;
 extern UCSConnection UCSLink;
@@ -680,46 +678,6 @@ void Console::ProcessCommand(const char* command) {
 					zoneserver_list.SOPZoneBootup(tmpname, atoi(sep.arg[1]), sep.arg[2], (bool) (strcasecmp(sep.arg[3], "static") == 0));
 				}
 			}
-			else if (strcasecmp(sep.arg[0], "worldshutdown") == 0 && admin >= consoleWorldStatus) {
-				int32 time, interval;
-				if(sep.IsNumber(1) && sep.IsNumber(2) && ((time=atoi(sep.arg[1]))>0) && ((interval=atoi(sep.arg[2]))>0)) {
-					zoneserver_list.WorldShutDown(time, interval);
-				}
-				else if(strcasecmp(sep.arg[1], "now") == 0) {
-					zoneserver_list.WorldShutDown(0, 0);
-				}
-				else if(strcasecmp(sep.arg[1], "disable") == 0) {
-        			SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
-					zoneserver_list.SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
-        			zoneserver_list.shutdowntimer->Disable();
-			        zoneserver_list.reminder->Disable();
-				}
-				else {
-					SendMessage(1, "Usage: worldshutdown [now] [disable] ([time] [interval])");
-					//Go ahead and shut down since that's what this used to do when invoked this way.
-					zoneserver_list.WorldShutDown(0, 0);
-				}
-			}
-			else if (strcasecmp(sep.arg[0], "lock") == 0 && admin >= consoleLockStatus) {
-				WorldConfig::LockWorld();
-				if (loginserverlist.Connected()) {
-					loginserverlist.SendStatus();
-					SendMessage(1, "World locked.");
-				}
-				else {
-					SendMessage(1, "World locked, but login server not connected.");
-				}
-			}
-			else if (strcasecmp(sep.arg[0], "unlock") == 0 && admin >= consoleLockStatus) {
-				WorldConfig::UnlockWorld();
-				if (loginserverlist.Connected()) {
-					loginserverlist.SendStatus();
-					SendMessage(1, "World unlocked.");
-				}
-				else {
-					SendMessage(1, "World unlocked, but login server not connected.");
-				}
-			}
 			else if (strcasecmp(sep.arg[0], "version") == 0 && admin >= consoleWorldStatus) {
 				SendMessage(1, "Current version information.");
 				SendMessage(1, "  %s", CURRENT_VERSION);
@@ -747,17 +705,6 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "Usage: Serverinfo [type]");
 					SendMessage(1, "  OS - Operating system version information.");
 				}
-			}
-			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= 100) {
-				#ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, nullptr);
-				#else
-					pthread_t thread;
-					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
-				#endif
-				RunLoops = true;
-				SendMessage(1, "  Login Server Reconnect manually restarted by Console");
-				_log(WORLD__CONSOLE,"Login Server Reconnect manually restarted by Console");
 			}
 			else if (strcasecmp(sep.arg[0], "zonelock") == 0 && admin >= consoleZoneStatus) {
 				if (strcasecmp(sep.arg[1], "list") == 0) {

@@ -22,10 +22,12 @@
 #include "../common/types.h"
 
 class EmuTCPConnection;
-class LoginServer{
+class ServerPacket;
+
+class LoginServerConnection{
 public:
-	LoginServer(const char*, uint16, const char*, const char*);
-	~LoginServer();
+	LoginServerConnection(const char*, uint16, const char*, const char*);
+	~LoginServerConnection();
 
 	bool InitLoginServer();
 
@@ -40,13 +42,12 @@ public:
 	bool Connected();
 
 private:
-	EmuTCPConnection* tcpc;
-	char	LoginServerAddress[256];
-	uint32	LoginServerIP;
-	uint16	LoginServerPort;
-	char	LoginAccount[32];
-	char	LoginPassword[32];
-
-	Timer statusupdate_timer;
+	EmuTCPConnection* mTCPConnection;
+	char mLoginServerAddress[256];
+	uint32 mLoginServerIP;
+	uint16 mLoginServerPort;
+	char mLoginAccount[32];
+	char mLoginPassword[32];
+	Timer mStatusUpdateTimer;
 };
 #endif

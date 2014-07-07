@@ -51,7 +51,6 @@
 
 #include "../common/servertalk.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"
@@ -68,31 +67,34 @@ extern uint32 numzones;
 extern uint32 numplayers;
 extern volatile bool	RunLoops;
 
-LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
-: statusupdate_timer(LoginServer_StatusUpdateInterval)
+static const int StatusUpdateInterval = 15000;
+
+LoginServerConnection::LoginServerConnection(const char* iAddress, uint16 iPort, const char* Account, const char* Password) :
+	mStatusUpdateTimer(StatusUpdateInterval),
+	mTCPConnection(0)
 {
-	strn0cpy(LoginServerAddress,iAddress,256);
-	LoginServerPort = iPort;
-	strn0cpy(LoginAccount,Account,31);
-	strn0cpy(LoginPassword,Password,31);
-	tcpc = new EmuTCPConnection(true);
-	tcpc->SetPacketMode(EmuTCPConnection::packetModeLogin);
+	strn0cpy(mLoginServerAddress,iAddress,256);
+	mLoginServerPort = iPort;
+	strn0cpy(mLoginAccount,Account,31);
+	strn0cpy(mLoginPassword,Password,31);
+	mTCPConnection = new EmuTCPConnection(true);
+	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
 }
 
-LoginServer::~LoginServer() {
-	delete tcpc;
+LoginServerConnection::~LoginServerConnection() {
+	delete mTCPConnection;
 }
 
-bool LoginServer::Process() {
+bool LoginServerConnection::Process() {
 	const WorldConfig *Config=WorldConfig::get();
 
-	if (statusupdate_timer.Check()) {
+	if (mStatusUpdateTimer.Check()) {
 		this->SendStatus();
 	}
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	ServerPacket *pack = 0;
-	while((pack = tcpc->PopPacket()))
+	while((pack = mTCPConnection->PopPacket()))
 	{
 		_log(WORLD__LS_TRACE,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
 		_hex(WORLD__LS_TRACE,pack->pBuffer,pack->size);
@@ -193,45 +195,45 @@ bool LoginServer::Process() {
 	return true;
 }
 
-bool LoginServer::InitLoginServer() {
+bool LoginServerConnection::InitLoginServer() {
 	if(Connected() == false) {
 		if(ConnectReady()) {
-			_log(WORLD__LS, "Connecting to login server: %s:%d",LoginServerAddress,LoginServerPort);
+			_log(WORLD__LS, "Connecting to login server: %s:%d",mLoginServerAddress,mLoginServerPort);
 			Connect();
 		} else {
 			_log(WORLD__LS_ERR, "Not connected but not ready to connect, this is bad: %s:%d",
-				LoginServerAddress,LoginServerPort);
+				mLoginServerAddress,mLoginServerPort);
 		}
 	}
 	return true;
 }
 
-bool LoginServer::Connect() {
+bool LoginServerConnection::Connect() {
 	char errbuf[TCPConnection_ErrorBufferSize];
-	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
-		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",LoginServerAddress);
+	if ((mLoginServerIP = ResolveIP(mLoginServerAddress, errbuf)) == 0) {
+		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",mLoginServerAddress);
 		return false;
 	}
 
-	if (LoginServerIP == 0 || LoginServerPort == 0) {
-		_log(WORLD__LS_ERR, "Connect info incomplete, cannot connect: %s:%d",LoginServerAddress,LoginServerPort);
+	if (mLoginServerIP == 0 || mLoginServerPort == 0) {
+		_log(WORLD__LS_ERR, "Connect info incomplete, cannot connect: %s:%d",mLoginServerAddress,mLoginServerPort);
 		return false;
 	}
 
-	if (tcpc->ConnectIP(LoginServerIP, LoginServerPort, errbuf)) {
-		_log(WORLD__LS, "Connected to Loginserver: %s:%d",LoginServerAddress,LoginServerPort);
+	if (mTCPConnection->ConnectIP(mLoginServerIP, mLoginServerPort, errbuf)) {
+		_log(WORLD__LS, "Connected to Loginserver: %s:%d",mLoginServerAddress,mLoginServerPort);
 		SendNewInfo();
 		SendStatus();
 		zoneserver_list.SendLSZones();
 		return true;
 	}
 	else {
-		_log(WORLD__LS_ERR, "Could not connect to login server: %s:%d %s",LoginServerAddress,LoginServerPort,errbuf);
+		_log(WORLD__LS_ERR, "Could not connect to login server: %s:%d %s",mLoginServerAddress,mLoginServerPort,errbuf);
 		return false;
 	}
 }
 
-void LoginServer::SendNewInfo() {
+void LoginServerConnection::SendNewInfo() {
 	uint16 port;
 	const WorldConfig *Config=WorldConfig::get();
 
@@ -245,22 +247,22 @@ void LoginServer::SendNewInfo() {
 	strcpy(lsi->serverversion, LOGIN_VERSION);
 	strcpy(lsi->name, Config->LongName.c_str());
 	strcpy(lsi->shortname, Config->ShortName.c_str());
-	strcpy(lsi->account, LoginAccount);
-	strcpy(lsi->password, LoginPassword);
+	strcpy(lsi->account, mLoginAccount);
+	strcpy(lsi->password, mLoginPassword);
 	if (Config->WorldAddress.length())
 		strcpy(lsi->remote_address, Config->WorldAddress.c_str());
 	if (Config->LocalAddress.length())
 		strcpy(lsi->local_address, Config->LocalAddress.c_str());
 	else {
-		tcpc->GetSockName(lsi->local_address,&port);
+		mTCPConnection->GetSockName(lsi->local_address,&port);
 		WorldConfig::SetLocalAddress(lsi->local_address);
 	}
 	SendPacket(pack);
 	delete pack;
 }
 
-void LoginServer::SendStatus() {
-	statusupdate_timer.Start();
+void LoginServerConnection::SendStatus() {
+	mStatusUpdateTimer.Start();
 	ServerPacket* pack = new ServerPacket;
 	pack->opcode = ServerOP_LSStatus;
 	pack->size = sizeof(ServerLSStatus_Struct);
@@ -281,17 +283,17 @@ void LoginServer::SendStatus() {
 	delete pack;
 }
 
-void LoginServer::SendPacket(ServerPacket* pack)
+void LoginServerConnection::SendPacket(ServerPacket* pack)
 {
-	tcpc->SendPacket(pack);
+	mTCPConnection->SendPacket(pack);
 }
 
-bool LoginServer::ConnectReady()
+bool LoginServerConnection::ConnectReady()
 {
-	return tcpc->ConnectReady();
+	return mTCPConnection->ConnectReady();
 }
 
-bool LoginServer::Connected()
+bool LoginServerConnection::Connected()
 {
-	return tcpc->Connected();
+	return mTCPConnection->Connected();
 }

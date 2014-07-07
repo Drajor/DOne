@@ -19,7 +19,6 @@
 #include "zoneserver.h"
 #include "clientlist.h"
 #include "LoginServer.h"
-#include "LoginServerList.h"
 #include "zonelist.h"
 #include "worlddb.h"
 #include "console.h"
@@ -39,7 +38,6 @@ extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
 extern ZSList zoneserver_list;
 extern ConsoleList console_list;
-extern LoginServerList loginserverlist;
 extern volatile bool RunLoops;
 extern UCSConnection UCSLink;
 void CatchSignal(int sig_num);
@@ -124,7 +122,7 @@ void ZoneServer::LSShutDownUpdate(uint32 zoneid){
 		else
 			zsd->zone = zoneid;
 		zsd->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
+		//loginserverlist.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -144,7 +142,7 @@ void ZoneServer::LSBootUpdate(uint32 zoneid, uint32 instanceid, bool startup){
 		bootup->zone = zoneid;
 		bootup->zone_wid = GetID();
 		bootup->instance = instanceid;
-		loginserverlist.SendPacket(pack);
+		//loginserverlist.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -159,7 +157,7 @@ void ZoneServer::LSSleepUpdate(uint32 zoneid){
 		ServerLSZoneSleep_Struct* sleep =(ServerLSZoneSleep_Struct*)pack->pBuffer;
 		sleep->zone = zoneid;
 		sleep->zone_wid = GetID();
-		loginserverlist.SendPacket(pack);
+		//loginserverlist.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
@@ -881,31 +879,6 @@ bool ZoneServer::Process() {
 				}
 				break;
 			}
-			case ServerOP_Lock: {
-				if (pack->size != sizeof(ServerLock_Struct)) {
-					zlog(WORLD__ZONE_ERR,"Wrong size on ServerOP_Lock. Got: %d, Expected: %d",pack->size,sizeof(ServerLock_Struct));
-					break;
-				}
-				ServerLock_Struct* slock = (ServerLock_Struct*) pack->pBuffer;
-				if (slock->mode >= 1)
-					WorldConfig::LockWorld();
-				else
-					WorldConfig::UnlockWorld();
-				if (loginserverlist.Connected()) {
-					loginserverlist.SendStatus();
-					if (slock->mode >= 1)
-						this->SendEmoteMessage(slock->myname, 0, 0, 13, "World locked");
-					else
-						this->SendEmoteMessage(slock->myname, 0, 0, 13, "World unlocked");
-				}
-				else {
-					if (slock->mode >= 1)
-						this->SendEmoteMessage(slock->myname, 0, 0, 13, "World locked, but login server not connected.");
-					else
-						this->SendEmoteMessage(slock->myname, 0, 0, 13, "World unlocked, but login server not conencted.");
-				}
-				break;
-								}
 			case ServerOP_Motd: {
 				if (pack->size != sizeof(ServerMotd_Struct)) {
 					zlog(WORLD__ZONE_ERR,"Wrong size on ServerOP_Motd. Got: %d, Expected: %d",pack->size,sizeof(ServerMotd_Struct));
