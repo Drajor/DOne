@@ -31,7 +31,7 @@
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
-#else // Pyro: fix for linux
+#else // fix for linux
 	#include <sys/socket.h>
 #ifdef FREEBSD //Timothy Whitman - January 7, 2003
 	#include <sys/types.h>
@@ -70,14 +70,14 @@ extern volatile bool	RunLoops;
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(const char* iAddress, uint16 iPort, const char* Account, const char* Password) :
+LoginServerConnection::LoginServerConnection(const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
 	mTCPConnection(0)
 {
-	strn0cpy(mLoginServerAddress,iAddress,256);
-	mLoginServerPort = iPort;
-	strn0cpy(mLoginAccount,Account,31);
-	strn0cpy(mLoginPassword,Password,31);
+	strn0cpy(mLoginServerAddress,pAddress,256);
+	mLoginServerPort = pPort;
+	strn0cpy(mLoginAccount,pAccountName,31);
+	strn0cpy(mLoginPassword,pPassword,31);
 	mTCPConnection = new EmuTCPConnection(true);
 	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
 }
@@ -86,11 +86,11 @@ LoginServerConnection::~LoginServerConnection() {
 	delete mTCPConnection;
 }
 
-bool LoginServerConnection::Process() {
+void LoginServerConnection::update() {
 	const WorldConfig *Config=WorldConfig::get();
 
 	if (mStatusUpdateTimer.Check()) {
-		this->SendStatus();
+		this->sendStatus();
 	}
 
 	/************ Get all packets from packet manager out queue and process them ************/
@@ -150,7 +150,7 @@ bool LoginServerConnection::Process() {
 					utwrs->response = -2;
 
 				utwrs->worldid = utwr->worldid;
-				SendPacket(outpack);
+				sendPacket(outpack);
 				delete outpack;
 				break;
 			}
@@ -192,24 +192,21 @@ bool LoginServerConnection::Process() {
 		}
 		delete pack;
 	}
-
-	return true;
 }
 
-bool LoginServerConnection::InitLoginServer() {
-	if(Connected() == false) {
-		if(ConnectReady()) {
+bool LoginServerConnection::initialise() {
+	if(!isConnected()) {
+		if(isConnectReady()) {
 			_log(WORLD__LS, "Connecting to login server: %s:%d",mLoginServerAddress,mLoginServerPort);
-			Connect();
+			connect();
 		} else {
-			_log(WORLD__LS_ERR, "Not connected but not ready to connect, this is bad: %s:%d",
-				mLoginServerAddress,mLoginServerPort);
+			_log(WORLD__LS_ERR, "Not connected but not ready to connect, this is bad: %s:%d", mLoginServerAddress,mLoginServerPort);
 		}
 	}
 	return true;
 }
 
-bool LoginServerConnection::Connect() {
+bool LoginServerConnection::connect() {
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if ((mLoginServerIP = ResolveIP(mLoginServerAddress, errbuf)) == 0) {
 		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",mLoginServerAddress);
@@ -223,8 +220,8 @@ bool LoginServerConnection::Connect() {
 
 	if (mTCPConnection->ConnectIP(mLoginServerIP, mLoginServerPort, errbuf)) {
 		_log(WORLD__LS, "Connected to Loginserver: %s:%d",mLoginServerAddress,mLoginServerPort);
-		SendNewInfo();
-		SendStatus();
+		sendNewInfo();
+		sendStatus();
 		zoneserver_list.SendLSZones();
 		return true;
 	}
@@ -234,7 +231,7 @@ bool LoginServerConnection::Connect() {
 	}
 }
 
-void LoginServerConnection::SendNewInfo() {
+void LoginServerConnection::sendNewInfo() {
 	uint16 port;
 	const WorldConfig *Config=WorldConfig::get();
 
@@ -258,11 +255,11 @@ void LoginServerConnection::SendNewInfo() {
 		mTCPConnection->GetSockName(lsi->local_address,&port);
 		WorldConfig::SetLocalAddress(lsi->local_address);
 	}
-	SendPacket(pack);
+	sendPacket(pack);
 	delete pack;
 }
 
-void LoginServerConnection::SendStatus() {
+void LoginServerConnection::sendStatus() {
 	mStatusUpdateTimer.Start();
 	ServerPacket* pack = new ServerPacket;
 	pack->opcode = ServerOP_LSStatus;
@@ -280,21 +277,21 @@ void LoginServerConnection::SendStatus() {
 
 	lss->num_zones = numzones;
 	lss->num_players = numplayers;
-	SendPacket(pack);
+	sendPacket(pack);
 	delete pack;
 }
 
-void LoginServerConnection::SendPacket(ServerPacket* pack)
+void LoginServerConnection::sendPacket(ServerPacket* pPacket)
 {
-	mTCPConnection->SendPacket(pack);
+	mTCPConnection->SendPacket(pPacket);
 }
 
-bool LoginServerConnection::ConnectReady()
+bool LoginServerConnection::isConnectReady()
 {
 	return mTCPConnection->ConnectReady();
 }
 
-bool LoginServerConnection::Connected()
+bool LoginServerConnection::isConnected()
 {
 	return mTCPConnection->Connected();
 }

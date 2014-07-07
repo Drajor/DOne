@@ -26,20 +26,17 @@ class ServerPacket;
 
 class LoginServerConnection{
 public:
-	LoginServerConnection(const char*, uint16, const char*, const char*);
+	LoginServerConnection(const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword);
 	~LoginServerConnection();
 
-	bool InitLoginServer();
-
-	bool Process();
-	bool Connect();
-
-	void SendNewInfo();
-	void SendStatus();
-
-	void SendPacket(ServerPacket* pack);
-	bool ConnectReady();
-	bool Connected();
+	bool initialise();
+	void update();
+	bool connect();
+	void sendNewInfo();
+	void sendStatus();
+	void sendPacket(ServerPacket* pPacket);
+	bool isConnectReady();
+	bool isConnected();
 
 private:
 	EmuTCPConnection* mTCPConnection;
