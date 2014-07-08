@@ -27,6 +27,9 @@ public:
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
+
+	bool getLocked() { return mLocked; }
+	void setLocked(bool pLocked);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account
@@ -41,6 +44,7 @@ private:
 	void _handleIncomingClientConnections();
 
 	bool mInitialised;
+	bool mLocked;
 	EmuTCPServer* mTCPServer;
 	LoginServerConnection* mLoginServerConnection;
 	UCSConnection* mUCSConnection;

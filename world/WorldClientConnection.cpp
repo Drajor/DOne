@@ -50,11 +50,6 @@
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
-extern uint32 numclients;
-extern volatile bool RunLoops;
-
-
-
 WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWorld)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
 	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
@@ -63,32 +58,23 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 	mWorld(pWorld),
 	mIdentified(false)
 {
-	// Live does not send datarate as of 3/11/2005
-	//eqs->SetDataRate(7);
 	mIP = eqs->GetRemoteIP();
 	mPort = ntohs(eqs->GetRemotePort());
 
 	autobootup_timeout.Disable();
 	connect.Disable();
 	seencharsel = false;
-	//cle = 0;
 	zoneID = 0;
 	char_name[0] = 0;
 	mCharacterID = 0;
 	pwaitingforbootup = 0;
 	StartInTutorial = false;
 	ClientVersionBit = 0;
-	numclients++;
 
 	ClientVersionBit = 1 << (eqs->ClientVersion() - 1);
 }
 
 WorldClientConnection::~WorldClientConnection() {
-	//if (RunLoops && cle && zoneID == 0)
-	//	cle->SetOnline(CLE_Status_Offline);
-
-	numclients--;
-
 	//let the stream factory know were done with this stream
 	eqs->Close();
 	eqs->ReleaseFromUse();
@@ -368,11 +354,11 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19] = {0};
-	char password[16] = {0};
+	char key[16] = {0};
 	strn0cpy(name, (char*)loginInfo->login_info,18);
-	strn0cpy(password, (char*)&(loginInfo->login_info[strlen(name)+1]), 15);
+	strn0cpy(key, (char*)&(loginInfo->login_info[strlen(name)+1]), 15);
 
-	if (strlen(password) <= 1) {
+	if (strlen(key) <= 1) {
 		// TODO: Find out how to tell the client wrong username/password
 		clog(WORLD__CLIENT_ERR,"Login without a password");
 		return false;
@@ -380,11 +366,7 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 
 	mZoning = (loginInfo->zoning == 1);
 
-	uint32 id = 0;
-	if(strncasecmp(name, "LS#", 3) == 0)
-		id=atoi(&name[3]);
-	else
-		id=atoi(name);
+	uint32 id = atoi(name);
 
 	if (!mWorld->isLoginServerConnected()) {
 		clog(WORLD__CLIENT_ERR, "Error: Login server login while not connected to login server.");
@@ -395,7 +377,7 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 
 	// This is first communication from client after Server Select
 	if (!mIdentified) {
-		if (mWorld->tryIdentify(this, id, password)) {
+		if (mWorld->tryIdentify(this, id, key)) {
 			/*
 				OP_GuildsList, OP_LogServer, OP_ApproveWorld
 				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.

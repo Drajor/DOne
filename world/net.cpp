@@ -76,7 +76,6 @@ TimeoutManager timeout_manager; // Can't remove this for now...
 
 DBAsync *dbasync = nullptr;
 volatile bool RunLoops = true;
-uint32 numclients = 0;
 uint32 numplayers = 0;
 uint32 numzones = 0;
 bool holdzones = false;
@@ -236,10 +235,6 @@ int main(int argc, char** argv) {
 //#endif
 //				}
 //			}
-		}
-		if (numclients == 0) {
-			Sleep(50);
-			continue;
 		}
 		Sleep(20);
 	}

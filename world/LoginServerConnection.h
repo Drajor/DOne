@@ -33,13 +33,15 @@ public:
 	bool initialise();
 	void update();
 	bool connect();
-	void sendNewInfo();
-	void sendStatus();
-	void sendPacket(ServerPacket* pPacket);
-	bool isConnectReady();
 	bool isConnected();
+	// Tells the Login Server whether work is locked, how many players / zones World has.
+	void sendWorldStatus();
 
 private:
+	bool _isConnectReady();
+	void _sendPacket(ServerPacket* pPacket);
+	void _sendWorldInformation();
+
 	World* mWorld;
 	EmuTCPConnection* mTCPConnection;
 	char mLoginServerAddress[256];

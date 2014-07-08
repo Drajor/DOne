@@ -16,21 +16,9 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/debug.h"
-#include <iostream>
-#include <string.h>
-#include <stdio.h>
-#include <iomanip>
-#include <stdlib.h>
 #include "../common/version.h"
 
 #ifdef _WINDOWS
-	#include <process.h>
-	#include <windows.h>
-	#include <winsock.h>
-
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
 #else
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -49,10 +37,10 @@
 #include "LoginServerConnection.h"
 #include "../common/EmuTCPConnection.h"
 #include "../common/servertalk.h"
-
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"
+
 #include "worlddb.h"
 #include "WorldConfig.h"
 #include "Utility.h"
@@ -60,7 +48,6 @@
 
 extern uint32 numzones;
 extern uint32 numplayers;
-extern volatile bool	RunLoops;
 
 static const int StatusUpdateInterval = 15000;
 
@@ -82,10 +69,10 @@ LoginServerConnection::~LoginServerConnection() {
 }
 
 void LoginServerConnection::update() {
-	const WorldConfig *Config=WorldConfig::get();
+	//const WorldConfig *Config=WorldConfig::get();
 
 	if (mStatusUpdateTimer.Check()) {
-		this->sendStatus();
+		this->sendWorldStatus();
 	}
 
 	/************ Get all packets from packet manager out queue and process them ************/
@@ -106,8 +93,9 @@ void LoginServerConnection::update() {
 			case ServerOP_UsertoWorldReq: {
 				Utility::print("ServerOP_UsertoWorldReq");
 				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
+				// TODO: AccountManager!
 				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
-				int16 status = database.CheckStatus(id);
+				int16 accountStatus = database.CheckStatus(id);
 
 				ServerPacket* outpack = new ServerPacket;
 				outpack->opcode = ServerOP_UsertoWorldResp;
@@ -117,6 +105,7 @@ void LoginServerConnection::update() {
 				UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
 				utwrs->lsaccountid = utwr->lsaccountid;
 				utwrs->ToID = utwr->FromID;
+				utwrs->worldid = utwr->worldid;
 
 				//utwrs->response = 1; // Normal, everything is OK.
 				//utwrs->response = 0; // 'That server currently unavailable. Please check the EverQuest webpage for current server status and try again later'.
@@ -124,28 +113,27 @@ void LoginServerConnection::update() {
 				//utwrs->response = -2; // 'This account is currently banned. Please contact customer service for more information.'
 				//utwrs->response = -3; // 'The world server has denied your login request. Please try again later.'
 
-				if (Config->Locked == true)
-				{
-					if ((status == 0 || status < 100) && (status != -2 || status != -1))
-						utwrs->response = 0;
-					if (status >= 100)
-						utwrs->response = 1;
-				}
-				else {
-					utwrs->response = 1;
-				}
+				static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
+				static const int16 ACCOUNT_STATUS_BANNED = -2;
 
-				int32 x = Config->MaxClients;
-				if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-					utwrs->response = -3;
+				// Assume everything is fine.
+				utwrs->response = 1;
 
-				if (status == -1)
+				// Check Suspended.
+				if (accountStatus == ACCOUNT_STATUS_SUSPENDED)
 					utwrs->response = -1;
-				if (status == -2)
+				// Check Banned.
+				if (accountStatus == ACCOUNT_STATUS_BANNED)
 					utwrs->response = -2;
 
-				utwrs->worldid = utwr->worldid;
-				sendPacket(outpack);
+				// Special case: Server is locked.
+				if (mWorld->getLocked() && accountStatus >= 0 ) {
+					utwrs->response = 0; // unsuspended/unbanned clients can not join locked server.
+					if (accountStatus >= 100) utwrs->response = 1; // GM/Admin may enter locked server.
+				}
+				// NOTE: There was a -3 here previously for 'MaxClients'.
+
+				_sendPacket(outpack);
 				delete outpack;
 				break;
 			}
@@ -195,7 +183,7 @@ void LoginServerConnection::update() {
 
 bool LoginServerConnection::initialise() {
 	if(!isConnected()) {
-		if(isConnectReady()) {
+		if(_isConnectReady()) {
 			_log(WORLD__LS, "Connecting to login server: %s:%d",mLoginServerAddress,mLoginServerPort);
 			connect();
 		} else {
@@ -219,8 +207,8 @@ bool LoginServerConnection::connect() {
 
 	if (mTCPConnection->ConnectIP(mLoginServerIP, mLoginServerPort, errbuf)) {
 		_log(WORLD__LS, "Connected to Loginserver: %s:%d",mLoginServerAddress,mLoginServerPort);
-		sendNewInfo();
-		sendStatus();
+		_sendWorldInformation();
+		sendWorldStatus();
 		return true;
 	}
 	else {
@@ -229,9 +217,8 @@ bool LoginServerConnection::connect() {
 	}
 }
 
-void LoginServerConnection::sendNewInfo() {
-	uint16 port;
-	const WorldConfig *Config=WorldConfig::get();
+void LoginServerConnection::_sendWorldInformation() {
+	const WorldConfig* config = WorldConfig::get();
 
 	ServerPacket* pack = new ServerPacket;
 	pack->opcode = ServerOP_NewLSInfo;
@@ -241,23 +228,24 @@ void LoginServerConnection::sendNewInfo() {
 	ServerNewLSInfo_Struct* lsi = (ServerNewLSInfo_Struct*) pack->pBuffer;
 	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
 	strcpy(lsi->serverversion, LOGIN_VERSION);
-	strcpy(lsi->name, Config->LongName.c_str());
-	strcpy(lsi->shortname, Config->ShortName.c_str());
+	strcpy(lsi->name, config->LongName.c_str());
+	strcpy(lsi->shortname, config->ShortName.c_str());
 	strcpy(lsi->account, mLoginAccount);
 	strcpy(lsi->password, mLoginPassword);
-	if (Config->WorldAddress.length())
-		strcpy(lsi->remote_address, Config->WorldAddress.c_str());
-	if (Config->LocalAddress.length())
-		strcpy(lsi->local_address, Config->LocalAddress.c_str());
+	if (config->WorldAddress.length())
+		strcpy(lsi->remote_address, config->WorldAddress.c_str());
+	if (config->LocalAddress.length())
+		strcpy(lsi->local_address, config->LocalAddress.c_str());
 	else {
+		uint16 port;
 		mTCPConnection->GetSockName(lsi->local_address,&port);
 		WorldConfig::SetLocalAddress(lsi->local_address);
 	}
-	sendPacket(pack);
+	_sendPacket(pack);
 	delete pack;
 }
 
-void LoginServerConnection::sendStatus() {
+void LoginServerConnection::sendWorldStatus() {
 	mStatusUpdateTimer.Start();
 	ServerPacket* pack = new ServerPacket;
 	pack->opcode = ServerOP_LSStatus;
@@ -275,21 +263,10 @@ void LoginServerConnection::sendStatus() {
 
 	lss->num_zones = numzones;
 	lss->num_players = numplayers;
-	sendPacket(pack);
+	_sendPacket(pack);
 	delete pack;
 }
 
-void LoginServerConnection::sendPacket(ServerPacket* pPacket)
-{
-	mTCPConnection->SendPacket(pPacket);
-}
-
-bool LoginServerConnection::isConnectReady()
-{
-	return mTCPConnection->ConnectReady();
-}
-
-bool LoginServerConnection::isConnected()
-{
-	return mTCPConnection->Connected();
-}
+void LoginServerConnection::_sendPacket(ServerPacket* pPacket) { mTCPConnection->SendPacket(pPacket); }
+bool LoginServerConnection::_isConnectReady() { return mTCPConnection->ConnectReady(); }
+bool LoginServerConnection::isConnected() { return mTCPConnection->Connected(); }

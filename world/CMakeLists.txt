@@ -35,6 +35,7 @@ SET(world_headers
 	DataStore.h
 	DataProvider.h
 	MySQLDataProvider.h
+	AccountManager.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

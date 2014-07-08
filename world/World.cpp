@@ -16,6 +16,7 @@ extern WorldDatabase database;
 
 World::World(DataStore* pDataStore) :
 	mInitialised(false),
+	mLocked(false),
 	mStreamIdentifier(0),
 	mStreamFactory(0),
 	mZoneManager(0),
@@ -149,4 +150,10 @@ bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerA
 		}
 	}
 	return false;
+}
+
+void World::setLocked(bool pLocked) {
+	mLocked = pLocked;
+	// Notify Login Server!
+	mLoginServerConnection->sendWorldStatus();
 }
