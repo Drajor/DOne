@@ -391,25 +391,26 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 		return false;
 	}
 
-	// When Client transitions from Server Select to Character Select
-	// Resolve a previous 'incoming' connection with THIS Connection.
-
 	bool authenticated = false;
 
 	// This is first communication from client after Server Select
 	if (!mIdentified) {
 		if (mWorld->tryIdentify(this, id, password)) {
-			//mIdentified = true;
-			authenticated = true;
-
-			SendGuildList();
-			SendLogServer();
+			/*
+				OP_GuildsList, OP_LogServer, OP_ApproveWorld
+				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
+			*/
+			//SendGuildList();
+			//SendLogServer();
 			//SendApproveWorld();
-			//SendEnterWorld(cle->name());
-			//SendPostEnterWorld();
-			SendExpansionInfo();
-			SendCharInfo();
+			SendEnterWorld(""); // Empty character name when coming from Server Select.
+			SendPostEnterWorld(); // Required.
+			SendExpansionInfo(); // Required.
+			SendCharInfo(); // Required.
+
+			authenticated = true;
 		}
+		// TODO: Else drop this connection .. whatever is happening its bad.
 	}
 	
 	//loginInfo->login_info->
