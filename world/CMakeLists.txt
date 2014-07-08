@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SOURCE_GROUP(Data FILES DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp)
 SET(world_sources
 	client.cpp
-	cliententry.cpp
 	CMakeLists.txt
 	LoginServerConnection.cpp
 	net.cpp
@@ -21,7 +20,6 @@ SET(world_sources
 
 SET(world_headers
 	client.h
-	cliententry.h
 	CMakeLists.txt
 	LoginServerConnection.h
 	SoFCharCreateData.h

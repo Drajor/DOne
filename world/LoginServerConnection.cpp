@@ -56,6 +56,7 @@
 #include "worlddb.h"
 #include "WorldConfig.h"
 #include "Utility.h"
+#include "World.h"
 
 extern uint32 numzones;
 extern uint32 numplayers;
@@ -63,8 +64,9 @@ extern volatile bool	RunLoops;
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
+LoginServerConnection::LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
+	mWorld(pWorld),
 	mTCPConnection(0)
 {
 	strn0cpy(mLoginServerAddress,pAddress,256);
@@ -159,6 +161,9 @@ void LoginServerConnection::update() {
 
 				// TODO LOL
 				//client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
+
+				// Notify World that a Client is inbound.
+				mWorld->notifyIncomingClient(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
 				break;
 			}
 			case ServerOP_LSFatalError: {

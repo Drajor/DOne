@@ -19,14 +19,10 @@
 #define CLIENT_H
 
 #include <string>
-
-//#include "../common/EQStream.h"
 #include "../common/linked_list.h"
 #include "../common/timer.h"
-//#include "zoneserver.h"
 #include "../common/logsys.h"
 #include "../common/eq_packet_structs.h"
-#include "cliententry.h"
 
 #define CLIENT_TIMEOUT 30000
 
@@ -56,30 +52,56 @@ public:
 	void	SendPostEnterWorld();
 	bool	GenPassKey(char* key);
 
-	inline uint32		GetIP()				{ return ip; }
-	inline uint16		GetPort()			{ return port; }
-	inline uint32		GetZoneID()			{ return zoneID; }
-	inline uint32		GetInstanceID()		{ return instanceID; }
-	inline uint32		WaitingForBootup()	{ return pwaitingforbootup; }
-	inline const char *	GetAccountName()	{ if (cle) { return cle->AccountName(); } return "NOCLE"; }
-	inline int16		GetAdmin()			{ if (cle) { return cle->Admin(); } return 0; }
-	inline uint32		GetAccountID()		{ if (cle) { return cle->AccountID(); } return 0; }
-	inline uint32		GetWID()			{ if (cle) { return cle->GetID(); } return 0; }
-	inline uint32		GetLSID()			{ if (cle) { return cle->getLoginServerAccountID(); } return 0; }
-	inline const char*	GetLSKey()			{ if (cle) { return cle->getLoginServerKey(); } return "NOKEY"; }
-	inline uint32		GetCharID()			{ return charid; }
+	
+	//inline uint16		GetPort()			{ return mPort; }
+	//inline uint32		GetZoneID()			{ return zoneID; }
+	//inline uint32		GetInstanceID()		{ return instanceID; }
+	//inline uint32		WaitingForBootup()	{ return pwaitingforbootup; }
+	//inline const char *	GetAccountName()	{ if (cle) { return cle->AccountName(); } return "NOCLE"; }
+	//inline int16		GetAdmin()			{ if (cle) { return cle->Admin(); } return 0; }
+	//inline uint32		getWorldAccountID()		{ if (cle) { return cle->AccountID(); } return 0; }
+	//inline uint32		GetWID()			{ if (cle) { return cle->GetID(); } return 0; }
+	//inline uint32		getLoginServerAccountID()			{ if (cle) { return cle->getLoginServerAccountID(); } return 0; }
+	//inline const char*	GetLSKey()			{ if (cle) { return cle->getLoginServerKey(); } return "NOKEY"; }
+	
 	inline const char*	GetCharName()		{ return char_name; }
-	inline ClientListEntry* GetCLE()		{ return cle; }
-	inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
+	//inline ClientListEntry* GetCLE()		{ return cle; }
+	//inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
+
+	bool getIdentified() { return mIdentified; }
+	uint32 getIP() { return mIP; }
+	uint16 getPort() { return mPort; }
+	uint32 getWorldAccountID() { return mWorldAccountID; }
+	uint32 getLoginServerAccountID() { return mLoginServerAccountID; }
+	std::string getLoginServerKey() { return mLoginServerKey; }
+	int16 getWorldAdmin() { return mWorldAdmin; }
+	uint32 getCharacterID() { return mCharacterID; }
+
+	void setIdentified(bool pIdentified) { mIdentified = pIdentified; }
+	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; }
+	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; }
+	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; }
+	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; }
+	void setWorldAdmin(int16 pWorldAdmin) { mWorldAdmin = pWorldAdmin; }
+
 private:
 
-	uint32	ip;
-	uint16	port;
-	uint32	charid;
+	bool mIdentified;
+	uint16 mPort;
+	uint32 mIP;
+	uint32 mWorldAccountID;
+	uint32 mLoginServerAccountID;
+	std::string mLoginServerAccountName;
+	std::string mLoginServerKey;
+	int16 mWorldAdmin;
+	uint32 mCharacterID;
+	
+	
+	
 	char	char_name[64];
 	uint32	zoneID;
 	uint32	instanceID;
-	bool	pZoning;
+	bool	mZoning;
 	Timer	autobootup_timeout;
 	uint32	pwaitingforbootup;
 
@@ -91,7 +113,7 @@ private:
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
 
-	ClientListEntry* cle;
+	//ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;
 	Timer	connect;
 	bool firstlogin;

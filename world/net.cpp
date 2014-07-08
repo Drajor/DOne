@@ -66,6 +66,7 @@
 
 #endif
 
+#include "../common/servertalk.h"
 #include "../common/dbasync.h"
 #include "WorldConfig.h"
 #include "World.h"

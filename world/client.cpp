@@ -31,6 +31,7 @@
 #include <zlib.h>
 #include <limits.h>
 
+#include "../common/servertalk.h"
 #include "World.h"
 #include "Utility.h"
 
@@ -57,20 +58,21 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
 	connect(1000),
 	eqs(ieqs),
-	mWorld(pWorld)
+	mWorld(pWorld),
+	mIdentified(false)
 {
 	// Live does not send datarate as of 3/11/2005
 	//eqs->SetDataRate(7);
-	ip = eqs->GetRemoteIP();
-	port = ntohs(eqs->GetRemotePort());
+	mIP = eqs->GetRemoteIP();
+	mPort = ntohs(eqs->GetRemotePort());
 
 	autobootup_timeout.Disable();
 	connect.Disable();
 	seencharsel = false;
-	cle = 0;
+	//cle = 0;
 	zoneID = 0;
 	char_name[0] = 0;
-	charid = 0;
+	mCharacterID = 0;
 	pwaitingforbootup = 0;
 	StartInTutorial = false;
 	ClientVersionBit = 0;
@@ -80,8 +82,8 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 }
 
 WorldClientConnection::~WorldClientConnection() {
-	if (RunLoops && cle && zoneID == 0)
-		cle->SetOnline(CLE_Status_Offline);
+	//if (RunLoops && cle && zoneID == 0)
+	//	cle->SetOnline(CLE_Status_Offline);
 
 	numclients--;
 
@@ -108,7 +110,7 @@ void WorldClientConnection::SendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if(RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2 && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
+	if(RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2 && getWorldAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
 		l->enable_FV = 1;
 
 	QueuePacket(outapp);
@@ -118,8 +120,8 @@ void WorldClientConnection::SendLogServer()
 void WorldClientConnection::SendEnterWorld(std::string name)
 {
 char char_name[32]= { 0 };
-	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
-		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
+	if (mZoning && database.GetLiveChar(getWorldAccountID(), char_name)) {
+		if(database.GetAccountIDByChar(char_name) != getWorldAccountID()) {
 			eqs->Close();
 			return;
 		} else {
@@ -142,9 +144,9 @@ void WorldClientConnection::SendExpansionInfo() {
 }
 
 void WorldClientConnection::SendCharInfo() {
-	if (cle) {
-		cle->SetOnline(CLE_Status_CharSelect);
-	}
+	//if (cle) {
+	//	cle->SetOnline(CLE_Status_CharSelect);
+	//}
 
 	if (ClientVersionBit & BIT_RoFAndLater)
 	{
@@ -161,7 +163,7 @@ void WorldClientConnection::SendCharInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	CharacterSelect_Struct* cs = (CharacterSelect_Struct*)outapp->pBuffer;
 
-	database.GetCharSelectInfo(GetAccountID(), cs);
+	database.GetCharSelectInfo(getWorldAccountID(), cs);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -374,7 +376,7 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 		return false;
 	}
 
-	pZoning=(loginInfo->zoning==1);
+	mZoning = (loginInfo->zoning == 1);
 
 	uint32 id = 0;
 	if(strncasecmp(name, "LS#", 3) == 0)
@@ -387,44 +389,83 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 		return false;
 	}
 
-	//cle = client_list.CheckAuth(id, password);
-	if (cle) {
-		if (cle->AccountID() == 0) {
-			return false;
-		}
+	// When Client transitions from Server Select to Character Select
+	// Resolve a previous 'incoming' connection with THIS Connection.
 
-		cle->SetOnline();
+	bool authenticated = false;
 
-		clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-		clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
+	// This is first communication from client after Server Select
+	if (!mIdentified) {
+		if (mWorld->tryIdentify(this, id, password)) {
+			//mIdentified = true;
+			authenticated = true;
 
-		if (!pZoning)
 			SendGuildList();
-		SendLogServer();
-		SendApproveWorld();
-		SendEnterWorld(cle->name());
-		SendPostEnterWorld();
-		if (!pZoning) {
+			SendLogServer();
+			//SendApproveWorld();
+			//SendEnterWorld(cle->name());
+			//SendPostEnterWorld();
 			SendExpansionInfo();
 			SendCharInfo();
-			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
 		}
-
 	}
-	else {
-		// TODO: Find out how to tell the client wrong username/password
-		clog(WORLD__CLIENT_ERR,"Bad/Expired session key '%s'",name);
-		return false;
-	}
+	
+	//loginInfo->login_info->
 
-	cle->SetIP(GetIP());
+	////cle = client_list.CheckAuth(id, password);
+	//if (cle) {
+	//	if (cle->AccountID() == 0) {
+	//		return false;
+	//	}
+
+	//	cle->SetOnline();
+
+	//	clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
+	//	clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
+
+	//	if (!pZoning)
+	//		SendGuildList();
+	//	SendLogServer();
+	//	SendApproveWorld();
+	//	SendEnterWorld(cle->name());
+	//	SendPostEnterWorld();
+	//	if (!pZoning) {
+	//		SendExpansionInfo();
+	//		SendCharInfo();
+	//		database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+	//	}
+
+	//}
+	//else {
+	//	// TODO: Find out how to tell the client wrong username/password
+	//	clog(WORLD__CLIENT_ERR,"Bad/Expired session key '%s'",name);
+	//	return false;
+	//}
+
+	//cle->SetIP(GetIP());
+	//cle->SetOnline();
+
+	//clog(WORLD__CLIENT, "Logged in. Mode=%s", mZoning ? "(Zoning)" : "(CharSel)");
+	//clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
+
+	//if (!mZoning)
+	//	SendGuildList();
+	//SendLogServer();
+	//SendApproveWorld();
+	//SendEnterWorld(cle->name());
+	//SendPostEnterWorld();
+	//if (!mZoning) {
+	//	SendExpansionInfo();
+	//	SendCharInfo();
+	//	//database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
+	//}
 
 	return true;
 }
 
 bool WorldClientConnection::HandleNameApprovalPacket(const EQApplicationPacket *app) {
 
-	if (GetAccountID() == 0) {
+	if (getWorldAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
 		return false;
 	}
@@ -449,7 +490,7 @@ bool WorldClientConnection::HandleNameApprovalPacket(const EQApplicationPacket *
 		//name must begin with an upper-case letter.
 		valid = false;
 	}
-	else if (database.ReserveName(GetAccountID(), char_name)) {
+	else if (database.ReserveName(getWorldAccountID(), char_name)) {
 		valid = true;
 	}
 	else {
@@ -593,7 +634,7 @@ bool WorldClientConnection::HandleCharacterCreateRequestPacket(const EQApplicati
 }
 
 bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
-	if (GetAccountID() == 0)
+	if (getWorldAccountID() == 0)
 	{
 		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
 		return false;
@@ -628,13 +669,13 @@ bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacke
 
 bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
-	if (GetAccountID() == 0) {
+	if (getWorldAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Enter world with no logged in account");
 		eqs->Close();
 		return true;
 	}
 
-	if(GetAdmin() < 0)
+	if(getWorldAdmin() < 0)
 	{
 		clog(WORLD__CLIENT,"Account banned or suspended.");
 		eqs->Close();
@@ -650,25 +691,25 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 
 	EQApplicationPacket *outapp;
 	uint32 tmpaccid = 0;
-	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
-	if (charid == 0 || tmpaccid != GetAccountID()) {
+	mCharacterID = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
+	if (mCharacterID == 0 || tmpaccid != getWorldAccountID()) {
 		clog(WORLD__CLIENT_ERR,"Could not get CharInfo for '%s'",char_name);
 		eqs->Close();
 		return true;
 	}
 
 	// Make sure this account owns this character
-	if (tmpaccid != GetAccountID()) {
+	if (tmpaccid != getWorldAccountID()) {
 		clog(WORLD__CLIENT_ERR,"This account does not own the character named '%s'",char_name);
 		eqs->Close();
 		return true;
 	}
 
-	if(!pZoning && ew->return_home && !ew->tutorial)
+	if(!mZoning && ew->return_home && !ew->tutorial)
 	{
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(getWorldAccountID(), cs);
 		bool home_enabled = false;
 
 		for(int x = 0; x < 10; ++x)
@@ -686,21 +727,21 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 
 		if(home_enabled)
 		{
-			zoneID = database.MoveCharacterToBind(charid,4);
+			zoneID = database.MoveCharacterToBind(mCharacterID,4);
 		}
 		else
 		{
 			clog(WORLD__CLIENT_ERR,"'%s' is trying to go home before they're able...",char_name);
-			database.SetHackerFlag(GetAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
+			//database.SetHackerFlag(getLoginServerAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
 			eqs->Close();
 			return true;
 		}
 	}
 
-	if(!pZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial || StartInTutorial))) {
+	if(!mZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial || StartInTutorial))) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(GetAccountID(), cs);
+		database.GetCharSelectInfo(getWorldAccountID(), cs);
 		bool tutorial_enabled = false;
 
 		for(int x = 0; x < 10; ++x)
@@ -719,12 +760,12 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 		if(tutorial_enabled)
 		{
 			zoneID = RuleI(World, TutorialZoneID);
-			database.MoveCharacterToZone(charid, database.GetZoneName(zoneID));
+			database.MoveCharacterToZone(mCharacterID, database.GetZoneName(zoneID));
 		}
 		else
 		{
 			clog(WORLD__CLIENT_ERR,"'%s' is trying to go to tutorial but are not allowed...",char_name);
-			database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
+			//database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
 			eqs->Close();
 			return true;
 		}
@@ -732,30 +773,30 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 
 	if (zoneID == 0 || !database.GetZoneName(zoneID)) {
 		// This is to save people in an invalid zone, once it's removed from the DB
-		database.MoveCharacterToZone(charid, "arena");
+		database.MoveCharacterToZone(mCharacterID, "arena");
 		clog(WORLD__CLIENT_ERR, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
 	}
 
 	if(instanceID > 0)
 	{
-		if(!database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(!database.VerifyInstanceAlive(instanceID, getCharacterID()))
 		{
-			zoneID = database.MoveCharacterToBind(charid);
+			zoneID = database.MoveCharacterToBind(mCharacterID);
 			instanceID = 0;
 		}
 		else
 		{
 			if(!database.VerifyZoneInstance(zoneID, instanceID))
 			{
-				zoneID = database.MoveCharacterToBind(charid);
+				zoneID = database.MoveCharacterToBind(mCharacterID);
 				instanceID = 0;
 			}
 		}
 	}
 
-	if(!pZoning) {
-		database.SetGroupID(char_name, 0, charid);
-		database.SetLoginFlags(charid, false, false, 1);
+	if(!mZoning) {
+		database.SetGroupID(char_name, 0, mCharacterID);
+		database.SetLoginFlags(mCharacterID, false, false, 1);
 	}
 	else{
 		uint32 groupid=database.GetGroupID(char_name);
@@ -793,7 +834,7 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 
 	int MailKey = MakeRandomInt(1, INT_MAX);
 
-	database.SetMailKey(charid, GetIP(), MailKey);
+	database.SetMailKey(mCharacterID, getIP(), MailKey);
 
 	char ConnectionType;
 
@@ -846,7 +887,7 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
-	if(char_acct_id == GetAccountID())
+	if(char_acct_id == getWorldAccountID())
 	{
 		clog(WORLD__CLIENT,"Delete character: %s",app->pBuffer);
 		database.DeleteCharacter((char *)app->pBuffer);
@@ -878,14 +919,14 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 	}
 
 	// Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
-	if (RuleB(World, GMAccountIPList) && this->GetAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
-		if(!database.CheckGMIPs(long2ip(this->GetIP()).c_str(), this->GetAccountID())) {
-			clog(WORLD__CLIENT,"GM Account not permited from source address %s and accountid %i", long2ip(this->GetIP()).c_str(), this->GetAccountID());
+	if (RuleB(World, GMAccountIPList) && this->getWorldAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
+		if(!database.CheckGMIPs(long2ip(this->getIP()).c_str(), this->getWorldAccountID())) {
+			clog(WORLD__CLIENT,"GM Account not permited from source address %s and accountid %i", long2ip(this->getIP()).c_str(), this->getWorldAccountID());
 			eqs->Close();
 		}
 	}
 
-	if (GetAccountID() == 0 && opcode != OP_SendLoginInfo) {
+	if (getWorldAccountID() == 0 && opcode != OP_SendLoginInfo) {
 		// Got a packet other than OP_SendLoginInfo when not logged in
 		clog(WORLD__CLIENT_ERR,"Expecting OP_SendLoginInfo, got %s", OpcodeNames[opcode]);
 		return false;
@@ -974,8 +1015,8 @@ bool WorldClientConnection::process() {
 
 	memset((char *) &to, 0, sizeof(to));
 	to.sin_family = AF_INET;
-	to.sin_port = port;
-	to.sin_addr.s_addr = ip;
+	to.sin_port = mPort;
+	to.sin_addr.s_addr = mIP;
 
 	if (autobootup_timeout.Check()) {
 		clog(WORLD__CLIENT_ERR, "Zone bootup timer expired, bootup failed or too slow.");
@@ -986,10 +1027,10 @@ bool WorldClientConnection::process() {
 		SendApproveWorld();
 		connect.Disable();
 	}
-	if (CLE_keepalive_timer.Check()) {
-		if (cle)
-			cle->KeepAlive();
-	}
+	//if (CLE_keepalive_timer.Check()) {
+	//	if (cle)
+	//		cle->KeepAlive();
+	//}
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	EQApplicationPacket *app = 0;
@@ -1001,18 +1042,6 @@ bool WorldClientConnection::process() {
 
 	if (!eqs->CheckState(ESTABLISHED)) {
 		Utility::print("In Client::process()");
-		if(WorldConfig::get()->UpdateStats){
-			ServerPacket* pack = new ServerPacket;
-			pack->opcode = ServerOP_LSPlayerLeftWorld;
-			pack->size = sizeof(ServerLSPlayerLeftWorld_Struct);
-			pack->pBuffer = new uchar[pack->size];
-			memset(pack->pBuffer,0,pack->size);
-			ServerLSPlayerLeftWorld_Struct* logout =(ServerLSPlayerLeftWorld_Struct*)pack->pBuffer;
-			strcpy(logout->key,GetLSKey());
-			logout->lsaccount_id = GetLSID();
-			//loginserverlist.SendPacket(pack);
-			safe_delete(pack);
-		}
 		clog(WORLD__CLIENT,"Client disconnected (not active in process)");
 		return false;
 	}
@@ -1027,7 +1056,7 @@ void WorldClientConnection::EnterWorld(bool TryBootup) {
 	//ZoneServer* zs = nullptr;
 	if(instanceID > 0)
 	{
-		if(database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(database.VerifyInstanceAlive(instanceID, getCharacterID()))
 		{
 			if(database.VerifyZoneInstance(zoneID, instanceID))
 			{
@@ -1037,7 +1066,7 @@ void WorldClientConnection::EnterWorld(bool TryBootup) {
 			{
 				instanceID = 0;
 //				zs = nullptr;
-				database.MoveCharacterToBind(GetCharID());
+				database.MoveCharacterToBind(getCharacterID());
 				ZoneUnavail();
 				return;
 			}
@@ -1046,7 +1075,7 @@ void WorldClientConnection::EnterWorld(bool TryBootup) {
 		{
 			instanceID = 0;
 			//zs = nullptr;
-			database.MoveCharacterToBind(GetCharID());
+			database.MoveCharacterToBind(getCharacterID());
 			ZoneUnavail();
 			return;
 		}
@@ -1080,8 +1109,8 @@ void WorldClientConnection::EnterWorld(bool TryBootup) {
 	}
 	pwaitingforbootup = 0;
 
-	cle->SetChar(charid, char_name);
-	database.UpdateLiveChar(char_name, GetAccountID());
+	//cle->SetChar(mCharacterID, char_name);
+	database.UpdateLiveChar(char_name, getWorldAccountID());
 	//clog(WORLD__CLIENT,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
 //	database.SetAuthentication(account_id, char_name, zone_name, ip);
 
@@ -1098,7 +1127,7 @@ void WorldClientConnection::EnterWorld(bool TryBootup) {
 		pack->pBuffer = new uchar[pack->size];
 		memset(pack->pBuffer, 0, pack->size);
 		WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
-		wtz->account_id = GetAccountID();
+		wtz->account_id = getWorldAccountID();
 		wtz->response = 0;
 		//zs->SendPacket(pack);
 		delete pack;
@@ -1161,16 +1190,17 @@ void WorldClientConnection::Clearance(int8 response)
 	//const char *zs_addr=zs->GetCAddress();
 	const char *zs_addr = "127.0.0.1";
 	if (!zs_addr[0]) {
-		if (cle->IsLocalClient()) {
-			struct in_addr in;
-			//in.s_addr = zs->GetIP();
-			//in.s_addr = zs->GetIP();
-			zs_addr=inet_ntoa(in);
-			if (!strcmp(zs_addr,"127.0.0.1"))
-				zs_addr=WorldConfig::get()->LocalAddress.c_str();
-		} else {
-			zs_addr=WorldConfig::get()->WorldAddress.c_str();
-		}
+		//if (cle->IsLocalClient()) {
+		//	struct in_addr in;
+		//	//in.s_addr = zs->GetIP();
+		//	//in.s_addr = zs->GetIP();
+		//	zs_addr=inet_ntoa(in);
+		//	if (!strcmp(zs_addr,"127.0.0.1"))
+		//		zs_addr=WorldConfig::get()->LocalAddress.c_str();
+		//} else {
+		//	zs_addr=WorldConfig::get()->WorldAddress.c_str();
+		//}
+		zs_addr = WorldConfig::get()->WorldAddress.c_str();
 	}
 //	strcpy(zsi->ip, zs_addr);
 	//zsi->port =zs->GetCPort();
@@ -1178,8 +1208,8 @@ void WorldClientConnection::Clearance(int8 response)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if (cle)
-		cle->SetOnline(CLE_Status_Zoning);
+	//if (cle)
+	//	cle->SetOnline(CLE_Status_Zoning);
 }
 
 void WorldClientConnection::ZoneUnavail() {
@@ -1307,8 +1337,8 @@ bool WorldClientConnection::OPCharCreate(char *name, CharCreate_Struct *cc)
 	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX +
 		cc->WIS + cc->INT + cc->CHA;
 
-	in.s_addr = GetIP();
-	clog(WORLD__CLIENT, "Character creation request from %s LS#%d (%s:%d) : ", GetCLE()->getLoginServerAccountName(), GetCLE()->getLoginServerAccountID(), inet_ntoa(in), GetPort());
+	in.s_addr = getIP();
+	//clog(WORLD__CLIENT, "Character creation request from %s LS#%d (%s:%d) : ", getLoginServerAccountName(), getLoginServerAccountID(), inet_ntoa(in), getPort());
 	clog(WORLD__CLIENT,"Name: %s", name);
 	clog(WORLD__CLIENT,"Race: %d  Class: %d  Gender: %d  Deity: %d  Start zone: %d",
 		cc->race, cc->class_, cc->gender, cc->deity, cc->start_zone);
@@ -1476,12 +1506,12 @@ bool WorldClientConnection::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 
 	// Starting Items inventory
-	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
+	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, getWorldAdmin());
 
 
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it
-	if (!database.StoreCharacter(GetAccountID(), &pp, &inv, &ext))
+	if (!database.StoreCharacter(getWorldAccountID(), &pp, &inv, &ext))
 	{
 		clog(WORLD__CLIENT_ERR,"Character creation failed: %s", pp.name);
 		return false;

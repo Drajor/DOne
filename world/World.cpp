@@ -3,6 +3,8 @@
 #include "ZoneManager.h"
 #include "LoginServerConnection.h"
 #include "UCSConnection.h"
+#include "client.h"
+#include "worlddb.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
@@ -10,6 +12,8 @@
 #include "../common/patches/patches.h"
 
 #include "Client.h"
+
+extern WorldDatabase database;
 
 World::World(DataStore* pDataStore) :
 	mInitialised(false),
@@ -41,7 +45,7 @@ bool World::initialise()
 	if (mInitialised) return false;
 
 	// Create our connection to the Login Server
-	mLoginServerConnection = new LoginServerConnection("127.0.0.1", 5998, "Admin", "Password");
+	mLoginServerConnection = new LoginServerConnection(this, "127.0.0.1", 5998, "Admin", "Password");
 	if (!mLoginServerConnection->initialise()) {
 		Utility::criticalError("Unable to initialise Login Server Connection");
 		return false;
@@ -77,10 +81,15 @@ void World::update()
 	mLoginServerConnection->update();
 
 	// Check if any new clients are connecting.
-	_handleIncomingConnections();
+	_handleIncomingClientConnections();
+
+	// Update World Clients.
+	for (auto i : mClients) {
+		i->process();
+	}
 }
 
-void World::_handleIncomingConnections() {
+void World::_handleIncomingClientConnections() {
 	// Check for incoming connections.
 	EQStream* incomingStream = nullptr;
 	while (incomingStream = mStreamFactory->Pop()) {
@@ -94,9 +103,8 @@ void World::_handleIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
-		// TEMP HACK
-		WorldClientConnection* client = new WorldClientConnection(incomingStreamInterface, this);
-		//client_list.Add(client);
+		Utility::print("World Incoming Connection");
+		mClients.push_back(new WorldClientConnection(incomingStreamInterface, this));
 	}
 }
 
@@ -111,4 +119,35 @@ void World::_checkUCSConnection() {
 			mUCSConnection->setConnection(tcpConnection);
 		}
 	}
+}
+
+void World::notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin /*= 0*/, uint32 pIP /*= 0*/, uint8 pLocal /*= 0*/)
+{
+	IncomingClient client;
+	client.mAccountID = pLoginServerID;
+	client.mAccountName = pLoginServerAccountName;
+	client.mKey = pLoginServerKey;
+	client.mWorldAdmin = pWorldAdmin;
+	client.mIP = pIP;
+	client.mLocal = pLocal;
+	mIncomingClients.push_back(client);
+}
+
+bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
+	// Check Incoming Clients that match Account ID / Key
+	for (auto& i : mIncomingClients) {
+		if (pLoginServerAccountID == i.mAccountID && pLoginServerKey == i.mKey && !pConnection->getIdentified()) {
+			// Configure the WorldClientConnection with details from the IncomingClient.
+			pConnection->setIdentified(true);
+			pConnection->setLoginServerAccountID(i.mAccountID);
+			pConnection->setLoginServerAccountName(i.mAccountName);
+			pConnection->setLoginServerKey(i.mKey);
+			pConnection->setWorldAdmin(i.mWorldAdmin);
+			pConnection->setWorldAccountID(database.GetAccountIDFromLSID(pLoginServerAccountID));
+			// TODO: Do I need to set IP or Local here?
+			// TODO Remove IncomingClient from list.
+			return true;
+		}
+	}
+	return false;
 }
