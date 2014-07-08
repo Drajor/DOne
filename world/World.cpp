@@ -3,7 +3,6 @@
 #include "ZoneManager.h"
 #include "LoginServerConnection.h"
 #include "UCSConnection.h"
-#include "client.h"
 #include "worlddb.h"
 
 #include "../common/EmuTCPServer.h"
@@ -11,7 +10,7 @@
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
 
-#include "Client.h"
+#include "WorldClientConnection.h"
 
 extern WorldDatabase database;
 

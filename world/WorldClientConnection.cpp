@@ -1,3 +1,5 @@
+#include "WorldClientConnection.h"
+
 #include "../common/debug.h"
 #include "../common/EQPacket.h"
 #include "../common/EQStreamIntf.h"
@@ -17,7 +19,7 @@
 #include "../common/clientversions.h"
 #include "../common/MiscFunctions.h"
 
-#include "client.h"
+
 #include "worlddb.h"
 #include "WorldConfig.h"
 #include "SoFCharCreateData.h"

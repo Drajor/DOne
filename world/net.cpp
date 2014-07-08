@@ -29,7 +29,6 @@
 #include "../common/timer.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQPacket.h"
-#include "client.h"
 #include "worlddb.h"
 #include "../common/seperator.h"
 #include "../common/version.h"
