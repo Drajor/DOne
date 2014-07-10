@@ -2,10 +2,11 @@
 #define DBCORE_H
 
 #ifdef _WINDOWS
-	#include <winsock.h>
-	#include <windows.h>
-	//#include <winsock.h>
+	#define _WINSOCKAPI_
+	// mysql depends on winsock therefore needs to be included first.
+	#include <winsock2.h>
 #endif
+
 #include <mysql.h>
 #include "../common/types.h"
 #include "../common/Mutex.h"

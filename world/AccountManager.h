@@ -2,23 +2,21 @@
 
 #include "../common/types.h"
 #include <string>
+#include <list>
 
-/*
-	Status
-	-2	Banned
-	-1	(Should be suspended however suspended accounts have the field 'suspendeduntil' set instead...)
-	0	Normal
-	>0	Guide..GM etc.
-*/
+struct AccountData;
+class DataStore;
 
-struct AccountData {
-	uint32 mID;
-	uint32 mLoginServerAccountID;
-	std::string mName;
-	std::string mCharacterName;
-	uint32 mSharedPlatinum;
-	int32 mStatus;
-	bool mGMSpeed;
-	bool mHidden;
-	// mSuspendUntil
+class AccountManager {
+public:
+	AccountManager(DataStore* pDataStore);
+	~AccountManager();
+	bool initialise();
+
+	// Lookup World Account ID associated with Login Server Account ID. 0 = Not found.
+	uint32 getWorldAccountID(uint32 pLoginServerAccountID);
+private:
+
+	std::list<AccountData*> mAccounts;
+	DataStore* mDataStore;
 };

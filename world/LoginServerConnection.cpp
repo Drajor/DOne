@@ -45,15 +45,17 @@
 #include "WorldConfig.h"
 #include "Utility.h"
 #include "World.h"
+#include "AccountManager.h"
 
 extern uint32 numzones;
 extern uint32 numplayers;
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
+LoginServerConnection::LoginServerConnection(World* pWorld, AccountManager* pAccountManager, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
 	mWorld(pWorld),
+	mAccountManager(pAccountManager),
 	mTCPConnection(0)
 {
 	strn0cpy(mLoginServerAddress,pAddress,256);
@@ -93,7 +95,8 @@ void LoginServerConnection::update() {
 			case ServerOP_UsertoWorldReq: {
 				Utility::print("ServerOP_UsertoWorldReq");
 				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
-				// TODO: AccountManager!
+				// TODO: Below.
+				//uint32 id = mAccountManager->getWorldAccountID(utwr->lsaccountid);
 				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
 				int16 accountStatus = database.CheckStatus(id);
 

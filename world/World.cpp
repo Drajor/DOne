@@ -1,6 +1,8 @@
 #include "World.h"
 #include "Utility.h"
 #include "ZoneManager.h"
+#include "AccountManager.h"
+#include "DataStore.h"
 #include "LoginServerConnection.h"
 #include "UCSConnection.h"
 #include "worlddb.h"
@@ -20,6 +22,7 @@ World::World(DataStore* pDataStore) :
 	mStreamIdentifier(0),
 	mStreamFactory(0),
 	mZoneManager(0),
+	mAccountManager(0),
 	mTCPServer(0),
 	mLoginServerConnection(0),
 	mUCSConnection(0),
@@ -31,12 +34,16 @@ World::World(DataStore* pDataStore) :
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
 	if (mTCPServer) mTCPServer->Close();
+	if (mUCSConnection) mUCSConnection->disconnect();
+	// TODO: Close LoginServerConnection?
 
 	safe_delete(mTCPServer);
 	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
 	safe_delete(mZoneManager);
+	safe_delete(mAccountManager);
+	safe_delete(mUCSConnection);
 }
 
 bool World::initialise()
@@ -45,7 +52,7 @@ bool World::initialise()
 	if (mInitialised) return false;
 
 	// Create our connection to the Login Server
-	mLoginServerConnection = new LoginServerConnection(this, "127.0.0.1", 5998, "Admin", "Password");
+	mLoginServerConnection = new LoginServerConnection(this, mAccountManager, "127.0.0.1", 5998, "Admin", "Password");
 	if (!mLoginServerConnection->initialise()) {
 		Utility::criticalError("Unable to initialise Login Server Connection");
 		return false;
@@ -62,6 +69,12 @@ bool World::initialise()
 	RegisterAllPatches(*mStreamIdentifier);
 
 	mZoneManager = new ZoneManager(mDataStore);
+
+	mAccountManager = new AccountManager(mDataStore);
+	if (!mAccountManager->initialise()) {
+		Utility::criticalError("Unable to initialise Account Manager");
+		return false;
+	}
 
 	mTCPServer = new EmuTCPServer();
 	char errbuf[TCPConnection_ErrorBufferSize];
@@ -87,6 +100,8 @@ void World::update()
 	for (auto i : mClients) {
 		i->process();
 	}
+
+	mDataStore->update();
 }
 
 void World::_handleIncomingClientConnections() {

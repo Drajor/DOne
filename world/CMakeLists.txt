@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SOURCE_GROUP(Data FILES DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp)
+SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp)
 SET(world_sources
 	WorldClientConnection.cpp
 	CMakeLists.txt
@@ -16,6 +16,8 @@ SET(world_sources
 	World.cpp
 	DataStore.cpp
 	MySQLDataProvider.cpp
+	AccountManager.cpp
+	DatabaseConnection.cpp
 )
 
 SET(world_headers
@@ -36,6 +38,7 @@ SET(world_headers
 	DataProvider.h
 	MySQLDataProvider.h
 	AccountManager.h
+	DatabaseConnection.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

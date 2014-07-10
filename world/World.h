@@ -10,6 +10,7 @@ class UCSConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
 class ZoneManager;
+class AccountManager;
 class DataStore;
 class WorldClientConnection;
 
@@ -22,8 +23,6 @@ public:
 
 	void notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin = 0, uint32 pIP = 0, uint8 pLocal = 0);
 	bool tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
-
-	void _checkUCSConnection();
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
@@ -41,6 +40,7 @@ private:
 	};
 	std::list<IncomingClient> mIncomingClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 
+	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 
 	bool mInitialised;
@@ -51,6 +51,7 @@ private:
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 	ZoneManager* mZoneManager;
+	AccountManager* mAccountManager;
 	DataStore* mDataStore;
 
 	std::list<WorldClientConnection*> mClients;

@@ -71,6 +71,7 @@
 #include "World.h"
 #include "DataStore.h"
 #include "MySQLDataProvider.h"
+#include "Utility.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
 
@@ -83,14 +84,19 @@ bool holdzones = false;
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
-	
 	MySQLDataProvider* dataProvider = new MySQLDataProvider();
-	dataProvider->initialise();
+	if (!dataProvider->initialise()) {
+		Utility::criticalError("Data Provider failed to initialise");
+		return 1;
+	}
 	DataStore* dataStore = new DataStore();
 	dataStore->setProvider(dataProvider);
 
 	World* world = new World(dataStore);
-	world->initialise();
+	if (!world->initialise()) {
+		Utility::criticalError("World failed to initialise");
+		return 1;
+	}
 
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();

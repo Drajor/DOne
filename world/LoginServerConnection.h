@@ -24,10 +24,11 @@
 class EmuTCPConnection;
 class ServerPacket;
 class World;
+class AccountManager;
 
 class LoginServerConnection{
 public:
-	LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword);
+	LoginServerConnection(World* pWorld, AccountManager* pAccountManager, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword);
 	~LoginServerConnection();
 
 	bool initialise();
@@ -43,6 +44,7 @@ private:
 	void _sendWorldInformation();
 
 	World* mWorld;
+	AccountManager* mAccountManager;
 	EmuTCPConnection* mTCPConnection;
 	char mLoginServerAddress[256];
 	uint32 mLoginServerIP;
