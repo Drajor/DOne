@@ -21,3 +21,11 @@ uint32 AccountManager::getWorldAccountID(uint32 pLoginServerAccountID) {
 	}
 	return 0;
 }
+
+uint32 AccountManager::getStatusFromLoginServerID(uint32 pLoginServerAccountID) {
+	for (auto i : mAccounts) {
+		if (i->mLoginServerAccountID == pLoginServerAccountID)
+			return i->mStatus;
+	}
+	return 0;
+}

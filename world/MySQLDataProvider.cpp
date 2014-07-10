@@ -1,29 +1,36 @@
 #include "MySQLDataProvider.h"
 #include "Data.h"
 #include "DatabaseConnection.h"
-#include "../common/StringUtil.h"
+#include "../common/timer.h"
+
+#define KEEP_ALIVE_TIMER 10000
 
 #define USE_FIELD_MACROS int j = 0
 #define NEXT_FIELD row[j++]
 #define NEXT_FIELD_INT atoi(NEXT_FIELD) 
 #define NEXT_FIELD_BOOL atoi(NEXT_FIELD) > 0 ? true : false
 
-MySQLDataProvider::MySQLDataProvider() : mDatabaseConnection(0) { }
+MySQLDataProvider::MySQLDataProvider() : mDatabaseConnection(0), mKeepAliveTimer(0) { }
 
-MySQLDataProvider::~MySQLDataProvider()
-{
+MySQLDataProvider::~MySQLDataProvider() {
+	safe_delete(mKeepAliveTimer);
 	safe_delete(mDatabaseConnection);
 }
 
-bool MySQLDataProvider::initialise()
-{
+bool MySQLDataProvider::initialise() {
+	mKeepAliveTimer = new Timer(KEEP_ALIVE_TIMER);
+	mKeepAliveTimer->Trigger();
+
 	mDatabaseConnection = new DatabaseConnection();
 	return mDatabaseConnection->initialise();
 }
 
-void MySQLDataProvider::update()
-{
-	mDatabaseConnection->ping();
+void MySQLDataProvider::update() {
+	// Is it time to ping mysql?
+	if (mKeepAliveTimer->Check()) {
+		mKeepAliveTimer->Start();
+		mDatabaseConnection->ping();
+	}
 }
 
 bool MySQLDataProvider::getAccounts(std::list<AccountData*>& pAccounts) {

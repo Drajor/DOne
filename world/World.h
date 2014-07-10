@@ -29,6 +29,9 @@ public:
 
 	bool getLocked() { return mLocked; }
 	void setLocked(bool pLocked);
+
+	// Login Server requests response for Client who would like to join the World.
+	int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account
@@ -42,7 +45,7 @@ private:
 
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
-
+	
 	bool mInitialised;
 	bool mLocked;
 	EmuTCPServer* mTCPServer;

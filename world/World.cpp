@@ -52,7 +52,7 @@ bool World::initialise()
 	if (mInitialised) return false;
 
 	// Create our connection to the Login Server
-	mLoginServerConnection = new LoginServerConnection(this, mAccountManager, "127.0.0.1", 5998, "Admin", "Password");
+	mLoginServerConnection = new LoginServerConnection(this, "127.0.0.1", 5998, "Admin", "Password");
 	if (!mLoginServerConnection->initialise()) {
 		Utility::criticalError("Unable to initialise Login Server Connection");
 		return false;
@@ -158,7 +158,7 @@ bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerA
 			pConnection->setLoginServerAccountName(i.mAccountName);
 			pConnection->setLoginServerKey(i.mKey);
 			pConnection->setWorldAdmin(i.mWorldAdmin);
-			pConnection->setWorldAccountID(database.GetAccountIDFromLSID(pLoginServerAccountID));
+			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
 			// TODO: Do I need to set IP or Local here?
 			// TODO Remove IncomingClient from list.
 			return true;
@@ -171,4 +171,24 @@ void World::setLocked(bool pLocked) {
 	mLocked = pLocked;
 	// Notify Login Server!
 	mLoginServerConnection->sendWorldStatus();
+}
+
+int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
+	static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
+	static const int16 ACCOUNT_STATUS_BANNED = -2;
+
+	// Fetch the Account Status.
+	uint32 accountStatus = mAccountManager->getStatusFromLoginServerID(pLoginServerAccountID);
+
+	// Account Suspended.
+	if (accountStatus == ACCOUNT_STATUS_SUSPENDED) return -1;
+	// Account Banned.
+	if (accountStatus == ACCOUNT_STATUS_BANNED) return -2;
+
+	// Server is Locked (Only GM/Admin may enter)
+	if (mLocked && accountStatus >= 100) return 1;
+	// Server is Locked and user is not a GM/Admin.
+	else if( mLocked && accountStatus < 100) return 0;
+
+	return 1; // Speak friend and enter.
 }

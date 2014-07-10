@@ -52,10 +52,9 @@ extern uint32 numplayers;
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(World* pWorld, AccountManager* pAccountManager, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
+LoginServerConnection::LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
 	mWorld(pWorld),
-	mAccountManager(pAccountManager),
 	mTCPConnection(0)
 {
 	strn0cpy(mLoginServerAddress,pAddress,256);
@@ -95,11 +94,6 @@ void LoginServerConnection::update() {
 			case ServerOP_UsertoWorldReq: {
 				Utility::print("ServerOP_UsertoWorldReq");
 				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
-				// TODO: Below.
-				//uint32 id = mAccountManager->getWorldAccountID(utwr->lsaccountid);
-				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
-				int16 accountStatus = database.CheckStatus(id);
-
 				ServerPacket* outpack = new ServerPacket;
 				outpack->opcode = ServerOP_UsertoWorldResp;
 				outpack->size = sizeof(UsertoWorldResponse_Struct);
@@ -109,33 +103,8 @@ void LoginServerConnection::update() {
 				utwrs->lsaccountid = utwr->lsaccountid;
 				utwrs->ToID = utwr->FromID;
 				utwrs->worldid = utwr->worldid;
-
-				//utwrs->response = 1; // Normal, everything is OK.
-				//utwrs->response = 0; // 'That server currently unavailable. Please check the EverQuest webpage for current server status and try again later'.
-				//utwrs->response = -1; // 'This account is currently suspended. Please contact customer service for more information.'
-				//utwrs->response = -2; // 'This account is currently banned. Please contact customer service for more information.'
-				//utwrs->response = -3; // 'The world server has denied your login request. Please try again later.'
-
-				static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
-				static const int16 ACCOUNT_STATUS_BANNED = -2;
-
-				// Assume everything is fine.
-				utwrs->response = 1;
-
-				// Check Suspended.
-				if (accountStatus == ACCOUNT_STATUS_SUSPENDED)
-					utwrs->response = -1;
-				// Check Banned.
-				if (accountStatus == ACCOUNT_STATUS_BANNED)
-					utwrs->response = -2;
-
-				// Special case: Server is locked.
-				if (mWorld->getLocked() && accountStatus >= 0 ) {
-					utwrs->response = 0; // unsuspended/unbanned clients can not join locked server.
-					if (accountStatus >= 100) utwrs->response = 1; // GM/Admin may enter locked server.
-				}
-				// NOTE: There was a -3 here previously for 'MaxClients'.
-
+				// Ask World if this Client can join World.
+				utwrs->response = mWorld->getUserToWorldResponse(utwr->lsaccountid);
 				_sendPacket(outpack);
 				delete outpack;
 				break;
@@ -143,17 +112,7 @@ void LoginServerConnection::update() {
 			case ServerOP_LSClientAuth: {
 				Utility::print("ServerOP_LSClientAuth");
 				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
-
-				//if (RuleI(World, AccountSessionLimit) >= 0) {
-				//	// Enforce the limit on the number of characters on the same account that can be
-				//	// online at the same time.
-				//	//client_list.EnforceSessionLimit(slsca->lsaccount_id);
-				//}
-
-				// TODO LOL
-				//client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
-
-				// Notify World that a Client is inbound.
+				// Tell World that a Client is inbound.
 				mWorld->notifyIncomingClient(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
 				break;
 			}

@@ -5,6 +5,7 @@
 
 struct AccountData;
 class DatabaseConnection;
+class Timer;
 
 class MySQLDataProvider : public DataProvider {
 public:
@@ -15,5 +16,6 @@ public:
 
 	bool getAccounts(std::list<AccountData*>& pAccounts);
 private:
+	Timer* mKeepAliveTimer;
 	DatabaseConnection* mDatabaseConnection;
 };
