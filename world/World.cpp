@@ -102,6 +102,8 @@ void World::update()
 	}
 
 	mDataStore->update();
+
+	// TODO: Erase any expired IncomingClients.
 }
 
 void World::_handleIncomingClientConnections() {
@@ -138,29 +140,31 @@ void World::_checkUCSConnection() {
 
 void World::notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin /*= 0*/, uint32 pIP /*= 0*/, uint8 pLocal /*= 0*/)
 {
-	IncomingClient client;
-	client.mAccountID = pLoginServerID;
-	client.mAccountName = pLoginServerAccountName;
-	client.mKey = pLoginServerKey;
-	client.mWorldAdmin = pWorldAdmin;
-	client.mIP = pIP;
-	client.mLocal = pLocal;
+	IncomingClient* client = new IncomingClient();
+	client->mAccountID = pLoginServerID;
+	client->mAccountName = pLoginServerAccountName;
+	client->mKey = pLoginServerKey;
+	client->mWorldAdmin = pWorldAdmin;
+	client->mIP = pIP;
+	client->mLocal = pLocal;
 	mIncomingClients.push_back(client);
 }
 
 bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
 	// Check Incoming Clients that match Account ID / Key
-	for (auto& i : mIncomingClients) {
-		if (pLoginServerAccountID == i.mAccountID && pLoginServerKey == i.mKey && !pConnection->getIdentified()) {
+	for (auto i = mIncomingClients.begin(); i != mIncomingClients.end(); i++) {
+		IncomingClient* incClient = *i;
+		if (pLoginServerAccountID == incClient->mAccountID && pLoginServerKey == incClient->mKey && !pConnection->getIdentified()) {
 			// Configure the WorldClientConnection with details from the IncomingClient.
 			pConnection->setIdentified(true);
-			pConnection->setLoginServerAccountID(i.mAccountID);
-			pConnection->setLoginServerAccountName(i.mAccountName);
-			pConnection->setLoginServerKey(i.mKey);
-			pConnection->setWorldAdmin(i.mWorldAdmin);
+			pConnection->setLoginServerAccountID(incClient->mAccountID);
+			pConnection->setLoginServerAccountName(incClient->mAccountName);
+			pConnection->setLoginServerKey(incClient->mKey);
+			pConnection->setWorldAdmin(incClient->mWorldAdmin);
 			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
 			// TODO: Do I need to set IP or Local here?
-			// TODO Remove IncomingClient from list.
+			delete incClient;
+			mIncomingClients.erase(i);
 			return true;
 		}
 	}

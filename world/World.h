@@ -41,7 +41,7 @@ private:
 		uint32 mIP;
 		uint8 mLocal;
 	};
-	std::list<IncomingClient> mIncomingClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
+	std::list<IncomingClient*> mIncomingClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
