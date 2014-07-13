@@ -203,10 +203,6 @@ int main(int argc, char** argv) {
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
-	_log(WORLD__INIT, "Loading char create info...");
-	database.LoadCharacterCreateAllocations();
-	database.LoadCharacterCreateCombos();
-
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 	InterserverTimer.Trigger();
 	uint8 ReconnectCounter = 100;

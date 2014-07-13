@@ -36,6 +36,7 @@
 #include "../common/servertalk.h"
 #include "World.h"
 #include "Utility.h"
+#include "Constants.h"
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -68,7 +69,6 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 	char_name[0] = 0;
 	mCharacterID = 0;
 	pwaitingforbootup = 0;
-	StartInTutorial = false;
 	ClientVersionBit = 0;
 
 	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
@@ -562,9 +562,36 @@ bool WorldClientConnection::HandleGenerateRandomNamePacket(const EQApplicationPa
 }
 
 bool WorldClientConnection::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
-	// New OpCode in SoF
-	uint32 allocs = character_create_allocations.size();
-	uint32 combos = character_create_race_class_combos.size();
+	/*
+	[Client Limitation][HoT] If the client is not an race/class combinations for any one class the class icon will not be greyed out.
+	*/
+	static const std::list<int> PlayableRaces = {
+		PlayableRaceIDs::Human,
+	};
+
+	static const std::list<int> PlayableClasses = {
+		PlayableClassIDs::Warrior,
+		PlayableClassIDs::Cleric,
+		PlayableClassIDs::Wizard,
+	};
+
+	std::list<RaceClassAllocation> raceClassAllocations;
+	RaceClassAllocation r;
+	r.Index = 0;
+	memset(r.BaseStats, 0, sizeof(r.BaseStats));
+	memset(r.DefaultPointAllocation, 0, sizeof(r.DefaultPointAllocation));
+	raceClassAllocations.push_back(r);
+	std::list<RaceClassCombos> raceClassCombos;
+
+	//int allocationIndex = 0;
+	for (auto i : PlayableRaces) {
+		for (auto j : PlayableClasses) {
+			raceClassCombos.push_back({ 0, i, j, PlayerDeityIDs::Agnostic, 0, ZoneIDs::NorthQeynos });
+		}
+	}
+
+	uint32 allocs = raceClassAllocations.size();
+	uint32 combos = raceClassCombos.size();
 	uint32 len = sizeof(RaceClassAllocation) * allocs;
 	len += sizeof(RaceClassCombos) * combos;
 	len += sizeof(uint8);
@@ -576,30 +603,18 @@ bool WorldClientConnection::HandleCharacterCreateRequestPacket(const EQApplicati
 	*((uint8*)ptr) = 0;
 	ptr += sizeof(uint8);
 
-	*((uint32*)ptr) = allocs;
+	*((uint32*)ptr) = allocs; // number of allocs.
 	ptr += sizeof(uint32);
 
-	for(int i = 0; i < allocs; ++i) {
-		RaceClassAllocation *alc = (RaceClassAllocation*)ptr;
-
-		alc->Index = character_create_allocations[i].Index;
-		for(int j = 0; j < 7; ++j) {
-			alc->BaseStats[j] = character_create_allocations[i].BaseStats[j];
-			alc->DefaultPointAllocation[j] = character_create_allocations[i].DefaultPointAllocation[j];
-		}
+	for (auto i : raceClassAllocations) {
+		memcpy(ptr, &i, sizeof(RaceClassAllocation));
 		ptr += sizeof(RaceClassAllocation);
 	}
 
-	*((uint32*)ptr) = combos;
+	*((uint32*)ptr) = combos; // number of combos.
 	ptr += sizeof(uint32);
-	for(int i = 0; i < combos; ++i) {
-		RaceClassCombos *cmb = (RaceClassCombos*)ptr;
-		cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
-		cmb->Race = character_create_race_class_combos[i].Race;
-		cmb->Class = character_create_race_class_combos[i].Class;
-		cmb->Deity = character_create_race_class_combos[i].Deity;
-		cmb->AllocationIndex = character_create_race_class_combos[i].AllocationIndex;
-		cmb->Zone = character_create_race_class_combos[i].Zone;
+	for (auto i : raceClassCombos) {
+		memcpy(ptr, &i, sizeof(RaceClassCombos));
 		ptr += sizeof(RaceClassCombos);
 	}
 
@@ -634,8 +649,6 @@ bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacke
 	}
 	else
 	{
-		if(ClientVersionBit & BIT_TitaniumAndEarlier)
-			StartInTutorial = true;
 		_sendCharacterSelectInfo();
 	}
 
@@ -713,7 +726,7 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 		}
 	}
 
-	if(!mZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial || StartInTutorial))) {
+	if(!mZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial /*|| StartInTutorial*/))) {
 		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
 		memset(cs, 0, sizeof(CharacterSelect_Struct));
 		database.GetCharSelectInfo(getWorldAccountID(), cs);
@@ -915,11 +928,6 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		case OP_World_Client_CRC1:
 		case OP_World_Client_CRC2:
 		{
-			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
-			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
-			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
-			// then 'Start Tutorial' was not chosen.
-			StartInTutorial = false;
 			return true;
 		}
 		case OP_SendLoginInfo:
@@ -936,7 +944,7 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_CharacterCreateRequest:
 		{
-			// New OpCode in SoF
+			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
 			return HandleCharacterCreateRequestPacket(app);
 		}
 		case OP_CharacterCreate: //Char create

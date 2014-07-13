@@ -37,9 +37,6 @@ public:
 	void GetLauncherList(std::vector<std::string> &result);
 	void SetMailKey(int CharID, int IPAddress, int MailKey);
 	bool GetCharacterLevel(const char *name, int &level);
-
-	bool LoadCharacterCreateAllocations();
-	bool LoadCharacterCreateCombos();
 protected:
 
 };

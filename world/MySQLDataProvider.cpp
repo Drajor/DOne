@@ -94,7 +94,7 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 			pCharacterSelectData->gender[i] = playerProfile->gender;
 			pCharacterSelectData->deity[i] = playerProfile->deity;
 			//pCharacterSelectData->zone[i] = GetZoneID(row[2]);
-			pCharacterSelectData->zone[i] = 0;
+			pCharacterSelectData->zone[i] = 1;
 			pCharacterSelectData->face[i] = playerProfile->face;
 			pCharacterSelectData->haircolor[i] = playerProfile->haircolor;
 			pCharacterSelectData->beardcolor[i] = playerProfile->beardcolor;
@@ -110,12 +110,12 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 
 			// No equipment yet. NUDES!
 			for (int j = 0; j < 9; j++) {
-				pCharacterSelectData->equip[i][j] = 0;
+				pCharacterSelectData->equip[i][j] = 2;
 				pCharacterSelectData->cs_colors[i][j].color = 0;
 			}
 
-			pCharacterSelectData->primary[i] = 148;
-			pCharacterSelectData->secondary[i] = 148;
+			pCharacterSelectData->primary[i] = 146;
+			pCharacterSelectData->secondary[i] = 146;
 
 		}
 	} else {
