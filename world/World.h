@@ -13,6 +13,7 @@ class ZoneManager;
 class AccountManager;
 class DataStore;
 class WorldClientConnection;
+struct CharacterSelect_Struct;
 
 class World {
 public:
@@ -32,6 +33,8 @@ public:
 
 	// Login Server requests response for Client who would like to join the World.
 	int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
+
+	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account

@@ -5,6 +5,7 @@
 #include <list>
 
 class DataProvider;
+struct CharacterSelect_Struct;
 
 class DataStore {
 public:
@@ -15,7 +16,7 @@ public:
 
 	// Account Data
 	bool getAccounts(std::list<AccountData*>& pAccounts);
-
+	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

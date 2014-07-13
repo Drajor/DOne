@@ -4,6 +4,7 @@
 #include <list>
 
 struct AccountData;
+struct CharacterSelect_Struct;
 class DatabaseConnection;
 class Timer;
 
@@ -15,6 +16,7 @@ public:
 	void update();
 
 	bool getAccounts(std::list<AccountData*>& pAccounts);
+	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 private:
 	Timer* mKeepAliveTimer;
 	DatabaseConnection* mDatabaseConnection;

@@ -98,7 +98,7 @@ void World::update()
 
 	// Update World Clients.
 	for (auto i : mClients) {
-		i->process();
+		i->update();
 	}
 
 	mDataStore->update();
@@ -138,8 +138,7 @@ void World::_checkUCSConnection() {
 	}
 }
 
-void World::notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin /*= 0*/, uint32 pIP /*= 0*/, uint8 pLocal /*= 0*/)
-{
+void World::notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
 	IncomingClient* client = new IncomingClient();
 	client->mAccountID = pLoginServerID;
 	client->mAccountName = pLoginServerAccountName;
@@ -195,4 +194,8 @@ int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
 	else if( mLocked && accountStatus < 100) return 0;
 
 	return 1; // Speak friend and enter.
+}
+
+bool World::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
+	return mDataStore->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
 }

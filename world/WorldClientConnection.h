@@ -30,43 +30,26 @@ class EQApplicationPacket;
 class EQStreamInterface;
 class World;
 
+/*
+TODO: Work out when to drop a WorldClientConnection. It looks like Zone previously had a role in this.
+*/
+
 class WorldClientConnection {
 public:
 	WorldClientConnection(EQStreamInterface* ieqs, World* pWorld);
 	~WorldClientConnection();
 
-	bool	process();
-	void	SendCharInfo();
-	void	SendMaxCharCreate(int max_chars);
-	void	SendMembership();
-	void	SendMembershipSettings();
-	void	EnterWorld(bool TryBootup = true);
-	void	ZoneUnavail();
+	bool update();
+	
+	
+	
+	
+	
+	
 	void	QueuePacket(const EQApplicationPacket* app, bool ack_req = true);
 	void	Clearance(int8 response);
-	void	SendGuildList();
-	void	SendEnterWorld(std::string name);
-	void	SendExpansionInfo();
-	void	SendLogServer();
-	void	SendApproveWorld();
-	void	SendPostEnterWorld();
-	bool	GenPassKey(char* key);
-
-	
-	//inline uint16		GetPort()			{ return mPort; }
-	//inline uint32		GetZoneID()			{ return zoneID; }
-	//inline uint32		GetInstanceID()		{ return instanceID; }
-	//inline uint32		WaitingForBootup()	{ return pwaitingforbootup; }
-	//inline const char *	GetAccountName()	{ if (cle) { return cle->AccountName(); } return "NOCLE"; }
-	//inline int16		GetAdmin()			{ if (cle) { return cle->Admin(); } return 0; }
-	//inline uint32		getWorldAccountID()		{ if (cle) { return cle->AccountID(); } return 0; }
-	//inline uint32		GetWID()			{ if (cle) { return cle->GetID(); } return 0; }
-	//inline uint32		getLoginServerAccountID()			{ if (cle) { return cle->getLoginServerAccountID(); } return 0; }
-	//inline const char*	GetLSKey()			{ if (cle) { return cle->getLoginServerKey(); } return "NOKEY"; }
 	
 	inline const char*	GetCharName()		{ return char_name; }
-	//inline ClientListEntry* GetCLE()		{ return cle; }
-	//inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
 
 	bool getIdentified() { return mIdentified; }
 	uint32 getIP() { return mIP; }
@@ -85,6 +68,19 @@ public:
 	void setWorldAdmin(int16 pWorldAdmin) { mWorldAdmin = pWorldAdmin; }
 
 private:
+
+	void _sendCharacterSelectInfo();
+	void _sendMaxCharCreate(int max_chars);
+	void _sendMembership();
+	void _sendMembershipSettings();
+	void _sendGuildList();
+	void _sendEnterWorld(std::string pCharacterName);
+	void _sendExpansionInfo();
+	void _sendLogServer();
+	void _sendApproveWorld();
+	void _sendPostEnterWorld();
+	void _sendZoneUnavailable();
+	void _sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo(bool TryBootup = true);
 
 	bool mIdentified;
 	uint16 mPort;
@@ -113,7 +109,6 @@ private:
 	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
 	void SetRacialLanguages( PlayerProfile_Struct *pp );
 
-	//ClientListEntry* cle;
 	Timer	CLE_keepalive_timer;
 	Timer	connect;
 	bool firstlogin;
@@ -130,7 +125,7 @@ private:
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
 
-	EQStreamInterface* const eqs;
+	EQStreamInterface* const mStreamInterface;
 	World* mWorld;
 };
 

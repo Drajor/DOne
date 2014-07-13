@@ -8,4 +8,6 @@ void DataStore::setProvider(DataProvider* pDataProvider) { mDataProvider = pData
 void DataStore::update() { mDataProvider->update(); }
 bool DataStore::getAccounts(std::list<AccountData*>& pAccounts) { return mDataProvider->getAccounts(pAccounts); }
 
+bool DataStore::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) { return mDataProvider->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData); }
+
 

@@ -2,6 +2,8 @@
 #include "Data.h"
 #include "DatabaseConnection.h"
 #include "../common/timer.h"
+#include "../common/eq_packet_structs.h"
+#include "../common/StringUtil.h"
 
 #define KEEP_ALIVE_TIMER 10000
 
@@ -57,6 +59,68 @@ bool MySQLDataProvider::getAccounts(std::list<AccountData*>& pAccounts) {
 		return false;
 	}
 
+	mysql_free_result(result);
+	return true;
+}
+
+bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
+	static const int NUM_CHARACTERS = 10;
+	static const std::string GET_CHARACTERS_QUERY = "SELECT name, profile, zonename, class, level FROM character_ WHERE account_id = %i order by name limit 10";
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, GET_CHARACTERS_QUERY.c_str(), pWorldAccountID);
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		safe_delete_array(query);
+
+		// TODO: Why are only part of this data initialised here?
+		for (int i = 0; i < NUM_CHARACTERS; i++) {
+			strcpy(pCharacterSelectData->name[i], "<none>");
+			pCharacterSelectData->zone[i] = 0;
+			pCharacterSelectData->level[i] = 0;
+			pCharacterSelectData->tutorial[i] = 0;
+			pCharacterSelectData->gohome[i] = 0;
+		}
+
+		for (int i = 0; i < mysql_num_rows(result); i++) {
+			MYSQL_ROW row = mysql_fetch_row(result);
+			strcpy(pCharacterSelectData->name[i], row[0]);
+
+			// Copy data from Player Profile.
+			PlayerProfile_Struct* playerProfile = (PlayerProfile_Struct*)row[1];
+			pCharacterSelectData->class_[i] = playerProfile->class_;
+			pCharacterSelectData->level[i] = playerProfile->level;
+			pCharacterSelectData->race[i] = playerProfile->race;
+			pCharacterSelectData->gender[i] = playerProfile->gender;
+			pCharacterSelectData->deity[i] = playerProfile->deity;
+			//pCharacterSelectData->zone[i] = GetZoneID(row[2]);
+			pCharacterSelectData->zone[i] = 0;
+			pCharacterSelectData->face[i] = playerProfile->face;
+			pCharacterSelectData->haircolor[i] = playerProfile->haircolor;
+			pCharacterSelectData->beardcolor[i] = playerProfile->beardcolor;
+			pCharacterSelectData->eyecolor2[i] = playerProfile->eyecolor2;
+			pCharacterSelectData->eyecolor1[i] = playerProfile->eyecolor1;
+			pCharacterSelectData->hairstyle[i] = playerProfile->hairstyle;
+			pCharacterSelectData->beard[i] = playerProfile->beard;
+			pCharacterSelectData->drakkin_heritage[i] = playerProfile->drakkin_heritage;
+			pCharacterSelectData->drakkin_tattoo[i] = playerProfile->drakkin_tattoo;
+			pCharacterSelectData->drakkin_details[i] = playerProfile->drakkin_details;
+			pCharacterSelectData->tutorial[i] = 0; // Disabled.
+			pCharacterSelectData->gohome[i] = 0; // Disabled.
+
+			// No equipment yet. NUDES!
+			for (int j = 0; j < 9; j++) {
+				pCharacterSelectData->equip[i][j] = 0;
+				pCharacterSelectData->cs_colors[i][j].color = 0;
+			}
+
+			pCharacterSelectData->primary[i] = 148;
+			pCharacterSelectData->secondary[i] = 148;
+
+		}
+	} else {
+		return false;
+	}
 	mysql_free_result(result);
 	return true;
 }
