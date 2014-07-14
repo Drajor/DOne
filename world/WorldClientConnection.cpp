@@ -334,8 +334,8 @@ void WorldClientConnection::_sendPostEnterWorld() {
 	safe_delete(outapp);
 }
 
-bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
-	if (app->size != sizeof(LoginInfo_Struct)) return false;
+bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* packet) {
+	if (packet->size != sizeof(LoginInfo_Struct)) return false;
 
 	/*
 	OP_SendLoginInfo is sent;
@@ -344,7 +344,7 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 		- Camping
 	*/
 
-	LoginInfo_Struct* loginInfo = (LoginInfo_Struct*)app->pBuffer;
+	LoginInfo_Struct* loginInfo = (LoginInfo_Struct*)packet->pBuffer;
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19] = {0};
@@ -438,18 +438,16 @@ bool WorldClientConnection::HandleSendLoginInfoPacket(const EQApplicationPacket 
 	return true;
 }
 
-bool WorldClientConnection::HandleNameApprovalPacket(const EQApplicationPacket *app) {
-
+bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* packet) {
 	if (getWorldAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
 		return false;
 	}
 
-	snprintf(char_name, 64, "%s", (char*)app->pBuffer);
-	uchar race = app->pBuffer[64];
-	uchar clas = app->pBuffer[68];
-
-	clog(WORLD__CLIENT,"Name approval request. Name=%s, race=%s, class=%s",char_name,GetRaceName(race),GetEQClassName(clas));
+	snprintf(char_name, 64, "%s", (char*)packet->pBuffer);
+	// TODO: Consider why race and class are sent here?
+	uchar race = packet->pBuffer[64];
+	uchar clas = packet->pBuffer[68];
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -457,20 +455,38 @@ bool WorldClientConnection::HandleNameApprovalPacket(const EQApplicationPacket *
 	outapp->pBuffer = new uchar[1];
 	outapp->size = 1;
 
-	bool valid;
-	if(!database.CheckNameFilter(char_name)) {
+	bool valid = true;
+	std::string characterName = char_name;
+	const int nameLength = characterName.length();
+	// Check length (4 >= x <= 15) 
+	if (nameLength < 4 || nameLength > 15) {
 		valid = false;
 	}
-	else if(char_name[0] < 'A' && char_name[0] > 'Z') {
-		//name must begin with an upper-case letter.
+	// Check case of first character (must be uppercase)
+	else if (characterName[0] < 'A' || characterName[0] > 'Z') {
 		valid = false;
 	}
-	else if (database.ReserveName(getWorldAccountID(), char_name)) {
-		valid = true;
+	// Check each character is alpha.
+	for (int i = 0; i < nameLength; i++) {
+		if (!isalpha(characterName[i])) {
+			valid = false;
+			break;
+		}
 	}
-	else {
+	// Check if name already in use.
+	if (valid && !mWorld->isCharacterNameUnique(characterName)) {
 		valid = false;
 	}
+	// Check if name is reserved.
+	if (valid && mWorld->isCharacterNameReserved(characterName)) {
+		valid = false;
+	}
+	// Reserve character name.
+	if (valid) {
+		// For the rare chance that more than one user tries to create a character with same name.
+		mWorld->reserveCharacterName(mWorldAccountID, characterName);
+	}
+
 	outapp->pBuffer[0] = valid? 1 : 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -561,12 +577,12 @@ bool WorldClientConnection::HandleGenerateRandomNamePacket(const EQApplicationPa
 	return true;
 }
 
-bool WorldClientConnection::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicationPacket* packet) {
 	/*
 	[Client Limitation][HoT] If the client is not an race/class combinations for any one class the class icon will not be greyed out.
 	*/
 	static const std::list<int> PlayableRaces = {
-		PlayableRaceIDs::Human,
+		PlayableRaceIDs::Human
 	};
 
 	static const std::list<int> PlayableClasses = {
@@ -932,11 +948,11 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_SendLoginInfo:
 		{
-			return HandleSendLoginInfoPacket(app);
+			return _handleSendLoginInfoPacket(app);
 		}
 		case OP_ApproveName: //Name approval
 		{
-			return HandleNameApprovalPacket(app);
+			return _handleNameApprovalPacket(app);
 		}
 		case OP_RandomNameGenerator:
 		{
@@ -945,7 +961,7 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		case OP_CharacterCreateRequest:
 		{
 			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
-			return HandleCharacterCreateRequestPacket(app);
+			return _handleCharacterCreateRequestPacket(app);
 		}
 		case OP_CharacterCreate: //Char create
 		{

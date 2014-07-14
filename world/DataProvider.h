@@ -13,6 +13,7 @@ public:
 	virtual void update() { };
 	virtual bool getAccounts(std::list<AccountData*>& pAccounts) = 0;
 	virtual bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) = 0;
+	virtual bool isCharacterNameUnique(std::string pCharacterName) = 0;
 
 private:
 };

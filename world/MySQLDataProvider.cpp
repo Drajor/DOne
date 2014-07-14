@@ -124,3 +124,25 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 	mysql_free_result(result);
 	return true;
 }
+
+bool MySQLDataProvider::isCharacterNameUnique(std::string pCharacterName)
+{
+	static const std::string CHECK_NAME_QUERY = "SELECT name FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, CHECK_NAME_QUERY.c_str(), pCharacterName.c_str());
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		// Expect zero rows if name is not in use.
+		if (mysql_num_rows(result) != 0) {
+			mysql_free_result(result);
+			return false;
+		}
+	}
+	else {
+		mysql_free_result(result);
+		return false;
+	}
+	mysql_free_result(result);
+	return true;
+}

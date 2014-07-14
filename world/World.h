@@ -2,6 +2,7 @@
 
 #include "../common/types.h"
 #include <list>
+#include <map>
 #include <string>
 
 class EmuTCPServer;
@@ -35,6 +36,9 @@ public:
 	int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
 
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
+	bool isCharacterNameUnique(std::string pCharacterName);
+	bool isCharacterNameReserved(std::string pCharacterName);
+	void reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account
@@ -45,10 +49,14 @@ private:
 		uint8 mLocal;
 	};
 	std::list<IncomingClient*> mIncomingClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
+	std::map<uint32, std::string> mReservedCharacterNames;
 
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 	
+
+
+
 	bool mInitialised;
 	bool mLocked;
 	EmuTCPServer* mTCPServer;

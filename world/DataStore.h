@@ -17,6 +17,7 @@ public:
 	// Account Data
 	bool getAccounts(std::list<AccountData*>& pAccounts);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
+	bool isCharacterNameUnique(std::string pCharacterName);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

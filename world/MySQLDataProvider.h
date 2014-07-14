@@ -17,6 +17,7 @@ public:
 
 	bool getAccounts(std::list<AccountData*>& pAccounts);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
+	bool isCharacterNameUnique(std::string pCharacterName);
 private:
 	Timer* mKeepAliveTimer;
 	DatabaseConnection* mDatabaseConnection;

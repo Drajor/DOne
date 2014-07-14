@@ -199,3 +199,16 @@ int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
 bool World::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
 	return mDataStore->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
 }
+
+bool World::isCharacterNameUnique(std::string pCharacterName) { return mDataStore->isCharacterNameUnique(pCharacterName); }
+
+bool World::isCharacterNameReserved(std::string pCharacterName) {
+	for (auto i : mReservedCharacterNames)
+		if (i.second == pCharacterName)
+			return true;
+	return false;
+}
+
+void World::reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName) {
+	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
+}
