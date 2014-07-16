@@ -6,6 +6,8 @@
 
 class DataProvider;
 struct CharacterSelect_Struct;
+struct PlayerProfile_Struct;
+struct ExtendedProfile_Struct;
 
 class DataStore {
 public:
@@ -18,6 +20,8 @@ public:
 	bool getAccounts(std::list<AccountData*>& pAccounts);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 	bool isCharacterNameUnique(std::string pCharacterName);
+	bool deleteCharacter(std::string pCharacterName);
+	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

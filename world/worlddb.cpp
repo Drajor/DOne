@@ -497,29 +497,6 @@ bool WorldDatabase::GetStartZoneSoF(PlayerProfile_Struct* in_pp, CharCreate_Stru
 	return true;
 }
 
-void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
-	char errbuf[MYSQL_ERRMSG_SIZE];
-	char* query = 0;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	rl.clear();
-
-	if (RunQuery(query, MakeAnyLenString(&query,
-			"SELECT name FROM launcher" )
-		, errbuf, &result))
-	{
-		while ((row = mysql_fetch_row(result))) {
-			rl.push_back(row[0]);
-		}
-		mysql_free_result(result);
-	}
-	else {
-		LogFile->write(EQEMuLog::Error, "WorldDatabase::GetLauncherList: %s", errbuf);
-	}
-	safe_delete_array(query);
-}
-
 void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
 
 	char errbuf[MYSQL_ERRMSG_SIZE];

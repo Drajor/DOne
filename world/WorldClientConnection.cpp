@@ -37,6 +37,7 @@
 #include "World.h"
 #include "Utility.h"
 #include "Constants.h"
+#include "LogSystem.h"
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -57,7 +58,8 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 	connect(1000),
 	mStreamInterface(ieqs),
 	mWorld(pWorld),
-	mIdentified(false)
+	mIdentified(false),
+	mReservedCharacterName("")
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
@@ -485,6 +487,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	if (valid) {
 		// For the rare chance that more than one user tries to create a character with same name.
 		mWorld->reserveCharacterName(mWorldAccountID, characterName);
+		mReservedCharacterName = characterName;
 	}
 
 	outapp->pBuffer[0] = valid? 1 : 0;
@@ -640,12 +643,7 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 }
 
 bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
-	if (getWorldAccountID() == 0)
-	{
-		clog(WORLD__CLIENT_ERR,"Account ID not set; unable to create character.");
-		return false;
-	}
-	else if (app->size != sizeof(CharCreate_Struct))
+	if (app->size != sizeof(CharCreate_Struct))
 	{
 		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
 		DumpPacket(app);
@@ -654,20 +652,29 @@ bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacke
 		return true;
 	}
 
-	CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
-	if(OPCharCreate(char_name, cc) == false)
-	{
-		database.DeleteCharacter(char_name);
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
-		outapp->pBuffer[0] = 0;
-		QueuePacket(outapp);
-		safe_delete(outapp);
-	}
-	else
-	{
-		_sendCharacterSelectInfo();
+	//CharCreate_Struct *cc = (CharCreate_Struct*)app->pBuffer;
+	//if(OPCharCreate(char_name, cc) == false)
+	//{
+	//	database.DeleteCharacter(char_name);
+	//	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ApproveName, 1);
+	//	outapp->pBuffer[0] = 0;
+	//	QueuePacket(outapp);
+	//	safe_delete(outapp);
+	//}
+	//else
+	//{
+	//	_sendCharacterSelectInfo();
+	//}
+
+	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
+	CharCreate_Struct* cc = (CharCreate_Struct*)app->pBuffer;
+	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, cc)) {
+		// TODO: Dump client.
 	}
 
+	_sendZoneUnavailable();
+
+	mReservedCharacterName = "";
 	return true;
 }
 
@@ -889,15 +896,12 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 }
 
 bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
-
-	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
-	if(char_acct_id == getWorldAccountID())
-	{
-		clog(WORLD__CLIENT,"Delete character: %s",app->pBuffer);
-		database.DeleteCharacter((char *)app->pBuffer);
+	// TODO: Check character is not in zone before deleting..
+	std::string characterName = (char*)app->pBuffer;
+	if (mWorld->deleteCharacter(characterName)) {
+		Log::info("Delete Character: %s"); // TODO:
 		_sendCharacterSelectInfo();
 	}
-
 	return true;
 }
 
@@ -911,36 +915,22 @@ bool WorldClientConnection::HandleZoneChangePacket(const EQApplicationPacket *ap
 }
 
 bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
+	// Check our Stream Interface.
+	if (!mStreamInterface->CheckState(ESTABLISHED)) {
+		// TODO: Can this even occur?
+		Log::error("Client disconnected (net inactive on send)");
+		return false;
+	}
+	// Check if unidentified and sending something other than OP_SendLoginInfo
+	if (!getIdentified() && app->GetOpcode() != OP_SendLoginInfo) {
+		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
+		return false;
+	}
 
 	EmuOpcode opcode = app->GetOpcode();
-
-	clog(WORLD__CLIENT_TRACE,"Recevied EQApplicationPacket");
-	_pkt(WORLD__CLIENT_TRACE,app);
-
-	if (!mStreamInterface->CheckState(ESTABLISHED)) {
-		clog(WORLD__CLIENT,"Client disconnected (net inactive on send)");
-		return false;
-	}
-
-	// Anti-GM Account hack, Checks source ip against valid GM Account IP Addresses
-	if (RuleB(World, GMAccountIPList) && this->getWorldAdmin() >= (RuleI(World, MinGMAntiHackStatus))) {
-		if(!database.CheckGMIPs(long2ip(this->getIP()).c_str(), this->getWorldAccountID())) {
-			clog(WORLD__CLIENT,"GM Account not permited from source address %s and accountid %i", long2ip(this->getIP()).c_str(), this->getWorldAccountID());
-			mStreamInterface->Close();
-		}
-	}
-
-	if (getWorldAccountID() == 0 && opcode != OP_SendLoginInfo) {
-		// Got a packet other than OP_SendLoginInfo when not logged in
-		clog(WORLD__CLIENT_ERR,"Expecting OP_SendLoginInfo, got %s", OpcodeNames[opcode]);
-		return false;
-	}
-	else if (opcode == OP_AckPacket) {
-		return true;
-	}
-
 	switch(opcode)
 	{
+		case OP_AckPacket:
 		case OP_World_Client_CRC1:
 		case OP_World_Client_CRC2:
 		{

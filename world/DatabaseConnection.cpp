@@ -200,3 +200,5 @@ bool DatabaseConnection::open(uint32* errnum, char* errbuf) {
 		return false;
 	}
 }
+
+uint32 DatabaseConnection::escapeString(char* tobuf, const char* frombuf, uint32 fromlen) { return mysql_real_escape_string(mMYSQL, tobuf, frombuf, fromlen); }

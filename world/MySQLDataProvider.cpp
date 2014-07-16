@@ -3,6 +3,7 @@
 #include "DatabaseConnection.h"
 #include "../common/timer.h"
 #include "../common/eq_packet_structs.h"
+#include "../common/extprofile.h"
 #include "../common/StringUtil.h"
 
 #define KEEP_ALIVE_TIMER 10000
@@ -145,4 +146,78 @@ bool MySQLDataProvider::isCharacterNameUnique(std::string pCharacterName)
 	}
 	mysql_free_result(result);
 	return true;
+}
+
+bool MySQLDataProvider::deleteCharacter(std::string pCharacterName) {
+	const uint32 characterID = _getCharacterID(pCharacterName);
+	if (characterID == 0) return false;
+
+	static const std::string DEL_CHARACTER_QUERY = "DELETE FROM character_ WHERE id = %i";
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, DEL_CHARACTER_QUERY.c_str(), characterID);
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		mysql_free_result(result);
+		return true;
+	}
+
+	return false;
+}
+
+uint32 MySQLDataProvider::_getCharacterID(std::string pCharacterName)
+{
+	static const std::string QUERY = "SELECT id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		// Name not found.
+		if (mysql_num_rows(result) != 1) {
+			mysql_free_result(result);
+			return 0;
+		}
+		MYSQL_ROW row = mysql_fetch_row(result);
+		mysql_free_result(result);
+		return static_cast<uint32>(atoi(row[0]));
+	}
+
+	mysql_free_result(result);
+	return 0;
+}
+
+bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile)
+{
+	// Create an entry in 'character_' table
+	//static const std::string CREATE_CHARACTER_QUERY = "INSERT INTO character_  SET account_id=%i, name='%s'";
+	//char errorBuffer[MYSQL_ERRMSG_SIZE];
+	
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char query[256 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 5];
+	char* end = query;
+
+	//char* query = 0;
+	/*uint32 queryLength = MakeAnyLenString(&query, CREATE_CHARACTER_QUERY.c_str(), pWorldAccountID, pCharacterName.c_str());*/
+	//MYSQL_RES* result;
+	uint32 characterID = 0;
+
+	// construct the character_ query
+	end += sprintf(end, "INSERT INTO character_ SET account_id=%i, name='%s', timelaston=0, zonename='northqeynos', x=0, y=0, z=0, profile=\'", pWorldAccountID, pCharacterName.c_str());
+	end += mDatabaseConnection->escapeString(end, (char*)pProfile, sizeof(PlayerProfile_Struct));
+	end += sprintf(end, "\', extprofile=\'");
+	end += mDatabaseConnection->escapeString(end, (char*)pExtendedProfile, sizeof(ExtendedProfile_Struct));
+	end += sprintf(end, "\'");
+
+	//RunQuery(query, (uint32)(end - query), errbuf, 0, &affected_rows);
+	if (mDatabaseConnection->runQuery(query, (uint32)(end - query), errbuf)){
+		return true;
+	}
+
+	//if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result, 0, &characterID) && characterID != 0 ) {
+	//	mysql_free_result(result);
+	//	return true;
+	//}
+	//mysql_free_result(result);
+	return false;
 }

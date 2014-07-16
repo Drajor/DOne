@@ -15,6 +15,7 @@ class AccountManager;
 class DataStore;
 class WorldClientConnection;
 struct CharacterSelect_Struct;
+struct CharCreate_Struct;
 
 class World {
 public:
@@ -35,10 +36,13 @@ public:
 	// Login Server requests response for Client who would like to join the World.
 	int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
 
+	// Character Select Screen
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 	bool isCharacterNameUnique(std::string pCharacterName);
 	bool isCharacterNameReserved(std::string pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName);
+	bool deleteCharacter(std::string pCharacterName);
+	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account
@@ -54,6 +58,8 @@ private:
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 	
+
+
 
 
 

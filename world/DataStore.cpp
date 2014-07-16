@@ -10,6 +10,12 @@ bool DataStore::getAccounts(std::list<AccountData*>& pAccounts) { return mDataPr
 bool DataStore::isCharacterNameUnique(std::string pCharacterName) { return mDataProvider->isCharacterNameUnique(pCharacterName); }
 bool DataStore::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) { return mDataProvider->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData); }
 
+bool DataStore::deleteCharacter(std::string pCharacterName) { return mDataProvider->deleteCharacter(pCharacterName); }
+
+bool DataStore::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	return mDataProvider->createCharacter(pWorldAccountID, pCharacterName, pProfile, pExtendedProfile);
+}
+
 
 
 

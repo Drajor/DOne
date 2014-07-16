@@ -11,8 +11,12 @@
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
+#include "../common/eq_packet_structs.h"
+#include "../common/extprofile.h"
 
 #include "WorldClientConnection.h"
+#include "Constants.h"
+#include "LogSystem.h"
 
 extern WorldDatabase database;
 
@@ -211,4 +215,81 @@ bool World::isCharacterNameReserved(std::string pCharacterName) {
 
 void World::reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName) {
 	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
+}
+
+bool World::deleteCharacter(std::string pCharacterName) { return mDataStore->deleteCharacter(pCharacterName); }
+
+bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData) {
+	// Find reserved name.
+	auto i = mReservedCharacterNames.find(pWorldAccountID);
+	if (i == mReservedCharacterNames.end()) {
+		Log::error("Reserved character name not found during character creation!");
+		return false;
+	} else {
+		mReservedCharacterNames.erase(pWorldAccountID);
+	}
+
+	// Create and configure profile.
+	PlayerProfile_Struct profile;
+	memset(&profile, 0, sizeof(PlayerProfile_Struct));
+	strcpy(profile.name, pCharacterName.c_str());
+
+	ExtendedProfile_Struct extendedProfile;
+	memset(&extendedProfile, 0, sizeof(ExtendedProfile_Struct));
+	// TODO: Check Validity!
+	
+	profile.race = pData->race;
+	profile.class_ = pData->class_;
+	profile.gender = pData->gender;
+	profile.deity = pData->deity;
+	profile.STR = pData->STR;
+	profile.STA = pData->STA;
+	profile.AGI = pData->AGI;
+	profile.DEX = pData->DEX;
+	profile.WIS = pData->WIS;
+	profile.INT = pData->INT;
+	profile.CHA = pData->CHA;
+	profile.face = pData->face;
+	profile.eyecolor1 = pData->eyecolor1;
+	profile.eyecolor2 = pData->eyecolor2;
+	profile.hairstyle = pData->hairstyle;
+	profile.haircolor = pData->haircolor;
+	profile.beard = pData->beard;
+	profile.beardcolor = pData->beardcolor;
+	profile.drakkin_heritage = pData->drakkin_heritage;
+	profile.drakkin_tattoo = pData->drakkin_tattoo;
+	profile.drakkin_details = pData->drakkin_details;
+	profile.birthday = 0; // TODO:
+	profile.lastlogin = 0; // TODO:
+	profile.level = 1;
+	profile.points = 5;
+	profile.cur_hp = 1000;
+	profile.hunger_level = 6000;
+	profile.thirst_level = 6000;
+	profile.zone_id = ZoneIDs::NorthQeynos;
+	profile.x = 0;
+	profile.y = 0;
+	profile.z = 0;
+
+	for (int i = 0; i < MAX_PP_SPELLBOOK; i++)
+		profile.spell_book[i] = 0xFFFFFFFF;
+
+	for (int i = 0; i < MAX_PP_MEMSPELL; i++)
+		profile.mem_spells[i] = 0xFFFFFFFF;
+
+	for (int i = 0; i < BUFF_COUNT; i++)
+		profile.buffs[i].spellid = 0xFFFF;
+
+	profile.binds[0].zoneId = profile.zone_id;
+	profile.binds[0].x = profile.x;
+	profile.binds[0].y = profile.y;
+	profile.binds[0].z = profile.z;
+	profile.binds[0].heading = profile.heading;
+
+	if (!mDataStore->createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
+		Log::error("Could not create character!"); // pCharacterName
+		return false;
+	}
+
+	return true;
 }

@@ -40,6 +40,7 @@ SET(world_headers
 	AccountManager.h
 	DatabaseConnection.h
 	Constants.h
+	LogSystem.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

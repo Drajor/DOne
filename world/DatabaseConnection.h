@@ -20,6 +20,7 @@ public:
 	bool initialise();
 	bool runQuery(const char* query, uint32 querylen, char* errbuf = 0, MYSQL_RES** result = 0, uint32* affected_rows = 0, uint32* last_insert_id = 0, uint32* errnum = 0, bool retry = true);
 	void ping();
+	uint32 escapeString(char* tobuf, const char* frombuf, uint32 fromlen);
 
 protected:
 	bool open(const char* iHost, const char* iUser, const char* iPassword, const char* iDatabase, uint32 iPort, uint32* errnum = 0, char* errbuf = 0, bool iCompress = false, bool iSSL = false);
