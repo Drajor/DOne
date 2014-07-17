@@ -43,6 +43,7 @@ public:
 	void reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName);
 	bool deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
+	bool isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account
@@ -58,6 +59,7 @@ private:
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 	
+
 
 
 

@@ -159,11 +159,10 @@ bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerA
 		IncomingClient* incClient = *i;
 		if (pLoginServerAccountID == incClient->mAccountID && pLoginServerKey == incClient->mKey && !pConnection->getIdentified()) {
 			// Configure the WorldClientConnection with details from the IncomingClient.
-			pConnection->setIdentified(true);
+			pConnection->_setIdentified(true);
 			pConnection->setLoginServerAccountID(incClient->mAccountID);
 			pConnection->setLoginServerAccountName(incClient->mAccountName);
 			pConnection->setLoginServerKey(incClient->mKey);
-			pConnection->setWorldAdmin(incClient->mWorldAdmin);
 			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
 			// TODO: Do I need to set IP or Local here?
 			delete incClient;
@@ -300,4 +299,9 @@ bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, 
 	}
 
 	return true;
+}
+
+bool World::isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName)
+{
+	return mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
 }

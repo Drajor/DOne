@@ -40,11 +40,6 @@ public:
 	~WorldClientConnection();
 
 	bool update();
-	
-	void	QueuePacket(const EQApplicationPacket* app, bool ack_req = true);
-	void	Clearance(int8 response);
-	
-	inline const char*	GetCharName()		{ return char_name; }
 
 	bool getIdentified() { return mIdentified; }
 	uint32 getIP() { return mIP; }
@@ -52,17 +47,16 @@ public:
 	uint32 getWorldAccountID() { return mWorldAccountID; }
 	uint32 getLoginServerAccountID() { return mLoginServerAccountID; }
 	std::string getLoginServerKey() { return mLoginServerKey; }
-	int16 getWorldAdmin() { return mWorldAdmin; }
 	uint32 getCharacterID() { return mCharacterID; }
 
-	void setIdentified(bool pIdentified) { mIdentified = pIdentified; }
 	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; }
 	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; }
 	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; }
 	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; }
-	void setWorldAdmin(int16 pWorldAdmin) { mWorldAdmin = pWorldAdmin; }
-
+	void _setIdentified(bool pIdentified) { mIdentified = pIdentified; } // This method should only ever be called by World::tryIdentify
 private:
+	
+	void _queuePacket(const EQApplicationPacket* app, bool ack_req = true);
 
 	void _sendCharacterSelectInfo();
 	void _sendMaxCharCreate(int max_chars);
@@ -75,7 +69,7 @@ private:
 	void _sendApproveWorld();
 	void _sendPostEnterWorld();
 	void _sendZoneUnavailable();
-	void _sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo(bool TryBootup = true);
+	void _sendZoneServerInfo();
 
 	bool mIdentified;
 	uint16 mPort;
@@ -84,7 +78,6 @@ private:
 	uint32 mLoginServerAccountID;
 	std::string mLoginServerAccountName;
 	std::string mLoginServerKey;
-	int16 mWorldAdmin;
 	uint32 mCharacterID;
 	std::string mReservedCharacterName;
 	
@@ -94,25 +87,14 @@ private:
 	uint32	zoneID;
 	uint32	instanceID;
 	bool	mZoning;
-	Timer	autobootup_timeout;
-	uint32	pwaitingforbootup;
-
 	uint32 ClientVersionBit;
 
-	Timer	CLE_keepalive_timer;
-	Timer	connect;
-	bool seencharsel;
-
-	bool HandlePacket(const EQApplicationPacket *app);
-	
-	
-	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
-	
-	bool HandleCharacterCreatePacket(const EQApplicationPacket *app);
-	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
-	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
-	bool HandleZoneChangePacket(const EQApplicationPacket *app);
-
+	bool _handlePacket(const EQApplicationPacket* pPacket);
+	bool _handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket);
+	bool _handleCharacterCreatePacket(const EQApplicationPacket* pPacket);
+	bool _handleEnterWorldPacket(const EQApplicationPacket* pPacket);
+	bool _handleDeleteCharacterPacket(const EQApplicationPacket* pPacket);
+	bool _handleZoneChangePacket(const EQApplicationPacket* pPacket);
 	bool _handleSendLoginInfoPacket(const EQApplicationPacket* packet);
 	bool _handleCharacterCreateRequestPacket(const EQApplicationPacket* packet);
 	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);

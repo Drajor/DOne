@@ -49,10 +49,7 @@
 	#include <unistd.h>
 #endif
 
-WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWorld)
-:	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
-	CLE_keepalive_timer(RuleI(World, ClientKeepaliveTimeoutMS)),
-	connect(1000),
+WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWorld) :
 	mStreamInterface(ieqs),
 	mWorld(pWorld),
 	mIdentified(false),
@@ -61,13 +58,9 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWo
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
 
-	autobootup_timeout.Disable();
-	connect.Disable();
-	seencharsel = false;
 	zoneID = 0;
 	char_name[0] = 0;
 	mCharacterID = 0;
-	pwaitingforbootup = 0;
 	ClientVersionBit = 0;
 
 	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
@@ -97,10 +90,9 @@ void WorldClientConnection::_sendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if(RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2 && getWorldAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
-		l->enable_FV = 1;
+	l->enable_FV = 0;
 
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -118,7 +110,7 @@ void WorldClientConnection::_sendEnterWorld(std::string pCharacterName)
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name)+1);
 	memcpy(outapp->pBuffer,char_name,strlen(char_name)+1);
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -126,7 +118,7 @@ void WorldClientConnection::_sendExpansionInfo() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	eis->Expansions = (RuleI(World, ExpansionSettings));
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -139,14 +131,11 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 		_sendMembershipSettings();
 	}
 
-	seencharsel = true;
-
-
 	// Send OP_SendCharInfo
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	CharacterSelect_Struct* cs = (CharacterSelect_Struct*)outapp->pBuffer;
 	mWorld->getCharacterSelectInfo(mWorldAccountID, cs);
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -156,7 +145,7 @@ void WorldClientConnection::_sendMaxCharCreate(int max_chars) {
 
 	mc->max_chars = max_chars;
 
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -213,7 +202,7 @@ void WorldClientConnection::_sendMembership() {
 	mc->exit_url_length = 0;
 	//mc->exit_url = 0; // Used on Live: "http://www.everquest.com/free-to-play/exit-silver"
 
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -322,14 +311,14 @@ void WorldClientConnection::_sendMembershipSettings() {
 	21	-	0		0		0		-	Unknown 0
 	*/
 
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
 void WorldClientConnection::_sendPostEnterWorld() {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outapp->size=0;
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }
 
@@ -488,7 +477,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	}
 
 	outapp->pBuffer[0] = valid? 1 : 0;
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 
 	if(!valid) {
@@ -498,7 +487,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	return true;
 }
 
-bool WorldClientConnection::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket) {
 	// creates up to a 10 char name
 	char vowels[18]="aeiouyaeiouaeioe";
 	char cons[48]="bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkd";
@@ -569,15 +558,29 @@ bool WorldClientConnection::HandleGenerateRandomNamePacket(const EQApplicationPa
 	}
 
 	rndname[0]=toupper(rndname[0]);
-	NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
+	NameGeneration_Struct* ngs = (NameGeneration_Struct*)pPacket->pBuffer;
 	memset(ngs->name,0,64);
 	strcpy(ngs->name,rndname);
 
-	QueuePacket(app);
+	_queuePacket(pPacket);
 	return true;
 }
 
 bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicationPacket* packet) {
+	struct RaceClassAllocation {
+		unsigned int Index;
+		unsigned int BaseStats[7];
+		unsigned int DefaultPointAllocation[7];
+	};
+
+	struct RaceClassCombos {
+		unsigned int ExpansionRequired;
+		unsigned int Race;
+		unsigned int Class;
+		unsigned int Deity;
+		unsigned int AllocationIndex;
+		unsigned int Zone;
+	};
 	/*
 	[Client Limitation][HoT] If the client is not an race/class combinations for any one class the class icon will not be greyed out.
 	*/
@@ -634,23 +637,23 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 		ptr += sizeof(RaceClassCombos);
 	}
 
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 	return true;
 }
 
-bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
-	if (app->size != sizeof(CharCreate_Struct))
+bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
+	if (pPacket->size != sizeof(CharCreate_Struct))
 	{
-		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",app->size,sizeof(CharCreate_Struct));
-		DumpPacket(app);
+		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",pPacket->size,sizeof(CharCreate_Struct));
+		DumpPacket(pPacket);
 		// the previous behavior was essentially returning true here
 		// but that seems a bit odd to me.
 		return true;
 	}
 
 	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
-	CharCreate_Struct* cc = (CharCreate_Struct*)app->pBuffer;
+	CharCreate_Struct* cc = (CharCreate_Struct*)pPacket->pBuffer;
 	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, cc)) {
 		// TODO: Dump client.
 	}
@@ -659,224 +662,145 @@ bool WorldClientConnection::HandleCharacterCreatePacket(const EQApplicationPacke
 	return true;
 }
 
-bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* pPacket) {
+	// Note: Enter Tutorial and Return Home are ignored at the moment.
 
-	if (getWorldAccountID() == 0) {
-		clog(WORLD__CLIENT_ERR,"Enter world with no logged in account");
-		mStreamInterface->Close();
+	// Sent after Character Creation.
+	// Sent after pressing 'Enter World' at Character Select.
+	// Is it sent while zoning?
+
+	EnterWorld_Struct *ew = (EnterWorld_Struct *)pPacket->pBuffer;
+	std::string characterName = ew->name;
+
+	// Check: Character belongs to this account. This also checks whether the character actually exists.
+	if (mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)){
+		// Send MOTD?
+		// Send ChatServer?
+		// Send ChatServer2?
+		// OP_ZoneServerInfo
+		_sendZoneServerInfo(); // /wave
 		return true;
 	}
 
-	if(getWorldAdmin() < 0)
-	{
-		clog(WORLD__CLIENT,"Account banned or suspended.");
-		mStreamInterface->Close();
-		return true;
-	}
+	Log::error("World refused entry! Account: %i, Character: %s"); // TODO:
+	mStreamInterface->Close();
+	return false;
 
-	//if (RuleI(World, MaxClientsPerIP) >= 0) {
-	//	client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
+
+	//if (zoneID == 0 || !database.GetZoneName(zoneID)) {
+	//	// This is to save people in an invalid zone, once it's removed from the DB
+	//	database.MoveCharacterToZone(mCharacterID, "arena");
+	//	clog(WORLD__CLIENT_ERR, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
 	//}
 
-	EnterWorld_Struct *ew=(EnterWorld_Struct *)app->pBuffer;
-	strn0cpy(char_name, ew->name, 64);
+	//if(instanceID > 0)
+	//{
+	//	if(!database.VerifyInstanceAlive(instanceID, getCharacterID()))
+	//	{
+	//		zoneID = database.MoveCharacterToBind(mCharacterID);
+	//		instanceID = 0;
+	//	}
+	//	else
+	//	{
+	//		if(!database.VerifyZoneInstance(zoneID, instanceID))
+	//		{
+	//			zoneID = database.MoveCharacterToBind(mCharacterID);
+	//			instanceID = 0;
+	//		}
+	//	}
+	//}
 
-	EQApplicationPacket *outapp;
-	uint32 tmpaccid = 0;
-	mCharacterID = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
-	if (mCharacterID == 0 || tmpaccid != getWorldAccountID()) {
-		clog(WORLD__CLIENT_ERR,"Could not get CharInfo for '%s'",char_name);
-		mStreamInterface->Close();
-		return true;
-	}
+	//if(!mZoning) {
+	//	database.SetGroupID(char_name, 0, mCharacterID);
+	//	database.SetLoginFlags(mCharacterID, false, false, 1);
+	//}
+	//else{
+	//	uint32 groupid=database.GetGroupID(char_name);
+	//	if(groupid>0){
+	//		char* leader=0;
+	//		char leaderbuf[64]={0};
+	//		if((leader=database.GetGroupLeaderForLogin(char_name,leaderbuf)) && strlen(leader)>1){
+	//			EQApplicationPacket* outapp3 = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+	//			GroupJoin_Struct* gj=(GroupJoin_Struct*)outapp3->pBuffer;
+	//			gj->action=8;
+	//			strcpy(gj->yourname,char_name);
+	//			strcpy(gj->membername,leader);
+	//			QueuePacket(outapp3);
+	//			safe_delete(outapp3);
+	//		}
+	//	}
+	//}
 
-	// Make sure this account owns this character
-	if (tmpaccid != getWorldAccountID()) {
-		clog(WORLD__CLIENT_ERR,"This account does not own the character named '%s'",char_name);
-		mStreamInterface->Close();
-		return true;
-	}
+	//outapp = new EQApplicationPacket(OP_MOTD);
+	//char tmp[500] = {0};
+	//if (database.GetVariable("MOTD", tmp, 500)) {
+	//	outapp->size = strlen(tmp)+1;
+	//	outapp->pBuffer = new uchar[outapp->size];
+	//	memset(outapp->pBuffer,0,outapp->size);
+	//	strcpy((char*)outapp->pBuffer, tmp);
 
-	if(!mZoning && ew->return_home && !ew->tutorial)
-	{
-		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
-		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(getWorldAccountID(), cs);
-		bool home_enabled = false;
+	//} else {
+	//	// Null Message of the Day. :)
+	//	outapp->size = 1;
+	//	outapp->pBuffer = new uchar[outapp->size];
+	//	outapp->pBuffer[0] = 0;
+	//}
+	//QueuePacket(outapp);
+	//safe_delete(outapp);
 
-		for(int x = 0; x < 10; ++x)
-		{
-			if(strcasecmp(cs->name[x], char_name) == 0)
-			{
-				if(cs->gohome[x] == 1)
-				{
-					home_enabled = true;
-					break;
-				}
-			}
-		}
-		safe_delete(cs);
+	//int MailKey = MakeRandomInt(1, INT_MAX);
 
-		if(home_enabled)
-		{
-			zoneID = database.MoveCharacterToBind(mCharacterID,4);
-		}
-		else
-		{
-			clog(WORLD__CLIENT_ERR,"'%s' is trying to go home before they're able...",char_name);
-			//database.SetHackerFlag(getLoginServerAccountName(), char_name, "MQGoHome: player tried to go home before they were able.");
-			mStreamInterface->Close();
-			return true;
-		}
-	}
+	//database.SetMailKey(mCharacterID, getIP(), MailKey);
 
-	if(!mZoning && (RuleB(World, EnableTutorialButton) && (ew->tutorial /*|| StartInTutorial*/))) {
-		CharacterSelect_Struct* cs = new CharacterSelect_Struct;
-		memset(cs, 0, sizeof(CharacterSelect_Struct));
-		database.GetCharSelectInfo(getWorldAccountID(), cs);
-		bool tutorial_enabled = false;
+	//char ConnectionType;
 
-		for(int x = 0; x < 10; ++x)
-		{
-			if(strcasecmp(cs->name[x], char_name) == 0)
-			{
-				if(cs->tutorial[x] == 1)
-				{
-					tutorial_enabled = true;
-					break;
-				}
-			}
-		}
-		safe_delete(cs);
+	//if(ClientVersionBit & BIT_UnderfootAndLater)
+	//	ConnectionType = 'U';
+	//else if(ClientVersionBit & BIT_SoFAndLater)
+	//	ConnectionType = 'S';
+	//else
+	//	ConnectionType = 'C';
 
-		if(tutorial_enabled)
-		{
-			zoneID = RuleI(World, TutorialZoneID);
-			database.MoveCharacterToZone(mCharacterID, database.GetZoneName(zoneID));
-		}
-		else
-		{
-			clog(WORLD__CLIENT_ERR,"'%s' is trying to go to tutorial but are not allowed...",char_name);
-			//database.SetHackerFlag(GetAccountName(), char_name, "MQTutorial: player tried to enter the tutorial without having tutorial enabled for this character.");
-			mStreamInterface->Close();
-			return true;
-		}
-	}
+	//EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_SetChatServer);
+	//char buffer[112];
 
-	if (zoneID == 0 || !database.GetZoneName(zoneID)) {
-		// This is to save people in an invalid zone, once it's removed from the DB
-		database.MoveCharacterToZone(mCharacterID, "arena");
-		clog(WORLD__CLIENT_ERR, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
-	}
+	//const WorldConfig *Config = WorldConfig::get();
 
-	if(instanceID > 0)
-	{
-		if(!database.VerifyInstanceAlive(instanceID, getCharacterID()))
-		{
-			zoneID = database.MoveCharacterToBind(mCharacterID);
-			instanceID = 0;
-		}
-		else
-		{
-			if(!database.VerifyZoneInstance(zoneID, instanceID))
-			{
-				zoneID = database.MoveCharacterToBind(mCharacterID);
-				instanceID = 0;
-			}
-		}
-	}
+	//sprintf(buffer,"%s,%i,%s.%s,%c%08X",
+	//	Config->ChatHost.c_str(),
+	//	Config->ChatPort,
+	//	Config->ShortName.c_str(),
+	//	this->GetCharName(), ConnectionType, MailKey
+	//);
+	//outapp2->size=strlen(buffer)+1;
+	//outapp2->pBuffer = new uchar[outapp2->size];
+	//memcpy(outapp2->pBuffer,buffer,outapp2->size);
+	//QueuePacket(outapp2);
+	//safe_delete(outapp2);
 
-	if(!mZoning) {
-		database.SetGroupID(char_name, 0, mCharacterID);
-		database.SetLoginFlags(mCharacterID, false, false, 1);
-	}
-	else{
-		uint32 groupid=database.GetGroupID(char_name);
-		if(groupid>0){
-			char* leader=0;
-			char leaderbuf[64]={0};
-			if((leader=database.GetGroupLeaderForLogin(char_name,leaderbuf)) && strlen(leader)>1){
-				EQApplicationPacket* outapp3 = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-				GroupJoin_Struct* gj=(GroupJoin_Struct*)outapp3->pBuffer;
-				gj->action=8;
-				strcpy(gj->yourname,char_name);
-				strcpy(gj->membername,leader);
-				QueuePacket(outapp3);
-				safe_delete(outapp3);
-			}
-		}
-	}
+	//outapp2 = new EQApplicationPacket(OP_SetChatServer2);
 
-	outapp = new EQApplicationPacket(OP_MOTD);
-	char tmp[500] = {0};
-	if (database.GetVariable("MOTD", tmp, 500)) {
-		outapp->size = strlen(tmp)+1;
-		outapp->pBuffer = new uchar[outapp->size];
-		memset(outapp->pBuffer,0,outapp->size);
-		strcpy((char*)outapp->pBuffer, tmp);
+	//if(ClientVersionBit & BIT_TitaniumAndEarlier)
+	//	ConnectionType = 'M';
 
-	} else {
-		// Null Message of the Day. :)
-		outapp->size = 1;
-		outapp->pBuffer = new uchar[outapp->size];
-		outapp->pBuffer[0] = 0;
-	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	//sprintf(buffer,"%s,%i,%s.%s,%c%08X",
+	//	Config->MailHost.c_str(),
+	//	Config->MailPort,
+	//	Config->ShortName.c_str(),
+	//	this->GetCharName(), ConnectionType, MailKey
+	//);
+	//outapp2->size=strlen(buffer)+1;
+	//outapp2->pBuffer = new uchar[outapp2->size];
+	//memcpy(outapp2->pBuffer,buffer,outapp2->size);
+	//QueuePacket(outapp2);
+	//safe_delete(outapp2);
 
-	int MailKey = MakeRandomInt(1, INT_MAX);
-
-	database.SetMailKey(mCharacterID, getIP(), MailKey);
-
-	char ConnectionType;
-
-	if(ClientVersionBit & BIT_UnderfootAndLater)
-		ConnectionType = 'U';
-	else if(ClientVersionBit & BIT_SoFAndLater)
-		ConnectionType = 'S';
-	else
-		ConnectionType = 'C';
-
-	EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_SetChatServer);
-	char buffer[112];
-
-	const WorldConfig *Config = WorldConfig::get();
-
-	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-		Config->ChatHost.c_str(),
-		Config->ChatPort,
-		Config->ShortName.c_str(),
-		this->GetCharName(), ConnectionType, MailKey
-	);
-	outapp2->size=strlen(buffer)+1;
-	outapp2->pBuffer = new uchar[outapp2->size];
-	memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	QueuePacket(outapp2);
-	safe_delete(outapp2);
-
-	outapp2 = new EQApplicationPacket(OP_SetChatServer2);
-
-	if(ClientVersionBit & BIT_TitaniumAndEarlier)
-		ConnectionType = 'M';
-
-	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-		Config->MailHost.c_str(),
-		Config->MailPort,
-		Config->ShortName.c_str(),
-		this->GetCharName(), ConnectionType, MailKey
-	);
-	outapp2->size=strlen(buffer)+1;
-	outapp2->pBuffer = new uchar[outapp2->size];
-	memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	QueuePacket(outapp2);
-	safe_delete(outapp2);
-
-	_sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo();
+	//_sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo();
 
 	return true;
 }
 
-bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
+bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
 	// TODO: Check character is not in zone before deleting..
 	std::string characterName = (char*)pPacket->pBuffer;
 	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
@@ -887,16 +811,16 @@ bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacke
 	return true;
 }
 
-bool WorldClientConnection::HandleZoneChangePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* pPacket) {
 	// HoT sends this to world while zoning and wants it echoed back.
 	if(ClientVersionBit & BIT_RoFAndLater)
 	{
-		QueuePacket(app);
+		_queuePacket(pPacket);
 	}
 	return true;
 }
 
-bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	// Check our Stream Interface.
 	if (!mStreamInterface->CheckState(ESTABLISHED)) {
 		// TODO: Can this even occur?
@@ -904,12 +828,13 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		return false;
 	}
 	// Check if unidentified and sending something other than OP_SendLoginInfo
-	if (!getIdentified() && app->GetOpcode() != OP_SendLoginInfo) {
+	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
+	if (!getIdentified() && pPacket->GetOpcode() != OP_SendLoginInfo) {
 		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
 		return false;
 	}
 
-	EmuOpcode opcode = app->GetOpcode();
+	EmuOpcode opcode = pPacket->GetOpcode();
 	switch(opcode)
 	{
 		case OP_AckPacket:
@@ -920,32 +845,33 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_SendLoginInfo:
 		{
-			return _handleSendLoginInfoPacket(app);
+			return _handleSendLoginInfoPacket(pPacket);
 		}
 		case OP_ApproveName: //Name approval
 		{
-			return _handleNameApprovalPacket(app);
+			return _handleNameApprovalPacket(pPacket);
 		}
 		case OP_RandomNameGenerator:
 		{
-			return HandleGenerateRandomNamePacket(app);
+			return _handleGenerateRandomNamePacket(pPacket);
 		}
 		case OP_CharacterCreateRequest:
 		{
 			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
-			return _handleCharacterCreateRequestPacket(app);
+			return _handleCharacterCreateRequestPacket(pPacket);
 		}
 		case OP_CharacterCreate: //Char create
 		{
-			return HandleCharacterCreatePacket(app);
+			return _handleCharacterCreatePacket(pPacket);
 		}
 		case OP_EnterWorld: // Enter world
 		{
-			return HandleEnterWorldPacket(app);
+								Utility::print("OP_EnterWorld");
+			return _handleEnterWorldPacket(pPacket);
 		}
 		case OP_DeleteCharacter:
 		{
-			return HandleDeleteCharacterPacket(app);
+			return _handleDeleteCharacterPacket(pPacket);
 		}
 		case OP_WorldComplete:
 		{
@@ -955,7 +881,7 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		case OP_ZoneChange:
 		{
 			// HoT sends this to world while zoning and wants it echoed back.
-			return HandleZoneChangePacket(app);
+			return _handleZoneChangePacket(pPacket);
 		}
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
@@ -972,7 +898,7 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 		default:
 		{
 			clog(WORLD__CLIENT_ERR,"Received unknown EQApplicationPacket");
-			_pkt(WORLD__CLIENT_ERR,app);
+			_pkt(WORLD__CLIENT_ERR,pPacket);
 			return true;
 		}
 	}
@@ -980,207 +906,33 @@ bool WorldClientConnection::HandlePacket(const EQApplicationPacket *app) {
 }
 
 bool WorldClientConnection::update() {
+	// Check our connection to the User.
+	if (!mStreamInterface->CheckState(ESTABLISHED)) {
+		Utility::print("WorldClientConnection Lost.");
+		return false;
+	}
+
 	bool ret = true;
-	//bool sendguilds = true;
-	sockaddr_in to;
-
-	memset((char *) &to, 0, sizeof(to));
-	to.sin_family = AF_INET;
-	to.sin_port = mPort;
-	to.sin_addr.s_addr = mIP;
-
-	if (autobootup_timeout.Check()) {
-		clog(WORLD__CLIENT_ERR, "Zone bootup timer expired, bootup failed or too slow.");
-		_sendZoneUnavailable();
-	}
-	if(connect.Check()){
-		_sendGuildList();// Send OPCode: OP_GuildsList
-		_sendApproveWorld();
-		connect.Disable();
-	}
-	//if (CLE_keepalive_timer.Check()) {
-	//	if (cle)
-	//		cle->KeepAlive();
-	//}
 
 	// Handle any incoming packets.
 	EQApplicationPacket* packet = 0;
 	while(ret && (packet = (EQApplicationPacket *)mStreamInterface->PopPacket())) {
-		ret = HandlePacket(packet);
+		ret = _handlePacket(packet);
 		delete packet;
-	}
-
-	if (!mStreamInterface->CheckState(ESTABLISHED)) {
-		Utility::print("In Client::process()");
-		clog(WORLD__CLIENT,"Client disconnected (not active in process)");
-		return false;
 	}
 
 	return ret;
 }
 
-void WorldClientConnection::_sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo(bool TryBootup) {
-	if (zoneID == 0)
-		return;
-
-	//ZoneServer* zs = nullptr;
-	if(instanceID > 0)
-	{
-		if(database.VerifyInstanceAlive(instanceID, getCharacterID()))
-		{
-			if(database.VerifyZoneInstance(zoneID, instanceID))
-			{
-				//zs = zoneserver_list.FindByInstanceID(instanceID);
-			}
-			else
-			{
-				instanceID = 0;
-//				zs = nullptr;
-				database.MoveCharacterToBind(getCharacterID());
-				_sendZoneUnavailable();
-				return;
-			}
-		}
-		else
-		{
-			instanceID = 0;
-			//zs = nullptr;
-			database.MoveCharacterToBind(getCharacterID());
-			_sendZoneUnavailable();
-			return;
-		}
-	}
-	else
-		//zs = zoneserver_list.FindByZoneID(zoneID);
-
-
-	const char *zone_name=database.GetZoneName(zoneID, true);
-	//if (zs) {
-	if (0) {
-		// warn the world we're comming, so it knows not to shutdown
-		//zs->IncommingClient(this);
-	}
-	else {
-		if (TryBootup) {
-			//clog(WORLD__CLIENT,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
-			autobootup_timeout.Start();
-			/*pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
-			if (pwaitingforbootup == 0) {
-				clog(WORLD__CLIENT_ERR,"No zoneserver available to boot up.");
-				ZoneUnavail();
-			}*/
-			return;
-		}
-		else {
-			//clog(WORLD__CLIENT_ERR,"Requested zone %s is no running.",zone_name);
-			_sendZoneUnavailable();
-			return;
-		}
-	}
-	pwaitingforbootup = 0;
-
-	//cle->SetChar(mCharacterID, char_name);
-	database.UpdateLiveChar(char_name, getWorldAccountID());
-	//clog(WORLD__CLIENT,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
-//	database.SetAuthentication(account_id, char_name, zone_name, ip);
-
-	if (seencharsel) {
-		//if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-		//	clog(WORLD__CLIENT_ERR,"Enter world failed. Zone is locked.");
-		//	ZoneUnavail();
-		//	return;
-		//}
-
-		ServerPacket* pack = new ServerPacket;
-		pack->opcode = ServerOP_AcceptWorldEntrance;
-		pack->size = sizeof(WorldToZone_Struct);
-		pack->pBuffer = new uchar[pack->size];
-		memset(pack->pBuffer, 0, pack->size);
-		WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
-		wtz->account_id = getWorldAccountID();
-		wtz->response = 0;
-		//zs->SendPacket(pack);
-		delete pack;
-	}
-	else {	// if they havent seen character select screen, we can assume this is a zone
-			// to zone movement, which should be preauthorized before they leave the previous zone
-		Clearance(1);
-	}
-}
-
-void WorldClientConnection::Clearance(int8 response)
-{
-	//ZoneServer* zs = nullptr;
-	//if(instanceID > 0)
-	//{
-	//	zs = zoneserver_list.FindByInstanceID(instanceID);
-	//}
-	//else
-	//{
-	//	zs = zoneserver_list.FindByZoneID(zoneID);
-	//}
-
-	//if(zs == 0 || response == -1 || response == 0)
-	//{
-	//	if (zs == 0)
-	//	{
-	//		clog(WORLD__CLIENT_ERR,"Unable to find zoneserver in Client::Clearance!!");
-	//	} else {
-	//		clog(WORLD__CLIENT_ERR, "Invalid response %d in Client::Clearance", response);
-	//	}
-
-	//	ZoneUnavail();
-	//	return;
-	//}
-
-	EQApplicationPacket* outapp;
-
-	//if (zs->GetCAddress() == nullptr) {
-	//	clog(WORLD__CLIENT_ERR, "Unable to do zs->GetCAddress() in Client::Clearance!!");
-	//	ZoneUnavail();
-	//	return;
-	//}
-
-	//if (zoneID == 0) {
-	//	clog(WORLD__CLIENT_ERR, "zoneID is nullptr in Client::Clearance!!");
-	//	ZoneUnavail();
-	//	return;
-	//}
-
-	//const char* zonename = database.GetZoneName(zoneID);
-	//if (zonename == 0) {
-	//	clog(WORLD__CLIENT_ERR, "zonename is nullptr in Client::Clearance!!");
-	//	ZoneUnavail();
-	//	return;
-	//}
-
-	// Send zone server IP data
-	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
+void WorldClientConnection::_sendZoneServerInfo() {
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
-	//const char *zs_addr=zs->GetCAddress();
-	const char *zs_addr = "127.0.0.1";
-	if (!zs_addr[0]) {
-		//if (cle->IsLocalClient()) {
-		//	struct in_addr in;
-		//	//in.s_addr = zs->GetIP();
-		//	//in.s_addr = zs->GetIP();
-		//	zs_addr=inet_ntoa(in);
-		//	if (!strcmp(zs_addr,"127.0.0.1"))
-		//		zs_addr=WorldConfig::get()->LocalAddress.c_str();
-		//} else {
-		//	zs_addr=WorldConfig::get()->WorldAddress.c_str();
-		//}
-		zs_addr = WorldConfig::get()->WorldAddress.c_str();
-	}
-//	strcpy(zsi->ip, zs_addr);
-	//zsi->port =zs->GetCPort();
-	//clog(WORLD__CLIENT,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
-	QueuePacket(outapp);
+	zsi->port = 7000;
+	strcpy(zsi->ip, "127.0.0.1");
+	_queuePacket(outapp);
 	safe_delete(outapp);
-
-	//if (cle)
-	//	cle->SetOnline(CLE_Status_Zoning);
 }
+
 
 void WorldClientConnection::_sendZoneUnavailable() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
@@ -1188,15 +940,13 @@ void WorldClientConnection::_sendZoneUnavailable() {
 	const char* zonename = database.GetZoneName(zoneID);
 	if (zonename)
 		strcpy(ua->zonename, zonename);
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	delete outapp;
 
 	zoneID = 0;
-	pwaitingforbootup = 0;
-	autobootup_timeout.Disable();
 }
 
-void WorldClientConnection::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
+void WorldClientConnection::_queuePacket(const EQApplicationPacket* app, bool ack_req) {
 	clog(WORLD__CLIENT_TRACE, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
 	_pkt(WORLD__CLIENT_TRACE, app);
 
@@ -1281,6 +1031,6 @@ void WorldClientConnection::_sendApproveWorld()
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00
 };
 	memcpy(aw->unknown544, foo, sizeof(foo));
-	QueuePacket(outapp);
+	_queuePacket(outapp);
 	safe_delete(outapp);
 }

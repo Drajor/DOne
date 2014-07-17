@@ -117,8 +117,8 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 				pCharacterSelectData->cs_colors[i][j].color = 0;
 			}
 
-			pCharacterSelectData->primary[i] = 146;
-			pCharacterSelectData->secondary[i] = 146;
+			pCharacterSelectData->primary[i] = 10744;
+			pCharacterSelectData->secondary[i] = 10744;
 
 		}
 	} else {

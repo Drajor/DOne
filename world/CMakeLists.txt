@@ -24,7 +24,6 @@ SET(world_headers
 	WorldClientConnection.h
 	CMakeLists.txt
 	LoginServerConnection.h
-	SoFCharCreateData.h
 	UCSConnection.h
 	WorldConfig.h
 	worlddb.h

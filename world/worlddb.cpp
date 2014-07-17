@@ -29,8 +29,8 @@
 #include "SoFCharCreateData.h"
 
 WorldDatabase database;
-extern std::vector<RaceClassAllocation> character_create_allocations;
-extern std::vector<RaceClassCombos> character_create_race_class_combos;
+//extern std::vector<RaceClassAllocation> character_create_allocations;
+//extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
 // solar: the current stuff is at the bottom of this function
