@@ -41,11 +41,6 @@ public:
 
 	bool update();
 	
-	
-	
-	
-	
-	
 	void	QueuePacket(const EQApplicationPacket* app, bool ack_req = true);
 	void	Clearance(int8 response);
 	
@@ -103,17 +98,10 @@ private:
 	uint32	pwaitingforbootup;
 
 	uint32 ClientVersionBit;
-	bool OPCharCreate(char *name, CharCreate_Struct *cc);
-
-	void SetClassStartingSkills( PlayerProfile_Struct *pp );
-	void SetRaceStartingSkills( PlayerProfile_Struct *pp );
-	void SetRacialLanguages( PlayerProfile_Struct *pp );
 
 	Timer	CLE_keepalive_timer;
 	Timer	connect;
-	bool firstlogin;
 	bool seencharsel;
-	bool realfirstlogin;
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	
@@ -132,8 +120,5 @@ private:
 	EQStreamInterface* const mStreamInterface;
 	World* mWorld;
 };
-
-bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
-bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc);
 
 #endif
