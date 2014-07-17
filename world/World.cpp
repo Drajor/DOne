@@ -5,7 +5,6 @@
 #include "DataStore.h"
 #include "LoginServerConnection.h"
 #include "UCSConnection.h"
-#include "worlddb.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
@@ -17,8 +16,6 @@
 #include "WorldClientConnection.h"
 #include "Constants.h"
 #include "LogSystem.h"
-
-extern WorldDatabase database;
 
 World::World(DataStore* pDataStore) :
 	mInitialised(false),

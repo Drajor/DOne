@@ -19,8 +19,6 @@
 #include "../common/clientversions.h"
 #include "../common/MiscFunctions.h"
 
-
-#include "worlddb.h"
 #include "WorldConfig.h"
 
 #include <iostream>
@@ -48,8 +46,8 @@
 	#include <unistd.h>
 #endif
 
-WorldClientConnection::WorldClientConnection(EQStreamInterface* ieqs, World* pWorld) :
-	mStreamInterface(ieqs),
+WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld) :
+	mStreamInterface(pStreamInterface),
 	mWorld(pWorld),
 	mIdentified(false),
 	mReservedCharacterName("")
@@ -71,54 +69,42 @@ WorldClientConnection::~WorldClientConnection() {
 	mStreamInterface->ReleaseFromUse();
 }
 
-void WorldClientConnection::_sendLogServer()
-{
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
-	LogServer_Struct *l=(LogServer_Struct *)outapp->pBuffer;
+void WorldClientConnection::_sendLogServer() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
+	LogServer_Struct* payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
 	const char *wsn=WorldConfig::get()->ShortName.c_str();
-	memcpy(l->worldshortname,wsn,strlen(wsn));
+	memcpy(payload->worldshortname,wsn,strlen(wsn));
 
 	if(RuleB(Mail, EnableMailSystem))
-		l->enablemail = 1;
+		payload->enablemail = 1;
 
 	if(RuleB(Chat, EnableVoiceMacros))
-		l->enablevoicemacros = 1;
+		payload->enablevoicemacros = 1;
 
-	l->enable_pvp = (RuleI(World, PVPSettings));
+	payload->enable_pvp = (RuleI(World, PVPSettings));
 
 	if(RuleB(World, IsGMPetitionWindowEnabled))
-		l->enable_petition_wnd = 1;
+		payload->enable_petition_wnd = 1;
 
-	l->enable_FV = 0;
+	payload->enable_FV = 0;
 
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendEnterWorld(std::string pCharacterName)
-{
-	char char_name[32]= { 0 };
-	if (mZoning && database.GetLiveChar(getWorldAccountID(), char_name)) {
-		if(database.GetAccountIDByChar(char_name) != getWorldAccountID()) {
-			mStreamInterface->Close();
-			return;
-		} else {
-			clog(WORLD__CLIENT,"Telling client to continue session.");
-		}
-	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name)+1);
-	memcpy(outapp->pBuffer,char_name,strlen(char_name)+1);
-	_queuePacket(outapp);
-	safe_delete(outapp);
+void WorldClientConnection::_sendEnterWorld(std::string pCharacterName) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
+	memcpy(outPacket->pBuffer, pCharacterName.c_str(), pCharacterName.length() + 1);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendExpansionInfo() {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
-	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	eis->Expansions = (RuleI(World, ExpansionSettings));
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
+	ExpansionInfo_Struct* payload = reinterpret_cast<ExpansionInfo_Struct*>(outPacket->pBuffer);
+	payload->Expansions = (RuleI(World, ExpansionSettings));
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendCharacterSelectInfo() {
@@ -131,26 +117,26 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 	}
 
 	// Send OP_SendCharInfo
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
-	CharacterSelect_Struct* cs = (CharacterSelect_Struct*)outapp->pBuffer;
-	mWorld->getCharacterSelectInfo(mWorldAccountID, cs);
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	EQApplicationPacket *outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
+	CharacterSelect_Struct* payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
+	mWorld->getCharacterSelectInfo(mWorldAccountID, payload);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendMaxCharCreate(int max_chars) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
-	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
+	MaxCharacters_Struct* payload = reinterpret_cast<MaxCharacters_Struct*>(outPacket->pBuffer);
 
-	mc->max_chars = max_chars;
+	payload->max_chars = max_chars;
 
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendMembership() {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
-	Membership_Struct* mc = (Membership_Struct*)outapp->pBuffer;
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
+	Membership_Struct* payload = reinterpret_cast<Membership_Struct*>(outPacket->pBuffer);
 
 	/*
 		The remaining entry fields probably hold more membership restriction data that needs to be identified.
@@ -173,43 +159,43 @@ void WorldClientConnection::_sendMembership() {
 		That is 15 possible fields, and there are 15 unknowns in the struct...Coincidence?
 	*/
 
-	mc->membership = 2;				//Hardcode to gold for now. We don't use anything else.
-	mc->races = 0x1ffff;			// Available Races (4110 for silver)
-	mc->classes = 0x1ffff;			// Available Classes (4614 for silver) - Was 0x101ffff
-	mc->entrysize = 21;				// Number of membership setting entries below
-	mc->entries[0] = 0xffffffff;	// Max AA Restriction
-	mc->entries[1] = 0xffffffff;	// Max Level Restriction
-	mc->entries[2] = 0xffffffff;	// Max Char Slots per Account (not used by client?)
-	mc->entries[3] = 0xffffffff;	// 1 for Silver
-	mc->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limitting to 8 until 10 is supported)
-	mc->entries[5] = 0xffffffff;	// Max Platinum per level
-	mc->entries[6] = 1;				// 0 for Silver
-	mc->entries[7] = 1;				// 0 for Silver
-	mc->entries[8] = 1;				// 1 for Silver
-	mc->entries[9] = 0xffffffff;	// Unknown - Maybe Loyalty Points every 12 hours? 60 per week for Silver
-	mc->entries[10] = 1;			// 1 for Silver
-	mc->entries[11] = 0xffffffff;	// Shared Bank Slots
-	mc->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks?
-	mc->entries[13] = 1;			// 1 for Silver
-	mc->entries[14] = 1;			// 0 for Silver
-	mc->entries[15] = 1;			// 0 for Silver
-	mc->entries[16] = 1;			// 1 for Silver
-	mc->entries[17] = 1;			// 0 for Silver
-	mc->entries[18] = 1;			// 0 for Silver
-	mc->entries[19] = 0xffffffff;	// 0 for Silver
-	mc->entries[20] = 0xffffffff;	// 0 for Silver
-	mc->exit_url_length = 0;
+	payload->membership = 2;				//Hardcode to gold for now. We don't use anything else.
+	payload->races = 0x1ffff;			// Available Races (4110 for silver)
+	payload->classes = 0x1ffff;			// Available Classes (4614 for silver) - Was 0x101ffff
+	payload->entrysize = 21;				// Number of membership setting entries below
+	payload->entries[0] = 0xffffffff;	// Max AA Restriction
+	payload->entries[1] = 0xffffffff;	// Max Level Restriction
+	payload->entries[2] = 0xffffffff;	// Max Char Slots per Account (not used by client?)
+	payload->entries[3] = 0xffffffff;	// 1 for Silver
+	payload->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limitting to 8 until 10 is supported)
+	payload->entries[5] = 0xffffffff;	// Max Platinum per level
+	payload->entries[6] = 1;				// 0 for Silver
+	payload->entries[7] = 1;				// 0 for Silver
+	payload->entries[8] = 1;				// 1 for Silver
+	payload->entries[9] = 0xffffffff;	// Unknown - Maybe Loyalty Points every 12 hours? 60 per week for Silver
+	payload->entries[10] = 1;			// 1 for Silver
+	payload->entries[11] = 0xffffffff;	// Shared Bank Slots
+	payload->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks?
+	payload->entries[13] = 1;			// 1 for Silver
+	payload->entries[14] = 1;			// 0 for Silver
+	payload->entries[15] = 1;			// 0 for Silver
+	payload->entries[16] = 1;			// 1 for Silver
+	payload->entries[17] = 1;			// 0 for Silver
+	payload->entries[18] = 1;			// 0 for Silver
+	payload->entries[19] = 0xffffffff;	// 0 for Silver
+	payload->entries[20] = 0xffffffff;	// 0 for Silver
+	payload->exit_url_length = 0;
 	//mc->exit_url = 0; // Used on Live: "http://www.everquest.com/free-to-play/exit-silver"
 
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendMembershipSettings() {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendMembershipDetails, sizeof(Membership_Details_Struct));
-	Membership_Details_Struct* mds = (Membership_Details_Struct*)outapp->pBuffer;
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMembershipDetails, sizeof(Membership_Details_Struct));
+	Membership_Details_Struct* payload = reinterpret_cast<Membership_Details_Struct*>(outPacket->pBuffer);
 
-	mds->membership_setting_count = 66;
+	payload->membership_setting_count = 66;
 	int32 gold_settings[22] = {-1,-1,-1,-1,-1,-1,1,1,1,-1,1,-1,-1,1,1,1,1,1,1,-1,-1,0};
 	uint32 entry_count = 0;
 	for (int setting_id=0; setting_id < 22; setting_id++)
@@ -217,15 +203,15 @@ void WorldClientConnection::_sendMembershipSettings() {
 		for (int setting_index=0; setting_index < 3; setting_index++)
 		{
 
-			mds->settings[entry_count].setting_index = setting_index;
-			mds->settings[entry_count].setting_id = setting_id;
-			mds->settings[entry_count].setting_value = gold_settings[setting_id];
+			payload->settings[entry_count].setting_index = setting_index;
+			payload->settings[entry_count].setting_id = setting_id;
+			payload->settings[entry_count].setting_value = gold_settings[setting_id];
 			entry_count++;
 		}
 	}
 
-	mds->race_entry_count = 15;
-	mds->class_entry_count = 15;
+	payload->race_entry_count = 15;
+	payload->class_entry_count = 15;
 
 	uint32 cur_purchase_id = 90287;
 	uint32 cur_purchase_id2 = 90301;
@@ -234,34 +220,34 @@ void WorldClientConnection::_sendMembershipSettings() {
 	{
 		if (entry_id == 0)
 		{
-			mds->membership_races[entry_id].purchase_id = 1;
-			mds->membership_races[entry_id].bitwise_entry = 0x1ffff;
-			mds->membership_classes[entry_id].purchase_id = 1;
-			mds->membership_classes[entry_id].bitwise_entry = 0x1ffff;
+			payload->membership_races[entry_id].purchase_id = 1;
+			payload->membership_races[entry_id].bitwise_entry = 0x1ffff;
+			payload->membership_classes[entry_id].purchase_id = 1;
+			payload->membership_classes[entry_id].bitwise_entry = 0x1ffff;
 		}
 		else
 		{
-			mds->membership_races[entry_id].purchase_id = cur_purchase_id;
+			payload->membership_races[entry_id].purchase_id = cur_purchase_id;
 
 			if (entry_id < 3)
 			{
-				mds->membership_classes[entry_id].purchase_id = cur_purchase_id;
+				payload->membership_classes[entry_id].purchase_id = cur_purchase_id;
 			}
 			else
 			{
-				mds->membership_classes[entry_id].purchase_id = cur_purchase_id2;
+				payload->membership_classes[entry_id].purchase_id = cur_purchase_id2;
 				cur_purchase_id2++;
 			}
 
 			if (entry_id == 1)
 			{
-				mds->membership_races[entry_id].bitwise_entry = 4110;
-				mds->membership_classes[entry_id].bitwise_entry = 4614;
+				payload->membership_races[entry_id].bitwise_entry = 4110;
+				payload->membership_classes[entry_id].bitwise_entry = 4614;
 			}
 			else if (entry_id == 2)
 			{
-				mds->membership_races[entry_id].bitwise_entry = 4110;
-				mds->membership_classes[entry_id].bitwise_entry = 4614;
+				payload->membership_races[entry_id].bitwise_entry = 4110;
+				payload->membership_classes[entry_id].bitwise_entry = 4614;
 			}
 			else
 			{
@@ -270,16 +256,16 @@ void WorldClientConnection::_sendMembershipSettings() {
 					// Live Skips 4096
 					cur_bitwise_value *= 2;
 				}
-				mds->membership_races[entry_id].bitwise_entry = cur_bitwise_value;
-				mds->membership_classes[entry_id].bitwise_entry = cur_bitwise_value;
+				payload->membership_races[entry_id].bitwise_entry = cur_bitwise_value;
+				payload->membership_classes[entry_id].bitwise_entry = cur_bitwise_value;
 			}
 			cur_purchase_id++;
 		}
 		cur_bitwise_value *= 2;
 	}
-	mds->exit_url_length = 0;	// Live uses 42
+	payload->exit_url_length = 0;	// Live uses 42
 	//strcpy(eq->exit_url, "http://www.everquest.com/free-to-play/exit");
-	mds->exit_url_length2 = 0;	// Live uses 49
+	payload->exit_url_length2 = 0;	// Live uses 49
 	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");
 
 	/*
@@ -310,19 +296,19 @@ void WorldClientConnection::_sendMembershipSettings() {
 	21	-	0		0		0		-	Unknown 0
 	*/
 
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendPostEnterWorld() {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
-	outapp->size=0;
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
+	outPacket->size = 0;
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
-bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* packet) {
-	if (packet->size != sizeof(LoginInfo_Struct)) return false;
+bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
+	if (pPacket->size != sizeof(LoginInfo_Struct)) return false;
 
 	/*
 	OP_SendLoginInfo is sent;
@@ -331,13 +317,13 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 		- Camping
 	*/
 
-	LoginInfo_Struct* loginInfo = (LoginInfo_Struct*)packet->pBuffer;
+	LoginInfo_Struct* payload = reinterpret_cast<LoginInfo_Struct*>(pPacket->pBuffer);
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19] = {0};
 	char key[16] = {0};
-	strn0cpy(name, (char*)loginInfo->login_info,18);
-	strn0cpy(key, (char*)&(loginInfo->login_info[strlen(name)+1]), 15);
+	strn0cpy(name, (char*)payload->login_info,18);
+	strn0cpy(key, (char*)&(payload->login_info[strlen(name)+1]), 15);
 
 	if (strlen(key) <= 1) {
 		// TODO: Find out how to tell the client wrong username/password
@@ -345,7 +331,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 		return false;
 	}
 
-	mZoning = (loginInfo->zoning == 1);
+	mZoning = (payload->zoning == 1);
 
 	uint32 id = atoi(name);
 
@@ -425,23 +411,18 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	return true;
 }
 
-bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* packet) {
+bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
 	if (getWorldAccountID() == 0) {
 		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
 		return false;
 	}
 
-	snprintf(char_name, 64, "%s", (char*)packet->pBuffer);
+	snprintf(char_name, 64, "%s", (char*)pPacket->pBuffer);
 	// TODO: Consider why race and class are sent here?
-	uchar race = packet->pBuffer[64];
-	uchar clas = packet->pBuffer[68];
+	uchar race = pPacket->pBuffer[64];
+	uchar clas = pPacket->pBuffer[68];
 
-	EQApplicationPacket *outapp;
-	outapp = new EQApplicationPacket;
-	outapp->SetOpcode(OP_ApproveName);
-	outapp->pBuffer = new uchar[1];
-	outapp->size = 1;
-
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 	bool valid = true;
 	std::string characterName = char_name;
 	const int nameLength = characterName.length();
@@ -475,9 +456,9 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		mReservedCharacterName = characterName;
 	}
 
-	outapp->pBuffer[0] = valid? 1 : 0;
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	outPacket->pBuffer[0] = valid? 1 : 0;
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 
 	if(!valid) {
 		memset(char_name, 0, sizeof(char_name));
@@ -557,9 +538,9 @@ bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationP
 	}
 
 	rndname[0]=toupper(rndname[0]);
-	NameGeneration_Struct* ngs = (NameGeneration_Struct*)pPacket->pBuffer;
-	memset(ngs->name,0,64);
-	strcpy(ngs->name,rndname);
+	NameGeneration_Struct* payload = reinterpret_cast<NameGeneration_Struct*>(pPacket->pBuffer);
+	memset(payload->name,0,64);
+	strcpy(payload->name,rndname);
 
 	_queuePacket(pPacket);
 	return true;
@@ -616,8 +597,8 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	len += sizeof(uint32);
 	len += sizeof(uint32);
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CharacterCreateRequest, len);
-	unsigned char *ptr = outapp->pBuffer;
+	EQApplicationPacket *outPacket = new EQApplicationPacket(OP_CharacterCreateRequest, len);
+	unsigned char *ptr = outPacket->pBuffer;
 	*((uint8*)ptr) = 0;
 	ptr += sizeof(uint8);
 
@@ -636,8 +617,8 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 		ptr += sizeof(RaceClassCombos);
 	}
 
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 	return true;
 }
 
@@ -652,8 +633,8 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 	}
 
 	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
-	CharCreate_Struct* cc = (CharCreate_Struct*)pPacket->pBuffer;
-	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, cc)) {
+	CharCreate_Struct* payload = reinterpret_cast<CharCreate_Struct*>(pPacket->pBuffer);
+	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, payload)) {
 		// TODO: Dump client.
 	}
 
@@ -668,8 +649,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	// Sent after pressing 'Enter World' at Character Select.
 	// Is it sent while zoning?
 
-	EnterWorld_Struct *ew = (EnterWorld_Struct *)pPacket->pBuffer;
-	std::string characterName = ew->name;
+	EnterWorld_Struct* payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
+	std::string characterName = payload->name;
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
 	if (mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)){
@@ -677,7 +658,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		// Send ChatServer?
 		// Send ChatServer2?
 		// OP_ZoneServerInfo
-		_sendZoneServerInfo(); // /wave
+		//_sendZoneServerInfo(); // /wave
+		_sendZoneUnavailable();
 		return true;
 	}
 
@@ -924,33 +906,30 @@ bool WorldClientConnection::update() {
 }
 
 void WorldClientConnection::_sendZoneServerInfo() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
-	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
-	zsi->port = 7000;
-	strcpy(zsi->ip, "127.0.0.1");
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
+	ZoneServerInfo_Struct* payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
+	payload->port = 7000;
+	strcpy(payload->ip, "127.0.0.1");
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 
 void WorldClientConnection::_sendZoneUnavailable() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
-	ZoneUnavail_Struct* ua = (ZoneUnavail_Struct*)outapp->pBuffer;
-	const char* zonename = database.GetZoneName(zoneID);
-	if (zonename)
-		strcpy(ua->zonename, zonename);
-	_queuePacket(outapp);
-	delete outapp;
-
-	zoneID = 0;
+	// NOTE: In HoT it doesnt matter what 'zone name' is sent back.
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
+	ZoneUnavail_Struct* payload = reinterpret_cast<ZoneUnavail_Struct*>(outPacket->pBuffer);
+	strcpy(payload->zonename, "NONE");
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_queuePacket(const EQApplicationPacket* app, bool ack_req) {
-	clog(WORLD__CLIENT_TRACE, "Sending EQApplicationPacket OpCode 0x%04x",app->GetOpcode());
-	_pkt(WORLD__CLIENT_TRACE, app);
+void WorldClientConnection::_queuePacket(const EQApplicationPacket* pPacket, bool ack_req) {
+	clog(WORLD__CLIENT_TRACE, "Sending EQApplicationPacket OpCode 0x%04x",pPacket->GetOpcode());
+	_pkt(WORLD__CLIENT_TRACE, pPacket);
 
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
-	mStreamInterface->QueuePacket(app, ack_req);
+	mStreamInterface->QueuePacket(pPacket, ack_req);
 }
 
 void WorldClientConnection::_sendGuildList() {
@@ -971,13 +950,10 @@ void WorldClientConnection::_sendGuildList() {
 }
 
 // @merth: I have no idea what this struct is for, so it's hardcoded for now
-void WorldClientConnection::_sendApproveWorld()
-{
-	EQApplicationPacket* outapp;
-
+void WorldClientConnection::_sendApproveWorld() {
 	// Send OPCode: OP_ApproveWorld, size: 544
-	outapp = new EQApplicationPacket(OP_ApproveWorld, sizeof(ApproveWorld_Struct));
-	ApproveWorld_Struct* aw = (ApproveWorld_Struct*)outapp->pBuffer;
+	 EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ApproveWorld, sizeof(ApproveWorld_Struct));
+	 ApproveWorld_Struct* payload = reinterpret_cast<ApproveWorld_Struct*>(outPacket->pBuffer);
 	uchar foo[] = {
 //0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x95,0x5E,0x30,0xA5,0xCA,0xD4,0xEA,0xF5,
 //0xCB,0x14,0xFC,0xF7,0x78,0xE2,0x73,0x15,0x90,0x17,0xCE,0x7A,0xEB,0xEC,0x3C,0x34,
@@ -1029,7 +1005,7 @@ void WorldClientConnection::_sendApproveWorld()
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00
 };
-	memcpy(aw->unknown544, foo, sizeof(foo));
-	_queuePacket(outapp);
-	safe_delete(outapp);
+	memcpy(payload->unknown544, foo, sizeof(foo));
+	_queuePacket(outPacket);
+	safe_delete(outPacket);
 }

@@ -36,7 +36,7 @@ TODO: Work out when to drop a WorldClientConnection. It looks like Zone previous
 
 class WorldClientConnection {
 public:
-	WorldClientConnection(EQStreamInterface* ieqs, World* pWorld);
+	WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld);
 	~WorldClientConnection();
 
 	bool update();

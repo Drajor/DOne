@@ -195,19 +195,10 @@ uint32 MySQLDataProvider::_getCharacterID(std::string pCharacterName)
 	return 0;
 }
 
-bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile)
-{
-	// Create an entry in 'character_' table
-	//static const std::string CREATE_CHARACTER_QUERY = "INSERT INTO character_  SET account_id=%i, name='%s'";
-	//char errorBuffer[MYSQL_ERRMSG_SIZE];
-	
+bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char query[256 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 5];
 	char* end = query;
-
-	//char* query = 0;
-	/*uint32 queryLength = MakeAnyLenString(&query, CREATE_CHARACTER_QUERY.c_str(), pWorldAccountID, pCharacterName.c_str());*/
-	//MYSQL_RES* result;
 	uint32 characterID = 0;
 
 	// construct the character_ query
@@ -217,16 +208,9 @@ bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCha
 	end += mDatabaseConnection->escapeString(end, (char*)pExtendedProfile, sizeof(ExtendedProfile_Struct));
 	end += sprintf(end, "\'");
 
-	//RunQuery(query, (uint32)(end - query), errbuf, 0, &affected_rows);
 	if (mDatabaseConnection->runQuery(query, (uint32)(end - query), errbuf)){
 		return true;
 	}
-
-	//if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result, 0, &characterID) && characterID != 0 ) {
-	//	mysql_free_result(result);
-	//	return true;
-	//}
-	//mysql_free_result(result);
 	return false;
 }
 

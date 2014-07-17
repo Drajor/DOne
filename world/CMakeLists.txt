@@ -8,7 +8,6 @@ SET(world_sources
 	net.cpp
 	UCSConnection.cpp
 	WorldConfig.cpp
-	worlddb.cpp
 	Utility.cpp
 	ZoneManager.cpp
 	Zone.cpp
@@ -26,7 +25,6 @@ SET(world_headers
 	LoginServerConnection.h
 	UCSConnection.h
 	WorldConfig.h
-	worlddb.h
 	WorldTCPConnection.h
 	Utility.h
 	ZoneManager.h

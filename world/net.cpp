@@ -17,7 +17,6 @@
 */
 #include "../common/debug.h"
 #include "../common/timer.h"
-#include "worlddb.h"
 #include "../common/version.h"
 #include "../common/timeoutmgr.h"
 #include "../common/platform.h"
@@ -86,33 +85,12 @@ int main(int argc, char** argv) {
 	else
 		_log(WORLD__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
 
-	_log(WORLD__INIT, "Connecting to MySQL...");
-	if (!database.Connect(
-		Config->DatabaseHost.c_str(),
-		Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(),
-		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
-		_log(WORLD__INIT_ERR, "Cannot continue without a database connection.");
-		return 1;
-	}
-
-	Timer InterserverTimer(10000); // does MySQL pings and auto-reconnect
-	InterserverTimer.Trigger();
-	uint8 ReconnectCounter = 100;
-
 	while(true) {
 		Timer::SetCurrentTime();
 		world->update();
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-
-		if (InterserverTimer.Check()) {
-			InterserverTimer.Start();
-			database.ping();
-			ReconnectCounter++;
-		}
 		Sleep(20);
 	}
 	_log(WORLD__SHUTDOWN,"World main loop completed.");
