@@ -16,6 +16,8 @@ bool DataStore::createCharacter(uint32 pWorldAccountID, std::string pCharacterNa
 	return mDataProvider->createCharacter(pWorldAccountID, pCharacterName, pProfile, pExtendedProfile);
 }
 
+bool DataStore::checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) { return mDataProvider->checkOwnership(pWorldAccountID, pCharacterName); }
+
 
 
 

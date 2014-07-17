@@ -229,3 +229,27 @@ bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCha
 	//mysql_free_result(result);
 	return false;
 }
+
+// TODO: This may be better as a generic get WorldAccountID by Character Name if there are other uses.
+bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) {
+	static const std::string QUERY = "SELECT account_id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		// Name not found.
+		if (mysql_num_rows(result) != 1) {
+			Log::error("Attempting to check ownership of character that doesn't exist."); // TODO:
+			mysql_free_result(result);
+			return false;
+		}
+		MYSQL_ROW row = mysql_fetch_row(result);
+		mysql_free_result(result);
+		return pWorldAccountID == static_cast<uint32>(atoi(row[0]));
+	}
+
+	Log::error("Checking ownership of character failed."); // TODO:
+	mysql_free_result(result);
+	return false;
+}

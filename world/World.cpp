@@ -217,7 +217,15 @@ void World::reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterN
 	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
 }
 
-bool World::deleteCharacter(std::string pCharacterName) { return mDataStore->deleteCharacter(pCharacterName); }
+bool World::deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName) {
+	// Verify that character with pCharacterName belongs to pWorldAccountID.
+	bool isOwner = mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
+	if (!isOwner) {
+		Log::error("Attempt made to delete a character that does not belong to the account owner."); // TODO: More information.. this is haxxors.
+		return false;
+	}
+	return mDataStore->deleteCharacter(pCharacterName);
+}
 
 bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData) {
 	// Find reserved name.

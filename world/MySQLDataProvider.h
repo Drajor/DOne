@@ -22,6 +22,7 @@ public:
 	bool isCharacterNameUnique(std::string pCharacterName);
 	bool deleteCharacter(std::string pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
 private:
 	uint32 _getCharacterID(std::string pCharacterName);
 	

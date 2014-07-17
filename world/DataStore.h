@@ -22,6 +22,9 @@ public:
 	bool isCharacterNameUnique(std::string pCharacterName);
 	bool deleteCharacter(std::string pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+
+	// Returns true if account(pWorldAccoundID) owns a character(pCharacterName).
+	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

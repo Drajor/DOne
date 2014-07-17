@@ -41,7 +41,7 @@ public:
 	bool isCharacterNameUnique(std::string pCharacterName);
 	bool isCharacterNameReserved(std::string pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName);
-	bool deleteCharacter(std::string pCharacterName);
+	bool deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
 private:
 	struct IncomingClient {
