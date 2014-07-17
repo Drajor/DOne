@@ -876,13 +876,14 @@ bool WorldClientConnection::HandleEnterWorldPacket(const EQApplicationPacket *ap
 	return true;
 }
 
-bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
+bool WorldClientConnection::HandleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
 	// TODO: Check character is not in zone before deleting..
-	std::string characterName = (char*)app->pBuffer;
+	std::string characterName = (char*)pPacket->pBuffer;
 	if (mWorld->deleteCharacter(characterName)) {
 		Log::info("Delete Character: %s"); // TODO:
 		_sendCharacterSelectInfo();
 	}
+	// TODO: Log Error.
 	return true;
 }
 

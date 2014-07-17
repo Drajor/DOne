@@ -5,6 +5,8 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "../common/StringUtil.h"
+#include "Utility.h"
+#include "LogSystem.h"
 
 #define KEEP_ALIVE_TIMER 10000
 
@@ -149,19 +151,25 @@ bool MySQLDataProvider::isCharacterNameUnique(std::string pCharacterName)
 }
 
 bool MySQLDataProvider::deleteCharacter(std::string pCharacterName) {
+	// Find character by ID
 	const uint32 characterID = _getCharacterID(pCharacterName);
-	if (characterID == 0) return false;
+	if (characterID == 0) {
+		Log::error("Character ID(%i) not found when attempting to delete %s"); // TODO: pCharacterName
+		return false;
+	}
 
 	static const std::string DEL_CHARACTER_QUERY = "DELETE FROM character_ WHERE id = %i";
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, DEL_CHARACTER_QUERY.c_str(), characterID);
-	MYSQL_RES* result;
-	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
-		mysql_free_result(result);
+	uint32 numRowsAffected = 0;
+	mDatabaseConnection->runQuery(query, queryLength, errorBuffer, 0, &numRowsAffected);
+	if (numRowsAffected == 1) {
+		Log::info("Character with ID(%i) and Name(%s) deleted successfully."); // TODO:
 		return true;
 	}
 
+	Log::error("Zero rows affected whilst trying to delete character with ID(%i) and Name(%s)"); // TODO:
 	return false;
 }
 
