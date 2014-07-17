@@ -22,7 +22,6 @@
 
 #include "worlddb.h"
 #include "WorldConfig.h"
-#include "SoFCharCreateData.h"
 
 #include <iostream>
 #include <iomanip>

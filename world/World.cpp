@@ -88,6 +88,21 @@ bool World::initialise()
 
 	mInitialised = true;
 	return true;
+	/*
+	Tasks which previously occurred at startup.
+	- Load World Config
+	- Load Log Settings
+	- Load Variables
+	- Load Zone Names
+	- Clear groups from DB
+	- Clear raids
+	- Clear raid details
+	- Load Items
+	- Load Guilds
+	- Load Ruleset
+	- Delete stale player corpses.
+	- Purge expired instances.
+	*/
 }
 
 void World::update()

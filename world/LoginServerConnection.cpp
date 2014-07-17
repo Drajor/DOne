@@ -47,9 +47,6 @@
 #include "World.h"
 #include "AccountManager.h"
 
-extern uint32 numzones;
-extern uint32 numplayers;
-
 static const int StatusUpdateInterval = 15000;
 
 LoginServerConnection::LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
@@ -218,13 +215,10 @@ void LoginServerConnection::sendWorldStatus() {
 
 	if (WorldConfig::get()->Locked)
 		lss->status = -2;
-	else if (numzones <= 0)
-		lss->status = -2;
-	else
-		lss->status = numplayers;
+	else lss->status = 100;
 
-	lss->num_zones = numzones;
-	lss->num_players = numplayers;
+	lss->num_zones = 100; // TODO:
+	lss->num_players = 100;
 	_sendPacket(pack);
 	delete pack;
 }

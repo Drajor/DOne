@@ -21,17 +21,12 @@
 #include "../common/StringUtil.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/Item.h"
-#include "../common/dbasync.h"
 #include "../common/rulesys.h"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
-#include "SoFCharCreateData.h"
 
 WorldDatabase database;
-//extern std::vector<RaceClassAllocation> character_create_allocations;
-//extern std::vector<RaceClassCombos> character_create_race_class_combos;
-
 
 // solar: the current stuff is at the bottom of this function
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs) {
