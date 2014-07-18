@@ -6,6 +6,7 @@
 class EQStreamFactory;
 class EQStreamIdentifier;
 class DataStore;
+class ZoneClientConnection;
 
 class Character;
 
@@ -33,4 +34,5 @@ private:
 	EQStreamIdentifier* mStreamIdentifier;
 	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
+	std::list<ZoneClientConnection*> mZoneClientConnections;
 };

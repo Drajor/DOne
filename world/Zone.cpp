@@ -1,5 +1,6 @@
 #include "Zone.h"
 #include "Character.h"
+#include "ZoneClientConnection.h"
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -43,6 +44,8 @@ void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
 
+	for (auto i : mZoneClientConnections)
+		i->update();
 }
 
 void Zone::shutdown()
@@ -56,7 +59,6 @@ void Zone::_handleIncomingConnections() {
 	while (incomingStream = mStreamFactory->Pop()) {
 		// Hand over to the EQStreamIdentifier. (Determine which client to user has)
 		mStreamIdentifier->AddStream(incomingStream);
-		Log::info("[Zone] New Stream");
 	}
 
 	mStreamIdentifier->Process();
@@ -64,7 +66,9 @@ void Zone::_handleIncomingConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		Character* character = new Character(incomingStreamInterface);
-		mCharacters.push_back(character);
+		//Character* character = new Character(incomingStreamInterface);
+		//mCharacters.push_back(character);
+		Log::info("[Zone] New Zone Client Connection");
+		mZoneClientConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this));
 	}
 }
