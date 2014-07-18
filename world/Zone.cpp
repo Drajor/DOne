@@ -4,9 +4,13 @@
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
+#include "LogSystem.h"
 
-Zone::Zone(DataStore* pDataStore) :
+Zone::Zone(DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
 	mDataStore(pDataStore),
+	mPort(pPort),
+	mID(pZoneID),
+	mInstanceID(pInstanceID),
 	mInitialised(false),
 	mStreamFactory(nullptr),
 	mStreamIdentifier(nullptr)
@@ -24,7 +28,7 @@ bool Zone::initialise() {
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
-	if (!mStreamFactory->Open(7000)) {
+	if (!mStreamFactory->Open(mPort)) {
 		return false;
 	}
 
@@ -52,6 +56,7 @@ void Zone::_handleIncomingConnections() {
 	while (incomingStream = mStreamFactory->Pop()) {
 		// Hand over to the EQStreamIdentifier. (Determine which client to user has)
 		mStreamIdentifier->AddStream(incomingStream);
+		Log::info("[Zone] New Stream");
 	}
 
 	mStreamIdentifier->Process();

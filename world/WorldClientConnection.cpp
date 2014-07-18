@@ -657,8 +657,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		// Send ChatServer?
 		// Send ChatServer2?
 		// OP_ZoneServerInfo
-		//_sendZoneServerInfo(); // /wave
-		_sendZoneUnavailable();
+		_sendZoneServerInfo(); // /wave
+		//_sendZoneUnavailable();
 		return true;
 	}
 
@@ -888,7 +888,7 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 bool WorldClientConnection::update() {
 	// Check our connection to the User.
 	if (!mStreamInterface->CheckState(ESTABLISHED)) {
-		Utility::print("WorldClientConnection Lost.");
+		//Utility::print("WorldClientConnection Lost.");
 		return false;
 	}
 
@@ -907,7 +907,7 @@ bool WorldClientConnection::update() {
 void WorldClientConnection::_sendZoneServerInfo() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
-	payload->port = 7000;
+	payload->port = mWorld->getZonePort(ZoneIDs::NorthQeynos); // TODO: Hardcode.
 	strcpy(payload->ip, "127.0.0.1");
 	_queuePacket(outPacket);
 	safe_delete(outPacket);

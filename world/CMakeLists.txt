@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp)
+SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp ZoneClientConnection.h ZoneClientConnection.cpp Character.h Character.cpp)
 SET(world_sources
 	WorldClientConnection.cpp
 	CMakeLists.txt

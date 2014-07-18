@@ -44,6 +44,8 @@ public:
 	bool deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
 	bool isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName);
+
+	uint16 getZonePort(uint16 pZoneID, uint16 pInstanceID = 0);
 private:
 	struct IncomingClient {
 		uint32 mAccountID; // Login Server Account

@@ -72,6 +72,7 @@ bool World::initialise()
 	RegisterAllPatches(*mStreamIdentifier);
 
 	mZoneManager = new ZoneManager(mDataStore);
+	mZoneManager->initialise();
 
 	mAccountManager = new AccountManager(mDataStore);
 	if (!mAccountManager->initialise()) {
@@ -107,9 +108,11 @@ bool World::initialise()
 void World::update()
 {
 	_checkUCSConnection();
-	mUCSConnection->update();
 
+	mUCSConnection->update();
 	mLoginServerConnection->update();
+	mDataStore->update();
+	mZoneManager->update();
 
 	// Check if any new clients are connecting.
 	_handleIncomingClientConnections();
@@ -118,10 +121,6 @@ void World::update()
 	for (auto i : mClients) {
 		i->update();
 	}
-
-	mDataStore->update();
-
-	// TODO: Erase any expired IncomingClients.
 }
 
 void World::_handleIncomingClientConnections() {
@@ -318,4 +317,8 @@ bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, 
 bool World::isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName)
 {
 	return mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
+}
+
+uint16 World::getZonePort(uint16 pZoneID, uint16 pInstanceID) {
+	return mZoneManager->getZonePort(pZoneID, pInstanceID);
 }
