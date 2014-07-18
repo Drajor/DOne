@@ -46,44 +46,36 @@
 
 #endif
 
-#include "WorldConfig.h"
 #include "World.h"
 #include "DataStore.h"
 #include "MySQLDataProvider.h"
-#include "Utility.h"
+#include "LogSystem.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
 
 int main(int argc, char** argv) {
-	MySQLDataProvider* dataProvider = new MySQLDataProvider();
-	if (!dataProvider->initialise()) {
-		Utility::criticalError("Data Provider failed to initialise");
-		return 1;
-	}
-	DataStore* dataStore = new DataStore();
-	dataStore->setProvider(dataProvider);
-
-	World* world = new World(dataStore);
-	if (!world->initialise()) {
-		Utility::criticalError("World failed to initialise");
-		return 1;
-	}
-
+	Log::status("World starting!");
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
-	// Load server configuration
-	_log(WORLD__INIT, "Loading server configuration..");
-	if (!WorldConfig::LoadConfig()) {
-		_log(WORLD__INIT_ERR, "Loading server configuration failed.");
+	Log::info("Data Provider : Initialising");
+	MySQLDataProvider* dataProvider = new MySQLDataProvider();
+	if (!dataProvider->initialise()) {
+		Log::error("Data Provider : Failed to initialise");
 		return 1;
 	}
-	const WorldConfig *Config=WorldConfig::get();
+	Log::info("Data Provider : Initialised");
 
-	if(!load_log_settings(Config->LogSettingsFile.c_str()))
-		_log(WORLD__INIT, "Warning: Unable to read %s", Config->LogSettingsFile.c_str());
-	else
-		_log(WORLD__INIT, "Log settings loaded from %s", Config->LogSettingsFile.c_str());
+	DataStore* dataStore = new DataStore();
+	dataStore->setProvider(dataProvider);
+
+	Log::info("World : Initialising");
+	World* world = new World(dataStore);
+	if (!world->initialise()) {
+		Log::error("World : Failed to initialise");
+		return 1;
+	}
+	Log::info("World : Initialised");
 
 	while(true) {
 		Timer::SetCurrentTime();
@@ -93,7 +85,7 @@ int main(int argc, char** argv) {
 		timeout_manager.CheckTimeouts();
 		Sleep(20);
 	}
-	_log(WORLD__SHUTDOWN,"World main loop completed.");
+	Log::status("World : Shutting down");
 
 	delete world;
 	delete dataStore;

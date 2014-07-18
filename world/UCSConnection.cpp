@@ -1,6 +1,5 @@
 #include "UCSConnection.h"
 #include "../common/debug.h"
-#include "WorldConfig.h"
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/EmuTCPConnection.h"
@@ -28,28 +27,15 @@ bool UCSConnection::update() {
 	{
 		if (!mAuthenticated)
 		{
-			if (WorldConfig::get()->SharedKey.length() > 0)
+			std::string SharedKey = "jkads89adsjkhadsjkhads8932jkhadsjhadsjk3289"; // TODO: Hardcoded for now.
+			if (pack->opcode == ServerOP_ZAAuth && pack->size == 16)
 			{
-				if (pack->opcode == ServerOP_ZAAuth && pack->size == 16)
-				{
-					uint8 tmppass[16];
+				uint8 tmppass[16];
 
-					MD5::Generate((const uchar*) WorldConfig::get()->SharedKey.c_str(), WorldConfig::get()->SharedKey.length(), tmppass);
+				MD5::Generate((const uchar*)SharedKey.c_str(), SharedKey.length(), tmppass);
 
-					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
-						mAuthenticated = true;
-					else
-					{
-						struct in_addr in;
-						in.s_addr = getIP();
-						_log(UCS__ERROR, "UCS authorization failed.");
-						ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
-						sendPacket(pack);
-						delete pack;
-						disconnect();
-						return false;
-					}
-				}
+				if (memcmp(pack->pBuffer, tmppass, 16) == 0)
+					mAuthenticated = true;
 				else
 				{
 					struct in_addr in;
@@ -64,8 +50,14 @@ bool UCSConnection::update() {
 			}
 			else
 			{
-				_log(UCS__ERROR,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
-				mAuthenticated = true;
+				struct in_addr in;
+				in.s_addr = getIP();
+				_log(UCS__ERROR, "UCS authorization failed.");
+				ServerPacket* pack = new ServerPacket(ServerOP_ZAAuthFailed);
+				sendPacket(pack);
+				delete pack;
+				disconnect();
+				return false;
 			}
 			delete pack;
 			continue;

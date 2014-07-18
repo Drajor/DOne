@@ -33,6 +33,7 @@ public:
 
 	bool initialise();
 	void update();
+
 	bool connect();
 	bool isConnected();
 	// Tells the Login Server whether work is locked, how many players / zones World has.
@@ -42,6 +43,8 @@ private:
 	bool _isConnectReady();
 	void _sendPacket(ServerPacket* pPacket);
 	void _sendWorldInformation();
+	void _handleLoginServerClientAuth(ServerPacket* pPacket);
+	void _handleUserToWorldRequest(ServerPacket * pPacket);
 
 	World* mWorld;
 	EmuTCPConnection* mTCPConnection;

@@ -41,11 +41,10 @@
 #include "../common/packet_dump.h"
 #include "../common/StringUtil.h"
 
-#include "worlddb.h"
-#include "WorldConfig.h"
 #include "Utility.h"
 #include "World.h"
 #include "AccountManager.h"
+#include "LogSystem.h"
 
 static const int StatusUpdateInterval = 15000;
 
@@ -67,55 +66,34 @@ LoginServerConnection::~LoginServerConnection() {
 }
 
 void LoginServerConnection::update() {
-	//const WorldConfig *Config=WorldConfig::get();
-
 	if (mStatusUpdateTimer.Check()) {
-		this->sendWorldStatus();
+		sendWorldStatus();
+		mStatusUpdateTimer.Start();
 	}
 
 	/************ Get all packets from packet manager out queue and process them ************/
-	ServerPacket *pack = 0;
-	while((pack = mTCPConnection->PopPacket()))
+	ServerPacket* packet = 0;
+	while((packet = mTCPConnection->PopPacket()))
 	{
-		_log(WORLD__LS_TRACE,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
-		_hex(WORLD__LS_TRACE,pack->pBuffer,pack->size);
+		_log(WORLD__LS_TRACE,"Recevied ServerPacket from LS OpCode 0x04x",packet->opcode);
+		_hex(WORLD__LS_TRACE,packet->pBuffer,packet->size);
 
-		switch(pack->opcode) {
+		switch(packet->opcode) {
 			case 0:
 				break;
 			case ServerOP_KeepAlive: {
-				// Ignored.
-				Utility::print("ServerOP_KeepAlive");
 				break;
 			}
 			case ServerOP_UsertoWorldReq: {
-				Utility::print("ServerOP_UsertoWorldReq");
-				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
-				ServerPacket* outpack = new ServerPacket;
-				outpack->opcode = ServerOP_UsertoWorldResp;
-				outpack->size = sizeof(UsertoWorldResponse_Struct);
-				outpack->pBuffer = new uchar[outpack->size];
-				memset(outpack->pBuffer, 0, outpack->size);
-				UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
-				utwrs->lsaccountid = utwr->lsaccountid;
-				utwrs->ToID = utwr->FromID;
-				utwrs->worldid = utwr->worldid;
-				// Ask World if this Client can join World.
-				utwrs->response = mWorld->getUserToWorldResponse(utwr->lsaccountid);
-				_sendPacket(outpack);
-				delete outpack;
+				_handleUserToWorldRequest(packet);
 				break;
 			}
 			case ServerOP_LSClientAuth: {
-				Utility::print("ServerOP_LSClientAuth");
-				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
-				// Tell World that a Client is inbound.
-				mWorld->notifyIncomingClient(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
+				_handleLoginServerClientAuth(packet);
 				break;
 			}
 			case ServerOP_LSFatalError: {
 				// Ignored. Public LS may or may not send this, local LS does not.
-				Utility::print("ServerOP_LSFatalError");
 				break;
 			}
 			case ServerOP_SystemwideMessage: {
@@ -131,96 +109,107 @@ void LoginServerConnection::update() {
 				break;
 			}
 			default: {
-				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
-				DumpPacket(pack->pBuffer, pack->size);
+				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)packet->opcode,packet->size);
+				DumpPacket(packet->pBuffer, packet->size);
 				break;
 			}
 		}
-		delete pack;
+		delete packet;
 	}
 }
 
 bool LoginServerConnection::initialise() {
-	if(!isConnected()) {
-		if(_isConnectReady()) {
-			_log(WORLD__LS, "Connecting to login server: %s:%d",mLoginServerAddress,mLoginServerPort);
-			connect();
-		} else {
-			_log(WORLD__LS_ERR, "Not connected but not ready to connect, this is bad: %s:%d", mLoginServerAddress,mLoginServerPort);
-		}
+	if (isConnected()) return true;
+
+	if (_isConnectReady()) {
+		Log::status("[Login Server Connection] Connecting");
+		connect();
+	} else {
+		Log::error("[Login Server Connection] Not ready to connect.");
+		return false;
 	}
+
 	return true;
 }
 
 bool LoginServerConnection::connect() {
 	char errbuf[TCPConnection_ErrorBufferSize];
-	if ((mLoginServerIP = ResolveIP(mLoginServerAddress, errbuf)) == 0) {
-		_log(WORLD__LS_ERR, "Unable to resolve '%s' to an IP.",mLoginServerAddress);
+
+	mLoginServerIP = ResolveIP(mLoginServerAddress, errbuf);
+	if (mLoginServerIP == 0) {
+		Log::error("[Login Server Connection] Unable to resolve Login Server IP");
 		return false;
 	}
 
-	if (mLoginServerIP == 0 || mLoginServerPort == 0) {
-		_log(WORLD__LS_ERR, "Connect info incomplete, cannot connect: %s:%d",mLoginServerAddress,mLoginServerPort);
+	if (mLoginServerPort == 0) {
+		Log::error("[Login Server Connection] Login Server port not set.");
 		return false;
 	}
 
 	if (mTCPConnection->ConnectIP(mLoginServerIP, mLoginServerPort, errbuf)) {
-		_log(WORLD__LS, "Connected to Loginserver: %s:%d",mLoginServerAddress,mLoginServerPort);
 		_sendWorldInformation();
 		sendWorldStatus();
+		Log::status("[Login Server Connection] Connected to Login Server");
 		return true;
 	}
-	else {
-		_log(WORLD__LS_ERR, "Could not connect to login server: %s:%d %s",mLoginServerAddress,mLoginServerPort,errbuf);
-		return false;
+
+	Log::error("[Login Server Connection] Failed to connect.");
+	return false;
+}
+
+void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
+	if (pPacket->size != sizeof(UsertoWorldRequest_Struct)) {
+		Log::error("[Login Server Connection] Wrong size of UsertoWorldRequest_Struct");
+		return;
 	}
+	UsertoWorldRequest_Struct* inPayload = reinterpret_cast<UsertoWorldRequest_Struct*>(pPacket->pBuffer);
+	ServerPacket* outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(UsertoWorldResponse_Struct));
+	UsertoWorldResponse_Struct* outPayload = reinterpret_cast<UsertoWorldResponse_Struct*>(outPacket->pBuffer);
+	outPayload->lsaccountid = inPayload->lsaccountid;
+	outPayload->ToID = inPayload->FromID;
+	outPayload->worldid = inPayload->worldid;
+	// Ask World if this Client can join World.
+	outPayload->response = mWorld->getUserToWorldResponse(inPayload->lsaccountid);
+	_sendPacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) {
+	if (pPacket->size != sizeof(ServerLSClientAuth)) {
+		Log::error("[Login Server Connection] Wrong size of ServerLSClientAuth");
+		return;
+	}
+	ServerLSClientAuth* payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
+	// Tell World that a Client is inbound.
+	mWorld->notifyIncomingClient(payload->lsaccount_id, payload->name, payload->key, payload->worldadmin, payload->ip, payload->local);
 }
 
 void LoginServerConnection::_sendWorldInformation() {
-	const WorldConfig* config = WorldConfig::get();
+	ServerPacket* outPacket = new ServerPacket(ServerOP_NewLSInfo, sizeof(ServerNewLSInfo_Struct));
+	ServerNewLSInfo_Struct* payload = reinterpret_cast<ServerNewLSInfo_Struct*>(outPacket->pBuffer);
+	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
+	strcpy(payload->serverversion, LOGIN_VERSION);
+	strcpy(payload->name, "DrajorTest"); // TODO: (Configuration)
+	strcpy(payload->shortname, "[TEST] Drajor");
+	strcpy(payload->account, mLoginAccount);
+	strcpy(payload->password, mLoginPassword);
 
-	ServerPacket* pack = new ServerPacket;
-	pack->opcode = ServerOP_NewLSInfo;
-	pack->size = sizeof(ServerNewLSInfo_Struct);
-	pack->pBuffer = new uchar[pack->size];
-	memset(pack->pBuffer, 0, pack->size);
-	ServerNewLSInfo_Struct* lsi = (ServerNewLSInfo_Struct*) pack->pBuffer;
-	strcpy(lsi->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->serverversion, LOGIN_VERSION);
-	strcpy(lsi->name, config->LongName.c_str());
-	strcpy(lsi->shortname, config->ShortName.c_str());
-	strcpy(lsi->account, mLoginAccount);
-	strcpy(lsi->password, mLoginPassword);
-	if (config->WorldAddress.length())
-		strcpy(lsi->remote_address, config->WorldAddress.c_str());
-	if (config->LocalAddress.length())
-		strcpy(lsi->local_address, config->LocalAddress.c_str());
-	else {
-		uint16 port;
-		mTCPConnection->GetSockName(lsi->local_address,&port);
-		WorldConfig::SetLocalAddress(lsi->local_address);
-	}
-	_sendPacket(pack);
-	delete pack;
+	_sendPacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void LoginServerConnection::sendWorldStatus() {
-	mStatusUpdateTimer.Start();
-	ServerPacket* pack = new ServerPacket;
-	pack->opcode = ServerOP_LSStatus;
-	pack->size = sizeof(ServerLSStatus_Struct);
-	pack->pBuffer = new uchar[pack->size];
-	memset(pack->pBuffer, 0, pack->size);
-	ServerLSStatus_Struct* lss = (ServerLSStatus_Struct*) pack->pBuffer;
+	ServerPacket* outPacket = new ServerPacket(ServerOP_LSStatus, sizeof(ServerLSStatus_Struct));
+	ServerLSStatus_Struct* payload = reinterpret_cast<ServerLSStatus_Struct*>(outPacket->pBuffer);
 
-	if (WorldConfig::get()->Locked)
-		lss->status = -2;
-	else lss->status = 100;
+	if (mWorld->getLocked())
+		payload->status = -2;
+	else payload->status = 100;
 
-	lss->num_zones = 100; // TODO:
-	lss->num_players = 100;
-	_sendPacket(pack);
-	delete pack;
+	payload->num_zones = 100; // TODO:
+	payload->num_players = 100;
+	_sendPacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void LoginServerConnection::_sendPacket(ServerPacket* pPacket) { mTCPConnection->SendPacket(pPacket); }

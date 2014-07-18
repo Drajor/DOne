@@ -1,9 +1,11 @@
 #pragma once
 
 #include <string>
+#include <stdarg.h>
 
 namespace Log {
-	static void status(std::string pMessage){};
-	static void info(std::string pMessage){};
-	static void error(std::string pMessage){};
+	void status(std::string pMessage);
+	void info(std::string pMessage);
+	void error(std::string pMessage);
+	void commonlog(std::string pMessage);
 }

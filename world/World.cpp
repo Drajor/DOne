@@ -53,11 +53,13 @@ bool World::initialise()
 	if (mInitialised) return false;
 
 	// Create our connection to the Login Server
+	Log::status("[WORLD] Login Server Connection : Initialising");
 	mLoginServerConnection = new LoginServerConnection(this, "127.0.0.1", 5998, "Admin", "Password");
 	if (!mLoginServerConnection->initialise()) {
-		Utility::criticalError("Unable to initialise Login Server Connection");
+		Log::error("[WORLD] Login Server Connection : Failed to initialise");
 		return false;
 	}
+	Log::status("[WORLD] Login Server Connection : Initialised");
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(WorldStream, 9000); // [Client Limitation] World must use port 9000

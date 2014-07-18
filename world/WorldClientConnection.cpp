@@ -19,8 +19,6 @@
 #include "../common/clientversions.h"
 #include "../common/MiscFunctions.h"
 
-#include "WorldConfig.h"
-
 #include <iostream>
 #include <iomanip>
 
@@ -72,8 +70,9 @@ WorldClientConnection::~WorldClientConnection() {
 void WorldClientConnection::_sendLogServer() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
 	LogServer_Struct* payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
-	const char *wsn=WorldConfig::get()->ShortName.c_str();
-	memcpy(payload->worldshortname,wsn,strlen(wsn));
+	//const char *wsn=WorldConfig::get()->ShortName.c_str();
+	//memcpy(payload->worldshortname,wsn,strlen(wsn));
+	strcpy(payload->worldshortname, "ShortNameToDo"); // TODO:
 
 	if(RuleB(Mail, EnableMailSystem))
 		payload->enablemail = 1;

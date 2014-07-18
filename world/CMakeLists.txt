@@ -5,9 +5,8 @@ SET(world_sources
 	WorldClientConnection.cpp
 	CMakeLists.txt
 	LoginServerConnection.cpp
-	net.cpp
+	main.cpp
 	UCSConnection.cpp
-	WorldConfig.cpp
 	Utility.cpp
 	ZoneManager.cpp
 	Zone.cpp
@@ -17,6 +16,8 @@ SET(world_sources
 	MySQLDataProvider.cpp
 	AccountManager.cpp
 	DatabaseConnection.cpp
+	LogSystem.cpp
+	Configuration.cpp
 )
 
 SET(world_headers
@@ -24,7 +25,6 @@ SET(world_headers
 	CMakeLists.txt
 	LoginServerConnection.h
 	UCSConnection.h
-	WorldConfig.h
 	WorldTCPConnection.h
 	Utility.h
 	ZoneManager.h
@@ -38,6 +38,7 @@ SET(world_headers
 	DatabaseConnection.h
 	Constants.h
 	LogSystem.h
+	Configuration.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})
