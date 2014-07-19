@@ -118,8 +118,14 @@ void World::update()
 	_handleIncomingClientConnections();
 
 	// Update World Clients.
-	for (auto i : mClients) {
-		i->update();
+	for (auto i = mClients.begin(); i != mClients.end();) {
+		if ((*i)->update()){
+			i++;
+		}
+		else {
+			delete *i;
+			i = mClients.erase(i);
+		}
 	}
 }
 

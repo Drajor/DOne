@@ -80,6 +80,7 @@ private:
 	std::string mLoginServerKey;
 	uint32 mCharacterID;
 	std::string mReservedCharacterName;
+	bool mConnectionDropped;
 	
 	
 	
@@ -98,7 +99,7 @@ private:
 	bool _handleSendLoginInfoPacket(const EQApplicationPacket* packet);
 	bool _handleCharacterCreateRequestPacket(const EQApplicationPacket* packet);
 	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);
-
+	void dropConnection() { mConnectionDropped = true; }
 	EQStreamInterface* const mStreamInterface;
 	World* mWorld;
 };

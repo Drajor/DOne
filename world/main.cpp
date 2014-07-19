@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		Sleep(20);
+		Sleep(0);
 	}
 	Log::status("World : Shutting down");
 

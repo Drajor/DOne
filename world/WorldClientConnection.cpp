@@ -48,15 +48,16 @@ WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface
 	mStreamInterface(pStreamInterface),
 	mWorld(pWorld),
 	mIdentified(false),
-	mReservedCharacterName("")
+	mReservedCharacterName(""),
+	mConnectionDropped(false),
+	ClientVersionBit(0),
+	zoneID(0),
+	mCharacterID(0)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
 
-	zoneID = 0;
 	char_name[0] = 0;
-	mCharacterID = 0;
-	ClientVersionBit = 0;
 
 	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
 }
@@ -307,7 +308,11 @@ void WorldClientConnection::_sendPostEnterWorld() {
 }
 
 bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
-	if (pPacket->size != sizeof(LoginInfo_Struct)) return false;
+	if (pPacket->size != sizeof(LoginInfo_Struct)) {
+		Log::error("[World Client Connection] Wrong sized LoginInfo_Struct");
+		dropConnection();
+		return false;
+	}
 
 	/*
 	OP_SendLoginInfo is sent;
@@ -411,10 +416,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 }
 
 bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
-	if (getWorldAccountID() == 0) {
-		clog(WORLD__CLIENT_ERR,"Name approval request with no logged in account");
-		return false;
-	}
+	// TODO: Check this packet size.
 
 	snprintf(char_name, 64, "%s", (char*)pPacket->pBuffer);
 	// TODO: Consider why race and class are sent here?
@@ -622,19 +624,18 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 }
 
 bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
-	if (pPacket->size != sizeof(CharCreate_Struct))
-	{
-		clog(WORLD__CLIENT_ERR,"Wrong size on OP_CharacterCreate. Got: %d, Expected: %d",pPacket->size,sizeof(CharCreate_Struct));
-		DumpPacket(pPacket);
-		// the previous behavior was essentially returning true here
-		// but that seems a bit odd to me.
-		return true;
+	if (pPacket->size != sizeof(CharCreate_Struct)) {
+		Log::error("[World Client Connection] Wrong sized CharCreate_Struct, dropping connection.");
+		dropConnection();
+		return false;
 	}
 
 	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
 	CharCreate_Struct* payload = reinterpret_cast<CharCreate_Struct*>(pPacket->pBuffer);
 	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, payload)) {
-		// TODO: Dump client.
+		Log::error("[World Client Connection] Character creation failed, dropping connection.");
+		dropConnection();
+		return false;
 	}
 
 	mReservedCharacterName = "";
@@ -663,8 +664,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		return true;
 	}
 
-	Log::error("World refused entry! Account: %i, Character: %s"); // TODO:
-	mStreamInterface->Close();
+	Log::error("[World Client Connection] World refused entry, dropping connection.");
+	dropConnection();
 	return false;
 
 
@@ -802,12 +803,6 @@ bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* p
 }
 
 bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	// Check our Stream Interface.
-	if (!mStreamInterface->CheckState(ESTABLISHED)) {
-		// TODO: Can this even occur?
-		Log::error("Client disconnected (net inactive on send)");
-		return false;
-	}
 	// Check if unidentified and sending something other than OP_SendLoginInfo
 	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
 	if (!getIdentified() && pPacket->GetOpcode() != OP_SendLoginInfo) {
@@ -887,9 +882,9 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 }
 
 bool WorldClientConnection::update() {
-	// Check our connection to the User.
-	if (!mStreamInterface->CheckState(ESTABLISHED)) {
-		//Utility::print("WorldClientConnection Lost.");
+	// Check our connection.
+	if (mConnectionDropped || !mStreamInterface->CheckState(ESTABLISHED)) {
+		Utility::print("WorldClientConnection Lost.");
 		return false;
 	}
 

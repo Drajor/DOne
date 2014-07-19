@@ -250,8 +250,8 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
 	payload->player.spawn.max_hp = 100;		//this field needs a better name
 	payload->player.spawn.race = 1; //race;
-	payload->player.spawn.runspeed = 30; // runspeed;
-	payload->player.spawn.walkspeed = 15; // runspeed * 0.5f;
+	payload->player.spawn.runspeed = 0.7; // runspeed;
+	payload->player.spawn.walkspeed = 0.35; // runspeed * 0.5f;
 	payload->player.spawn.class_ = 1;// class_;
 	payload->player.spawn.gender = 1; // gender;
 	payload->player.spawn.level = 1;// level;
