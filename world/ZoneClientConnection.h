@@ -38,6 +38,9 @@ private:
 	void _sendZoneServerReady();
 	void _sendExpZoneIn();
 	void _sendWorldObjectsSent();
+	void _handleClientUpdate(const EQApplicationPacket* pPacket);
+	void _handleSpawnAppearance(const EQApplicationPacket* pPacket);
+	void _handleCamp(const EQApplicationPacket* pPacket);
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;
 	Zone* mZone;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../common/types.h"
+
 enum PlayableRaceIDs {
 	Human = 1,
 	Barbarian = 2,
@@ -44,4 +46,38 @@ enum PlayerDeityIDs {
 
 enum ZoneIDs {
 	NorthQeynos = 2
+};
+
+enum SpawnAppearanceTypes : int16 {
+	Die = 0,
+	WhoLevel = 1,
+	Invisible = 3,
+	PVP = 4,
+	Light = 5,
+	Animation = 14,
+	Sneak = 15,
+	SpawnID = 16,
+	HP = 17,
+	LinkDead = 18,
+	Levitate = 19,
+	GM = 20,
+	Anonymous = 21,
+	GuildID = 22,
+	GuildRank = 23,
+	AFK = 24,
+	Pet = 25,
+	Split = 28,
+	Size = 29,
+	NPCName = 31,
+	ShowHelm = 43,
+	DamageState = 44
+};
+
+enum SpawnAppearanceAnimations : int16 {
+	Standing = 100,
+	Freeze = 102,
+	Looting = 105,
+	Sitting = 110,
+	Crouch = 111,
+	Death = 115
 };

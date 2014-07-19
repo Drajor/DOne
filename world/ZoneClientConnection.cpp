@@ -1,4 +1,5 @@
 #include "ZoneClientConnection.h"
+#include "Constants.h"
 #include "Zone.h"
 #include "Character.h"
 #include "LogSystem.h"
@@ -44,9 +45,8 @@ void ZoneClientConnection::dropConnection()
 
 bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {	
 	EmuOpcode opcode = pPacket->GetOpcode();
-	//std::stringstream ss;
-	//ss << "Packet: " << opcode;
-	//Utility::print(ss.str());
+	if (opcode == 0 || opcode == OP_FloatListThing) return true;
+
 	switch (opcode) {
 	case OP_AckPacket:
 		Utility::print("OP_AckPacket");
@@ -79,12 +79,14 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_SpawnAppearance:
 		Utility::print("OP_SpawnAppearance");
+		_handleSpawnAppearance(pPacket);
 		break;
 	case OP_WearChange:
 		Utility::print("OP_WearChange");
 		break;
 	case OP_ClientUpdate:
-		Utility::print("OP_ClientUpdate");
+		//Utility::print("OP_ClientUpdate");
+		_handleClientUpdate(pPacket);
 		break;
 	case OP_ClientError:
 		Utility::print("OP_ClientError");
@@ -124,6 +126,13 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_TargetMouse:
 		Utility::print("OP_TargetMouse");
+		break;
+	case OP_Camp:
+		// Sent when user types /camp or presses the camp button.
+		_handleCamp(pPacket);
+		break;
+	case OP_Logout:
+		Utility::print("OP_Logout");
 		break;
 	default:
 		Utility::print("UNKNOWN PACKET");
@@ -250,8 +259,8 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
 	payload->player.spawn.max_hp = 100;		//this field needs a better name
 	payload->player.spawn.race = 1; //race;
-	payload->player.spawn.runspeed = 0.7; // runspeed;
-	payload->player.spawn.walkspeed = 0.35; // runspeed * 0.5f;
+	payload->player.spawn.runspeed = 2.7; // runspeed;
+	payload->player.spawn.walkspeed = 1.35; // runspeed * 0.5f;
 	payload->player.spawn.class_ = 1;// class_;
 	payload->player.spawn.gender = 1; // gender;
 	payload->player.spawn.level = 1;// level;
@@ -384,4 +393,93 @@ void ZoneClientConnection::_sendWorldObjectsSent() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_WorldObjectsSent, 0);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(PlayerPositionUpdateClient_Struct);
+	if (pPacket->size != EXPECTED_SIZE && pPacket->size != EXPECTED_SIZE + 1) {
+		Log::error("[Zone Client Connection] Wrong sized PlayerPositionUpdateClient_Struct, dropping connection.");
+		// TODO: Drop connection!
+		return;
+	}
+
+	PlayerPositionUpdateClient_Struct* payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
+	mCharacter->mProfile->x = payload->x_pos;
+	mCharacter->mProfile->y = payload->y_pos;
+	mCharacter->mProfile->z = payload->z_pos;
+	mCharacter->mProfile->heading = payload->heading;
+	mCharacter->mAnimation = payload->animation; // Not actually animation. May refer to animation speed when moving + moving forward - backward.
+
+	// TODO: Update other players.
+}
+
+void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(SpawnAppearance_Struct);
+	if (pPacket->size != EXPECTED_SIZE && pPacket->size != EXPECTED_SIZE + 1) {
+		Log::error("[Zone Client Connection] Wrong sized SpawnAppearance_Struct, dropping connection.");
+		// TODO: Drop connection!
+		return;
+	}
+
+	SpawnAppearance_Struct* payload = reinterpret_cast<SpawnAppearance_Struct*>(pPacket->pBuffer);
+	const uint16 actionType = payload->type;
+	const uint32 actionParameter = payload->parameter;
+	switch (actionType) {
+		// Handle animation.
+	case SpawnAppearanceTypes::Animation:
+		switch (actionParameter) {
+		case SpawnAppearanceAnimations::Standing:
+			mCharacter->setStanding(true);
+			break;
+		case SpawnAppearanceAnimations::Freeze:
+			break;
+		case SpawnAppearanceAnimations::Looting:
+			break;
+		case SpawnAppearanceAnimations::Sitting:
+			mCharacter->setStanding(false);
+			break;
+		case SpawnAppearanceAnimations::Crouch:
+			// Crouch or Jump triggers this.
+			break;
+		case SpawnAppearanceAnimations::Death:
+			break;
+		default:
+			std::stringstream ss;
+			ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes::Animation parameter : " << actionParameter;
+			Log::info(ss.str());
+			break;
+		}
+		// Handle anonymous / roleplay
+	case SpawnAppearanceTypes::Anonymous:
+		// Not anonymous
+		if (actionParameter == 0) {
+			mCharacter->mProfile->anon = 0;
+			Log::info("Setting character non-anonymous / non-roleplay");
+		}
+		// Anonymous
+		else if (actionParameter == 1) {
+			mCharacter->mProfile->anon = 1;
+			Log::info("Setting character to anonymous");
+		}
+		// Roleplay
+		else if (actionParameter == 2) {
+			mCharacter->mProfile->anon = 2;
+			Log::info("Setting character to Roleplay");
+		}
+		else {
+			std::stringstream ss;
+			ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes::Anonymous parameter : " << actionParameter;
+			Log::error(ss.str());
+		}
+		// TODO: Update other clients.
+		break;
+	default:
+		break;
+	}
+}
+
+void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
+	mCharacter->startCamp();
 }

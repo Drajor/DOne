@@ -2,7 +2,10 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 
-Character::Character() { }
+Character::Character() :
+mAnimation(0),
+mStanding(true)
+{ }
 Character::~Character() {
 	delete mProfile;
 	delete mExtendedProfile;
@@ -16,7 +19,16 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mExtendedProfile = pExtendedProfile;
 
 	mName = mProfile->name;
-	//mID = mProfile->
 
 	return true;
+}
+
+void Character::setStanding(bool pStanding) {
+	mStanding = pStanding;
+	if (mStanding)
+		mCampTimer.Disable();
+}
+
+void Character::startCamp() {
+	mCampTimer.Start(29000, true);
 }
