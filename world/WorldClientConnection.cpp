@@ -653,6 +653,7 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
 	if (mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)){
+		// TODO: Send mWorld->addExpectedCharacter(ZoneID, InstanceID, characterName)
 		// Send MOTD?
 		// Send ChatServer?
 		// Send ChatServer2?

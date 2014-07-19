@@ -237,3 +237,31 @@ bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pChar
 	mysql_free_result(result);
 	return false;
 }
+
+bool MySQLDataProvider::loadCharacter(std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	static const std::string QUERY = "SELECT profile, extprofile FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	char* query = 0;
+	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
+	MYSQL_RES* result;
+	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
+		MYSQL_ROW row = mysql_fetch_row(result);
+		PlayerProfile_Struct* profile = (PlayerProfile_Struct*)row[0];
+		ExtendedProfile_Struct* extendedProfile = (ExtendedProfile_Struct*)row[1];
+
+		memcpy(pProfile, profile, sizeof(PlayerProfile_Struct));
+		memcpy(pExtendedProfile, extendedProfile, sizeof(ExtendedProfile_Struct));
+
+		mysql_free_result(result);
+		return true;
+	}
+
+	Log::error("Load Character failed.");
+	mysql_free_result(result);
+	return true;
+}
+
+void MySQLDataProvider::copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProfile_Struct* pProfileFrom)
+{
+
+}

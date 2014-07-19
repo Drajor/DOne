@@ -25,6 +25,7 @@ public:
 
 	// Returns true if account(pWorldAccoundID) owns a character(pCharacterName).
 	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
+	bool loadCharacter(std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

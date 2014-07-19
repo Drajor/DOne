@@ -19,9 +19,5 @@ public:
 	virtual bool deleteCharacter(std::string pCharacterName) = 0;
 	virtual bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
 	virtual bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) = 0;
-
-
-
-
-private:
+	virtual bool loadCharacter(std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
 };

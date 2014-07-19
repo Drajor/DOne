@@ -1,15 +1,22 @@
 #include "ZoneClientConnection.h"
+#include "Zone.h"
+#include "Character.h"
+#include "LogSystem.h"
+#include "DataStore.h"
 #include "../common/EQStreamIntf.h"
 #include "../common/emu_opcodes.h"
 #include "../common/EQPacket.h"
 #include "../common/eq_packet_structs.h"
-
+#include "../common/extprofile.h"
 #include "Utility.h"
 #include <sstream>
 
-ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone) :
+ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone) :
 mStreamInterface(pStreamInterface),
-mZone(pZone)
+mZone(pZone),
+mDataStore(pDataStore),
+mCharacter(0),
+mZoneConnectionStatus(ZoneConnectionStatus::NONE)
 {
 
 }
@@ -30,6 +37,11 @@ void ZoneClientConnection::update() {
 	}
 }
 
+void ZoneClientConnection::dropConnection()
+{
+
+}
+
 bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {	
 	EmuOpcode opcode = pPacket->GetOpcode();
 	//std::stringstream ss;
@@ -43,14 +55,15 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("OP_ZoneEntry");
 		_handleZoneEntry(pPacket);
 		break;
+	case OP_ReqClientSpawn:
+		Utility::print("OP_ReqClientSpawn");
+		_handleRequestClientSpawn(pPacket);
+		break;
 	case OP_SetServerFilter:
 		Utility::print("OP_SetServerFilter");
 		break;
 	case OP_SendAATable:
 		Utility::print("OP_SendAATable");
-		break;
-	case OP_ReqClientSpawn:
-		Utility::print("OP_ReqClientSpawn");
 		break;
 	case OP_SendExpZonein:
 		Utility::print("OP_SendExpZonein");
@@ -109,18 +122,266 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_GetGuildsList:
 		Utility::print("OP_GetGuildsList");
 		break;
+	case OP_TargetMouse:
+		Utility::print("OP_TargetMouse");
+		break;
 	default:
 		Utility::print("UNKNOWN PACKET");
+		std::stringstream ss;
+		ss << "Packet: " << opcode;
+		Utility::print(ss.str());
 		break;
 	}
 	return true;
 }
 
 void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
-	if (pPacket->size != sizeof(ClientZoneEntry_Struct)) {
-
+	// Check that this packet was expected.
+	if (mZoneConnectionStatus != ZoneConnectionStatus::NONE) {
+		Log::error("[Zone Client Connection] Received unexpected OP_ZoneEntry, dropping connection.");
+		dropConnection();
 		return;
 	}
-		
+	// Check packet is the correct size.
+	if (pPacket->size != sizeof(ClientZoneEntry_Struct)) {
+		Log::error("[Zone Client Connection] Received wrong sized ClientZoneEntry_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
 	ClientZoneEntry_Struct* payload = (ClientZoneEntry_Struct*)pPacket->pBuffer;
+
+	// Check character name is valid.
+	if (strlen(payload->char_name) > 63) { // TODO: Remove magic number.
+		Log::error("[Zone Client Connection] Received wrong sized character name in ClientZoneEntry_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	std::string characterName = payload->char_name;
+
+	// Check that this Zone is expecting this client.
+	if (!mZone->isClientExpected(characterName)) {
+		Log::error("[Zone Client Connection] Client not expected in Zone, dropping connection.");
+		dropConnection();
+	}
+
+	mZone->removeExpectedCharacter(characterName); // Character has arrived so we can stop expecting them.
+	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
+
+	// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
+	PlayerProfile_Struct* profile = new PlayerProfile_Struct();
+	memset(profile, 0, sizeof(PlayerProfile_Struct));
+	ExtendedProfile_Struct* extendedProfile = new ExtendedProfile_Struct();
+	memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
+	if(!mDataStore->loadCharacter(characterName, profile, extendedProfile)) {
+		Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
+		dropConnection();
+		safe_delete(profile);
+		safe_delete(extendedProfile);
+		return;
+	}
+
+	// Initialise Character.
+	mCharacter = new Character();
+	if (!mCharacter->initialise(profile, extendedProfile)) {
+		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
+		dropConnection();
+		safe_delete(mCharacter);
+		return;
+	}
+	// We will load this up every time for now but soon this data can be passed between Zones.
+
+	// REPLY
+	// OP_PlayerProfile
+	_sendPlayerProfile();
+	// OP_ZoneEntry
+	_sendZoneEntry();
+	// Bulk Spawns
+	_sendZoneSpawns();
+	// Corpses Bulk
+	// PvP updates?
+	// OP_TimeOfDay
+	_sendTimeOfDay();
+	// Tributes
+	_sendTributeUpdate();
+	// Bulk Inventory
+	_sendInventory();
+	// Cursor Items (only sent when some item is on the cursor)
+	// Tasks
+	// XTargets
+	// Weather
+	_sendWeather();
+}
+
+void ZoneClientConnection::_sendTimeOfDay() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+	TimeOfDay_Struct* payload = (TimeOfDay_Struct*)outPacket->pBuffer;
+	memset(payload, 0, sizeof(TimeOfDay_Struct)); // TODO:
+	outPacket->priority = 6; // TODO: Look into this.
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendPlayerProfile() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
+	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
+	//m_pp.entityid = getID(); // TODO:
+	memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
+	outPacket->priority = 6;
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendZoneEntry() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
+	ServerZoneEntry_Struct* payload = (ServerZoneEntry_Struct*)outPacket->pBuffer;
+
+	//FillSpawnStruct(&outPacket->player, castToMOB());
+	/////////////////////////
+	strcpy(payload->player.spawn.name, mCharacter->getName().c_str());
+	//if (isClient()) {
+	//	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
+	//}
+
+	payload->player.spawn.heading = 0;//FloatToEQ19(heading);
+	payload->player.spawn.x = 0; //FloatToEQ19(x_pos);//((int32)x_pos)<<3;
+	payload->player.spawn.y = 0; // FloatToEQ19(y_pos);//((int32)y_pos)<<3;
+	payload->player.spawn.z = 0; // FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	payload->player.spawn.spawnId = 1; // getID();
+	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
+	payload->player.spawn.max_hp = 100;		//this field needs a better name
+	payload->player.spawn.race = 1; //race;
+	payload->player.spawn.runspeed = 30; // runspeed;
+	payload->player.spawn.walkspeed = 15; // runspeed * 0.5f;
+	payload->player.spawn.class_ = 1;// class_;
+	payload->player.spawn.gender = 1; // gender;
+	payload->player.spawn.level = 1;// level;
+	payload->player.spawn.deity = 396; // deity;
+	payload->player.spawn.animation = 0;
+	payload->player.spawn.findable = 0; // findable ? 1 : 0;
+	payload->player.spawn.light = 1; // light;
+	payload->player.spawn.showhelm = 1;
+
+	payload->player.spawn.invis = 0; // (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
+	payload->player.spawn.NPC = 0; // isClient() ? 0 : 1;
+	payload->player.spawn.IsMercenary = 0;
+
+	payload->player.spawn.petOwnerId = 0;// ownerid;
+
+	payload->player.spawn.haircolor = 0; // haircolor;
+	payload->player.spawn.beardcolor = 0; // beardcolor;
+	payload->player.spawn.eyecolor1 = 0; //eyecolor1;
+	payload->player.spawn.eyecolor2 = 0; // eyecolor2;
+	payload->player.spawn.hairstyle = 0; // hairstyle;
+	payload->player.spawn.face = 0; // luclinface;
+	payload->player.spawn.beard = 0; // beard;
+	payload->player.spawn.StandState = 0; // GetAppearanceValue(_appearance);
+	payload->player.spawn.drakkin_heritage = 0; // drakkin_heritage;
+	payload->player.spawn.drakkin_tattoo = 0; // drakkin_tattoo;
+	payload->player.spawn.drakkin_details = 0; // drakkin_details;
+	payload->player.spawn.equip_chest2 = 0; // texture;
+
+	payload->player.spawn.helm = 0;//helmtexture;
+	payload->player.spawn.helm = 0;
+	payload->player.spawn.guildrank = 0xFF;
+	payload->player.spawn.size = 10;//size;
+	payload->player.spawn.bodytype = 0; // bodytype;
+	payload->player.spawn.flymode = 0;// FindType(SE_Levitate) ? 2 : 0;
+	payload->player.spawn.lastName[0] = '\0';
+	memset(payload->player.spawn.set_to_0xFF, 0xFF, sizeof(payload->player.spawn.set_to_0xFF));
+	/////////////////////////
+	payload->player.spawn.afk = 0;// AFK;
+	payload->player.spawn.lfg = 0;// LFG; // afk and lfg are cleared on zoning on live
+	payload->player.spawn.anon = 0;// m_pp.anon;
+	payload->player.spawn.gm = 0;// GetGM() ? 1 : 0;
+	payload->player.spawn.guildID = 0;// GuildID();
+	payload->player.spawn.is_pet = 0;
+	/////////////////////////
+
+	payload->player.spawn.curHp = 1;
+	payload->player.spawn.NPC = 0;
+	payload->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
+	outPacket->priority = 6;
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendZoneSpawns() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendTributeUpdate()
+{
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
+	TributeInfo_Struct* payload = (TributeInfo_Struct *)outPacket->pBuffer;
+	mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendInventory()
+{
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_CharInventory, 0);
+	mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendWeather() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Weather, 12);
+	Weather_Struct* payload = (Weather_Struct*)outPacket->pBuffer;
+	//ws->val1 = 0x000000FF;
+	//if (zone->zone_weather == 1)
+	//	
+	//if (zone->zone_weather == 2)
+	//{
+	//	outapp->pBuffer[8] = 0x01;
+	//	ws->type = 0x02;
+	//}
+	payload->type = 0x31; // Rain
+	outPacket->priority = 6;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+	_sendDoors();
+	_sendObjects();
+	_sendAAStats();
+	_sendZonePoints();
+	_sendZoneServerReady();
+	_sendExpZoneIn();
+	_sendWorldObjectsSent();
+}
+
+void ZoneClientConnection::_sendDoors() {
+	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnDoor, 0);
+	//mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendObjects() {
+	return;
+	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_GroundSpawn, 0);
+	//mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendZonePoints() {
+	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendZonepoints, 0);
+	//mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendAAStats() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendAAStats, 0);
+	mStreamInterface->QueuePacket(outPacket);
+}
+
+void ZoneClientConnection::_sendZoneServerReady() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneServerReady, 0);
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendExpZoneIn() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendExpZonein, 0);
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_sendWorldObjectsSent() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_WorldObjectsSent, 0);
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }

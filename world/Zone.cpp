@@ -69,6 +69,27 @@ void Zone::_handleIncomingConnections() {
 		//Character* character = new Character(incomingStreamInterface);
 		//mCharacters.push_back(character);
 		Log::info("[Zone] New Zone Client Connection");
-		mZoneClientConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this));
+		mZoneClientConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
 	}
+}
+
+bool Zone::isClientExpected(std::string pCharacterName) {
+	return true;
+	// TODO: Sort this out.
+	//for (auto i : mExpectedCharacters) {
+	//	if (i == pCharacterName)
+	//		return true;
+	//}
+	//return false;
+}
+
+void Zone::addExpectedCharacter(std::string pCharacterName)
+{
+	mExpectedCharacters.push_back(pCharacterName);
+}
+
+void Zone::removeExpectedCharacter(std::string pCharacterName)
+{
+	// TODO: Check that pCharacterName is actually in mExpectedCharacters.
+	mExpectedCharacters.remove(pCharacterName);
 }

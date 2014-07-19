@@ -3,15 +3,44 @@
 class EQStreamInterface;
 class EQApplicationPacket;
 class Zone;
+class Character;
+class DataStore;
 
 class ZoneClientConnection {
 public:
-	ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone);
+	enum ZoneConnectionStatus {
+		NONE,
+		ZoneEntryReceived,
+	};
+public:
+	ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone);
 	~ZoneClientConnection();
 	void update();
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	void _handleZoneEntry(const EQApplicationPacket* pPacket);
+	void _handleRequestClientSpawn(const EQApplicationPacket* pPacket);
+
+	void dropConnection();
 private:
+	void _sendTimeOfDay();
+
+	void _sendPlayerProfile();
+	void _sendZoneEntry();
+	void _sendZoneSpawns();
+	void _sendTributeUpdate();
+	void _sendInventory();
+	void _sendWeather();
+
+	void _sendDoors();
+	void _sendObjects();
+	void _sendZonePoints();
+	void _sendAAStats();
+	void _sendZoneServerReady();
+	void _sendExpZoneIn();
+	void _sendWorldObjectsSent();
 	EQStreamInterface* mStreamInterface;
+	DataStore* mDataStore;
 	Zone* mZone;
+	Character* mCharacter;
+	ZoneConnectionStatus mZoneConnectionStatus;
 };
