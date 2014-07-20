@@ -134,7 +134,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleCamp(pPacket);
 		break;
 	case OP_Logout:
-		Utility::print("OP_Logout");
+		// This occurs 30 seconds after /camp
+		_handleLogOut(pPacket);
+		break;
+	case OP_DeleteSpawn:
+		// Client sends this after /camp
+		_handleDeleteSpawn(pPacket);
 		break;
 	case OP_ChannelMessage:
 		_handleChannelMessage(pPacket);
@@ -176,12 +181,12 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	std::string characterName = payload->char_name;
 
 	// Check that this Zone is expecting this client.
-	if (!mZone->isClientExpected(characterName)) {
+	if (!mZone->checkAuthentication(characterName)) {
 		Log::error("[Zone Client Connection] Client not expected in Zone, dropping connection.");
 		dropConnection();
 	}
 
-	mZone->removeExpectedCharacter(characterName); // Character has arrived so we can stop expecting them.
+	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
 	// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
@@ -647,4 +652,39 @@ void ZoneClientConnection::sendMessage(uint32 pType, std::string pMessage) {
 	strcpy(payload->message, pMessage.c_str());
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
+	CancelTrade_Struct* ct = (CancelTrade_Struct*)outapp->pBuffer;
+	ct->fromid = mCharacter->getSpawnID();
+	ct->action = groupActUpdate;
+	mStreamInterface->FastQueuePacket(&outapp);
+
+	_sendPreLogOutReply();
+	_sendLogOutReply();
+
+	// Tell Zone.
+	mZone->notifyCharacterLogOut(mCharacter);
+
+	// Note: The client will hang until this is closed.
+	mStreamInterface->Close();
+}
+
+void ZoneClientConnection::_sendLogOutReply() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_LogoutReply);
+	mStreamInterface->FastQueuePacket(&outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_sendPreLogOutReply() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_PreLogoutReply);
+	mStreamInterface->FastQueuePacket(&outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket)
+{
+	_sendLogOutReply();
 }

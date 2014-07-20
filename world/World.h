@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/types.h"
+#include "ClientAuthentication.h"
 #include <list>
 #include <map>
 #include <string>
@@ -17,6 +18,8 @@ class WorldClientConnection;
 struct CharacterSelect_Struct;
 struct CharCreate_Struct;
 
+
+
 class World {
 public:
 	World(DataStore* pDataStore);
@@ -24,8 +27,11 @@ public:
 	bool initialise();
 	void update();
 
-	void notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin = 0, uint32 pIP = 0, uint8 pLocal = 0);
-	bool tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
+	void addAuthentication(ClientAuthentication& pAuthentication);
+	void removeAuthentication(ClientAuthentication& pAuthentication);
+	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
+	void addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID = 0);
+	bool authenticationExists(uint32 pLoginServerID);
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
@@ -47,19 +53,12 @@ public:
 
 	uint16 getZonePort(uint16 pZoneID, uint16 pInstanceID = 0);
 private:
-	struct IncomingClient {
-		uint32 mAccountID; // Login Server Account
-		std::string mAccountName; // Login Server Account
-		std::string mKey;
-		int16 mWorldAdmin;
-		uint32 mIP;
-		uint8 mLocal;
-	};
-	std::list<IncomingClient*> mIncomingClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
+	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, std::string> mReservedCharacterNames;
 
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
+	
 	
 
 
@@ -78,5 +77,5 @@ private:
 	AccountManager* mAccountManager;
 	DataStore* mDataStore;
 
-	std::list<WorldClientConnection*> mClients;
+	std::list<WorldClientConnection*> mClientConnections;
 };

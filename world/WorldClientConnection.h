@@ -18,6 +18,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include "ClientAuthentication.h"
 #include <string>
 #include "../common/linked_list.h"
 #include "../common/timer.h"
@@ -41,7 +42,7 @@ public:
 
 	bool update();
 
-	bool getIdentified() { return mIdentified; }
+	bool getAuthenticated() { return mAuthenticated; }
 	uint32 getIP() { return mIP; }
 	uint16 getPort() { return mPort; }
 	uint32 getWorldAccountID() { return mWorldAccountID; }
@@ -53,7 +54,7 @@ public:
 	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; }
 	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; }
 	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; }
-	void _setIdentified(bool pIdentified) { mIdentified = pIdentified; } // This method should only ever be called by World::tryIdentify
+	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; } // This method should only ever be called by World::checkAuthentication
 private:
 	
 	void _queuePacket(const EQApplicationPacket* app, bool ack_req = true);
@@ -71,7 +72,8 @@ private:
 	void _sendZoneUnavailable();
 	void _sendZoneServerInfo();
 
-	bool mIdentified;
+	bool mAuthenticated;
+	ClientAuthentication mAuthentication;
 	uint16 mPort;
 	uint32 mIP;
 	uint32 mWorldAccountID;

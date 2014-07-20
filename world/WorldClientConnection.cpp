@@ -47,7 +47,7 @@
 WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld) :
 	mStreamInterface(pStreamInterface),
 	mWorld(pWorld),
-	mIdentified(false),
+	mAuthenticated(false),
 	mReservedCharacterName(""),
 	mConnectionDropped(false),
 	ClientVersionBit(0),
@@ -340,13 +340,13 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	uint32 id = atoi(name);
 
 	if (!mWorld->isLoginServerConnected()) {
-		clog(WORLD__CLIENT_ERR, "Error: Login server login while not connected to login server.");
+		Log::error("[World Client Connection] Not connected to Login Server");
 		return false;
 	}
 
 	// This is first communication from client after Server Select
-	if (!mIdentified) {
-		if (mWorld->tryIdentify(this, id, key)) {
+	if (!mAuthenticated) {
+		if (mWorld->checkAuthentication(this, id, key)) {
 			/*
 				OP_GuildsList, OP_LogServer, OP_ApproveWorld
 				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
@@ -359,7 +359,11 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 			_sendExpansionInfo(); // Required.
 			_sendCharacterSelectInfo(); // Required.
 		}
-		// TODO: Else drop this connection .. whatever is happening its bad.
+		else {
+			Log::error("[World Client Connection] Failed to identify incoming client, dropping connection");
+			dropConnection();
+			return false;
+		}
 	}
 	
 	//loginInfo->login_info->
@@ -659,6 +663,7 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		// Send ChatServer?
 		// Send ChatServer2?
 		// OP_ZoneServerInfo
+		mWorld->addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos);
 		_sendZoneServerInfo(); // /wave
 		//_sendZoneUnavailable();
 		return true;
@@ -803,9 +808,10 @@ bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* p
 }
 
 bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+	Log::info("packetssss");
 	// Check if unidentified and sending something other than OP_SendLoginInfo
 	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
-	if (!getIdentified() && pPacket->GetOpcode() != OP_SendLoginInfo) {
+	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
 		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
 		return false;
 	}

@@ -180,8 +180,15 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 		return;
 	}
 	ServerLSClientAuth* payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
-	// Tell World that a Client is inbound.
-	mWorld->notifyIncomingClient(payload->lsaccount_id, payload->name, payload->key, payload->worldadmin, payload->ip, payload->local);
+	// Add authentication for the incoming client.
+	ClientAuthentication authentication;
+	authentication.mAccountID = payload->lsaccount_id;
+	authentication.mAccountName = payload->name;
+	authentication.mKey = payload->key;
+	authentication.mWorldAdmin = payload->worldadmin;
+	authentication.mIP = payload->ip;
+	authentication.mLocal = payload->local;
+	mWorld->addAuthentication(authentication);
 }
 
 void LoginServerConnection::_sendWorldInformation() {

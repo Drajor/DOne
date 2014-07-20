@@ -47,6 +47,7 @@ SET(world_headers
 	CommandHandler.h
 	Profile.h
 	ZoneClientConnection.h
+	ClientAuthentication.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

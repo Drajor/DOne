@@ -1,9 +1,13 @@
 #include "ZoneManager.h"
 #include "Zone.h"
+#include "World.h"
 #include "DataStore.h"
 #include "LogSystem.h"
 
-ZoneManager::ZoneManager(DataStore* pDataStore) :mDataStore(pDataStore) { }
+ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
+mWorld(pWorld),
+mDataStore(pDataStore)
+{ }
 
 void ZoneManager::update() {
 	for (auto& i : mZones) {
@@ -11,11 +15,7 @@ void ZoneManager::update() {
 	}
 }
 
-void ZoneManager::clientConnect(WorldClientConnection* pClient)
-{
-}
-
-uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID /*= 0*/) {
+uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID) {
 	// Search existing zones
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
@@ -23,12 +23,8 @@ uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID /*= 0*/) {
 		}
 	}
 
-	// Zone not currently up so lets create it.
-	Log::info("[Zone Manager] : Zone Request");
-	Zone* zone = new Zone(mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
-	zone->initialise();
-	mZones.push_back(zone);
-
+	// Zone was not found, create it.
+	Zone* zone = _makeZone(pZoneID, pInstanceID);
 	return zone->getPort();
 }
 
@@ -42,4 +38,26 @@ uint32 ZoneManager::_getNextZonePort() {
 	mAvailableZonePorts.pop_front();
 	return port;
 	// TODO: Error check this ;)
+}
+
+void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID) {
+	bool zoneFound = false;
+	for (auto i : mZones) {
+		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
+			i->addAuthentication(pAuthentication, pCharacterName);
+			return;
+		}
+	}
+
+	// Zone was not found, create it.
+	Zone* zone = _makeZone(pZoneID, pInstanceID);
+	zone->addAuthentication(pAuthentication, pCharacterName);
+}
+
+Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
+	Log::info("[Zone Manager] : Zone Request");
+	Zone* zone = new Zone(mWorld, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
+	zone->initialise();
+	mZones.push_back(zone);
+	return zone;
 }

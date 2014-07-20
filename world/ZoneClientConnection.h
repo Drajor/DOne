@@ -39,6 +39,8 @@ private:
 	void _sendInventory();
 	void _sendWeather();
 
+	void _sendPreLogOutReply();
+	void _sendLogOutReply();
 	
 
 	void _sendDoors();
@@ -52,6 +54,12 @@ private:
 	void _handleSpawnAppearance(const EQApplicationPacket* pPacket);
 	void _handleCamp(const EQApplicationPacket* pPacket);
 	void _handleChannelMessage(const EQApplicationPacket* pPacket);
+	void _handleLogOut(const EQApplicationPacket* pPacket);
+	void _handleDeleteSpawn(const EQApplicationPacket* pPacket);
+	
+
+	
+
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;
 	Zone* mZone;

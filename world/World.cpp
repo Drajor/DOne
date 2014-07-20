@@ -71,7 +71,7 @@ bool World::initialise()
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
-	mZoneManager = new ZoneManager(mDataStore);
+	mZoneManager = new ZoneManager(this, mDataStore);
 	mZoneManager->initialise();
 
 	mAccountManager = new AccountManager(mDataStore);
@@ -118,13 +118,13 @@ void World::update()
 	_handleIncomingClientConnections();
 
 	// Update World Clients.
-	for (auto i = mClients.begin(); i != mClients.end();) {
+	for (auto i = mClientConnections.begin(); i != mClientConnections.end();) {
 		if ((*i)->update()){
 			i++;
 		}
 		else {
 			delete *i;
-			i = mClients.erase(i);
+			i = mClientConnections.erase(i);
 		}
 	}
 }
@@ -144,7 +144,7 @@ void World::_handleIncomingClientConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
 		Utility::print("World Incoming Connection");
-		mClients.push_back(new WorldClientConnection(incomingStreamInterface, this));
+		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface, this));
 	}
 }
 
@@ -161,34 +161,46 @@ void World::_checkUCSConnection() {
 	}
 }
 
-void World::notifyIncomingClient(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
-	IncomingClient* client = new IncomingClient();
-	client->mAccountID = pLoginServerID;
-	client->mAccountName = pLoginServerAccountName;
-	client->mKey = pLoginServerKey;
-	client->mWorldAdmin = pWorldAdmin;
-	client->mIP = pIP;
-	client->mLocal = pLocal;
-	mIncomingClients.push_back(client);
+//void World::addAuthentication(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
+//	ClientAuthentication* client = new ClientAuthentication();
+//	client->mAccountID = pLoginServerID;
+//	client->mAccountName = pLoginServerAccountName;
+//	client->mKey = pLoginServerKey;
+//	client->mWorldAdmin = pWorldAdmin;
+//	client->mIP = pIP;
+//	client->mLocal = pLocal;
+//	mAuthenticatedClients.push_back(client);
+//}
+
+void World::addAuthentication(ClientAuthentication& pAuthentication) {
+	// Save our copy
+	ClientAuthentication* authentication = new ClientAuthentication(pAuthentication);
+	mAuthenticatedClients.push_back(authentication);
 }
 
-bool World::tryIdentify(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
+bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
 	// Check Incoming Clients that match Account ID / Key
-	for (auto i = mIncomingClients.begin(); i != mIncomingClients.end(); i++) {
-		IncomingClient* incClient = *i;
-		if (pLoginServerAccountID == incClient->mAccountID && pLoginServerKey == incClient->mKey && !pConnection->getIdentified()) {
+	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
+		ClientAuthentication* incClient = *i;
+		if (pLoginServerAccountID == incClient->mAccountID && pLoginServerKey == incClient->mKey && !pConnection->getAuthenticated()) {
 			// Configure the WorldClientConnection with details from the IncomingClient.
-			pConnection->_setIdentified(true);
+			pConnection->_setAuthenticated(true);
 			pConnection->setLoginServerAccountID(incClient->mAccountID);
 			pConnection->setLoginServerAccountName(incClient->mAccountName);
 			pConnection->setLoginServerKey(incClient->mKey);
 			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
-			// TODO: Do I need to set IP or Local here?
-			delete incClient;
-			mIncomingClients.erase(i);
 			return true;
 		}
 	}
+	return false;
+}
+
+bool World::authenticationExists(uint32 pLoginServerID) {
+	for (auto i : mAuthenticatedClients) {
+		if (i->mAccountID = pLoginServerID)
+			return true;
+	}
+
 	return false;
 }
 
@@ -209,6 +221,10 @@ int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
 	if (accountStatus == ACCOUNT_STATUS_SUSPENDED) return -1;
 	// Account Banned.
 	if (accountStatus == ACCOUNT_STATUS_BANNED) return -2;
+
+	// Check for existing authentication
+	// This prevents same account sign in.
+	if (authenticationExists(pLoginServerAccountID)) return -3;
 
 	// Server is Locked (Only GM/Admin may enter)
 	if (mLocked && accountStatus >= 100) return 1;
@@ -327,4 +343,8 @@ bool World::isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterNa
 
 uint16 World::getZonePort(uint16 pZoneID, uint16 pInstanceID) {
 	return mZoneManager->getZonePort(pZoneID, pInstanceID);
+}
+
+void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID) {
+	mZoneManager->addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
 }

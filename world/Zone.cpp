@@ -1,4 +1,5 @@
 #include "Zone.h"
+#include "World.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "../common/types.h"
@@ -7,7 +8,8 @@
 #include "../common/patches/patches.h"
 #include "LogSystem.h"
 
-Zone::Zone(DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+	mWorld(pWorld),
 	mDataStore(pDataStore),
 	mPort(pPort),
 	mID(pZoneID),
@@ -40,6 +42,29 @@ bool Zone::initialise() {
 	mInitialised = true;
 	return true;
 }
+
+void Zone::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName) {
+	mAuthenticatedCharacters.insert(std::make_pair(pCharacterName, pAuthentication));
+}
+
+void Zone::removeAuthentication(std::string pCharacterName) {
+	mAuthenticatedCharacters.erase(pCharacterName);
+}
+
+bool Zone::checkAuthentication(std::string pCharacterName) {
+	for (auto i : mAuthenticatedCharacters) {
+		if (i.first == pCharacterName) {
+			Log::info("[Zone] Authentication Passed");
+			return true;
+		}
+	}
+
+	Log::error("[Zone] checkAuthentication is returning false. This is unexpected.");
+	return false;
+}
+
+
+
 
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
@@ -74,27 +99,6 @@ void Zone::_handleIncomingConnections() {
 	}
 }
 
-bool Zone::isClientExpected(std::string pCharacterName) {
-	return true;
-	// TODO: Sort this out.
-	//for (auto i : mExpectedCharacters) {
-	//	if (i == pCharacterName)
-	//		return true;
-	//}
-	//return false;
-}
-
-void Zone::addExpectedCharacter(std::string pCharacterName)
-{
-	mExpectedCharacters.push_back(pCharacterName);
-}
-
-void Zone::removeExpectedCharacter(std::string pCharacterName)
-{
-	// TODO: Check that pCharacterName is actually in mExpectedCharacters.
-	mExpectedCharacters.remove(pCharacterName);
-}
-
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->setPosition(pX, pY, pZ, 0);
 	pCharacter->getConnection()->sendPosition();
@@ -102,4 +106,9 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 
 void Zone::updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading){
 	pCharacter->setPosition(pX, pY, pZ, pHeading);
+}
+
+void Zone::notifyCharacterLogOut(Character* pCharacter)
+{
+	//mWorld->notifyIncomingClient()
 }
