@@ -4,6 +4,7 @@
 #include "LogSystem.h"
 #include <vector>
 #include <sstream>
+#include "ZoneClientConnection.h"
 
 // Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -87,6 +88,15 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			uint32 chatType = 0;
 			if (stoulSafe(chatType, pParameters[0])) {
 				pCharacter->message(chatType, pParameters[1]);
+			}
+		}
+	}
+	else if (pCommandName == "appearance") {
+		if (pParameters.size() == 2) {
+			uint32 appType = 0;
+			uint32 appParameter = 0;
+			if (stoulSafe(appType, pParameters[0]) && stoulSafe(appParameter, pParameters[1])) {
+				pCharacter->getConnection()->sendAppearance(appType, appParameter);
 			}
 		}
 	}

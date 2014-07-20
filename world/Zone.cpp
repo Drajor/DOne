@@ -63,15 +63,38 @@ bool Zone::checkAuthentication(std::string pCharacterName) {
 	return false;
 }
 
-
-
-
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
 
 	for (auto i : mZoneClientConnections)
 		i->update();
+
+	for (auto i = mCharacters.begin(); i != mCharacters.end();) {
+		// Remove Characters that logged out.
+		if ((*i)->getLoggedOut()) {
+			ZoneClientConnection* connection = (*i)->getConnection();
+			mZoneClientConnections.remove(connection);
+			//mZoneClientConnections.erase(connection);
+			delete connection;
+			delete *i;
+			i = mCharacters.erase(i);
+		}
+		else {
+			(*i)->update();
+			i++;
+		}
+	}
+
+	//for (auto i = mClientConnections.begin(); i != mClientConnections.end();) {
+	//	if ((*i)->update()){
+	//		i++;
+	//	}
+	//	else {
+	//		delete *i;
+	//		i = mClientConnections.erase(i);
+	//	}
+	//}
 }
 
 void Zone::shutdown()
@@ -92,8 +115,6 @@ void Zone::_handleIncomingConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		//Character* character = new Character(incomingStreamInterface);
-		//mCharacters.push_back(character);
 		Log::info("[Zone] New Zone Client Connection");
 		mZoneClientConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
 	}
@@ -111,4 +132,14 @@ void Zone::updateCharacterPosition(Character* pCharacter, float pX, float pY, fl
 void Zone::notifyCharacterLogOut(Character* pCharacter)
 {
 	//mWorld->notifyIncomingClient()
+}
+
+void Zone::notifyCharacterZoneOut(Character* pCharacter)
+{
+
+}
+
+void Zone::notifyCharacterLinkDead(Character* pCharacter)
+{
+
 }

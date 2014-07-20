@@ -66,6 +66,8 @@ public:
 	PlayerProfile_Struct* getProfile() { return mProfile; }
 	ExtendedProfile_Struct* getExtendedProfile() { return mExtendedProfile; }
 	void startCamp();
+	void setLoggedOut(bool pLoggedOut) { mLoggedOut = pLoggedOut; }
+	bool getLoggedOut() { return mLoggedOut; }
 	void setAFK(bool pAFK);
 	void setShowHelm(bool pShowHelm);
 
@@ -100,6 +102,7 @@ private:
 	std::string mName;
 	bool mStanding;
 	bool mAFK;
+	bool mLoggedOut; // Flag indicating whether this character logged out via /camp
 	uint32 mStatus;
 	Timer mCampTimer; // 30 seconds.
 

@@ -14,7 +14,12 @@ class ZoneClientConnection {
 public:
 	enum ZoneConnectionStatus {
 		NONE,
-		ZoneEntryReceived,
+		ZoneEntryReceived,		// On OP_ZoneEntry
+		PlayerProfileSent,
+		ClientRequestZoneData,	// On OP_ReqNewZone
+		ZoneInformationSent,
+		ClientRequestSpawn,		// On OP_ReqClientSpawn
+		Complete				// On 
 	};
 public:
 	ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone);
@@ -28,6 +33,7 @@ public:
 
 	void sendPosition();
 	void sendMessage(uint32 pType, std::string pMessage);
+	void sendAppearance(uint16 pType, uint32 pParameter);
 
 private:
 	void _sendTimeOfDay();
@@ -56,10 +62,13 @@ private:
 	void _handleChannelMessage(const EQApplicationPacket* pPacket);
 	void _handleLogOut(const EQApplicationPacket* pPacket);
 	void _handleDeleteSpawn(const EQApplicationPacket* pPacket);
-	
+	void _handleRequestNewZoneData(const EQApplicationPacket* pPacket);
+
+	void _sendNewZoneData();
+	void _handleClientReady(const EQApplicationPacket* pPacket);
 
 	
-
+	bool mConnected;
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;
 	Zone* mZone;

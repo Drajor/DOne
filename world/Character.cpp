@@ -7,6 +7,7 @@ Character::Character(uint32 pCharacterID) :
 mCharacterID(pCharacterID),
 mStanding(true),
 mAFK(false),
+mLoggedOut(false),
 mStatus(0),
 mZone(0)
 { }

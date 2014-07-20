@@ -808,7 +808,6 @@ bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* p
 }
 
 bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	Log::info("packetssss");
 	// Check if unidentified and sending something other than OP_SendLoginInfo
 	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
 	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {

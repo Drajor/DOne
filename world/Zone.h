@@ -30,6 +30,8 @@ public:
 	uint16 getPort() { return mPort; }
 
 	void notifyCharacterLogOut(Character* pCharacter);
+	void notifyCharacterZoneOut(Character* pCharacter);
+	void notifyCharacterLinkDead(Character* pCharacter);
 
 	void updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading);
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);

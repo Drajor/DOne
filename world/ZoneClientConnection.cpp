@@ -21,33 +21,39 @@ mZone(pZone),
 mDataStore(pDataStore),
 mCharacter(0),
 mCommandHandler(0),
-mZoneConnectionStatus(ZoneConnectionStatus::NONE)
+mZoneConnectionStatus(ZoneConnectionStatus::NONE),
+mConnected(true)
 {
 	mCommandHandler = new CommandHandler();
 }
 
-ZoneClientConnection::~ZoneClientConnection() { }
+ZoneClientConnection::~ZoneClientConnection() {
+	dropConnection();
+	mStreamInterface->ReleaseFromUse();
+	// NOTE: mStreamInterface is intentionally not deleted here.
+}
 
 void ZoneClientConnection::update() {
-	if (!mStreamInterface->CheckState(ESTABLISHED)) {
+	if (!mConnected || !mStreamInterface->CheckState(ESTABLISHED)) {
 		return;
 	}
 
-	// Handle packets.
 	EQApplicationPacket* packet = 0;
 	bool ret = true;
-	while (ret && (packet = (EQApplicationPacket*)mStreamInterface->PopPacket())) {
+	while (ret && mConnected && (packet = (EQApplicationPacket*)mStreamInterface->PopPacket())) {
 		ret = _handlePacket(packet);
 		delete packet;
 	}
 }
 
-void ZoneClientConnection::dropConnection()
-{
-
+void ZoneClientConnection::dropConnection() {
+	mConnected = false;
+	mStreamInterface->Close();
 }
 
-bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {	
+bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
+
 	EmuOpcode opcode = pPacket->GetOpcode();
 	if (opcode == 0 || opcode == OP_FloatListThing) return true;
 
@@ -79,7 +85,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("OP_ZoneComplete");
 		break;
 	case OP_ReqNewZone:
-		Utility::print("OP_ReqNewZone");
+		// UF sends this but still works when there is no reply.
+		_handleRequestNewZoneData(pPacket);
 		break;
 	case OP_SpawnAppearance:
 		_handleSpawnAppearance(pPacket);
@@ -109,7 +116,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("OP_SendAAStats");
 		break;
 	case OP_ClientReady:
-		Utility::print("OP_ClientReady");
+		_handleClientReady(pPacket);
 		break;
 	case OP_UpdateAA:
 		Utility::print("OP_UpdateAA");
@@ -136,7 +143,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_Logout:
 		// This occurs 30 seconds after /camp
 		_handleLogOut(pPacket);
-		break;
+		return false;
 	case OP_DeleteSpawn:
 		// Client sends this after /camp
 		_handleDeleteSpawn(pPacket);
@@ -145,7 +152,6 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleChannelMessage(pPacket);
 		break;
 	default:
-		//Utility::print("UNKNOWN PACKET");
 		std::stringstream ss;
 		ss << "Unknown Packet: " << opcode;
 		Utility::print(ss.str());
@@ -184,6 +190,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	if (!mZone->checkAuthentication(characterName)) {
 		Log::error("[Zone Client Connection] Client not expected in Zone, dropping connection.");
 		dropConnection();
+		return;
 	}
 
 	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
@@ -220,6 +227,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// REPLY
 	// OP_PlayerProfile
 	_sendPlayerProfile();
+	mZoneConnectionStatus = ZoneConnectionStatus::PlayerProfileSent;
 	// OP_ZoneEntry
 	_sendZoneEntry();
 	// Bulk Spawns
@@ -237,6 +245,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// XTargets
 	// Weather
 	_sendWeather();
+	mZoneConnectionStatus = ZoneConnectionStatus::ZoneInformationSent;
 }
 
 void ZoneClientConnection::_sendTimeOfDay() {
@@ -365,6 +374,7 @@ void ZoneClientConnection::_sendWeather() {
 }
 
 void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestSpawn;
 	_sendDoors();
 	_sendObjects();
 	_sendAAStats();
@@ -666,10 +676,9 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	_sendLogOutReply();
 
 	// Tell Zone.
+	mCharacter->setLoggedOut(true);
 	mZone->notifyCharacterLogOut(mCharacter);
-
-	// Note: The client will hang until this is closed.
-	mStreamInterface->Close();
+	dropConnection();
 }
 
 void ZoneClientConnection::_sendLogOutReply() {
@@ -687,4 +696,32 @@ void ZoneClientConnection::_sendPreLogOutReply() {
 void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket)
 {
 	_sendLogOutReply();
+}
+
+void ZoneClientConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestZoneData;
+	_sendNewZoneData();
+}
+
+void ZoneClientConnection::_sendNewZoneData() {
+	// TODO: Send some real data.
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	NewZone_Struct* payload = reinterpret_cast<NewZone_Struct*>(outPacket->pBuffer);
+	strcpy(payload->char_name, mCharacter->getName().c_str());
+
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
+}
+
+void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* payload = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
+	payload->spawn_id = mCharacter->getSpawnID();
+	payload->type = pType;
+	payload->parameter = pParameter;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
