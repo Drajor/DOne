@@ -2437,13 +2437,13 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_Anon) {
 		// For Anon/Roleplay
 		if (sa->parameter == 1) { // Anon
-			m_pp.anon = 1;
+			m_pp.mAnonymous = 1;
 		}
 		else if ((sa->parameter == 2) || (sa->parameter == 3)) { // This is Roleplay, or anon+rp
-			m_pp.anon = 2;
+			m_pp.mAnonymous = 2;
 		}
 		else if (sa->parameter == 0) { // This is Non-Anon
-			m_pp.anon = 0;
+			m_pp.mAnonymous = 0;
 		}
 		else {
 			std::cerr << "Client " << name << " unknown Anon/Roleplay Switch " << (int)sa->parameter << std::endl;

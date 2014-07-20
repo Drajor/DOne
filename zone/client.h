@@ -317,7 +317,7 @@ public:
 	inline void	Disconnect()	{ eqs->Close(); client_state = DISCONNECTED; }
 	inline bool IsLD()			const { return (bool) (client_state == CLIENT_LINKDEAD); }
 	void	WorldKick();
-	inline uint8	GetAnon()		const { return m_pp.anon; }
+	inline uint8	GetAnon()		const { return m_pp.mAnonymous; }
 	inline PlayerProfile_Struct& GetPP()	{ return m_pp; }
 	inline ExtendedProfile_Struct& GetEPP()	{ return m_epp; }
 	inline Inventory& GetInv()				{ return m_inv; }

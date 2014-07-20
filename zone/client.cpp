@@ -1236,11 +1236,11 @@ void Client::UpdateWho(uint8 remove) {
 	scl->race = this->GetRace();
 	scl->class_ = GetClass();
 	scl->level = GetLevel();
-	if (m_pp.anon == 0)
+	if (m_pp.mAnonymous == 0)
 		scl->anon = 0;
-	else if (m_pp.anon == 1)
+	else if (m_pp.mAnonymous == 1)
 		scl->anon = 1;
-	else if (m_pp.anon >= 2)
+	else if (m_pp.mAnonymous >= 2)
 		scl->anon = 2;
 
 	scl->ClientVersion = GetClientVersion();
@@ -1586,7 +1586,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	// Populate client-specific spawn information
 	ns->spawn.afk		= AFK;
 	ns->spawn.lfg		= LFG; // afk and lfg are cleared on zoning on live
-	ns->spawn.anon		= m_pp.anon;
+	ns->spawn.anon		= m_pp.mAnonymous;
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;

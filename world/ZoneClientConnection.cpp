@@ -78,14 +78,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("OP_ReqNewZone");
 		break;
 	case OP_SpawnAppearance:
-		Utility::print("OP_SpawnAppearance");
 		_handleSpawnAppearance(pPacket);
 		break;
 	case OP_WearChange:
 		Utility::print("OP_WearChange");
 		break;
 	case OP_ClientUpdate:
-		//Utility::print("OP_ClientUpdate");
 		_handleClientUpdate(pPacket);
 		break;
 	case OP_ClientError:
@@ -455,18 +453,15 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	case SpawnAppearanceTypes::Anonymous:
 		// Not anonymous
 		if (actionParameter == 0) {
-			mCharacter->mProfile->anon = 0;
-			Log::info("Setting character non-anonymous / non-roleplay");
+			mCharacter->mProfile->mAnonymous = 0;
 		}
 		// Anonymous
 		else if (actionParameter == 1) {
-			mCharacter->mProfile->anon = 1;
-			Log::info("Setting character to anonymous");
+			mCharacter->mProfile->mAnonymous = 1;
 		}
 		// Roleplay
 		else if (actionParameter == 2) {
-			mCharacter->mProfile->anon = 2;
-			Log::info("Setting character to Roleplay");
+			mCharacter->mProfile->mAnonymous = 2;
 		}
 		else {
 			std::stringstream ss;

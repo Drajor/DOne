@@ -319,7 +319,7 @@ ENCODE(OP_PlayerProfile) {
 	OUT(lastlogin);
 	OUT(timePlayedMin);
 	OUT(pvp);
-	OUT(anon);
+	OUT(mAnonymous);
 	OUT(gm);
 	OUT(guildrank);
 	OUT(guildbanker);

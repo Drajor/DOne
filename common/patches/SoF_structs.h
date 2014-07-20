@@ -869,7 +869,7 @@ struct PlayerProfile_Struct //23576 Octets
 /*15240*/ uint32  timePlayedMin;      // time character played
 //*21020*/ uint8 unknown1959[4];        // was uint32 unknown19588; - Not in SoF???
 /*15244*/ uint8   pvp;                // 1=pvp, 0=not pvp
-/*15245*/ uint8   anon;               // 2=roleplay, 1=anon, 0=not anon
+/*15245*/ uint8   mAnonymous;               // 2=roleplay, 1=anon, 0=not anon
 /*15246*/ uint8   gm;                 // 0=no, 1=yes (guessing!)
 /*15247*/ uint8    guildrank;        // 0=member, 1=officer, 2=guildleader
 /*15248*/ uint32  guildbanker;

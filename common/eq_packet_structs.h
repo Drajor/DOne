@@ -877,7 +877,7 @@ struct PlayerProfile_Struct
 /*0236*/	uint32				timePlayedMin;		// in minutes
 /*0240*/	uint8				pvp;
 /*0241*/	uint8				level2;				//no idea why this is here, but thats how it is on live
-/*0242*/	uint8				anon;				// 2=roleplay, 1=anon, 0=not anon
+/*0242*/	uint8				mAnonymous;				// 2=roleplay, 1=anon, 0=not anon
 /*0243*/	uint8				gm;
 /*0244*/	uint8				guildrank;
 /*0245*/	uint8				guildbanker;

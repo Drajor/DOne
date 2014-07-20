@@ -892,7 +892,7 @@ struct PlayerProfile_Struct
 /*15272*/ uint32  lastlogin;       // character last save time
 /*15276*/ uint32  timePlayedMin;      // time character played
 /*15280*/ uint8   pvp;                // 1=pvp, 0=not pvp
-/*15281*/ uint8   anon;               // 2=roleplay, 1=anon, 0=not anon
+/*15281*/ uint8   mAnonymous;               // 2=roleplay, 1=anon, 0=not anon
 /*15282*/ uint8   gm;                 // 0=no, 1=yes (guessing!)
 /*15283*/ uint8    guildrank;        // 0=member, 1=officer, 2=guildleader -1=no guild
 /*15284*/ uint32  guildbanker;

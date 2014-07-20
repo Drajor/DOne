@@ -912,7 +912,7 @@ struct PlayerProfile_Struct
 /*18216*/ uint32  account_startdate;       // Date the Account was started - New Field for Underfoot***
 /*18220*/ uint32  timePlayedMin;      // time character played
 /*18224*/ uint8   pvp;                // 1=pvp, 0=not pvp
-/*18225*/ uint8   anon;               // 2=roleplay, 1=anon, 0=not anon
+/*18225*/ uint8   mAnonymous;               // 2=roleplay, 1=anon, 0=not anon
 /*18226*/ uint8   gm;                 // 0=no, 1=yes (guessing!)
 /*18227*/ uint8    guildrank;        // 0=member, 1=officer, 2=guildleader -1=no guild
 /*18228*/ uint32  guildbanker;
