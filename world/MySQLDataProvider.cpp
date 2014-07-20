@@ -238,8 +238,8 @@ bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pChar
 	return false;
 }
 
-bool MySQLDataProvider::loadCharacter(std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
-	static const std::string QUERY = "SELECT profile, extprofile FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+bool MySQLDataProvider::loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	static const std::string QUERY = "SELECT profile, extprofile, id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
@@ -248,6 +248,7 @@ bool MySQLDataProvider::loadCharacter(std::string pCharacterName, PlayerProfile_
 		MYSQL_ROW row = mysql_fetch_row(result);
 		PlayerProfile_Struct* profile = (PlayerProfile_Struct*)row[0];
 		ExtendedProfile_Struct* extendedProfile = (ExtendedProfile_Struct*)row[1];
+		pCharacterID = static_cast<uint32>(atoi(row[2]));
 
 		memcpy(pProfile, profile, sizeof(PlayerProfile_Struct));
 		memcpy(pExtendedProfile, extendedProfile, sizeof(ExtendedProfile_Struct));

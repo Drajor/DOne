@@ -9,8 +9,9 @@ struct PlayerProfile_Struct;
 struct ExtendedProfile_Struct;
 
 class Character {
+	friend ZoneClientConnection;
 public:
-	Character();
+	Character(uint32 pCharacterID);
 	~Character();
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 	void update();
@@ -18,15 +19,18 @@ public:
 	void setStanding(bool pStanding);
 
 	std::string getName() { return mName; }
+	uint32 getID() { return mID; };
 	PlayerProfile_Struct* getProfile() { return mProfile; }
 	ExtendedProfile_Struct* getExtendedProfile() { return mExtendedProfile; }
 	void startCamp();
+	void setAFK(bool pAFK);
+	void setShowHelm(bool pShowHelm);
 private:
-	friend ZoneClientConnection;
-	uint32 mID;
+	
+	const uint32 mID;
 	std::string mName;
-	int32 mAnimation;
 	bool mStanding;
+	bool mAFK;
 	Timer mCampTimer; // 30 seconds.
 
 	PlayerProfile_Struct* mProfile;

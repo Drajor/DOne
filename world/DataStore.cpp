@@ -18,8 +18,8 @@ bool DataStore::createCharacter(uint32 pWorldAccountID, std::string pCharacterNa
 
 bool DataStore::checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) { return mDataProvider->checkOwnership(pWorldAccountID, pCharacterName); }
 
-bool DataStore::loadCharacter(std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
-	return mDataProvider->loadCharacter(pCharacterName, pProfile, pExtendedProfile);
+bool DataStore::loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	return mDataProvider->loadCharacter(pCharacterName, pCharacterID, pProfile, pExtendedProfile);
 }
 
 

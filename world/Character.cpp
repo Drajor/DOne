@@ -2,9 +2,10 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 
-Character::Character() :
-mAnimation(0),
-mStanding(true)
+Character::Character(uint32 pCharacterID) :
+mID(pCharacterID),
+mStanding(true),
+mAFK(false)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -31,4 +32,12 @@ void Character::setStanding(bool pStanding) {
 
 void Character::startCamp() {
 	mCampTimer.Start(29000, true);
+}
+
+void Character::setAFK(bool pAFK) {
+	mAFK = pAFK;
+}
+
+void Character::setShowHelm(bool pShowHelm) {
+	mProfile->showhelm = pShowHelm ? 1 : 0;
 }

@@ -150,7 +150,8 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		return;
 	}
 	// Check packet is the correct size.
-	if (pPacket->size != sizeof(ClientZoneEntry_Struct)) {
+	static const std::size_t EXPECTED_SIZE = sizeof(ClientZoneEntry_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
 		Log::error("[Zone Client Connection] Received wrong sized ClientZoneEntry_Struct, dropping connection.");
 		dropConnection();
 		return;
@@ -181,7 +182,8 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	memset(profile, 0, sizeof(PlayerProfile_Struct));
 	ExtendedProfile_Struct* extendedProfile = new ExtendedProfile_Struct();
 	memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
-	if(!mDataStore->loadCharacter(characterName, profile, extendedProfile)) {
+	uint32 characterID = 0;
+	if(!mDataStore->loadCharacter(characterName, characterID, profile, extendedProfile)) {
 		Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
 		dropConnection();
 		safe_delete(profile);
@@ -190,7 +192,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	}
 
 	// Initialise Character.
-	mCharacter = new Character();
+	mCharacter = new Character(characterID);
 	if (!mCharacter->initialise(profile, extendedProfile)) {
 		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
 		dropConnection();
@@ -407,7 +409,6 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	mCharacter->mProfile->y = payload->y_pos;
 	mCharacter->mProfile->z = payload->z_pos;
 	mCharacter->mProfile->heading = payload->heading;
-	mCharacter->mAnimation = payload->animation; // Not actually animation. May refer to animation speed when moving + moving forward - backward.
 
 	// TODO: Update other players.
 }
@@ -424,6 +425,13 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	SpawnAppearance_Struct* payload = reinterpret_cast<SpawnAppearance_Struct*>(pPacket->pBuffer);
 	const uint16 actionType = payload->type;
 	const uint32 actionParameter = payload->parameter;
+
+	// Ignore if spawn id does not match this characters ID.
+	if (payload->spawn_id != mCharacter->getID()) {
+		// Note: UF client sends spawn ID (0) and action type (51) every few seconds. Not sure why.
+		return;
+	}
+
 	switch (actionType) {
 		// Handle animation.
 	case SpawnAppearanceTypes::Animation:
@@ -451,6 +459,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		}
 		// Handle anonymous / roleplay
 	case SpawnAppearanceTypes::Anonymous:
+		// TODO: Update other clients.
 		// Not anonymous
 		if (actionParameter == 0) {
 			mCharacter->mProfile->mAnonymous = 0;
@@ -463,14 +472,50 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		else if (actionParameter == 2) {
 			mCharacter->mProfile->mAnonymous = 2;
 		}
-		else {
-			std::stringstream ss;
-			ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes::Anonymous parameter : " << actionParameter;
-			Log::error(ss.str());
-		}
+		// Anything else is ignored.
+		break;
+		// Handle AFK
+	case SpawnAppearanceTypes::AFK:
 		// TODO: Update other clients.
+		if (actionParameter == 0) {
+			mCharacter->setAFK(false);
+		}
+		else if (actionParameter == 1) {
+			mCharacter->setAFK(true);
+		}
+		// Anything else is ignored.
+		break;
+	case SpawnAppearanceTypes::ShowHelm:
+		// TODO: Update other clients.
+		if (actionParameter == 0) {
+			mCharacter->setShowHelm(false);
+		}
+		else if (actionParameter == 1) {
+			mCharacter->setShowHelm(true);
+		}
+		// Anything else is ignored.
+		break;
+		// Ignore!
+	case SpawnAppearanceTypes::HP:
+		break;
+	case SpawnAppearanceTypes::Split:
+		break;
+	case SpawnAppearanceTypes::Die:
+		break;
+	case SpawnAppearanceTypes::DamageState:
+		break;
+	case SpawnAppearanceTypes::Sneak:
+		break;
+	case SpawnAppearanceTypes::Invisible:
+		break;
+	case SpawnAppearanceTypes::Size:
+		break;
+	case SpawnAppearanceTypes::Light:
 		break;
 	default:
+		std::stringstream ss;
+		ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes : " << actionType;
+		Log::error(ss.str());
 		break;
 	}
 }
