@@ -621,6 +621,22 @@ void ZoneClientConnection::sendPosition() {
 	safe_delete(outPacket);
 }
 
+/*
+header[0]
+0x00 = asdf
+0x01 = says 'asdf'
+0x02 = shouts 'asdf'
+0x03 = asdf
+0x04 = asdf
+0x05 = tells the group, 'asdf'
+6 says
+7 says
+..
+30 says
+
+header[1]
+*/
+
 void ZoneClientConnection::sendMessage(uint32 pType, std::string pMessage) {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
 	SpecialMesg_Struct* payload = reinterpret_cast<SpecialMesg_Struct*>(outPacket->pBuffer);

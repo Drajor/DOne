@@ -33,6 +33,18 @@ bool stofSafe(float& pValue, std::string& pString) {
 	return false;
 }
 
+bool stoulSafe(uint32& pValue, std::string& pString) {
+	try {
+		pValue = std::stoul(pString);
+		return true;
+	}
+	catch (...) {
+		return false;
+	}
+	return false;
+}
+
+
 void CommandHandler::command(Character* pCharacter, std::string pCommandMessage) {
 	Log::info("Got a command message");
 
@@ -59,8 +71,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 				pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
 			}
 			else {
-				pCharacter->message(0, "Problem!");
-				Log::error("Command Invalid");
+				pCharacter->message(MC_Red, "There was a problem with your parameters.");
 			}
 		}
 	}
@@ -68,6 +79,18 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	else if (pCommandName == "loc") {
 		std::stringstream ss;
 		ss << "Your location is " << pCharacter->getX() << ", " << pCharacter->getY() << ", " << pCharacter->getZ();
-		pCharacter->message(0, ss.str());
+		pCharacter->message(MC_Yellow, ss.str());
+	}
+	// repeater
+	else if (pCommandName == "repeat") {
+		if (pParameters.size() == 2) {
+			uint32 chatType = 0;
+			if (stoulSafe(chatType, pParameters[0])) {
+				pCharacter->message(chatType, pParameters[1]);
+			}
+		}
+	}
+	else {
+		pCharacter->message(MC_Yellow, "Unknown command.");
 	}
 }
