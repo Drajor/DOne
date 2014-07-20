@@ -49,6 +49,7 @@ void CommandHandler::command(Character* pCharacter, std::string pCommandMessage)
 
 
 void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandName, std::vector<std::string> pParameters) {
+	// #warp
 	if (pCommandName == "warp" && pCharacter->getStatus() > 200) {
 		if (pParameters.size() == 3) {
 			float x = 0.0f;
@@ -56,13 +57,17 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			float z = 0.0f;
 			if (stofSafe(x, pParameters[0]) && stofSafe(y, pParameters[1]) && stofSafe(z, pParameters[2])) {
 				pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
-				//pCharacter->setPosition(x, y, z);
-				//pCharacter->getZoneClientConnection()->sendPosition();
 			}
 			else {
 				pCharacter->message(0, "Problem!");
 				Log::error("Command Invalid");
 			}
 		}
+	}
+	// #loc
+	else if (pCommandName == "loc") {
+		std::stringstream ss;
+		ss << "Your location is " << pCharacter->getX() << ", " << pCharacter->getY() << ", " << pCharacter->getZ();
+		pCharacter->message(0, ss.str());
 	}
 }

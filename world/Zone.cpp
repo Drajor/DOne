@@ -95,8 +95,11 @@ void Zone::removeExpectedCharacter(std::string pCharacterName)
 	mExpectedCharacters.remove(pCharacterName);
 }
 
-void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ)
-{
-	pCharacter->setPosition(pX, pY, pZ);
+void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
+	pCharacter->setPosition(pX, pY, pZ, 0);
 	pCharacter->getConnection()->sendPosition();
+}
+
+void Zone::updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading){
+	pCharacter->setPosition(pX, pY, pZ, pHeading);
 }

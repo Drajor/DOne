@@ -26,6 +26,7 @@ public:
 	void removeExpectedCharacter(std::string pCharacterName);
 	bool isClientExpected(std::string pCharacterName);
 
+	void updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading);
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 private:

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <stdarg.h>
+#include <sstream>
 
 namespace Log {
 	void status(std::string pMessage);

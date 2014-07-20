@@ -47,12 +47,40 @@ void Character::setShowHelm(bool pShowHelm) {
 
 void Character::message(uint32 pType, std::string pMessage)
 {
-
+	//mConnection->sendMessage();
 }
 
-void Character::setPosition(float pX, float pY, float pZ)
-{
-	mProfile->x = pX;
-	mProfile->y = pY;
-	mProfile->z = pZ;
+void Character::setPosition(float pX, float pY, float pZ, float pHeading) {
+	mX = pX;
+	mY = pY;
+	mZ = pZ;
+	mHeading = pHeading;
+	_updateProfilePosition();
+}
+
+void Character::setPosition(Vector3& pPosition) {
+	mX = pPosition.x;
+	mY = pPosition.y;
+	mZ = pPosition.z;
+	_updateProfilePosition();
+}
+
+void Character::setPosition(Vector4& pPosition) {
+	mX = pPosition.x;
+	mY = pPosition.y;
+	mZ = pPosition.z;
+	mHeading = pPosition.h;
+	_updateProfilePosition();
+}
+
+void Character::setHeading(float pHeading) {
+	mHeading = pHeading;
+	_updateProfilePosition();
+}
+
+void Character::_updateProfilePosition() {
+	mProfile->x = mX;
+	mProfile->y = mY;
+	mProfile->z = mZ;
+	mProfile->heading = mHeading;
 }

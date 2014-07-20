@@ -416,12 +416,7 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	}
 
 	PlayerPositionUpdateClient_Struct* payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
-	mCharacter->mProfile->x = payload->x_pos;
-	mCharacter->mProfile->y = payload->y_pos;
-	mCharacter->mProfile->z = payload->z_pos;
-	mCharacter->mProfile->heading = payload->heading;
-
-	// TODO: Update other players.
+	mZone->updateCharacterPosition(mCharacter, payload->x_pos, payload->y_pos, payload->z_pos, payload->heading);
 }
 
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
@@ -608,14 +603,14 @@ void ZoneClientConnection::sendPosition() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
 	memset(payload, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
-	payload->spawn_id = 1;// mCharacter->getID();
-	payload->x_pos = FloatToEQ19(mCharacter->mProfile->x);
-	payload->y_pos = FloatToEQ19(mCharacter->mProfile->y);
-	payload->z_pos = FloatToEQ19(mCharacter->mProfile->z);
+	payload->spawn_id = mCharacter->getSpawnID();
+	payload->x_pos = FloatToEQ19(mCharacter->getX());
+	payload->y_pos = FloatToEQ19(mCharacter->getY());
+	payload->z_pos = FloatToEQ19(mCharacter->getZ());
 	payload->delta_x = NewFloatToEQ13(0);
 	payload->delta_y = NewFloatToEQ13(0);
 	payload->delta_z = NewFloatToEQ13(0);
-	payload->heading = FloatToEQ19(mCharacter->mProfile->heading);
+	payload->heading = FloatToEQ19(mCharacter->getHeading());
 	payload->animation = 0;
 	payload->delta_heading = NewFloatToEQ13(0);
 	payload->padding0002 = 0;

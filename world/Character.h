@@ -10,6 +10,22 @@ class ZoneClientConnection;
 struct PlayerProfile_Struct;
 struct ExtendedProfile_Struct;
 
+struct Vector3 {
+	Vector3() : x(0.0f), y(0.0f), z(0.0f) {};
+	Vector3(float pX, float pY, float pZ) : x(pX), y(pY), z(pZ) {};
+	float x;
+	float y;
+	float z;
+};
+struct Vector4 {
+	Vector4() : x(0.0f), y(0.0f), z(0.0f), h(0.0f) {};
+	Vector4(float pX, float pY, float pZ, float pH) : x(pX), y(pY), z(pZ), h(pH) {};
+	float x;
+	float y;
+	float z;
+	float h;
+};
+
 class Character {
 	friend ZoneClientConnection;
 public:
@@ -40,9 +56,30 @@ public:
 	void setShowHelm(bool pShowHelm);
 
 	void message(uint32 pType, std::string pMessage);
-	void setPosition(float pX, float pY, float pZ);
+	
 
+
+	// Position and Heading
+	Vector3 getPosition3() { return Vector3(mX, mY, mZ); };
+	Vector4 getPosition4() { return Vector4(mX, mY, mZ, mHeading); };
+	float getX() { return mX; }
+	float getY() { return mY; }
+	float getZ() { return mZ; }
+
+	void setPosition(float pX, float pY, float pZ, float pHeading);
+	void setPosition(Vector3& pPosition);
+	void setPosition(Vector4& pPosition);
+
+	float getHeading() { return mHeading; }
+	void setHeading(float pHeading);
+	
 private:
+
+	float mX;
+	float mY;
+	float mZ;
+	float mHeading;
+	void _updateProfilePosition();
 	
 	const uint32 mCharacterID;
 	uint16 mSpawnID;
