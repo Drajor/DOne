@@ -5,6 +5,7 @@ class EQApplicationPacket;
 class Zone;
 class Character;
 class DataStore;
+class CommandHandler;
 
 class ZoneClientConnection {
 public:
@@ -21,6 +22,9 @@ public:
 	void _handleRequestClientSpawn(const EQApplicationPacket* pPacket);
 
 	void dropConnection();
+
+	void sendPosition();
+
 private:
 	void _sendTimeOfDay();
 
@@ -30,6 +34,8 @@ private:
 	void _sendTributeUpdate();
 	void _sendInventory();
 	void _sendWeather();
+
+	
 
 	void _sendDoors();
 	void _sendObjects();
@@ -41,9 +47,11 @@ private:
 	void _handleClientUpdate(const EQApplicationPacket* pPacket);
 	void _handleSpawnAppearance(const EQApplicationPacket* pPacket);
 	void _handleCamp(const EQApplicationPacket* pPacket);
+	void _handleChannelMessage(const EQApplicationPacket* pPacket);
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;
 	Zone* mZone;
 	Character* mCharacter;
 	ZoneConnectionStatus mZoneConnectionStatus;
+	CommandHandler* mCommandHandler; // For now every connection has their own.
 };

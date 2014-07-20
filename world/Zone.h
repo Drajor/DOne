@@ -26,9 +26,12 @@ public:
 	void removeExpectedCharacter(std::string pCharacterName);
 	bool isClientExpected(std::string pCharacterName);
 
+	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
+	uint16 getNextSpawnID() { return mNextSpawnID++; }
 private:
 	void _handleIncomingConnections();
 	
+	uint16 mNextSpawnID;
 	uint32 mID; // Zone ID
 	uint32 mInstanceID;
 	uint32 mPort;

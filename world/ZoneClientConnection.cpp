@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "LogSystem.h"
 #include "DataStore.h"
+#include "CommandHandler.h"
 #include "../common/EQStreamIntf.h"
 #include "../common/emu_opcodes.h"
 #include "../common/EQPacket.h"
@@ -12,14 +13,17 @@
 #include "Utility.h"
 #include <sstream>
 
+#include "../common/MiscFunctions.h"
+
 ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone) :
 mStreamInterface(pStreamInterface),
 mZone(pZone),
 mDataStore(pDataStore),
 mCharacter(0),
+mCommandHandler(0),
 mZoneConnectionStatus(ZoneConnectionStatus::NONE)
 {
-
+	mCommandHandler = new CommandHandler();
 }
 
 ZoneClientConnection::~ZoneClientConnection() { }
@@ -132,10 +136,13 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_Logout:
 		Utility::print("OP_Logout");
 		break;
+	case OP_ChannelMessage:
+		_handleChannelMessage(pPacket);
+		break;
 	default:
-		Utility::print("UNKNOWN PACKET");
+		//Utility::print("UNKNOWN PACKET");
 		std::stringstream ss;
-		ss << "Packet: " << opcode;
+		ss << "Unknown Packet: " << opcode;
 		Utility::print(ss.str());
 		break;
 	}
@@ -199,6 +206,10 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		safe_delete(mCharacter);
 		return;
 	}
+	mCharacter->setZone(mZone);
+	mCharacter->setSpawnID(mZone->getNextSpawnID());
+	mCharacter->setConnection(this);
+
 	// We will load this up every time for now but soon this data can be passed between Zones.
 
 	// REPLY
@@ -255,7 +266,7 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.x = 0; //FloatToEQ19(x_pos);//((int32)x_pos)<<3;
 	payload->player.spawn.y = 0; // FloatToEQ19(y_pos);//((int32)y_pos)<<3;
 	payload->player.spawn.z = 0; // FloatToEQ19(z_pos);//((int32)z_pos)<<3;
-	payload->player.spawn.spawnId = 1; // getID();
+	payload->player.spawn.spawnId = mCharacter->getSpawnID();
 	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
 	payload->player.spawn.max_hp = 100;		//this field needs a better name
 	payload->player.spawn.race = 1; //race;
@@ -522,4 +533,95 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 
 void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
 	mCharacter->startCamp();
+}
+
+enum CHANNEL : uint32 {
+	CH_GUILD = 0, // /gu
+	CH_GROUP = 2, // /g
+	CH_SHOUT = 3, // /shou
+	CH_AUCTION = 4, // /auc
+	CH_OOC = 5, // /ooc
+	CH_BROADCAST = 6, // ??
+	CH_TELL = 7, // /t
+	CH_SAY = 8, // /say
+	CH_RAID = 15, // /rs
+	CH_UCS = 20, // Not sure yet.
+	CH_EMOTE = 22 // UF+
+
+};
+void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	// NOTE: This packet size increases with message size.
+	static const std::size_t EXPECTED_SIZE = sizeof(ChannelMessage_Struct);
+	if (pPacket->size < EXPECTED_SIZE || pPacket->size > 661) { // TODO: Magic number. 661 is biggest UF can send legitimately.
+		Log::error("[Zone Client Connection] Wrong sized ChannelMessage_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	ChannelMessage_Struct* payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
+	uint32 channel = payload->chan_num;
+	std::string message = payload->message; // TODO: I am sure if this is completely safe.
+
+	// Check message size.
+	if (message.empty()) {
+		Log::error("[Zone Client Connection] Got empty message, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	switch (channel) {
+	case CHANNEL::CH_GUILD:
+		break;
+	case CHANNEL::CH_GROUP:
+		break;
+	case CHANNEL::CH_SHOUT:
+		break;
+	case CHANNEL::CH_OOC:
+		break;
+	case CHANNEL::CH_BROADCAST:
+		break;
+	case CHANNEL::CH_TELL:
+		break;
+	case CHANNEL::CH_SAY:
+		// Check whether user has entered a command.
+		if (message[0] == COMMAND_TOKEN) {
+			mCommandHandler->command(mCharacter, message);
+			break;
+		}
+		break;
+	case CHANNEL::CH_RAID:
+		break;
+	case CHANNEL::CH_UCS:
+		break;
+	case CHANNEL::CH_EMOTE:
+		break;
+	default:
+		std::stringstream ss;
+		ss << "[Zone Client Connection] " << __FUNCTION__ << " Got unexpected channel number: " << channel;
+		Log::error(ss.str());
+		break;
+	}
+}
+
+void ZoneClientConnection::sendPosition() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
+	memset(payload, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
+	payload->spawn_id = 1;// mCharacter->getID();
+	payload->x_pos = FloatToEQ19(mCharacter->mProfile->x);
+	payload->y_pos = FloatToEQ19(mCharacter->mProfile->y);
+	payload->z_pos = FloatToEQ19(mCharacter->mProfile->z);
+	payload->delta_x = NewFloatToEQ13(0);
+	payload->delta_y = NewFloatToEQ13(0);
+	payload->delta_z = NewFloatToEQ13(0);
+	payload->heading = FloatToEQ19(mCharacter->mProfile->heading);
+	payload->animation = 0;
+	payload->delta_heading = NewFloatToEQ13(0);
+	payload->padding0002 = 0;
+	payload->padding0006 = 7;
+	payload->padding0014 = 0x7f;
+	payload->padding0018 = 0x5df27;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }

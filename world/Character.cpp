@@ -3,9 +3,11 @@
 #include "../common/extprofile.h"
 
 Character::Character(uint32 pCharacterID) :
-mID(pCharacterID),
+mCharacterID(pCharacterID),
 mStanding(true),
-mAFK(false)
+mAFK(false),
+mStatus(0),
+mZone(0)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -20,6 +22,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mExtendedProfile = pExtendedProfile;
 
 	mName = mProfile->name;
+	mStatus = 255;
 
 	return true;
 }
@@ -40,4 +43,16 @@ void Character::setAFK(bool pAFK) {
 
 void Character::setShowHelm(bool pShowHelm) {
 	mProfile->showhelm = pShowHelm ? 1 : 0;
+}
+
+void Character::message(uint32 pType, std::string pMessage)
+{
+
+}
+
+void Character::setPosition(float pX, float pY, float pZ)
+{
+	mProfile->x = pX;
+	mProfile->y = pY;
+	mProfile->z = pZ;
 }

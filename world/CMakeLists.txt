@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp ZoneClientConnection.h ZoneClientConnection.cpp Character.h Character.cpp)
+
 SET(world_sources
 	WorldClientConnection.cpp
 	CMakeLists.txt
@@ -19,6 +20,7 @@ SET(world_sources
 	DatabaseConnection.cpp
 	LogSystem.cpp
 	Configuration.cpp
+	CommandHandler.cpp
 )
 
 SET(world_headers
@@ -40,6 +42,7 @@ SET(world_headers
 	Constants.h
 	LogSystem.h
 	Configuration.h
+	CommandHandler.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

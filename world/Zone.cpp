@@ -14,7 +14,8 @@ Zone::Zone(DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstance
 	mInstanceID(pInstanceID),
 	mInitialised(false),
 	mStreamFactory(nullptr),
-	mStreamIdentifier(nullptr)
+	mStreamIdentifier(nullptr),
+	mNextSpawnID(1)
 {
 }
 
@@ -92,4 +93,10 @@ void Zone::removeExpectedCharacter(std::string pCharacterName)
 {
 	// TODO: Check that pCharacterName is actually in mExpectedCharacters.
 	mExpectedCharacters.remove(pCharacterName);
+}
+
+void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ)
+{
+	pCharacter->setPosition(pX, pY, pZ);
+	pCharacter->getConnection()->sendPosition();
 }
