@@ -620,3 +620,15 @@ void ZoneClientConnection::sendPosition() {
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
+
+void ZoneClientConnection::sendMessage(uint32 pType, std::string pMessage) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
+	SpecialMesg_Struct* payload = reinterpret_cast<SpecialMesg_Struct*>(outPacket->pBuffer);
+	payload->header[0] = 0x00; // Header used for #emote style messages..
+	payload->header[1] = 0x00; // Play around with these to see other types
+	payload->header[2] = 0x00;
+	payload->msg_type = pType;
+	strcpy(payload->message, pMessage.c_str());
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../common/types.h"
+#include <string>
+
 class EQStreamInterface;
 class EQApplicationPacket;
 class Zone;
@@ -24,6 +27,7 @@ public:
 	void dropConnection();
 
 	void sendPosition();
+	void sendMessage(uint32 pType, std::string pMessage);
 
 private:
 	void _sendTimeOfDay();

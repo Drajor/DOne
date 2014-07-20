@@ -1,6 +1,7 @@
 #include "Character.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
+#include "ZoneClientConnection.h"
 
 Character::Character(uint32 pCharacterID) :
 mCharacterID(pCharacterID),
@@ -47,7 +48,7 @@ void Character::setShowHelm(bool pShowHelm) {
 
 void Character::message(uint32 pType, std::string pMessage)
 {
-	//mConnection->sendMessage();
+	mConnection->sendMessage(pType, pMessage);
 }
 
 void Character::setPosition(float pX, float pY, float pZ, float pHeading) {
