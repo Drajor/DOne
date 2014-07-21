@@ -19,7 +19,7 @@ public:
 		ClientRequestZoneData,	// On OP_ReqNewZone
 		ZoneInformationSent,
 		ClientRequestSpawn,		// On OP_ReqClientSpawn
-		Complete				// On 
+		Complete				// On OP_ClientReady
 	};
 public:
 	ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone);
@@ -33,7 +33,9 @@ public:
 
 	void sendPosition();
 	void sendMessage(uint32 pType, std::string pMessage);
+	void sendSimpleMessage(uint32 pType, uint32 pStringID);
 	void sendAppearance(uint16 pType, uint32 pParameter);
+	
 
 private:
 	void _sendTimeOfDay();
@@ -66,8 +68,10 @@ private:
 
 	void _sendNewZoneData();
 	void _handleClientReady(const EQApplicationPacket* pPacket);
-
-	
+	void _handleSendAATable(const EQApplicationPacket* pPacket);
+	void _handleUpdateAA(const EQApplicationPacket* pPacket);
+	void _handleTarget(const EQApplicationPacket* pPacket);
+	void _handleTGB(const EQApplicationPacket* pPacket);
 	bool mConnected;
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;

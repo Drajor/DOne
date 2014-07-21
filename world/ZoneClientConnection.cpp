@@ -12,6 +12,7 @@
 #include "../common/extprofile.h"
 #include "Utility.h"
 #include <sstream>
+#include "MessageStringIDs.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -59,30 +60,28 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 
 	switch (opcode) {
 	case OP_AckPacket:
-		Utility::print("OP_AckPacket");
+		// Ignore.
 		break;
 	case OP_ZoneEntry:
-		Utility::print("OP_ZoneEntry");
 		_handleZoneEntry(pPacket);
 		break;
 	case OP_ReqClientSpawn:
-		Utility::print("OP_ReqClientSpawn");
 		_handleRequestClientSpawn(pPacket);
 		break;
 	case OP_SetServerFilter:
-		Utility::print("OP_SetServerFilter");
+		Utility::print("[UNHANDLED OP_SetServerFilter]");
 		break;
 	case OP_SendAATable:
-		Utility::print("OP_SendAATable");
+		_handleSendAATable(pPacket);
 		break;
 	case OP_SendExpZonein:
-		Utility::print("OP_SendExpZonein");
+		Utility::print("[UNHANDLED OP_SendExpZonein]");
 		break;
 	case OP_WorldObjectsSent:
-		Utility::print("OP_WorldObjectsSent");
+		// Ignore. Because I don't understand what this is for.
 		break;
 	case OP_ZoneComplete:
-		Utility::print("OP_ZoneComplete");
+		Utility::print("[UNHANDLED OP_ZoneComplete]");
 		break;
 	case OP_ReqNewZone:
 		// UF sends this but still works when there is no reply.
@@ -92,49 +91,56 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleSpawnAppearance(pPacket);
 		break;
 	case OP_WearChange:
-		Utility::print("OP_WearChange");
+		// Ignore.
 		break;
 	case OP_ClientUpdate:
 		_handleClientUpdate(pPacket);
 		break;
 	case OP_ClientError:
-		Utility::print("OP_ClientError");
+		Utility::print("[UNHANDLED OP_ClientError]");
 		break;
 	case OP_ApproveZone:
-		Utility::print("OP_ApproveZone");
+		Utility::print("[UNHANDLED OP_ApproveZone]");
 		break;
 	case OP_TGB:
-		Utility::print("OP_TGB");
+		/*
+		/tgb is a little strange
+		When a player enters /tgb on two packets are sent
+			- first 0 or 1 for on and off
+			- then 2 for some reason.
+		*/
+		_handleTGB(pPacket);
 		break;
 	case OP_SendTributes:
-		Utility::print("OP_SendTributes");
+		// Ignore. Tribute system later.
 		break;
 	case OP_SendGuildTributes:
-		Utility::print("OP_SendGuildTributes");
+		Utility::print("[UNHANDLED OP_SendGuildTributes]");
 		break;
 	case OP_SendAAStats:
-		Utility::print("OP_SendAAStats");
+		Utility::print("[UNHANDLED OP_SendAAStats]");
 		break;
 	case OP_ClientReady:
 		_handleClientReady(pPacket);
 		break;
 	case OP_UpdateAA:
-		Utility::print("OP_UpdateAA");
+		_handleUpdateAA(pPacket);
 		break;
 	case OP_BlockedBuffs:
-		Utility::print("OP_BlockedBuffs");
+		// Ignore. Not Implemented.
 		break;
 	case OP_XTargetRequest:
-		Utility::print("OP_XTargetRequest");
+		Utility::print("[UNHANDLED OP_XTargetRequest]");
 		break;
 	case OP_XTargetAutoAddHaters:
-		Utility::print("OP_XTargetAutoAddHaters");
+		Utility::print("[UNHANDLED OP_XTargetAutoAddHaters]");
 		break;
 	case OP_GetGuildsList:
-		Utility::print("OP_GetGuildsList");
+		Utility::print("[UNHANDLED OP_GetGuildsList]");
 		break;
 	case OP_TargetMouse:
-		Utility::print("OP_TargetMouse");
+	case OP_TargetCommand:
+		_handleTarget(pPacket);
 		break;
 	case OP_Camp:
 		// Sent when user types /camp or presses the camp button.
@@ -150,6 +156,22 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_ChannelMessage:
 		_handleChannelMessage(pPacket);
+		break;
+		// Ignore all mercenary packets.
+	case OP_MercenaryDataRequest:
+	case OP_MercenaryDataResponse:
+	case OP_MercenaryHire:
+	case OP_MercenaryUnknown1:
+	case OP_MercenaryTimer:
+	case OP_MercenaryAssign:
+	case OP_MercenaryDataUpdate:
+	case OP_MercenaryCommand:
+	case OP_MercenarySuspendRequest:
+	case OP_MercenarySuspendResponse:
+	case OP_MercenaryUnsuspendResponse:
+	case OP_MercenaryDataUpdateRequest:
+	case OP_MercenaryDismiss:
+	case OP_MercenaryTimerRequest:
 		break;
 	default:
 		std::stringstream ss;
@@ -722,6 +744,53 @@ void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	payload->spawn_id = mCharacter->getSpawnID();
 	payload->type = pType;
 	payload->parameter = pParameter;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
+	// TODO:
+}
+
+void ZoneClientConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
+	// TODO:
+}
+
+void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(ClientTarget_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Wrong sized ClientTarget_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	// TODO:
+}
+
+void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(uint32);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Wrong sized OP_TGB, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
+	if (tgb == 0 || tgb == 1) {
+		mCharacter->setTGB(tgb == 1);
+		sendSimpleMessage(0, mCharacter->getTGB() ? TGB_ON : TGB_OFF);
+	}
+	// Ignore anything else, including the extra 2 packet UF sends.
+}
+
+void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
+	SimpleMessage_Struct* payload = (SimpleMessage_Struct*)outPacket->pBuffer;
+	payload->color = pType;
+	payload->string_id = pStringID;
+
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

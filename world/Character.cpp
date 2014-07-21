@@ -8,6 +8,7 @@ mCharacterID(pCharacterID),
 mStanding(true),
 mAFK(false),
 mLoggedOut(false),
+mTGB(false),
 mStatus(0),
 mZone(0)
 { }

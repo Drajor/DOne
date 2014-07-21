@@ -68,7 +68,7 @@ enum SpawnAppearanceTypes : int16 {
 	Pet = 25,
 	Split = 28,
 	Size = 29,
-	NPCName = 31,
+	NPCName = 31, // 1 = Trader <PlayerName>
 	ShowHelm = 43,
 	DamageState = 44
 };

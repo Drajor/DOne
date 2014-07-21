@@ -89,6 +89,10 @@ public:
 	float getHeading() { return mHeading; }
 	void setHeading(float pHeading);
 	
+	// Target Group Buff
+	void setTGB(bool pTGB) { mTGB = pTGB; }
+	bool getTGB() { return mTGB; }
+
 private:
 
 	float mX;
@@ -97,12 +101,15 @@ private:
 	float mHeading;
 	void _updateProfilePosition();
 	
+
+
 	const uint32 mCharacterID;
 	uint16 mSpawnID;
 	std::string mName;
 	bool mStanding;
 	bool mAFK;
 	bool mLoggedOut; // Flag indicating whether this character logged out via /camp
+	bool mTGB;
 	uint32 mStatus;
 	Timer mCampTimer; // 30 seconds.
 

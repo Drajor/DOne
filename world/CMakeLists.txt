@@ -48,6 +48,7 @@ SET(world_headers
 	Profile.h
 	ZoneClientConnection.h
 	ClientAuthentication.h
+	MessageStringIDs.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})
