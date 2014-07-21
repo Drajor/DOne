@@ -93,6 +93,18 @@ public:
 	void setTGB(bool pTGB) { mTGB = pTGB; }
 	bool getTGB() { return mTGB; }
 
+	// Healing
+	void healPercentage(int pPercent);
+
+	// Damage
+	void damage(uint32 pAmount);
+
+	int32 getCurrentHP() { return mCurrentHP; }
+	int32 getMaximumHP() { return mMaximumHP; }
+	int32 getCurrentMana() { return mCurrentMana; }
+	int32 getMaximumMana() { return mMaximumMana; }
+	int32 getCurrentEndurance() { return mCurrentEndurance; }
+	int32 getMaximumEndurance() { return mMaximumEndurance; }
 private:
 
 	float mX;
@@ -100,7 +112,15 @@ private:
 	float mZ;
 	float mHeading;
 	void _updateProfilePosition();
-	
+	void setAnonymous(uint8 pAnonymous);
+
+	int32 mCurrentHP;
+	int32 mMaximumHP;
+	int32 mCurrentMana;
+	int32 mMaximumMana;
+	int32 mCurrentEndurance;
+	int32 mMaximumEndurance;
+
 
 
 	const uint32 mCharacterID;

@@ -35,7 +35,7 @@ public:
 	void sendMessage(uint32 pType, std::string pMessage);
 	void sendSimpleMessage(uint32 pType, uint32 pStringID);
 	void sendAppearance(uint16 pType, uint32 pParameter);
-	
+	void sendHPUpdate();
 
 private:
 	void _sendTimeOfDay();

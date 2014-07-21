@@ -76,6 +76,17 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			}
 		}
 	}
+	// #heal
+	else if (pCommandName == "heal") {
+		pCharacter->healPercentage(100);
+	}
+	// #damage <amount>
+	else if (pCommandName == "damage" && pParameters.size() == 1) {
+		unsigned int damage = 0;
+		if (stoulSafe(damage, pParameters[0])) {
+			pCharacter->damage(damage);
+		}
+	}
 	// #loc
 	else if (pCommandName == "loc") {
 		std::stringstream ss;

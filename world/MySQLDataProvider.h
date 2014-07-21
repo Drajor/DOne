@@ -2,6 +2,7 @@
 
 #include "DataProvider.h"
 #include <list>
+#include <sstream>
 
 struct AccountData;
 struct CharacterSelect_Struct;
@@ -18,6 +19,7 @@ public:
 	void update();
 
 	bool getAccounts(std::list<AccountData*>& pAccounts);
+	bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 	bool isCharacterNameUnique(std::string pCharacterName);
 	bool deleteCharacter(std::string pCharacterName);
@@ -31,4 +33,5 @@ private:
 	
 	Timer* mKeepAliveTimer;
 	DatabaseConnection* mDatabaseConnection;
+	std::stringstream mStringStream;
 };

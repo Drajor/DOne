@@ -157,6 +157,15 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_ChannelMessage:
 		_handleChannelMessage(pPacket);
 		break;
+	case OP_Jump:
+		// Ignore.
+		break;
+	case OP_PotionBelt:
+		// Ignore.
+		break;
+	case OP_BazaarSearch:
+		// Ignore.
+		break;
 		// Ignore all mercenary packets.
 	case OP_MercenaryDataRequest:
 	case OP_MercenaryDataResponse:
@@ -502,39 +511,38 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		}
 		// Handle anonymous / roleplay
 	case SpawnAppearanceTypes::Anonymous:
-		// TODO: Update other clients.
-		// Not anonymous
-		if (actionParameter == 0) {
-			mCharacter->mProfile->mAnonymous = 0;
-		}
-		// Anonymous
-		else if (actionParameter == 1) {
-			mCharacter->mProfile->mAnonymous = 1;
-		}
-		// Roleplay
-		else if (actionParameter == 2) {
-			mCharacter->mProfile->mAnonymous = 2;
+		// 0 = Normal, 1 = Anonymous, 2 = Roleplay
+		if (actionParameter >= 0 && actionParameter <= 2) {
+			// Update character and notify zone.
+			mCharacter->setAnonymous(actionParameter);
+			mZone->notifyCharacterAnonymous(actionParameter);
 		}
 		// Anything else is ignored.
 		break;
 		// Handle AFK
 	case SpawnAppearanceTypes::AFK:
-		// TODO: Update other clients.
 		if (actionParameter == 0) {
+			// Update character and notify zone.
 			mCharacter->setAFK(false);
+			mZone->notifyCharacterAFK(mCharacter, false);
 		}
 		else if (actionParameter == 1) {
+			// Update character and notify zone.
 			mCharacter->setAFK(true);
+			mZone->notifyCharacterAFK(mCharacter, true);
 		}
 		// Anything else is ignored.
 		break;
 	case SpawnAppearanceTypes::ShowHelm:
-		// TODO: Update other clients.
 		if (actionParameter == 0) {
+			// Update character and notify zone.
 			mCharacter->setShowHelm(false);
+			mZone->notifyCharacterShowHelm(mCharacter, false);
 		}
 		else if (actionParameter == 1) {
+			// Update character and notify zone.
 			mCharacter->setShowHelm(true);
+			mZone->notifyCharacterShowHelm(mCharacter, true);
 		}
 		// Anything else is ignored.
 		break;
@@ -730,6 +738,7 @@ void ZoneClientConnection::_sendNewZoneData() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	NewZone_Struct* payload = reinterpret_cast<NewZone_Struct*>(outPacket->pBuffer);
 	strcpy(payload->char_name, mCharacter->getName().c_str());
+	//payload->gravity = 2; // TODO: Get a good default.
 
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
@@ -790,6 +799,17 @@ void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID) {
 	SimpleMessage_Struct* payload = (SimpleMessage_Struct*)outPacket->pBuffer;
 	payload->color = pType;
 	payload->string_id = pStringID;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendHPUpdate() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+	SpawnHPUpdate_Struct* payload = reinterpret_cast<SpawnHPUpdate_Struct*>(outPacket->pBuffer);
+	payload->spawn_id = mCharacter->getSpawnID();
+	payload->cur_hp = mCharacter->getCurrentHP();
+	payload->max_hp = mCharacter->getMaximumHP();
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);

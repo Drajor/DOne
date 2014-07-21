@@ -131,15 +131,30 @@ void Zone::updateCharacterPosition(Character* pCharacter, float pX, float pY, fl
 
 void Zone::notifyCharacterLogOut(Character* pCharacter)
 {
-	//mWorld->notifyIncomingClient()
+	// TODO: Tell Everyone!
 }
 
 void Zone::notifyCharacterZoneOut(Character* pCharacter)
 {
-
+	// TODO: Tell Everyone!
 }
 
 void Zone::notifyCharacterLinkDead(Character* pCharacter)
 {
+	// TODO: Tell Everyone!
+}
 
+void Zone::notifyCharacterAFK(Character* mCharacter, bool pAFK)
+{
+	// TODO: Tell Everyone!
+}
+
+void Zone::notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm)
+{
+	// TODO: Tell Everyone!
+}
+
+void Zone::notifyCharacterAnonymous(uint8 pAnonymous)
+{
+	// TODO: Tell Everyone!
 }

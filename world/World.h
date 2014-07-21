@@ -32,6 +32,7 @@ public:
 	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
 	void addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
+	bool ensureAccountExists(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
@@ -53,12 +54,14 @@ public:
 
 	uint16 getZonePort(uint16 pZoneID, uint16 pInstanceID = 0);
 private:
+	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, std::string> mReservedCharacterNames;
 
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 	
+
 	
 
 

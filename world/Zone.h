@@ -32,6 +32,9 @@ public:
 	void notifyCharacterLogOut(Character* pCharacter);
 	void notifyCharacterZoneOut(Character* pCharacter);
 	void notifyCharacterLinkDead(Character* pCharacter);
+	void notifyCharacterAFK(Character* mCharacter, bool pAFK);
+	void notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm);
+	void notifyCharacterAnonymous(uint8 pAnonymous);
 
 	void updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading);
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
@@ -39,6 +42,9 @@ public:
 	
 private:
 	void _handleIncomingConnections();
+	
+
+
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 
 

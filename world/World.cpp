@@ -197,7 +197,7 @@ bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLogi
 
 bool World::authenticationExists(uint32 pLoginServerID) {
 	for (auto i : mAuthenticatedClients) {
-		if (i->mAccountID = pLoginServerID)
+		if (i->mAccountID == pLoginServerID)
 			return true;
 	}
 
@@ -347,4 +347,27 @@ uint16 World::getZonePort(uint16 pZoneID, uint16 pInstanceID) {
 
 void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID) {
 	mZoneManager->addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
+}
+
+ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
+	for (auto i : mAuthenticatedClients) {
+		if (i->mAccountID == pLoginServerAccountID)
+			return i;
+	}
+
+	return 0;
+}
+
+bool World::ensureAccountExists(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+	// Create Account if this is a new player /dance
+	if (!mAccountManager->accountExists(pLoginServerAccountID)) {
+		// Create account.
+		if (!mAccountManager->createAccount(pLoginServerAccountID, pLoginServerAccountName)) {
+			Log::error("[World] Account creation failed.");
+			return false; // Account does not exist and could not be created.
+		}
+		Log::info("[World] New account created");
+		return true; // Account created.
+	}
+	return true; // Account already exists.
 }

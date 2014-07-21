@@ -22,6 +22,10 @@ bool DataStore::loadCharacter(std::string pCharacterName, uint32& pCharacterID, 
 	return mDataProvider->loadCharacter(pCharacterName, pCharacterID, pProfile, pExtendedProfile);
 }
 
+bool DataStore::createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+	return mDataProvider->createAccount(pLoginServerAccountID, pLoginServerAccountName);
+}
+
 
 
 

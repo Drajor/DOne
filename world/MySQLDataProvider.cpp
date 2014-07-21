@@ -273,3 +273,26 @@ void MySQLDataProvider::copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProf
 {
 
 }
+
+bool MySQLDataProvider::createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+	Profile p("MySQLDataProvider::createAccount");
+	mStringStream.clear();
+	mStringStream << "INSERT INTO account SET lsaccount_id=" << pLoginServerAccountID << ", name='" << pLoginServerAccountName << "', time_creation=UNIX_TIMESTAMP();";
+	const std::string query = mStringStream.str();
+	mStringStream.clear();
+
+	uint32 queryLength = query.length();
+	char errorBuffer[MYSQL_ERRMSG_SIZE];
+	uint32 numRowsAffected = 0;
+
+	if (mDatabaseConnection->runQuery(query.c_str(), queryLength, errorBuffer, 0, &numRowsAffected)) {
+		if (numRowsAffected != 1) {
+			Log::error("[MYSQL Data Provider] Number of rows affected in createAccount was wrong.");
+			return false;
+		}
+		return true;
+	}
+
+	Log::error("[MYSQL Data Provider] Query in createAccount failed.");
+	return false;
+}

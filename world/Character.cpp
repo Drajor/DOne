@@ -5,12 +5,20 @@
 
 Character::Character(uint32 pCharacterID) :
 mCharacterID(pCharacterID),
+mProfile(0),
+mExtendedProfile(0),
 mStanding(true),
 mAFK(false),
 mLoggedOut(false),
 mTGB(false),
 mStatus(0),
-mZone(0)
+mZone(0),
+mCurrentHP(100),
+mMaximumHP(100),
+mCurrentMana(100),
+mMaximumMana(100),
+mCurrentEndurance(100),
+mMaximumEndurance(100)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -86,4 +94,17 @@ void Character::_updateProfilePosition() {
 	mProfile->y = mY;
 	mProfile->z = mZ;
 	mProfile->heading = mHeading;
+}
+
+void Character::healPercentage(int pPercent) {
+	mConnection->sendHPUpdate();
+}
+
+void Character::damage(uint32 pAmount) {
+	mCurrentHP -= pAmount;
+	mConnection->sendHPUpdate();
+}
+
+void Character::setAnonymous(uint8 pAnonymous) {
+	mProfile->mAnonymous = pAnonymous;
 }

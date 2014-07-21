@@ -162,6 +162,9 @@ void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
 		Log::error("[Login Server Connection] Wrong size of UsertoWorldRequest_Struct");
 		return;
 	}
+
+	Log::info("[Login Server Connection] User to World Request");
+
 	UsertoWorldRequest_Struct* inPayload = reinterpret_cast<UsertoWorldRequest_Struct*>(pPacket->pBuffer);
 	ServerPacket* outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(UsertoWorldResponse_Struct));
 	UsertoWorldResponse_Struct* outPayload = reinterpret_cast<UsertoWorldResponse_Struct*>(outPacket->pBuffer);
@@ -170,6 +173,7 @@ void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
 	outPayload->worldid = inPayload->worldid;
 	// Ask World if this Client can join World.
 	outPayload->response = mWorld->getUserToWorldResponse(inPayload->lsaccountid);
+
 	_sendPacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -179,6 +183,9 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 		Log::error("[Login Server Connection] Wrong size of ServerLSClientAuth");
 		return;
 	}
+
+	Log::info("[Login Server Connection] Adding new authentication.");
+
 	ServerLSClientAuth* payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
 	// Add authentication for the incoming client.
 	ClientAuthentication authentication;
@@ -189,6 +196,11 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 	authentication.mIP = payload->ip;
 	authentication.mLocal = payload->local;
 	mWorld->addAuthentication(authentication);
+
+	// Check if client does not yet have an account.
+	if (!mWorld->ensureAccountExists(payload->lsaccount_id, payload->name)) {
+		Log::error("[Login Server Connection] accountCheck failed.");
+	}
 }
 
 void LoginServerConnection::_sendWorldInformation() {
