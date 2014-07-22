@@ -10,8 +10,8 @@ mExtendedProfile(0),
 mName("soandso"),
 mLastName(""),
 mRace(0),
-mRunSpeed(1.0f),
-mWalkSpeed(0.5f),
+mRunSpeed(0.7f),
+mWalkSpeed(0.35f),
 mClass(0),
 mGender(0),
 mLevel(1),
@@ -28,7 +28,16 @@ mMaximumHP(100),
 mCurrentMana(100),
 mMaximumMana(100),
 mCurrentEndurance(100),
-mMaximumEndurance(100)
+mMaximumEndurance(100),
+mX(0),
+mY(0),
+mZ(0),
+mHeading(0),
+mDeltaX(0),
+mDeltaY(0),
+mDeltaZ(0),
+mDeltaHeading(0),
+mAnimation(0)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -45,6 +54,15 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mName = mProfile->name;
 	mRace = mProfile->race;
 	mStatus = 255;
+
+	mX = mProfile->x;
+	mY = mProfile->y;
+	mZ = mProfile->z;
+	mHeading = mProfile->heading;
+	mDeltaX = 0;
+	mDeltaY = 0;
+	mDeltaZ = 0;
+	mDeltaHeading = 0;
 
 	return true;
 }
@@ -118,4 +136,12 @@ void Character::damage(uint32 pAmount) {
 
 void Character::setAnonymous(uint8 pAnonymous) {
 	mProfile->mAnonymous = pAnonymous;
+}
+
+void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
+{
+	mDeltaX = pDeltaX;
+	mDeltaY = pDeltaY;
+	mDeltaZ = pDeltaZ;
+	mDeltaHeading = pDeltaHeading;
 }

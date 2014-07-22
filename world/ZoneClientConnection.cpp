@@ -466,7 +466,14 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	}
 
 	PlayerPositionUpdateClient_Struct* payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
-	mZone->updateCharacterPosition(mCharacter, payload->x_pos, payload->y_pos, payload->z_pos, payload->heading);
+
+	if (mCharacter->getX() != payload->x_pos || mCharacter->getY() != payload->y_pos || mCharacter->getZ() != payload->z_pos || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
+		//mZone->updateCharacterPosition(mCharacter, payload->x_pos, payload->y_pos, payload->z_pos, payload->heading);
+		mCharacter->setPosition(payload->x_pos, payload->y_pos, payload->z_pos, EQ19toFloat(payload->heading));
+		mCharacter->setAnimation(payload->animation);
+		mCharacter->setPositionDeltas(payload->delta_x, payload->delta_y, payload->delta_z, payload->delta_heading);
+		mZone->notifyCharacterPositionChanged(mCharacter);
+	}
 }
 
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
@@ -483,11 +490,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	const uint32 actionParameter = payload->parameter;
 
 	// Ignore if spawn id does not match this characters ID.
-	if (payload->spawn_id != mCharacter->getID()) {
+	if (payload->spawn_id != mCharacter->getSpawnID()) {
 		// Note: UF client sends spawn ID (0) and action type (51) every few seconds. Not sure why.
 		return;
 	}
 
+	Log::error("Got Spawn Appearance");
 	switch (actionType) {
 		// Handle animation.
 	case SpawnAppearanceTypes::Animation:
@@ -656,12 +664,12 @@ void ZoneClientConnection::sendPosition() {
 	payload->x_pos = FloatToEQ19(mCharacter->getX());
 	payload->y_pos = FloatToEQ19(mCharacter->getY());
 	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(0);
-	payload->delta_y = NewFloatToEQ13(0);
-	payload->delta_z = NewFloatToEQ13(0);
+	payload->delta_x = NewFloatToEQ13(mCharacter->getDeltaX());
+	payload->delta_y = NewFloatToEQ13(mCharacter->getDeltaY());
+	payload->delta_z = NewFloatToEQ13(mCharacter->getDeltaZ());
 	payload->heading = FloatToEQ19(mCharacter->getHeading());
 	payload->animation = 0;
-	payload->delta_heading = NewFloatToEQ13(0);
+	payload->delta_heading = NewFloatToEQ13(mCharacter->getDeltaHeading());
 	payload->padding0002 = 0;
 	payload->padding0006 = 7;
 	payload->padding0014 = 0x7f;
@@ -818,56 +826,84 @@ void ZoneClientConnection::sendHPUpdate() {
 EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
 	NewSpawn_Struct* payload = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
-	payload->spawn.heading = FloatToEQ19(mCharacter->getHeading());
-	payload->spawn.x = FloatToEQ19(mCharacter->getX());
-	payload->spawn.y = FloatToEQ19(mCharacter->getY());
-	payload->spawn.z = FloatToEQ19(mCharacter->getZ());
-	payload->spawn.spawnId = mCharacter->getSpawnID();
-	payload->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
-	payload->spawn.max_hp = 100;
-	payload->spawn.race = mCharacter->getRace();
-	payload->spawn.runspeed = mCharacter->getRunSpeed();
-	payload->spawn.walkspeed = mCharacter->getWalkSpeed();
-	payload->spawn.class_ = mCharacter->getClass();
-	payload->spawn.gender = mCharacter->getGender();
-	payload->spawn.level = mCharacter->getLevel();
-	payload->spawn.deity = mCharacter->getDeity();
-	payload->spawn.animation = 0;
-	payload->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
-	payload->spawn.light = 0; // TODO: Items
-	payload->spawn.showhelm = 1;
-	payload->spawn.invis = 0;	// TODO: GM Hide?
-	payload->spawn.NPC = 0;
-	payload->spawn.IsMercenary = 0;
-	payload->spawn.petOwnerId = 0;
-	// TODO: Below Appearances
-	payload->spawn.haircolor = 0;
-	payload->spawn.beardcolor = 0;
-	payload->spawn.eyecolor1 = 0;
-	payload->spawn.eyecolor2 = 0;
-	payload->spawn.hairstyle = 0;
-	payload->spawn.face = 0;
-	payload->spawn.beard = 0;
-	payload->spawn.StandState = 0;
-	payload->spawn.drakkin_heritage = 0;
-	payload->spawn.drakkin_tattoo = 0;
-	payload->spawn.drakkin_details = 0;
-	payload->spawn.equip_chest2 = 0;
-	payload->spawn.helm = 0;
-	// TODO: Look at old helm stuff when Items
-	payload->spawn.guildrank = 0xFF;
-	payload->spawn.size = mCharacter->getSize();
-	payload->spawn.bodytype = 0; // TODO: Understand this better.
-	payload->spawn.flymode = 0;
-	strcpy(payload->spawn.name, mCharacter->getName().c_str());
-	strcpy(payload->spawn.lastName, mCharacter->getLastName().c_str());
-	// TODO: Equipment materials when Items.
-	memset(payload->spawn.set_to_0xFF, 0xFF, sizeof(payload->spawn.set_to_0xFF));
-	
+	populateSpawnStruct(payload);
 	return outPacket;
 }
+
+EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
+	payload->spawn_id = mCharacter->getSpawnID();
+	payload->x_pos = FloatToEQ19(mCharacter->getX());
+	payload->y_pos = FloatToEQ19(mCharacter->getY());
+	payload->z_pos = FloatToEQ19(mCharacter->getZ());
+	payload->delta_x = NewFloatToEQ13(mCharacter->getDeltaX());
+	payload->delta_y = NewFloatToEQ13(mCharacter->getDeltaY());
+	payload->delta_z = NewFloatToEQ13(mCharacter->getDeltaZ());
+	payload->heading = FloatToEQ19(mCharacter->getHeading());
+	payload->padding0002 = 0;
+	payload->padding0006 = 7;
+	payload->padding0014 = 0x7f;
+	payload->padding0018 = 0x5df27;
+	payload->animation = mCharacter->getAnimation();
+	std::stringstream ss;
+	ss << mCharacter->getName() << " DX(" << mCharacter->getDeltaX() << ") DY(" << mCharacter->getDeltaY() << ") DZ(" << mCharacter->getDeltaZ();
+	Log::error(ss.str());
+	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaHeading()));
+
+	return outPacket;
+}
+
 
 void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket)
 {
 	mStreamInterface->QueuePacket(pPacket);
+}
+
+void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
+	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
+	pSpawn->spawn.x = FloatToEQ19(mCharacter->getX());
+	pSpawn->spawn.y = FloatToEQ19(mCharacter->getY());
+	pSpawn->spawn.z = FloatToEQ19(mCharacter->getZ());
+	pSpawn->spawn.spawnId = mCharacter->getSpawnID();
+	pSpawn->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
+	pSpawn->spawn.max_hp = 100;
+	pSpawn->spawn.race = mCharacter->getRace();
+	pSpawn->spawn.runspeed = mCharacter->getRunSpeed();
+	pSpawn->spawn.walkspeed = mCharacter->getWalkSpeed();
+	pSpawn->spawn.class_ = mCharacter->getClass();
+	pSpawn->spawn.gender = mCharacter->getGender();
+	pSpawn->spawn.level = mCharacter->getLevel();
+	pSpawn->spawn.deity = mCharacter->getDeity();
+	pSpawn->spawn.animation = 0;
+	pSpawn->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
+	pSpawn->spawn.light = 0; // TODO: Items
+	pSpawn->spawn.showhelm = 1;
+	pSpawn->spawn.invis = 0;	// TODO: GM Hide?
+	pSpawn->spawn.NPC = 0;
+	pSpawn->spawn.IsMercenary = 0;
+	pSpawn->spawn.petOwnerId = 0;
+	// TODO: Below Appearances
+	pSpawn->spawn.haircolor = 0;
+	pSpawn->spawn.beardcolor = 0;
+	pSpawn->spawn.eyecolor1 = 0;
+	pSpawn->spawn.eyecolor2 = 0;
+	pSpawn->spawn.hairstyle = 0;
+	pSpawn->spawn.face = 0;
+	pSpawn->spawn.beard = 0;
+	pSpawn->spawn.StandState = 0;
+	pSpawn->spawn.drakkin_heritage = 0;
+	pSpawn->spawn.drakkin_tattoo = 0;
+	pSpawn->spawn.drakkin_details = 0;
+	pSpawn->spawn.equip_chest2 = 0;
+	pSpawn->spawn.helm = 0;
+	// TODO: Look at old helm stuff when Items
+	pSpawn->spawn.guildrank = 0xFF;
+	pSpawn->spawn.size = mCharacter->getSize();
+	pSpawn->spawn.bodytype = 0; // TODO: Understand this better.
+	pSpawn->spawn.flymode = 0;
+	strcpy(pSpawn->spawn.name, mCharacter->getName().c_str());
+	strcpy(pSpawn->spawn.lastName, mCharacter->getLastName().c_str());
+	// TODO: Equipment materials when Items.
+	memset(pSpawn->spawn.set_to_0xFF, 0xFF, sizeof(pSpawn->spawn.set_to_0xFF));
 }

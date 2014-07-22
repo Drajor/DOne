@@ -9,6 +9,7 @@ class Zone;
 class Character;
 class DataStore;
 class CommandHandler;
+struct NewSpawn_Struct;
 
 class ZoneClientConnection {
 public:
@@ -37,7 +38,9 @@ public:
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
 
-	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory.
+	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
+	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
+	EQApplicationPacket* makeCharacterPositionUpdate(); // Caller is responsible for memory deallocation.
 
 	void sendPacket(EQApplicationPacket* pPacket);
 
@@ -76,6 +79,7 @@ private:
 	void _handleUpdateAA(const EQApplicationPacket* pPacket);
 	void _handleTarget(const EQApplicationPacket* pPacket);
 	void _handleTGB(const EQApplicationPacket* pPacket);
+	
 	bool mConnected;
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;

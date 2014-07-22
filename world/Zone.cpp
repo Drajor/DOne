@@ -141,13 +141,30 @@ void Zone::notifyCharacterZoneOut(Character* pCharacter)
 }
 
 void Zone::notifyCharacterZoneIn(Character* pCharacter) {
-	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterSpawnPacket();
-
+	// Notify players in zone.
+	ZoneClientConnection* sender = pCharacter->getConnection();
+	EQApplicationPacket* outPacket = sender->makeCharacterSpawnPacket();
 	for (auto i : mZoneClientConnections) {
-		i->sendPacket(outPacket);
+		if(i != sender)
+			i->sendPacket(outPacket);
 	}
-
 	safe_delete(outPacket);
+
+	// Notify character zoning in of zone spawns.
+	const unsigned int numCharacters = mZoneClientConnections.size();
+	if (numCharacters > 1) {
+		EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, sizeof(NewSpawn_Struct)* numCharacters);
+		NewSpawn_Struct* spawns = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
+		int index = 0;
+		for (auto i : mZoneClientConnections) {
+			i->populateSpawnStruct(&spawns[index]);
+			index++;
+		}
+
+		sender->sendPacket(outPacket);
+		safe_delete(outPacket);
+	}
+	
 }
 
 
@@ -169,4 +186,15 @@ void Zone::notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm)
 void Zone::notifyCharacterAnonymous(uint8 pAnonymous)
 {
 	// TODO: Tell Everyone!
+}
+
+void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
+	// Notify players in zone.
+	ZoneClientConnection* sender = pCharacter->getConnection();
+	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
+	for (auto i : mZoneClientConnections) {
+		if (i != sender)
+			i->sendPacket(outPacket);
+	}
+	safe_delete(outPacket);
 }

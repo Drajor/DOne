@@ -78,17 +78,22 @@ public:
 
 
 	// Position and Heading
+	void setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading);
 	Vector3 getPosition3() { return Vector3(mX, mY, mZ); };
 	Vector4 getPosition4() { return Vector4(mX, mY, mZ, mHeading); };
 	float getX() { return mX; }
 	float getY() { return mY; }
 	float getZ() { return mZ; }
+	int32 getDeltaX() { return mDeltaX; }
+	int32 getDeltaY() { return mDeltaY; }
+	int32 getDeltaZ() { return mDeltaZ; }
 
 	void setPosition(float pX, float pY, float pZ, float pHeading);
 	void setPosition(Vector3& pPosition);
 	void setPosition(Vector4& pPosition);
 
 	float getHeading() { return mHeading; }
+	int32 getDeltaHeading() { return mDeltaHeading; }
 	void setHeading(float pHeading);
 	uint32 getRace() { return mRace; }
 	float getRunSpeed() { return mRunSpeed; }
@@ -98,6 +103,8 @@ public:
 	uint8 getLevel() { return mLevel; }
 	uint16 getDeity() { return mDeity; }
 	float getSize() { return mSize; }
+	int32 getAnimation() { return mAnimation; }
+	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
 	
 	// Target Group Buff
 	void setTGB(bool pTGB) { mTGB = pTGB; }
@@ -121,9 +128,14 @@ private:
 	float mY;
 	float mZ;
 	float mHeading;
+	int32 mDeltaX;
+	int32 mDeltaY;
+	int32 mDeltaZ;
+	int32 mDeltaHeading;
+	int32 mAnimation;
 	void _updateProfilePosition();
 	void setAnonymous(uint8 pAnonymous);
-
+	
 	float mSize;
 	uint16 mDeity;
 	uint8 mLevel;
