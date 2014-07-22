@@ -589,20 +589,6 @@ void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
 	mCharacter->startCamp();
 }
 
-enum CHANNEL : uint32 {
-	CH_GUILD = 0, // /gu
-	CH_GROUP = 2, // /g
-	CH_SHOUT = 3, // /shou
-	CH_AUCTION = 4, // /auc
-	CH_OOC = 5, // /ooc
-	CH_BROADCAST = 6, // ??
-	CH_TELL = 7, // /t
-	CH_SAY = 8, // /say
-	CH_RAID = 15, // /rs
-	CH_UCS = 20, // Not sure yet.
-	CH_EMOTE = 22 // UF+
-
-};
 void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
 	// Check packet size.
 	// NOTE: This packet size increases with message size.
@@ -614,8 +600,10 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	}
 
 	ChannelMessage_Struct* payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
-	uint32 channel = payload->chan_num;
-	std::string message = payload->message; // TODO: I am sure if this is completely safe.
+	const uint32 channel = payload->chan_num;
+	const std::string message = payload->message; // TODO: I am sure if this is completely safe.
+	const std::string senderName = payload->sender;
+	const std::string targetName = payload->targetname;
 
 	// Check message size.
 	if (message.empty()) {
@@ -624,31 +612,41 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		return;
 	}
 
+	std::stringstream ss;
+	ss << "[CHAT] Sender(" << payload->sender << ") Target(" << payload->targetname << ") Channel(" << payload->chan_num << ") Message(" << payload->message << ")";
+	Log::info(ss.str());
+
 	switch (channel) {
-	case CHANNEL::CH_GUILD:
+	case ChannelID::CH_GUILD:
 		break;
-	case CHANNEL::CH_GROUP:
+	case ChannelID::CH_GROUP:
 		break;
-	case CHANNEL::CH_SHOUT:
+	case ChannelID::CH_SHOUT:
+		mZone->notifyCharacterChatShout(mCharacter, message);
 		break;
-	case CHANNEL::CH_OOC:
+	case ChannelID::CH_AUCTION:
+		mZone->notifyCharacterChatAuction(mCharacter, message);
 		break;
-	case CHANNEL::CH_BROADCAST:
+	case ChannelID::CH_OOC:
+		mZone->notifyCharacterChatOOC(mCharacter, message);
 		break;
-	case CHANNEL::CH_TELL:
+	case ChannelID::CH_BROADCAST:
 		break;
-	case CHANNEL::CH_SAY:
+	case ChannelID::CH_TELL:
+		break;
+	case ChannelID::CH_SAY:
 		// Check whether user has entered a command.
 		if (message[0] == COMMAND_TOKEN) {
 			mCommandHandler->command(mCharacter, message);
 			break;
 		}
+		mZone->notifyCharacterChatSay(mCharacter, message);
 		break;
-	case CHANNEL::CH_RAID:
+	case ChannelID::CH_RAID:
 		break;
-	case CHANNEL::CH_UCS:
+	case ChannelID::CH_UCS:
 		break;
-	case CHANNEL::CH_EMOTE:
+	case ChannelID::CH_EMOTE:
 		break;
 	default:
 		std::stringstream ss;

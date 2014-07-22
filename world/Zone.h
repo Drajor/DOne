@@ -41,14 +41,19 @@ public:
 	void notifyCharacterStanding(Character* pCharacter);
 	void notifyCharacterSitting(Character* pCharacter);
 	void notifyCharacterCrouching(Character* pCharacter);
+	void notifyCharacterChatSay(Character* pCharacter, const std::string pMessage);
+	void notifyCharacterChatShout(Character* pCharacter, const std::string pMessage);
+	void notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage);
+	void notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 	
 private:
+	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter);
 	void _handleIncomingConnections();
-	
+
 
 
 

@@ -123,3 +123,49 @@ enum BodyType {
 	BT_InvisMan = 66,	//no name, seen on 'InvisMan', can be /targeted
 	BT_Special = 67
 };
+
+enum ChannelID : uint32 {
+	CH_GUILD = 0, // /gu
+	CH_GROUP = 2, // /g
+	CH_SHOUT = 3, // /shou
+	CH_AUCTION = 4, // /auc
+	CH_OOC = 5, // /ooc
+	CH_BROADCAST = 6, // ??
+	CH_TELL = 7, // /t
+	CH_SAY = 8, // /say
+	CH_RAID = 15, // /rs
+	CH_UCS = 20, // Not sure yet.
+	CH_EMOTE = 22 // UF+
+
+};
+
+enum Language : uint32 {
+	COMMON_TONGUE_LANG = 0,
+	BARBARIAN_LANG = 1,
+	ERUDIAN_LANG = 2,
+	ELVISH_LANG = 3,
+	DARK_ELVISH_LANG = 4,
+	DWARVISH_LANG = 5,
+	TROLL_LANG = 6,
+	OGRE_LANG = 7,
+	GNOMISH_LANG = 8,
+	HALFLING_LANG = 9,
+	THIEVES_CANT_LANG = 10,
+	OLD_ERUDIAN_LANG = 11,
+	ELDER_ELVISH_LANG = 12,
+	FROGLOK_LANG = 13,
+	GOBLIN_LANG = 14,
+	GNOLL_LANG = 15,
+	COMBINE_TONGUE_LANG = 16,
+	ELDER_TEIRDAL_LANG = 17,
+	LIZARDMAN_LANG = 18,
+	ORCISH_LANG = 19,
+	FAERIE_LANG = 20,
+	DRAGON_LANG = 21,
+	ELDER_DRAGON_LANG = 22,
+	DARK_SPEECH_LANG = 23,
+	VAH_SHIR_LANG = 24,
+	ALARAN_LANG = 25,
+	HADAL_LANG = 26,
+	UNKNOWN_LANG = 27
+};
