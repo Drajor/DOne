@@ -241,6 +241,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		return;
 	}
 
+	// We will load this up every time for now but soon this data can be passed between Zones.
 	// Initialise Character.
 	mCharacter = new Character(characterID);
 	if (!mCharacter->initialise(profile, extendedProfile)) {
@@ -252,8 +253,6 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	mCharacter->setZone(mZone);
 	mCharacter->setSpawnID(mZone->getNextSpawnID());
 	mCharacter->setConnection(this);
-
-	// We will load this up every time for now but soon this data can be passed between Zones.
 
 	// REPLY
 	// OP_PlayerProfile
@@ -413,6 +412,11 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	_sendZoneServerReady();
 	_sendExpZoneIn();
 	_sendWorldObjectsSent();
+}
+
+void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
+	mZone->notifyCharacterZoneIn(mCharacter);
 }
 
 void ZoneClientConnection::_sendDoors() {
@@ -743,10 +747,6 @@ void ZoneClientConnection::_sendNewZoneData() {
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
 
-void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
-	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
-}
-
 void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* payload = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
@@ -813,4 +813,61 @@ void ZoneClientConnection::sendHPUpdate() {
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
+	NewSpawn_Struct* payload = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
+	payload->spawn.heading = FloatToEQ19(mCharacter->getHeading());
+	payload->spawn.x = FloatToEQ19(mCharacter->getX());
+	payload->spawn.y = FloatToEQ19(mCharacter->getY());
+	payload->spawn.z = FloatToEQ19(mCharacter->getZ());
+	payload->spawn.spawnId = mCharacter->getSpawnID();
+	payload->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
+	payload->spawn.max_hp = 100;
+	payload->spawn.race = mCharacter->getRace();
+	payload->spawn.runspeed = mCharacter->getRunSpeed();
+	payload->spawn.walkspeed = mCharacter->getWalkSpeed();
+	payload->spawn.class_ = mCharacter->getClass();
+	payload->spawn.gender = mCharacter->getGender();
+	payload->spawn.level = mCharacter->getLevel();
+	payload->spawn.deity = mCharacter->getDeity();
+	payload->spawn.animation = 0;
+	payload->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
+	payload->spawn.light = 0; // TODO: Items
+	payload->spawn.showhelm = 1;
+	payload->spawn.invis = 0;	// TODO: GM Hide?
+	payload->spawn.NPC = 0;
+	payload->spawn.IsMercenary = 0;
+	payload->spawn.petOwnerId = 0;
+	// TODO: Below Appearances
+	payload->spawn.haircolor = 0;
+	payload->spawn.beardcolor = 0;
+	payload->spawn.eyecolor1 = 0;
+	payload->spawn.eyecolor2 = 0;
+	payload->spawn.hairstyle = 0;
+	payload->spawn.face = 0;
+	payload->spawn.beard = 0;
+	payload->spawn.StandState = 0;
+	payload->spawn.drakkin_heritage = 0;
+	payload->spawn.drakkin_tattoo = 0;
+	payload->spawn.drakkin_details = 0;
+	payload->spawn.equip_chest2 = 0;
+	payload->spawn.helm = 0;
+	// TODO: Look at old helm stuff when Items
+	payload->spawn.guildrank = 0xFF;
+	payload->spawn.size = mCharacter->getSize();
+	payload->spawn.bodytype = 0; // TODO: Understand this better.
+	payload->spawn.flymode = 0;
+	strcpy(payload->spawn.name, mCharacter->getName().c_str());
+	strcpy(payload->spawn.lastName, mCharacter->getLastName().c_str());
+	// TODO: Equipment materials when Items.
+	memset(payload->spawn.set_to_0xFF, 0xFF, sizeof(payload->spawn.set_to_0xFF));
+	
+	return outPacket;
+}
+
+void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket)
+{
+	mStreamInterface->QueuePacket(pPacket);
 }

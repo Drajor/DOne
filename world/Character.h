@@ -60,8 +60,10 @@ public:
 	void setStanding(bool pStanding);
 
 	std::string getName() { return mName; }
+	std::string getLastName() { return mLastName; }
 	uint32 getID() { return mCharacterID; };
 	uint16 getSpawnID() { return mSpawnID; }
+	// Returns the account status that this Character belongs to.
 	uint32 getStatus() { return mStatus; }
 	PlayerProfile_Struct* getProfile() { return mProfile; }
 	ExtendedProfile_Struct* getExtendedProfile() { return mExtendedProfile; }
@@ -88,6 +90,14 @@ public:
 
 	float getHeading() { return mHeading; }
 	void setHeading(float pHeading);
+	uint32 getRace() { return mRace; }
+	float getRunSpeed() { return mRunSpeed; }
+	float getWalkSpeed() { return mWalkSpeed; }
+	uint8 getClass() { return mClass; }
+	uint8 getGender() { return mGender; }
+	uint8 getLevel() { return mLevel; }
+	uint16 getDeity() { return mDeity; }
+	float getSize() { return mSize; }
 	
 	// Target Group Buff
 	void setTGB(bool pTGB) { mTGB = pTGB; }
@@ -114,6 +124,15 @@ private:
 	void _updateProfilePosition();
 	void setAnonymous(uint8 pAnonymous);
 
+	float mSize;
+	uint16 mDeity;
+	uint8 mLevel;
+	uint8 mClass;
+	uint32 mRace;
+	uint8 mGender;
+	float mRunSpeed;
+	float mWalkSpeed;
+
 	int32 mCurrentHP;
 	int32 mMaximumHP;
 	int32 mCurrentMana;
@@ -126,6 +145,7 @@ private:
 	const uint32 mCharacterID;
 	uint16 mSpawnID;
 	std::string mName;
+	std::string mLastName;
 	bool mStanding;
 	bool mAFK;
 	bool mLoggedOut; // Flag indicating whether this character logged out via /camp

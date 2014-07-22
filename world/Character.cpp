@@ -7,6 +7,16 @@ Character::Character(uint32 pCharacterID) :
 mCharacterID(pCharacterID),
 mProfile(0),
 mExtendedProfile(0),
+mName("soandso"),
+mLastName(""),
+mRace(0),
+mRunSpeed(1.0f),
+mWalkSpeed(0.5f),
+mClass(0),
+mGender(0),
+mLevel(1),
+mDeity(394), // Agnostic
+mSize(5.0f),
 mStanding(true),
 mAFK(false),
 mLoggedOut(false),
@@ -33,6 +43,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mExtendedProfile = pExtendedProfile;
 
 	mName = mProfile->name;
+	mRace = mProfile->race;
 	mStatus = 255;
 
 	return true;

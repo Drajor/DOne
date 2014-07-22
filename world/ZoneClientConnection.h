@@ -37,6 +37,10 @@ public:
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
 
+	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory.
+
+	void sendPacket(EQApplicationPacket* pPacket);
+
 private:
 	void _sendTimeOfDay();
 

@@ -6,6 +6,7 @@
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
+#include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
 Zone::Zone(World* pWorld, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
@@ -138,6 +139,17 @@ void Zone::notifyCharacterZoneOut(Character* pCharacter)
 {
 	// TODO: Tell Everyone!
 }
+
+void Zone::notifyCharacterZoneIn(Character* pCharacter) {
+	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterSpawnPacket();
+
+	for (auto i : mZoneClientConnections) {
+		i->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}
+
 
 void Zone::notifyCharacterLinkDead(Character* pCharacter)
 {

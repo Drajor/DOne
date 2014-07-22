@@ -29,8 +29,9 @@ public:
 	uint32 getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
 
-	void notifyCharacterLogOut(Character* pCharacter);
+	void notifyCharacterZoneIn(Character* pCharacter);
 	void notifyCharacterZoneOut(Character* pCharacter);
+	void notifyCharacterLogOut(Character* pCharacter);
 	void notifyCharacterLinkDead(Character* pCharacter);
 	void notifyCharacterAFK(Character* mCharacter, bool pAFK);
 	void notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm);
@@ -43,6 +44,7 @@ public:
 private:
 	void _handleIncomingConnections();
 	
+
 
 
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
