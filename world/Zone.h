@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Constants.h"
 #include "ClientAuthentication.h"
 #include <list>
 #include <map>
@@ -34,17 +35,23 @@ public:
 	void notifyCharacterPositionChanged(Character* pCharacter);
 	void notifyCharacterLogOut(Character* pCharacter);
 	void notifyCharacterLinkDead(Character* pCharacter);
-	void notifyCharacterAFK(Character* mCharacter, bool pAFK);
-	void notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm);
-	void notifyCharacterAnonymous(uint8 pAnonymous);
+	void notifyCharacterAFK(Character* pCharacter);
+	void notifyCharacterShowHelm(Character* pCharacter);
+	void notifyCharacterAnonymous(Character* pCharacter);
+	void notifyCharacterStanding(Character* pCharacter);
+	void notifyCharacterSitting(Character* pCharacter);
+	void notifyCharacterCrouching(Character* pCharacter);
 
-	void updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading);
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 	
 private:
+	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceTypes pType, uint32 pParameter);
 	void _handleIncomingConnections();
 	
+
+
+
 
 
 

@@ -81,8 +81,15 @@ void Character::setAFK(bool pAFK) {
 	mAFK = pAFK;
 }
 
+bool Character::getAFK() {
+	return mAFK;
+}
+
 void Character::setShowHelm(bool pShowHelm) {
 	mProfile->showhelm = pShowHelm ? 1 : 0;
+}
+bool Character::getShowHelm() {
+	return mProfile->showhelm == 1;
 }
 
 void Character::message(uint32 pType, std::string pMessage)
@@ -137,6 +144,11 @@ void Character::damage(uint32 pAmount) {
 void Character::setAnonymous(uint8 pAnonymous) {
 	mProfile->mAnonymous = pAnonymous;
 }
+
+uint8 Character::getAnonymous() {
+	return mProfile->mAnonymous;
+}
+
 
 void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
 {

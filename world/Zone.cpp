@@ -2,6 +2,7 @@
 #include "World.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
+#include "Constants.h"
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -126,10 +127,6 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->getConnection()->sendPosition();
 }
 
-void Zone::updateCharacterPosition(Character* pCharacter, float pX, float pY, float pZ, float pHeading){
-	pCharacter->setPosition(pX, pY, pZ, pHeading);
-}
-
 void Zone::notifyCharacterLogOut(Character* pCharacter)
 {
 	// TODO: Tell Everyone!
@@ -168,30 +165,56 @@ void Zone::notifyCharacterZoneIn(Character* pCharacter) {
 }
 
 
+void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
+	// Notify players in zone.
+	ZoneClientConnection* sender = pCharacter->getConnection();
+	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
+	for (auto i : mZoneClientConnections) {
+		if (i != sender)
+			i->sendPacket(outPacket);
+	}
+	safe_delete(outPacket);
+}
+
+
 void Zone::notifyCharacterLinkDead(Character* pCharacter)
 {
 	// TODO: Tell Everyone!
 }
 
-void Zone::notifyCharacterAFK(Character* mCharacter, bool pAFK)
-{
-	// TODO: Tell Everyone!
+void Zone::notifyCharacterAFK(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::AFK, pCharacter->getAFK());
 }
 
-void Zone::notifyCharacterShowHelm(Character* mCharacter, bool pShowHelm)
-{
-	// TODO: Tell Everyone!
+void Zone::notifyCharacterShowHelm(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::ShowHelm, pCharacter->getShowHelm());
 }
 
-void Zone::notifyCharacterAnonymous(uint8 pAnonymous)
-{
-	// TODO: Tell Everyone!
+void Zone::notifyCharacterAnonymous(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Anonymous, pCharacter->getAnonymous());
 }
 
-void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
-	// Notify players in zone.
-	ZoneClientConnection* sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
+void Zone::notifyCharacterStanding(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Standing);
+}
+
+void Zone::notifyCharacterSitting(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Sitting);
+}
+
+void Zone::notifyCharacterCrouching(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Crouch);
+}
+
+
+void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceTypes pType, uint32 pParameter) {
+	const ZoneClientConnection* sender = pCharacter->getConnection();
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* appearance = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
+	appearance->spawn_id = pCharacter->getSpawnID();
+	appearance->type = pType;
+	appearance->parameter = pParameter;
+
 	for (auto i : mZoneClientConnections) {
 		if (i != sender)
 			i->sendPacket(outPacket);

@@ -502,6 +502,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		switch (actionParameter) {
 		case SpawnAppearanceAnimations::Standing:
 			mCharacter->setStanding(true);
+			mZone->notifyCharacterStanding(mCharacter);
 			break;
 		case SpawnAppearanceAnimations::Freeze:
 			break;
@@ -509,9 +510,11 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 			break;
 		case SpawnAppearanceAnimations::Sitting:
 			mCharacter->setStanding(false);
+			mZone->notifyCharacterSitting(mCharacter);
 			break;
 		case SpawnAppearanceAnimations::Crouch:
 			// Crouch or Jump triggers this.
+			mZone->notifyCharacterCrouching(mCharacter);
 			break;
 		case SpawnAppearanceAnimations::Death:
 			break;
@@ -527,7 +530,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter >= 0 && actionParameter <= 2) {
 			// Update character and notify zone.
 			mCharacter->setAnonymous(actionParameter);
-			mZone->notifyCharacterAnonymous(actionParameter);
+			mZone->notifyCharacterAnonymous(mCharacter);
 		}
 		// Anything else is ignored.
 		break;
@@ -536,12 +539,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setAFK(false);
-			mZone->notifyCharacterAFK(mCharacter, false);
+			mZone->notifyCharacterAFK(mCharacter);
 		}
 		else if (actionParameter == 1) {
 			// Update character and notify zone.
 			mCharacter->setAFK(true);
-			mZone->notifyCharacterAFK(mCharacter, true);
+			mZone->notifyCharacterAFK(mCharacter);
 		}
 		// Anything else is ignored.
 		break;
@@ -549,12 +552,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setShowHelm(false);
-			mZone->notifyCharacterShowHelm(mCharacter, false);
+			mZone->notifyCharacterShowHelm(mCharacter);
 		}
 		else if (actionParameter == 1) {
 			// Update character and notify zone.
 			mCharacter->setShowHelm(true);
-			mZone->notifyCharacterShowHelm(mCharacter, true);
+			mZone->notifyCharacterShowHelm(mCharacter);
 		}
 		// Anything else is ignored.
 		break;

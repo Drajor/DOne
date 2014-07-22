@@ -71,7 +71,9 @@ public:
 	void setLoggedOut(bool pLoggedOut) { mLoggedOut = pLoggedOut; }
 	bool getLoggedOut() { return mLoggedOut; }
 	void setAFK(bool pAFK);
+	bool getAFK();
 	void setShowHelm(bool pShowHelm);
+	bool getShowHelm();
 
 	void message(uint32 pType, std::string pMessage);
 	
@@ -105,6 +107,8 @@ public:
 	float getSize() { return mSize; }
 	int32 getAnimation() { return mAnimation; }
 	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
+	void setAnonymous(uint8 pAnonymous);
+	uint8 getAnonymous();
 	
 	// Target Group Buff
 	void setTGB(bool pTGB) { mTGB = pTGB; }
@@ -134,7 +138,7 @@ private:
 	int32 mDeltaHeading;
 	int32 mAnimation;
 	void _updateProfilePosition();
-	void setAnonymous(uint8 pAnonymous);
+	
 	
 	float mSize;
 	uint16 mDeity;
