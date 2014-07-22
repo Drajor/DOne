@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/types.h"
+#include "../common/timer.h"
 #include <string>
 
 class EQStreamInterface;
@@ -81,6 +82,7 @@ private:
 	void _handleTGB(const EQApplicationPacket* pPacket);
 	
 	bool mConnected;
+	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;
 	DataStore* mDataStore;
 	Zone* mZone;

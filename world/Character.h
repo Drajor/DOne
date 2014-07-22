@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Constants.h"
 #include "../common/types.h"
 #include "../common/timer.h"
 #include <string>
@@ -47,6 +48,8 @@ public:
 	~Character();
 
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool onZoneIn();
+	bool onZoneOut();
 
 	void setZone(Zone* pZone) { mZone = pZone; }
 	void setSpawnID(uint16 pSpawnID) { mSpawnID = pSpawnID; }
@@ -106,10 +109,14 @@ public:
 	uint16 getDeity() { return mDeity; }
 	float getSize() { return mSize; }
 	int32 getAnimation() { return mAnimation; }
+	SpawnAppearanceAnimation getAppearance() { return mAppearance; }
 	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
 	void setAnonymous(uint8 pAnonymous);
 	uint8 getAnonymous();
-	
+	uint8 getGM();
+	uint8 getGuildRank() { return mGuildRank; }
+	uint32 getGuildID() { return mGuildID; }
+
 	// Target Group Buff
 	void setTGB(bool pTGB) { mTGB = pTGB; }
 	bool getTGB() { return mTGB; }
@@ -128,6 +135,8 @@ public:
 	int32 getMaximumEndurance() { return mMaximumEndurance; }
 private:
 
+	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
+
 	float mX;
 	float mY;
 	float mZ;
@@ -137,8 +146,11 @@ private:
 	int32 mDeltaZ;
 	int32 mDeltaHeading;
 	int32 mAnimation;
+	SpawnAppearanceAnimation mAppearance;
 	void _updateProfilePosition();
 	
+
+
 	
 	float mSize;
 	uint16 mDeity;
@@ -148,6 +160,9 @@ private:
 	uint8 mGender;
 	float mRunSpeed;
 	float mWalkSpeed;
+
+	uint8 mGuildRank;
+	uint32 mGuildID;
 
 	int32 mCurrentHP;
 	int32 mMaximumHP;
@@ -162,6 +177,7 @@ private:
 	uint16 mSpawnID;
 	std::string mName;
 	std::string mLastName;
+	bool mGM;
 	bool mStanding;
 	bool mAFK;
 	bool mLoggedOut; // Flag indicating whether this character logged out via /camp

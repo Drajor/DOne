@@ -46,7 +46,7 @@ public:
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 	
 private:
-	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceTypes pType, uint32 pParameter);
+	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter);
 	void _handleIncomingConnections();
 	
 

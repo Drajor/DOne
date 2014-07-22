@@ -37,7 +37,11 @@ mDeltaX(0),
 mDeltaY(0),
 mDeltaZ(0),
 mDeltaHeading(0),
-mAnimation(0)
+mAnimation(0),
+mAppearance(SpawnAppearanceAnimation::Standing),
+mGM(0),
+mGuildID(0xFFFFFFFF),
+mGuildRank(0xFF)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -53,7 +57,12 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 
 	mName = mProfile->name;
 	mRace = mProfile->race;
+	mClass = mProfile->class_;
+	mGender = mProfile->gender;
+	mLevel = mProfile->level;
 	mStatus = 255;
+	mGM = mProfile->gm;
+	mGM = true; // testing!
 
 	mX = mProfile->x;
 	mY = mProfile->y;
@@ -67,10 +76,24 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	return true;
 }
 
+bool Character::onZoneIn() {
+	return true;
+}
+
+bool Character::onZoneOut() {
+	return true;
+}
+
 void Character::setStanding(bool pStanding) {
 	mStanding = pStanding;
-	if (mStanding)
+	if (mStanding) {
 		mCampTimer.Disable();
+		_setAppearance(Standing);
+	}
+	else {
+		_setAppearance(Sitting);
+	}
+		
 }
 
 void Character::startCamp() {
@@ -156,4 +179,8 @@ void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, i
 	mDeltaY = pDeltaY;
 	mDeltaZ = pDeltaZ;
 	mDeltaHeading = pDeltaHeading;
+}
+
+uint8 Character::getGM() {
+	return mGM;
 }

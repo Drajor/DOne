@@ -182,32 +182,14 @@ void Zone::notifyCharacterLinkDead(Character* pCharacter)
 	// TODO: Tell Everyone!
 }
 
-void Zone::notifyCharacterAFK(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::AFK, pCharacter->getAFK());
-}
+void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->getAFK()); }
+void Zone::notifyCharacterShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
+void Zone::notifyCharacterAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
+void Zone::notifyCharacterStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Standing); }
+void Zone::notifyCharacterSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
+void Zone::notifyCharacterCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
 
-void Zone::notifyCharacterShowHelm(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::ShowHelm, pCharacter->getShowHelm());
-}
-
-void Zone::notifyCharacterAnonymous(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Anonymous, pCharacter->getAnonymous());
-}
-
-void Zone::notifyCharacterStanding(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Standing);
-}
-
-void Zone::notifyCharacterSitting(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Sitting);
-}
-
-void Zone::notifyCharacterCrouching(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypes::Animation, SpawnAppearanceAnimations::Crouch);
-}
-
-
-void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceTypes pType, uint32 pParameter) {
+void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* appearance = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
