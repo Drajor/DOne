@@ -412,6 +412,7 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
 	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
 	mZone->notifyCharacterZoneIn(mCharacter);
+	mZone->addCharacter(mCharacter);
 	mCharacter->onZoneIn();
 	mForceSendPositionTimer.Start(4000);
 }
@@ -606,11 +607,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	const std::string targetName = payload->targetname;
 
 	// Check message size.
-	if (message.empty()) {
-		Log::error("[Zone Client Connection] Got empty message, dropping connection.");
-		dropConnection();
-		return;
-	}
+	if (message.empty()) { return; }
 
 	std::stringstream ss;
 	ss << "[CHAT] Sender(" << payload->sender << ") Target(" << payload->targetname << ") Channel(" << payload->chan_num << ") Message(" << payload->message << ")";
@@ -633,6 +630,9 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	case ChannelID::CH_BROADCAST:
 		break;
 	case ChannelID::CH_TELL:
+		if (senderName.length() > 0 && targetName.length() > 0) {
+			mZone->notifyCharacterChatTell(mCharacter, targetName, message);
+		}
 		break;
 	case ChannelID::CH_SAY:
 		// Check whether user has entered a command.

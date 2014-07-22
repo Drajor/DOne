@@ -27,20 +27,6 @@ struct Vector4 {
 	float h;
 };
 
-// [Client Limitation][UF] These values are set by the client.
-enum MessageColour {
-	MC_White = 0,
-	MC_Grey = 1,
-	MC_DarkGreen = 2,
-	MC_LightBlue = 4,
-	MC_Pink = 5,
-	MC_Red = 13,
-	MC_LightGreen = 14,
-	MC_Yellow = 15,
-	MC_DarkBlue = 16,
-	MC_Aqua = 18
-};
-
 class Character {
 	friend ZoneClientConnection;
 public:

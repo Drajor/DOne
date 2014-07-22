@@ -22,6 +22,7 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
 	void removeAuthentication(std::string pCharacterName);
 	bool checkAuthentication(std::string pCharacterName);
+	void addCharacter(Character* pCharacter);
 
 	void shutdown();
 	void update();
@@ -45,15 +46,17 @@ public:
 	void notifyCharacterChatShout(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage);
+	void notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 	
 private:
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
+	void _sendTell(Character* pCharacter, const std::string pFromName, const std::string pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter);
 	void _handleIncomingConnections();
-
+	
 
 
 

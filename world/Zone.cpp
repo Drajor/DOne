@@ -65,6 +65,10 @@ bool Zone::checkAuthentication(std::string pCharacterName) {
 	return false;
 }
 
+void Zone::addCharacter(Character* pCharacter) {
+	mCharacters.push_back(pCharacter);
+}
+
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
@@ -238,6 +242,48 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::strin
 		if (i != sender)
 			i->sendPacket(outPacket);
 	}
+	safe_delete(outPacket);
+}
+
+void Zone::notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage) {
+	// Check if receiver is in zone.
+	for (auto i : mCharacters) {
+		if (i->getName() == pTargetName) {
+			_sendTell(i, pCharacter->getName(), pMessage);
+			// Send reply back to sender.
+			std::stringstream ss;
+			ss << "You told " << pTargetName << ", '" << pMessage << "'";
+			pCharacter->getConnection()->sendMessage(MC_White, ss.str());
+			return;
+		}
+	}
+
+	// TODO: OOZ
+	// As per below. Not sure how keen I am about having Character* from another zone in here.
+	/*
+	Character* other = mZoneManager->findCharacter(pTargetName);
+	if (other) {
+		_sendTell(i, pCharacter->getName(), pMessage);
+		return;
+	}
+	*/
+
+	// Character was found not in this zone or others.
+	std::stringstream ss;
+	ss << "You told " << pTargetName << ", '" << pTargetName << " is not online at this time'";
+	pCharacter->getConnection()->sendMessage(MC_White, ss.str());
+}
+
+void Zone::_sendTell(Character* pCharacter, const std::string pFromName, const std::string pMessage) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
+	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
+	payload->language = Language::COMMON_TONGUE_LANG;
+	payload->skill_in_language = 0;
+	payload->chan_num = CH_TELL;
+	strcpy(payload->message, pMessage.c_str());
+	strcpy(payload->sender, pFromName.c_str());
+
+	pCharacter->getConnection()->sendPacket(outPacket);
 	safe_delete(outPacket);
 }
 
