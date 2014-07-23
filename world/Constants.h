@@ -147,6 +147,7 @@ enum ChannelID : uint32 {
 	CH_BROADCAST = 6, // ??
 	CH_TELL = 7, // /t
 	CH_SAY = 8, // /say
+	CH_GMSAY = 11, // ??
 	CH_RAID = 15, // /rs
 	CH_UCS = 20, // Not sure yet.
 	CH_EMOTE = 22 // UF+
@@ -182,4 +183,21 @@ enum Language : uint32 {
 	ALARAN_LANG = 25,
 	HADAL_LANG = 26,
 	UNKNOWN_LANG = 27
+};
+
+enum Animation : uint8 {
+	ANIM_KICK = 1,
+	ANIM_PIERCING = 2,	//might be piercing?
+	ANIM_2HSLASHING = 3,
+	ANIM_2HWEAPON = 4,
+	ANIM_1HWEAPON = 5,
+	ANIM_DUALWIELD = 6,
+	ANIM_TAILRAKE = 7,	//slam & Dpunch too
+	ANIM_HAND2HAND = 8,
+	ANIM_SHOOTBOW = 9,
+	ANIM_ROUNDKICK = 11,
+	ANIM_SWARMATTACK = 20,	//dunno about this one..
+	ANIM_FLYINGKICK = 45,
+	ANIM_TIGERCLAW = 46,
+	ANIM_EAGLESTRIKE = 47,
 };

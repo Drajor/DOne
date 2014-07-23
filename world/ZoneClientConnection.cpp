@@ -16,6 +16,14 @@
 
 #include "../common/MiscFunctions.h"
 
+/*
+Known GM Commands
+/goto
+/kill
+/summon
+/emotezone
+*/
+
 ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone) :
 mStreamInterface(pStreamInterface),
 mZone(pZone),
@@ -188,6 +196,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_MercenaryDismiss:
 	case OP_MercenaryTimerRequest:
 		break;
+	case OP_Emote:
+		_handleEmote(pPacket);
+		break;
+	case OP_Animation:
+		_handleAnimation(pPacket);
+		break;
 	default:
 		std::stringstream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -212,16 +226,8 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		return;
 	}
 
-	ClientZoneEntry_Struct* payload = (ClientZoneEntry_Struct*)pPacket->pBuffer;
-
-	// Check character name is valid.
-	if (strlen(payload->char_name) > 63) { // TODO: Remove magic number.
-		Log::error("[Zone Client Connection] Received wrong sized character name in ClientZoneEntry_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
-
-	std::string characterName = payload->char_name;
+	ClientZoneEntry_Struct* payload = reinterpret_cast<ClientZoneEntry_Struct*>(pPacket->pBuffer);
+	std::string characterName = Utility::safeString(payload->char_name, 64);
 
 	// Check that this Zone is expecting this client.
 	if (!mZone->checkAuthentication(characterName)) {
@@ -594,25 +600,23 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	// Check packet size.
 	// NOTE: This packet size increases with message size.
 	static const std::size_t EXPECTED_SIZE = sizeof(ChannelMessage_Struct);
-	if (pPacket->size < EXPECTED_SIZE || pPacket->size > 661) { // TODO: Magic number. 661 is biggest UF can send legitimately.
+	static const std::size_t MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
+	if (pPacket->size < EXPECTED_SIZE || pPacket->size > MAXIMUM_SIZE) {
 		Log::error("[Zone Client Connection] Wrong sized ChannelMessage_Struct, dropping connection.");
 		dropConnection();
 		return;
 	}
 
 	ChannelMessage_Struct* payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
+
+	static const std::size_t MAX_MESSAGE_SIZE = 513;
+	static const std::size_t MAX_SENDER_SIZE = 64;
+	static const std::size_t MAX_TARGET_SIZE = 64;
+	const std::string message = Utility::safeString(payload->message, MAX_MESSAGE_SIZE);
+	const std::string senderName = Utility::safeString(payload->sender, MAX_SENDER_SIZE);
+	const std::string targetName = Utility::safeString(payload->targetname, MAX_TARGET_SIZE);
 	const uint32 channel = payload->chan_num;
-	const std::string message = payload->message; // TODO: I am sure if this is completely safe.
-	const std::string senderName = payload->sender;
-	const std::string targetName = payload->targetname;
-
-	// Check message size.
-	if (message.empty()) { return; }
-
-	std::stringstream ss;
-	ss << "[CHAT] Sender(" << payload->sender << ") Target(" << payload->targetname << ") Channel(" << payload->chan_num << ") Message(" << payload->message << ")";
-	Log::info(ss.str());
-
+	
 	switch (channel) {
 	case ChannelID::CH_GUILD:
 		break;
@@ -627,7 +631,9 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	case ChannelID::CH_OOC:
 		mZone->notifyCharacterChatOOC(mCharacter, message);
 		break;
+	case ChannelID::CH_GMSAY:
 	case ChannelID::CH_BROADCAST:
+		// GM_SAY / CH_BROADAST are unused as far as I know.
 		break;
 	case ChannelID::CH_TELL:
 		if (senderName.length() > 0 && targetName.length() > 0) {
@@ -646,7 +652,9 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		break;
 	case ChannelID::CH_UCS:
 		break;
+		// /emote dances around wildly!
 	case ChannelID::CH_EMOTE:
+		mZone->notifyCharacterEmote(mCharacter, message);
 		break;
 	default:
 		std::stringstream ss;
@@ -906,4 +914,82 @@ void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
 	strcpy(pSpawn->spawn.lastName, mCharacter->getLastName().c_str());
 	// TODO: Equipment materials when Items.
 	memset(pSpawn->spawn.set_to_0xFF, 0xFF, sizeof(pSpawn->spawn.set_to_0xFF));
+}
+
+void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(Emote_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Wrong sized Emote_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	static const unsigned int MAX_EMOTE_SIZE = 1024;
+	Emote_Struct* payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
+	std::string message = Utility::safeString(payload->message, MAX_EMOTE_SIZE);
+	mZone->notifyCharacterEmote(mCharacter, message);
+}
+
+void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const std::size_t EXPECTED_SIZE = sizeof(Animation_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Wrong sized Animation_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+	/*
+	/dance A=10 V=58
+	/rude /finger /bird /flipoff A=10 V=30
+	/bow A=10 V=70
+	/shrug A=10 V=65
+	/smile A=10 V=77
+	/cheer /happy A=10 V=27
+	/brb /wave A=10 V=29
+	/applaud /clap A=10 V=51
+	/bleed /hungry A=10 V=52
+	/blink A=10 V=59
+	/blush A=10 V=53
+	/boggle /agree A=10 V=49
+	/bored /yawn A=10 V=31
+	/burp /cough A=10 V=55
+	/cackle /chuckle /giggle /snicker A=10 V=54
+	/cringe /duck A=10 V=56
+	/cry /frown /mourn A=10 V=28
+	/curious /stare A=10 V=57
+	/drool /peer /whistle A=10 V=61
+	/gasp A=10 V=49
+	/glare A=10 V=60
+	/grovel /plead /apologize A=10 V=50
+	/kneel A=10 V=62
+	/point A=10 V=64
+	/ponder /shrug A=10 V=65
+	/puzzle A=10 V=57
+	/raise /ready A=10 V=66
+	/salute A=10 V=67
+	/shiver A=10 V=68
+	/tap A=10 V=69
+	/thank A=10 V=70
+	/veto A=10 V=59
+
+	http://everquest.allakhazam.com/history/patches-1999.html
+	New emotes:
+	- Here is a list of new emotes that have been added to the game: agree,
+	amaze, apologize, applaud, plead, bite, bleed, blink, blush, boggle,
+	bonk, bored, brb, burp, bye, cackle, calm, clap, comfort, congratulate,
+	cough, cringe, curious, dance, drool, duck, eye, gasp, giggle, glare,
+	grin, groan, grovel, happy, hungry, introduce, jk (just kidding),
+	kneel, lost, massage, moan, mourn, peer, point, ponder, puzzle, raise,
+	ready, roar, salute, shiver, shrug, sigh, smirk, snarl, snicker, stare,
+	tap, tease, thank, thirsty, veto, welcome, whine, whistle, yawn.
+	*/
+
+
+
+	Animation_Struct* payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
+	std::stringstream ss;
+	ss << "[Animation] - Action=" << (int)payload->action << "  Value=" << (int)payload->value;
+	Log::info(ss.str());
+	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value);
 }

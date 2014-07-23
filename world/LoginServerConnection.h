@@ -20,6 +20,7 @@
 
 #include "../common/timer.h"
 #include "../common/types.h"
+#include <string>
 
 class EmuTCPConnection;
 class ServerPacket;
@@ -28,7 +29,7 @@ class AccountManager;
 
 class LoginServerConnection{
 public:
-	LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword);
+	LoginServerConnection(World* pWorld, std::string pAddress, uint16 pPort, std::string pAccountName, std::string pPassword);
 	~LoginServerConnection();
 
 	bool initialise();
@@ -48,11 +49,11 @@ private:
 
 	World* mWorld;
 	EmuTCPConnection* mTCPConnection;
-	char mLoginServerAddress[256];
+	std::string mLoginServerAddress;
 	uint32 mLoginServerIP;
 	uint16 mLoginServerPort;
-	char mLoginAccount[32];
-	char mLoginPassword[32];
+	std::string mLoginAccount;
+	std::string mLoginPassword;
 	Timer mStatusUpdateTimer;
 };
 #endif

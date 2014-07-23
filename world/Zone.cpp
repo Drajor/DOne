@@ -228,6 +228,21 @@ void Zone::notifyCharacterChatOOC(Character* pCharacter, const std::string pMess
 	// TODO: Server OOC
 }
 
+void Zone::notifyCharacterEmote(Character* pCharacter, const std::string pMessage) {
+	const ZoneClientConnection* sender = pCharacter->getConnection();
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Emote, 4 + pMessage.length() + pCharacter->getName().length() + 2);
+	Emote_Struct* payload = reinterpret_cast<Emote_Struct*>(outPacket->pBuffer);
+	char* Buffer = (char*)payload;
+	Buffer += 4;
+	snprintf(Buffer, sizeof(Emote_Struct)-4, "%s %s", pCharacter->getName().c_str(), pMessage.c_str());
+
+	for (auto i : mZoneClientConnections) {
+		if (i != sender)
+			i->sendPacket(outPacket);
+	}
+	safe_delete(outPacket);
+}
+
 void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
@@ -287,3 +302,15 @@ void Zone::_sendTell(Character* pCharacter, const std::string pFromName, const s
 	safe_delete(outPacket);
 }
 
+void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pValue) {
+	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
+	Animation_Struct* payload = reinterpret_cast<Animation_Struct*>(outPacket->pBuffer);
+	payload->spawnid = pCharacter->getSpawnID();
+	payload->action = pAction;
+	payload->value = pValue;
+
+	for (auto i : mZoneClientConnections) {
+		i->sendPacket(outPacket);
+	}
+	safe_delete(outPacket);
+}

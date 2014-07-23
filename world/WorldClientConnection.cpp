@@ -69,10 +69,8 @@ WorldClientConnection::~WorldClientConnection() {
 }
 
 void WorldClientConnection::_sendLogServer() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
-	LogServer_Struct* payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
-	//const char *wsn=WorldConfig::get()->ShortName.c_str();
-	//memcpy(payload->worldshortname,wsn,strlen(wsn));
+	auto outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
+	auto payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
 	strcpy(payload->worldshortname, "ShortNameToDo"); // TODO:
 
 	if(RuleB(Mail, EnableMailSystem))
@@ -93,15 +91,16 @@ void WorldClientConnection::_sendLogServer() {
 }
 
 void WorldClientConnection::_sendEnterWorld(std::string pCharacterName) {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
+	// TODO: Play with this +1 business.
+	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
 	memcpy(outPacket->pBuffer, pCharacterName.c_str(), pCharacterName.length() + 1);
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendExpansionInfo() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
-	ExpansionInfo_Struct* payload = reinterpret_cast<ExpansionInfo_Struct*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
+	auto payload = reinterpret_cast<ExpansionInfo_Struct*>(outPacket->pBuffer);
 	payload->Expansions = (RuleI(World, ExpansionSettings));
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
@@ -116,17 +115,16 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 		_sendMembershipSettings();
 	}
 
-	// Send OP_SendCharInfo
-	EQApplicationPacket *outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
-	CharacterSelect_Struct* payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
+	auto payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
 	mWorld->getCharacterSelectInfo(mWorldAccountID, payload);
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendMaxCharCreate(int max_chars) {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
-	MaxCharacters_Struct* payload = reinterpret_cast<MaxCharacters_Struct*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
+	auto payload = reinterpret_cast<MaxCharacters_Struct*>(outPacket->pBuffer);
 
 	payload->max_chars = max_chars;
 
@@ -135,8 +133,8 @@ void WorldClientConnection::_sendMaxCharCreate(int max_chars) {
 }
 
 void WorldClientConnection::_sendMembership() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
-	Membership_Struct* payload = reinterpret_cast<Membership_Struct*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
+	auto payload = reinterpret_cast<Membership_Struct*>(outPacket->pBuffer);
 
 	/*
 		The remaining entry fields probably hold more membership restriction data that needs to be identified.
@@ -301,27 +299,22 @@ void WorldClientConnection::_sendMembershipSettings() {
 }
 
 void WorldClientConnection::_sendPostEnterWorld() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
+	auto outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outPacket->size = 0;
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
-	if (pPacket->size != sizeof(LoginInfo_Struct)) {
+	// Check packet size.
+	static const auto EXPECTED_SIZE = sizeof(LoginInfo_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
 		Log::error("[World Client Connection] Wrong sized LoginInfo_Struct");
 		dropConnection();
 		return false;
 	}
 
-	/*
-	OP_SendLoginInfo is sent;
-		- Transitioning from Server Select to Character Select
-		- Zoning
-		- Camping
-	*/
-
-	LoginInfo_Struct* payload = reinterpret_cast<LoginInfo_Struct*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<LoginInfo_Struct*>(pPacket->pBuffer);
 
 	// Quagmire - max len for name is 18, pass 15
 	char name[19] = {0};
@@ -421,13 +414,13 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 
 bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
 	// TODO: Check this packet size.
-
+	
 	snprintf(char_name, 64, "%s", (char*)pPacket->pBuffer);
 	// TODO: Consider why race and class are sent here?
 	uchar race = pPacket->pBuffer[64];
 	uchar clas = pPacket->pBuffer[68];
 
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ApproveName, 1);
+	auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 	bool valid = true;
 	std::string characterName = char_name;
 	const int nameLength = characterName.length();
@@ -602,7 +595,7 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	len += sizeof(uint32);
 	len += sizeof(uint32);
 
-	EQApplicationPacket *outPacket = new EQApplicationPacket(OP_CharacterCreateRequest, len);
+	auto outPacket = new EQApplicationPacket(OP_CharacterCreateRequest, len);
 	unsigned char *ptr = outPacket->pBuffer;
 	*((uint8*)ptr) = 0;
 	ptr += sizeof(uint8);
@@ -628,14 +621,16 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 }
 
 bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
-	if (pPacket->size != sizeof(CharCreate_Struct)) {
+	// Check packet size.
+	static const auto EXPECTED_SIZE = sizeof(CharCreate_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
 		Log::error("[World Client Connection] Wrong sized CharCreate_Struct, dropping connection.");
 		dropConnection();
 		return false;
 	}
 
 	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
-	CharCreate_Struct* payload = reinterpret_cast<CharCreate_Struct*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<CharCreate_Struct*>(pPacket->pBuffer);
 	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, payload)) {
 		Log::error("[World Client Connection] Character creation failed, dropping connection.");
 		dropConnection();
@@ -653,7 +648,7 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	// Sent after pressing 'Enter World' at Character Select.
 	// Is it sent while zoning?
 
-	EnterWorld_Struct* payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
 	std::string characterName = payload->name;
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
@@ -789,13 +784,25 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 
 bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
 	// TODO: Check character is not in zone before deleting..
-	std::string characterName = (char*)pPacket->pBuffer;
-	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
-		Log::info("Delete Character: %s"); // TODO:
-		_sendCharacterSelectInfo();
+	// Check packet size.
+	static const auto MAXIMUM_NAME_SIZE = 64;
+	if (pPacket->size > MAXIMUM_NAME_SIZE) {
+		Log::error("[World Client Connection] Too many characters in character delete.");
+		dropConnection();
+		return false;
 	}
-	// TODO: Log Error / Drop connection.
-	return true;
+
+	std::string characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
+	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
+		std::stringstream ss;
+		ss << "[World Client Connection] Character: " << characterName << " deleted.";
+		Log::info(ss.str());
+		_sendCharacterSelectInfo();
+		return true;
+	}
+
+	Log::error("[World Client Connection] Failed to delete character.");
+	return false;
 }
 
 bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* pPacket) {
@@ -824,43 +831,34 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		{
 			return true;
 		}
-		case OP_SendLoginInfo:
-		{
+		case OP_SendLoginInfo: {
 			return _handleSendLoginInfoPacket(pPacket);
 		}
-		case OP_ApproveName: //Name approval
-		{
+		case OP_ApproveName: {
 			return _handleNameApprovalPacket(pPacket);
 		}
-		case OP_RandomNameGenerator:
-		{
+		case OP_RandomNameGenerator: {
 			return _handleGenerateRandomNamePacket(pPacket);
 		}
-		case OP_CharacterCreateRequest:
-		{
+		case OP_CharacterCreateRequest: {
 			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
 			return _handleCharacterCreateRequestPacket(pPacket);
 		}
-		case OP_CharacterCreate: //Char create
-		{
+		case OP_CharacterCreate: {
 			return _handleCharacterCreatePacket(pPacket);
 		}
-		case OP_EnterWorld: // Enter world
-		{
-								Utility::print("OP_EnterWorld");
+		case OP_EnterWorld: {
 			return _handleEnterWorldPacket(pPacket);
 		}
 		case OP_DeleteCharacter:
 		{
 			return _handleDeleteCharacterPacket(pPacket);
 		}
-		case OP_WorldComplete:
-		{
+		case OP_WorldComplete: {
 			mStreamInterface->Close();
 			return true;
 		}
-		case OP_ZoneChange:
-		{
+		case OP_ZoneChange: {
 			// HoT sends this to world while zoning and wants it echoed back.
 			return _handleZoneChangePacket(pPacket);
 		}
@@ -876,10 +874,8 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 			// they are handled.
 			return true;
 		}
-		default:
-		{
-			clog(WORLD__CLIENT_ERR,"Received unknown EQApplicationPacket");
-			_pkt(WORLD__CLIENT_ERR,pPacket);
+		default: {
+			Log::error("[World Client Connection] Got unexpected packet, ignoring.");
 			return true;
 		}
 	}
@@ -906,8 +902,8 @@ bool WorldClientConnection::update() {
 }
 
 void WorldClientConnection::_sendZoneServerInfo() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
-	ZoneServerInfo_Struct* payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
+	auto payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
 	payload->port = mWorld->getZonePort(ZoneIDs::NorthQeynos); // TODO: Hardcode.
 	strcpy(payload->ip, "127.0.0.1");
 	_queuePacket(outPacket);
@@ -916,18 +912,15 @@ void WorldClientConnection::_sendZoneServerInfo() {
 
 
 void WorldClientConnection::_sendZoneUnavailable() {
-	// NOTE: In HoT it doesnt matter what 'zone name' is sent back.
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
-	ZoneUnavail_Struct* payload = reinterpret_cast<ZoneUnavail_Struct*>(outPacket->pBuffer);
+	// NOTE: In UF it doesnt matter what 'zone name' is sent back.
+	auto outPacket = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
+	auto payload = reinterpret_cast<ZoneUnavail_Struct*>(outPacket->pBuffer);
 	strcpy(payload->zonename, "NONE");
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_queuePacket(const EQApplicationPacket* pPacket, bool ack_req) {
-	clog(WORLD__CLIENT_TRACE, "Sending EQApplicationPacket OpCode 0x%04x",pPacket->GetOpcode());
-	_pkt(WORLD__CLIENT_TRACE, pPacket);
-
 	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
 	mStreamInterface->QueuePacket(pPacket, ack_req);
 }
@@ -952,8 +945,8 @@ void WorldClientConnection::_sendGuildList() {
 // @merth: I have no idea what this struct is for, so it's hardcoded for now
 void WorldClientConnection::_sendApproveWorld() {
 	// Send OPCode: OP_ApproveWorld, size: 544
-	 EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ApproveWorld, sizeof(ApproveWorld_Struct));
-	 ApproveWorld_Struct* payload = reinterpret_cast<ApproveWorld_Struct*>(outPacket->pBuffer);
+	 auto outPacket = new EQApplicationPacket(OP_ApproveWorld, sizeof(ApproveWorld_Struct));
+	 auto payload = reinterpret_cast<ApproveWorld_Struct*>(outPacket->pBuffer);
 	uchar foo[] = {
 //0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x95,0x5E,0x30,0xA5,0xCA,0xD4,0xEA,0xF5,
 //0xCB,0x14,0xFC,0xF7,0x78,0xE2,0x73,0x15,0x90,0x17,0xCE,0x7A,0xEB,0xEC,0x3C,0x34,

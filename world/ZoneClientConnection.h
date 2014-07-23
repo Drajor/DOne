@@ -80,7 +80,8 @@ private:
 	void _handleUpdateAA(const EQApplicationPacket* pPacket);
 	void _handleTarget(const EQApplicationPacket* pPacket);
 	void _handleTGB(const EQApplicationPacket* pPacket);
-	
+	void _handleEmote(const EQApplicationPacket* pPacket);
+	void _handleAnimation(const EQApplicationPacket* pPacket);
 	bool mConnected;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;

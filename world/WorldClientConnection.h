@@ -25,15 +25,9 @@
 #include "../common/logsys.h"
 #include "../common/eq_packet_structs.h"
 
-#define CLIENT_TIMEOUT 30000
-
 class EQApplicationPacket;
 class EQStreamInterface;
 class World;
-
-/*
-TODO: Work out when to drop a WorldClientConnection. It looks like Zone previously had a role in this.
-*/
 
 class WorldClientConnection {
 public:

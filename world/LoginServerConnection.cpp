@@ -48,15 +48,15 @@
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(World* pWorld, const char* pAddress, uint16 pPort, const char* pAccountName, const char* pPassword) :
+LoginServerConnection::LoginServerConnection(World* pWorld, std::string pAddress, uint16 pPort, std::string pAccountName, std::string pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
 	mWorld(pWorld),
-	mTCPConnection(0)
+	mTCPConnection(0),
+	mLoginServerAddress(pAddress),
+	mLoginAccount(pAccountName),
+	mLoginPassword(pPassword),
+	mLoginServerPort(pPort)
 {
-	strn0cpy(mLoginServerAddress,pAddress,256);
-	mLoginServerPort = pPort;
-	strn0cpy(mLoginAccount,pAccountName,31);
-	strn0cpy(mLoginPassword,pPassword,31);
 	mTCPConnection = new EmuTCPConnection(true);
 	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
 }
@@ -71,13 +71,8 @@ void LoginServerConnection::update() {
 		mStatusUpdateTimer.Start();
 	}
 
-	/************ Get all packets from packet manager out queue and process them ************/
 	ServerPacket* packet = 0;
-	while((packet = mTCPConnection->PopPacket()))
-	{
-		_log(WORLD__LS_TRACE,"Recevied ServerPacket from LS OpCode 0x04x",packet->opcode);
-		_hex(WORLD__LS_TRACE,packet->pBuffer,packet->size);
-
+	while((packet = mTCPConnection->PopPacket())) {
 		switch(packet->opcode) {
 			case 0:
 				break;
@@ -109,8 +104,7 @@ void LoginServerConnection::update() {
 				break;
 			}
 			default: {
-				_log(WORLD__LS_ERR, "Unknown LSOpCode: 0x%04x size=%d",(int)packet->opcode,packet->size);
-				DumpPacket(packet->pBuffer, packet->size);
+				Log::error("[Login Server Connection] Got unexpected packet, ignoring.");
 				break;
 			}
 		}
@@ -135,7 +129,7 @@ bool LoginServerConnection::initialise() {
 bool LoginServerConnection::connect() {
 	char errbuf[TCPConnection_ErrorBufferSize];
 
-	mLoginServerIP = ResolveIP(mLoginServerAddress, errbuf);
+	mLoginServerIP = ResolveIP(mLoginServerAddress.c_str(), errbuf);
 	if (mLoginServerIP == 0) {
 		Log::error("[Login Server Connection] Unable to resolve Login Server IP");
 		return false;
@@ -158,16 +152,18 @@ bool LoginServerConnection::connect() {
 }
 
 void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
-	if (pPacket->size != sizeof(UsertoWorldRequest_Struct)) {
+	// Check packet size.
+	static const auto EXPECTED_SIZE = sizeof(UsertoWorldRequest_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
 		Log::error("[Login Server Connection] Wrong size of UsertoWorldRequest_Struct");
 		return;
 	}
 
 	Log::info("[Login Server Connection] User to World Request");
 
-	UsertoWorldRequest_Struct* inPayload = reinterpret_cast<UsertoWorldRequest_Struct*>(pPacket->pBuffer);
-	ServerPacket* outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(UsertoWorldResponse_Struct));
-	UsertoWorldResponse_Struct* outPayload = reinterpret_cast<UsertoWorldResponse_Struct*>(outPacket->pBuffer);
+	auto inPayload = reinterpret_cast<UsertoWorldRequest_Struct*>(pPacket->pBuffer);
+	auto outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(UsertoWorldResponse_Struct));
+	auto outPayload = reinterpret_cast<UsertoWorldResponse_Struct*>(outPacket->pBuffer);
 	outPayload->lsaccountid = inPayload->lsaccountid;
 	outPayload->ToID = inPayload->FromID;
 	outPayload->worldid = inPayload->worldid;
@@ -179,19 +175,20 @@ void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
 }
 
 void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) {
-	if (pPacket->size != sizeof(ServerLSClientAuth)) {
+	static const auto EXPECTED_SIZE = sizeof(ServerLSClientAuth);
+	if (pPacket->size != EXPECTED_SIZE) {
 		Log::error("[Login Server Connection] Wrong size of ServerLSClientAuth");
 		return;
 	}
 
 	Log::info("[Login Server Connection] Adding new authentication.");
 
-	ServerLSClientAuth* payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
 	// Add authentication for the incoming client.
 	ClientAuthentication authentication;
 	authentication.mAccountID = payload->lsaccount_id;
-	authentication.mAccountName = payload->name;
-	authentication.mKey = payload->key;
+	authentication.mAccountName = Utility::safeString(payload->name, 30);
+	authentication.mKey = Utility::safeString(payload->key, 30);
 	authentication.mWorldAdmin = payload->worldadmin;
 	authentication.mIP = payload->ip;
 	authentication.mLocal = payload->local;
@@ -204,22 +201,22 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 }
 
 void LoginServerConnection::_sendWorldInformation() {
-	ServerPacket* outPacket = new ServerPacket(ServerOP_NewLSInfo, sizeof(ServerNewLSInfo_Struct));
-	ServerNewLSInfo_Struct* payload = reinterpret_cast<ServerNewLSInfo_Struct*>(outPacket->pBuffer);
+	auto outPacket = new ServerPacket(ServerOP_NewLSInfo, sizeof(ServerNewLSInfo_Struct));
+	auto payload = reinterpret_cast<ServerNewLSInfo_Struct*>(outPacket->pBuffer);
 	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
 	strcpy(payload->serverversion, LOGIN_VERSION);
 	strcpy(payload->name, "DrajorTest"); // TODO: (Configuration)
 	strcpy(payload->shortname, "[TEST] Drajor");
-	strcpy(payload->account, mLoginAccount);
-	strcpy(payload->password, mLoginPassword);
+	strcpy(payload->account, mLoginAccount.c_str());
+	strcpy(payload->password, mLoginPassword.c_str());
 
 	_sendPacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void LoginServerConnection::sendWorldStatus() {
-	ServerPacket* outPacket = new ServerPacket(ServerOP_LSStatus, sizeof(ServerLSStatus_Struct));
-	ServerLSStatus_Struct* payload = reinterpret_cast<ServerLSStatus_Struct*>(outPacket->pBuffer);
+	auto outPacket = new ServerPacket(ServerOP_LSStatus, sizeof(ServerLSStatus_Struct));
+	auto payload = reinterpret_cast<ServerLSStatus_Struct*>(outPacket->pBuffer);
 
 	if (mWorld->getLocked())
 		payload->status = -2;
