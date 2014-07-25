@@ -6,6 +6,8 @@
 #include "../common/extprofile.h"
 #include "ZoneClientConnection.h"
 
+static const int AUTO_SAVE_FREQUENCY = 10000;
+
 Character::Character(uint32 pCharacterID) :
 mCharacterID(pCharacterID),
 mProfile(0),
@@ -59,6 +61,11 @@ void Character::update() {
 			mZone->notifyCharacterLevelIncrease(this);
 		}
 	}
+
+	if (mAutoSave.Check()) {
+		_updateForSave();
+		mZone->requestSave(this);
+	}
 }
 
 bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
@@ -87,6 +94,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mExperience = mProfile->exp;
 
 	mSuperGMPower.Start(2000);
+	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 
 	mProfile->STR = 5;
 	mProfile->STA = 100;
@@ -347,4 +355,17 @@ float Character::getDefaultSize(uint32 pRace) {
 	default:
 		return 0;
 	}
+}
+
+void Character::_updateForSave() {
+	// Ensure profile is updated for save.
+	mProfile->x = getX();
+	mProfile->y = getY();
+	mProfile->z = getZ();
+
+	mProfile->level = getLevel();
+	mProfile->exp = getExperience();
+
+	mProfile->zone_id = mZone->getID();
+	mProfile->zoneInstance = mZone->getInstanceID();
 }

@@ -27,6 +27,7 @@ public:
 	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
 	bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 	bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
+	bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
 };

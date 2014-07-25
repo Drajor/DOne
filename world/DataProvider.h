@@ -21,4 +21,5 @@ public:
 	virtual bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) = 0;
 	virtual bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
 	virtual bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) = 0;
+	virtual bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
 };

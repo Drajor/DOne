@@ -96,6 +96,7 @@ private:
 	void _handleAnimation(const EQApplicationPacket* pPacket);
 	
 
+
 	bool mConnected;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;

@@ -26,6 +26,10 @@ bool DataStore::createAccount(uint32 pLoginServerAccountID, std::string pLoginSe
 	return mDataProvider->createAccount(pLoginServerAccountID, pLoginServerAccountName);
 }
 
+bool DataStore::saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	return mDataProvider->saveCharacter(pCharacterID, pProfile, pExtendedProfile);
+}
+
 
 
 

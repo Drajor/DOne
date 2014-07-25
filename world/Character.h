@@ -155,7 +155,8 @@ private:
 
 	uint32 mExperience;
 	void _checkForLevelIncrease();
-	
+	void _updateForSave();
+
 
 	
 	float mSize;
@@ -192,6 +193,7 @@ private:
 	Timer mCampTimer; // 30 seconds.
 
 	Timer mSuperGMPower;
+	Timer mAutoSave;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;

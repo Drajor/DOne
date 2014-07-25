@@ -27,6 +27,7 @@ public:
 	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
 
 	bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	uint32 _getCharacterID(std::string pCharacterName);
 	void copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProfile_Struct* pProfileFrom);

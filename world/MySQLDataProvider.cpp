@@ -269,6 +269,27 @@ bool MySQLDataProvider::loadCharacter(std::string pCharacterName, uint32& pChara
 	return true;
 }
 
+bool MySQLDataProvider::saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+	Profile p("MySQLDataProvider::saveCharacter");
+
+	char errbuf[MYSQL_ERRMSG_SIZE];
+	char query[256 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 5];
+	char* end = query;
+	
+	// construct the character_ query
+	end += sprintf(end, "UPDATE character_ SET profile=\'");
+	end += mDatabaseConnection->escapeString(end, (char*)pProfile, sizeof(PlayerProfile_Struct));
+	end += sprintf(end, "\', extprofile=\'");
+	end += mDatabaseConnection->escapeString(end, (char*)pExtendedProfile, sizeof(ExtendedProfile_Struct));
+	end += sprintf(end, "\' WHERE id=%i", pCharacterID);
+
+	uint32 numRowsAffected = 0;
+	if (mDatabaseConnection->runQuery(query, (uint32)(end - query), errbuf, 0, &numRowsAffected)){
+		return true;
+	}
+	return false;
+}
+
 void MySQLDataProvider::copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProfile_Struct* pProfileFrom)
 {
 

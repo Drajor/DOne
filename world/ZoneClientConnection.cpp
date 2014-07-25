@@ -1025,4 +1025,3 @@ void ZoneClientConnection::sendStats()
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
-

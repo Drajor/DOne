@@ -58,6 +58,8 @@ public:
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
+
+	void requestSave(Character* pCharacter);
 	
 private:
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
@@ -66,7 +68,7 @@ private:
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
-
+	
 
 
 

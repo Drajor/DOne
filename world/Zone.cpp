@@ -3,6 +3,7 @@
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "Constants.h"
+#include "DataStore.h"
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -369,4 +370,14 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 
 void Zone::_sendCharacterLevel(Character* pCharacter) {
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::WhoLevel, pCharacter->getLevel());
+}
+
+void Zone::requestSave(Character*pCharacter) {
+	// Save taking 7ms - 90ms ... I will have to do something about that eventually.
+	// http://dev.mysql.com/doc/refman/5.5/en/too-many-connections.html
+	// Considering a DB connection per user and just copy data to another thread.
+	if (!mDataStore->saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
+		pCharacter->getConnection()->sendMessage(MC_Red, "[ERROR] There was an error saving your character. I suggest you log out.");
+		Log::error("[Zone] Failed to save character");
+	}
 }
