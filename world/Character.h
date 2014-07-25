@@ -134,6 +134,8 @@ public:
 	void setLevel(uint8 pLevel);
 private:
 
+	void _initialiseProfile();
+
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
 	float mX;

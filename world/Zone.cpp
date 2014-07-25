@@ -333,6 +333,17 @@ void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 
 }
 
 void Zone::notifyCharacterLevelIncrease(Character* pCharacter) {
+	// Notify user client.
+	_sendCharacterLevel(pCharacter);
+	_sendLevelAppearance(pCharacter);
+}
+
+void Zone::notifyCharacterLevelDecrease(Character* pCharacter) {
+	// Notify user client.
+	_sendCharacterLevel(pCharacter);
+}
+
+void Zone::_sendLevelAppearance(Character* pCharacter) {
 	auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
 	auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
 	payload->parm1 = 0x4D;
@@ -354,4 +365,8 @@ void Zone::notifyCharacterLevelIncrease(Character* pCharacter) {
 	}
 
 	safe_delete(outPacket);
+}
+
+void Zone::_sendCharacterLevel(Character* pCharacter) {
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::WhoLevel, pCharacter->getLevel());
 }

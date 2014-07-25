@@ -981,6 +981,16 @@ void ZoneClientConnection::sendExperienceUpdate() {
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
 
+void ZoneClientConnection::sendLevelUpdate() {
+	auto outPacket = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
+	LevelUpdate_Struct* payload = reinterpret_cast<LevelUpdate_Struct*>(outPacket->pBuffer);
+	payload->level = mCharacter->getLevel();
+	payload->exp = mCharacter->getExperienceRatio();
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
 void ZoneClientConnection::sendExperienceGain() {
 	sendSimpleMessage(MT_Experience, GAIN_XP);
 }
@@ -997,9 +1007,10 @@ void ZoneClientConnection::sendLevelGain() {
 }
 
 void ZoneClientConnection::sendLevelLost() {
-	std::stringstream ss;
-	ss << mCharacter->getLevel();
-	sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
+	// NOTE: UF Handles this message itself, no need to send.
+	//std::stringstream ss;
+	//ss << mCharacter->getLevel();
+	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
 }
 
 void ZoneClientConnection::sendLevelAppearance() {

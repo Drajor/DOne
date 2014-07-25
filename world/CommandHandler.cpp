@@ -139,7 +139,14 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 		}
 	}
 	// #setlevel <number>
-	// TODO:
+	else if (pCommandName == "setlevel") {
+		if (pParameters.size() == 1) {
+			uint32 level = 0;
+			if (stoulSafe(level, pParameters[0])) {
+				pCharacter->setLevel(static_cast<uint8>(level));
+			}
+		}
+	}
 	// #gm <on/off>
 	else if (pCommandName == "gm" && pCharacter->getStatus() >= 100) {
 		if (pParameters.size() == 1) {

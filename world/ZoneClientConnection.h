@@ -48,6 +48,7 @@ public:
 	void sendLevelGain();
 	void sendLevelLost();
 	void sendLevelAppearance();
+	void sendLevelUpdate();
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.

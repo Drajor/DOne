@@ -87,7 +87,14 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 
 	mSuperGMPower.Start(2000);
 
+	// Perform any profile patching that needs to be done.
+	_initialiseProfile();
+
 	return true;
+}
+
+void Character::_initialiseProfile() {
+	// TODO:
 }
 
 bool Character::onZoneIn() {
@@ -210,6 +217,21 @@ void Character::doAnimation(uint8 pAnimationID) {
 }
 
 void Character::addExperience(uint32 pExperience) {
+	// Handle special case where Character is max level / experience.
+	if (mLevel == Character::getMaxCharacterLevel()) {
+		// Character is already at max exp - 1
+		if (mExperience == getExperienceForNextLevel() - 1) {
+			message(MC_LightBlue, "You can no longer gain experience.");
+			return;
+		}
+		// This experience will take the Character over the limit.
+		else if (mExperience + pExperience > getExperienceForNextLevel() - 1) {
+			// Modify pExeperience so that pExperience + mExperience = getExperienceForNextLevel - 1 (Capped).
+			pExperience = (getExperienceForNextLevel() - 1 - mExperience);
+		}
+	}
+
+
 	mExperience += pExperience;
 	mConnection->sendExperienceGain();
 	_checkForLevelIncrease();
@@ -240,14 +262,34 @@ void Character::_checkForLevelIncrease() {
 	while (mExperience >= getExperienceForNextLevel()) {
 		mExperience -= getExperienceForNextLevel();
 		setLevel(mLevel + 1);
-		mConnection->sendLevelGain();
-		// Notify zone.
-		mZone->notifyCharacterLevelIncrease(this);
 	}
 }
 
 void Character::setLevel(uint8 pLevel) {
-	mLevel = pLevel;
+	// Ensure not going above maximum level.
+	if (pLevel > Character::getMaxCharacterLevel()){
+		pLevel = Character::getMaxCharacterLevel();
+	}
+	
+	// Increasing.
+	if (pLevel > mLevel) {
+		mLevel = pLevel;
+		// Notify user.
+		mConnection->sendLevelUpdate();
+		mConnection->sendLevelGain();
+		// Notify zone.
+		mZone->notifyCharacterLevelIncrease(this);
+	}
+	else if (pLevel < mLevel) {
+		mExperience = 0; // to be safe.
+		mLevel = pLevel;
+		// Notify user.
+		mConnection->sendLevelUpdate();
+		mConnection->sendLevelLost();
+		// Notify zone.
+		mZone->notifyCharacterLevelDecrease(this);
+	}
+	
 }
 
 uint32 Character::getExperienceRatio() {
