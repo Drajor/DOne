@@ -50,6 +50,8 @@ public:
 
 	std::string getName() { return mName; }
 	std::string getLastName() { return mLastName; }
+	std::string getTitle() { return mTitle; }
+	std::string getSuffix() { return mSuffix; }
 	uint32 getID() { return mCharacterID; };
 	uint16 getSpawnID() { return mSpawnID; }
 	// Returns the account status that this Character belongs to.
@@ -87,6 +89,7 @@ public:
 	int32 getDeltaHeading() { return mDeltaHeading; }
 	void setHeading(float pHeading);
 	uint32 getRace() { return mRace; }
+	uint32 getOriginalRace() { return mOriginalRace; }
 	float getRunSpeed() { return mRunSpeed; }
 	float getWalkSpeed() { return mWalkSpeed; }
 	uint8 getClass() { return mClass; }
@@ -103,6 +106,11 @@ public:
 	void setGM(bool pGM);
 	uint8 getGuildRank() { return mGuildRank; }
 	uint32 getGuildID() { return mGuildID; }
+
+	int32 getCopper() { return mCopper; }
+	int32 getSilver() { return mSilver; }
+	int32 getGold() { return mGold; }
+	int32 getPlatinum() { return mPlatinum; }
 
 	// Target Group Buff
 	void setTGB(bool pTGB) { mTGB = pTGB; }
@@ -156,7 +164,7 @@ private:
 	uint32 mExperience;
 	void _checkForLevelIncrease();
 	void _updateForSave();
-
+	
 
 	
 	float mSize;
@@ -164,6 +172,7 @@ private:
 	uint8 mLevel;
 	uint8 mClass;
 	uint32 mRace;
+	uint32 mOriginalRace; // Race that was loaded from Profile.
 	uint8 mGender;
 	float mRunSpeed;
 	float mWalkSpeed;
@@ -178,12 +187,17 @@ private:
 	int32 mCurrentEndurance;
 	int32 mMaximumEndurance;
 
-
+	int32 mCopper;
+	int32 mSilver;
+	int32 mGold;
+	int32 mPlatinum;
 
 	const uint32 mCharacterID;
 	uint16 mSpawnID;
 	std::string mName;
 	std::string mLastName;
+	std::string mTitle;
+	std::string mSuffix;
 	bool mGM;
 	bool mStanding;
 	bool mAFK;

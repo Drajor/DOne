@@ -14,7 +14,10 @@ mProfile(0),
 mExtendedProfile(0),
 mName("soandso"),
 mLastName(""),
+mTitle(""),
+mSuffix(""),
 mRace(0),
+mOriginalRace(0),
 mRunSpeed(0.7f),
 mWalkSpeed(0.35f),
 mClass(0),
@@ -47,7 +50,11 @@ mAppearance(SpawnAppearanceAnimation::Standing),
 mGM(0),
 mGuildID(0xFFFFFFFF),
 mGuildRank(0xFF),
-mExperience(0)
+mExperience(0),
+mCopper(0),
+mSilver(0),
+mGold(0),
+mPlatinum(0)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -73,7 +80,10 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mExtendedProfile = pExtendedProfile;
 
 	mName = mProfile->name;
-	mRace = mProfile->race;
+	mLastName = mProfile->last_name;
+	mTitle = mProfile->title;
+	mSuffix = mProfile->suffix;
+	mOriginalRace = mRace = mProfile->race;
 	mClass = mProfile->class_;
 	mGender = mProfile->gender;
 	mLevel = mProfile->level;
@@ -103,6 +113,11 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mProfile->CHA = 5;
 	mProfile->INT = 5;
 	mProfile->WIS = 5;
+
+	mCopper = mProfile->copper;
+	mSilver = mProfile->silver;
+	mGold = mProfile->gold;
+	mPlatinum = mProfile->platinum;
 
 	// Perform any profile patching that needs to be done.
 	_initialiseProfile();
@@ -359,13 +374,37 @@ float Character::getDefaultSize(uint32 pRace) {
 
 void Character::_updateForSave() {
 	// Ensure profile is updated for save.
+
+	// TODO: Consider checking the ranges of these strings before saving.
+	strcpy(mProfile->name, getName().c_str());
+	strcpy(mProfile->last_name, getLastName().c_str());
+	strcpy(mProfile->title, getTitle().c_str());
+	strcpy(mProfile->suffix, getSuffix().c_str());
+
+	mProfile->gm = getGM();
+	mProfile->class_ = getClass();
+	mProfile->race = getOriginalRace();
+	mProfile->deity = getDeity();
+	mProfile->gender = getGender();
+	mProfile->mAnonymous = getAnonymous();
+	mProfile->showhelm = getShowHelm();
+
+	mProfile->copper = getCopper();
+	mProfile->silver = getSilver();
+	mProfile->gold = getGold();
+	mProfile->platinum = getPlatinum();
+	
 	mProfile->x = getX();
 	mProfile->y = getY();
 	mProfile->z = getZ();
+	mProfile->heading = getHeading();
 
 	mProfile->level = getLevel();
 	mProfile->exp = getExperience();
 
 	mProfile->zone_id = mZone->getID();
 	mProfile->zoneInstance = mZone->getInstanceID();
+
+	mProfile->guild_id = getGuildID();
+	mProfile->guildrank = getGuildID();
 }
