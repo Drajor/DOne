@@ -192,8 +192,9 @@ void Zone::notifyCharacterAnonymous(Character* pCharacter) { _sendSpawnAppearanc
 void Zone::notifyCharacterStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Standing); }
 void Zone::notifyCharacterSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
 void Zone::notifyCharacterCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
+void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->getGM(), true); }
 
-void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter) {
+void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* appearance = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
@@ -201,9 +202,16 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 	appearance->type = pType;
 	appearance->parameter = pParameter;
 
-	for (auto i : mZoneClientConnections) {
-		if (i != sender)
+	if (pIncludeSender) {
+		for (auto i : mZoneClientConnections) {
 			i->sendPacket(outPacket);
+		}
+	}
+	else {
+		for (auto i : mZoneClientConnections) {
+			if (i != sender)
+				i->sendPacket(outPacket);
+		}
 	}
 	safe_delete(outPacket);
 }

@@ -100,6 +100,7 @@ public:
 	void setAnonymous(uint8 pAnonymous);
 	uint8 getAnonymous();
 	uint8 getGM();
+	void setGM(bool pGM);
 	uint8 getGuildRank() { return mGuildRank; }
 	uint32 getGuildID() { return mGuildID; }
 
@@ -150,7 +151,7 @@ private:
 
 	uint32 mExperience;
 	void _checkForLevelIncrease();
-
+	
 
 	
 	float mSize;

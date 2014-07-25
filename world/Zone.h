@@ -50,6 +50,7 @@ public:
 	void notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void notifyCharacterLevelIncrease(Character* pCharacter);
+	void notifyCharacterGM(Character* pCharacter);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
@@ -57,9 +58,10 @@ public:
 private:
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
 	void _sendTell(Character* pCharacter, const std::string pFromName, const std::string pMessage);
-	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter);
+	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _handleIncomingConnections();
 	
+
 
 
 

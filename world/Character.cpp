@@ -54,8 +54,10 @@ Character::~Character() {
 
 void Character::update() {
 
-	if (mSuperGMPower.Check()) {
-		mZone->notifyCharacterLevelIncrease(this);
+	if (mGM) {
+		if (mSuperGMPower.Check()) {
+			mZone->notifyCharacterLevelIncrease(this);
+		}
 	}
 }
 
@@ -194,8 +196,14 @@ void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, i
 }
 
 uint8 Character::getGM() {
-	return mGM;
+	return mGM ? 1 : 0;
 }
+
+void Character::setGM(bool pGM) {
+	mGM = pGM;
+	mProfile->gm = getGM();
+}
+
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);

@@ -140,6 +140,14 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	}
 	// #setlevel <number>
 	// TODO:
+	// #gm <on/off>
+	else if (pCommandName == "gm" && pCharacter->getStatus() >= 100) {
+		if (pParameters.size() == 1) {
+			bool gm = pParameters[0] == "on";
+			pCharacter->setGM(gm);
+			pCharacter->getZone()->notifyCharacterGM(pCharacter);
+		}
+	}
 	else {
 		pCharacter->message(MC_Yellow, "Unknown command.");
 	}

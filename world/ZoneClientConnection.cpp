@@ -302,7 +302,7 @@ void ZoneClientConnection::_sendTimeOfDay() {
 void ZoneClientConnection::_sendPlayerProfile() {
 	auto outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
-	//m_pp.entityid = getID(); // TODO:
+	//mCharacter->getProfile()->entityid = mCharacter->getSpawnID();
 	memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
 	outPacket->priority = 6;
 	mStreamInterface->FastQueuePacket(&outPacket);
