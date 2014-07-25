@@ -82,10 +82,19 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mDeltaY = 0;
 	mDeltaZ = 0;
 	mDeltaHeading = 0;
+	mSize = Character::getDefaultSize(mRace);
 
 	mExperience = mProfile->exp;
 
 	mSuperGMPower.Start(2000);
+
+	mProfile->STR = 5;
+	mProfile->STA = 100;
+	mProfile->AGI = 5;
+	mProfile->DEX = 5;
+	mProfile->CHA = 5;
+	mProfile->INT = 5;
+	mProfile->WIS = 5;
 
 	// Perform any profile patching that needs to be done.
 	_initialiseProfile();
@@ -306,4 +315,36 @@ uint32 Character::getExperienceRatio() {
 uint32 Character::getExperienceForLevel(uint8 pLevel)
 {
 	return (pLevel * pLevel) * 20;
+}
+
+float Character::getDefaultSize(uint32 pRace) {
+	switch (pRace) {
+	case Ogre:
+		return 9;
+	case Troll:
+		return 8;
+	case Vahshir:
+	case Barbarian:
+		return 7;
+	case Human:
+	case HighElf:
+	case Erudite:
+	case Iksar:
+	case Drakkin:
+		return 6;
+	case HalfElf:
+		return 5.5;
+	case WoodElf:
+	case DarkElf:
+	case Froglok:
+		return 5;
+	case Dwarf:
+		return 4;
+	case Halfling:
+		return 3.5;
+	case Gnome:
+		return 3;
+	default:
+		return 0;
+	}
 }

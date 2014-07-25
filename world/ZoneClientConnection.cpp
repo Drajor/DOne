@@ -1017,3 +1017,12 @@ void ZoneClientConnection::sendLevelAppearance() {
 
 }
 
+void ZoneClientConnection::sendStats()
+{
+	auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
+	payload->str = 5;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+

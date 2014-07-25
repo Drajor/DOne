@@ -132,6 +132,8 @@ public:
 	static uint32 getExperienceForLevel(uint8 pLevel);
 	static uint8 getMaxCharacterLevel() { return 20; }
 	void setLevel(uint8 pLevel);
+
+	static float getDefaultSize(uint32 pRace);
 private:
 
 	void _initialiseProfile();

@@ -6,6 +6,12 @@
 #include <sstream>
 #include "ZoneClientConnection.h"
 
+#define PACKET_PLAY
+#ifdef PACKET_PLAY
+#include "../common/eq_packet_structs.h"
+#include "../common/EQPacket.h"
+#endif
+
 // Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
 	std::stringstream ss(s);
@@ -154,6 +160,19 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			pCharacter->setGM(gm);
 			pCharacter->getZone()->notifyCharacterGM(pCharacter);
 		}
+	}
+	// #setstat
+	else if (pCommandName == "setstat" && pCharacter->getStatus() >= 255) {
+		// TODO: OP_IncreaseStats is strange.
+		//auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+		//auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
+		////payload->unknown0 = 0;
+		////payload->str = 5; // AGI
+		//payload->str = 5;
+		////mStreamInterface->QueuePacket(outPacket);
+		//pCharacter->getConnection()->sendPacket(outPacket);
+		//safe_delete(outPacket);
+		////pCharacter->getConnection()->sendStats();
 	}
 	else {
 		pCharacter->message(MC_Yellow, "Unknown command.");
