@@ -120,6 +120,26 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			}
 		}
 	}
+	// #addexp <number>
+	else if (pCommandName == "addexp") {
+		if (pParameters.size() == 1) {
+			uint32 expAdd = 0;
+			if (stoulSafe(expAdd, pParameters[0])) {
+				pCharacter->addExperience(expAdd);
+			}
+		}
+	}
+	// #remexp <number>
+	else if (pCommandName == "remexp") {
+		if (pParameters.size() == 1) {
+			uint32 expRemove = 0;
+			if (stoulSafe(expRemove, pParameters[0])) {
+				pCharacter->removeExperience(expRemove);
+			}
+		}
+	}
+	// #setlevel <number>
+	// TODO:
 	else {
 		pCharacter->message(MC_Yellow, "Unknown command.");
 	}

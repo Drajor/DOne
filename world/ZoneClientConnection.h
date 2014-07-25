@@ -12,6 +12,8 @@ class DataStore;
 class CommandHandler;
 struct NewSpawn_Struct;
 
+static const std::string EmptyString = std::string();
+
 class ZoneClientConnection {
 public:
 	enum ZoneConnectionStatus {
@@ -36,8 +38,16 @@ public:
 	void sendPosition();
 	void sendMessage(uint32 pType, std::string pMessage);
 	void sendSimpleMessage(uint32 pType, uint32 pStringID);
+	void sendSimpleMessage(uint32 pType, uint32 pStringID, std::string pParameter0, std::string pParameter1 = EmptyString, std::string pParameter2 = EmptyString, std::string pParameter3 = EmptyString, std::string pParameter4 = EmptyString, std::string pParameter5 = EmptyString, std::string pParameter6 = EmptyString, std::string pParameter7 = EmptyString, std::string pParameter8 = EmptyString, std::string pParameter9 = EmptyString);
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
+
+	void sendExperienceUpdate();
+	void sendExperienceGain();
+	void sendExperienceLoss();
+	void sendLevelGain();
+	void sendLevelLost();
+	void sendLevelAppearance();
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -82,6 +92,8 @@ private:
 	void _handleTGB(const EQApplicationPacket* pPacket);
 	void _handleEmote(const EQApplicationPacket* pPacket);
 	void _handleAnimation(const EQApplicationPacket* pPacket);
+	
+
 	bool mConnected;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;

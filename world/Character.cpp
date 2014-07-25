@@ -1,5 +1,7 @@
 #include "Character.h"
 #include "Zone.h"
+#include "Utility.h"
+#include "LogSystem.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "ZoneClientConnection.h"
@@ -42,7 +44,8 @@ mAnimation(0),
 mAppearance(SpawnAppearanceAnimation::Standing),
 mGM(0),
 mGuildID(0xFFFFFFFF),
-mGuildRank(0xFF)
+mGuildRank(0xFF),
+mExperience(0)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -50,6 +53,10 @@ Character::~Character() {
 }
 
 void Character::update() {
+
+	if (mSuperGMPower.Check()) {
+		mZone->notifyCharacterLevelIncrease(this);
+	}
 }
 
 bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
@@ -73,6 +80,10 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mDeltaY = 0;
 	mDeltaZ = 0;
 	mDeltaHeading = 0;
+
+	mExperience = mProfile->exp;
+
+	mSuperGMPower.Start(2000);
 
 	return true;
 }
@@ -188,4 +199,61 @@ uint8 Character::getGM() {
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);
+}
+
+void Character::addExperience(uint32 pExperience) {
+	mExperience += pExperience;
+	mConnection->sendExperienceGain();
+	_checkForLevelIncrease();
+	mProfile->exp = mExperience;
+	// Update user experience bar.
+	mConnection->sendExperienceUpdate();
+}
+
+void Character::removeExperience(uint32 pExperience) {
+	// No loss of level at this stage.
+	if (mExperience == 0) return;
+
+	// Prevent experience value wrapping.
+	if (pExperience > mExperience) {
+		pExperience = mExperience;
+	}
+
+	mExperience -= pExperience;
+	mProfile->exp = mExperience;
+
+	// Send user a message.
+	mConnection->sendExperienceLoss();
+	// Update user experience bar.
+	mConnection->sendExperienceUpdate();
+}
+
+void Character::_checkForLevelIncrease() {
+	while (mExperience >= getExperienceForNextLevel()) {
+		mExperience -= getExperienceForNextLevel();
+		setLevel(mLevel + 1);
+		mConnection->sendLevelGain();
+		// Notify zone.
+		mZone->notifyCharacterLevelIncrease(this);
+	}
+}
+
+void Character::setLevel(uint8 pLevel) {
+	mLevel = pLevel;
+}
+
+uint32 Character::getExperienceRatio() {
+	// Protect against division by zero.
+	uint32 next = getExperienceForNextLevel();
+	if (next == 0) {
+		Log::error("[Character] Prevented division by zero in getExperienceRatio");
+		return 0;
+	}
+
+	return 330.0f * (mExperience / static_cast<float>(next));
+}
+
+uint32 Character::getExperienceForLevel(uint8 pLevel)
+{
+	return (pLevel * pLevel) * 20;
 }

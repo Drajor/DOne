@@ -323,3 +323,27 @@ void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 
 	}
 	safe_delete(outPacket);
 }
+
+void Zone::notifyCharacterLevelIncrease(Character* pCharacter) {
+	auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
+	auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
+	payload->parm1 = 0x4D;
+	payload->parm2 = payload->parm1 + 1;
+	payload->parm3 = payload->parm2 + 1;
+	payload->parm4 = payload->parm3 + 1;
+	payload->parm5 = payload->parm4 + 1;
+	payload->spawn_id = pCharacter->getSpawnID();
+	payload->value1a = 1;
+	payload->value2a = 2;
+	payload->value3a = 1;
+	payload->value3b = 1;
+	payload->value4a = 1;
+	payload->value4b = 1;
+	payload->value5a = 2;
+
+	for (auto i : mZoneClientConnections) {
+		i->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}

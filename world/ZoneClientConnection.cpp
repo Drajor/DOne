@@ -59,6 +59,7 @@ void ZoneClientConnection::update() {
 	if (mForceSendPositionTimer.Check()) {
 		mZone->notifyCharacterPositionChanged(mCharacter);
 	}
+	mCharacter->update();
 }
 
 void ZoneClientConnection::dropConnection() {
@@ -816,6 +817,40 @@ void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID) {
 	safe_delete(outPacket);
 }
 
+void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID, std::string pParameter0, std::string pParameter1, std::string pParameter2, std::string pParameter3, std::string pParameter4, std::string pParameter5, std::string pParameter6, std::string pParameter7, std::string pParameter8, std::string pParameter9) {
+	int length = 0;
+	std::string message;
+	length += pParameter0.length();
+	message += pParameter0;
+	length += pParameter1.length();
+	message += pParameter1;
+	length += pParameter2.length();
+	message += pParameter2;
+	length += pParameter3.length();
+	message += pParameter3;
+	length += pParameter4.length();
+	message += pParameter4;
+	length += pParameter5.length();
+	message += pParameter5;
+	length += pParameter6.length();
+	message += pParameter6;
+	length += pParameter7.length();
+	message += pParameter7;
+	length += pParameter8.length();
+	message += pParameter8;
+	length += pParameter9.length();
+	message += pParameter9;
+
+	auto outPacket = new EQApplicationPacket(OP_FormattedMessage, length + 13);
+	auto payload = (FormattedMessage_Struct *)outPacket->pBuffer;
+	payload->type = pType;
+	payload->string_id = pStringID;
+	strcpy(payload->message, message.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
 void ZoneClientConnection::sendHPUpdate() {
 	auto outPacket = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
 	auto payload = reinterpret_cast<SpawnHPUpdate_Struct*>(outPacket->pBuffer);
@@ -938,3 +973,36 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
 	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value, false);
 }
+
+void ZoneClientConnection::sendExperienceUpdate() {
+	auto outPacket = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+	auto payload = reinterpret_cast<ExpUpdate_Struct*>(outPacket->pBuffer);
+	payload->exp = mCharacter->getExperienceRatio();
+	mStreamInterface->FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::sendExperienceGain() {
+	sendSimpleMessage(MT_Experience, GAIN_XP);
+}
+
+void ZoneClientConnection::sendExperienceLoss() {
+	// There is no StringID for this message apparently.
+	sendMessage(MC_Yellow, "You have lost experience.");
+}
+
+void ZoneClientConnection::sendLevelGain() {
+	std::stringstream ss;
+	ss << mCharacter->getLevel();
+	sendSimpleMessage(MT_Experience, GAIN_LEVEL, ss.str());
+}
+
+void ZoneClientConnection::sendLevelLost() {
+	std::stringstream ss;
+	ss << mCharacter->getLevel();
+	sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
+}
+
+void ZoneClientConnection::sendLevelAppearance() {
+
+}
+

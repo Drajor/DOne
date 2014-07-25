@@ -121,6 +121,16 @@ public:
 	int32 getMaximumEndurance() { return mMaximumEndurance; }
 
 	void doAnimation(uint8 pAnimationID);
+
+	// Experience
+	uint32 getExperience() { return mExperience; }
+	uint32 getExperienceRatio();
+	void addExperience(uint32 pExperience);
+	void removeExperience(uint32 pExperience);
+	uint32 getExperienceForNextLevel() { return Character::getExperienceForLevel(mLevel + 1); }
+	static uint32 getExperienceForLevel(uint8 pLevel);
+	static uint8 getMaxCharacterLevel() { return 20; }
+	void setLevel(uint8 pLevel);
 private:
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
@@ -138,6 +148,8 @@ private:
 	void _updateProfilePosition();
 	
 
+	uint32 mExperience;
+	void _checkForLevelIncrease();
 
 
 	
@@ -173,6 +185,8 @@ private:
 	bool mTGB;
 	uint32 mStatus;
 	Timer mCampTimer; // 30 seconds.
+
+	Timer mSuperGMPower;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;
