@@ -119,6 +119,8 @@ public:
 	int32 getMaximumMana() { return mMaximumMana; }
 	int32 getCurrentEndurance() { return mCurrentEndurance; }
 	int32 getMaximumEndurance() { return mMaximumEndurance; }
+
+	void doAnimation(uint8 pAnimationID);
 private:
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
@@ -135,6 +137,7 @@ private:
 	SpawnAppearanceAnimation mAppearance;
 	void _updateProfilePosition();
 	
+
 
 
 	

@@ -934,57 +934,7 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 		dropConnection();
 		return;
 	}
-	/*
-	/dance A=10 V=58
-	/rude /finger /bird /flipoff A=10 V=30
-	/bow A=10 V=70
-	/shrug A=10 V=65
-	/smile A=10 V=77
-	/cheer /happy A=10 V=27
-	/brb /wave A=10 V=29
-	/applaud /clap A=10 V=51
-	/bleed /hungry A=10 V=52
-	/blink A=10 V=59
-	/blush A=10 V=53
-	/boggle /agree A=10 V=49
-	/bored /yawn A=10 V=31
-	/burp /cough A=10 V=55
-	/cackle /chuckle /giggle /snicker A=10 V=54
-	/cringe /duck A=10 V=56
-	/cry /frown /mourn A=10 V=28
-	/curious /stare A=10 V=57
-	/drool /peer /whistle A=10 V=61
-	/gasp A=10 V=49
-	/glare A=10 V=60
-	/grovel /plead /apologize A=10 V=50
-	/kneel A=10 V=62
-	/point A=10 V=64
-	/ponder /shrug A=10 V=65
-	/puzzle A=10 V=57
-	/raise /ready A=10 V=66
-	/salute A=10 V=67
-	/shiver A=10 V=68
-	/tap A=10 V=69
-	/thank A=10 V=70
-	/veto A=10 V=59
-
-	http://everquest.allakhazam.com/history/patches-1999.html
-	New emotes:
-	- Here is a list of new emotes that have been added to the game: agree,
-	amaze, apologize, applaud, plead, bite, bleed, blink, blush, boggle,
-	bonk, bored, brb, burp, bye, cackle, calm, clap, comfort, congratulate,
-	cough, cringe, curious, dance, drool, duck, eye, gasp, giggle, glare,
-	grin, groan, grovel, happy, hungry, introduce, jk (just kidding),
-	kneel, lost, massage, moan, mourn, peer, point, ponder, puzzle, raise,
-	ready, roar, salute, shiver, shrug, sigh, smirk, snarl, snicker, stare,
-	tap, tease, thank, thirsty, veto, welcome, whine, whistle, yawn.
-	*/
-
-
 
 	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
-	std::stringstream ss;
-	ss << "[Animation] - Action=" << (int)payload->action << "  Value=" << (int)payload->value;
-	Log::info(ss.str());
-	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value);
+	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value, false);
 }

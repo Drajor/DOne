@@ -302,15 +302,24 @@ void Zone::_sendTell(Character* pCharacter, const std::string pFromName, const s
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pValue) {
+void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender) {
+	auto sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* payload = reinterpret_cast<Animation_Struct*>(outPacket->pBuffer);
 	payload->spawnid = pCharacter->getSpawnID();
 	payload->action = pAction;
-	payload->value = pValue;
+	payload->value = pAnimationID;
 
-	for (auto i : mZoneClientConnections) {
-		i->sendPacket(outPacket);
+	if (pIncludeSender) {
+		for (auto i : mZoneClientConnections) {
+			i->sendPacket(outPacket);
+		}
+	}
+	else {
+		for (auto i : mZoneClientConnections) {
+			if ( i != sender)
+				i->sendPacket(outPacket);
+		}
 	}
 	safe_delete(outPacket);
 }

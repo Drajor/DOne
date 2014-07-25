@@ -111,6 +111,15 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			}
 		}
 	}
+	// #anim <number>
+	else if (pCommandName == "anim") {
+		if (pParameters.size() == 1) {
+			uint32 animationID = 0;
+			if (stoulSafe(animationID, pParameters[0])) {
+				pCharacter->doAnimation(animationID);
+			}
+		}
+	}
 	else {
 		pCharacter->message(MC_Yellow, "Unknown command.");
 	}

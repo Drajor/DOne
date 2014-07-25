@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "Zone.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "ZoneClientConnection.h"
@@ -183,4 +184,8 @@ void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, i
 
 uint8 Character::getGM() {
 	return mGM;
+}
+
+void Character::doAnimation(uint8 pAnimationID) {
+	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);
 }

@@ -186,18 +186,99 @@ enum Language : uint32 {
 };
 
 enum Animation : uint8 {
-	ANIM_KICK = 1,
-	ANIM_PIERCING = 2,	//might be piercing?
-	ANIM_2HSLASHING = 3,
-	ANIM_2HWEAPON = 4,
-	ANIM_1HWEAPON = 5,
-	ANIM_DUALWIELD = 6,
-	ANIM_TAILRAKE = 7,	//slam & Dpunch too
-	ANIM_HAND2HAND = 8,
-	ANIM_SHOOTBOW = 9,
-	ANIM_ROUNDKICK = 11,
-	ANIM_SWARMATTACK = 20,	//dunno about this one..
-	ANIM_FLYINGKICK = 45,
-	ANIM_TIGERCLAW = 46,
-	ANIM_EAGLESTRIKE = 47,
+	ANIM_KICK = 1, // tested
+	ANIM_PIERCING = 2,	// tested
+	ANIM_2HSLASHING = 3, // tested
+	ANIM_2HWEAPON = 4, // Same animation as 2 but plays a different sound
+	ANIM_1HWEAPON = 5, // tested RHS sword swing
+	ANIM_DUALWIELD = 6, // tested LSH sword swing
+	ANIM_TAILRAKE = 7,	//tested slam & Dpunch too
+	ANIM_HAND2HAND = 8, // tested (punch)
+	ANIM_SHOOTBOW = 9, // tested
+	ANIM_SWIMMING0 = 10, // tested
+	ANIM_ROUNDKICK = 11, // tested
+	ANIM_TWITCH = 12, // tested
+	ANIM_HIT = 13, // tested
+	ANIM_TRIP = 14, // tested
+	ANIM_DROWNING = 15, // tested
+	ANIM_DEATHX = 16, // tested
+	ANIM_17 = 17, // Nothing (Tested with Human Female)
+	ANIM_18 = 18, // Nothing (Tested with Human Female)
+	ANIM_JUMP_HORIZONTAL = 19, // tested
+	ANIM_JUMP_VERTICAL = 20, // tested Was previously ANIM_SWARMATTACK
+	ANIM_FALLING = 21, // tested
+	ANIM_CROUCH_MOVING = 22, // tested
+	ANIM_CLIMB = 23, // tested
+	ANIM_DUCK = 24, // tested
+	ANIM_SWIMMING_IDLE = 25, // tested
+	ANIM_IDLE_LOOK = 26, // tested
+	ANIM_HAPPY = 27, // tested /cheer /happy
+	ANIM_SAD = 28, // tested /cry /frown /mourn
+	ANIM_WAVE = 29, // tested /brb /wave
+	ANIM_RUDE = 30, // tested /rude /finger /bird /flipoff
+	ANIM_YAWN = 31, // tested /bored /yawn
+	ANIM_32 = 32, // Nothing (Tested with: Human Female)
+	ANIM_SITX = 33, // tested
+	ANIM_SHUFFLE0 = 34, // tested The character shuffles their feet a little bit.
+	ANIM_SHUFFLE1 = 35, // As above.
+	ANIM_BEND_KNEE = 36, // Really looks like a kneel but /kneel uses a different animation.
+	ANIM_SWIMMING1 = 37, // tested Same as 10 (ANIM_SWIMMING0)
+	ANIM_SIT_IDLE0 = 38, // tested
+	ANIM_PLAY_DRUM = 39, // tested
+	ANIM_PLAY_FLUTE = 40, // tested
+	ANIM_STIR_POT = 41, // tested It really looks like character is stirring a large pot with 2 hands.
+	ANIM_CASTING0 = 42, // tested
+	ANIM_CASTING1 = 43, // tested
+	ANIM_CASTING2 = 44, // tested
+	ANIM_FLYING_KICK = 45, // tested (Monk)
+	ANIM_TIGER_CLAW = 46, // tested (Monk)
+	ANIM_EAGLE_STRIKE = 47, // tested (Monk)
+	ANIM_NOD = 48, // tested /nod /agree
+	ANIM_GASP = 49, // tested /boggle /gasp
+	ANIM_PLEAD = 50, // tested /grovel /plead /apologize
+	ANIM_CLAP = 51, // tested /applaud /clap
+	ANIM_BLEED = 52, // tested /bleed /hungry
+	ANIM_BLUSH = 53, // tested /blush
+	ANIM_CHUCKLE = 54, // tested /cackle /chuckle /giggle /snicker
+	ANIM_BURP = 55, // tested /burp /cough
+	ANIM_CRINGE = 56, // tested /cringe /duck
+	ANIM_CURIOUS = 57, // tested /curious /stare /puzzle
+	ANIM_DANCE = 58, // tested /dance
+	ANIM_BLINK = 59, // tested /blink /veto
+	ANIM_GLARE = 60, // tested /glare
+	ANIM_PEER = 61, // tested /drool /peer /whistle
+	ANIM_KNEEL = 62, // tested /kneel
+	ANIM_UNK3 = 63, // tested Character appears disappointed.. maybe there is an emote for it.
+	ANIM_POINT = 64, // tested /point
+	ANIM_SHRUG = 65, // tested /ponder /shrug
+	ANIM_RAISE = 66, // tested /raise /ready
+	ANIM_SALUTE = 67, // tested /salute
+	ANIM_SHIVER = 68, // tested /shiver
+	ANIM_TAP = 69, // tested /tap
+	ANIM_BOW = 70, // tested /bow /thank
+	ANIM_71 = 71, // Nothing (Tested with Human Female)
+	ANIM_72 = 72, // tested Character puts arms out and looks around.
+	ANIM_SIT_IDLE1 = 73, // tested Character moves head.
+	ANIM_RIDING_IDLE = 74, // tested
+	ANIM_75, // Nothing (Tested with Human Female)
+	ANIM_76, // Nothing (Tested with Human Female)
+	ANIM_SMILE = 77, // tested
+	ANIM_RIDING = 78, // tested
+	ANIM_79, // Nothing (Tested with Human Female)
+	ANIM_CRACK_WHIP0, // tested Will be related to mounts/riding I expect
+	ANIM_CRACK_WHIP1 // As Above.
+	// Animations appear to loop back to 1 around here.
 };
+
+/*
+http://everquest.allakhazam.com/history/patches-1999.html
+New emotes:
+- Here is a list of new emotes that have been added to the game: agree,
+amaze, apologize, applaud, plead, bite, bleed, blink, blush, boggle,
+bonk, bored, brb, burp, bye, cackle, calm, clap, comfort, congratulate,
+cough, cringe, curious, dance, drool, duck, eye, gasp, giggle, glare,
+grin, groan, grovel, happy, hungry, introduce, jk (just kidding),
+kneel, lost, massage, moan, mourn, peer, point, ponder, puzzle, raise,
+ready, roar, salute, shiver, shrug, sigh, smirk, snarl, snicker, stare,
+tap, tease, thank, thirsty, veto, welcome, whine, whistle, yawn.
+*/
