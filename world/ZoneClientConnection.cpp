@@ -992,7 +992,7 @@ void ZoneClientConnection::sendExperienceLoss() {
 
 void ZoneClientConnection::sendLevelGain() {
 	std::stringstream ss;
-	ss << mCharacter->getLevel();
+	ss << static_cast<int>(mCharacter->getLevel());
 	sendSimpleMessage(MT_Experience, GAIN_LEVEL, ss.str());
 }
 
