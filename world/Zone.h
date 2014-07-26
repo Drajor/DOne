@@ -12,11 +12,12 @@ class DataStore;
 class ZoneClientConnection;
 
 class World;
+class ZoneManager;
 class Character;
 
 class Zone {
 public:
-	Zone(World* pWorld, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
+	Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
 	~Zone();
 	bool initialise();
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
@@ -50,15 +51,14 @@ public:
 	void notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void notifyCharacterLevelIncrease(Character* pCharacter);
-
-	
-
 	void notifyCharacterLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
+	void whoRequest(Character* pCharacter, WhoFilter& pFilter);
+	void getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter);
 	void requestSave(Character* pCharacter);
 	
 private:
@@ -68,7 +68,9 @@ private:
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
+	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	
+
 
 
 
@@ -93,6 +95,7 @@ private:
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 	World* mWorld;
+	ZoneManager* mZoneManager;
 	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
 	std::list<ZoneClientConnection*> mZoneClientConnections;

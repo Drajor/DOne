@@ -3,6 +3,7 @@
 #include "../common/types.h"
 #include "../common/timer.h"
 #include <string>
+#include <list>
 
 class EQStreamInterface;
 class EQApplicationPacket;
@@ -50,6 +51,7 @@ public:
 	void sendLevelAppearance();
 	void sendLevelUpdate();
 	void sendStats();
+	void sendWhoResults(std::list<Character*>& pMatches);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -94,6 +96,7 @@ private:
 	void _handleTGB(const EQApplicationPacket* pPacket);
 	void _handleEmote(const EQApplicationPacket* pPacket);
 	void _handleAnimation(const EQApplicationPacket* pPacket);
+	void _handleWhoAllRequest(const EQApplicationPacket* pPacket);
 	
 
 

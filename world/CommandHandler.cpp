@@ -161,6 +161,16 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			pCharacter->getZone()->notifyCharacterGM(pCharacter);
 		}
 	}
+	// #race <number>
+	//else if (pCommandName == "race" && pCharacter->getStatus() >= 100) {
+	//	if (pParameters.size() == 1) {
+	//		uint32 race = 0;
+	//		if (stoulSafe(pParameters[0], race)) {
+	//			pCharacter->setRace(race);
+
+	//		}
+	//	}
+	//}
 	// #setstat
 	else if (pCommandName == "setstat" && pCharacter->getStatus() >= 255) {
 		// TODO: OP_IncreaseStats is strange.

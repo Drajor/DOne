@@ -2,6 +2,8 @@
 #include "Zone.h"
 #include "World.h"
 #include "DataStore.h"
+#include "Character.h"
+#include "ZoneClientConnection.h"
 #include "LogSystem.h"
 
 ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
@@ -56,8 +58,16 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 
 Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
 	Log::info("[Zone Manager] : Zone Request");
-	Zone* zone = new Zone(mWorld, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
+	Zone* zone = new Zone(mWorld, this, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
 	zone->initialise();
 	mZones.push_back(zone);
 	return zone;
+}
+
+void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
+	std::list<Character*> matches;
+	for (auto i : mZones) {
+		i->getWhoMatches(matches, pFilter);
+	}
+	pCharacter->getConnection()->sendWhoResults(matches);
 }

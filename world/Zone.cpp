@@ -1,5 +1,6 @@
 #include "Zone.h"
 #include "World.h"
+#include "ZoneManager.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "Constants.h"
@@ -11,8 +12,9 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
 	mWorld(pWorld),
+	mZoneManager(pZoneManager),
 	mDataStore(pDataStore),
 	mPort(pPort),
 	mID(pZoneID),
@@ -380,4 +382,26 @@ void Zone::requestSave(Character*pCharacter) {
 		pCharacter->getConnection()->sendMessage(MC_Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 	}
+}
+
+void Zone::whoRequest(Character* pCharacter, WhoFilter& pFilter) {
+	// /who all
+	if (pFilter.mType == WHO_WORLD) {
+		mZoneManager->whoAllRequest(pCharacter, pFilter);
+	}
+	// /who
+	else if (pFilter.mType == WHO_ZONE) {
+		_handleWhoRequest(pCharacter, pFilter);
+	}
+}
+
+void Zone::_handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
+	std::list<Character*> matches;
+	getWhoMatches(matches, pFilter);
+	pCharacter->getConnection()->sendWhoResults(matches);
+}
+
+void Zone::getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter) {
+	// Search zone for matches to pFilter.
+	pMatches.insert(pMatches.begin(), mCharacters.begin(), mCharacters.end());
 }

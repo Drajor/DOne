@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/types.h"
+#include <string>
 
 enum PlayableRaceIDs {
 	Human = 1,
@@ -282,3 +283,28 @@ kneel, lost, massage, moan, mourn, peer, point, ponder, puzzle, raise,
 ready, roar, salute, shiver, shrug, sigh, smirk, snarl, snicker, stare,
 tap, tease, thank, thirsty, veto, welcome, whine, whistle, yawn.
 */
+
+enum WhoType {
+	WHO_ZONE,
+	WHO_WORLD
+};
+struct WhoFilter {
+	WhoFilter() : mType(WHO_ZONE), mName(""), mRace(0), mClass(0), mMinLevel(0), mMaxLevel(0) {};
+	WhoType mType;
+	std::string mName;
+	uint32 mRace;
+	uint8 mClass;
+	uint8 mMinLevel;
+	uint8 mMaxLevel;
+};
+//struct Who_All_Struct { // 76 length total
+//	/*000*/	char	whom[64];
+//	/*064*/	uint32	wrace;		// FF FF = no race
+//
+//	/*068*/	uint32	wclass;		// FF FF = no class
+//	/*072*/	uint32	lvllow;		// FF FF = no numbers
+//	/*076*/	uint32	lvlhigh;	// FF FF = no numbers
+//	/*080*/	uint32	gmlookup;	// FF FF = not doing /who all gm
+//	/*084*/	uint32	guildid;
+//	/*088*/	uint8	unknown076[64];
+//	/*152*/	uint32	type;		// New for SoF. 0 = /who 3 = /who

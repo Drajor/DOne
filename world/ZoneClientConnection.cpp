@@ -203,6 +203,14 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_Animation:
 		_handleAnimation(pPacket);
 		break;
+	case OP_Save:
+		Utility::print("[UNHANDLED OP_Save]");
+		break;
+	case OP_SaveOnZoneReq:
+		Utility::print("[UNHANDLED OP_SaveOnZoneReq]");
+		break;
+	case OP_WhoAllRequest:
+		_handleWhoAllRequest(pPacket);
 	default:
 		std::stringstream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -1022,6 +1030,87 @@ void ZoneClientConnection::sendStats()
 	auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
 	auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
 	payload->str = 5;
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPacket) {
+	// Check packet size.
+	static const auto EXPECTED_SIZE = sizeof(Who_All_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Wrong sized Who_All_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto payload = reinterpret_cast<Who_All_Struct*>(pPacket->pBuffer);
+	if (payload->type != 0 && payload->type != 3) return;
+
+	WhoFilter filter;
+	filter.mType = payload->type == 0 ? WHO_ZONE : WHO_WORLD;
+	filter.mName = Utility::safeString(payload->whom, 64);
+
+	if (payload->lvllow != 0xFFFFFFFF) filter.mMinLevel = payload->lvllow;
+	if (payload->lvlhigh != 0xFFFFFFFF) filter.mMaxLevel = payload->lvlhigh;
+	if (payload->wrace != 0xFFFFFFFF) filter.mRace = payload->wrace;
+	if (payload->wclass != 0xFFFFFFFF) filter.mClass = payload->wclass;
+
+	mZone->whoRequest(mCharacter, filter);
+}
+
+void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
+	static const std::string LINE("---------------------------");
+	int packetSize = 0;
+	int numResults = pMatches.size();
+	
+	// The first loop over pMatches is required to calculate the space needed for Character name / guild name.
+	for (auto i : pMatches) {
+		packetSize += i->getName().length() + 1; // + 1 is for the null terminator (std::string::length includes only characters).
+		if (i->getGuildID() != 0xFFFFFFFF) { // TODO: Remove this hex
+			// TODO: When Guilds.
+		}
+	}
+
+	packetSize += sizeof(WhoAllReturnStruct) + (numResults * sizeof(WhoAllPlayer));
+	auto outPacket = new EQApplicationPacket(OP_WhoAllResponse, packetSize);
+	auto payload = reinterpret_cast<WhoAllReturnStruct*>(outPacket->pBuffer);
+	payload->id = 0;
+	payload->playerineqstring = 5001; // TODO: Magic.
+	strcpy(payload->line, LINE.c_str());
+	payload->unknown35 = 0x0a;
+	payload->unknown36 = 0;
+	payload->playersinzonestring = 5029;
+	payload->unknown44[0] = 0;
+	payload->unknown44[1] = 0;
+	payload->unknown52 = numResults;
+	payload->unknown56 = numResults;
+	payload->playercount = numResults;
+
+	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+	dynamicStructure.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
+
+	for (auto i : pMatches) {
+		// NOTE: The write methods below *MUST* stay in order.
+		dynamicStructure.write<uint32>(5025); // formatstring
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // pidstring
+		dynamicStructure.writeString(i->getName()); // name
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // rankstring
+		dynamicStructure.writeString(""); // guild
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[0]
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[1]
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // zonestring
+		dynamicStructure.write<uint32>(0); // zone
+		dynamicStructure.write<uint32>(i->getClass()); // class_
+		dynamicStructure.write<uint32>(i->getLevel()); // level
+		dynamicStructure.write<uint32>(i->getRace()); // race
+		dynamicStructure.writeString(""); // account
+		dynamicStructure.write<uint32>(0); // unknown100
+	}
+
+	if (dynamicStructure.getBytesWritten() != packetSize) {
+		Log::error("[Zone Client Connection] Wrong amount of data written in sendWhoResults.");
+	}
+
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
