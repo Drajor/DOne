@@ -1,4 +1,5 @@
 #include "Zone.h"
+#include "ZoneData.h"
 #include "World.h"
 #include "ZoneManager.h"
 #include "Character.h"
@@ -22,7 +23,9 @@ Zone::Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint
 	mInitialised(false),
 	mStreamFactory(nullptr),
 	mStreamIdentifier(nullptr),
-	mNextSpawnID(1)
+	mNextSpawnID(1),
+	mLongName("Unknown Zone"),
+	mShortName("Unknown Zone")
 {
 }
 
@@ -43,6 +46,10 @@ bool Zone::initialise() {
 
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
+
+	mLongNameStringID = ZoneData::getLongNameStringID(mID);
+	mLongName = ZoneData::getLongName(mID);
+	mShortName = ZoneData::getShortName(mID);
 
 	mInitialised = true;
 	return true;

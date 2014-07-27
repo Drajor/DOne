@@ -20,6 +20,10 @@ public:
 	Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
 	~Zone();
 	bool initialise();
+	std::string getLongName() { return mLongName; }
+	std::string getShortName() { return mShortName; }
+	uint32 getLongNameStringID() { return mLongNameStringID; }
+
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
 	void removeAuthentication(std::string pCharacterName);
 	bool checkAuthentication(std::string pCharacterName);
@@ -85,7 +89,9 @@ private:
 
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 
-
+	uint32 mLongNameStringID;
+	std::string mLongName;
+	std::string mShortName;
 	uint16 mNextSpawnID;
 	uint32 mID; // Zone ID
 	uint32 mInstanceID;

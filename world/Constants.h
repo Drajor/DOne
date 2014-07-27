@@ -63,6 +63,12 @@ enum MessageColour {
 	MC_Aqua = 18
 };
 
+enum Anonymous{
+	ANON_None = 0,
+	ANON_Roleplay = 1,
+	ANON_Anonymous = 2
+};
+
 enum SpawnAppearanceType : int16 {
 	Die = 0,
 	WhoLevel = 1,

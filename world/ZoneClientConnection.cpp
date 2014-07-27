@@ -1,6 +1,7 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "Zone.h"
+#include "ZoneData.h"
 #include "Character.h"
 #include "LogSystem.h"
 #include "DataStore.h"
@@ -1062,6 +1063,9 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	static const std::string LINE("---------------------------");
 	int packetSize = 0;
 	int numResults = pMatches.size();
+
+	std::string FakeGuild = "WooHoo";
+	std::string FakeAccount = "WHAT IS THIS?";
 	
 	// The first loop over pMatches is required to calculate the space needed for Character name / guild name.
 	for (auto i : pMatches) {
@@ -1069,6 +1073,9 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		if (i->getGuildID() != 0xFFFFFFFF) { // TODO: Remove this hex
 			// TODO: When Guilds.
 		}
+
+		packetSize += FakeGuild.length() + 1;
+		packetSize += FakeAccount.length() + 1;
 	}
 
 	packetSize += sizeof(WhoAllReturnStruct) + (numResults * sizeof(WhoAllPlayer));
@@ -1086,29 +1093,107 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	payload->unknown56 = numResults;
 	payload->playercount = numResults;
 
+	std::stringstream ss;
+	ss << "Size WhoAllReturnStruct= " << sizeof(WhoAllReturnStruct);
+	Log::error(ss.str());
+	ss.str("");
+	ss << "Size WhoAllPlayer= " << sizeof(WhoAllPlayer);
+	Log::error(ss.str());
+
 	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
 	dynamicStructure.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
 
+	ss << "Written 1: " << dynamicStructure.getBytesWritten();
+	Log::error(ss.str());
+
+	enum RankMessageID {
+		RM_STEWARD = 5007,				// * Steward *
+		RM_APPRENTICE_GUIDE = 5008,		// * Apprentice Guide *
+		RM_GUIDE = 5009,				// * Guide *
+		RM_QUESTTROUPE = 5010,			// * QuestTroupe *
+		RM_SENIOR_GUIDE = 5011,			// * Senior Guide *
+		RM_GM_TESTER = 5012,			// * GM - Tester *
+		RM_EQ_SUPPORT = 5013,			// * EQ Support *
+		RM_GM_STAFF = 5014,				// * GM - Staff *
+		RM_GM_ADMIN = 5015,				// * GM - Admin *
+		RM_GM_LEAD_ADMIN = 5016,		// * GM - Lead Admin *
+		RM_QUESTMASTER = 5017,			// * QuestMaster *
+		RM_GM_AREAS = 5018,				// * GM - Areas *
+		RM_GM_CODER = 5019,				// * GM - Coder *
+		RM_GM_MGMT = 5020,				// * GM - Mgmt *
+		RM_GM_IMPOSSIBLE = 5021,		// * GM - Impossible *
+		RM_AFK = 12311,
+		RM_GM = 12312,
+		RM_LD = 12313,
+		RM_LFG = 12314,
+		RM_TRADER = 12315
+	};
+
+	enum FormatStringID {
+		FS_GM_ANONYMOUS = 5022,		// % T1[ANON(% 2 % 3)] % 4 (% 5) % 6 % 7 % 8
+		FS_ROLEPLAY = 5023,		// % T1[ANONYMOUS] % 2 % 3 % 4
+		FS_ANONYMOUS = 5024,		//% T1[ANONYMOUS] % 2 % 3
+		FS_DEFAULT = 5025		//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
+	};
+	const bool receiverIsGM = mCharacter->getGM() == 1 ? true : false;
 	for (auto i : pMatches) {
 		// NOTE: The write methods below *MUST* stay in order.
-		dynamicStructure.write<uint32>(5025); // formatstring
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // pidstring
+
+		// Determine Format String ID.
+		uint32 formatString = FS_DEFAULT;
+		if (i->getAnonymous() != ANON_None) {
+			// Player is /roleplay
+			if (i->getAnonymous() == ANON_Roleplay) 
+				formatString = FS_ROLEPLAY;
+			// Player is /anonymous
+			if (i->getAnonymous() == ANON_Anonymous)
+				formatString = FS_ANONYMOUS;
+
+			// Allows GM to see through anonymous.
+			if (receiverIsGM)
+				formatString = FS_GM_ANONYMOUS;
+		}
+		dynamicStructure.write<uint32>(formatString); // formatstring
+
+		dynamicStructure.write<uint32>(0xFFFFFFFF); // pidstring (Not sure what this does).
+
 		dynamicStructure.writeString(i->getName()); // name
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // rankstring
-		dynamicStructure.writeString(""); // guild
+		
+		// Determine Rank String ID.
+		uint32 rankStringID = 0xFFFFFFFF;
+		if (i->getStatus() > 0) {
+			// TODO: Can break these up further and use more rank IDs.
+			if (i->getStatus() == 255) {
+				rankStringID = RM_GM_IMPOSSIBLE;
+			}
+			else {
+				rankStringID = RM_GM;
+			}
+		}
+		dynamicStructure.write<uint32>(rankStringID); // rankstring
+
+		dynamicStructure.writeString(FakeGuild); // guild
+		//dynamicStructure.write<uint32>(0); // guild
 		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[0]
 		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[1]
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // zonestring
-		dynamicStructure.write<uint32>(0); // zone
+		//dynamicStructure.write<uint32>(0xFFFFFFFF); // zonestring
+		dynamicStructure.write<uint32>(i->getZone()->getLongNameStringID()); // zonestring // This is StringID 
+		dynamicStructure.write<uint32>(4); // zone (Not sure what this does).
 		dynamicStructure.write<uint32>(i->getClass()); // class_
 		dynamicStructure.write<uint32>(i->getLevel()); // level
 		dynamicStructure.write<uint32>(i->getRace()); // race
-		dynamicStructure.writeString(""); // account
+		dynamicStructure.writeString(FakeAccount); // account
+		//dynamicStructure.write<uint32>(0); // account
 		dynamicStructure.write<uint32>(0); // unknown100
+		//ss << "Written 4: " << dynamicStructure.getBytesWritten();
+		//Log::error(ss.str());
+		//ss.str("");
 	}
 
 	if (dynamicStructure.getBytesWritten() != packetSize) {
-		Log::error("[Zone Client Connection] Wrong amount of data written in sendWhoResults.");
+		std::stringstream ss;
+		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
+		Log::error(ss.str());
 	}
 
 	mStreamInterface->QueuePacket(outPacket);
