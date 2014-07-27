@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 class Zone;
+class Group;
 class EQStreamInterface;
 class ZoneClientConnection;
 struct PlayerProfile_Struct;
@@ -28,6 +29,7 @@ struct Vector4 {
 	float h;
 };
 
+
 class Character {
 	friend ZoneClientConnection;
 public:
@@ -40,6 +42,11 @@ public:
 
 	void addQueuedTell(std::string pSenderName, std::string pMessage);
 	bool hasQueuedTells() { return !mQueuedTells.empty(); }
+
+	// Group
+	bool hasGroup() { return mGroup != nullptr; }
+	Group* getGroup() { return mGroup; }
+	void setGroup(Group* pGroup) { mGroup = pGroup; }
 
 	void setZone(Zone* pZone) { mZone = pZone; }
 	void setSpawnID(uint16 pSpawnID) { mSpawnID = pSpawnID; }
@@ -215,6 +222,8 @@ private:
 
 	std::unordered_multimap<std::string, std::string> mQueuedTells;
 	void _processQueuedTells();
+
+	Group* mGroup;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;

@@ -211,6 +211,23 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_WhoAllRequest:
 		_handleWhoAllRequest(pPacket);
+	case OP_GroupInvite:
+		_handleGroupInvite(pPacket);
+		break;
+	case OP_GroupInvite2:
+		Utility::print("[UNHANDLED OP_GroupInvite2]");
+		break;
+	case OP_GroupFollow:
+		// Player pressed 'Follow' button on group window
+		_handleGroupFollow(pPacket);
+		break;
+	case OP_GroupFollow2:
+		Utility::print("[UNHANDLED OP_GroupFollow2]");
+		break;
+	case OP_GroupCancelInvite:
+		// Player pressed 'Decline' button on group window.
+		_handleGroupCanelInvite(pPacket);
+		break;
 	default:
 		std::stringstream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -1221,6 +1238,142 @@ void ZoneClientConnection::sendTell(std::string pSenderName, std::string pMessag
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pSenderName.c_str());
 
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
+	// Check packet is the correct size.
+	static const auto EXPECTED_SIZE = sizeof(GroupInvite_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Received wrong sized GroupInvite_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
+	const std::string inviterName = Utility::safeString(payload->inviter_name, 64);
+	const std::string inviteeName = Utility::safeString(payload->invitee_name, 64);
+
+	// Check: Inviter is this Character
+	if (inviterName != mCharacter->getName()) {
+		return;
+	}
+	// Check Invitee is not this Character
+	if (inviteeName == mCharacter->getName()) {
+		return;
+	}
+
+	mZone->notifyCharacterGroupInvite(mCharacter, inviteeName);
+}
+
+void ZoneClientConnection::sendGroupInvite(const std::string pFromCharacterName) {
+	auto outPacket = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
+	auto payload = reinterpret_cast<GroupInvite_Struct*>(outPacket->pBuffer);
+	strcpy(payload->inviter_name, pFromCharacterName.c_str());
+	strcpy(payload->invitee_name, mCharacter->getName().c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
+	// Check packet is the correct size.
+	static const auto EXPECTED_SIZE = sizeof(GroupGeneric_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Received wrong sized GroupGeneric_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
+	
+	std::string inviteeName = Utility::safeString(payload->name1, 64);
+	std::string inviterName = Utility::safeString(payload->name2, 64);
+
+	mZone->notifyCharacterAcceptGroupInvite(mCharacter, inviterName);
+}
+
+void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
+	// Check packet is the correct size.
+	static const auto EXPECTED_SIZE = sizeof(GroupCancel_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Received wrong sized GroupCancel_Struct, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
+	std::string inviteeName = Utility::safeString(payload->name1, 64);
+	std::string inviterName = Utility::safeString(payload->name2, 64);
+
+	mZone->notifyCharacterDeclineGroupInvite(mCharacter, inviterName);
+}
+
+void ZoneClientConnection::sendGroupCreate() {
+	int packetSize = 32 + mCharacter->getName().length() + 1;
+	auto outPacket = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
+
+	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+
+	dynamicStructure.write<uint32>(0);
+	dynamicStructure.write<uint32>(1);
+	dynamicStructure.write<uint8>(0);
+
+	dynamicStructure.write<uint32>(0);
+	dynamicStructure.writeString(mCharacter->getName());
+	dynamicStructure.write<uint8>(0);
+	dynamicStructure.write<uint8>(0);
+	dynamicStructure.write<uint8>(0);
+	dynamicStructure.write<uint32>(mCharacter->getLevel());
+	dynamicStructure.write<uint8>(0);
+	dynamicStructure.write<uint32>(0);
+	dynamicStructure.write<uint32>(0);
+	dynamicStructure.write<uint16>(0);
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+
+	// Check payload size calculation.
+	if (dynamicStructure.getBytesWritten() != packetSize) {
+		std::stringstream ss;
+		ss << "[Zone Client Connection] Wrong amount of data written in sendGroupCreate. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
+		Log::error(ss.str());
+	}
+
+	//char *Buffer = (char *)outPacket->pBuffer;
+	//// Header
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);
+	//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name
+
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0
+	//VARSTRUCT_ENCODE_STRING(Buffer, getName());
+	//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());
+	//VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+	//VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+
+	//FastQueuePacket(&outPacket);
+}
+
+void ZoneClientConnection::sendGroupLeaderChange(const std::string pCharacterName) {
+	auto outPacket = new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
+	auto payload = reinterpret_cast<GroupLeaderChange_Struct*>(outPacket->pBuffer);
+	strcpy(payload->LeaderName, pCharacterName.c_str());
+	//FastQueuePacket(&outPacket);
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGroupAcknowledge() {
+	static const auto PACKET_SIZE = 4;
+	auto outPacket = new EQApplicationPacket(OP_GroupAcknowledge, PACKET_SIZE);
+	//FastQueuePacket(&outapp);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

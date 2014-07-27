@@ -23,6 +23,8 @@ SET(world_sources
 	CommandHandler.cpp
 	Profile.cpp
 	ZoneClientConnection.cpp
+	ZoneData.cpp
+	GroupManager.cpp
 )
 
 SET(world_headers
@@ -48,7 +50,8 @@ SET(world_headers
 	Profile.h
 	ZoneClientConnection.h
 	ClientAuthentication.h
-	MessageStringIDs.h
+	ZoneData.h
+	GroupManager.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

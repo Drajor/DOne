@@ -2,6 +2,7 @@
 #include "ZoneData.h"
 #include "World.h"
 #include "ZoneManager.h"
+#include "GroupManager.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "Constants.h"
@@ -13,7 +14,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
 	mWorld(pWorld),
 	mZoneManager(pZoneManager),
 	mDataStore(pDataStore),
@@ -385,4 +386,59 @@ void Zone::_handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 void Zone::getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter) {
 	// Search zone for matches to pFilter.
 	pMatches.insert(pMatches.begin(), mCharacters.begin(), mCharacters.end());
+}
+
+void Zone::notifyCharacterGroupInvite(Character* pCharacter, const std::string pToCharacterName) {
+	// Search our Zone first.
+	Character* toCharacter = findCharacter(pToCharacterName);
+	if (toCharacter) {
+		// Character already grouped.
+		if (toCharacter->hasGroup()) {
+
+		}
+		else {
+			toCharacter->getConnection()->sendGroupInvite(pCharacter->getName());
+		}
+		return;
+	}
+
+	// Search all zones.
+	toCharacter = mZoneManager->findCharacter(pToCharacterName, false, this);
+	if (toCharacter) {
+		return;
+	}
+	
+	// Player was not found (as per Live).
+	std::stringstream ss;
+	ss << "Player " << pToCharacterName << " was not found.";
+	pCharacter->getConnection()->sendMessage(MessageType::Red, ss.str());
+}
+
+Character* Zone::findCharacter(const std::string pCharacterName) {
+	for (auto i : mCharacters) {
+		if (i->getName() == pCharacterName)
+			return i;
+	}
+
+	return nullptr;
+}
+
+void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName) {
+	// Search our Zone first.
+	Character* toCharacter = findCharacter(pToCharacterName);
+	if (toCharacter) {
+		// Joining existing group.
+		if (toCharacter->hasGroup()) {
+
+		}
+		// Starting a new group.
+		else {
+			mGroupManager->makeGroup(toCharacter, pCharacter);
+		}
+	}
+}
+
+void Zone::notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName)
+{
+	
 }

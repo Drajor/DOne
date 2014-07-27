@@ -14,10 +14,12 @@ class ZoneClientConnection;
 class World;
 class ZoneManager;
 class Character;
+class Group;
+class GroupManager;
 
 class Zone {
 public:
-	Zone(World* pWorld, ZoneManager* pZoneManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
+	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
 	~Zone();
 	bool initialise();
 	std::string getLongName() { return mLongName; }
@@ -35,6 +37,7 @@ public:
 	uint32 getID() { return mID; }
 	uint32 getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
+	Character* findCharacter(const std::string pCharacterName);
 
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void notifyCharacterZoneOut(Character* pCharacter);
@@ -58,6 +61,11 @@ public:
 	void notifyCharacterLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
+	// Group
+	void notifyCharacterGroupInvite(Character* pCharacter, const std::string pToCharacterName);
+	void notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName);
+	void notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName);
+
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
@@ -74,7 +82,7 @@ private:
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
-	
+
 
 
 
@@ -104,6 +112,7 @@ private:
 	EQStreamIdentifier* mStreamIdentifier;
 	World* mWorld;
 	ZoneManager* mZoneManager;
+	GroupManager* mGroupManager;
 	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
 	std::list<ZoneClientConnection*> mZoneClientConnections;

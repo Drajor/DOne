@@ -55,6 +55,11 @@ public:
 	void sendWhoResults(std::list<Character*>& pMatches);
 	void sendTell(std::string pSenderName, std::string pMessage);
 
+	void sendGroupInvite(const std::string pFromCharacterName);
+	void sendGroupCreate();
+	void sendGroupLeaderChange(const std::string pCharacterName);
+	void sendGroupAcknowledge();
+
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
 	EQApplicationPacket* makeCharacterPositionUpdate(); // Caller is responsible for memory deallocation.
@@ -99,7 +104,9 @@ private:
 	void _handleEmote(const EQApplicationPacket* pPacket);
 	void _handleAnimation(const EQApplicationPacket* pPacket);
 	void _handleWhoAllRequest(const EQApplicationPacket* pPacket);
-	
+	void _handleGroupInvite(const EQApplicationPacket* pPacket);
+	void _handleGroupFollow(const EQApplicationPacket* pPacket);
+	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);
 
 
 	bool mConnected;

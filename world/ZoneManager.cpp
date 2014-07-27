@@ -1,5 +1,6 @@
 #include "ZoneManager.h"
 #include "Zone.h"
+#include "GroupManager.h"
 #include "World.h"
 #include "DataStore.h"
 #include "Character.h"
@@ -9,8 +10,14 @@
 
 ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
 mWorld(pWorld),
-mDataStore(pDataStore)
+mDataStore(pDataStore),
+mGroupManager(nullptr)
 { }
+
+ZoneManager::~ZoneManager() {
+	safe_delete(mGroupManager);
+}
+
 
 void ZoneManager::update() {
 	for (auto& i : mZones) {
@@ -34,6 +41,8 @@ uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID) {
 void ZoneManager::initialise() {
 	for (int i = 7000; i < 200; i++)
 		mAvailableZonePorts.push_back(i);
+
+	mGroupManager = new GroupManager();
 }
 
 uint32 ZoneManager::_getNextZonePort() {
@@ -59,7 +68,7 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 
 Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
 	Log::info("[Zone Manager] : Zone Request");
-	Zone* zone = new Zone(mWorld, this, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
+	Zone* zone = new Zone(mWorld, this, mGroupManager, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
 	zone->initialise();
 	mZones.push_back(zone);
 	return zone;
@@ -95,4 +104,27 @@ void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const std::stri
 
 	// pTargetName is not online at this time.
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::White, StringID::PLAYER_NOT_ONLINE, pTargetName);
+}
+
+Character* ZoneManager::findCharacter(const std::string pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) {
+	Character* character = nullptr;
+
+	// Search Zones.
+	for (auto i : mZones) {
+		if (i != pExcludeZone) {
+			character = i->findCharacter(pCharacterName);
+			if (character)
+				return character;
+		}
+	}
+
+	// Search zoning characters.
+	if (pIncludeZoning) {
+		for (auto i : mZoningCharacters) {
+			if (i->getName() == pCharacterName)
+				return i;
+		}
+	}
+
+	return nullptr;
 }

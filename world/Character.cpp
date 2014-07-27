@@ -54,7 +54,8 @@ mExperience(0),
 mCopper(0),
 mSilver(0),
 mGold(0),
-mPlatinum(0)
+mPlatinum(0),
+mGroup(nullptr)
 { }
 Character::~Character() {
 	delete mProfile;
