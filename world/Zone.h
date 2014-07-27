@@ -52,7 +52,7 @@ public:
 	void notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterEmote(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage);
+	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void notifyCharacterLevelIncrease(Character* pCharacter);
 	void notifyCharacterLevelDecrease(Character* pCharacter);
@@ -61,19 +61,21 @@ public:
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
+	bool trySendTell(const std::string& pSenderName, const std::string& pTargetName, const std::string& pMessage);
+	void processCharacterQueuedTells(Character* );
 	void whoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter);
 	void requestSave(Character* pCharacter);
 	
 private:
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
-	void _sendTell(Character* pCharacter, const std::string pFromName, const std::string pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	
+
 
 
 

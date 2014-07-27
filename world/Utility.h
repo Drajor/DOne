@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Constants.h"
 #include <string>
 #include <sstream>
 #include "LogSystem.h"
@@ -11,6 +12,10 @@ namespace Utility {
 	static std::string safeString(char* pCString, unsigned int pMaxSize) {
 		pCString[pMaxSize - 1] = '\0'; // Ensure there is a null terminator at the very end
 		return std::string(pCString);
+	}
+
+	static std::string StringIDString(StringID pStringID) {
+		return std::to_string(static_cast<std::uint32_t>(pStringID));
 	}
 
 	class DynamicStructure {

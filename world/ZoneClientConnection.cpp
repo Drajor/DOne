@@ -13,7 +13,6 @@
 #include "../common/extprofile.h"
 #include "Utility.h"
 #include <sstream>
-#include "MessageStringIDs.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -710,13 +709,13 @@ header[0]
 header[1]
 */
 
-void ZoneClientConnection::sendMessage(uint32 pType, std::string pMessage) {
+void ZoneClientConnection::sendMessage(MessageType pType, std::string pMessage) {
 	auto outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
 	auto payload = reinterpret_cast<SpecialMesg_Struct*>(outPacket->pBuffer);
 	payload->header[0] = 0x00; // Header used for #emote style messages..
 	payload->header[1] = 0x00; // Play around with these to see other types
 	payload->header[2] = 0x00;
-	payload->msg_type = pType;
+	payload->msg_type = static_cast<std::uint32_t>(pType);
 	strcpy(payload->message, pMessage.c_str());
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
@@ -811,53 +810,65 @@ void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
 	if (tgb == 0 || tgb == 1) {
 		mCharacter->setTGB(tgb == 1);
-		sendSimpleMessage(0, mCharacter->getTGB() ? TGB_ON : TGB_OFF);
+		sendSimpleMessage(MessageType::White, mCharacter->getTGB() ? StringID::TGB_ON : StringID::TGB_OFF);
 	}
 	// Ignore anything else, including the extra 2 packet UF sends.
 }
 
-void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID) {
+void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID) {
 	auto outPacket = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
 	auto payload = reinterpret_cast<SimpleMessage_Struct*>(outPacket->pBuffer);
-	payload->color = pType;
-	payload->string_id = pStringID;
+	payload->color = static_cast<std::uint32_t>(pType);
+	payload->string_id = static_cast<std::uint32_t>(pStringID);
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendSimpleMessage(uint32 pType, uint32 pStringID, std::string pParameter0, std::string pParameter1, std::string pParameter2, std::string pParameter3, std::string pParameter4, std::string pParameter5, std::string pParameter6, std::string pParameter7, std::string pParameter8, std::string pParameter9) {
-	int length = 0;
+void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, std::string pParameter0, std::string pParameter1, std::string pParameter2, std::string pParameter3, std::string pParameter4, std::string pParameter5, std::string pParameter6, std::string pParameter7, std::string pParameter8, std::string pParameter9) {
+	int packetSize = 0;
 	std::string message;
-	length += pParameter0.length();
-	message += pParameter0;
-	length += pParameter1.length();
-	message += pParameter1;
-	length += pParameter2.length();
-	message += pParameter2;
-	length += pParameter3.length();
-	message += pParameter3;
-	length += pParameter4.length();
-	message += pParameter4;
-	length += pParameter5.length();
-	message += pParameter5;
-	length += pParameter6.length();
-	message += pParameter6;
-	length += pParameter7.length();
-	message += pParameter7;
-	length += pParameter8.length();
-	message += pParameter8;
-	length += pParameter9.length();
-	message += pParameter9;
 
-	auto outPacket = new EQApplicationPacket(OP_FormattedMessage, length + 13);
-	auto payload = (FormattedMessage_Struct *)outPacket->pBuffer;
-	payload->type = pType;
-	payload->string_id = pStringID;
-	strcpy(payload->message, message.c_str());
+	if (pParameter0.length() != 0) packetSize += pParameter0.length() + 1;
+	if (pParameter1.length() != 0) packetSize += pParameter1.length() + 1;
+	if (pParameter2.length() != 0) packetSize += pParameter2.length() + 1;
+	if (pParameter3.length() != 0) packetSize += pParameter3.length() + 1;
+	if (pParameter4.length() != 0) packetSize += pParameter4.length() + 1;
+	if (pParameter5.length() != 0) packetSize += pParameter5.length() + 1;
+	if (pParameter6.length() != 0) packetSize += pParameter6.length() + 1;
+	if (pParameter7.length() != 0) packetSize += pParameter7.length() + 1;
+	if (pParameter8.length() != 0) packetSize += pParameter8.length() + 1;
+	if (pParameter9.length() != 0) packetSize += pParameter9.length() + 1;
+
+	packetSize += sizeof(FormattedMessage_Struct);
+	auto outPacket = new EQApplicationPacket(OP_FormattedMessage, packetSize);
+	auto payload = reinterpret_cast<FormattedMessage_Struct*>(outPacket->pBuffer);
+	payload->type = static_cast<std::uint32_t>(pType);
+	payload->string_id = static_cast<std::uint32_t>(pStringID);
+
+	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+	dynamicStructure.movePointer(sizeof(FormattedMessage_Struct));
+
+	if (pParameter0.length() != 0) dynamicStructure.writeString(pParameter0);
+	if (pParameter1.length() != 0) dynamicStructure.writeString(pParameter1);
+	if (pParameter2.length() != 0) dynamicStructure.writeString(pParameter2);
+	if (pParameter3.length() != 0) dynamicStructure.writeString(pParameter3);
+	if (pParameter4.length() != 0) dynamicStructure.writeString(pParameter4);
+	if (pParameter5.length() != 0) dynamicStructure.writeString(pParameter5);
+	if (pParameter6.length() != 0) dynamicStructure.writeString(pParameter6);
+	if (pParameter7.length() != 0) dynamicStructure.writeString(pParameter7);
+	if (pParameter8.length() != 0) dynamicStructure.writeString(pParameter8);
+	if (pParameter9.length() != 0) dynamicStructure.writeString(pParameter9);
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+
+	// Check payload size calculation.
+	if (dynamicStructure.getBytesWritten() != packetSize) {
+		std::stringstream ss;
+		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
+		Log::error(ss.str());
+	}
 }
 
 void ZoneClientConnection::sendHPUpdate() {
@@ -1001,18 +1012,18 @@ void ZoneClientConnection::sendLevelUpdate() {
 }
 
 void ZoneClientConnection::sendExperienceGain() {
-	sendSimpleMessage(MT_Experience, GAIN_XP);
+	sendSimpleMessage(MessageType::Experience, StringID::GAIN_XP);
 }
 
 void ZoneClientConnection::sendExperienceLoss() {
 	// There is no StringID for this message apparently.
-	sendMessage(MC_Yellow, "You have lost experience.");
+	sendMessage(MessageType::Yellow, "You have lost experience.");
 }
 
 void ZoneClientConnection::sendLevelGain() {
 	std::stringstream ss;
 	ss << static_cast<int>(mCharacter->getLevel());
-	sendSimpleMessage(MT_Experience, GAIN_LEVEL, ss.str());
+	sendSimpleMessage(MessageType::Experience, StringID::GAIN_LEVEL, ss.str());
 }
 
 void ZoneClientConnection::sendLevelLost() {
@@ -1190,11 +1201,25 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		//ss.str("");
 	}
 
+	// Check payload size calculation.
 	if (dynamicStructure.getBytesWritten() != packetSize) {
 		std::stringstream ss;
 		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
 		Log::error(ss.str());
 	}
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendTell(std::string pSenderName, std::string pMessage) {
+	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
+	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
+	payload->language = Language::COMMON_TONGUE_LANG;
+	payload->skill_in_language = 0;
+	payload->chan_num = CH_TELL;
+	strcpy(payload->message, pMessage.c_str());
+	strcpy(payload->sender, pSenderName.c_str());
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);

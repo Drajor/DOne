@@ -278,46 +278,20 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::strin
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterChatTell(Character* pCharacter, const std::string pTargetName, const std::string pMessage) {
-	// Check if receiver is in zone.
+void Zone::notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage) {
+	mZoneManager->notifyCharacterChatTell(pCharacter, pTargetName, pMessage);
+}
+
+bool Zone::trySendTell(const std::string& pSenderName, const std::string& pTargetName, const std::string& pMessage) {
 	for (auto i : mCharacters) {
 		if (i->getName() == pTargetName) {
-			_sendTell(i, pCharacter->getName(), pMessage);
-			// Send reply back to sender.
-			std::stringstream ss;
-			ss << "You told " << pTargetName << ", '" << pMessage << "'";
-			pCharacter->getConnection()->sendMessage(MC_White, ss.str());
-			return;
+			i->getConnection()->sendTell(pSenderName, pMessage);
+			return true;
 		}
 	}
 
-	// TODO: OOZ
-	// As per below. Not sure how keen I am about having Character* from another zone in here.
-	/*
-	Character* other = mZoneManager->findCharacter(pTargetName);
-	if (other) {
-		_sendTell(i, pCharacter->getName(), pMessage);
-		return;
-	}
-	*/
-
-	// Character was found not in this zone or others.
-	std::stringstream ss;
-	ss << "You told " << pTargetName << ", '" << pTargetName << " is not online at this time'";
-	pCharacter->getConnection()->sendMessage(MC_White, ss.str());
-}
-
-void Zone::_sendTell(Character* pCharacter, const std::string pFromName, const std::string pMessage) {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
-	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
-	payload->language = Language::COMMON_TONGUE_LANG;
-	payload->skill_in_language = 0;
-	payload->chan_num = CH_TELL;
-	strcpy(payload->message, pMessage.c_str());
-	strcpy(payload->sender, pFromName.c_str());
-
-	pCharacter->getConnection()->sendPacket(outPacket);
-	safe_delete(outPacket);
+	// Character not in this zone.
+	return false;
 }
 
 void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender) {
@@ -386,7 +360,7 @@ void Zone::requestSave(Character*pCharacter) {
 	// http://dev.mysql.com/doc/refman/5.5/en/too-many-connections.html
 	// Considering a DB connection per user and just copy data to another thread.
 	if (!mDataStore->saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
-		pCharacter->getConnection()->sendMessage(MC_Red, "[ERROR] There was an error saving your character. I suggest you log out.");
+		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 	}
 }

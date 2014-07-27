@@ -168,7 +168,7 @@ bool Character::getShowHelm() {
 	return mProfile->showhelm == 1;
 }
 
-void Character::message(uint32 pType, std::string pMessage)
+void Character::message(MessageType pType, std::string pMessage)
 {
 	mConnection->sendMessage(pType, pMessage);
 }
@@ -253,7 +253,7 @@ void Character::addExperience(uint32 pExperience) {
 	if (mLevel == Character::getMaxCharacterLevel()) {
 		// Character is already at max exp - 1
 		if (mExperience == getExperienceForNextLevel() - 1) {
-			message(MC_LightBlue, "You can no longer gain experience.");
+			message(MessageType::LightBlue, "You can no longer gain experience.");
 			return;
 		}
 		// This experience will take the Character over the limit.
@@ -407,4 +407,15 @@ void Character::_updateForSave() {
 
 	mProfile->guild_id = getGuildID();
 	mProfile->guildrank = getGuildID();
+}
+
+void Character::addQueuedTell(std::string pSenderName, std::string pMessage) {
+	mQueuedTells.insert(std::make_pair(pSenderName, pMessage));
+}
+
+void Character::_processQueuedTells() {
+	for (auto i : mQueuedTells) {
+		mConnection->sendTell(i.first, i.second);
+	}
+	mQueuedTells.clear();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../common/types.h"
+#include "Constants.h"
+
 #include "../common/timer.h"
 #include <string>
 #include <list>
@@ -37,9 +38,9 @@ public:
 	void dropConnection();
 
 	void sendPosition();
-	void sendMessage(uint32 pType, std::string pMessage);
-	void sendSimpleMessage(uint32 pType, uint32 pStringID);
-	void sendSimpleMessage(uint32 pType, uint32 pStringID, std::string pParameter0, std::string pParameter1 = EmptyString, std::string pParameter2 = EmptyString, std::string pParameter3 = EmptyString, std::string pParameter4 = EmptyString, std::string pParameter5 = EmptyString, std::string pParameter6 = EmptyString, std::string pParameter7 = EmptyString, std::string pParameter8 = EmptyString, std::string pParameter9 = EmptyString);
+	void sendMessage(MessageType pType, std::string pMessage);
+	void sendSimpleMessage(MessageType pType, StringID pStringID);
+	void sendSimpleMessage(MessageType pType, StringID pStringID, std::string pParameter0, std::string pParameter1 = EmptyString, std::string pParameter2 = EmptyString, std::string pParameter3 = EmptyString, std::string pParameter4 = EmptyString, std::string pParameter5 = EmptyString, std::string pParameter6 = EmptyString, std::string pParameter7 = EmptyString, std::string pParameter8 = EmptyString, std::string pParameter9 = EmptyString);
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
 
@@ -52,6 +53,7 @@ public:
 	void sendLevelUpdate();
 	void sendStats();
 	void sendWhoResults(std::list<Character*>& pMatches);
+	void sendTell(std::string pSenderName, std::string pMessage);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.

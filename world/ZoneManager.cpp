@@ -5,6 +5,7 @@
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "LogSystem.h"
+#include "Utility.h"
 
 ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
 mWorld(pWorld),
@@ -70,4 +71,28 @@ void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
 		i->getWhoMatches(matches, pFilter);
 	}
 	pCharacter->getConnection()->sendWhoResults(matches);
+}
+
+void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage) {
+	// Search Zones
+	for (auto i : mZones) {
+		if (i->trySendTell(pCharacter->getName(), pTargetName, pMessage)) {
+			// Send echo "You told Player, 'Message'
+			pCharacter->getConnection()->sendSimpleMessage(MessageType::TellEcho, StringID::TELL_ECHO, pTargetName, pMessage);
+			return;
+		}
+	}
+
+	// Check zoning Characters
+	for (auto i : mZoningCharacters) {
+		if (i->getName() == pTargetName) {
+			// Send queued echo "You told Player, '[queued] Message'
+			pCharacter->getConnection()->sendSimpleMessage(MessageType::TellEcho, StringID::TELL_QUEUED, pTargetName, Utility::StringIDString(StringID::QUEUED), pMessage);
+			// Store queued message.
+			i->addQueuedTell(pCharacter->getName(), pMessage);
+		}
+	}
+
+	// pTargetName is not online at this time.
+	pCharacter->getConnection()->sendSimpleMessage(MessageType::White, StringID::PLAYER_NOT_ONLINE, pTargetName);
 }

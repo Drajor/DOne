@@ -4,6 +4,7 @@
 #include "../common/types.h"
 #include "../common/timer.h"
 #include <string>
+#include <unordered_map>
 
 class Zone;
 class EQStreamInterface;
@@ -37,6 +38,9 @@ public:
 	bool onZoneIn();
 	bool onZoneOut();
 
+	void addQueuedTell(std::string pSenderName, std::string pMessage);
+	bool hasQueuedTells() { return !mQueuedTells.empty(); }
+
 	void setZone(Zone* pZone) { mZone = pZone; }
 	void setSpawnID(uint16 pSpawnID) { mSpawnID = pSpawnID; }
 
@@ -66,7 +70,7 @@ public:
 	void setShowHelm(bool pShowHelm);
 	bool getShowHelm();
 
-	void message(uint32 pType, std::string pMessage);
+	void message(MessageType pType, std::string pMessage);
 	
 
 
@@ -208,6 +212,9 @@ private:
 
 	Timer mSuperGMPower;
 	Timer mAutoSave;
+
+	std::unordered_multimap<std::string, std::string> mQueuedTells;
+	void _processQueuedTells();
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;
