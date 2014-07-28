@@ -1288,8 +1288,11 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
-	std::string inviteeName = Utility::safeString(payload->name1, 64);
-	std::string inviterName = Utility::safeString(payload->name2, 64);
+	std::string inviterName = Utility::safeString(payload->name1, 64); // Character who invited.
+	std::string inviteeName = Utility::safeString(payload->name2, 64); // Character accepting inviting.
+
+	//std::stringstream ss; ss << "Name1= " << inviteeName << " Name2=" << inviterName;
+	//Utility::print(ss.str());
 
 	mZone->notifyCharacterAcceptGroupInvite(mCharacter, inviterName);
 }
@@ -1331,8 +1334,9 @@ void ZoneClientConnection::sendGroupCreate() {
 	dynamicStructure.write<uint32>(0);
 	dynamicStructure.write<uint16>(0);
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	mStreamInterface->FastQueuePacket(&outPacket);
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
 
 	// Check payload size calculation.
 	if (dynamicStructure.getBytesWritten() != packetSize) {
@@ -1365,15 +1369,54 @@ void ZoneClientConnection::sendGroupLeaderChange(const std::string pCharacterNam
 	auto outPacket = new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
 	auto payload = reinterpret_cast<GroupLeaderChange_Struct*>(outPacket->pBuffer);
 	strcpy(payload->LeaderName, pCharacterName.c_str());
-	//FastQueuePacket(&outPacket);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	mStreamInterface->FastQueuePacket(&outPacket);
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
 }
 
 void ZoneClientConnection::sendGroupAcknowledge() {
 	static const auto PACKET_SIZE = 4;
 	auto outPacket = new EQApplicationPacket(OP_GroupAcknowledge, PACKET_SIZE);
-	//FastQueuePacket(&outapp);
+	mStreamInterface->FastQueuePacket(&outPacket);
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGroupFollow(const std::string& pLeaderCharacterName, const std::string& pMemberCharacterName) {
+	auto outPacket = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
+	auto payload = reinterpret_cast<GroupGeneric_Struct*>(outPacket->pBuffer);
+	strcpy(payload->name1, pLeaderCharacterName.c_str());
+	strcpy(payload->name2, pMemberCharacterName.c_str()); 
+
+	mStreamInterface->FastQueuePacket(&outPacket);
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGroupJoin(const std::string& pCharacterName) {
+	auto outPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
+	auto payload = reinterpret_cast<GroupJoin_Struct*>(outPacket->pBuffer);
+	payload->action = groupActJoin;
+
+	strcpy(payload->membername, pCharacterName.c_str());
+	strcpy(payload->yourname, mCharacter->getName().c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGroupUpdate(std::list<std::string>& pGroupMemberNames) {
+	auto outPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
+	auto payload = (GroupUpdate2_Struct*)outPacket->pBuffer;
+	payload->action = groupActUpdate;
+	strcpy(payload->yourname, mCharacter->getName().c_str());
+
+	int count = 0;
+	for (auto i : pGroupMemberNames) {
+		strcpy(payload->membername[count], i.c_str());
+		count++;
+	}
+	
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

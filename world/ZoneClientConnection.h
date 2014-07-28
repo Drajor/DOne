@@ -59,6 +59,9 @@ public:
 	void sendGroupCreate();
 	void sendGroupLeaderChange(const std::string pCharacterName);
 	void sendGroupAcknowledge();
+	void sendGroupFollow(const std::string& pLeaderCharacterName, const std::string& pMemberCharacterName);
+	void sendGroupJoin(const std::string& pCharacterName);
+	void sendGroupUpdate(std::list<std::string>& pGroupMemberNames);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -107,6 +110,7 @@ private:
 	void _handleGroupInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupFollow(const EQApplicationPacket* pPacket);
 	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);
+
 
 
 	bool mConnected;

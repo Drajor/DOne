@@ -222,7 +222,6 @@ private:
 
 	std::unordered_multimap<std::string, std::string> mQueuedTells;
 	void _processQueuedTells();
-
 	Group* mGroup;
 
 	Zone* mZone;

@@ -1,13 +1,15 @@
 #pragma once
 
 #include <list>
+#include <string>
 
 class Character;
 
 class Group {
 public:
-	bool isFull() { return mCharacters.size() == 6; }
+	bool isFull() { return mMembers.size() == 6; }
 	bool isMember(Character* pCharacter);
+	void getMemberNames(std::list<std::string>& pMemberNames, std::string pExcludeCharacterName);
 private:
 	friend class GroupManager;
 	void addMember(Character* pCharacter);
@@ -16,7 +18,7 @@ private:
 	~Group();
 
 	Character* mLeader;
-	std::list<Character*> mCharacters;
+	std::list<Character*> mMembers;
 };
 
 class GroupManager {
