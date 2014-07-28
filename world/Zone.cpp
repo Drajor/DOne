@@ -17,6 +17,7 @@
 Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
 	mWorld(pWorld),
 	mZoneManager(pZoneManager),
+	mGroupManager(pGroupManager),
 	mDataStore(pDataStore),
 	mPort(pPort),
 	mID(pZoneID),
