@@ -39,10 +39,11 @@ uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID) {
 }
 
 void ZoneManager::initialise() {
-	for (int i = 7000; i < 200; i++)
-		mAvailableZonePorts.push_back(i);
+	for (int i = 0; i < 200; i++)
+		mAvailableZonePorts.push_back(7000+i);
 
 	mGroupManager = new GroupManager();
+	mGroupManager->test();
 }
 
 uint32 ZoneManager::_getNextZonePort() {
