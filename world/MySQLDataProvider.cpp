@@ -235,8 +235,9 @@ bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pChar
 			return false;
 		}
 		MYSQL_ROW row = mysql_fetch_row(result);
+		bool isOwner = pWorldAccountID == static_cast<uint32>(atoi(row[0]));
 		mysql_free_result(result);
-		return pWorldAccountID == static_cast<uint32>(atoi(row[0]));
+		return isOwner;
 	}
 
 	Log::error("Checking ownership of character failed."); // TODO:
