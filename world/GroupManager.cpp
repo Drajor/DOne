@@ -46,45 +46,59 @@ N(OP_DoGroupLeadershipAbility),
 N(OP_SetGroupTarget),
 */
 
+// Trying it out.
+#define ARG_STR(pARG) #pARG
+#define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+
 void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
-	Group* group = new Group();
-	group->addMember(pLeader);
-	group->addMember(pMember);
-	group->setLeader(pLeader);
+	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
 
-	// Notify leader(inviter) that a group has been created.
-	pLeader->getConnection()->sendGroupCreate();
-	// Notify leader(inviter) that they are the group leader.
-	pLeader->getConnection()->sendGroupLeaderChange(pLeader->getName());
-	// Ping?
-	pLeader->getConnection()->sendGroupAcknowledge();
-	// Notify leader(inviter) that the member(invitee) has agreed to group.
-	pLeader->getConnection()->sendGroupFollow(pLeader->getName(), pMember->getName());
-	// Ping?
-	pMember->getConnection()->sendGroupAcknowledge();
-
-	pLeader->getConnection()->sendGroupJoin(pMember->getName());
-	//pMember->getConnection()->sendGroupJoin(pLeader->getName());
-
-	//auto hpPacket = new EQApplicationPacket(OP_MobHealth, sizeof(SpawnHPUpdate_Struct2));
-	//auto hpPayload = reinterpret_cast<SpawnHPUpdate_Struct2*>(hpPacket->pBuffer);
-	//
-	//hpPayload->spawn_id = pLeader->getSpawnID();
-	//hpPayload->hp = 30;
-
-	//pMember->getConnection()->sendPacket(hpPacket);
-	//safe_delete(hpPacket);
-
-	std::list<std::string> memberNames;
-	group->getMemberNames(memberNames, pMember->getName());
-	pMember->getConnection()->sendGroupUpdate(memberNames);
-
-	//app->SetOpcode(OP_MobHealth);
-	//app->size = sizeof(SpawnHPUpdate_Struct2);
+	Group* group = new Group(pLeader, pMember);
+	mGroups.push_back(group);
 }
 
-Group::Group() : mLeader(nullptr) {
+void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter) {
+	ARG_PTR_CHECK(pCharacter); ARG_PTR_CHECK(pRemoveCharacter);
+	
+	// Check: Characters are in the same group.
+	if (pCharacter->getGroup() != pRemoveCharacter->getGroup()) {
+		Log::error("[Group Manager] Group mismatch in removeMemberRequest.");
+		return;
+	}
 
+	// Character is removing them self from the group.
+	if (pCharacter == pRemoveCharacter) {
+		Group* group = pCharacter->getGroup();
+		group->removeMember(pRemoveCharacter);
+
+		// Tidy up if group is disbanded.
+		if (group->mIsDisbanded) {
+			mGroups.remove(group);
+			delete group;
+		}
+	}
+}
+
+Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader), mIsDisbanded(false) {
+	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
+	
+	mMembers.push_back(pLeader);
+	mMembers.push_back(pMember);
+	pLeader->setGroup(this);
+	pMember->setGroup(this);
+
+	pLeader->getConnection()->sendGroupCreate();
+	pLeader->getConnection()->sendGroupLeaderChange(pLeader->getName());
+	pLeader->getConnection()->sendGroupAcknowledge();
+	pLeader->getConnection()->sendGroupFollow(pLeader->getName(), pMember->getName());
+
+	pMember->getConnection()->sendGroupAcknowledge();
+	pLeader->getConnection()->sendGroupJoin(pMember->getName());
+
+	std::list<std::string> memberNames;
+	getMemberNames(memberNames, pMember->getName());
+	pMember->getConnection()->sendGroupUpdate(memberNames);
 }
 
 Group::~Group() {
@@ -92,6 +106,8 @@ Group::~Group() {
 }
 
 void Group::addMember(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	
 	// Check: Group is not already full.
 	if (isFull()) {
 		Log::error("[Group] Group is full and attempting to add another member.");
@@ -110,13 +126,63 @@ void Group::addMember(Character* pCharacter) {
 
 	mMembers.push_back(pCharacter);
 	pCharacter->setGroup(this);
+
+	// TODO: Update the rest of the group.
+}
+
+void Group::removeMember(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
+	bool removed = false;
+	for (auto i : mMembers) {
+		if (i == pCharacter) {
+			removed = true;
+			break;
+		}
+	}
+
+	if (!removed) {
+		// TODO: Log
+		return;
+	}
+
+	mMembers.remove(pCharacter);
+	pCharacter->setGroup(nullptr);
+
+	// Tell the leaving character that they left the group.
+	pCharacter->getConnection()->sendGroupLeave(pCharacter->getName());
+
+	// Tell the remaining members that pCharacter left the group.
+	for (auto i : mMembers)
+		i->getConnection()->sendGroupLeave(pCharacter->getName());
+	
+	// Check if group needs to disband.
+	if (getNumMembers() == 1) {
+		Character* lastMember = *mMembers.begin();
+		mMembers.clear();
+
+		lastMember->setGroup(nullptr);
+		lastMember->getConnection()->sendGroupDisband();
+		
+		mIsDisbanded = true;
+		return;
+	}
+
+	// Group leader is leaving.
+	if (mLeader == pCharacter) {
+
+	}
 }
 
 void Group::setLeader(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
 	mLeader = pCharacter;
 }
 
 bool Group::isMember(Character* pCharacter) {
+	ARG_PTR_CHECK_BOOL(pCharacter);
+
 	for (auto i : mMembers) {
 		if (i == pCharacter) return true;
 	}

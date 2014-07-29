@@ -50,6 +50,16 @@ enum ZoneIDs {
 	NorthQeynos = 2
 };
 
+enum class Statistic : std::uint32_t {
+	Strength,
+	Stamina,
+	Charisma,
+	Dexterity,
+	Intelligence,
+	Agility,
+	Wisdom
+};
+
 enum Anonymous{
 	ANON_None = 0,
 	ANON_Roleplay = 1,

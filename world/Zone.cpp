@@ -424,6 +424,16 @@ Character* Zone::findCharacter(const std::string pCharacterName) {
 	return nullptr;
 }
 
+Character* Zone::_findCharacter(const std::string& pCharacterName, bool pIncludeZoning) {
+	// Search locally first.
+	Character* character = findCharacter(pCharacterName);
+	if (character) return character;
+
+	// Proceed to global search.
+	return mZoneManager->findCharacter(pCharacterName, pIncludeZoning, this);
+}
+
+
 void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName) {
 	// Search our Zone first.
 	Character* toCharacter = findCharacter(pToCharacterName);
@@ -442,4 +452,20 @@ void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string p
 void Zone::notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName)
 {
 	
+}
+
+void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName) {
+	Character* removeCharacter = _findCharacter(pRemoveCharacterName); // TODO: Disbanding zoning characters?
+	if (!removeCharacter) {
+		Log::error("[Zone] Attempting to remove Character from group that does not exist.");
+		return;
+	}
+
+	mGroupManager->removeMemberRequest(pCharacter, removeCharacter);
+	//// Check: Same group.
+	//if (pCharacter->getGroup() != removeCharacter->getGroup()) {
+	//	Log::error("[Zone] Attempting to remove Character ");
+	//	return;
+	//}
+	//Group* group = pCharacter->getGroup();
 }

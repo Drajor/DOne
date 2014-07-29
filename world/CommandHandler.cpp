@@ -5,6 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "ZoneClientConnection.h"
+#include "Constants.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -164,16 +165,32 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	//}
 	// #setstat
 	else if (pCommandName == "setstat" && pCharacter->getStatus() >= 255) {
-		// TODO: OP_IncreaseStats is strange.
-		//auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-		//auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
-		////payload->unknown0 = 0;
-		////payload->str = 5; // AGI
-		//payload->str = 5;
-		////mStreamInterface->QueuePacket(outPacket);
-		//pCharacter->getConnection()->sendPacket(outPacket);
-		//safe_delete(outPacket);
-		////pCharacter->getConnection()->sendStats();
+		if (pParameters.size() == 2) {
+			std::string statStr = pParameters[0];
+			std::string statName = "unknown";
+			uint32 value = 0;
+			Statistic statistic;
+			if (!stoulSafe(value, pParameters[1])) {
+				return;
+			}
+
+			// Determine which statistic is changing.
+			if (statStr == "str") { statistic = Statistic::Strength; statName = "strength"; }
+			else if (statStr == "sta") { statistic = Statistic::Stamina; statName = "stamina"; }
+			else if (statStr == "cha") { statistic = Statistic::Charisma; statName = "charisma"; }
+			else if (statStr == "dex") { statistic = Statistic::Dexterity; statName = "dexterity"; }
+			else if (statStr == "int") { statistic = Statistic::Intelligence; statName = "intelligence"; }
+			else if (statStr == "agi") { statistic = Statistic::Agility; statName = "agility"; }
+			else if (statStr == "wis") { statistic = Statistic::Wisdom; statName = "wisdom"; }
+			else {
+				return;
+			}
+
+			std::stringstream ss;
+			ss << "Changing " << pCharacter->getName() << "'s " << statName << " from " << pCharacter->getBaseStatistic(statistic) << " to " << value;
+			pCharacter->message(MessageType::LightGreen, ss.str());
+			pCharacter->setBaseStatistic(statistic, value);
+		}
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

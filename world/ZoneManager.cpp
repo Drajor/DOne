@@ -15,6 +15,7 @@ mGroupManager(nullptr)
 { }
 
 ZoneManager::~ZoneManager() {
+	ZoneClientConnection::deinitialise();
 	safe_delete(mGroupManager);
 }
 
@@ -41,9 +42,8 @@ uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID) {
 void ZoneManager::initialise() {
 	for (int i = 0; i < 200; i++)
 		mAvailableZonePorts.push_back(7000+i);
-
+	ZoneClientConnection::initalise();
 	mGroupManager = new GroupManager();
-	mGroupManager->test();
 }
 
 uint32 ZoneManager::_getNextZonePort() {

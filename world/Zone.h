@@ -65,6 +65,7 @@ public:
 	void notifyCharacterGroupInvite(Character* pCharacter, const std::string pToCharacterName);
 	void notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName);
 	void notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName);
+	void notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
@@ -76,13 +77,17 @@ public:
 	void requestSave(Character* pCharacter);
 	
 private:
+
+	// Performs a global Character search.
+	Character* _findCharacter(const std::string& pCharacterName, bool pIncludeZoning = false);
+
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
-
+	
 
 
 

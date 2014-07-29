@@ -62,6 +62,8 @@ public:
 	void sendGroupFollow(const std::string& pLeaderCharacterName, const std::string& pMemberCharacterName);
 	void sendGroupJoin(const std::string& pCharacterName);
 	void sendGroupUpdate(std::list<std::string>& pGroupMemberNames);
+	void sendGroupDisband();
+	void sendGroupLeave(const std::string& pLeavingCharacterName);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -70,6 +72,7 @@ public:
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
+
 	void _sendTimeOfDay();
 
 	void _sendPlayerProfile();
@@ -110,7 +113,7 @@ private:
 	void _handleGroupInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupFollow(const EQApplicationPacket* pPacket);
 	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);
-
+	void _handleGroupDisband(const EQApplicationPacket* pPacket);
 
 
 	bool mConnected;
@@ -121,4 +124,15 @@ private:
 	Character* mCharacter;
 	ZoneConnectionStatus mZoneConnectionStatus;
 	CommandHandler* mCommandHandler; // For now every connection has their own.
+
+	public:
+		static void initalise();
+		static void deinitialise();
+	private:
+	
+	static EQApplicationPacket* mGroupJoinPacket;
+	static EQApplicationPacket* mGroupLeavePacket;
+	static EQApplicationPacket* mGroupDisbandPacket;
+	static EQApplicationPacket* mGroupLeaderChangePacket;
+	static EQApplicationPacket* mGroupUpdateMembersPacket;
 };

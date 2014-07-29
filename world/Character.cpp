@@ -107,14 +107,6 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mSuperGMPower.Start(2000);
 	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 
-	mProfile->STR = 5;
-	mProfile->STA = 100;
-	mProfile->AGI = 5;
-	mProfile->DEX = 5;
-	mProfile->CHA = 5;
-	mProfile->INT = 5;
-	mProfile->WIS = 5;
-
 	mCopper = mProfile->copper;
 	mSilver = mProfile->silver;
 	mGold = mProfile->gold;
@@ -419,4 +411,90 @@ void Character::_processQueuedTells() {
 		mConnection->sendTell(i.first, i.second);
 	}
 	mQueuedTells.clear();
+}
+
+uint32 Character::getBaseStatistic(Statistic pStatistic) {
+	switch (pStatistic)
+	{
+	case Statistic::Strength:
+		return mProfile->STR;
+		break;
+	case Statistic::Stamina:
+		return mProfile->STA;
+		break;
+	case Statistic::Charisma:
+		return mProfile->CHA;
+		break;
+	case Statistic::Dexterity:
+		return mProfile->DEX;
+		break;
+	case Statistic::Intelligence:
+		return mProfile->INT;
+		break;
+	case Statistic::Agility:
+		return mProfile->AGI;
+		break;
+	case Statistic::Wisdom:
+		return mProfile->WIS;
+		break;
+	default:
+		Log::error("[Character] Unknown Statistic in getBaseStatistic.");
+		break;
+	}
+
+	return 0;
+}
+
+void Character::setBaseStatistic(Statistic pStatistic, uint32 pValue) {
+	switch (pStatistic) {
+	case Statistic::Strength:
+		mProfile->STR = pValue;
+		break;
+	case Statistic::Stamina:
+		mProfile->STA = pValue;
+		break;
+	case Statistic::Charisma:
+		mProfile->CHA = pValue;
+		break;
+	case Statistic::Dexterity:
+		mProfile->DEX = pValue;
+		break;
+	case Statistic::Intelligence:
+		mProfile->INT = pValue;
+		break;
+	case Statistic::Agility:
+		mProfile->AGI = pValue;
+		break;
+	case Statistic::Wisdom:
+		mProfile->WIS = pValue;
+		break;
+	default:
+		Log::error("[Character] Unknown Statistic in setBaseStatistic.");
+		break;
+	}
+}
+
+uint32 Character::getStatistic(Statistic pStatistic) {
+	switch (pStatistic)
+	{
+	case Statistic::Strength:
+		return getStrength();
+	case Statistic::Stamina:
+		return getStamina();
+	case Statistic::Charisma:
+		return getCharisma();
+	case Statistic::Dexterity:
+		return getDexterity();
+	case Statistic::Intelligence:
+		return getIntelligence();
+	case Statistic::Agility:
+		return getAgility();
+	case Statistic::Wisdom:
+		return getWisdom();
+	default:
+		Log::error("[Character] Unknown Statistic in getStatistic.");
+		break;
+	}
+
+	return 0;
 }

@@ -153,6 +153,20 @@ public:
 	void setLevel(uint8 pLevel);
 
 	static float getDefaultSize(uint32 pRace);
+
+	// Base Stats
+	uint32 getBaseStatistic(Statistic pStatistic);
+	void setBaseStatistic(Statistic pStatistic, uint32 pValue);
+
+	// 
+	uint32 getStrength() { return 0; };
+	uint32 getStamina() { return 0; };
+	uint32 getCharisma() { return 0; };
+	uint32 getDexterity() { return 0; };
+	uint32 getIntelligence() { return 0; };
+	uint32 getAgility() { return 0; };
+	uint32 getWisdom() { return 0; };
+	uint32 getStatistic(Statistic pStatistic);
 private:
 
 	void _initialiseProfile();
