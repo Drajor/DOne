@@ -124,14 +124,7 @@ void Character::_initialiseProfile() {
 }
 
 bool Character::onZoneIn() {
-	// Send any queued tells.
-	if (hasQueuedTells())
-		_processQueuedTells();
-
-	// Send any queued group messages.
-	if (hasQueuedGroupMessages())
-		_processQueuedGroupMessages();
-
+	_processMessageQueue();
 	return true;
 }
 
@@ -411,28 +404,6 @@ void Character::_updateForSave() {
 	mProfile->guildrank = getGuildID();
 }
 
-void Character::addQueuedTell(std::string pSenderName, std::string pMessage) {
-	mQueuedTells.insert(std::make_pair(pSenderName, pMessage));
-}
-void Character::queueGroupMessage(std::string pSenderName, std::string pMessage) {
-	mQueuedGroupMessages.insert(std::make_pair(pSenderName, pMessage));
-}
-
-
-void Character::_processQueuedTells() {
-	for (auto i : mQueuedTells) {
-		mConnection->sendTell(i.first, i.second);
-	}
-	mQueuedTells.clear();
-}
-
-void Character::_processQueuedGroupMessages() {
-	for (auto i : mQueuedGroupMessages) {
-		mConnection->sendGroupChat(i.first, i.second);
-	}
-	mQueuedGroupMessages.clear();
-}
-
 uint32 Character::getBaseStatistic(Statistic pStatistic) {
 	switch (pStatistic)
 	{
@@ -517,4 +488,14 @@ uint32 Character::getStatistic(Statistic pStatistic) {
 	}
 
 	return 0;
+}
+
+void Character::_processMessageQueue() {
+	for (auto i : mMessageQueue)
+		mConnection->sendChannelMessage(i.mChannelID, i.mSenderName, i.mMessage);
+	mMessageQueue.clear();
+}
+
+void Character::addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
+	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
 }

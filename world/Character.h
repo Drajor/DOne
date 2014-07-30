@@ -40,11 +40,7 @@ public:
 	bool isZoning() { return mIsZoning; }
 	bool onZoneIn();
 	bool onZoneOut();
-
-	void addQueuedTell(std::string pSenderName, std::string pMessage);
-	bool hasQueuedTells() { return !mQueuedTells.empty(); }
-	void queueGroupMessage(std::string pSenderName, std::string pMessage);
-	bool hasQueuedGroupMessages() { return !mQueuedGroupMessages.empty(); }
+	void addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage);
 
 	// Group
 	bool hasGroup() { return mGroup != nullptr; }
@@ -238,15 +234,18 @@ private:
 	Timer mSuperGMPower;
 	Timer mAutoSave;
 
-	std::unordered_multimap<std::string, std::string> mQueuedTells;
-	void _processQueuedTells();
-	std::unordered_multimap<std::string, std::string> mQueuedGroupMessages;
-	void _processQueuedGroupMessages();
-
 	Group* mGroup;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;
 	PlayerProfile_Struct* mProfile;
 	ExtendedProfile_Struct* mExtendedProfile;
+
+	struct QueuedChannelMessage {
+		const ChannelID mChannelID;
+		const std::string mSenderName;
+		const std::string mMessage;
+	};
+	std::list<QueuedChannelMessage> mMessageQueue;
+	void _processMessageQueue();
 };

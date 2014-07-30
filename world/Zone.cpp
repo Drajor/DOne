@@ -229,21 +229,21 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 }
 
 void Zone::notifyCharacterChatSay(Character* pCharacter, const std::string pMessage) {
-	_sendChat(pCharacter, CH_SAY, pMessage);
+	_sendChat(pCharacter, ChannelID::CH_SAY, pMessage);
 }
 
 void Zone::notifyCharacterChatShout(Character* pCharacter, const std::string pMessage) {
-	_sendChat(pCharacter, CH_SHOUT, pMessage);
+	_sendChat(pCharacter, ChannelID::CH_SHOUT, pMessage);
 }
 
 void Zone::notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage) {
-	_sendChat(pCharacter, CH_AUCTION, pMessage);
+	_sendChat(pCharacter, ChannelID::CH_AUCTION, pMessage);
 
 	// TODO: Server Auction
 }
 
 void Zone::notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage) {
-	_sendChat(pCharacter, CH_OOC, pMessage);
+	_sendChat(pCharacter, ChannelID::CH_OOC, pMessage);
 	
 	// TODO: Server OOC
 }
@@ -269,7 +269,7 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::strin
 	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
 	payload->language = Language::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
-	payload->chan_num = pChannel;
+	payload->chan_num = static_cast<std::uint32_t>(pChannel);
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pCharacter->getName().c_str());
 

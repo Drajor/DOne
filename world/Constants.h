@@ -142,7 +142,7 @@ enum BodyType {
 	BT_Special = 67
 };
 
-enum ChannelID : uint32 {
+enum class ChannelID : std::uint32_t {
 	CH_GUILD = 0, // /gu
 	CH_GROUP = 2, // /g
 	CH_SHOUT = 3, // /shou

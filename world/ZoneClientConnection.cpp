@@ -1255,12 +1255,12 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendTell(std::string pSenderName, std::string pMessage) {
+void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
 	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
 	payload->language = Language::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
-	payload->chan_num = CH_TELL;
+	payload->chan_num = static_cast<std::uint32_t>(pChannel);
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pSenderName.c_str());
 
@@ -1268,18 +1268,18 @@ void ZoneClientConnection::sendTell(std::string pSenderName, std::string pMessag
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendGroupChat(std::string pSenderName, std::string pMessage) {
-	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
-	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
-	payload->language = Language::COMMON_TONGUE_LANG;
-	payload->skill_in_language = 0;
-	payload->chan_num = CH_GROUP;
-	strcpy(payload->message, pMessage.c_str());
-	strcpy(payload->sender, pSenderName.c_str());
-
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+void ZoneClientConnection::sendTell(const std::string& pSenderName, const std::string& pMessage) {
+	sendChannelMessage(ChannelID::CH_TELL, pSenderName, pMessage);
 }
+
+void ZoneClientConnection::sendGroupMessage(const std::string& pSenderName, const std::string& pMessage) {
+	sendChannelMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
+}
+
+void ZoneClientConnection::sendGuildMessage(const std::string& pSenderName, const std::string& pMessage) {
+	sendChannelMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
+}
+
 
 void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
 	// Check packet is the correct size.

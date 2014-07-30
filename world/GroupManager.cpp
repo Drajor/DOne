@@ -84,10 +84,10 @@ void GroupManager::chatSent(Character* pCharacter, const std::string pMessage) {
 	for (auto i : pCharacter->getGroup()->mMembers) {
 		// Check: If group member is currently zoning.
 		if (i->isZoning()) {
-			i->queueGroupMessage(pCharacter->getName(), pMessage);
+			i->addQueuedMessage(ChannelID::CH_GROUP, pCharacter->getName(), pMessage);
 			continue;
 		}
-		i->getConnection()->sendGroupChat(pCharacter->getName(), pMessage);
+		i->getConnection()->sendGroupMessage(pCharacter->getName(), pMessage);
 	}
 }
 

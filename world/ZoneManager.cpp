@@ -99,7 +99,7 @@ void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const std::stri
 			// Send queued echo "You told Player, '[queued] Message'
 			pCharacter->getConnection()->sendSimpleMessage(MessageType::TellEcho, StringID::TELL_QUEUED, pTargetName, Utility::StringIDString(StringID::QUEUED), pMessage);
 			// Store queued message.
-			i->addQueuedTell(pCharacter->getName(), pMessage);
+			i->addQueuedMessage(ChannelID::CH_TELL, pCharacter->getName(), pMessage);
 		}
 	}
 

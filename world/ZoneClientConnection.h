@@ -53,8 +53,11 @@ public:
 	void sendLevelUpdate();
 	void sendStats();
 	void sendWhoResults(std::list<Character*>& pMatches);
-	void sendTell(std::string pSenderName, std::string pMessage);
-	void sendGroupChat(std::string pSenderName, std::string pMessage);
+
+	void sendChannelMessage(const ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage);
+	void sendTell(const std::string& pSenderName, const std::string& pMessage);
+	void sendGroupMessage(const std::string& pSenderName, const std::string& pMessage);
+	void sendGuildMessage(const std::string& pSenderName, const std::string& pMessage);
 
 	void sendGroupInvite(const std::string pFromCharacterName);
 	void sendGroupCreate();
