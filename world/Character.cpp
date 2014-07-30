@@ -55,7 +55,8 @@ mCopper(0),
 mSilver(0),
 mGold(0),
 mPlatinum(0),
-mGroup(nullptr)
+mGroup(nullptr),
+mIsZoning(false)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -123,6 +124,14 @@ void Character::_initialiseProfile() {
 }
 
 bool Character::onZoneIn() {
+	// Send any queued tells.
+	if (hasQueuedTells())
+		_processQueuedTells();
+
+	// Send any queued group messages.
+	if (hasQueuedGroupMessages())
+		_processQueuedGroupMessages();
+
 	return true;
 }
 
@@ -405,12 +414,23 @@ void Character::_updateForSave() {
 void Character::addQueuedTell(std::string pSenderName, std::string pMessage) {
 	mQueuedTells.insert(std::make_pair(pSenderName, pMessage));
 }
+void Character::queueGroupMessage(std::string pSenderName, std::string pMessage) {
+	mQueuedGroupMessages.insert(std::make_pair(pSenderName, pMessage));
+}
+
 
 void Character::_processQueuedTells() {
 	for (auto i : mQueuedTells) {
 		mConnection->sendTell(i.first, i.second);
 	}
 	mQueuedTells.clear();
+}
+
+void Character::_processQueuedGroupMessages() {
+	for (auto i : mQueuedGroupMessages) {
+		mConnection->sendGroupChat(i.first, i.second);
+	}
+	mQueuedGroupMessages.clear();
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

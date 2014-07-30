@@ -37,11 +37,14 @@ public:
 	~Character();
 
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool isZoning() { return mIsZoning; }
 	bool onZoneIn();
 	bool onZoneOut();
 
 	void addQueuedTell(std::string pSenderName, std::string pMessage);
 	bool hasQueuedTells() { return !mQueuedTells.empty(); }
+	void queueGroupMessage(std::string pSenderName, std::string pMessage);
+	bool hasQueuedGroupMessages() { return !mQueuedGroupMessages.empty(); }
 
 	// Group
 	bool hasGroup() { return mGroup != nullptr; }
@@ -173,6 +176,7 @@ private:
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
+	bool mIsZoning;
 	float mX;
 	float mY;
 	float mZ;
@@ -236,6 +240,9 @@ private:
 
 	std::unordered_multimap<std::string, std::string> mQueuedTells;
 	void _processQueuedTells();
+	std::unordered_multimap<std::string, std::string> mQueuedGroupMessages;
+	void _processQueuedGroupMessages();
+
 	Group* mGroup;
 
 	Zone* mZone;
