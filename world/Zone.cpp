@@ -469,3 +469,15 @@ void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string&
 	//}
 	//Group* group = pCharacter->getGroup();
 }
+
+void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage) {
+	// Check: Character has a group.
+	if (pCharacter->hasGroup()) {
+		mGroupManager->chatSent(pCharacter, pMessage);
+		return;
+	}
+
+	// Log: De-sync or hacker
+	std::stringstream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
+	Log::error(ss.str());
+}

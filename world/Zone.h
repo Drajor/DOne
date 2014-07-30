@@ -53,6 +53,7 @@ public:
 	void notifyCharacterChatSay(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatShout(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage);
+	void notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterEmote(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage);
 	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
@@ -88,6 +89,7 @@ private:
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	
+
 
 
 

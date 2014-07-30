@@ -670,6 +670,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	case ChannelID::CH_GUILD:
 		break;
 	case ChannelID::CH_GROUP:
+		mZone->notifyCharacterChatGroup(mCharacter, message);
 		break;
 	case ChannelID::CH_SHOUT:
 		mZone->notifyCharacterChatShout(mCharacter, message);
@@ -1260,6 +1261,19 @@ void ZoneClientConnection::sendTell(std::string pSenderName, std::string pMessag
 	payload->language = Language::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
 	payload->chan_num = CH_TELL;
+	strcpy(payload->message, pMessage.c_str());
+	strcpy(payload->sender, pSenderName.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGroupChat(std::string pSenderName, std::string pMessage) {
+	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
+	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
+	payload->language = Language::COMMON_TONGUE_LANG;
+	payload->skill_in_language = 0;
+	payload->chan_num = CH_GROUP;
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pSenderName.c_str());
 

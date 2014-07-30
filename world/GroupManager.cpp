@@ -80,6 +80,12 @@ void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemove
 	}
 }
 
+void GroupManager::chatSent(Character* pCharacter, const std::string pMessage) {
+	for (auto i : pCharacter->getGroup()->mMembers) {
+		i->getConnection()->sendGroupChat(pCharacter->getName(), pMessage);
+	}
+}
+
 Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader), mIsDisbanded(false) {
 	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
 	

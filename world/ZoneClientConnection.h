@@ -54,6 +54,7 @@ public:
 	void sendStats();
 	void sendWhoResults(std::list<Character*>& pMatches);
 	void sendTell(std::string pSenderName, std::string pMessage);
+	void sendGroupChat(std::string pSenderName, std::string pMessage);
 
 	void sendGroupInvite(const std::string pFromCharacterName);
 	void sendGroupCreate();
