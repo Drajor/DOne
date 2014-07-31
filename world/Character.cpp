@@ -56,7 +56,8 @@ mSilver(0),
 mGold(0),
 mPlatinum(0),
 mGroup(nullptr),
-mIsZoning(false)
+mIsZoning(false),
+mIsLinkDead(false)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -498,4 +499,8 @@ void Character::_processMessageQueue() {
 
 void Character::addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
+}
+
+void Character::setLinkDead() {
+	mIsLinkDead = true;
 }

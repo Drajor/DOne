@@ -34,6 +34,12 @@ public:
 	void shutdown();
 	void update();
 
+	void _updateCharacters();
+
+	void _updateConnections();
+
+	void _updatePreConnections();
+
 	uint32 getID() { return mID; }
 	uint32 getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
@@ -88,7 +94,8 @@ private:
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
-	
+	void _handleCharacterLinkDead(Character* pCharacter);
+
 
 
 
@@ -122,5 +129,7 @@ private:
 	GroupManager* mGroupManager;
 	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
-	std::list<ZoneClientConnection*> mZoneClientConnections;
+	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
+	std::list<ZoneClientConnection*> mConnections;
+	std::list<Character*> mLinkDeadCharacters;
 };

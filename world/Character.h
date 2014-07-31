@@ -38,6 +38,8 @@ public:
 
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 	bool isZoning() { return mIsZoning; }
+	bool isLinkDead() { return mIsLinkDead; }
+	void setLinkDead();
 	bool onZoneIn();
 	bool onZoneOut();
 	void addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage);
@@ -173,6 +175,7 @@ private:
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
 	bool mIsZoning;
+	bool mIsLinkDead;
 	float mX;
 	float mY;
 	float mZ;

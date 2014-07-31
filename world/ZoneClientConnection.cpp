@@ -35,15 +35,14 @@ ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, 
 mStreamInterface(pStreamInterface),
 mZone(pZone),
 mDataStore(pDataStore),
-mCharacter(0),
-mCommandHandler(0),
+mCharacter(nullptr),
+mCommandHandler(nullptr),
 mZoneConnectionStatus(ZoneConnectionStatus::NONE),
-mConnected(true)
+mConnected(true),
+mConnectionOrigin(ConnectionOrigin::Unknown)
 {
 	mCommandHandler = new CommandHandler();
 	mForceSendPositionTimer.Disable();
-
-	
 }
 
 ZoneClientConnection::~ZoneClientConnection() {
@@ -61,11 +60,26 @@ void ZoneClientConnection::initalise() {
 }
 
 void ZoneClientConnection::deinitialise() {
+	safe_delete(mGroupJoinPacket);
+	safe_delete(mGroupLeavePacket);
 	safe_delete(mGroupDisbandPacket);
+	safe_delete(mGroupLeaderChangePacket);
+	safe_delete(mGroupUpdateMembersPacket);
 }
+
+bool ZoneClientConnection::isConnected() {
+	return mConnected && mStreamInterface->CheckState(ESTABLISHED);
+}
+
 
 void ZoneClientConnection::update() {
 	if (!mConnected || !mStreamInterface->CheckState(ESTABLISHED)) {
+		if (mCharacter) {
+			mZone->notifyCharacterLinkDead(mCharacter);
+		}
+		else {
+			Log::error("[Zone Client Connection] Disconnected before Character assignment.");
+		}
 		return;
 	}
 
@@ -287,6 +301,11 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		return;
 	}
 
+	// TODO:
+	// Request Character from Zone (Zone request from ZoneManager)
+	// If character returned mConnectionOrigin = ConnectionOrigin::Zone else
+	mConnectionOrigin = ConnectionOrigin::Character_Select;
+
 	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
@@ -466,9 +485,6 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
 	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
-	mZone->notifyCharacterZoneIn(mCharacter);
-	mZone->addCharacter(mCharacter);
-	mCharacter->onZoneIn();
 	mForceSendPositionTimer.Start(4000);
 }
 

@@ -27,9 +27,18 @@ public:
 		ClientRequestSpawn,		// On OP_ReqClientSpawn
 		Complete				// On OP_ClientReady
 	};
+	enum class ConnectionOrigin {
+		Unknown,
+		Zone,
+		Character_Select
+	};
 public:
 	ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone);
 	~ZoneClientConnection();
+	ConnectionOrigin getConnectionOrigin() { return mConnectionOrigin; }
+	bool isConnected();
+	bool isReadyForZoneIn() { return mZoneConnectionStatus == Complete; }
+	Character* getCharacter() { return mCharacter; }
 	void update();
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	void _handleZoneEntry(const EQApplicationPacket* pPacket);
@@ -120,6 +129,7 @@ private:
 	void _handleGroupDisband(const EQApplicationPacket* pPacket);
 
 
+	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;

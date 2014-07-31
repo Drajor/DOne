@@ -85,34 +85,105 @@ void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
 
-	for (auto i : mZoneClientConnections)
-		i->update();
+	_updatePreConnections();
+	_updateConnections();
+	_updateCharacters();
+}
 
-	for (auto i = mCharacters.begin(); i != mCharacters.end();) {
-		// Remove Characters that logged out.
-		if ((*i)->getLoggedOut()) {
-			ZoneClientConnection* connection = (*i)->getConnection();
-			mZoneClientConnections.remove(connection);
-			//mZoneClientConnections.erase(connection);
+void Zone::_updatePreConnections() {
+	// Update our pre-connections (zoning in or coming from character select).
+	for (auto i = mPreConnections.begin(); i != mPreConnections.end();) {
+		auto connection = *i;
+		// Connection is fine, proceed as normal.
+		if (connection->isConnected()) {
+			connection->update();
+			// 
+			if (connection->isReadyForZoneIn()) {
+				Character* character = connection->getCharacter();
+				if (character) {
+					// Remove from pre-connection list.
+					i = mPreConnections.erase(i);
+					// Add to the main connection list.
+					mConnections.push_back(connection);
+					// Add Character to zone.
+					mCharacters.push_back(character);
+					// Tell everyone else.
+					notifyCharacterZoneIn(character);
+					// Let Character do what it needs to.
+					character->onZoneIn();
+				}
+				else {
+					// This should never occur.
+					Log::info("[Zone] Connection was ready for zone in but no Character.");
+					delete connection;
+					i = mPreConnections.erase(i);
+				}
+				continue;
+			}
+			i++;
+		}
+		// Connection has been lost.
+		else {
+			Log::info("[Zone] Connection lost while zoning in.");
+			// Disconnect while zoning or logging in.
+			Character* character = connection->getCharacter();
+			if (character) {
+				// TODO: Group/Raid + anything else that could be interested IF this was a dc during zoning.
+				delete character;
+			}
 			delete connection;
-			delete *i;
+			i = mPreConnections.erase(i);
+		}
+	}
+}
+
+void Zone::_updateConnections() {
+	// Update our connections.
+	for (auto i = mConnections.begin(); i != mConnections.end();) {
+		auto connection = *i;
+		// Connection is fine, proceed as normal.
+		if (connection->isConnected()) {
+			connection->update();
+			i++;
+		}
+		// Connection has been lost.
+		else {
+			// Expected: Player was camping.
+			// Expected: Player zoning.
+			// Unexpected: Linkdead.
+		}
+
+	}
+}
+
+void Zone::_updateCharacters() {
+	for (auto i = mCharacters.begin(); i != mCharacters.end();) {
+		auto character = *i;
+		// Remove any Characters that have logged out.
+		if (character->getLoggedOut()) {
+			// Delete ZoneClientConnection.
+			ZoneClientConnection* connection = character->getConnection();
+			mConnections.remove(connection);
+			delete connection;
+			// Delete/Remove Character.
+			delete character;
 			i = mCharacters.erase(i);
 		}
-		else {
+		// Remove any Characters that have done link dead.
+		//else if (character->isLinkDead()) {
+		//	// Delete ZoneClientConnection.
+		//	ZoneClientConnection* connection = character->getConnection();
+		//	mZoneClientConnections.remove(connection);
+		//	delete connection;
+		//	// Remove Character.
+		//	i = mCharacters.erase(i);
+		//	_handleCharacterLinkDead(character);
+		//}
+		else if (!character->isLinkDead()) {
 			(*i)->update();
 			i++;
 		}
 	}
-
-	//for (auto i = mClientConnections.begin(); i != mClientConnections.end();) {
-	//	if ((*i)->update()){
-	//		i++;
-	//	}
-	//	else {
-	//		delete *i;
-	//		i = mClientConnections.erase(i);
-	//	}
-	//}
 }
 
 void Zone::shutdown()
@@ -134,7 +205,7 @@ void Zone::_handleIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		Log::info("[Zone] New Zone Client Connection");
-		mZoneClientConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
+		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
 	}
 }
 
@@ -157,19 +228,19 @@ void Zone::notifyCharacterZoneIn(Character* pCharacter) {
 	// Notify players in zone.
 	ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = sender->makeCharacterSpawnPacket();
-	for (auto i : mZoneClientConnections) {
+	for (auto i : mConnections) {
 		if(i != sender)
 			i->sendPacket(outPacket);
 	}
 	safe_delete(outPacket);
 
 	// Notify character zoning in of zone spawns.
-	const unsigned int numCharacters = mZoneClientConnections.size();
+	const unsigned int numCharacters = mConnections.size();
 	if (numCharacters > 1) {
 		EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, sizeof(NewSpawn_Struct)* numCharacters);
 		NewSpawn_Struct* spawns = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
 		int index = 0;
-		for (auto i : mZoneClientConnections) {
+		for (auto i : mConnections) {
 			i->populateSpawnStruct(&spawns[index]);
 			index++;
 		}
@@ -185,7 +256,7 @@ void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
 	// Notify players in zone.
 	ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
-	for (auto i : mZoneClientConnections) {
+	for (auto i : mConnections) {
 		if (i != sender)
 			i->sendPacket(outPacket);
 	}
@@ -193,9 +264,10 @@ void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
 }
 
 
-void Zone::notifyCharacterLinkDead(Character* pCharacter)
-{
-	// TODO: Tell Everyone!
+void Zone::notifyCharacterLinkDead(Character* pCharacter) {
+	// Update other clients.
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false);
+	mLinkDeadCharacters.push_back(pCharacter);
 }
 
 void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->getAFK()); }
@@ -215,12 +287,12 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 	appearance->parameter = pParameter;
 
 	if (pIncludeSender) {
-		for (auto i : mZoneClientConnections) {
+		for (auto i : mConnections) {
 			i->sendPacket(outPacket);
 		}
 	}
 	else {
-		for (auto i : mZoneClientConnections) {
+		for (auto i : mConnections) {
 			if (i != sender)
 				i->sendPacket(outPacket);
 		}
@@ -256,7 +328,7 @@ void Zone::notifyCharacterEmote(Character* pCharacter, const std::string pMessag
 	Buffer += 4;
 	snprintf(Buffer, sizeof(Emote_Struct)-4, "%s %s", pCharacter->getName().c_str(), pMessage.c_str());
 
-	for (auto i : mZoneClientConnections) {
+	for (auto i : mConnections) {
 		if (i != sender)
 			i->sendPacket(outPacket);
 	}
@@ -273,7 +345,7 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::strin
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pCharacter->getName().c_str());
 
-	for (auto i : mZoneClientConnections) {
+	for (auto i : mConnections) {
 		if (i != sender)
 			i->sendPacket(outPacket);
 	}
@@ -305,12 +377,12 @@ void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 
 	payload->value = pAnimationID;
 
 	if (pIncludeSender) {
-		for (auto i : mZoneClientConnections) {
+		for (auto i : mConnections) {
 			i->sendPacket(outPacket);
 		}
 	}
 	else {
-		for (auto i : mZoneClientConnections) {
+		for (auto i : mConnections) {
 			if ( i != sender)
 				i->sendPacket(outPacket);
 		}
@@ -346,7 +418,7 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 	payload->value4b = 1;
 	payload->value5a = 2;
 
-	for (auto i : mZoneClientConnections) {
+	for (auto i : mConnections) {
 		i->sendPacket(outPacket);
 	}
 
@@ -462,12 +534,6 @@ void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string&
 	}
 
 	mGroupManager->removeMemberRequest(pCharacter, removeCharacter);
-	//// Check: Same group.
-	//if (pCharacter->getGroup() != removeCharacter->getGroup()) {
-	//	Log::error("[Zone] Attempting to remove Character ");
-	//	return;
-	//}
-	//Group* group = pCharacter->getGroup();
 }
 
 void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage) {
@@ -480,4 +546,10 @@ void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMe
 	// Log: De-sync or hacker
 	std::stringstream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
 	Log::error(ss.str());
+}
+
+void Zone::_handleCharacterLinkDead(Character* pCharacter) {
+	mLinkDeadCharacters.push_back(pCharacter);
+	
+	// Start timer before cleaning up.
 }
