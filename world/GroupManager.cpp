@@ -138,6 +138,18 @@ void GroupManager::_sendMessage(Group* pGroup, std::string pSenderName, std::str
 	}
 }
 
+void GroupManager::handleMakeLeaderRequest(Character* pCharacter, Character* pNewLeader) {
+	ARG_PTR_CHECK(pCharacter);
+	ARG_PTR_CHECK(pNewLeader);
+	ERROR_CONDITION(pCharacter->getGroup() && pNewLeader->getGroup()); // Both Characters must have valid groups.
+	ERROR_CONDITION((pCharacter->getGroup() == pNewLeader->getGroup())); // Both Characters must be in the same group.
+	ERROR_CONDITION((pCharacter == pCharacter->getGroup()->mLeader)); // The requesting Character is the group leader.
+
+	Group* group = pCharacter->getGroup();
+	group->mLeader = pNewLeader;
+	group->sendGroupLeaderChange();
+}
+
 Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
 	// NOTE: Error Conditions are ignored here as CTOR is private.
@@ -164,9 +176,8 @@ Group::~Group() {
 
 void Group::addMember(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION((pCharacter->getGroup() != nullptr)); // Check: Character already has a group.
-	ERROR_CONDITION((mMembers.size() < MAX_NUM_GROUP_MEMBERS)); // Check: Group is already full.
-	ERROR_CONDITION(isMember(pCharacter)); // Check: Character is already a member of this group.
+	ERROR_CONDITION((pCharacter->getGroup() == nullptr)); // Check: Character does not have a group.
+	ERROR_CONDITION((mMembers.size() < MAX_NUM_GROUP_MEMBERS)); // Check: Group is not already full.
 
 	mMembers.push_back(pCharacter);
 	pCharacter->setGroup(this);
@@ -182,25 +193,6 @@ void Group::removeMember(Character* pCharacter) {
 	mMembers.remove(pCharacter);
 	pCharacter->setGroup(nullptr);
 
-	//// Tell the leaving character that they left the group.
-	//if (!pCharacter->isLinkDead())
-	//	pCharacter->getConnection()->sendGroupLeave(pCharacter->getName());
-
-	//// Tell the remaining members that pCharacter left the group.
-	//sendMemberLeaveMessage(pCharacter->getName());
-	//
-	//// Check if group needs to disband.
-	//if (getNumMembers() == 1) {
-	//	Character* lastMember = *mMembers.begin();
-	//	mMembers.clear();
-
-	//	lastMember->setGroup(nullptr);
-	//	lastMember->getConnection()->sendGroupDisband();
-	//	
-	//	mIsDisbanded = true;
-	//	return;
-	//}
-
 	// Group leader is leaving.
 	if (mLeader == pCharacter) {
 
@@ -210,6 +202,13 @@ void Group::removeMember(Character* pCharacter) {
 void Group::sendMemberLeaveMessage(std::string pLeaverName) {
 	for (auto i : mMembers)
 		i->getConnection()->sendGroupLeave(pLeaverName);
+}
+
+void Group::sendGroupLeaderChange() {
+	ERROR_CONDITION(mLeader); // Check: mLeader pointer is valid.
+
+	for (auto i : mMembers)
+		i->getConnection()->sendGroupLeaderChange(mLeader->getName());
 }
 
 void Group::setLeader(Character* pCharacter) {

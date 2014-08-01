@@ -247,25 +247,30 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_WhoAllRequest:
 		_handleWhoAllRequest(pPacket);
 	case OP_GroupInvite:
+		// NOTE: This occurs when the player presses 'Invite' on the group window.
 		_handleGroupInvite(pPacket);
 		break;
 	case OP_GroupInvite2:
 		Utility::print("[UNHANDLED OP_GroupInvite2]");
 		break;
 	case OP_GroupFollow:
-		// Player pressed 'Follow' button on group window
+		// NOTE: This occurs when the player presses 'Follow' on the group window.
 		_handleGroupFollow(pPacket);
 		break;
 	case OP_GroupFollow2:
 		Utility::print("[UNHANDLED OP_GroupFollow2]");
 		break;
 	case OP_GroupCancelInvite:
-		// Player pressed 'Decline' button on group window.
+		// NOTE: This occurs when the player presses 'Decline' on the group window.
 		_handleGroupCanelInvite(pPacket);
 		break;
 	case OP_GroupDisband:
 		// Player pressed 'Disband' on group window OR entered /disband
 		_handleGroupDisband(pPacket);
+		break;
+	case OP_GroupMakeLeader:
+		// NOTE: This occurs when the player uses the /makeleader command.
+		_handleGroupMakeLeader(pPacket);
 		break;
 	default:
 		std::stringstream ss;
@@ -1296,7 +1301,7 @@ void ZoneClientConnection::sendGuildMessage(const std::string& pSenderName, cons
 	sendChannelMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
 }
 
-
+// NOTE: This occurs when the player presses 'Invite' on the group window.
 void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
 	// Check packet is the correct size.
 	static const auto EXPECTED_SIZE = sizeof(GroupInvite_Struct);
@@ -1332,6 +1337,7 @@ void ZoneClientConnection::sendGroupInvite(const std::string pFromCharacterName)
 	safe_delete(outPacket);
 }
 
+// NOTE: This occurs when the player presses 'Follow' on the group window.
 void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
 	// Check packet is the correct size.
 	static const auto EXPECTED_SIZE = sizeof(GroupGeneric_Struct);
@@ -1344,13 +1350,14 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
 	std::string inviterName = Utility::safeString(payload->name1, 64); // Character who invited.
-	std::string inviteeName = Utility::safeString(payload->name2, 64); // Character accepting inviting.
+	std::string inviteeName = Utility::safeString(payload->name2, 64); // Character accepting invite.
 
 	// TODO: Sanity check?
 
 	mZone->notifyCharacterAcceptGroupInvite(mCharacter, inviterName);
 }
 
+// NOTE: This occurs when the player presses 'Decline' on the group window.
 void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
 	// Check packet is the correct size.
 	static const auto EXPECTED_SIZE = sizeof(GroupCancel_Struct);
@@ -1505,4 +1512,30 @@ void ZoneClientConnection::sendGroupDisband() {
 
 	// Send.
 	mStreamInterface->QueuePacket(mGroupDisbandPacket);
+}
+
+void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
+	// Check packet is the correct size.
+	static const auto EXPECTED_SIZE = sizeof(GroupMakeLeader_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Received wrong sized GroupMakeLeader_Struct in _handleGroupMakeLeader, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
+
+	std::string currentLeader = Utility::safeString(payload->CurrentLeader, 64);
+	std::string newLeader = Utility::safeString(payload->NewLeader, 64);
+
+	// Check: Leader names match.
+	if (currentLeader != mCharacter->getName()) {
+		return;
+	}
+	// Check: Character has group.
+	if (!mCharacter->hasGroup()) {
+		return;
+	}
+
+	mZone->notifyCharacterMakeLeaderRequest(mCharacter, newLeader);
 }

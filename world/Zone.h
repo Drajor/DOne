@@ -74,6 +74,7 @@ public:
 	void notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName);
 	void notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName);
 	void notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName);
+	void notifyCharacterMakeLeaderRequest(Character* pCharacter, std::string pNewLeaderName);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
@@ -97,7 +98,7 @@ private:
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void _handleCharacterLinkDead(Character* pCharacter);
-
+	
 
 
 

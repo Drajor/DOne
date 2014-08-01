@@ -17,6 +17,7 @@ private:
 	void removeMember(Character* pCharacter);
 	void setLeader(Character* pCharacter);
 	void sendMemberLeaveMessage(std::string pLeaverName);
+	void sendGroupLeaderChange();
 	bool needsDisbanding() { return mMembers.size() == 1; }
 	Group(Character* pLeader, Character* pMember);
 	~Group();
@@ -33,11 +34,11 @@ public:
 	void removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter);
 	void handleGroupMessage(Character* pCharacter, const std::string pMessage);
 	void handleCharacterLinkDead(Character* pCharacter);
-
+	void handleMakeLeaderRequest(Character* pCharacter, Character* pNewLeader);
 private:
 
 	void _sendMessage(Group* pGroup, std::string pSenderName, std::string pMessage);
 	void _disbandGroup(Group* pGroup);
-
+	
 	std::list<Group*> mGroups;
 };

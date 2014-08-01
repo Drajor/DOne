@@ -534,7 +534,7 @@ void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string p
 	if (toCharacter) {
 		// Joining existing group.
 		if (toCharacter->hasGroup()) {
-
+			//mGroupManager->addT
 		}
 		// Starting a new group.
 		else {
@@ -568,6 +568,16 @@ void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMe
 	// Log: De-sync or hacker
 	std::stringstream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
 	Log::error(ss.str());
+}
+
+void Zone::notifyCharacterMakeLeaderRequest(Character* pCharacter, std::string pNewLeaderName) {
+	Character* newLeader = findCharacter(pNewLeaderName);
+	if (newLeader) {
+		mGroupManager->handleMakeLeaderRequest(pCharacter, newLeader);
+		return;
+	}
+
+	// NOTE: The Character does not exist. (Example /makeleader someonethatdoesntexist)
 }
 
 void Zone::_handleCharacterLinkDead(Character* pCharacter) {
