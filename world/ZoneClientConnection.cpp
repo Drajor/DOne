@@ -75,7 +75,7 @@ bool ZoneClientConnection::isConnected() {
 void ZoneClientConnection::update() {
 	if (!mConnected || !mStreamInterface->CheckState(ESTABLISHED)) {
 		if (mCharacter) {
-			mZone->notifyCharacterLinkDead(mCharacter);
+			//mZone->notifyCharacterLinkDead(mCharacter);
 		}
 		else {
 			Log::error("[Zone Client Connection] Disconnected before Character assignment.");

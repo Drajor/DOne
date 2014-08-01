@@ -31,7 +31,8 @@ public:
 	// pCharacter is making the request to remove pRemoveCharacter.
 	void removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter);
 	void chatSent(Character* pCharacter, const std::string pMessage);
-	
+	void handleCharacterLinkDead(Character* pCharacter);
+
 private:
 	std::list<Group*> mGroups;
 };

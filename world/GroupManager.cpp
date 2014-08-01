@@ -91,6 +91,11 @@ void GroupManager::chatSent(Character* pCharacter, const std::string pMessage) {
 	}
 }
 
+void GroupManager::handleCharacterLinkDead(Character* pCharacter)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
 Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader), mIsDisbanded(false) {
 	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
 	

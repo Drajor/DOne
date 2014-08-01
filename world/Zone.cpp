@@ -7,6 +7,7 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
+#include "Utility.h"
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -77,10 +78,6 @@ bool Zone::checkAuthentication(std::string pCharacterName) {
 	return false;
 }
 
-void Zone::addCharacter(Character* pCharacter) {
-	mCharacters.push_back(pCharacter);
-}
-
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
@@ -88,6 +85,22 @@ void Zone::update() {
 	_updatePreConnections();
 	_updateConnections();
 	_updateCharacters();
+
+	// Check: LD Characters for removal.
+	for (auto i = mLinkDeadCharacters.begin(); i != mLinkDeadCharacters.end();) {
+		// Check: LD timer has finished.
+		if (i->mTimer->Check()) {
+			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
+
+			// TODO: Save
+			_sendDespawn(i->mCharacter->getSpawnID(), false);
+			delete i->mTimer;
+			delete i->mCharacter;
+			i = mLinkDeadCharacters.erase(i);
+			continue;
+		}
+		i++;
+	}
 }
 
 void Zone::_updatePreConnections() {
@@ -101,6 +114,8 @@ void Zone::_updatePreConnections() {
 			if (connection->isReadyForZoneIn()) {
 				Character* character = connection->getCharacter();
 				if (character) {
+					Log::info("[Zone] Adding new Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
+
 					// Remove from pre-connection list.
 					i = mPreConnections.erase(i);
 					// Add to the main connection list.
@@ -151,6 +166,16 @@ void Zone::_updateConnections() {
 			// Expected: Player was camping.
 			// Expected: Player zoning.
 			// Unexpected: Linkdead.
+			{
+				Character * character = connection->getCharacter();
+				Log::info("[Zone] Character LD. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
+				// Correct iterator.
+				delete connection; // Free.
+				i = mConnections.erase(i);
+
+				_handleCharacterLinkDead(character);
+				continue;
+			}
 		}
 
 	}
@@ -169,16 +194,6 @@ void Zone::_updateCharacters() {
 			delete character;
 			i = mCharacters.erase(i);
 		}
-		// Remove any Characters that have done link dead.
-		//else if (character->isLinkDead()) {
-		//	// Delete ZoneClientConnection.
-		//	ZoneClientConnection* connection = character->getConnection();
-		//	mZoneClientConnections.remove(connection);
-		//	delete connection;
-		//	// Remove Character.
-		//	i = mCharacters.erase(i);
-		//	_handleCharacterLinkDead(character);
-		//}
 		else if (!character->isLinkDead()) {
 			(*i)->update();
 			i++;
@@ -204,7 +219,7 @@ void Zone::_handleIncomingConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		Log::info("[Zone] New Zone Client Connection");
+		Log::info("[Zone] New Zone Client Connection. " + Utility::zoneLogDetails(this));
 		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
 	}
 }
@@ -264,12 +279,6 @@ void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
 }
 
 
-void Zone::notifyCharacterLinkDead(Character* pCharacter) {
-	// Update other clients.
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false);
-	mLinkDeadCharacters.push_back(pCharacter);
-}
-
 void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->getAFK()); }
 void Zone::notifyCharacterShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
 void Zone::notifyCharacterAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
@@ -277,6 +286,7 @@ void Zone::notifyCharacterStanding(Character* pCharacter) { _sendSpawnAppearance
 void Zone::notifyCharacterSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
 void Zone::notifyCharacterCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
 void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->getGM(), true); }
+void Zone::notifyCharacterLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
 
 void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
@@ -330,6 +340,18 @@ void Zone::notifyCharacterEmote(Character* pCharacter, const std::string pMessag
 
 	for (auto i : mConnections) {
 		if (i != sender)
+			i->sendPacket(outPacket);
+	}
+	safe_delete(outPacket);
+}
+
+void Zone::_sendDespawn(uint16 pSpawnID, bool pDecay) {
+	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
+	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
+	payload->spawn_id = pSpawnID;
+	payload->Decay = pDecay ? 1 : 0;
+
+	for (auto i : mConnections) {
 			i->sendPacket(outPacket);
 	}
 	safe_delete(outPacket);
@@ -549,7 +571,32 @@ void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMe
 }
 
 void Zone::_handleCharacterLinkDead(Character* pCharacter) {
-	mLinkDeadCharacters.push_back(pCharacter);
-	
-	// Start timer before cleaning up.
+	ZoneClientConnection* connection = pCharacter->getConnection();
+	pCharacter->setLinkDead();
+
+	// Tidy up ZoneClientConnection.
+	//mConnections.remove(connection); // Remove from active connections.
+	//delete connection; // Free.
+
+
+	// Tidy up Character
+	mCharacters.remove(pCharacter); // Remove from active Character list.
+	//mLinkDeadCharacters.push_back(pCharacter); // Add to LD Character list.
+	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
+
+	LinkDeadCharacter linkdeadCharacter;
+	linkdeadCharacter.mTimer = new Timer(5000);
+	linkdeadCharacter.mCharacter = pCharacter;
+	mLinkDeadCharacters.push_back(linkdeadCharacter);
+
+	if (pCharacter->hasGroup())
+		mGroupManager->handleCharacterLinkDead(pCharacter); // Notify Group Manager.
+
+	//if (character->hasRaid())
+	//	mRaidManager->handleCharacterLinkDead(character); // Notify Raid Manager.
+
+	//if (character->hasGuild())
+	//	mGuildManager->handleCharacterLinkDead(character); // Notify Guild Manager.
+
+	notifyCharacterLinkDead(pCharacter);
 }

@@ -4,7 +4,9 @@
 #include "ClientAuthentication.h"
 #include <list>
 #include <map>
+#include <unordered_map>
 #include "../common/types.h"
+#include "../common/timer.h"
 
 class EQStreamFactory;
 class EQStreamIdentifier;
@@ -29,7 +31,6 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
 	void removeAuthentication(std::string pCharacterName);
 	bool checkAuthentication(std::string pCharacterName);
-	void addCharacter(Character* pCharacter);
 
 	void shutdown();
 	void update();
@@ -88,6 +89,7 @@ private:
 	// Performs a global Character search.
 	Character* _findCharacter(const std::string& pCharacterName, bool pIncludeZoning = false);
 
+	void _sendDespawn(uint16 pSpawnID, bool pDecay = false);
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendLevelAppearance(Character* pCharacter);
@@ -131,5 +133,11 @@ private:
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;
-	std::list<Character*> mLinkDeadCharacters;
+	//std::list<Character*> mLinkDeadCharacters;
+	struct LinkDeadCharacter {
+		Timer* mTimer;
+		Character* mCharacter;
+	};
+	std::list<LinkDeadCharacter> mLinkDeadCharacters;
+	//std::unordered_map<Timer, Character*> mLinkDeadCharacters;
 };
