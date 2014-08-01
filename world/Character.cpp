@@ -28,7 +28,7 @@ mDeity(394), // Agnostic
 mSize(5.0f),
 mStanding(true),
 mAFK(false),
-mLoggedOut(false),
+mCampComplete(false),
 mTGB(false),
 mStatus(0),
 mZone(0),

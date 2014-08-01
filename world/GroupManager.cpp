@@ -76,11 +76,7 @@ void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemove
 		pRemoveCharacter->getConnection()->sendGroupLeave(pRemoveCharacter->getName()); // Notify Character leaving.
 		group->sendMemberLeaveMessage(pRemoveCharacter->getName()); // Notify remaining group members.
 
-		// TODO: Leadership Change.
-
-		// Disband Group if required.
-		if (group->needsDisbanding())
-			_disbandGroup(group);
+		_postMemberRemoval(group);
 	}
 	// One Character is trying to remove another.
 	else {
@@ -97,11 +93,18 @@ void GroupManager::handleCharacterLinkDead(Character* pCharacter) {
 	_sendMessage(group, "[System]", pCharacter->getName() + " has gone LD."); // Notify group of LD.
 	group->sendMemberLeaveMessage(pCharacter->getName()); // Notify remaining group members.
 
-	// TODO: Leadership Change.
+	_postMemberRemoval(group);
+}
 
-	// Disband Group if required.
-	if (group->needsDisbanding())
-		_disbandGroup(group);
+void GroupManager::handleCharacterCamped(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+
+	Group* group = pCharacter->getGroup();
+	group->removeMember(pCharacter);
+	group->sendMemberLeaveMessage(pCharacter->getName()); // Notify remaining group members.
+
+	_postMemberRemoval(group);
 }
 
 void GroupManager::_disbandGroup(Group* pGroup) {
@@ -150,6 +153,22 @@ void GroupManager::handleMakeLeaderRequest(Character* pCharacter, Character* pNe
 	group->sendGroupLeaderChange();
 }
 
+void GroupManager::_postMemberRemoval(Group* pGroup) {
+	ARG_PTR_CHECK(pGroup);
+
+	// Check: Group needs disbanding.
+	if (pGroup->needsDisbanding()) {
+		_disbandGroup(pGroup);
+		return;
+	}
+
+	// Check: Group needs a new leader.
+	if (!pGroup->hasLeader()) {
+		pGroup->mLeader = *pGroup->mMembers.begin();
+		pGroup->sendGroupLeaderChange();
+	}
+}
+
 Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
 	// NOTE: Error Conditions are ignored here as CTOR is private.
@@ -168,10 +187,6 @@ Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 	std::list<std::string> memberNames;
 	getMemberNames(memberNames, pMember->getName());
 	pMember->getConnection()->sendGroupUpdate(memberNames);
-}
-
-Group::~Group() {
-
 }
 
 void Group::addMember(Character* pCharacter) {
@@ -194,12 +209,11 @@ void Group::removeMember(Character* pCharacter) {
 	pCharacter->setGroup(nullptr);
 
 	// Group leader is leaving.
-	if (mLeader == pCharacter) {
-
-	}
+	if (mLeader == pCharacter) mLeader = nullptr;
 }
 
 void Group::sendMemberLeaveMessage(std::string pLeaverName) {
+	// TODO: Zoning members.
 	for (auto i : mMembers)
 		i->getConnection()->sendGroupLeave(pLeaverName);
 }
@@ -207,14 +221,9 @@ void Group::sendMemberLeaveMessage(std::string pLeaverName) {
 void Group::sendGroupLeaderChange() {
 	ERROR_CONDITION(mLeader); // Check: mLeader pointer is valid.
 
+	// TODO: Zoning members.
 	for (auto i : mMembers)
 		i->getConnection()->sendGroupLeaderChange(mLeader->getName());
-}
-
-void Group::setLeader(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
-
-	mLeader = pCharacter;
 }
 
 bool Group::isMember(Character* pCharacter) {

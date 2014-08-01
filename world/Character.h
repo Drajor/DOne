@@ -73,9 +73,11 @@ public:
 	uint32 getStatus() { return mStatus; }
 	PlayerProfile_Struct* getProfile() { return mProfile; }
 	ExtendedProfile_Struct* getExtendedProfile() { return mExtendedProfile; }
+	
 	void startCamp();
-	void setLoggedOut(bool pLoggedOut) { mLoggedOut = pLoggedOut; }
-	bool getLoggedOut() { return mLoggedOut; }
+	void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
+	bool getCampComplete() { return mCampComplete; }
+
 	void setAFK(bool pAFK);
 	bool getAFK();
 	void setShowHelm(bool pShowHelm);
@@ -233,7 +235,7 @@ private:
 	bool mGM;
 	bool mStanding;
 	bool mAFK;
-	bool mLoggedOut; // Flag indicating whether this character logged out via /camp
+	bool mCampComplete; // Flag indicating whether this character logged out via /camp
 	bool mTGB;
 	uint32 mStatus;
 	Timer mCampTimer; // 30 seconds.

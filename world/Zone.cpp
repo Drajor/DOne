@@ -175,18 +175,35 @@ void Zone::_updateConnections() {
 		if (connection->isConnected()) {
 			connection->update();
 			i++;
+			continue;
 		}
 		// Connection has been lost.
 		else {
-			// Expected: Player was camping.
+			Character* character = connection->getCharacter();
+
+			// Check: Character camped out.
+			if (character->getCampComplete()) {
+				Log::info("[Zone] Character camped. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
+
+				_sendDespawn(character->getSpawnID()); // Notify other players.
+				// TODO: Save
+				i = mConnections.erase(i); // Correct iterator.
+				mCharacters.remove(character);
+
+				// Check: Grouped Character.
+				if (character->hasGroup())
+					mGroupManager->handleCharacterCamped(character);
+
+				delete connection;
+				delete character;
+				continue;
+			}
 			// Expected: Player zoning.
-			// Unexpected: Linkdead.
-			{
-				Character * character = connection->getCharacter();
+			// Unexpected: Link Dead.
+			else {
 				Log::info("[Zone] Character LD. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
-				// Correct iterator.
 				delete connection; // Free.
-				i = mConnections.erase(i);
+				i = mConnections.erase(i); // Correct iterator.
 
 				_handleCharacterLinkDead(character);
 				continue;
@@ -197,23 +214,8 @@ void Zone::_updateConnections() {
 }
 
 void Zone::_updateCharacters() {
-	for (auto i = mCharacters.begin(); i != mCharacters.end();) {
-		auto character = *i;
-		// Remove any Characters that have logged out.
-		if (character->getLoggedOut()) {
-			// Delete ZoneClientConnection.
-			ZoneClientConnection* connection = character->getConnection();
-			mConnections.remove(connection);
-			delete connection;
-			// Delete/Remove Character.
-			delete character;
-			i = mCharacters.erase(i);
-		}
-		else if (!character->isLinkDead()) {
-			(*i)->update();
-			i++;
-		}
-	}
+	for (auto i : mCharacters)
+		i->update();
 }
 
 void Zone::shutdown()
@@ -242,11 +244,6 @@ void Zone::_handleIncomingConnections() {
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->setPosition(pX, pY, pZ, 0);
 	pCharacter->getConnection()->sendPosition();
-}
-
-void Zone::notifyCharacterLogOut(Character* pCharacter)
-{
-	// TODO: Tell Everyone!
 }
 
 void Zone::notifyCharacterZoneOut(Character* pCharacter)
@@ -599,14 +596,8 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 	ZoneClientConnection* connection = pCharacter->getConnection();
 	pCharacter->setLinkDead();
 
-	// Tidy up ZoneClientConnection.
-	//mConnections.remove(connection); // Remove from active connections.
-	//delete connection; // Free.
-
-
 	// Tidy up Character
 	mCharacters.remove(pCharacter); // Remove from active Character list.
-	//mLinkDeadCharacters.push_back(pCharacter); // Add to LD Character list.
 	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
 
 	LinkDeadCharacter linkdeadCharacter;

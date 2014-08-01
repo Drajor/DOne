@@ -50,7 +50,6 @@ public:
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void notifyCharacterZoneOut(Character* pCharacter);
 	void notifyCharacterPositionChanged(Character* pCharacter);
-	void notifyCharacterLogOut(Character* pCharacter);
 	void notifyCharacterLinkDead(Character* pCharacter);
 	void notifyCharacterAFK(Character* pCharacter);
 	void notifyCharacterShowHelm(Character* pCharacter);

@@ -803,9 +803,8 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	_sendPreLogOutReply();
 	_sendLogOutReply();
 
-	// Tell Zone.
-	mCharacter->setLoggedOut(true);
-	mZone->notifyCharacterLogOut(mCharacter);
+	// NOTE: Zone picks up the dropped connection next update.
+	mCharacter->setCampComplete(true);
 	dropConnection();
 }
 
