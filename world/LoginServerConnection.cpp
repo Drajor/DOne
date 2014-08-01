@@ -186,8 +186,8 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 	auto payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
 	// Add authentication for the incoming client.
 	ClientAuthentication authentication;
-	authentication.mAccountID = payload->lsaccount_id;
-	authentication.mAccountName = Utility::safeString(payload->name, 30);
+	authentication.mLoginServerAccountID = payload->lsaccount_id;
+	authentication.mLoginServerAccountName = Utility::safeString(payload->name, 30);
 	authentication.mKey = Utility::safeString(payload->key, 30);
 	authentication.mWorldAdmin = payload->worldadmin;
 	authentication.mIP = payload->ip;

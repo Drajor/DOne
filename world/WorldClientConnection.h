@@ -44,10 +44,10 @@ public:
 	std::string getLoginServerKey() { return mLoginServerKey; }
 	uint32 getCharacterID() { return mCharacterID; }
 
-	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; }
-	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; }
-	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; }
-	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; }
+	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; mAuthentication.mWorldAccountID = pWorldAccountID; }
+	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; mAuthentication.mLoginServerAccountID = pLoginServerAccountID; }
+	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; mAuthentication.mKey = pLoginServerKey; }
+	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; mAuthentication.mLoginServerAccountName = pLoginServerAccountName; }
 	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; } // This method should only ever be called by World::checkAuthentication
 private:
 	

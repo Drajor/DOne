@@ -78,6 +78,18 @@ bool Zone::checkAuthentication(std::string pCharacterName) {
 	return false;
 }
 
+bool Zone::getAuthentication(std::string pCharacterName, ClientAuthentication& pAuthentication) {
+	for (auto i : mAuthenticatedCharacters) {
+		if (i.first == pCharacterName) {
+			pAuthentication = i.second;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
@@ -91,6 +103,9 @@ void Zone::update() {
 		// Check: LD timer has finished.
 		if (i->mTimer->Check()) {
 			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
+
+			// Remove World Authentication - allowing them to log back in.
+			mWorld->removeAuthentication(i->mCharacter->getAuthentication());
 
 			// TODO: Save
 			_sendDespawn(i->mCharacter->getSpawnID(), false);

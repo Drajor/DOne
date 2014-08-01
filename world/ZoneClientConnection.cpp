@@ -270,6 +270,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GroupMakeLeader:
 		// NOTE: This occurs when the player uses the /makeleader command.
+		// Note: This occurs when the player uses the context menu on the group window (Roles->Leader).
 		_handleGroupMakeLeader(pPacket);
 		break;
 	default:
@@ -305,12 +306,19 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		dropConnection();
 		return;
 	}
+	// Retrieve Authentication.
+	ClientAuthentication authentication;
+	if (!mZone->getAuthentication(characterName, authentication)) {
+		Log::error("[Zone Client Connection] Client authentication not found, dropping connection.");
+		dropConnection();
+		return;
+	}
 
 	// TODO:
 	// Request Character from Zone (Zone request from ZoneManager)
 	// If character returned mConnectionOrigin = ConnectionOrigin::Zone else
 	mConnectionOrigin = ConnectionOrigin::Character_Select;
-
+	
 	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
@@ -330,7 +338,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 
 	// We will load this up every time for now but soon this data can be passed between Zones.
 	// Initialise Character.
-	mCharacter = new Character(characterID);
+	mCharacter = new Character(characterID, authentication);
 	if (!mCharacter->initialise(profile, extendedProfile)) {
 		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
 		dropConnection();

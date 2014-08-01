@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "ClientAuthentication.h"
 #include "../common/types.h"
 #include "../common/timer.h"
 #include <string>
@@ -33,8 +34,10 @@ struct Vector4 {
 class Character {
 	friend ZoneClientConnection;
 public:
-	Character(uint32 pCharacterID);
+	Character(uint32 pCharacterID, ClientAuthentication& pAuthentication);
 	~Character();
+	
+	ClientAuthentication getAuthentication() { return mAuthentication; }
 
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 	bool isZoning() { return mIsZoning; }
@@ -174,6 +177,7 @@ private:
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
+	ClientAuthentication mAuthentication;
 	bool mIsZoning;
 	bool mIsLinkDead;
 	float mX;

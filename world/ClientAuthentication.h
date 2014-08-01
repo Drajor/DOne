@@ -4,9 +4,10 @@
 #include <string>
 
 struct ClientAuthentication {
-	ClientAuthentication() : mAccountID(0), mAccountName(""), mKey(""), mWorldAdmin(0), mIP(0), mLocal(0) {};
-	uint32 mAccountID; // Login Server Account
-	std::string mAccountName; // Login Server Account
+	ClientAuthentication() : mWorldAccountID(0), mLoginServerAccountID(0), mLoginServerAccountName(""), mKey(""), mWorldAdmin(0), mIP(0), mLocal(0) {};
+	uint32 mWorldAccountID;
+	uint32 mLoginServerAccountID;
+	std::string mLoginServerAccountName;
 	std::string mKey;
 	int16 mWorldAdmin;
 	uint32 mIP;

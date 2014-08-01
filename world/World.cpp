@@ -178,15 +178,26 @@ void World::addAuthentication(ClientAuthentication& pAuthentication) {
 	mAuthenticatedClients.push_back(authentication);
 }
 
+void World::removeAuthentication(ClientAuthentication& pAuthentication) {
+	for (auto i : mAuthenticatedClients) {
+		// Only need to match on Account IDs
+		if (i->mLoginServerAccountID == pAuthentication.mLoginServerAccountID) {
+			Log::info("[World] Removing Client Authentication for TODO");
+			mAuthenticatedClients.remove(i);
+			return;
+		}
+	}
+}
+
 bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
 	// Check Incoming Clients that match Account ID / Key
 	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
 		ClientAuthentication* incClient = *i;
-		if (pLoginServerAccountID == incClient->mAccountID && pLoginServerKey == incClient->mKey && !pConnection->getAuthenticated()) {
+		if (pLoginServerAccountID == incClient->mLoginServerAccountID && pLoginServerKey == incClient->mKey && !pConnection->getAuthenticated()) {
 			// Configure the WorldClientConnection with details from the IncomingClient.
 			pConnection->_setAuthenticated(true);
-			pConnection->setLoginServerAccountID(incClient->mAccountID);
-			pConnection->setLoginServerAccountName(incClient->mAccountName);
+			pConnection->setLoginServerAccountID(incClient->mLoginServerAccountID);
+			pConnection->setLoginServerAccountName(incClient->mLoginServerAccountName);
 			pConnection->setLoginServerKey(incClient->mKey);
 			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
 			return true;
@@ -197,7 +208,7 @@ bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLogi
 
 bool World::authenticationExists(uint32 pLoginServerID) {
 	for (auto i : mAuthenticatedClients) {
-		if (i->mAccountID == pLoginServerID)
+		if (i->mLoginServerAccountID == pLoginServerID)
 			return true;
 	}
 
@@ -351,7 +362,7 @@ void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::st
 
 ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
 	for (auto i : mAuthenticatedClients) {
-		if (i->mAccountID == pLoginServerAccountID)
+		if (i->mLoginServerAccountID == pLoginServerAccountID)
 			return i;
 	}
 

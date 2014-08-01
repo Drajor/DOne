@@ -8,8 +8,9 @@
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
-Character::Character(uint32 pCharacterID) :
+Character::Character(uint32 pCharacterID, ClientAuthentication& pAuthentication) :
 mCharacterID(pCharacterID),
+mAuthentication(pAuthentication),
 mProfile(0),
 mExtendedProfile(0),
 mName("soandso"),

@@ -31,6 +31,7 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
 	void removeAuthentication(std::string pCharacterName);
 	bool checkAuthentication(std::string pCharacterName);
+	bool getAuthentication(std::string pCharacterName, ClientAuthentication& pAuthentication);
 
 	void shutdown();
 	void update();
