@@ -561,7 +561,7 @@ void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string&
 void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage) {
 	// Check: Character has a group.
 	if (pCharacter->hasGroup()) {
-		mGroupManager->chatSent(pCharacter, pMessage);
+		mGroupManager->handleGroupMessage(pCharacter, pMessage);
 		return;
 	}
 

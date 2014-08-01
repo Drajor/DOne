@@ -50,59 +50,100 @@ N(OP_SetGroupTarget),
 #define ARG_STR(pARG) #pARG
 #define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
 #define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define ERROR_CONDITION(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ERROR_CONDITION_BOOL(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
+
+static const int MAX_NUM_GROUP_MEMBERS = 6;
 
 void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
-	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
+	ARG_PTR_CHECK(pLeader);
+	ARG_PTR_CHECK(pMember);
+	ERROR_CONDITION(!(pLeader->hasGroup() || pMember->hasGroup())); // Both Characters must not have groups.
 
-	Group* group = new Group(pLeader, pMember);
-	mGroups.push_back(group);
+	mGroups.push_back(new Group(pLeader, pMember));
 }
 
 void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter) {
-	ARG_PTR_CHECK(pCharacter); ARG_PTR_CHECK(pRemoveCharacter);
+	ARG_PTR_CHECK(pCharacter);
+	ARG_PTR_CHECK(pRemoveCharacter);
+	ERROR_CONDITION(pCharacter->getGroup() && pRemoveCharacter->getGroup()); // Both Characters must have valid groups.
+	ERROR_CONDITION((pCharacter->getGroup() == pRemoveCharacter->getGroup())); // Both Characters must be in the same group.
 	
-	// Check: Characters are in the same group.
-	if (pCharacter->getGroup() != pRemoveCharacter->getGroup()) {
-		Log::error("[Group Manager] Group mismatch in removeMemberRequest.");
-		return;
-	}
-
 	// Character is removing them self from the group.
 	if (pCharacter == pRemoveCharacter) {
 		Group* group = pCharacter->getGroup();
 		group->removeMember(pRemoveCharacter);
+		pRemoveCharacter->getConnection()->sendGroupLeave(pRemoveCharacter->getName()); // Notify Character leaving.
+		group->sendMemberLeaveMessage(pRemoveCharacter->getName()); // Notify remaining group members.
 
-		// Tidy up if group is disbanded.
-		if (group->mIsDisbanded) {
-			mGroups.remove(group);
-			delete group;
-		}
+		// TODO: Leadership Change.
+
+		// Disband Group if required.
+		if (group->needsDisbanding())
+			_disbandGroup(group);
+	}
+	// One Character is trying to remove another.
+	else {
+
 	}
 }
 
-void GroupManager::chatSent(Character* pCharacter, const std::string pMessage) {
-	for (auto i : pCharacter->getGroup()->mMembers) {
-		// Check: If group member is currently zoning.
+void GroupManager::handleCharacterLinkDead(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+
+	Group* group = pCharacter->getGroup();
+	group->removeMember(pCharacter);
+	_sendMessage(group, "[System]", pCharacter->getName() + " has gone LD."); // Notify group of LD.
+	group->sendMemberLeaveMessage(pCharacter->getName()); // Notify remaining group members.
+
+	// TODO: Leadership Change.
+
+	// Disband Group if required.
+	if (group->needsDisbanding())
+		_disbandGroup(group);
+}
+
+void GroupManager::_disbandGroup(Group* pGroup) {
+	ARG_PTR_CHECK(pGroup);
+	ERROR_CONDITION(pGroup->mMembers.size() == 1); // Only disband groups with one member left.
+
+	Character* lastMember = *pGroup->mMembers.begin();
+	pGroup->mMembers.clear();
+
+	lastMember->setGroup(nullptr);
+	lastMember->getConnection()->sendGroupDisband();
+
+	mGroups.remove(pGroup);
+	delete pGroup;
+}
+
+void GroupManager::handleGroupMessage(Character* pCharacter, const std::string pMessage) {
+	ARG_PTR_CHECK(pCharacter);
+	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+
+	_sendMessage(pCharacter->getGroup(), pCharacter->getName(), pMessage);
+}
+
+void GroupManager::_sendMessage(Group* pGroup, std::string pSenderName, std::string pMessage) {
+	ARG_PTR_CHECK(pGroup);
+
+	for (auto i : pGroup->mMembers) {
+		// Check: Where a group member is zoning, queue the message.
 		if (i->isZoning()) {
-			i->addQueuedMessage(ChannelID::CH_GROUP, pCharacter->getName(), pMessage);
+			i->addQueuedMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
 			continue;
 		}
-		i->getConnection()->sendGroupMessage(pCharacter->getName(), pMessage);
+		i->getConnection()->sendGroupMessage(pSenderName, pMessage);
 	}
 }
 
-void GroupManager::handleCharacterLinkDead(Character* pCharacter)
-{
-	throw std::logic_error("The method or operation is not implemented.");
-}
-
-Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader), mIsDisbanded(false) {
+Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 	ARG_PTR_CHECK(pLeader); ARG_PTR_CHECK(pMember);
+	// NOTE: Error Conditions are ignored here as CTOR is private.
 	
-	mMembers.push_back(pLeader);
-	mMembers.push_back(pMember);
-	pLeader->setGroup(this);
-	pMember->setGroup(this);
+	addMember(pLeader);
+	addMember(pMember);
 
 	pLeader->getConnection()->sendGroupCreate();
 	pLeader->getConnection()->sendGroupLeaderChange(pLeader->getName());
@@ -123,22 +164,9 @@ Group::~Group() {
 
 void Group::addMember(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	
-	// Check: Group is not already full.
-	if (isFull()) {
-		Log::error("[Group] Group is full and attempting to add another member.");
-		return;
-	}
-	// Check: pCharacter is not already in this group.
-	if (isMember(pCharacter)) {
-		Log::error("[Group] Attempting to add character to a group that it is already a member of.");
-		return;
-	}
-	// Check: pCharacter is not already grouped.
-	if (pCharacter->hasGroup()) {
-		Log::error("[Group] Attempting to add character to a group that is already grouped.");
-		return;
-	}
+	ERROR_CONDITION((pCharacter->getGroup() != nullptr)); // Check: Character already has a group.
+	ERROR_CONDITION((mMembers.size() < MAX_NUM_GROUP_MEMBERS)); // Check: Group is already full.
+	ERROR_CONDITION(isMember(pCharacter)); // Check: Character is already a member of this group.
 
 	mMembers.push_back(pCharacter);
 	pCharacter->setGroup(this);
@@ -148,46 +176,40 @@ void Group::addMember(Character* pCharacter) {
 
 void Group::removeMember(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-
-	bool removed = false;
-	for (auto i : mMembers) {
-		if (i == pCharacter) {
-			removed = true;
-			break;
-		}
-	}
-
-	if (!removed) {
-		// TODO: Log
-		return;
-	}
+	ERROR_CONDITION((pCharacter->getGroup() == this)); // Check: Pointer matching (sanity).
+	ERROR_CONDITION(isMember(pCharacter)); // Check: Character is already a member of this group.
 
 	mMembers.remove(pCharacter);
 	pCharacter->setGroup(nullptr);
 
-	// Tell the leaving character that they left the group.
-	pCharacter->getConnection()->sendGroupLeave(pCharacter->getName());
+	//// Tell the leaving character that they left the group.
+	//if (!pCharacter->isLinkDead())
+	//	pCharacter->getConnection()->sendGroupLeave(pCharacter->getName());
 
-	// Tell the remaining members that pCharacter left the group.
-	for (auto i : mMembers)
-		i->getConnection()->sendGroupLeave(pCharacter->getName());
-	
-	// Check if group needs to disband.
-	if (getNumMembers() == 1) {
-		Character* lastMember = *mMembers.begin();
-		mMembers.clear();
+	//// Tell the remaining members that pCharacter left the group.
+	//sendMemberLeaveMessage(pCharacter->getName());
+	//
+	//// Check if group needs to disband.
+	//if (getNumMembers() == 1) {
+	//	Character* lastMember = *mMembers.begin();
+	//	mMembers.clear();
 
-		lastMember->setGroup(nullptr);
-		lastMember->getConnection()->sendGroupDisband();
-		
-		mIsDisbanded = true;
-		return;
-	}
+	//	lastMember->setGroup(nullptr);
+	//	lastMember->getConnection()->sendGroupDisband();
+	//	
+	//	mIsDisbanded = true;
+	//	return;
+	//}
 
 	// Group leader is leaving.
 	if (mLeader == pCharacter) {
 
 	}
+}
+
+void Group::sendMemberLeaveMessage(std::string pLeaverName) {
+	for (auto i : mMembers)
+		i->getConnection()->sendGroupLeave(pLeaverName);
 }
 
 void Group::setLeader(Character* pCharacter) {
@@ -212,3 +234,5 @@ void Group::getMemberNames(std::list<std::string>& pMemberNames, std::string pEx
 			pMemberNames.push_back(i->getName());
 	}
 }
+
+
