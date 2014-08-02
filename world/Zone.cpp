@@ -198,7 +198,20 @@ void Zone::_updateConnections() {
 				delete character;
 				continue;
 			}
-			// Expected: Player zoning.
+			// Expected: Player zoning out.
+			else if (character->isZoningOut()) {
+				Log::info("[Zone] Character zoning out. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
+
+				_sendDespawn(character->getSpawnID()); // Notify other players.
+				// TODO: Save
+				i = mConnections.erase(i); // Correct iterator.
+				character->onZoneOut();
+				mCharacters.remove(character);
+				mZoneManager->notifyCharacterZoneOut(character);
+
+				delete connection;
+				continue;
+			}
 			// Unexpected: Link Dead.
 			else {
 				Log::info("[Zone] Character LD. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
@@ -246,9 +259,12 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->getConnection()->sendPosition();
 }
 
-void Zone::notifyCharacterZoneOut(Character* pCharacter)
-{
-	// TODO: Tell Everyone!
+void Zone::notifyCharacterZoneOut(Character* pCharacter) {
+	//_sendDespawn(pCharacter->getSpawnID()); // Notify other players.
+
+	//pCharacter->onZoneOut();
+	//mCharacters.remove(pCharacter);
+	//mZoneManager->notifyCharacterZoneOut(pCharacter);
 }
 
 void Zone::notifyCharacterZoneIn(Character* pCharacter) {

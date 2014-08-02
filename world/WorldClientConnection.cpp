@@ -91,9 +91,8 @@ void WorldClientConnection::_sendLogServer() {
 }
 
 void WorldClientConnection::_sendEnterWorld(std::string pCharacterName) {
-	// TODO: Play with this +1 business.
 	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
-	memcpy(outPacket->pBuffer, pCharacterName.c_str(), pCharacterName.length() + 1);
+	strcpy(reinterpret_cast<char*>(outPacket->pBuffer), pCharacterName.c_str());
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -344,13 +343,21 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 				OP_GuildsList, OP_LogServer, OP_ApproveWorld
 				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
 			*/
-			_sendGuildList();
-			_sendLogServer();
-			_sendApproveWorld();
-			_sendEnterWorld(""); // Empty character name when coming from Server Select. 
-			_sendPostEnterWorld(); // Required.
-			_sendExpansionInfo(); // Required.
-			_sendCharacterSelectInfo(); // Required.
+			if (mZoning) {
+				_sendLogServer();
+				_sendApproveWorld();
+				_sendEnterWorld("Playerzero");
+				_sendPostEnterWorld();
+			}
+			else {
+				_sendGuildList();
+				_sendLogServer();
+				_sendApproveWorld();
+				_sendEnterWorld(""); // Empty character name when coming from Server Select. 
+				_sendPostEnterWorld(); // Required.
+				_sendExpansionInfo(); // Required.
+				_sendCharacterSelectInfo(); // Required.
+			}
 		}
 		else {
 			Log::error("[World Client Connection] Failed to identify incoming client, dropping connection");
@@ -650,6 +657,34 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 
 	auto payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
 	std::string characterName = payload->name;
+
+	// Check: Character belongs to this account. This also checks whether the character actually exists.
+	if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
+		Log::error("[World Client Connection] World refused entry, dropping connection.");
+		dropConnection();
+		return false;
+	}
+
+	// Client is between zones.
+	if (mZoning) {
+		// What zone are they moving to?
+		//zoneID 
+		//mWorld->getZoningCharacter()
+
+		// Retrieve zone change data.
+		if (mWorld->getCharacterZoneChangeData(characterName)) {
+
+		}
+		else {
+			Log::error("[World Client Connection] Unable to retrieve ZoneChangeData TODO");
+			dropConnection();
+			return false;
+		}
+	}
+	// Client is moving from Character Select / Character Create.
+	else {
+
+	}
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
 	if (mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)){

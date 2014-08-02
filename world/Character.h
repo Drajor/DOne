@@ -77,6 +77,8 @@ public:
 	void startCamp();
 	void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
 	bool getCampComplete() { return mCampComplete; }
+	void setZoningOut() { mIsZoningOut = true; }
+	bool isZoningOut() { return mIsZoningOut; }
 
 	void setAFK(bool pAFK);
 	bool getAFK();
@@ -235,6 +237,7 @@ private:
 	bool mGM;
 	bool mStanding;
 	bool mAFK;
+	bool mIsZoningOut;
 	bool mCampComplete; // Flag indicating whether this character logged out via /camp
 	bool mTGB;
 	uint32 mStatus;

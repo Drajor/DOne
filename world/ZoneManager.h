@@ -21,12 +21,14 @@ public:
 	void update();
 	uint16 getZonePort(uint32 pZoneID, uint32 pInstanceID = 0);
 	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
+	void notifyCharacterZoneOut(Character* pCharacter);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const std::string pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:
 	Zone* _makeZone(uint32 pZoneID, uint32 pInstanceID = 0);
 	uint32 _getNextZonePort();
 	
+
 
 
 

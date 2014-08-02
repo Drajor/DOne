@@ -58,7 +58,8 @@ mGold(0),
 mPlatinum(0),
 mGroup(nullptr),
 mIsZoning(false),
-mIsLinkDead(false)
+mIsLinkDead(false),
+mIsZoningOut(false)
 { }
 Character::~Character() {
 	delete mProfile;
@@ -126,11 +127,16 @@ void Character::_initialiseProfile() {
 }
 
 bool Character::onZoneIn() {
+	mIsZoning = false;
 	_processMessageQueue();
 	return true;
 }
 
 bool Character::onZoneOut() {
+	mIsZoning = true;
+	mZone = nullptr;
+	mSpawnID = 0;
+	mConnection = nullptr;
 	return true;
 }
 

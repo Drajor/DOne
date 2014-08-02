@@ -129,3 +129,7 @@ Character* ZoneManager::findCharacter(const std::string pCharacterName, bool pIn
 
 	return nullptr;
 }
+
+void ZoneManager::notifyCharacterZoneOut(Character* pCharacter) {
+	mZoningCharacters.push_back(pCharacter);
+}

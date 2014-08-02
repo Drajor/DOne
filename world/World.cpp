@@ -133,7 +133,7 @@ void World::_handleIncomingClientConnections() {
 	// Check for incoming connections.
 	EQStream* incomingStream = nullptr;
 	while (incomingStream = mStreamFactory->Pop()) {
-		// Hand over to the EQStreamIdentifier. (Determine which client to user has)
+		// Hand over to the EQStreamIdentifier. (Determine which client the user has)
 		mStreamIdentifier->AddStream(incomingStream);
 	}
 
@@ -143,7 +143,7 @@ void World::_handleIncomingClientConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
-		Utility::print("World Incoming Connection");
+		Log::info("[World] Incoming Connection");
 		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface, this));
 	}
 }
@@ -381,4 +381,9 @@ bool World::ensureAccountExists(uint32 pLoginServerAccountID, std::string pLogin
 		return true; // Account created.
 	}
 	return true; // Account already exists.
+}
+
+bool World::getCharacterZoneChangeData(std::string pCharacterName)
+{
+	throw std::logic_error("The method or operation is not implemented.");
 }
