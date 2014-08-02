@@ -83,18 +83,17 @@ void ZoneClientConnection::update() {
 		return;
 	}
 
+	// [UF] When a character has been standing still for too long they disappear. Here we force send the position to stop that.
+	if (mForceSendPositionTimer.Check()) {
+		mZone->notifyCharacterPositionChanged(mCharacter);
+	}
+
 	EQApplicationPacket* packet = 0;
 	bool ret = true;
 	while (ret && mConnected && (packet = (EQApplicationPacket*)mStreamInterface->PopPacket())) {
 		ret = _handlePacket(packet);
 		delete packet;
 	}
-
-	// [UF] When a character has been standing still for too long they disappear. Here we force send the position to stop that.
-	if (mForceSendPositionTimer.Check()) {
-		mZone->notifyCharacterPositionChanged(mCharacter);
-	}
-	mCharacter->update();
 }
 
 void ZoneClientConnection::dropConnection() {
@@ -202,6 +201,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		return false;
 	case OP_DeleteSpawn:
 		// Client sends this after /camp
+		// NOTE: Sent as a Character is about to zone out.
 		_handleDeleteSpawn(pPacket);
 		break;
 	case OP_ChannelMessage:
@@ -272,6 +272,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /makeleader command.
 		// Note: This occurs when the player uses the context menu on the group window (Roles->Leader).
 		_handleGroupMakeLeader(pPacket);
+		break;
+	case OP_ZoneChange:
+		Utility::print("[GOT OP_ZoneChange]");
+		_handleZoneChange(pPacket);
 		break;
 	default:
 		std::stringstream ss;
@@ -803,8 +807,9 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	_sendPreLogOutReply();
 	_sendLogOutReply();
 
-	// NOTE: Zone picks up the dropped connection next update.
 	mCharacter->setCampComplete(true);
+
+	// NOTE: Zone picks up the dropped connection next update.
 	dropConnection();
 }
 
@@ -822,6 +827,11 @@ void ZoneClientConnection::_sendPreLogOutReply() {
 
 void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 	_sendLogOutReply();
+	mCharacter->setZoningOut();
+	mZone->notifyCharacterZoneOut(mCharacter);
+
+	// NOTE: Zone picks up the dropped connection next update.
+	dropConnection();
 }
 
 void ZoneClientConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
@@ -834,6 +844,8 @@ void ZoneClientConnection::_sendNewZoneData() {
 	auto outPacket = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	auto payload = reinterpret_cast<NewZone_Struct*>(outPacket->pBuffer);
 	strcpy(payload->char_name, mCharacter->getName().c_str());
+	payload->zone_id = mZone->getID();
+	payload->zone_instance = mZone->getInstanceID();
 	//payload->gravity = 2; // TODO: Get a good default.
 
 	mStreamInterface->FastQueuePacket(&outPacket);
@@ -1545,4 +1557,52 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 	}
 
 	mZone->notifyCharacterMakeLeaderRequest(mCharacter, newLeader);
+}
+
+void ZoneClientConnection::sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID) {
+	auto outPacket = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+	auto payload = reinterpret_cast<RequestClientZoneChange_Struct*>(outPacket->pBuffer);
+
+	payload->zone_id = pZoneID;
+	payload->instance_id = pInstanceID;
+	payload->type = 0x01; // Copied.
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendZoneChange(uint32 pZoneID, uint16 pInstanceID) {
+	auto outPacket = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
+	auto payload = reinterpret_cast<ZoneChange_Struct*>(outPacket->pBuffer);
+	strcpy(payload->char_name, mCharacter->getName().c_str());
+	payload->zoneID = pZoneID;
+	payload->instanceID = pInstanceID;
+	payload->success = 1;
+	//payload->zone_reason = 
+	outPacket->priority = 6;
+	mStreamInterface->FastQueuePacket(&outPacket);
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
+	// Check packet is the correct size.
+	static const auto EXPECTED_SIZE = sizeof(ZoneChange_Struct);
+	if (pPacket->size != EXPECTED_SIZE) {
+		Log::error("[Zone Client Connection] Received wrong sized ZoneChange_Struct in _handleZoneChange, dropping connection.");
+		dropConnection();
+		return;
+	}
+
+	auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
+	auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
+	xx->fromid = mCharacter->getSpawnID();
+	xx->action = groupActUpdate;
+	mStreamInterface->FastQueuePacket(&x);
+
+	auto a = new EQApplicationPacket(OP_PreLogoutReply);
+	mStreamInterface->FastQueuePacket(&a);
+
+	auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
+	sendZoneChange(payload->zoneID, payload->instanceID);
 }

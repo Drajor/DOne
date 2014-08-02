@@ -78,6 +78,9 @@ public:
 	void sendGroupDisband();
 	void sendGroupLeave(const std::string& pLeavingCharacterName);
 
+	void sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID);
+	void sendZoneChange(uint32 pZoneID, uint16 pInstanceID);
+
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
 	EQApplicationPacket* makeCharacterPositionUpdate(); // Caller is responsible for memory deallocation.
@@ -143,6 +146,7 @@ private:
 		static void initalise();
 		static void deinitialise();
 		void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
+		void _handleZoneChange(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mGroupJoinPacket;

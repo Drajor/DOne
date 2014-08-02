@@ -153,6 +153,15 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 			pCharacter->getZone()->notifyCharacterGM(pCharacter);
 		}
 	}
+	else if (pCommandName == "zone" && pCharacter->getStatus() >= 100) {
+		if (pParameters.size() == 2) {
+			uint32 zoneID = 0;
+			uint32 instanceID = 0;
+			if (stoulSafe(zoneID, pParameters[0]) && stoulSafe(instanceID, pParameters[1])) {
+				pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
+			}
+		}
+	}
 	// #race <number>
 	//else if (pCommandName == "race" && pCharacter->getStatus() >= 100) {
 	//	if (pParameters.size() == 1) {
