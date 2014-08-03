@@ -1,4 +1,5 @@
 #include "GroupManager.h"
+#include "Utility.h"
 #include "Character.h"
 #include "Zone.h"
 #include "ZoneClientConnection.h"
@@ -47,11 +48,6 @@ N(OP_SetGroupTarget),
 */
 
 // Trying it out.
-#define ARG_STR(pARG) #pARG
-#define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
-#define ERROR_CONDITION(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define ERROR_CONDITION_BOOL(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
 
 static const int MAX_NUM_GROUP_MEMBERS = 6;
 

@@ -18,10 +18,14 @@ class ZoneManager;
 class Character;
 class Group;
 class GroupManager;
+class Guild;
+class GuildManager;
+class Raid;
+class RaidManager;
 
 class Zone {
 public:
-	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
+	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
 	~Zone();
 	bool initialise();
 	std::string getLongName() { return mLongName; }
@@ -76,6 +80,9 @@ public:
 	void notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName);
 	void notifyCharacterMakeLeaderRequest(Character* pCharacter, std::string pNewLeaderName);
 
+	// Guild
+	void notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName);
+
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
@@ -98,21 +105,6 @@ private:
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void _handleCharacterLinkDead(Character* pCharacter);
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 
@@ -130,6 +122,8 @@ private:
 	World* mWorld;
 	ZoneManager* mZoneManager;
 	GroupManager* mGroupManager;
+	GuildManager* mGuildManager;
+	RaidManager* mRaidManager;
 	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in

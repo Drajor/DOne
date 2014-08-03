@@ -102,6 +102,8 @@ void ZoneClientConnection::dropConnection() {
 }
 
 bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK_BOOL(pPacket);
+
 	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
 
 	EmuOpcode opcode = pPacket->GetOpcode();
@@ -273,6 +275,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// Note: This occurs when the player uses the context menu on the group window (Roles->Leader).
 		_handleGroupMakeLeader(pPacket);
 		break;
+	case OP_GuildCreate:
+		// NOTE: This occurs when the player uses the /guildcreate command.
+		_handleGuildCreate(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -287,6 +293,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	ERROR_CONDITION(mConnected);
+
 	// Check that this packet was expected.
 	if (mZoneConnectionStatus != ZoneConnectionStatus::NONE) {
 		Log::error("[Zone Client Connection] Received unexpected OP_ZoneEntry, dropping connection.");
@@ -378,6 +387,8 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 }
 
 void ZoneClientConnection::_sendTimeOfDay() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 	auto payload = (TimeOfDay_Struct*)outPacket->pBuffer;
 	memset(payload, 0, sizeof(TimeOfDay_Struct)); // TODO:
@@ -386,6 +397,8 @@ void ZoneClientConnection::_sendTimeOfDay() {
 }
 
 void ZoneClientConnection::_sendPlayerProfile() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
 	//mCharacter->getProfile()->entityid = mCharacter->getSpawnID();
@@ -395,6 +408,8 @@ void ZoneClientConnection::_sendPlayerProfile() {
 }
 
 void ZoneClientConnection::_sendZoneEntry() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
 	auto payload = (ServerZoneEntry_Struct*)outPacket->pBuffer;
 
@@ -457,22 +472,30 @@ void ZoneClientConnection::_sendZoneEntry() {
 }
 
 void ZoneClientConnection::_sendZoneSpawns() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
 
 void ZoneClientConnection::_sendTributeUpdate() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
 	auto payload = (TributeInfo_Struct *)outPacket->pBuffer;
 	mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendInventory() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_CharInventory, 0);
 	mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendWeather() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_Weather, 12);
 	auto payload = (Weather_Struct*)outPacket->pBuffer;
 	//ws->val1 = 0x000000FF;
@@ -490,6 +513,9 @@ void ZoneClientConnection::_sendWeather() {
 }
 
 void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	ERROR_CONDITION(mConnected);
+
 	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestSpawn;
 	_sendDoors();
 	_sendObjects();
@@ -501,37 +527,48 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 }
 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+
 	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
 	mForceSendPositionTimer.Start(4000);
 }
 
 void ZoneClientConnection::_sendDoors() {
+	ERROR_CONDITION(mConnected);
 	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnDoor, 0);
 	//mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendObjects() {
+	ERROR_CONDITION(mConnected);
 	return;
 	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_GroundSpawn, 0);
 	//mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendZonePoints() {
+	ERROR_CONDITION(mConnected);
 	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendZonepoints, 0);
 	//mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendAAStats() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_SendAAStats, 0);
 	mStreamInterface->QueuePacket(outPacket);
 }
 
 void ZoneClientConnection::_sendZoneServerReady() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ZoneServerReady, 0);
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
 
 void ZoneClientConnection::_sendExpZoneIn() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_SendExpZonein, 0);
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
@@ -543,13 +580,10 @@ void ZoneClientConnection::_sendWorldObjectsSent() {
 }
 
 void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(PlayerPositionUpdateClient_Struct);
-	if (pPacket->size != EXPECTED_SIZE && pPacket->size != EXPECTED_SIZE + 1) {
-		Log::error("[Zone Client Connection] Wrong sized PlayerPositionUpdateClient_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(PlayerPositionUpdateClient_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
 
 	auto payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
 
@@ -565,13 +599,10 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 }
 
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(SpawnAppearance_Struct);
-	if (pPacket->size != EXPECTED_SIZE && pPacket->size != EXPECTED_SIZE + 1) {
-		Log::error("[Zone Client Connection] Wrong sized SpawnAppearance_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(SpawnAppearance_Struct);
+	
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
 
 	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(pPacket->pBuffer);
 	const uint16 actionType = payload->type;
@@ -675,19 +706,18 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 }
 
 void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+
 	mCharacter->startCamp();
 }
 
 void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	// NOTE: This packet size increases with message size.
-	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct);
+	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct); // NOTE: This packet size increases with message size.
 	static const auto MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
-	if (pPacket->size < EXPECTED_SIZE || pPacket->size > MAXIMUM_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized ChannelMessage_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size <= MAXIMUM_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size >= EXPECTED_SIZE);
 
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
 
@@ -748,6 +778,8 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 }
 
 void ZoneClientConnection::sendPosition() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	auto payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
 	memset(payload, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
@@ -765,6 +797,7 @@ void ZoneClientConnection::sendPosition() {
 	payload->padding0006 = 7;
 	payload->padding0014 = 0x7f;
 	payload->padding0018 = 0x5df27;
+
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -786,6 +819,8 @@ header[1]
 */
 
 void ZoneClientConnection::sendMessage(MessageType pType, std::string pMessage) {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
 	auto payload = reinterpret_cast<SpecialMesg_Struct*>(outPacket->pBuffer);
 	payload->header[0] = 0x00; // Header used for #emote style messages..
@@ -798,6 +833,9 @@ void ZoneClientConnection::sendMessage(MessageType pType, std::string pMessage) 
 }
 
 void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	auto payload = reinterpret_cast<CancelTrade_Struct*>(outPacket->pBuffer);
 	payload->fromid = mCharacter->getSpawnID();
@@ -814,12 +852,16 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_sendLogOutReply() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_LogoutReply);
 	mStreamInterface->FastQueuePacket(&outPacket);
 	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendPreLogOutReply() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_PreLogoutReply);
 	mStreamInterface->FastQueuePacket(&outPacket);
 	safe_delete(outPacket);
@@ -840,6 +882,8 @@ void ZoneClientConnection::_handleRequestNewZoneData(const EQApplicationPacket* 
 }
 
 void ZoneClientConnection::_sendNewZoneData() {
+	ERROR_CONDITION(mConnected);
+
 	// TODO: Send some real data.
 	auto outPacket = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	auto payload = reinterpret_cast<NewZone_Struct*>(outPacket->pBuffer);
@@ -852,43 +896,41 @@ void ZoneClientConnection::_sendNewZoneData() {
 }
 
 void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
+	ERROR_CONDITION(mConnected);
+	
 	auto outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
 	payload->spawn_id = mCharacter->getSpawnID();
 	payload->type = pType;
 	payload->parameter = pParameter;
+
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
 	// TODO:
 }
 
 void ZoneClientConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
 	// TODO:
 }
 
 void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(ClientTarget_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized ClientTarget_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ClientTarget_Struct);
 
-	// TODO:
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+
 }
 
 void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(uint32);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized OP_TGB, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(uint32);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
 	if (tgb == 0 || tgb == 1) {
@@ -899,6 +941,8 @@ void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID) {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
 	auto payload = reinterpret_cast<SimpleMessage_Struct*>(outPacket->pBuffer);
 	payload->color = static_cast<std::uint32_t>(pType);
@@ -909,6 +953,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 }
 
 void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, std::string pParameter0, std::string pParameter1, std::string pParameter2, std::string pParameter3, std::string pParameter4, std::string pParameter5, std::string pParameter6, std::string pParameter7, std::string pParameter8, std::string pParameter9) {
+	ERROR_CONDITION(mConnected);
+
 	int packetSize = 0;
 	std::string message;
 
@@ -955,6 +1001,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 }
 
 void ZoneClientConnection::sendHPUpdate() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
 	auto payload = reinterpret_cast<SpawnHPUpdate_Struct*>(outPacket->pBuffer);
 	payload->spawn_id = mCharacter->getSpawnID();
@@ -966,6 +1014,8 @@ void ZoneClientConnection::sendHPUpdate() {
 }
 
 EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
+	ERROR_CONDITION_BOOL(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
 	auto payload = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
 	populateSpawnStruct(payload);
@@ -973,6 +1023,8 @@ EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
 }
 
 EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
+	//ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	auto payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
 	payload->spawn_id = mCharacter->getSpawnID();
@@ -995,10 +1047,13 @@ EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
 
 
 void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
+	ERROR_CONDITION(mConnected);
 	mStreamInterface->QueuePacket(pPacket);
 }
 
 void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
+	ERROR_CONDITION(mConnected);
+
 	pSpawn->spawn.gm = mCharacter->getGM();
 	pSpawn->spawn.anon = mCharacter->getAnonymous();
 	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
@@ -1050,13 +1105,10 @@ void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
 }
 
 void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(Emote_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized Emote_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Emote_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	static const unsigned int MAX_EMOTE_SIZE = 1024;
 	auto payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
@@ -1065,19 +1117,18 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(Animation_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized Animation_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Animation_Struct);
+	
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
 	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value, false);
 }
 
 void ZoneClientConnection::sendExperienceUpdate() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
 	auto payload = reinterpret_cast<ExpUpdate_Struct*>(outPacket->pBuffer);
 	payload->exp = mCharacter->getExperienceRatio();
@@ -1085,8 +1136,10 @@ void ZoneClientConnection::sendExperienceUpdate() {
 }
 
 void ZoneClientConnection::sendLevelUpdate() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
-	LevelUpdate_Struct* payload = reinterpret_cast<LevelUpdate_Struct*>(outPacket->pBuffer);
+	auto payload = reinterpret_cast<LevelUpdate_Struct*>(outPacket->pBuffer);
 	payload->level = mCharacter->getLevel();
 	payload->exp = mCharacter->getExperienceRatio();
 
@@ -1095,18 +1148,19 @@ void ZoneClientConnection::sendLevelUpdate() {
 }
 
 void ZoneClientConnection::sendExperienceGain() {
+	ERROR_CONDITION(mConnected);
 	sendSimpleMessage(MessageType::Experience, StringID::GAIN_XP);
 }
 
 void ZoneClientConnection::sendExperienceLoss() {
+	ERROR_CONDITION(mConnected);
 	// There is no StringID for this message apparently.
 	sendMessage(MessageType::Yellow, "You have lost experience.");
 }
 
 void ZoneClientConnection::sendLevelGain() {
-	std::stringstream ss;
-	ss << static_cast<int>(mCharacter->getLevel());
-	sendSimpleMessage(MessageType::Experience, StringID::GAIN_LEVEL, ss.str());
+	ERROR_CONDITION(mConnected);
+	sendSimpleMessage(MessageType::Experience, StringID::GAIN_LEVEL, std::to_string(mCharacter->getLevel()));
 }
 
 void ZoneClientConnection::sendLevelLost() {
@@ -1117,11 +1171,12 @@ void ZoneClientConnection::sendLevelLost() {
 }
 
 void ZoneClientConnection::sendLevelAppearance() {
-
+	ERROR_CONDITION(mConnected);
 }
 
-void ZoneClientConnection::sendStats()
-{
+void ZoneClientConnection::sendStats() {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
 	auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
 	payload->str = 5;
@@ -1130,13 +1185,10 @@ void ZoneClientConnection::sendStats()
 }
 
 void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(Who_All_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Wrong sized Who_All_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Who_All_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<Who_All_Struct*>(pPacket->pBuffer);
 	if (payload->type != 0 && payload->type != 3) return;
@@ -1154,6 +1206,8 @@ void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPack
 }
 
 void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
+	ERROR_CONDITION(mConnected);
+
 	static const std::string LINE("---------------------------");
 	int packetSize = 0;
 	int numResults = pMatches.size();
@@ -1296,6 +1350,8 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 }
 
 void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
 	payload->language = Language::COMMON_TONGUE_LANG;
@@ -1309,26 +1365,26 @@ void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const st
 }
 
 void ZoneClientConnection::sendTell(const std::string& pSenderName, const std::string& pMessage) {
+	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_TELL, pSenderName, pMessage);
 }
 
 void ZoneClientConnection::sendGroupMessage(const std::string& pSenderName, const std::string& pMessage) {
+	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
 }
 
 void ZoneClientConnection::sendGuildMessage(const std::string& pSenderName, const std::string& pMessage) {
+	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
 }
 
 // NOTE: This occurs when the player presses 'Invite' on the group window.
 void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(GroupInvite_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized GroupInvite_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupInvite_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
 	const std::string inviterName = Utility::safeString(payload->inviter_name, 64);
@@ -1347,6 +1403,8 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 }
 
 void ZoneClientConnection::sendGroupInvite(const std::string pFromCharacterName) {
+	ERROR_CONDITION(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(outPacket->pBuffer);
 	strcpy(payload->inviter_name, pFromCharacterName.c_str());
@@ -1358,13 +1416,10 @@ void ZoneClientConnection::sendGroupInvite(const std::string pFromCharacterName)
 
 // NOTE: This occurs when the player presses 'Follow' on the group window.
 void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(GroupGeneric_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized GroupGeneric_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupGeneric_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
@@ -1378,13 +1433,10 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 
 // NOTE: This occurs when the player presses 'Decline' on the group window.
 void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(GroupCancel_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized GroupCancel_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupCancel_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
 	std::string inviteeName = Utility::safeString(payload->name1, 64);
@@ -1396,6 +1448,8 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 }
 
 void ZoneClientConnection::sendGroupCreate() {
+	ERROR_CONDITION(mConnected);
+
 	int packetSize = 31 + mCharacter->getName().length() + 1; // Magic number due to no packet structure.
 	auto outPacket = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
 
@@ -1483,13 +1537,10 @@ void ZoneClientConnection::sendGroupUpdate(std::list<std::string>& pGroupMemberN
 }
 
 void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(GroupGeneric_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized GroupGeneric_Struct in _handleGroupDisband, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupGeneric_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 	
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	std::string removeCharacterName = Utility::safeString(payload->name1, 64);
@@ -1534,13 +1585,10 @@ void ZoneClientConnection::sendGroupDisband() {
 }
 
 void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(GroupMakeLeader_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized GroupMakeLeader_Struct in _handleGroupMakeLeader, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupMakeLeader_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
 
@@ -1586,13 +1634,10 @@ void ZoneClientConnection::sendZoneChange(uint32 pZoneID, uint16 pInstanceID) {
 }
 
 void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(ZoneChange_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized ZoneChange_Struct in _handleZoneChange, dropping connection.");
-		dropConnection();
-		return;
-	}
+	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ZoneChange_Struct);
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
@@ -1605,4 +1650,21 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 
 	auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
 	sendZoneChange(payload->zoneID, payload->instanceID);
+}
+
+void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
+	static const auto EXPECTED_PAYLOAD_SIZE = 64;
+	static const auto MIN_GUILD_NAME_LENGTH = 4;
+
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	
+	const std::string guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), 64);
+
+	// Check: Minimum length of guild name.
+	if (guildName.length() < MIN_GUILD_NAME_LENGTH) { return; }
+	// Check: Character already has a guild.
+	if (mCharacter->hasGuild()) { return; }
+
+	mZone->notifyCharacterGuildCreate(mCharacter, guildName);
 }

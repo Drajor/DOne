@@ -15,10 +15,12 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
 	mWorld(pWorld),
 	mZoneManager(pZoneManager),
 	mGroupManager(pGroupManager),
+	mGuildManager(pGuildManager),
+	mRaidManager(pRaidManager),
 	mDataStore(pDataStore),
 	mPort(pPort),
 	mID(pZoneID),
@@ -631,4 +633,8 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 	//	mGuildManager->handleCharacterLinkDead(character); // Notify Guild Manager.
 
 	notifyCharacterLinkDead(pCharacter);
+}
+
+void Zone::notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName) {
+
 }

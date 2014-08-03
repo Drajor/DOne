@@ -25,6 +25,8 @@ SET(world_sources
 	ZoneClientConnection.cpp
 	ZoneData.cpp
 	GroupManager.cpp
+	GuildManager.cpp
+	RaidManager.cpp
 )
 
 SET(world_headers
@@ -52,6 +54,8 @@ SET(world_headers
 	ClientAuthentication.h
 	ZoneData.h
 	GroupManager.h
+	GuildManager.h
+	RaidManager.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

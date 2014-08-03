@@ -130,7 +130,9 @@ private:
 	void _handleGroupFollow(const EQApplicationPacket* pPacket);
 	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupDisband(const EQApplicationPacket* pPacket);
-
+	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
+	void _handleZoneChange(const EQApplicationPacket* pPacket);
+	void _handleGuildCreate(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
@@ -145,8 +147,6 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
-		void _handleZoneChange(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mGroupJoinPacket;

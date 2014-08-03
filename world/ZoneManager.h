@@ -7,6 +7,8 @@
 class WorldClientConnection;
 class Zone;
 class GroupManager;
+class GuildManager;
+class RaidManager;
 class DataStore;
 class World;
 class Character;
@@ -27,14 +29,11 @@ public:
 private:
 	Zone* _makeZone(uint32 pZoneID, uint32 pInstanceID = 0);
 	uint32 _getNextZonePort();
-	
-
-
-
-
 
 	World* mWorld;
 	GroupManager* mGroupManager;
+	GuildManager* mGuildManager;
+	RaidManager* mRaidManager;
 	DataStore* mDataStore;
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;

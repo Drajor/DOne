@@ -9,6 +9,8 @@
 
 class Zone;
 class Group;
+class Guild;
+class Raid;
 class EQStreamInterface;
 class ZoneClientConnection;
 struct PlayerProfile_Struct;
@@ -51,6 +53,16 @@ public:
 	bool hasGroup() { return mGroup != nullptr; }
 	Group* getGroup() { return mGroup; }
 	void setGroup(Group* pGroup) { mGroup = pGroup; }
+
+	// Guild
+	bool hasGuild() { return mGuild != nullptr; }
+	Guild* getGuild() { return mGuild; }
+	void setGuild(Guild* pGuild) { mGuild = pGuild; }
+
+	// Raid
+	bool hasRaid() { return mRaid != nullptr; }
+	Raid* getRaid() { return mRaid; }
+	void setRaid(Raid* pRaid) { mRaid = pRaid; }
 
 	void setZone(Zone* pZone) { mZone = pZone; }
 	void setSpawnID(uint16 pSpawnID) { mSpawnID = pSpawnID; }
@@ -247,6 +259,8 @@ private:
 	Timer mAutoSave;
 
 	Group* mGroup;
+	Guild* mGuild;
+	Raid* mRaid;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;

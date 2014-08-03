@@ -1,6 +1,8 @@
 #include "ZoneManager.h"
 #include "Zone.h"
 #include "GroupManager.h"
+#include "GuildManager.h"
+#include "RaidManager.h"
 #include "World.h"
 #include "DataStore.h"
 #include "Character.h"
@@ -11,7 +13,9 @@
 ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
 mWorld(pWorld),
 mDataStore(pDataStore),
-mGroupManager(nullptr)
+mGroupManager(nullptr),
+mGuildManager(nullptr),
+mRaidManager(nullptr)
 { }
 
 ZoneManager::~ZoneManager() {
@@ -44,6 +48,8 @@ void ZoneManager::initialise() {
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
 	mGroupManager = new GroupManager();
+	mGuildManager = new GuildManager();
+	mRaidManager = new RaidManager();
 }
 
 uint32 ZoneManager::_getNextZonePort() {
@@ -69,7 +75,7 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 
 Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
 	Log::info("[Zone Manager] : Zone Request");
-	Zone* zone = new Zone(mWorld, this, mGroupManager, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
+	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
 	zone->initialise();
 	mZones.push_back(zone);
 	return zone;
