@@ -27,10 +27,14 @@ class Zone {
 public:
 	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
 	~Zone();
+	
+	ZoneManager* getZoneManager() { return mZoneManager; }
+
 	bool initialise();
 	std::string getLongName() { return mLongName; }
 	std::string getShortName() { return mShortName; }
 	uint32 getLongNameStringID() { return mLongNameStringID; }
+	std::uint32_t getNumCharacters() { return mCharacters.size(); }
 
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
 	void removeAuthentication(std::string pCharacterName);
@@ -111,6 +115,7 @@ private:
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void _handleCharacterLinkDead(Character* pCharacter);
 	
+
 
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 

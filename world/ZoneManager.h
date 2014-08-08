@@ -3,6 +3,7 @@
 #include "ClientAuthentication.h"
 #include <list>
 #include "../common/types.h"
+#include <cstdint>
 
 class WorldClientConnection;
 class Zone;
@@ -14,10 +15,21 @@ class World;
 class Character;
 struct WhoFilter;
 
+struct ZoneSearchEntry {
+	ZoneSearchEntry() : mName(""), mID(0), mInstanceID(0), mNumCharacters(0) {};
+	std::string mName;
+	std::uint32_t mID;
+	std::uint32_t mInstanceID;
+	std::uint32_t mNumCharacters;
+};
+typedef std::list<ZoneSearchEntry> ZoneSearchResult;
+
 class ZoneManager {
 public:
 	ZoneManager(World* pWorld, DataStore* pDataStore);
 	~ZoneManager();
+	ZoneSearchResult getAllZones();
+
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID = 0);
 	
 	void registerZoneTransfer(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID);

@@ -163,3 +163,17 @@ Character* ZoneManager::getZoningCharacter(std::string pCharacterName) {
 
 	return nullptr;
 }
+
+ZoneSearchResult ZoneManager::getAllZones() {
+	ZoneSearchResult result;
+	for (auto i : mZones) {
+		ZoneSearchEntry entry;
+		entry.mName = i->getLongName();
+		entry.mID = i->getID();
+		entry.mInstanceID = i->getInstanceID();
+		entry.mNumCharacters = i->getNumCharacters();
+		result.push_back(entry);
+	}
+
+	return result;
+}

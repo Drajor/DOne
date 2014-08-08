@@ -42,6 +42,7 @@ mConnected(true),
 mConnectionOrigin(ConnectionOrigin::Unknown)
 {
 	mCommandHandler = new CommandHandler();
+	mCommandHandler->initialise();
 	mForceSendPositionTimer.Disable();
 }
 
@@ -49,6 +50,7 @@ ZoneClientConnection::~ZoneClientConnection() {
 	dropConnection();
 	mStreamInterface->ReleaseFromUse();
 	// NOTE: mStreamInterface is intentionally not deleted here.
+	safe_delete(mCommandHandler);
 }
 
 void ZoneClientConnection::initalise() {

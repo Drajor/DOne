@@ -74,4 +74,11 @@ namespace Utility {
 		char* mStart; // start memory location.
 		char* mPointer; // current location in memory.
 	};
+
+	// list.remove_if(Utility::containerEntryDelete)
+	template <typename T>
+	bool containerEntryDelete(T pValue) {
+		delete pValue;
+		return true;
+	}
 }
