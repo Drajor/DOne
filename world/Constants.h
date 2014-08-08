@@ -47,7 +47,12 @@ enum PlayerDeityIDs {
 };
 
 enum ZoneIDs {
-	NorthQeynos = 2
+	SouthQeynos = 1,
+	NorthQeynos = 2,
+	TheSurefallGlade = 3,
+	TheQeynosHills = 4,
+	HighpassHold = 5,
+	HighKeep = 6
 };
 
 enum class Statistic : std::uint32_t {

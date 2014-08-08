@@ -64,7 +64,7 @@ private:
 	void _sendApproveWorld();
 	void _sendPostEnterWorld();
 	void _sendZoneUnavailable();
-	void _sendZoneServerInfo();
+	void _sendZoneServerInfo(uint16 pPort);
 
 	bool mAuthenticated;
 	ClientAuthentication mAuthentication;

@@ -8,9 +8,10 @@
 #define ARG_STR(pARG) #pARG
 #define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
 #define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
-#define ERROR_CONDITION(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define ERROR_CONDITION_BOOL(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
-#define PACKET_SIZE_CHECK(pCondition) if(!pCondition)  { std::stringstream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ERROR_CONDITION(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ERROR_CONDITION_BOOL(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define PACKET_SIZE_CHECK(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define PACKET_SIZE_CHECK_BOOL(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
 
 class Character;
 class Zone;

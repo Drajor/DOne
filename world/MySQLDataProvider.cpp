@@ -79,7 +79,7 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 	if (mDatabaseConnection->runQuery(query, queryLength, errorBuffer, &result)) {
 		safe_delete_array(query);
 
-		// TODO: Why are only part of this data initialised here?
+		// TODO: Why is only part of this data initialised here?
 		for (int i = 0; i < NUM_CHARACTERS; i++) {
 			strcpy(pCharacterSelectData->name[i], "<none>");
 			pCharacterSelectData->zone[i] = 0;
@@ -99,8 +99,7 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 			pCharacterSelectData->race[i] = playerProfile->race;
 			pCharacterSelectData->gender[i] = playerProfile->gender;
 			pCharacterSelectData->deity[i] = playerProfile->deity;
-			//pCharacterSelectData->zone[i] = GetZoneID(row[2]);
-			pCharacterSelectData->zone[i] = 1;
+			pCharacterSelectData->zone[i] = playerProfile->zone_id;
 			pCharacterSelectData->face[i] = playerProfile->face;
 			pCharacterSelectData->haircolor[i] = playerProfile->haircolor;
 			pCharacterSelectData->beardcolor[i] = playerProfile->beardcolor;

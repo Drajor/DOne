@@ -1,4 +1,6 @@
 #include "ZoneData.h"
+#include "Utility.h"
+#include "LogSystem.h"
 /*
 2243 South Qeynos
 2244 North Qeynos
@@ -228,26 +230,54 @@
 4049 Dulak's Harbor
 4050 Hatesfury
 */
+//ZoneInformation ZoneData::mZoneData[1000];
 
-std::string ZoneData::getLongName(uint32 pZoneID)
-{
-	return "North Qeynos";
-}
-
-std::string ZoneData::getShortName(uint32 pZoneID)
-{
-	return "qeynos2";
-}
+ZoneData::ZoneInformation ZoneData::mZoneData[ZoneData::NUM_ZONES] = {
+	{ 0, 0, "No Zone Long", "nozone", 0.0f, 0.0f, 0.0f },
+	{ 1, 0, "South Qeynos", "qeynos", 0.0f, 0.0f, 0.0f },
+	{ 2, 0, "North Qeynos", "qeynos2", 0.0f, 0.0f, 0.0f },
+	{ 3, 0, "The Surefall Glade", "qrg", 0.0f, 0.0f, 0.0f },
+	{ 4, 0, "The Qeynos Hills", "qeytoqrg", 0.0f, 0.0f, 0.0f },
+	{ 5, 0, "Highpass Hold", "highpass", 0.0f, 0.0f, 0.0f },
+	{ 6, 0, "High Keep", "highkeep", 0.0f, 0.0f, 0.0f },
+};
 
 bool ZoneData::initialise()
 {
-	//ZoneData::mZoneData[757] = { 757, 0, "breedinggrounds", "The Breeding Grounds", 0.0f, 0.0f, 3.0f };
-	//mZoneData[0] = {}
-
 	return true;
 }
 
-uint32 ZoneData::getLongNameStringID(uint32 pZoneID)
-{
-	return 2244;
+bool ZoneData::isZoneIDValid(uint32 pZoneID) {
+	return !(pZoneID == 0 || pZoneID >= ZoneData::NUM_ZONES);
+}
+
+
+std::string ZoneData::getLongName(uint32 pZoneID) {
+	if (ZoneData::isZoneIDValid(pZoneID))
+		return ZoneData::mZoneData[pZoneID].mLongName;
+	
+	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+	Log::error(ss.str());
+
+	return "";
+}
+
+std::string ZoneData::getShortName(uint32 pZoneID){
+	if (ZoneData::isZoneIDValid(pZoneID))
+		return ZoneData::mZoneData[pZoneID].mShortName;
+
+	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+	Log::error(ss.str());
+
+	return "";
+}
+
+uint32 ZoneData::getLongNameStringID(uint32 pZoneID) {
+	if (ZoneData::isZoneIDValid(pZoneID))
+		return ZoneData::mZoneData[pZoneID].mLongNameStringID;
+
+	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+	Log::error(ss.str());
+
+	return 0;
 }

@@ -18,7 +18,8 @@ class WorldClientConnection;
 struct CharacterSelect_Struct;
 struct CharCreate_Struct;
 
-struct ZoneChangeData {
+struct ZoneTransfer {
+	std::string mCharacterName;
 	uint32 mFromZoneID;
 	uint32 mFromInstanceID;
 	uint32 mToZoneID;
@@ -58,13 +59,15 @@ public:
 	bool isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName);
 
 	uint16 getZonePort(uint16 pZoneID, uint16 pInstanceID = 0);
-	bool getCharacterZoneChangeData(std::string pCharacterName);
-	void addCharacterZoneChangeData(ZoneChangeData pZoneChangeData) { mZoneChangeData.push_back(pZoneChangeData); }
+	
+	bool getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& pZoneTransfer);
+	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
+	void removeZoneTransfer(std::string& pCharacterName);
 private:
 	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, std::string> mReservedCharacterNames;
-	std::list<ZoneChangeData> mZoneChangeData;
+	std::list<ZoneTransfer> mZoneTransfers;
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 

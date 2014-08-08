@@ -649,188 +649,61 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 }
 
 bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK_BOOL(pPacket);
+
 	// Note: Enter Tutorial and Return Home are ignored at the moment.
 
-	// Sent after Character Creation.
-	// Sent after pressing 'Enter World' at Character Select.
-	// Is it sent while zoning?
-
 	auto payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
-	std::string characterName = payload->name;
+	std::string characterName = Utility::safeString(payload->name, 64);
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
 	if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
-		Log::error("[World Client Connection] World refused entry, dropping connection.");
+		std::stringstream ss; ss << "[World Client Connection] World refused entry for " << characterName << ", dropping connection.";
+		Log::error(ss.str());
 		dropConnection();
 		return false;
 	}
 
 	// Client is between zones.
 	if (mZoning) {
-		// What zone are they moving to?
-		//zoneID 
-		//mWorld->getZoningCharacter()
-
 		// Retrieve zone change data.
-		if (mWorld->getCharacterZoneChangeData(characterName)) {
+		ZoneTransfer zoneTransfer;
+		if (mWorld->getCharacterZoneTransfer(characterName, zoneTransfer)) {
+			mWorld->removeZoneTransfer(characterName); // Remove zone transfer authority.
+			// Add authentication to the zone the character is going to.
+			mWorld->addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
+			// Tell client which Zone to connect to.
+			_sendZoneServerInfo(mWorld->getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
 
+			return true;
 		}
+		// Failed to find ZoneTransfer data for character.
 		else {
-			Log::error("[World Client Connection] Unable to retrieve ZoneChangeData TODO");
+			std::stringstream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
+			Log::error(ss.str());
 			dropConnection();
 			return false;
 		}
 	}
 	// Client is moving from Character Select / Character Create.
 	else {
-
-	}
-
-	// Check: Character belongs to this account. This also checks whether the character actually exists.
-	if (mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)){
-		// TODO: Send mWorld->addExpectedCharacter(ZoneID, InstanceID, characterName)
+		// TODO: At the moment Characters always go to NQ.
+		mWorld->addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
 		// Send MOTD?
 		// Send ChatServer?
 		// Send ChatServer2?
-		// OP_ZoneServerInfo
-		mWorld->addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos);
-		_sendZoneServerInfo(); // /wave
-		//_sendZoneUnavailable();
+		_sendZoneServerInfo(mWorld->getZonePort(ZoneIDs::NorthQeynos, 0));
 		return true;
 	}
-
-	Log::error("[World Client Connection] World refused entry, dropping connection.");
-	dropConnection();
-	return false;
-
-
-	//if (zoneID == 0 || !database.GetZoneName(zoneID)) {
-	//	// This is to save people in an invalid zone, once it's removed from the DB
-	//	database.MoveCharacterToZone(mCharacterID, "arena");
-	//	clog(WORLD__CLIENT_ERR, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
-	//}
-
-	//if(instanceID > 0)
-	//{
-	//	if(!database.VerifyInstanceAlive(instanceID, getCharacterID()))
-	//	{
-	//		zoneID = database.MoveCharacterToBind(mCharacterID);
-	//		instanceID = 0;
-	//	}
-	//	else
-	//	{
-	//		if(!database.VerifyZoneInstance(zoneID, instanceID))
-	//		{
-	//			zoneID = database.MoveCharacterToBind(mCharacterID);
-	//			instanceID = 0;
-	//		}
-	//	}
-	//}
-
-	//if(!mZoning) {
-	//	database.SetGroupID(char_name, 0, mCharacterID);
-	//	database.SetLoginFlags(mCharacterID, false, false, 1);
-	//}
-	//else{
-	//	uint32 groupid=database.GetGroupID(char_name);
-	//	if(groupid>0){
-	//		char* leader=0;
-	//		char leaderbuf[64]={0};
-	//		if((leader=database.GetGroupLeaderForLogin(char_name,leaderbuf)) && strlen(leader)>1){
-	//			EQApplicationPacket* outapp3 = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-	//			GroupJoin_Struct* gj=(GroupJoin_Struct*)outapp3->pBuffer;
-	//			gj->action=8;
-	//			strcpy(gj->yourname,char_name);
-	//			strcpy(gj->membername,leader);
-	//			QueuePacket(outapp3);
-	//			safe_delete(outapp3);
-	//		}
-	//	}
-	//}
-
-	//outapp = new EQApplicationPacket(OP_MOTD);
-	//char tmp[500] = {0};
-	//if (database.GetVariable("MOTD", tmp, 500)) {
-	//	outapp->size = strlen(tmp)+1;
-	//	outapp->pBuffer = new uchar[outapp->size];
-	//	memset(outapp->pBuffer,0,outapp->size);
-	//	strcpy((char*)outapp->pBuffer, tmp);
-
-	//} else {
-	//	// Null Message of the Day. :)
-	//	outapp->size = 1;
-	//	outapp->pBuffer = new uchar[outapp->size];
-	//	outapp->pBuffer[0] = 0;
-	//}
-	//QueuePacket(outapp);
-	//safe_delete(outapp);
-
-	//int MailKey = MakeRandomInt(1, INT_MAX);
-
-	//database.SetMailKey(mCharacterID, getIP(), MailKey);
-
-	//char ConnectionType;
-
-	//if(ClientVersionBit & BIT_UnderfootAndLater)
-	//	ConnectionType = 'U';
-	//else if(ClientVersionBit & BIT_SoFAndLater)
-	//	ConnectionType = 'S';
-	//else
-	//	ConnectionType = 'C';
-
-	//EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_SetChatServer);
-	//char buffer[112];
-
-	//const WorldConfig *Config = WorldConfig::get();
-
-	//sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-	//	Config->ChatHost.c_str(),
-	//	Config->ChatPort,
-	//	Config->ShortName.c_str(),
-	//	this->GetCharName(), ConnectionType, MailKey
-	//);
-	//outapp2->size=strlen(buffer)+1;
-	//outapp2->pBuffer = new uchar[outapp2->size];
-	//memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	//QueuePacket(outapp2);
-	//safe_delete(outapp2);
-
-	//outapp2 = new EQApplicationPacket(OP_SetChatServer2);
-
-	//if(ClientVersionBit & BIT_TitaniumAndEarlier)
-	//	ConnectionType = 'M';
-
-	//sprintf(buffer,"%s,%i,%s.%s,%c%08X",
-	//	Config->MailHost.c_str(),
-	//	Config->MailPort,
-	//	Config->ShortName.c_str(),
-	//	this->GetCharName(), ConnectionType, MailKey
-	//);
-	//outapp2->size=strlen(buffer)+1;
-	//outapp2->pBuffer = new uchar[outapp2->size];
-	//memcpy(outapp2->pBuffer,buffer,outapp2->size);
-	//QueuePacket(outapp2);
-	//safe_delete(outapp2);
-
-	//_sendEnterWorldSomethingElseThatNeedsRenamingBadlyFoo();
-
-	return true;
 }
 
 bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
-	// TODO: Check character is not in zone before deleting..
-	// Check packet size.
 	static const auto MAXIMUM_NAME_SIZE = 64;
-	if (pPacket->size > MAXIMUM_NAME_SIZE) {
-		Log::error("[World Client Connection] Too many characters in character delete.");
-		dropConnection();
-		return false;
-	}
+	PACKET_SIZE_CHECK_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
 
 	std::string characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
 	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
-		std::stringstream ss;
-		ss << "[World Client Connection] Character: " << characterName << " deleted.";
+		std::stringstream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();
 		return true;
@@ -936,10 +809,11 @@ bool WorldClientConnection::update() {
 	return ret;
 }
 
-void WorldClientConnection::_sendZoneServerInfo() {
+void WorldClientConnection::_sendZoneServerInfo(uint16 pPort)
+{
 	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	auto payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
-	payload->port = mWorld->getZonePort(ZoneIDs::NorthQeynos); // TODO: Hardcode.
+	payload->port = pPort;
 	strcpy(payload->ip, "127.0.0.1");
 	_queuePacket(outPacket);
 	safe_delete(outPacket);

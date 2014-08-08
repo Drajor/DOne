@@ -8,6 +8,7 @@
 class ZoneData {
 public:
 	static bool initialise();
+	static bool isZoneIDValid(uint32 pZoneID);
 	static std::string getLongName(uint32 pZoneID);
 	static std::string getShortName(uint32 pZoneID);
 	static uint32 getLongNameStringID(uint32 pZoneID);
@@ -21,7 +22,8 @@ private:
 		float mSafeY;
 		float mSafeZ;
 	};
-	static ZoneInformation mZoneData[1000];
+	static const int NUM_ZONES = 7;
+	static ZoneInformation mZoneData[NUM_ZONES];
 	ZoneData() {};
 	~ZoneData() {};
 };

@@ -327,37 +327,46 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		return;
 	}
 
-	// TODO:
-	// Request Character from Zone (Zone request from ZoneManager)
-	// If character returned mConnectionOrigin = ConnectionOrigin::Zone else
-	mConnectionOrigin = ConnectionOrigin::Character_Select;
-	
 	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
-	// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
-	auto profile = new PlayerProfile_Struct();
-	memset(profile, 0, sizeof(PlayerProfile_Struct));
-	auto extendedProfile = new ExtendedProfile_Struct();
-	memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
-	uint32 characterID = 0;
-	if(!mDataStore->loadCharacter(characterName, characterID, profile, extendedProfile)) {
-		Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
-		dropConnection();
-		safe_delete(profile);
-		safe_delete(extendedProfile);
-		return;
+	// Determine whether Character is zoning or logging in.
+	Character* character = mZone->getZoningCharacter(characterName);
+
+	// Character is coming from another zone.
+	if (character) {
+		mConnectionOrigin = ConnectionOrigin::Zone;
+		mCharacter = character;
+	}
+	// Character is coming from character select.
+	else {
+		mConnectionOrigin = ConnectionOrigin::Character_Select;
+
+		// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
+		auto profile = new PlayerProfile_Struct();
+		memset(profile, 0, sizeof(PlayerProfile_Struct));
+		auto extendedProfile = new ExtendedProfile_Struct();
+		memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
+		uint32 characterID = 0;
+		if (!mDataStore->loadCharacter(characterName, characterID, profile, extendedProfile)) {
+			Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
+			dropConnection();
+			safe_delete(profile);
+			safe_delete(extendedProfile);
+			return;
+		}
+
+		// We will load this up every time for now but soon this data can be passed between Zones.
+		// Initialise Character.
+		mCharacter = new Character(characterID, authentication);
+		if (!mCharacter->initialise(profile, extendedProfile)) {
+			Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
+			dropConnection();
+			safe_delete(mCharacter);
+			return;
+		}
 	}
 
-	// We will load this up every time for now but soon this data can be passed between Zones.
-	// Initialise Character.
-	mCharacter = new Character(characterID, authentication);
-	if (!mCharacter->initialise(profile, extendedProfile)) {
-		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
-		dropConnection();
-		safe_delete(mCharacter);
-		return;
-	}
 	mCharacter->setZone(mZone);
 	mCharacter->setSpawnID(mZone->getNextSpawnID());
 	mCharacter->setConnection(this);
@@ -402,6 +411,8 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	auto outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
 	//mCharacter->getProfile()->entityid = mCharacter->getSpawnID();
+	mCharacter->getProfile()->zone_id = mZone->getID();
+	mCharacter->getProfile()->zoneInstance = mZone->getInstanceID();
 	memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
 	outPacket->priority = 6;
 	mStreamInterface->FastQueuePacket(&outPacket);
@@ -890,7 +901,9 @@ void ZoneClientConnection::_sendNewZoneData() {
 	strcpy(payload->char_name, mCharacter->getName().c_str());
 	payload->zone_id = mZone->getID();
 	payload->zone_instance = mZone->getInstanceID();
-	//payload->gravity = 2; // TODO: Get a good default.
+	strcpy(payload->zone_short_name, mZone->getShortName().c_str());
+	strcpy(payload->zone_long_name, mZone->getLongName().c_str()); // NOTE: This affects the zone in message "You have entered ..."
+	payload->gravity = 0.4f;
 
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
@@ -1626,11 +1639,8 @@ void ZoneClientConnection::sendZoneChange(uint32 pZoneID, uint16 pInstanceID) {
 	payload->zoneID = pZoneID;
 	payload->instanceID = pInstanceID;
 	payload->success = 1;
-	//payload->zone_reason = 
 	outPacket->priority = 6;
 	mStreamInterface->FastQueuePacket(&outPacket);
-	//mStreamInterface->QueuePacket(outPacket);
-	//safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
@@ -1650,6 +1660,8 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 
 	auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
 	sendZoneChange(payload->zoneID, payload->instanceID);
+
+	mZone->notifyCharacterZoneChange(mCharacter, payload->zoneID, payload->instanceID);
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {

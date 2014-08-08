@@ -74,8 +74,10 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 }
 
 Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
-	Log::info("[Zone Manager] : Zone Request");
-	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, _getNextZonePort(), pZoneID, pInstanceID);
+	const uint32 zonePort = _getNextZonePort();
+	std::stringstream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
+	Log::info(ss.str());
+	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, zonePort, pZoneID, pInstanceID);
 	zone->initialise();
 	mZones.push_back(zone);
 	return zone;
@@ -138,4 +140,26 @@ Character* ZoneManager::findCharacter(const std::string pCharacterName, bool pIn
 
 void ZoneManager::notifyCharacterZoneOut(Character* pCharacter) {
 	mZoningCharacters.push_back(pCharacter);
+}
+
+void ZoneManager::registerZoneTransfer(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID) {
+	ARG_PTR_CHECK(pCharacter);
+
+	ZoneTransfer zoneTransfer;
+	zoneTransfer.mCharacterName = pCharacter->getName();
+	zoneTransfer.mFromZoneID = pCharacter->getZone()->getID();
+	zoneTransfer.mFromInstanceID = pCharacter->getZone()->getInstanceID();
+	zoneTransfer.mToZoneID = pZoneID;
+	zoneTransfer.mToInstanceID = pInstanceID;
+
+	mWorld->addCharacterZoneTransfer(zoneTransfer);
+}
+
+Character* ZoneManager::getZoningCharacter(std::string pCharacterName) {
+	for (auto i : mZoningCharacters) {
+		if (i->getName() == pCharacterName)
+			return i;
+	}
+
+	return nullptr;
 }

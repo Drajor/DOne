@@ -638,3 +638,13 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 void Zone::notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName) {
 
 }
+
+void Zone::notifyCharacterZoneChange(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID) {
+	// TODO: Are we expecting this character to zone out?
+
+	mZoneManager->registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
+}
+
+Character* Zone::getZoningCharacter(std::string pCharacterName) {
+	return mZoneManager->getZoningCharacter(pCharacterName);
+}

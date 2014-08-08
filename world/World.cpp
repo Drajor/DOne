@@ -383,7 +383,23 @@ bool World::ensureAccountExists(uint32 pLoginServerAccountID, std::string pLogin
 	return true; // Account already exists.
 }
 
-bool World::getCharacterZoneChangeData(std::string pCharacterName)
-{
-	throw std::logic_error("The method or operation is not implemented.");
+bool World::getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& pZoneTransfer) {
+	for (auto i : mZoneTransfers) {
+		if (i.mCharacterName == pCharacterName) {
+			pZoneTransfer = i;
+			return true;
+		}
+	}
+
+	return false;
 }
+
+void World::removeZoneTransfer(std::string& pCharacterName) {
+	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
+		if (i->mCharacterName == pCharacterName) {
+			mZoneTransfers.erase(i);
+			return;
+		}
+	}
+}
+

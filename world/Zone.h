@@ -83,6 +83,9 @@ public:
 	// Guild
 	void notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName);
 
+	void notifyCharacterZoneChange(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID);
+	Character* getZoningCharacter(std::string pCharacterName);
+
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
@@ -91,6 +94,8 @@ public:
 	void whoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter);
 	void requestSave(Character* pCharacter);
+
+	
 	
 private:
 
@@ -105,6 +110,7 @@ private:
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void _handleCharacterLinkDead(Character* pCharacter);
+	
 
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 
