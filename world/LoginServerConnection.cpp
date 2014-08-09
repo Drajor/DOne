@@ -48,7 +48,7 @@
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(World* pWorld, std::string pAddress, uint16 pPort, std::string pAccountName, std::string pPassword) :
+LoginServerConnection::LoginServerConnection(World* pWorld, String pAddress, uint16 pPort, String pAccountName, String pPassword) :
 	mStatusUpdateTimer(StatusUpdateInterval),
 	mWorld(pWorld),
 	mTCPConnection(0),

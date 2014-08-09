@@ -161,7 +161,7 @@ void World::_checkUCSConnection() {
 	}
 }
 
-//void World::addAuthentication(uint32 pLoginServerID, std::string pLoginServerAccountName, std::string pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
+//void World::addAuthentication(uint32 pLoginServerID, String pLoginServerAccountName, String pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
 //	ClientAuthentication* client = new ClientAuthentication();
 //	client->mAccountID = pLoginServerID;
 //	client->mAccountName = pLoginServerAccountName;
@@ -189,7 +189,7 @@ void World::removeAuthentication(ClientAuthentication& pAuthentication) {
 	}
 }
 
-bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey) {
+bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, String pLoginServerKey) {
 	// Check Incoming Clients that match Account ID / Key
 	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
 		ClientAuthentication* incClient = *i;
@@ -249,20 +249,20 @@ bool World::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struc
 	return mDataStore->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
 }
 
-bool World::isCharacterNameUnique(std::string pCharacterName) { return mDataStore->isCharacterNameUnique(pCharacterName); }
+bool World::isCharacterNameUnique(String pCharacterName) { return mDataStore->isCharacterNameUnique(pCharacterName); }
 
-bool World::isCharacterNameReserved(std::string pCharacterName) {
+bool World::isCharacterNameReserved(String pCharacterName) {
 	for (auto i : mReservedCharacterNames)
 		if (i.second == pCharacterName)
 			return true;
 	return false;
 }
 
-void World::reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName) {
+void World::reserveCharacterName(uint32 pWorldAccountID, String pCharacterName) {
 	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
 }
 
-bool World::deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName) {
+bool World::deleteCharacter(uint32 pWorldAccountID, String pCharacterName) {
 	// Verify that character with pCharacterName belongs to pWorldAccountID.
 	bool isOwner = mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
 	if (!isOwner) {
@@ -272,7 +272,7 @@ bool World::deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName) 
 	return mDataStore->deleteCharacter(pCharacterName);
 }
 
-bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData) {
+bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {
 	// Find reserved name.
 	auto i = mReservedCharacterNames.find(pWorldAccountID);
 	if (i == mReservedCharacterNames.end()) {
@@ -347,7 +347,7 @@ bool World::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, 
 	return true;
 }
 
-bool World::isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName)
+bool World::isWorldEntryAllowed(uint32 pWorldAccountID, String pCharacterName)
 {
 	return mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
 }
@@ -356,7 +356,7 @@ uint16 World::getZonePort(ZoneID pZoneID, uint16 pInstanceID) {
 	return mZoneManager->getZonePort(pZoneID, pInstanceID);
 }
 
-void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
+void World::addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
 	mZoneManager->addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
 }
 
@@ -369,7 +369,7 @@ ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
 	return 0;
 }
 
-bool World::ensureAccountExists(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+bool World::ensureAccountExists(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
 	// Create Account if this is a new player /dance
 	if (!mAccountManager->accountExists(pLoginServerAccountID)) {
 		// Create account.
@@ -383,7 +383,7 @@ bool World::ensureAccountExists(uint32 pLoginServerAccountID, std::string pLogin
 	return true; // Account already exists.
 }
 
-bool World::getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& pZoneTransfer) {
+bool World::getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZoneTransfer) {
 	for (auto i : mZoneTransfers) {
 		if (i.mCharacterName == pCharacterName) {
 			pZoneTransfer = i;
@@ -394,7 +394,7 @@ bool World::getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& 
 	return false;
 }
 
-void World::removeZoneTransfer(std::string& pCharacterName) {
+void World::removeZoneTransfer(String& pCharacterName) {
 	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
 		if (i->mCharacterName == pCharacterName) {
 			mZoneTransfers.erase(i);

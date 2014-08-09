@@ -1,13 +1,13 @@
 #pragma once
 
-#include <string>
+#include "Constants.h"
 
 class Profile {
 public:
-	Profile(std::string pName);
+	Profile(String pName);
 	~Profile();
 private:
-	std::string mName;
+	String mName;
 	__int64 mStart;
 	double mFrequency;
 };

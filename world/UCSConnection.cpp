@@ -27,7 +27,7 @@ bool UCSConnection::update() {
 	{
 		if (!mAuthenticated)
 		{
-			std::string SharedKey = "jkads89adsjkhadsjkhads8932jkhadsjhadsjk3289"; // TODO: Hardcoded for now.
+			String SharedKey = "jkads89adsjkhadsjkhads8932jkhadsjhadsjk3289"; // TODO: Hardcoded for now.
 			if (pack->opcode == ServerOP_ZAAuth && pack->size == 16)
 			{
 				uint8 tmppass[16];

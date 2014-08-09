@@ -6,28 +6,28 @@
 #include "LogSystem.h"
 
 #define ARG_STR(pARG) #pARG
-#define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { std::stringstream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
-#define ERROR_CONDITION(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define ERROR_CONDITION_BOOL(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
-#define PACKET_SIZE_CHECK(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define PACKET_SIZE_CHECK_BOOL(pCondition) if(!(pCondition))  { std::stringstream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define ARG_PTR_CHECK(pARG) if(pARG == nullptr) { StringStream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ARG_PTR_CHECK_BOOL(pARG) if(pARG == nullptr) { StringStream ss; ss << "[ARG_PTR_CHECK] ("<< ARG_STR(pARG) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define ERROR_CONDITION(pCondition) if(!(pCondition))  { StringStream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define ERROR_CONDITION_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[ERROR_CONDITION] ("<< ARG_STR(pCondition) << ") Found in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define PACKET_SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
+#define PACKET_SIZE_CHECK_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
 
 class Character;
 class Zone;
 namespace Utility {
-	void print(std::string pMessage);
-	void criticalError(std::string pMessage);
+	void print(String pMessage);
+	void criticalError(String pMessage);
 
-	std::string characterLogDetails(Character* pCharacter);
-	std::string zoneLogDetails(Zone* pZone);
+	String characterLogDetails(Character* pCharacter);
+	String zoneLogDetails(Zone* pZone);
 
-	static std::string safeString(char* pCString, unsigned int pMaxSize) {
+	static String safeString(char* pCString, unsigned int pMaxSize) {
 		pCString[pMaxSize - 1] = '\0'; // Ensure there is a null terminator at the very end
-		return std::string(pCString);
+		return String(pCString);
 	}
 
-	static std::string StringIDString(StringID pStringID) {
+	static String StringIDString(StringID pStringID) {
 		return std::to_string(static_cast<std::uint32_t>(pStringID));
 	}
 
@@ -49,7 +49,7 @@ namespace Utility {
 			}
 		}
 
-		void writeString(std::string pData) {
+		void writeString(String pData) {
 			if (mWritten + pData.length() + 1 <= mSize) {
 				strcpy(mPointer, pData.c_str());
 				mPointer += pData.length() + 1;
@@ -82,7 +82,7 @@ namespace Utility {
 		return true;
 	}
 
-	static bool stofSafe(float& pValue, std::string& pString) {
+	static bool stofSafe(float& pValue, String& pString) {
 		try {
 			pValue = std::stof(pString);
 			return true;
@@ -93,7 +93,7 @@ namespace Utility {
 		return false;
 	}
 
-	static bool stoulSafe(uint32& pValue, std::string& pString) {
+	static bool stoulSafe(uint32& pValue, String& pString) {
 		try {
 			pValue = std::stoul(pString);
 			return true;
@@ -105,7 +105,7 @@ namespace Utility {
 	}
 
 	// String To Unsigned 16
-	static bool stou16Safe(std::uint16_t& pValue, std::string pString) {
+	static bool stou16Safe(std::uint16_t& pValue, String pString) {
 		try {
 			pValue = static_cast<std::uint16_t>(std::stoul(pString));
 			return true;

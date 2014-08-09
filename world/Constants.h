@@ -3,14 +3,17 @@
 #include "../common/types.h"
 #include <cstdint>
 #include <string>
+#include <sstream>
 #include <list>
 #include <vector>
 #include <unordered_map>
+#include <map>
 
 typedef std::uint16_t ZoneID;
 typedef std::uint16_t InstanceID; // Zone Instance ID
 typedef std::uint16_t SpawnID;
 typedef std::string String;
+typedef std::stringstream StringStream;
 
 enum PlayableRaceIDs {
 	Human = 1,
@@ -792,7 +795,7 @@ enum WhoType {
 struct WhoFilter {
 	WhoFilter() : mType(WHO_ZONE), mName(""), mRace(0), mClass(0), mMinLevel(0), mMaxLevel(0) {};
 	WhoType mType;
-	std::string mName;
+	String mName;
 	uint32 mRace;
 	uint8 mClass;
 	uint8 mMinLevel;

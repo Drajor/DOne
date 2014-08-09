@@ -17,9 +17,9 @@
 #endif
 
 // Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-	std::stringstream ss(s);
-	std::string item;
+std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {
+	StringStream ss(s);
+	String item;
 	while (std::getline(ss, item, delim)) {
 		elems.push_back(item);
 	}
@@ -27,8 +27,8 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 }
 
 // Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-std::vector<std::string> split(const std::string &s, char delim) {
-	std::vector<std::string> elems;
+std::vector<String> split(const String &s, char delim) {
+	std::vector<String> elems;
 	split(s, delim, elems);
 	return elems;
 }
@@ -36,7 +36,7 @@ std::vector<std::string> split(const std::string &s, char delim) {
 /*****************************************************************************************************************************/
 class ZoneCommand : public Command {
 public:
-	ZoneCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zone <Zone ID> <Zone Instance ID>";
 	};
 
@@ -58,7 +58,7 @@ public:
 /*****************************************************************************************************************************/
 class WarpCommand : public Command {
 public:
-	WarpCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	WarpCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #warp <X> <Y> <Z>";
 	};
 
@@ -84,7 +84,7 @@ public:
 /*****************************************************************************************************************************/
 class GMCommand : public Command {
 public:
-	GMCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	GMCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #gm on / #gm off";
 	};
 
@@ -104,14 +104,14 @@ public:
 /*****************************************************************************************************************************/
 class ZoneListCommand : public Command {
 public:
-	ZoneListCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneListCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zonelist";
 	};
 
 	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		ZoneSearchResult result = pCharacter->getZone()->getZoneManager()->getAllZones();
 		for (auto i : result) {
-			std::stringstream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
+			StringStream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
 			pCharacter->getConnection()->sendMessage(MessageType::Aqua, ss.str());
 		}
 	}
@@ -120,7 +120,7 @@ public:
 /*****************************************************************************************************************************/
 class AddExperienceCommand : public Command {
 public:
-	AddExperienceCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	AddExperienceCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #addexp <number>";
 	};
 
@@ -141,7 +141,7 @@ public:
 /*****************************************************************************************************************************/
 class RemoveExperienceCommand : public Command {
 public:
-	RemoveExperienceCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	RemoveExperienceCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #remexp <number>";
 	};
 
@@ -162,12 +162,12 @@ public:
 /*****************************************************************************************************************************/
 class LocationCommand : public Command {
 public:
-	LocationCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	LocationCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #loc";
 	};
 
 	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		std::stringstream ss;
+		StringStream ss;
 		ss << "Your location is " << pCharacter->getX() << ", " << pCharacter->getY() << ", " << pCharacter->getZ();
 		pCharacter->message(MessageType::White, ss.str());
 	}
@@ -176,7 +176,7 @@ public:
 /*****************************************************************************************************************************/
 class LevelCommand : public Command {
 public:
-	LevelCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	LevelCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #level <number>";
 	};
 
@@ -197,7 +197,7 @@ public:
 /*****************************************************************************************************************************/
 class StatsCommand : public Command {
 public:
-	StatsCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	StatsCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage Example: #setstat str 10";
 	};
 
@@ -208,8 +208,8 @@ public:
 			return;
 		}
 
-		std::string statStr = pParameters[0];
-		std::string statName = "unknown";
+		String statStr = pParameters[0];
+		String statName = "unknown";
 		uint32 value = 0;
 		Statistic statistic;
 		if (!Utility::stoulSafe(value, pParameters[1])) {
@@ -228,7 +228,7 @@ public:
 			return;
 		}
 
-		std::stringstream ss;
+		StringStream ss;
 		ss << "Changing " << pCharacter->getName() << "'s " << statName << " from " << pCharacter->getBaseStatistic(statistic) << " to " << value;
 		pCharacter->message(MessageType::LightGreen, ss.str());
 		pCharacter->setBaseStatistic(statistic, value);
@@ -238,7 +238,7 @@ public:
 /*****************************************************************************************************************************/
 class ZoneSearchCommand : public Command {
 public:
-	ZoneSearchCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneSearchCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zs <text>";
 	};
 
@@ -261,7 +261,7 @@ public:
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
-//	YOURCOMMAND(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+//	YOURCOMMAND(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 //		mHelpMessage = "Usage: ";
 //	};
 //
@@ -289,11 +289,11 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new LocationCommand(100, { "loc" }));
 }
 
-void CommandHandler::command(Character* pCharacter, std::string pCommandMessage) {
+void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 	// Break up the message.
-	std::vector<std::string> elements = split(pCommandMessage, ' ');
+	std::vector<String> elements = split(pCommandMessage, ' ');
 	// Extract command name.
-	std::string commandName = elements[0].substr(1, elements[0].length() - 1);
+	String commandName = elements[0].substr(1, elements[0].length() - 1);
 	// Remove command name (#zone)
 	elements.erase(elements.begin());
 
@@ -316,7 +316,7 @@ void CommandHandler::command(Character* pCharacter, std::string pCommandMessage)
 	}
 }
 
-void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandName, std::vector<std::string> pParameters) {
+void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, std::vector<String> pParameters) {
 
 	// #heal
 	if (pCommandName == "heal") {
@@ -352,7 +352,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	}
 }
 
-Command* CommandHandler::findCommand(std::string pCommandName) {
+Command* CommandHandler::findCommand(String pCommandName) {
 	for (auto i : mCommands) {
 		for (auto j : i->getAliases()) {
 			if (j == pCommandName)

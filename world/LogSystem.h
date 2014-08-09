@@ -1,11 +1,10 @@
 #pragma once
 
-#include <string>
-#include <sstream>
+#include "Constants.h"
 
 namespace Log {
-	void status(std::string pMessage);
-	void info(std::string pMessage);
-	void error(std::string pMessage);
-	void commonlog(std::string pMessage);
+	void status(String pMessage);
+	void info(String pMessage);
+	void error(String pMessage);
+	void commonlog(String pMessage);
 }

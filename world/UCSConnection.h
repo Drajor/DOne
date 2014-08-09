@@ -1,7 +1,6 @@
-#ifndef UCS_H
-#define UCS_H
+#pragma once
 
-#include "../common/types.h"
+#include "Constants.h"
 
 class EmuTCPConnection;
 class ServerPacket;
@@ -18,5 +17,3 @@ private:
 	EmuTCPConnection* mTCPConnection;
 	bool mAuthenticated;
 };
-
-#endif

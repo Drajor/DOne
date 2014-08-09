@@ -2,10 +2,6 @@
 
 #include "Constants.h"
 #include "ClientAuthentication.h"
-#include <list>
-#include <map>
-#include <unordered_map>
-#include "../common/types.h"
 #include "../common/timer.h"
 
 class EQStreamFactory;
@@ -25,14 +21,14 @@ class RaidManager;
 
 class Zone {
 public:
-	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, uint32 pInstanceID = 0);
+	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID = 0);
 	~Zone();
 	
 	ZoneManager* getZoneManager() { return mZoneManager; }
 
 	bool initialise();
-	std::string getLongName() { return mLongName; }
-	std::string getShortName() { return mShortName; }
+	String getLongName() { return mLongName; }
+	String getShortName() { return mShortName; }
 	uint32 getLongNameStringID() { return mLongNameStringID; }
 	float getGravity() { return 0.4f; }
 	float getMinimumZ() { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
@@ -40,10 +36,10 @@ public:
 
 	std::uint32_t getNumCharacters() { return mCharacters.size(); }
 
-	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
-	void removeAuthentication(std::string pCharacterName);
-	bool checkAuthentication(std::string pCharacterName);
-	bool getAuthentication(std::string pCharacterName, ClientAuthentication& pAuthentication);
+	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName);
+	void removeAuthentication(String pCharacterName);
+	bool checkAuthentication(String pCharacterName);
+	bool getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication);
 
 	void shutdown();
 	void update();
@@ -55,9 +51,9 @@ public:
 	void _updatePreConnections();
 
 	ZoneID getID() { return mID; }
-	uint32 getInstanceID() { return mInstanceID; }
+	InstanceID getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
-	Character* findCharacter(const std::string pCharacterName);
+	Character* findCharacter(const String pCharacterName);
 
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void notifyCharacterZoneOut(Character* pCharacter);
@@ -69,35 +65,35 @@ public:
 	void notifyCharacterStanding(Character* pCharacter);
 	void notifyCharacterSitting(Character* pCharacter);
 	void notifyCharacterCrouching(Character* pCharacter);
-	void notifyCharacterChatSay(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatShout(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterEmote(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage);
-	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
+	void notifyCharacterChatSay(Character* pCharacter, const String pMessage);
+	void notifyCharacterChatShout(Character* pCharacter, const String pMessage);
+	void notifyCharacterChatOOC(Character* pCharacter, const String pMessage);
+	void notifyCharacterChatGroup(Character* pCharacter, const String pMessage);
+	void notifyCharacterEmote(Character* pCharacter, const String pMessage);
+	void notifyCharacterChatAuction(Character* pCharacter, const String pMessage);
+	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void notifyCharacterLevelIncrease(Character* pCharacter);
 	void notifyCharacterLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
 	// Group
-	void notifyCharacterGroupInvite(Character* pCharacter, const std::string pToCharacterName);
-	void notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName);
-	void notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName);
-	void notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName);
-	void notifyCharacterMakeLeaderRequest(Character* pCharacter, std::string pNewLeaderName);
+	void notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName);
+	void notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName);
+	void notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName);
+	void notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName);
+	void notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName);
 
 	// Guild
-	void notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName);
+	void notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName);
 
 	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
-	Character* getZoningCharacter(std::string pCharacterName);
+	Character* getZoningCharacter(String pCharacterName);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
-	bool trySendTell(const std::string& pSenderName, const std::string& pTargetName, const std::string& pMessage);
+	bool trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage);
 	void processCharacterQueuedTells(Character* );
 	void whoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter);
@@ -108,10 +104,10 @@ public:
 private:
 
 	// Performs a global Character search.
-	Character* _findCharacter(const std::string& pCharacterName, bool pIncludeZoning = false);
+	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
 
 	void _sendDespawn(uint16 pSpawnID, bool pDecay = false);
-	void _sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage);
+	void _sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
@@ -124,14 +120,14 @@ private:
 
 
 
-	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
+	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID;
-	std::string mLongName;
-	std::string mShortName;
+	String mLongName;
+	String mShortName;
 	uint16 mNextSpawnID;
 	ZoneID mID;
-	uint32 mInstanceID;
+	InstanceID mInstanceID;
 	uint32 mPort;
 
 	bool mInitialised; // Flag indicating whether the Zone has been initialised.

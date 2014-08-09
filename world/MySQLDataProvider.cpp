@@ -41,7 +41,7 @@ void MySQLDataProvider::update() {
 
 bool MySQLDataProvider::getAccounts(std::list<AccountData*>& pAccounts) {
 	Profile p("MySQLDataProvider::getAccounts");
-	static const std::string GET_ACCOUNTS_QUERY = "SELECT id, name, charname, sharedplat, status, lsaccount_id, gmspeed, hideme, suspendeduntil FROM account";
+	static const String GET_ACCOUNTS_QUERY = "SELECT id, name, charname, sharedplat, status, lsaccount_id, gmspeed, hideme, suspendeduntil FROM account";
 	static const uint32 GET_ACCOUNTS_QUERY_LENGTH = GET_ACCOUNTS_QUERY.length();
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	MYSQL_RES* result;
@@ -71,7 +71,7 @@ bool MySQLDataProvider::getAccounts(std::list<AccountData*>& pAccounts) {
 bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
 	Profile p("MySQLDataProvider::getCharacterSelectInfo");
 	static const int NUM_CHARACTERS = 10;
-	static const std::string GET_CHARACTERS_QUERY = "SELECT name, profile, zonename, class, level FROM character_ WHERE account_id = %i order by name limit 10";
+	static const String GET_CHARACTERS_QUERY = "SELECT name, profile, zonename, class, level FROM character_ WHERE account_id = %i order by name limit 10";
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, GET_CHARACTERS_QUERY.c_str(), pWorldAccountID);
@@ -130,9 +130,9 @@ bool MySQLDataProvider::getCharacterSelectInfo(uint32 pWorldAccountID, Character
 	return true;
 }
 
-bool MySQLDataProvider::isCharacterNameUnique(std::string pCharacterName) {
+bool MySQLDataProvider::isCharacterNameUnique(String pCharacterName) {
 	Profile p("MySQLDataProvider::isCharacterNameUnique");
-	static const std::string CHECK_NAME_QUERY = "SELECT name FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	static const String CHECK_NAME_QUERY = "SELECT name FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, CHECK_NAME_QUERY.c_str(), pCharacterName.c_str());
@@ -152,7 +152,7 @@ bool MySQLDataProvider::isCharacterNameUnique(std::string pCharacterName) {
 	return true;
 }
 
-bool MySQLDataProvider::deleteCharacter(std::string pCharacterName) {
+bool MySQLDataProvider::deleteCharacter(String pCharacterName) {
 	Profile p("MySQLDataProvider::deleteCharacter");
 	// Find character by ID
 	const uint32 characterID = _getCharacterID(pCharacterName);
@@ -161,7 +161,7 @@ bool MySQLDataProvider::deleteCharacter(std::string pCharacterName) {
 		return false;
 	}
 
-	static const std::string DEL_CHARACTER_QUERY = "DELETE FROM character_ WHERE id = %i";
+	static const String DEL_CHARACTER_QUERY = "DELETE FROM character_ WHERE id = %i";
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, DEL_CHARACTER_QUERY.c_str(), characterID);
@@ -176,9 +176,9 @@ bool MySQLDataProvider::deleteCharacter(std::string pCharacterName) {
 	return false;
 }
 
-uint32 MySQLDataProvider::_getCharacterID(std::string pCharacterName) {
+uint32 MySQLDataProvider::_getCharacterID(String pCharacterName) {
 	Profile p("MySQLDataProvider::_getCharacterID");
-	static const std::string QUERY = "SELECT id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	static const String QUERY = "SELECT id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
@@ -198,7 +198,7 @@ uint32 MySQLDataProvider::_getCharacterID(std::string pCharacterName) {
 	return 0;
 }
 
-bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, String pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	Profile p("MySQLDataProvider::createCharacter");
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	char query[256 + sizeof(PlayerProfile_Struct)* 2 + sizeof(ExtendedProfile_Struct)* 2 + 5];
@@ -219,9 +219,9 @@ bool MySQLDataProvider::createCharacter(uint32 pWorldAccountID, std::string pCha
 }
 
 // TODO: This may be better as a generic get WorldAccountID by Character Name if there are other uses.
-bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) {
+bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, String pCharacterName) {
 	Profile p("MySQLDataProvider::checkOwnership");
-	static const std::string QUERY = "SELECT account_id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	static const String QUERY = "SELECT account_id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
@@ -244,9 +244,9 @@ bool MySQLDataProvider::checkOwnership(uint32 pWorldAccountID, std::string pChar
 	return false;
 }
 
-bool MySQLDataProvider::loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+bool MySQLDataProvider::loadCharacter(String pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	Profile p("MySQLDataProvider::loadCharacter");
-	static const std::string QUERY = "SELECT profile, extprofile, id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
+	static const String QUERY = "SELECT profile, extprofile, id FROM character_ WHERE BINARY name = '%s'"; // BINARY makes it case sensitive.
 	char errorBuffer[MYSQL_ERRMSG_SIZE];
 	char* query = 0;
 	uint32 queryLength = MakeAnyLenString(&query, QUERY.c_str(), pCharacterName.c_str());
@@ -295,11 +295,11 @@ void MySQLDataProvider::copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProf
 
 }
 
-bool MySQLDataProvider::createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+bool MySQLDataProvider::createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
 	Profile p("MySQLDataProvider::createAccount");
 	mStringStream.clear();
 	mStringStream << "INSERT INTO account SET lsaccount_id=" << pLoginServerAccountID << ", name='" << pLoginServerAccountName << "', time_creation=UNIX_TIMESTAMP();";
-	const std::string query = mStringStream.str();
+	const String query = mStringStream.str();
 	mStringStream.clear();
 
 	uint32 queryLength = query.length();

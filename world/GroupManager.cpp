@@ -117,14 +117,14 @@ void GroupManager::_disbandGroup(Group* pGroup) {
 	delete pGroup;
 }
 
-void GroupManager::handleGroupMessage(Character* pCharacter, const std::string pMessage) {
+void GroupManager::handleGroupMessage(Character* pCharacter, const String pMessage) {
 	ARG_PTR_CHECK(pCharacter);
 	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
 
 	_sendMessage(pCharacter->getGroup(), pCharacter->getName(), pMessage);
 }
 
-void GroupManager::_sendMessage(Group* pGroup, std::string pSenderName, std::string pMessage) {
+void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessage) {
 	ARG_PTR_CHECK(pGroup);
 
 	for (auto i : pGroup->mMembers) {
@@ -180,7 +180,7 @@ Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 	pMember->getConnection()->sendGroupAcknowledge();
 	pLeader->getConnection()->sendGroupJoin(pMember->getName());
 
-	std::list<std::string> memberNames;
+	std::list<String> memberNames;
 	getMemberNames(memberNames, pMember->getName());
 	pMember->getConnection()->sendGroupUpdate(memberNames);
 }
@@ -208,7 +208,7 @@ void Group::removeMember(Character* pCharacter) {
 	if (mLeader == pCharacter) mLeader = nullptr;
 }
 
-void Group::sendMemberLeaveMessage(std::string pLeaverName) {
+void Group::sendMemberLeaveMessage(String pLeaverName) {
 	// TODO: Zoning members.
 	for (auto i : mMembers)
 		i->getConnection()->sendGroupLeave(pLeaverName);
@@ -232,7 +232,7 @@ bool Group::isMember(Character* pCharacter) {
 	return false;
 }
 
-void Group::getMemberNames(std::list<std::string>& pMemberNames, std::string pExcludeCharacterName) {
+void Group::getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName) {
 	for (auto i : mMembers) {
 		if (i->getName() != pExcludeCharacterName)
 			pMemberNames.push_back(i->getName());

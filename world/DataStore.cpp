@@ -7,22 +7,22 @@ DataStore::~DataStore() { }
 void DataStore::setProvider(DataProvider* pDataProvider) { mDataProvider = pDataProvider; }
 void DataStore::update() { mDataProvider->update(); }
 bool DataStore::getAccounts(std::list<AccountData*>& pAccounts) { return mDataProvider->getAccounts(pAccounts); }
-bool DataStore::isCharacterNameUnique(std::string pCharacterName) { return mDataProvider->isCharacterNameUnique(pCharacterName); }
+bool DataStore::isCharacterNameUnique(String pCharacterName) { return mDataProvider->isCharacterNameUnique(pCharacterName); }
 bool DataStore::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) { return mDataProvider->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData); }
 
-bool DataStore::deleteCharacter(std::string pCharacterName) { return mDataProvider->deleteCharacter(pCharacterName); }
+bool DataStore::deleteCharacter(String pCharacterName) { return mDataProvider->deleteCharacter(pCharacterName); }
 
-bool DataStore::createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+bool DataStore::createCharacter(uint32 pWorldAccountID, String pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	return mDataProvider->createCharacter(pWorldAccountID, pCharacterName, pProfile, pExtendedProfile);
 }
 
-bool DataStore::checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) { return mDataProvider->checkOwnership(pWorldAccountID, pCharacterName); }
+bool DataStore::checkOwnership(uint32 pWorldAccountID, String pCharacterName) { return mDataProvider->checkOwnership(pWorldAccountID, pCharacterName); }
 
-bool DataStore::loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
+bool DataStore::loadCharacter(String pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	return mDataProvider->loadCharacter(pCharacterName, pCharacterID, pProfile, pExtendedProfile);
 }
 
-bool DataStore::createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+bool DataStore::createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
 	return mDataProvider->createAccount(pLoginServerAccountID, pLoginServerAccountName);
 }
 

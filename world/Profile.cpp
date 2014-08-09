@@ -1,10 +1,8 @@
-
 #include "Profile.h"
 #include <windows.h>
-#include <sstream>
 #include "LogSystem.h"
 
-Profile::Profile(std::string pName) :
+Profile::Profile(String pName) :
 mName(pName),
 mStart(0),
 mFrequency(0.0f)
@@ -22,7 +20,7 @@ Profile::~Profile()
 	QueryPerformanceCounter(&li);
 	double ms = double(li.QuadPart - mStart) / mFrequency;
 
-	std::stringstream ss;
+	StringStream ss;
 	ss << "[Profile " << mName << "] Completed in " << ms << " ms";
 	Log::info(ss.str());
 }

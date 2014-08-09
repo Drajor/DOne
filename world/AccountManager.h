@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../common/types.h"
-#include <string>
-#include <list>
+#include "Constants.h"
 
 struct AccountData;
 class DataStore;
@@ -17,7 +15,7 @@ public:
 	uint32 getWorldAccountID(uint32 pLoginServerAccountID);
 	uint32 getStatusFromLoginServerID(uint32 pLoginServerAccountID);
 	bool accountExists(uint32 pLoginServerAccountID);
-	bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
+	bool createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName);
 private:
 	void _clearAccounts();
 

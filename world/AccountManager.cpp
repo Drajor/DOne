@@ -36,7 +36,7 @@ bool AccountManager::accountExists(uint32 pLoginServerAccountID) {
 	return false;
 }
 
-bool AccountManager::createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) {
+bool AccountManager::createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
 	if (mDataStore->createAccount(pLoginServerAccountID, pLoginServerAccountName)) {
 		// AccountManagers internal accounts are out of date so lets reload them.
 		_clearAccounts();

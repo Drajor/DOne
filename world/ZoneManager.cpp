@@ -59,7 +59,7 @@ uint32 ZoneManager::_getNextZonePort() {
 	// TODO: Error check this ;)
 }
 
-void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
+void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
 	bool zoneFound = false;
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
@@ -75,7 +75,7 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 
 Zone* ZoneManager::_makeZone(ZoneID pZoneID, uint32 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
-	std::stringstream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << static_cast<std::uint16_t>(pZoneID) << " InstanceID: " << pInstanceID;
+	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << static_cast<std::uint16_t>(pZoneID) << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
 	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, zonePort, pZoneID, pInstanceID);
 	zone->initialise();
@@ -91,7 +91,7 @@ void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
 	pCharacter->getConnection()->sendWhoResults(matches);
 }
 
-void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage) {
+void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
 	// Search Zones
 	for (auto i : mZones) {
 		if (i->trySendTell(pCharacter->getName(), pTargetName, pMessage)) {
@@ -115,7 +115,7 @@ void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const std::stri
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::White, StringID::PLAYER_NOT_ONLINE, pTargetName);
 }
 
-Character* ZoneManager::findCharacter(const std::string pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) {
+Character* ZoneManager::findCharacter(const String pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) {
 	Character* character = nullptr;
 
 	// Search Zones.
@@ -155,7 +155,7 @@ void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, ui
 	mWorld->addCharacterZoneTransfer(zoneTransfer);
 }
 
-Character* ZoneManager::getZoningCharacter(std::string pCharacterName) {
+Character* ZoneManager::getZoningCharacter(String pCharacterName) {
 	for (auto i : mZoningCharacters) {
 		if (i->getName() == pCharacterName)
 			return i;

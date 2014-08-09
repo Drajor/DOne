@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../common/types.h"
+#include "Constants.h"
 #include "Data.h"
-#include <list>
 
 class DataProvider;
 struct CharacterSelect_Struct;
@@ -19,14 +18,14 @@ public:
 	// Account Data
 	bool getAccounts(std::list<AccountData*>& pAccounts);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
-	bool isCharacterNameUnique(std::string pCharacterName);
-	bool deleteCharacter(std::string pCharacterName);
-	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool isCharacterNameUnique(String pCharacterName);
+	bool deleteCharacter(String pCharacterName);
+	bool createCharacter(uint32 pWorldAccountID, String pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 
 	// Returns true if account(pWorldAccoundID) owns a character(pCharacterName).
-	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
-	bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
-	bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
+	bool checkOwnership(uint32 pWorldAccountID, String pCharacterName);
+	bool loadCharacter(String pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName);
 	bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.

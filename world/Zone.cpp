@@ -15,7 +15,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID) :
 	mWorld(pWorld),
 	mZoneManager(pZoneManager),
 	mGroupManager(pGroupManager),
@@ -60,15 +60,15 @@ bool Zone::initialise() {
 	return true;
 }
 
-void Zone::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName) {
+void Zone::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName) {
 	mAuthenticatedCharacters.insert(std::make_pair(pCharacterName, pAuthentication));
 }
 
-void Zone::removeAuthentication(std::string pCharacterName) {
+void Zone::removeAuthentication(String pCharacterName) {
 	mAuthenticatedCharacters.erase(pCharacterName);
 }
 
-bool Zone::checkAuthentication(std::string pCharacterName) {
+bool Zone::checkAuthentication(String pCharacterName) {
 	for (auto i : mAuthenticatedCharacters) {
 		if (i.first == pCharacterName) {
 			Log::info("[Zone] Authentication Passed");
@@ -80,7 +80,7 @@ bool Zone::checkAuthentication(std::string pCharacterName) {
 	return false;
 }
 
-bool Zone::getAuthentication(std::string pCharacterName, ClientAuthentication& pAuthentication) {
+bool Zone::getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication) {
 	for (auto i : mAuthenticatedCharacters) {
 		if (i.first == pCharacterName) {
 			pAuthentication = i.second;
@@ -340,27 +340,27 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterChatSay(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterChatSay(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_SAY, pMessage);
 }
 
-void Zone::notifyCharacterChatShout(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterChatShout(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_SHOUT, pMessage);
 }
 
-void Zone::notifyCharacterChatAuction(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterChatAuction(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_AUCTION, pMessage);
 
 	// TODO: Server Auction
 }
 
-void Zone::notifyCharacterChatOOC(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterChatOOC(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_OOC, pMessage);
 	
 	// TODO: Server OOC
 }
 
-void Zone::notifyCharacterEmote(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterEmote(Character* pCharacter, const String pMessage) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Emote, 4 + pMessage.length() + pCharacter->getName().length() + 2);
 	Emote_Struct* payload = reinterpret_cast<Emote_Struct*>(outPacket->pBuffer);
@@ -387,7 +387,7 @@ void Zone::_sendDespawn(uint16 pSpawnID, bool pDecay) {
 	safe_delete(outPacket);
 }
 
-void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::string pMessage) {
+void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
@@ -404,11 +404,11 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const std::strin
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage) {
+void Zone::notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
 	mZoneManager->notifyCharacterChatTell(pCharacter, pTargetName, pMessage);
 }
 
-bool Zone::trySendTell(const std::string& pSenderName, const std::string& pTargetName, const std::string& pMessage) {
+bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage) {
 	for (auto i : mCharacters) {
 		if (i->getName() == pTargetName) {
 			i->getConnection()->sendTell(pSenderName, pMessage);
@@ -513,7 +513,7 @@ void Zone::getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter) {
 	pMatches.insert(pMatches.begin(), mCharacters.begin(), mCharacters.end());
 }
 
-void Zone::notifyCharacterGroupInvite(Character* pCharacter, const std::string pToCharacterName) {
+void Zone::notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName) {
 	// Search our Zone first.
 	Character* toCharacter = findCharacter(pToCharacterName);
 	if (toCharacter) {
@@ -534,12 +534,12 @@ void Zone::notifyCharacterGroupInvite(Character* pCharacter, const std::string p
 	}
 	
 	// Player was not found (as per Live).
-	std::stringstream ss;
+	StringStream ss;
 	ss << "Player " << pToCharacterName << " was not found.";
 	pCharacter->getConnection()->sendMessage(MessageType::Red, ss.str());
 }
 
-Character* Zone::findCharacter(const std::string pCharacterName) {
+Character* Zone::findCharacter(const String pCharacterName) {
 	for (auto i : mCharacters) {
 		if (i->getName() == pCharacterName)
 			return i;
@@ -548,7 +548,7 @@ Character* Zone::findCharacter(const std::string pCharacterName) {
 	return nullptr;
 }
 
-Character* Zone::_findCharacter(const std::string& pCharacterName, bool pIncludeZoning) {
+Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZoning) {
 	// Search locally first.
 	Character* character = findCharacter(pCharacterName);
 	if (character) return character;
@@ -558,7 +558,7 @@ Character* Zone::_findCharacter(const std::string& pCharacterName, bool pInclude
 }
 
 
-void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string pToCharacterName) {
+void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName) {
 	// Search our Zone first.
 	Character* toCharacter = findCharacter(pToCharacterName);
 	if (toCharacter) {
@@ -573,12 +573,12 @@ void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, std::string p
 	}
 }
 
-void Zone::notifyCharacterDeclineGroupInvite(Character* pCharacter, std::string pToCharacterName)
+void Zone::notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName)
 {
 	
 }
 
-void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string& pRemoveCharacterName) {
+void Zone::notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName) {
 	Character* removeCharacter = _findCharacter(pRemoveCharacterName); // TODO: Disbanding zoning characters?
 	if (!removeCharacter) {
 		Log::error("[Zone] Attempting to remove Character from group that does not exist.");
@@ -588,7 +588,7 @@ void Zone::notifyCharacterGroupDisband(Character* pCharacter, const std::string&
 	mGroupManager->removeMemberRequest(pCharacter, removeCharacter);
 }
 
-void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMessage) {
+void Zone::notifyCharacterChatGroup(Character* pCharacter, const String pMessage) {
 	// Check: Character has a group.
 	if (pCharacter->hasGroup()) {
 		mGroupManager->handleGroupMessage(pCharacter, pMessage);
@@ -596,11 +596,11 @@ void Zone::notifyCharacterChatGroup(Character* pCharacter, const std::string pMe
 	}
 
 	// Log: De-sync or hacker
-	std::stringstream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
+	StringStream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
 	Log::error(ss.str());
 }
 
-void Zone::notifyCharacterMakeLeaderRequest(Character* pCharacter, std::string pNewLeaderName) {
+void Zone::notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName) {
 	Character* newLeader = findCharacter(pNewLeaderName);
 	if (newLeader) {
 		mGroupManager->handleMakeLeaderRequest(pCharacter, newLeader);
@@ -635,7 +635,7 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 	notifyCharacterLinkDead(pCharacter);
 }
 
-void Zone::notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName) {
+void Zone::notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName) {
 
 }
 
@@ -645,6 +645,6 @@ void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint
 	mZoneManager->registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
 }
 
-Character* Zone::getZoningCharacter(std::string pCharacterName) {
+Character* Zone::getZoningCharacter(String pCharacterName) {
 	return mZoneManager->getZoningCharacter(pCharacterName);
 }

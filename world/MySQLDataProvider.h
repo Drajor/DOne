@@ -1,8 +1,7 @@
 #pragma once
 
+#include "Constants.h"
 #include "DataProvider.h"
-#include <list>
-#include <sstream>
 
 struct AccountData;
 struct CharacterSelect_Struct;
@@ -19,20 +18,20 @@ public:
 	void update();
 
 	bool getAccounts(std::list<AccountData*>& pAccounts);
-	bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
+	bool createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName);
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
-	bool isCharacterNameUnique(std::string pCharacterName);
-	bool deleteCharacter(std::string pCharacterName);
-	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
-	bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName);
+	bool isCharacterNameUnique(String pCharacterName);
+	bool deleteCharacter(String pCharacterName);
+	bool createCharacter(uint32 pWorldAccountID, String pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool checkOwnership(uint32 pWorldAccountID, String pCharacterName);
 
-	bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool loadCharacter(String pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 	bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
-	uint32 _getCharacterID(std::string pCharacterName);
+	uint32 _getCharacterID(String pCharacterName);
 	void copyProfile(PlayerProfile_Struct* pProfileTo, PlayerProfile_Struct* pProfileFrom);
 	
 	Timer* mKeepAliveTimer;
 	DatabaseConnection* mDatabaseConnection;
-	std::stringstream mStringStream;
+	StringStream mStringStream;
 };

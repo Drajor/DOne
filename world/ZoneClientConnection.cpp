@@ -286,7 +286,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleZoneChange(pPacket);
 		break;
 	default:
-		std::stringstream ss;
+		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
 		Utility::print(ss.str());
 		break;
@@ -313,7 +313,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	}
 
 	auto payload = reinterpret_cast<ClientZoneEntry_Struct*>(pPacket->pBuffer);
-	std::string characterName = Utility::safeString(payload->char_name, 64);
+	String characterName = Utility::safeString(payload->char_name, 64);
 
 	// Check that this Zone is expecting this client.
 	if (!mZone->checkAuthentication(characterName)) {
@@ -651,7 +651,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		case SpawnAppearanceAnimation::Death:
 			break;
 		default:
-			std::stringstream ss;
+			StringStream ss;
 			ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes::Animation parameter : " << actionParameter;
 			Log::info(ss.str());
 			break;
@@ -711,7 +711,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	case SpawnAppearanceType::Light:
 		break;
 	default:
-		std::stringstream ss;
+		StringStream ss;
 		ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes : " << actionType;
 		Log::error(ss.str());
 		break;
@@ -737,9 +737,9 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	static const auto MAX_MESSAGE_SIZE = 513;
 	static const auto MAX_SENDER_SIZE = 64;
 	static const auto MAX_TARGET_SIZE = 64;
-	const std::string message = Utility::safeString(payload->message, MAX_MESSAGE_SIZE);
-	const std::string senderName = Utility::safeString(payload->sender, MAX_SENDER_SIZE);
-	const std::string targetName = Utility::safeString(payload->targetname, MAX_TARGET_SIZE);
+	const String message = Utility::safeString(payload->message, MAX_MESSAGE_SIZE);
+	const String senderName = Utility::safeString(payload->sender, MAX_SENDER_SIZE);
+	const String targetName = Utility::safeString(payload->targetname, MAX_TARGET_SIZE);
 	const uint32 channel = payload->chan_num;
 	
 	switch (channel) {
@@ -783,7 +783,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		mZone->notifyCharacterEmote(mCharacter, message);
 		break;
 	default:
-		std::stringstream ss;
+		StringStream ss;
 		ss << "[Zone Client Connection] " << __FUNCTION__ << " Got unexpected channel number: " << channel;
 		Log::error(ss.str());
 		break;
@@ -831,7 +831,7 @@ header[0]
 header[1]
 */
 
-void ZoneClientConnection::sendMessage(MessageType pType, std::string pMessage) {
+void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
 	ERROR_CONDITION(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
@@ -969,11 +969,11 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, std::string pParameter0, std::string pParameter1, std::string pParameter2, std::string pParameter3, std::string pParameter4, std::string pParameter5, std::string pParameter6, std::string pParameter7, std::string pParameter8, std::string pParameter9) {
+void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
 	ERROR_CONDITION(mConnected);
 
 	int packetSize = 0;
-	std::string message;
+	String message;
 
 	if (pParameter0.length() != 0) packetSize += pParameter0.length() + 1;
 	if (pParameter1.length() != 0) packetSize += pParameter1.length() + 1;
@@ -1011,7 +1011,7 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 
 	// Check payload size calculation.
 	if (dynamicStructure.getBytesWritten() != packetSize) {
-		std::stringstream ss;
+		StringStream ss;
 		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
 		Log::error(ss.str());
 	}
@@ -1129,7 +1129,7 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 
 	static const unsigned int MAX_EMOTE_SIZE = 1024;
 	auto payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
-	std::string message = Utility::safeString(payload->message, MAX_EMOTE_SIZE);
+	String message = Utility::safeString(payload->message, MAX_EMOTE_SIZE);
 	mZone->notifyCharacterEmote(mCharacter, message);
 }
 
@@ -1182,7 +1182,7 @@ void ZoneClientConnection::sendLevelGain() {
 
 void ZoneClientConnection::sendLevelLost() {
 	// NOTE: UF Handles this message itself, no need to send.
-	//std::stringstream ss;
+	//StringStream ss;
 	//ss << mCharacter->getLevel();
 	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
 }
@@ -1225,16 +1225,16 @@ void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPack
 void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	ERROR_CONDITION(mConnected);
 
-	static const std::string LINE("---------------------------");
+	static const String LINE("---------------------------");
 	int packetSize = 0;
 	int numResults = pMatches.size();
 
-	std::string FakeGuild = "WooHoo";
-	std::string FakeAccount = "WHAT IS THIS?";
+	String FakeGuild = "WooHoo";
+	String FakeAccount = "WHAT IS THIS?";
 	
 	// The first loop over pMatches is required to calculate the space needed for Character name / guild name.
 	for (auto i : pMatches) {
-		packetSize += i->getName().length() + 1; // + 1 is for the null terminator (std::string::length includes only characters).
+		packetSize += i->getName().length() + 1; // + 1 is for the null terminator (String::length includes only characters).
 		if (i->getGuildID() != 0xFFFFFFFF) { // TODO: Remove this hex
 			// TODO: When Guilds.
 		}
@@ -1258,7 +1258,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	payload->unknown56 = numResults;
 	payload->playercount = numResults;
 
-	std::stringstream ss;
+	StringStream ss;
 	ss << "Size WhoAllReturnStruct= " << sizeof(WhoAllReturnStruct);
 	Log::error(ss.str());
 	ss.str("");
@@ -1357,7 +1357,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 
 	// Check payload size calculation.
 	if (dynamicStructure.getBytesWritten() != packetSize) {
-		std::stringstream ss;
+		StringStream ss;
 		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
 		Log::error(ss.str());
 	}
@@ -1366,7 +1366,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
+void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	ERROR_CONDITION(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
@@ -1381,17 +1381,17 @@ void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const st
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendTell(const std::string& pSenderName, const std::string& pMessage) {
+void ZoneClientConnection::sendTell(const String& pSenderName, const String& pMessage) {
 	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_TELL, pSenderName, pMessage);
 }
 
-void ZoneClientConnection::sendGroupMessage(const std::string& pSenderName, const std::string& pMessage) {
+void ZoneClientConnection::sendGroupMessage(const String& pSenderName, const String& pMessage) {
 	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
 }
 
-void ZoneClientConnection::sendGuildMessage(const std::string& pSenderName, const std::string& pMessage) {
+void ZoneClientConnection::sendGuildMessage(const String& pSenderName, const String& pMessage) {
 	ERROR_CONDITION(mConnected);
 	sendChannelMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
 }
@@ -1404,8 +1404,8 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
-	const std::string inviterName = Utility::safeString(payload->inviter_name, 64);
-	const std::string inviteeName = Utility::safeString(payload->invitee_name, 64);
+	const String inviterName = Utility::safeString(payload->inviter_name, 64);
+	const String inviteeName = Utility::safeString(payload->invitee_name, 64);
 
 	// Check: Inviter is this Character
 	if (inviterName != mCharacter->getName()) {
@@ -1419,7 +1419,7 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 	mZone->notifyCharacterGroupInvite(mCharacter, inviteeName);
 }
 
-void ZoneClientConnection::sendGroupInvite(const std::string pFromCharacterName) {
+void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
 	ERROR_CONDITION(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
@@ -1440,8 +1440,8 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
-	std::string inviterName = Utility::safeString(payload->name1, 64); // Character who invited.
-	std::string inviteeName = Utility::safeString(payload->name2, 64); // Character accepting invite.
+	String inviterName = Utility::safeString(payload->name1, 64); // Character who invited.
+	String inviteeName = Utility::safeString(payload->name2, 64); // Character accepting invite.
 
 	// TODO: Sanity check?
 
@@ -1456,8 +1456,8 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
-	std::string inviteeName = Utility::safeString(payload->name1, 64);
-	std::string inviterName = Utility::safeString(payload->name2, 64);
+	String inviteeName = Utility::safeString(payload->name1, 64);
+	String inviterName = Utility::safeString(payload->name2, 64);
 	
 	// TODO: Sanity check?
 
@@ -1490,13 +1490,13 @@ void ZoneClientConnection::sendGroupCreate() {
 
 	// Check payload size calculation.
 	if (dynamicStructure.getBytesWritten() != packetSize) {
-		std::stringstream ss;
+		StringStream ss;
 		ss << "[Zone Client Connection] Wrong amount of data written in sendGroupCreate. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
 		Log::error(ss.str());
 	}
 }
 
-void ZoneClientConnection::sendGroupLeaderChange(const std::string pCharacterName) {
+void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
 	// Configure.
 	auto payload = reinterpret_cast<GroupLeaderChange_Struct*>(mGroupLeaderChangePacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1514,7 +1514,7 @@ void ZoneClientConnection::sendGroupAcknowledge() {
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendGroupFollow(const std::string& pLeaderCharacterName, const std::string& pMemberCharacterName) {
+void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName) {
 	auto outPacket = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(outPacket->pBuffer);
 	strcpy(payload->name1, pLeaderCharacterName.c_str());
@@ -1524,7 +1524,7 @@ void ZoneClientConnection::sendGroupFollow(const std::string& pLeaderCharacterNa
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendGroupJoin(const std::string& pCharacterName) {
+void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
 	// Configure.
 	auto payload = reinterpret_cast<GroupJoin_Struct*>(mGroupJoinPacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1536,7 +1536,7 @@ void ZoneClientConnection::sendGroupJoin(const std::string& pCharacterName) {
 	mStreamInterface->QueuePacket(mGroupJoinPacket);
 }
 
-void ZoneClientConnection::sendGroupUpdate(std::list<std::string>& pGroupMemberNames) {
+void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
 	// Configure.
 	auto payload = reinterpret_cast<GroupUpdate2_Struct*>(mGroupUpdateMembersPacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1560,8 +1560,8 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 	
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
-	std::string removeCharacterName = Utility::safeString(payload->name1, 64);
-	std::string myCharacterName = Utility::safeString(payload->name2, 64);
+	String removeCharacterName = Utility::safeString(payload->name1, 64);
+	String myCharacterName = Utility::safeString(payload->name2, 64);
 
 	// Check: This Character has a group.
 	if (!mCharacter->hasGroup()) {
@@ -1578,7 +1578,7 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 	mZone->notifyCharacterGroupDisband(mCharacter, removeCharacterName);
 }
 
-void ZoneClientConnection::sendGroupLeave(const std::string& pLeavingCharacterName) {
+void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
 	// Configure.
 	auto payload = reinterpret_cast<GroupJoin_Struct*>(mGroupLeavePacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1609,8 +1609,8 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
 
-	std::string currentLeader = Utility::safeString(payload->CurrentLeader, 64);
-	std::string newLeader = Utility::safeString(payload->NewLeader, 64);
+	String currentLeader = Utility::safeString(payload->CurrentLeader, 64);
+	String newLeader = Utility::safeString(payload->NewLeader, 64);
 
 	// Check: Leader names match.
 	if (currentLeader != mCharacter->getName()) {
@@ -1675,7 +1675,7 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 	ARG_PTR_CHECK(pPacket);
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 	
-	const std::string guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), 64);
+	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), 64);
 
 	// Check: Minimum length of guild name.
 	if (guildName.length() < MIN_GUILD_NAME_LENGTH) { return; }

@@ -14,7 +14,7 @@ class DataStore;
 class CommandHandler;
 struct NewSpawn_Struct;
 
-static const std::string EmptyString = std::string();
+static const String EmptyString = String();
 
 class ZoneClientConnection {
 public:
@@ -47,9 +47,9 @@ public:
 	void dropConnection();
 
 	void sendPosition();
-	void sendMessage(MessageType pType, std::string pMessage);
+	void sendMessage(MessageType pType, String pMessage);
 	void sendSimpleMessage(MessageType pType, StringID pStringID);
-	void sendSimpleMessage(MessageType pType, StringID pStringID, std::string pParameter0, std::string pParameter1 = EmptyString, std::string pParameter2 = EmptyString, std::string pParameter3 = EmptyString, std::string pParameter4 = EmptyString, std::string pParameter5 = EmptyString, std::string pParameter6 = EmptyString, std::string pParameter7 = EmptyString, std::string pParameter8 = EmptyString, std::string pParameter9 = EmptyString);
+	void sendSimpleMessage(MessageType pType, StringID pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
 
@@ -63,20 +63,20 @@ public:
 	void sendStats();
 	void sendWhoResults(std::list<Character*>& pMatches);
 
-	void sendChannelMessage(const ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage);
-	void sendTell(const std::string& pSenderName, const std::string& pMessage);
-	void sendGroupMessage(const std::string& pSenderName, const std::string& pMessage);
-	void sendGuildMessage(const std::string& pSenderName, const std::string& pMessage);
+	void sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage);
+	void sendTell(const String& pSenderName, const String& pMessage);
+	void sendGroupMessage(const String& pSenderName, const String& pMessage);
+	void sendGuildMessage(const String& pSenderName, const String& pMessage);
 
-	void sendGroupInvite(const std::string pFromCharacterName);
+	void sendGroupInvite(const String pFromCharacterName);
 	void sendGroupCreate();
-	void sendGroupLeaderChange(const std::string pCharacterName);
+	void sendGroupLeaderChange(const String pCharacterName);
 	void sendGroupAcknowledge();
-	void sendGroupFollow(const std::string& pLeaderCharacterName, const std::string& pMemberCharacterName);
-	void sendGroupJoin(const std::string& pCharacterName);
-	void sendGroupUpdate(std::list<std::string>& pGroupMemberNames);
+	void sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName);
+	void sendGroupJoin(const String& pCharacterName);
+	void sendGroupUpdate(std::list<String>& pGroupMemberNames);
 	void sendGroupDisband();
-	void sendGroupLeave(const std::string& pLeavingCharacterName);
+	void sendGroupLeave(const String& pLeavingCharacterName);
 
 	void sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID);
 	void sendZoneChange(uint32 pZoneID, uint16 pInstanceID);

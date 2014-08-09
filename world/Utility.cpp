@@ -3,28 +3,28 @@
 #include "Zone.h"
 #include <iostream>
 
-void Utility::print(std::string pMessage)
+void Utility::print(String pMessage)
 {
 	std::cout << pMessage << std::endl;
 }
 
-void Utility::criticalError(std::string pMessage)
+void Utility::criticalError(String pMessage)
 {
 	print("[Critical Error] " + pMessage);
 }
 
-std::string Utility::characterLogDetails(Character* pCharacter) {
+String Utility::characterLogDetails(Character* pCharacter) {
 	if (pCharacter == nullptr) return "[NULL CHARACTER POINTER]";
 
-	std::stringstream ss;
+	StringStream ss;
 	ss << "[Character(Name: " << pCharacter->getName() << /*" Account ID: " << pCharacter->getWorldAccountID() <<*/ ")]";
 	return ss.str();
 }
 
-std::string Utility::zoneLogDetails(Zone* pZone) {
+String Utility::zoneLogDetails(Zone* pZone) {
 	if (pZone == nullptr) return "[NULL ZONE POINTER]";
 
-	std::stringstream ss;
+	StringStream ss;
 	ss << "[Zone(Name: " << pZone->getLongName() << " ID:" << static_cast<std::uint16_t>(pZone->getID()) << " InstanceID:" << pZone->getInstanceID() << ")]";
 	return ss.str();
 }

@@ -258,7 +258,7 @@ bool ZoneData::initialise() {
 		mZoneInformation.push_back(zoneInformation);
 		element = element->NextSiblingElement();
 	}
-	std::stringstream ss; ss << "[Zone Data] Loaded data for " << mZoneInformation.size() << " Zones.";
+	StringStream ss; ss << "[Zone Data] Loaded data for " << mZoneInformation.size() << " Zones.";
 	Log::info(ss.str());
 	return true;
 }
@@ -275,7 +275,7 @@ ZoneData::ZoneInformation* ZoneData::findZoneInformation(ZoneID pZoneID) {
 String ZoneData::getLongName(ZoneID pZoneID) {
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
-		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
 		Log::error(ss.str());
 		return "";
 	}
@@ -285,7 +285,7 @@ String ZoneData::getLongName(ZoneID pZoneID) {
 String ZoneData::getShortName(ZoneID pZoneID){
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
-		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
 		Log::error(ss.str());
 		return "";
 	}
@@ -295,7 +295,7 @@ String ZoneData::getShortName(ZoneID pZoneID){
 std::uint32_t ZoneData::getLongNameStringID(ZoneID pZoneID) {
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
-		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
 		Log::error(ss.str());
 		return 0;
 	}

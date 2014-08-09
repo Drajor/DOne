@@ -1,7 +1,6 @@
 #pragma once
 
-#include <list>
-#include <string>
+#include "Constants.h"
 
 class Character;
 
@@ -11,12 +10,12 @@ class Group {
 	Group(Character* pLeader, Character* pMember);
 	~Group() {};
 
-	void getMemberNames(std::list<std::string>& pMemberNames, std::string pExcludeCharacterName);
+	void getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName);
 	bool isMember(Character* pCharacter);
 	void addMember(Character* pCharacter);
 	void removeMember(Character* pCharacter);
 	bool hasLeader() { return mLeader != nullptr; }
-	void sendMemberLeaveMessage(std::string pLeaverName);
+	void sendMemberLeaveMessage(String pLeaverName);
 	void sendGroupLeaderChange();
 	bool needsDisbanding() { return mMembers.size() == 1; }
 
@@ -30,13 +29,13 @@ public:
 
 	// pCharacter is making the request to remove pRemoveCharacter.
 	void removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter);
-	void handleGroupMessage(Character* pCharacter, const std::string pMessage);
+	void handleGroupMessage(Character* pCharacter, const String pMessage);
 	void handleCharacterLinkDead(Character* pCharacter);
 	void handleCharacterCamped(Character* pCharacter);
 	void handleMakeLeaderRequest(Character* pCharacter, Character* pNewLeader);
 private:
 
-	void _sendMessage(Group* pGroup, std::string pSenderName, std::string pMessage);
+	void _sendMessage(Group* pGroup, String pSenderName, String pMessage);
 	void _disbandGroup(Group* pGroup);
 	void _postMemberRemoval(Group* pGroup);
 	

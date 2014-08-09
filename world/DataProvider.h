@@ -15,11 +15,11 @@ public:
 	virtual void update() { };
 	virtual bool getAccounts(std::list<AccountData*>& pAccounts) = 0;
 	virtual bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) = 0;
-	virtual bool isCharacterNameUnique(std::string pCharacterName) = 0;
-	virtual bool deleteCharacter(std::string pCharacterName) = 0;
-	virtual bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
-	virtual bool checkOwnership(uint32 pWorldAccountID, std::string pCharacterName) = 0;
-	virtual bool loadCharacter(std::string pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
-	virtual bool createAccount(uint32 pLoginServerAccountID, std::string pLoginServerAccountName) = 0;
+	virtual bool isCharacterNameUnique(String pCharacterName) = 0;
+	virtual bool deleteCharacter(String pCharacterName) = 0;
+	virtual bool createCharacter(uint32 pWorldAccountID, String pCharacterName, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
+	virtual bool checkOwnership(uint32 pWorldAccountID, String pCharacterName) = 0;
+	virtual bool loadCharacter(String pCharacterName, uint32& pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
+	virtual bool createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName) = 0;
 	virtual bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) = 0;
 };

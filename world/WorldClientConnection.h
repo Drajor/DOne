@@ -41,13 +41,13 @@ public:
 	uint16 getPort() { return mPort; }
 	uint32 getWorldAccountID() { return mWorldAccountID; }
 	uint32 getLoginServerAccountID() { return mLoginServerAccountID; }
-	std::string getLoginServerKey() { return mLoginServerKey; }
+	String getLoginServerKey() { return mLoginServerKey; }
 	uint32 getCharacterID() { return mCharacterID; }
 
 	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; mAuthentication.mWorldAccountID = pWorldAccountID; }
 	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; mAuthentication.mLoginServerAccountID = pLoginServerAccountID; }
-	void setLoginServerKey(std::string pLoginServerKey) { mLoginServerKey = pLoginServerKey; mAuthentication.mKey = pLoginServerKey; }
-	void setLoginServerAccountName(std::string pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; mAuthentication.mLoginServerAccountName = pLoginServerAccountName; }
+	void setLoginServerKey(String pLoginServerKey) { mLoginServerKey = pLoginServerKey; mAuthentication.mKey = pLoginServerKey; }
+	void setLoginServerAccountName(String pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; mAuthentication.mLoginServerAccountName = pLoginServerAccountName; }
 	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; } // This method should only ever be called by World::checkAuthentication
 private:
 	
@@ -58,7 +58,7 @@ private:
 	void _sendMembership();
 	void _sendMembershipSettings();
 	void _sendGuildList();
-	void _sendEnterWorld(std::string pCharacterName);
+	void _sendEnterWorld(String pCharacterName);
 	void _sendExpansionInfo();
 	void _sendLogServer();
 	void _sendApproveWorld();
@@ -72,10 +72,10 @@ private:
 	uint32 mIP;
 	uint32 mWorldAccountID;
 	uint32 mLoginServerAccountID;
-	std::string mLoginServerAccountName;
-	std::string mLoginServerKey;
+	String mLoginServerAccountName;
+	String mLoginServerKey;
 	uint32 mCharacterID;
-	std::string mReservedCharacterName;
+	String mReservedCharacterName;
 	bool mConnectionDropped;
 	
 	

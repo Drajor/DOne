@@ -20,11 +20,11 @@ struct CharacterSelect_Struct;
 struct CharCreate_Struct;
 
 struct ZoneTransfer {
-	std::string mCharacterName;
+	String mCharacterName;
 	ZoneID mFromZoneID;
-	uint32 mFromInstanceID;
+	InstanceID mFromInstanceID;
 	ZoneID mToZoneID;
-	uint32 mToInstanceID;
+	InstanceID mToInstanceID;
 };
 
 class World {
@@ -36,10 +36,10 @@ public:
 
 	void addAuthentication(ClientAuthentication& pAuthentication);
 	void removeAuthentication(ClientAuthentication& pAuthentication);
-	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
-	void addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
+	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, String pLoginServerKey);
+	void addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
-	bool ensureAccountExists(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
+	bool ensureAccountExists(uint32 pLoginServerAccountID, String pLoginServerAccountName);
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
@@ -52,22 +52,22 @@ public:
 
 	// Character Select Screen
 	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
-	bool isCharacterNameUnique(std::string pCharacterName);
-	bool isCharacterNameReserved(std::string pCharacterName);
-	void reserveCharacterName(uint32 pWorldAccountID, std::string pCharacterName);
-	bool deleteCharacter(uint32 pWorldAccountID, std::string pCharacterName);
-	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
-	bool isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName);
+	bool isCharacterNameUnique(String pCharacterName);
+	bool isCharacterNameReserved(String pCharacterName);
+	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
+	bool deleteCharacter(uint32 pWorldAccountID, String pCharacterName);
+	bool createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData);
+	bool isWorldEntryAllowed(uint32 pWorldAccountID, String pCharacterName);
 
 	uint16 getZonePort(ZoneID pZoneID, uint16 pInstanceID = 0);
 	
-	bool getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& pZoneTransfer);
+	bool getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZoneTransfer);
 	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
-	void removeZoneTransfer(std::string& pCharacterName);
+	void removeZoneTransfer(String& pCharacterName);
 private:
 	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
-	std::map<uint32, std::string> mReservedCharacterNames;
+	std::map<uint32, String> mReservedCharacterNames;
 	std::list<ZoneTransfer> mZoneTransfers;
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();

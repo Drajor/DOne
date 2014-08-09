@@ -19,9 +19,9 @@ struct WhoFilter;
 
 struct ZoneSearchEntry {
 	ZoneSearchEntry() : mName(""), mID(ZoneIDs::NoZone), mInstanceID(0), mNumCharacters(0) {};
-	std::string mName;
+	String mName;
 	ZoneID mID;
-	std::uint32_t mInstanceID;
+	InstanceID mInstanceID;
 	std::uint32_t mNumCharacters;
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;
@@ -32,18 +32,18 @@ public:
 	~ZoneManager();
 	ZoneSearchResult getAllZones();
 
-	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
+	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	
 	void registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
-	Character* getZoningCharacter(std::string pCharacterName);
+	Character* getZoningCharacter(String pCharacterName);
 
 	void initialise();
 	void update();
 	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
-	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
+	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void notifyCharacterZoneOut(Character* pCharacter);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
-	Character* findCharacter(const std::string pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
+	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:
 	Zone* _makeZone(ZoneID pZoneID, uint32 pInstanceID = 0);
 	uint32 _getNextZonePort();

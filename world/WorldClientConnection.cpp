@@ -90,7 +90,7 @@ void WorldClientConnection::_sendLogServer() {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendEnterWorld(std::string pCharacterName) {
+void WorldClientConnection::_sendEnterWorld(String pCharacterName) {
 	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
 	strcpy(reinterpret_cast<char*>(outPacket->pBuffer), pCharacterName.c_str());
 	_queuePacket(outPacket);
@@ -429,7 +429,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 
 	auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 	bool valid = true;
-	std::string characterName = char_name;
+	String characterName = char_name;
 	const int nameLength = characterName.length();
 	// Check length (4 >= x <= 15) 
 	if (nameLength < 4 || nameLength > 15) {
@@ -654,11 +654,11 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	// Note: Enter Tutorial and Return Home are ignored at the moment.
 
 	auto payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
-	std::string characterName = Utility::safeString(payload->name, 64);
+	String characterName = Utility::safeString(payload->name, 64);
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
 	if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
-		std::stringstream ss; ss << "[World Client Connection] World refused entry for " << characterName << ", dropping connection.";
+		StringStream ss; ss << "[World Client Connection] World refused entry for " << characterName << ", dropping connection.";
 		Log::error(ss.str());
 		dropConnection();
 		return false;
@@ -679,7 +679,7 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		}
 		// Failed to find ZoneTransfer data for character.
 		else {
-			std::stringstream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
+			StringStream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
 			Log::error(ss.str());
 			dropConnection();
 			return false;
@@ -701,9 +701,9 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	static const auto MAXIMUM_NAME_SIZE = 64;
 	PACKET_SIZE_CHECK_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
 
-	std::string characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
+	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
 	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
-		std::stringstream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
+		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();
 		return true;
