@@ -304,3 +304,14 @@ uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
 	}
 	return zoneInformation->mLongNameStringID;
 }
+
+ZoneDataSearchResults ZoneData::searchByName(std::string pName) {
+	ZoneDataSearchResults results;
+	for (auto i : mZoneInformation) {
+		if (i->mShortName.find(pName) != std::string::npos || i->mLongName.find(pName) != std::string::npos) {
+			results.push_back({i->mID, i->mShortName, i->mLongName});
+		}
+	}
+
+	return results;
+}

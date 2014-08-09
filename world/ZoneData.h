@@ -27,6 +27,14 @@ struct ZonePoint {
 	std::uint16_t mDestinationInstanceID;
 };
 
+struct ZoneDataSearchEntry {
+	ZoneID mID;
+	std::string mShortName;
+	std::string mLongName;
+};
+
+typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
+
 class ZoneData {
 public:
 	static ZoneData& getInstance() {
@@ -39,6 +47,9 @@ public:
 	std::string getLongName(ZoneID pZoneID);
 	std::string getShortName(ZoneID pZoneID);
 	uint32 getLongNameStringID(ZoneID pZoneID);
+
+	ZoneDataSearchResults searchByName(std::string pName);
+
 private:
 	struct ZoneInformation {
 		ZoneInformation() : mID(0), mLongNameStringID(0), mLongName(""), mShortName(""), mSafeX(0.0f), mSafeY(0.0f), mSafeZ(0.0f) {};

@@ -1,6 +1,7 @@
 #include "CommandHandler.h"
 #include "Character.h"
 #include "Zone.h"
+#include "ZoneData.h"
 #include "ZoneManager.h"
 #include "Utility.h"
 #include "LogSystem.h"
@@ -234,6 +235,28 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class ZoneSearchCommand : public Command {
+public:
+	ZoneSearchCommand(std::uint8_t pMinimumStatus, std::list<std::string> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #zs <text>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameters
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return;
+		}
+
+		ZoneDataSearchResults results = ZoneData::getInstance().searchByName(pParameters[0]);
+		pCharacter->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
+		for (auto i : results){
+			pCharacter->message(MessageType::Yellow, "[Zone " + std::to_string(i.mID) + "] " + i.mShortName + " | " + i.mLongName );
+		}
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -256,6 +279,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new WarpCommand(100, { "warp", "goto", "go" }));
 	mCommands.push_back(new GMCommand(100, { "gm" }));
 	mCommands.push_back(new ZoneListCommand(100, { "zonelist", "zlist" }));
+	mCommands.push_back(new ZoneSearchCommand(100, { "zonesearch", "zs" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));
