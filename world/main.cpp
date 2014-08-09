@@ -47,6 +47,7 @@
 #endif
 
 #include "World.h"
+#include "ZoneData.h"
 #include "DataStore.h"
 #include "MySQLDataProvider.h"
 #include "LogSystem.h"
@@ -58,6 +59,13 @@ int main(int argc, char** argv) {
 	Log::status("World starting!");
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
+
+	Log::info("Zone Data : Initialising");
+	if (!ZoneData::getInstance().initialise()){
+		Log::error("Zone Data : Failed to initialise");
+		return 1;
+	}
+	Log::info("Zone Data : Initialised");
 
 	Log::info("Data Provider : Initialising");
 	MySQLDataProvider* dataProvider = new MySQLDataProvider();

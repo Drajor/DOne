@@ -15,7 +15,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID) :
+Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, uint32 pInstanceID) :
 	mWorld(pWorld),
 	mZoneManager(pZoneManager),
 	mGroupManager(pGroupManager),
@@ -52,9 +52,9 @@ bool Zone::initialise() {
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
-	mLongNameStringID = ZoneData::getLongNameStringID(mID);
-	mLongName = ZoneData::getLongName(mID);
-	mShortName = ZoneData::getShortName(mID);
+	mLongNameStringID = ZoneData::getInstance().getLongNameStringID(mID);
+	mLongName = ZoneData::getInstance().getLongName(mID);
+	mShortName = ZoneData::getInstance().getShortName(mID);
 
 	mInitialised = true;
 	return true;
@@ -639,7 +639,7 @@ void Zone::notifyCharacterGuildCreate(Character* pCharacter, const std::string p
 
 }
 
-void Zone::notifyCharacterZoneChange(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID) {
+void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
 	// TODO: Are we expecting this character to zone out?
 
 	mZoneManager->registerZoneTransfer(pCharacter, pZoneID, pInstanceID);

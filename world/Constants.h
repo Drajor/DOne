@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <string>
 
+typedef std::uint16_t ZoneID;
+
 enum PlayableRaceIDs {
 	Human = 1,
 	Barbarian = 2,
@@ -46,7 +48,8 @@ enum PlayerDeityIDs {
 	Agnostic = 396
 };
 
-enum ZoneIDs {
+enum ZoneIDs : ZoneID {
+	NoZone = 0,
 	SouthQeynos = 1,
 	NorthQeynos = 2,
 	TheSurefallGlade = 3,
@@ -54,6 +57,7 @@ enum ZoneIDs {
 	HighpassHold = 5,
 	HighKeep = 6
 };
+//std::uint16_t ZoneIDToType(ZoneID pZoneID) { return static_cast<std::uint16_t>(pZoneID); }
 
 enum class Statistic : std::uint32_t {
 	Strength,

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/types.h"
+#include "Constants.h"
 #include "ClientAuthentication.h"
 #include <list>
 #include <map>
@@ -20,9 +21,9 @@ struct CharCreate_Struct;
 
 struct ZoneTransfer {
 	std::string mCharacterName;
-	uint32 mFromZoneID;
+	ZoneID mFromZoneID;
 	uint32 mFromInstanceID;
-	uint32 mToZoneID;
+	ZoneID mToZoneID;
 	uint32 mToInstanceID;
 };
 
@@ -36,7 +37,7 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication);
 	void removeAuthentication(ClientAuthentication& pAuthentication);
 	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, std::string pLoginServerKey);
-	void addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID = 0);
+	void addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
 	bool ensureAccountExists(uint32 pLoginServerAccountID, std::string pLoginServerAccountName);
 
@@ -58,7 +59,7 @@ public:
 	bool createCharacter(uint32 pWorldAccountID, std::string pCharacterName, CharCreate_Struct* pData);
 	bool isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterName);
 
-	uint16 getZonePort(uint16 pZoneID, uint16 pInstanceID = 0);
+	uint16 getZonePort(ZoneID pZoneID, uint16 pInstanceID = 0);
 	
 	bool getCharacterZoneTransfer(std::string& pCharacterName, ZoneTransfer& pZoneTransfer);
 	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }

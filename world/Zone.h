@@ -25,7 +25,7 @@ class RaidManager;
 
 class Zone {
 public:
-	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, uint32 pZoneID, uint32 pInstanceID = 0);
+	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, uint32 pInstanceID = 0);
 	~Zone();
 	
 	ZoneManager* getZoneManager() { return mZoneManager; }
@@ -34,6 +34,10 @@ public:
 	std::string getLongName() { return mLongName; }
 	std::string getShortName() { return mShortName; }
 	uint32 getLongNameStringID() { return mLongNameStringID; }
+	float getGravity() { return 0.4f; }
+	float getMinimumZ() { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
+	std::uint8_t getZoneType() { return 255; } // Unknown.
+
 	std::uint32_t getNumCharacters() { return mCharacters.size(); }
 
 	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName);
@@ -50,7 +54,7 @@ public:
 
 	void _updatePreConnections();
 
-	uint32 getID() { return mID; }
+	ZoneID getID() { return mID; }
 	uint32 getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
 	Character* findCharacter(const std::string pCharacterName);
@@ -87,7 +91,7 @@ public:
 	// Guild
 	void notifyCharacterGuildCreate(Character* pCharacter, const std::string pGuildName);
 
-	void notifyCharacterZoneChange(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID);
+	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
 	Character* getZoningCharacter(std::string pCharacterName);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
@@ -117,13 +121,16 @@ private:
 	
 
 
+
+
+
 	std::map<std::string, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID;
 	std::string mLongName;
 	std::string mShortName;
 	uint16 mNextSpawnID;
-	uint32 mID; // Zone ID
+	ZoneID mID;
 	uint32 mInstanceID;
 	uint32 mPort;
 

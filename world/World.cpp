@@ -352,11 +352,11 @@ bool World::isWorldEntryAllowed(uint32 pWorldAccountID, std::string pCharacterNa
 	return mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
 }
 
-uint16 World::getZonePort(uint16 pZoneID, uint16 pInstanceID) {
+uint16 World::getZonePort(ZoneID pZoneID, uint16 pInstanceID) {
 	return mZoneManager->getZonePort(pZoneID, pInstanceID);
 }
 
-void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID) {
+void World::addZoneAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
 	mZoneManager->addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
 }
 

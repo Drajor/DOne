@@ -65,12 +65,12 @@ namespace Utility {
 			mPointer += pBytes;
 			mWritten += pBytes; // I need to think about this more.
 		}
-		int getSize() { return mSize; }
-		int getBytesWritten() { return mWritten; }
+		std::size_t getSize() { return mSize; }
+		std::size_t getBytesWritten() { return mWritten; }
 
 	private:
-		int mSize; // maximum number of bytes to be written.
-		int mWritten; // number of bytes written.
+		std::size_t mSize; // maximum number of bytes to be written.
+		std::size_t mWritten; // number of bytes written.
 		char* mStart; // start memory location.
 		char* mPointer; // current location in memory.
 	};
@@ -80,5 +80,39 @@ namespace Utility {
 	bool containerEntryDelete(T pValue) {
 		delete pValue;
 		return true;
+	}
+
+	static bool stofSafe(float& pValue, std::string& pString) {
+		try {
+			pValue = std::stof(pString);
+			return true;
+		}
+		catch (...) {
+			return false;
+		}
+		return false;
+	}
+
+	static bool stoulSafe(uint32& pValue, std::string& pString) {
+		try {
+			pValue = std::stoul(pString);
+			return true;
+		}
+		catch (...) {
+			return false;
+		}
+		return false;
+	}
+
+	// String To Unsigned 16
+	static bool stou16Safe(std::uint16_t& pValue, std::string pString) {
+		try {
+			pValue = static_cast<std::uint16_t>(std::stoul(pString));
+			return true;
+		}
+		catch (...) {
+			return false;
+		}
+		return false;
 	}
 }

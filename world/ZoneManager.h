@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Constants.h"
+
 #include "ClientAuthentication.h"
 #include <list>
 #include "../common/types.h"
@@ -16,9 +18,9 @@ class Character;
 struct WhoFilter;
 
 struct ZoneSearchEntry {
-	ZoneSearchEntry() : mName(""), mID(0), mInstanceID(0), mNumCharacters(0) {};
+	ZoneSearchEntry() : mName(""), mID(ZoneIDs::NoZone), mInstanceID(0), mNumCharacters(0) {};
 	std::string mName;
-	std::uint32_t mID;
+	ZoneID mID;
 	std::uint32_t mInstanceID;
 	std::uint32_t mNumCharacters;
 };
@@ -30,20 +32,20 @@ public:
 	~ZoneManager();
 	ZoneSearchResult getAllZones();
 
-	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID = 0);
+	void addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	
-	void registerZoneTransfer(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID);
+	void registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
 	Character* getZoningCharacter(std::string pCharacterName);
 
 	void initialise();
 	void update();
-	uint16 getZonePort(uint32 pZoneID, uint32 pInstanceID = 0);
+	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
 	void notifyCharacterChatTell(Character* pCharacter, const std::string& pTargetName, const std::string& pMessage);
 	void notifyCharacterZoneOut(Character* pCharacter);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const std::string pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:
-	Zone* _makeZone(uint32 pZoneID, uint32 pInstanceID = 0);
+	Zone* _makeZone(ZoneID pZoneID, uint32 pInstanceID = 0);
 	uint32 _getNextZonePort();
 	
 

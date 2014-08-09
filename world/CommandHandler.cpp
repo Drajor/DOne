@@ -32,28 +32,6 @@ std::vector<std::string> split(const std::string &s, char delim) {
 	return elems;
 }
 
-bool stofSafe(float& pValue, std::string& pString) {
-	try {
-		pValue = std::stof(pString);
-		return true;
-	}
-	catch (...) {
-		return false;
-	}
-	return false;
-}
-
-bool stoulSafe(uint32& pValue, std::string& pString) {
-	try {
-		pValue = std::stoul(pString);
-		return true;
-	}
-	catch (...) {
-		return false;
-	}
-	return false;
-}
-
 /*****************************************************************************************************************************/
 class ZoneCommand : public Command {
 public:
@@ -70,7 +48,7 @@ public:
 
 		uint32 zoneID = 0;
 		uint32 instanceID = 0;
-		if (stoulSafe(zoneID, pParameters[0]) && stoulSafe(instanceID, pParameters[1])) {
+		if (Utility::stoulSafe(zoneID, pParameters[0]) && Utility::stoulSafe(instanceID, pParameters[1])) {
 			pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
 		}
 	}
@@ -93,7 +71,7 @@ public:
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;
-		if (stofSafe(x, pParameters[0]) && stofSafe(y, pParameters[1]) && stofSafe(z, pParameters[2])) {
+		if (Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2])) {
 			pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
 		}
 		else {
@@ -153,7 +131,7 @@ public:
 		}
 
 		uint32 expAdd = 0;
-		if (stoulSafe(expAdd, pParameters[0])) {
+		if (Utility::stoulSafe(expAdd, pParameters[0])) {
 			pCharacter->addExperience(expAdd);
 		}
 	}
@@ -174,7 +152,7 @@ public:
 		}
 
 		uint32 expRemove = 0;
-		if (stoulSafe(expRemove, pParameters[0])) {
+		if (Utility::stoulSafe(expRemove, pParameters[0])) {
 			pCharacter->removeExperience(expRemove);
 		}
 	}
@@ -209,7 +187,7 @@ public:
 		}
 
 		uint32 level = 0;
-		if (stoulSafe(level, pParameters[0])) {
+		if (Utility::stoulSafe(level, pParameters[0])) {
 			pCharacter->setLevel(static_cast<uint8>(level));
 		}
 	}
@@ -233,7 +211,7 @@ public:
 		std::string statName = "unknown";
 		uint32 value = 0;
 		Statistic statistic;
-		if (!stoulSafe(value, pParameters[1])) {
+		if (!Utility::stoulSafe(value, pParameters[1])) {
 			return;
 		}
 
@@ -309,15 +287,10 @@ void CommandHandler::command(Character* pCharacter, std::string pCommandMessage)
 		command->handleCommand(pCharacter, elements);
 	}
 	else {
-		pCharacter->message(MessageType::Yellow, "Unknown Command.");
-		return;
+		// Hack/Test commands can be handled in here.
+		_handleCommand(pCharacter, commandName, elements);
 	}
-
-	// Hack/Test commands can be handled in here.
-	_handleCommand(pCharacter, commandName, elements);
 }
-
-
 
 void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandName, std::vector<std::string> pParameters) {
 
@@ -328,7 +301,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	// #damage <amount>
 	else if (pCommandName == "damage" && pParameters.size() == 1) {
 		unsigned int damage = 0;
-		if (stoulSafe(damage, pParameters[0])) {
+		if (Utility::stoulSafe(damage, pParameters[0])) {
 			pCharacter->damage(damage);
 		}
 	}
@@ -336,7 +309,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 		if (pParameters.size() == 2) {
 			uint32 appType = 0;
 			uint32 appParameter = 0;
-			if (stoulSafe(appType, pParameters[0]) && stoulSafe(appParameter, pParameters[1])) {
+			if (Utility::stoulSafe(appType, pParameters[0]) && Utility::stoulSafe(appParameter, pParameters[1])) {
 				pCharacter->getConnection()->sendAppearance(appType, appParameter);
 			}
 		}
@@ -345,7 +318,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, std::string pCommandN
 	else if (pCommandName == "anim") {
 		if (pParameters.size() == 1) {
 			uint32 animationID = 0;
-			if (stoulSafe(animationID, pParameters[0])) {
+			if (Utility::stoulSafe(animationID, pParameters[0])) {
 				pCharacter->doAnimation(animationID);
 			}
 		}

@@ -232,52 +232,75 @@
 */
 //ZoneInformation ZoneData::mZoneData[1000];
 
-ZoneData::ZoneInformation ZoneData::mZoneData[ZoneData::NUM_ZONES] = {
-	{ 0, 0, "No Zone Long", "nozone", 0.0f, 0.0f, 0.0f },
-	{ 1, 0, "South Qeynos", "qeynos", 0.0f, 0.0f, 0.0f },
-	{ 2, 0, "North Qeynos", "qeynos2", 0.0f, 0.0f, 0.0f },
-	{ 3, 0, "The Surefall Glade", "qrg", 0.0f, 0.0f, 0.0f },
-	{ 4, 0, "The Qeynos Hills", "qeytoqrg", 0.0f, 0.0f, 0.0f },
-	{ 5, 0, "Highpass Hold", "highpass", 0.0f, 0.0f, 0.0f },
-	{ 6, 0, "High Keep", "highkeep", 0.0f, 0.0f, 0.0f },
-};
+#include "../common/tinyxml/tinyxml.h"
 
-bool ZoneData::initialise()
-{
+//ZoneData::ZoneInformation ZoneData::mZoneData[ZoneData::NUM_ZONES] = {
+//	{ ZoneIDs::NoZone, 0, "No Zone Long", "nozone", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::SouthQeynos, 0, "South Qeynos", "qeynos", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::NorthQeynos, 0, "North Qeynos", "qeynos2", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::TheSurefallGlade, 0, "The Surefall Glade", "qrg", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::TheQeynosHills, 0, "The Qeynos Hills", "qeytoqrg", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::HighpassHold, 0, "Highpass Hold", "highpass", 0.0f, 0.0f, 0.0f },
+//	{ ZoneIDs::HighKeep, 0, "High Keep", "highkeep", 0.0f, 0.0f, 0.0f },
+//};
+
+bool ZoneData::initialise() {
+	TiXmlDocument document;
+	bool loaded = document.LoadFile("zone_data.xml");
+	if (!loaded) {
+		return false;
+	}
+	TiXmlElement* element = document.FirstChildElement("zone_data")->FirstChildElement("zone");
+	while (element) {
+		ZoneInformation* zoneInformation = new ZoneInformation();
+		zoneInformation->mShortName = element->Attribute("short_name");
+		zoneInformation->mLongName = element->Attribute("long_name");
+		Utility::stou16Safe(zoneInformation->mID, std::string(element->Attribute("id")));
+		Utility::stofSafe(zoneInformation->mSafeX, std::string(element->Attribute("safe_x")));
+		Utility::stofSafe(zoneInformation->mSafeY, std::string(element->Attribute("safe_y")));
+		Utility::stofSafe(zoneInformation->mSafeZ, std::string(element->Attribute("safe_z")));
+		
+		mZoneInformation.push_back(zoneInformation);
+		element = element->NextSiblingElement();
+	}
 	return true;
 }
 
-bool ZoneData::isZoneIDValid(uint32 pZoneID) {
-	return !(pZoneID == 0 || pZoneID >= ZoneData::NUM_ZONES);
+ZoneData::ZoneInformation* ZoneData::findZoneInformation(ZoneID pZoneID) {
+	for (auto i : mZoneInformation) {
+		if (pZoneID == i->mID)
+			return i;
+	}
+
+	return nullptr;
 }
 
-
-std::string ZoneData::getLongName(uint32 pZoneID) {
-	if (ZoneData::isZoneIDValid(pZoneID))
-		return ZoneData::mZoneData[pZoneID].mLongName;
-	
-	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-	Log::error(ss.str());
-
-	return "";
+std::string ZoneData::getLongName(ZoneID pZoneID) {
+	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
+	if (!zoneInformation) {
+		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		Log::error(ss.str());
+		return "";
+	}
+	return zoneInformation->mLongName;
 }
 
-std::string ZoneData::getShortName(uint32 pZoneID){
-	if (ZoneData::isZoneIDValid(pZoneID))
-		return ZoneData::mZoneData[pZoneID].mShortName;
-
-	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-	Log::error(ss.str());
-
-	return "";
+std::string ZoneData::getShortName(ZoneID pZoneID){
+	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
+	if (!zoneInformation) {
+		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		Log::error(ss.str());
+		return "";
+	}
+	return zoneInformation->mShortName;
 }
 
-uint32 ZoneData::getLongNameStringID(uint32 pZoneID) {
-	if (ZoneData::isZoneIDValid(pZoneID))
-		return ZoneData::mZoneData[pZoneID].mLongNameStringID;
-
-	std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-	Log::error(ss.str());
-
-	return 0;
+uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
+	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
+	if (!zoneInformation) {
+		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
+		Log::error(ss.str());
+		return 0;
+	}
+	return zoneInformation->mLongNameStringID;
 }

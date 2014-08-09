@@ -30,7 +30,7 @@ void ZoneManager::update() {
 	}
 }
 
-uint16 ZoneManager::getZonePort(uint32 pZoneID, uint32 pInstanceID) {
+uint16 ZoneManager::getZonePort(ZoneID pZoneID, uint32 pInstanceID) {
 	// Search existing zones
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
@@ -59,7 +59,7 @@ uint32 ZoneManager::_getNextZonePort() {
 	// TODO: Error check this ;)
 }
 
-void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, uint32 pZoneID, uint32 pInstanceID) {
+void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::string pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
 	bool zoneFound = false;
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
@@ -73,9 +73,9 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, std::
 	zone->addAuthentication(pAuthentication, pCharacterName);
 }
 
-Zone* ZoneManager::_makeZone(uint32 pZoneID, uint32 pInstanceID) {
+Zone* ZoneManager::_makeZone(ZoneID pZoneID, uint32 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
-	std::stringstream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
+	std::stringstream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << static_cast<std::uint16_t>(pZoneID) << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
 	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, zonePort, pZoneID, pInstanceID);
 	zone->initialise();
@@ -142,7 +142,7 @@ void ZoneManager::notifyCharacterZoneOut(Character* pCharacter) {
 	mZoningCharacters.push_back(pCharacter);
 }
 
-void ZoneManager::registerZoneTransfer(Character* pCharacter, uint16 pZoneID, uint16 pInstanceID) {
+void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
 	ARG_PTR_CHECK(pCharacter);
 
 	ZoneTransfer zoneTransfer;

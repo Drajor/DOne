@@ -95,7 +95,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mGender = mProfile->gender;
 	mLevel = mProfile->level;
 	mStatus = 255;
-	mGM = mProfile->gm;
+	mGM = (mProfile->gm == 1);
 	mGM = true; // testing!
 
 	mX = mProfile->x;
@@ -110,7 +110,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 
 	mExperience = mProfile->exp;
 
-	mSuperGMPower.Start(2000);
+	//mSuperGMPower.Start(2000);
 	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 
 	mCopper = mProfile->copper;

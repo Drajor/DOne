@@ -25,6 +25,6 @@ std::string Utility::zoneLogDetails(Zone* pZone) {
 	if (pZone == nullptr) return "[NULL ZONE POINTER]";
 
 	std::stringstream ss;
-	ss << "[Zone(Name: " << pZone->getLongName() << " ID:" << pZone->getID() << " InstanceID:" << pZone->getInstanceID() << ")]";
+	ss << "[Zone(Name: " << pZone->getLongName() << " ID:" << static_cast<std::uint16_t>(pZone->getID()) << " InstanceID:" << pZone->getInstanceID() << ")]";
 	return ss.str();
 }

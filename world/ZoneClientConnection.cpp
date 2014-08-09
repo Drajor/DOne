@@ -800,12 +800,12 @@ void ZoneClientConnection::sendPosition() {
 	payload->x_pos = FloatToEQ19(mCharacter->getX());
 	payload->y_pos = FloatToEQ19(mCharacter->getY());
 	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(mCharacter->getDeltaX());
-	payload->delta_y = NewFloatToEQ13(mCharacter->getDeltaY());
-	payload->delta_z = NewFloatToEQ13(mCharacter->getDeltaZ());
-	payload->heading = FloatToEQ19(mCharacter->getHeading());
+	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaX()));
+	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaY()));
+	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaZ()));
+	payload->heading = FloatToEQ19(static_cast<float>(mCharacter->getHeading()));
 	payload->animation = 0;
-	payload->delta_heading = NewFloatToEQ13(mCharacter->getDeltaHeading());
+	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaHeading()));
 	payload->padding0002 = 0;
 	payload->padding0006 = 7;
 	payload->padding0014 = 0x7f;
@@ -905,7 +905,9 @@ void ZoneClientConnection::_sendNewZoneData() {
 	payload->zone_instance = mZone->getInstanceID();
 	strcpy(payload->zone_short_name, mZone->getShortName().c_str());
 	strcpy(payload->zone_long_name, mZone->getLongName().c_str()); // NOTE: This affects the zone in message "You have entered ..."
-	payload->gravity = 0.4f;
+	payload->gravity = mZone->getGravity();
+	payload->underworld = mZone->getMinimumZ();
+	payload->ztype = mZone->getZoneType();
 
 	mStreamInterface->FastQueuePacket(&outPacket);
 }
@@ -1046,9 +1048,9 @@ EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
 	payload->x_pos = FloatToEQ19(mCharacter->getX());
 	payload->y_pos = FloatToEQ19(mCharacter->getY());
 	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(mCharacter->getDeltaX());
-	payload->delta_y = NewFloatToEQ13(mCharacter->getDeltaY());
-	payload->delta_z = NewFloatToEQ13(mCharacter->getDeltaZ());
+	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaX()));
+	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaY()));
+	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaZ()));
 	payload->heading = FloatToEQ19(mCharacter->getHeading());
 	payload->padding0002 = 0;
 	payload->padding0006 = 7;
