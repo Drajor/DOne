@@ -230,39 +230,36 @@
 4049 Dulak's Harbor
 4050 Hatesfury
 */
-//ZoneInformation ZoneData::mZoneData[1000];
 
 #include "../common/tinyxml/tinyxml.h"
 
-//ZoneData::ZoneInformation ZoneData::mZoneData[ZoneData::NUM_ZONES] = {
-//	{ ZoneIDs::NoZone, 0, "No Zone Long", "nozone", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::SouthQeynos, 0, "South Qeynos", "qeynos", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::NorthQeynos, 0, "North Qeynos", "qeynos2", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::TheSurefallGlade, 0, "The Surefall Glade", "qrg", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::TheQeynosHills, 0, "The Qeynos Hills", "qeytoqrg", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::HighpassHold, 0, "Highpass Hold", "highpass", 0.0f, 0.0f, 0.0f },
-//	{ ZoneIDs::HighKeep, 0, "High Keep", "highkeep", 0.0f, 0.0f, 0.0f },
-//};
+ZoneData::~ZoneData(){
+	mZoneInformation.remove_if(Utility::containerEntryDelete<ZoneInformation*>);
+}
 
 bool ZoneData::initialise() {
 	TiXmlDocument document;
 	bool loaded = document.LoadFile("zone_data.xml");
 	if (!loaded) {
+		Log::error("[Zone Data] Failed to load data.");
 		return false;
 	}
+
 	TiXmlElement* element = document.FirstChildElement("zone_data")->FirstChildElement("zone");
 	while (element) {
 		ZoneInformation* zoneInformation = new ZoneInformation();
 		zoneInformation->mShortName = element->Attribute("short_name");
 		zoneInformation->mLongName = element->Attribute("long_name");
-		Utility::stou16Safe(zoneInformation->mID, std::string(element->Attribute("id")));
-		Utility::stofSafe(zoneInformation->mSafeX, std::string(element->Attribute("safe_x")));
-		Utility::stofSafe(zoneInformation->mSafeY, std::string(element->Attribute("safe_y")));
-		Utility::stofSafe(zoneInformation->mSafeZ, std::string(element->Attribute("safe_z")));
+		Utility::stou16Safe(zoneInformation->mID, String(element->Attribute("id")));
+		Utility::stofSafe(zoneInformation->mSafeX, String(element->Attribute("safe_x")));
+		Utility::stofSafe(zoneInformation->mSafeY, String(element->Attribute("safe_y")));
+		Utility::stofSafe(zoneInformation->mSafeZ, String(element->Attribute("safe_z")));
 		
 		mZoneInformation.push_back(zoneInformation);
 		element = element->NextSiblingElement();
 	}
+	std::stringstream ss; ss << "[Zone Data] Loaded data for " << mZoneInformation.size() << " Zones.";
+	Log::info(ss.str());
 	return true;
 }
 
@@ -275,7 +272,7 @@ ZoneData::ZoneInformation* ZoneData::findZoneInformation(ZoneID pZoneID) {
 	return nullptr;
 }
 
-std::string ZoneData::getLongName(ZoneID pZoneID) {
+String ZoneData::getLongName(ZoneID pZoneID) {
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
 		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
@@ -285,7 +282,7 @@ std::string ZoneData::getLongName(ZoneID pZoneID) {
 	return zoneInformation->mLongName;
 }
 
-std::string ZoneData::getShortName(ZoneID pZoneID){
+String ZoneData::getShortName(ZoneID pZoneID){
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
 		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
@@ -295,7 +292,7 @@ std::string ZoneData::getShortName(ZoneID pZoneID){
 	return zoneInformation->mShortName;
 }
 
-uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
+std::uint32_t ZoneData::getLongNameStringID(ZoneID pZoneID) {
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
 		std::stringstream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
@@ -305,10 +302,10 @@ uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
 	return zoneInformation->mLongNameStringID;
 }
 
-ZoneDataSearchResults ZoneData::searchByName(std::string pName) {
+ZoneDataSearchResults ZoneData::searchByName(String pSearchText) {
 	ZoneDataSearchResults results;
 	for (auto i : mZoneInformation) {
-		if (i->mShortName.find(pName) != std::string::npos || i->mLongName.find(pName) != std::string::npos) {
+		if (i->mShortName.find(pSearchText) != String::npos || i->mLongName.find(pSearchText) != String::npos) {
 			results.push_back({i->mID, i->mShortName, i->mLongName});
 		}
 	}

@@ -3,8 +3,14 @@
 #include "../common/types.h"
 #include <cstdint>
 #include <string>
+#include <list>
+#include <vector>
+#include <unordered_map>
 
 typedef std::uint16_t ZoneID;
+typedef std::uint16_t InstanceID; // Zone Instance ID
+typedef std::uint16_t SpawnID;
+typedef std::string String;
 
 enum PlayableRaceIDs {
 	Human = 1,
@@ -83,7 +89,7 @@ enum SpawnAppearanceType : int16 {
 	Light = 5,
 	Animation = 14,
 	Sneak = 15,
-	SpawnID = 16,
+	SA_SpawnID = 16,
 	HP = 17,
 	LinkDead = 18,
 	Levitate = 19,

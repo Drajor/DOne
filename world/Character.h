@@ -2,10 +2,7 @@
 
 #include "Constants.h"
 #include "ClientAuthentication.h"
-#include "../common/types.h"
 #include "../common/timer.h"
-#include <string>
-#include <unordered_map>
 
 class Zone;
 class Group;
@@ -47,7 +44,7 @@ public:
 	void setLinkDead();
 	bool onZoneIn();
 	bool onZoneOut();
-	void addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage);
+	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
 
 	// Group
 	bool hasGroup() { return mGroup != nullptr; }
@@ -75,12 +72,12 @@ public:
 
 	void setStanding(bool pStanding);
 
-	std::string getName() { return mName; }
-	std::string getLastName() { return mLastName; }
-	std::string getTitle() { return mTitle; }
-	std::string getSuffix() { return mSuffix; }
+	String getName() { return mName; }
+	String getLastName() { return mLastName; }
+	String getTitle() { return mTitle; }
+	String getSuffix() { return mSuffix; }
 	uint32 getID() { return mCharacterID; };
-	uint16 getSpawnID() { return mSpawnID; }
+	SpawnID getSpawnID() { return mSpawnID; }
 	// Returns the account status that this Character belongs to.
 	uint32 getStatus() { return mStatus; }
 	PlayerProfile_Struct* getProfile() { return mProfile; }
@@ -97,7 +94,7 @@ public:
 	void setShowHelm(bool pShowHelm);
 	bool getShowHelm();
 
-	void message(MessageType pType, std::string pMessage);
+	void message(MessageType pType, String pMessage);
 	
 
 
@@ -241,11 +238,11 @@ private:
 	int32 mPlatinum;
 
 	const uint32 mCharacterID;
-	uint16 mSpawnID;
-	std::string mName;
-	std::string mLastName;
-	std::string mTitle;
-	std::string mSuffix;
+	SpawnID mSpawnID;
+	String mName;
+	String mLastName;
+	String mTitle;
+	String mSuffix;
 	bool mGM;
 	bool mStanding;
 	bool mAFK;
@@ -269,8 +266,8 @@ private:
 
 	struct QueuedChannelMessage {
 		const ChannelID mChannelID;
-		const std::string mSenderName;
-		const std::string mMessage;
+		const String mSenderName;
+		const String mMessage;
 	};
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();

@@ -279,7 +279,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new WarpCommand(100, { "warp", "goto", "go" }));
 	mCommands.push_back(new GMCommand(100, { "gm" }));
 	mCommands.push_back(new ZoneListCommand(100, { "zonelist", "zlist" }));
-	mCommands.push_back(new ZoneSearchCommand(100, { "zonesearch", "zs" }));
+	mCommands.push_back(new ZoneSearchCommand(100, { "zonesearch", "zs", "findzone", "fz" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));

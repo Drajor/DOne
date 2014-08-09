@@ -173,7 +173,7 @@ bool Character::getShowHelm() {
 	return mProfile->showhelm == 1;
 }
 
-void Character::message(MessageType pType, std::string pMessage)
+void Character::message(MessageType pType, String pMessage)
 {
 	mConnection->sendMessage(pType, pMessage);
 }
@@ -506,7 +506,7 @@ void Character::_processMessageQueue() {
 	mMessageQueue.clear();
 }
 
-void Character::addQueuedMessage(ChannelID pChannel, const std::string& pSenderName, const std::string& pMessage) {
+void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
 }
 

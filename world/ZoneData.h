@@ -1,16 +1,15 @@
 #pragma once
 
-// Home for static zone data.
-
 #include "Constants.h"
-#include "../common/types.h"
-#include <string>
-#include <cstdint>
-#include <list>
 
-/*
-For each zone, the client has a lits of hard-coded zone lines.
-*/
+// For the #zonesearch command.
+struct ZoneDataSearchEntry {
+	ZoneID mID;
+	String mShortName;
+	String mLongName;
+};
+typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
+
 struct ZonePoint {
 	ZoneID mID;
 	float mX;
@@ -24,16 +23,8 @@ struct ZonePoint {
 	float mDestinationHeading;
 
 	ZoneID mDestinationZoneID;
-	std::uint16_t mDestinationInstanceID;
+	InstanceID mDestinationInstanceID;
 };
-
-struct ZoneDataSearchEntry {
-	ZoneID mID;
-	std::string mShortName;
-	std::string mLongName;
-};
-
-typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
 class ZoneData {
 public:
@@ -43,20 +34,19 @@ public:
 	}
 
 	bool initialise();
-	bool isZoneIDValid(ZoneID pZoneID);
-	std::string getLongName(ZoneID pZoneID);
-	std::string getShortName(ZoneID pZoneID);
-	uint32 getLongNameStringID(ZoneID pZoneID);
+	String getLongName(ZoneID pZoneID);
+	String getShortName(ZoneID pZoneID);
+	std::uint32_t getLongNameStringID(ZoneID pZoneID);
 
-	ZoneDataSearchResults searchByName(std::string pName);
+	ZoneDataSearchResults searchByName(String pSearchText);
 
 private:
 	struct ZoneInformation {
 		ZoneInformation() : mID(0), mLongNameStringID(0), mLongName(""), mShortName(""), mSafeX(0.0f), mSafeY(0.0f), mSafeZ(0.0f) {};
 		ZoneID mID;
-		uint32 mLongNameStringID;
-		std::string mLongName;
-		std::string mShortName;
+		std::uint32_t mLongNameStringID;
+		String mLongName;
+		String mShortName;
 		float mSafeX;
 		float mSafeY;
 		float mSafeZ;
@@ -66,7 +56,7 @@ private:
 	ZoneInformation* findZoneInformation(ZoneID pZoneID);
 
 	ZoneData() {};
-	~ZoneData() {};
+	~ZoneData();
 	ZoneData(ZoneData const&);
 	void operator=(ZoneData const&);
 };
