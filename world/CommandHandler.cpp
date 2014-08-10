@@ -3,6 +3,7 @@
 #include "Zone.h"
 #include "ZoneData.h"
 #include "ZoneManager.h"
+#include "GuildManager.h"
 #include "Utility.h"
 #include "LogSystem.h"
 #include <vector>
@@ -257,6 +258,30 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class GuildSearchCommand : public Command {
+public:
+	GuildSearchCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #guildsearch <optional text>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Get all guilds.
+		if (pParameters.size() == 0) {
+			GuildSearchResults results = GuildManager::getInstance().getAllGuilds();
+			for (auto i : results){
+				pCharacter->message(MessageType::Yellow, "[Guild " + std::to_string(i.mID) + "] " + i.mName);
+			}
+		}
+		// Search guilds.
+		else if (pParameters.size() == 1) {
+		}
+		else {
+			invalidParameters(pCharacter, pParameters);
+			return;
+		}
+	}
+};
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -280,6 +305,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new GMCommand(100, { "gm" }));
 	mCommands.push_back(new ZoneListCommand(100, { "zonelist", "zlist" }));
 	mCommands.push_back(new ZoneSearchCommand(100, { "zonesearch", "zs", "findzone", "fz" }));
+	mCommands.push_back(new GuildSearchCommand(100, { "guildsearch", "gs", "findguild", "fg" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));

@@ -648,23 +648,13 @@ Character* Zone::getZoningCharacter(String pCharacterName) {
 }
 
 void Zone::notifyGuildsChanged() {
-	//std::list<String> guildNames = mGuildManager->getGuildNames();
-	//std::size_t packetSize = 64 * (guildNames.size()+1);
-
-	std::list<String> guildNames = { "One", "Two", "Three", "Four", "Five" };
-	std::size_t packetSize = 64 + (64 * 1500);
-	//memset()
+	auto outPacket = new EQApplicationPacket(OP_GuildsList);
+	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
 	
-	auto outPacket = new EQApplicationPacket(OP_GuildsList, packetSize);
-	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
-	memset(outPacket->pBuffer, 0, packetSize);
-	dynamicStructure.movePointer(64);
-	for (auto i : guildNames) {
-		dynamicStructure.writeFixedString(i, MAX_GUILD_NAME_LENGTH);
-	}
 	for (auto i : mConnections) {
 		i->sendPacket(outPacket);
 	}
-
+	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }

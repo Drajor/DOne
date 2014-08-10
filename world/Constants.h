@@ -19,6 +19,7 @@ typedef std::uint8_t GuildRank;
 
 static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
+static const auto MAX_GUILDS = 1000; // This value is arbitrary.
 
 enum GuildRanks : GuildRank {
 	Member = 0,

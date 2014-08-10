@@ -118,6 +118,11 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mGold = mProfile->gold;
 	mPlatinum = mProfile->platinum;
 
+	// temp removing guild 
+	mProfile->guild_id = 0xFFFFFFFF;
+	mProfile->guildrank = 0;
+
+
 	// Perform any profile patching that needs to be done.
 	_initialiseProfile();
 
