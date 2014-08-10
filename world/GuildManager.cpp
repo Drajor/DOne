@@ -3,10 +3,12 @@
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "Zone.h"
+#include "Profile.h"
 
 #include "../common/tinyxml/tinyxml.h"
 
 bool GuildManager::initialise() {
+	Profile p("GuildManager::initialise");
 	Log::status("[Guild Manager] Initialising.");
 
 	for (auto i = 0; i < MAX_GUILDS; i++) {
@@ -29,7 +31,16 @@ bool GuildManager::initialise() {
 		guild->mName = guildElement->Attribute("name");
 		guild->mMOTD = guildElement->Attribute("motd");
 
-		// TODO: Members
+		// Read members data.
+		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
+		while (memberElement) {
+			uint32 memberID = 0;
+			uint32 memberRank = 0;
+			Utility::stoulSafe(memberID, String(memberElement->Attribute("id")));
+			Utility::stoulSafe(memberRank, String(memberElement->Attribute("rank")));
+			guild->mMembers.push_back({ memberID, memberRank });
+			memberElement = memberElement->NextSiblingElement();
+		}
 
 		guildElement = guildElement->NextSiblingElement();
 	}
@@ -75,6 +86,7 @@ bool GuildManager::makeGuild(Character* pCharacter, const String pGuildName) {
 	pCharacter->getConnection()->sendAppearance(SA_GuildRank, GuildRanks::Leader);
 	pCharacter->getConnection()->sendGuildRank();
 
+	_save();
 	return true;
 }
 
@@ -87,7 +99,32 @@ Guild* GuildManager::_findGuildByName(const String pGuildName) {
 	return nullptr;
 }
 
-void GuildManager::_save(){ }
+void GuildManager::_save() {
+	Profile p("GuildManager::_save");
+
+	TiXmlDocument document;
+	TiXmlElement* guildsElement = new TiXmlElement("guilds");
+
+	for (auto i : mGuilds) {
+		TiXmlElement* guildElement = new TiXmlElement("guild");
+		guildElement->SetAttribute("id", i->mID);
+		guildElement->SetAttribute("name", i->mName.c_str());
+		guildElement->SetAttribute("motd", i->mMOTD.c_str());
+
+		TiXmlElement* membersElement = new TiXmlElement("members");
+		for (auto j : i->mMembers) {
+			TiXmlElement* memberElement = new TiXmlElement("member");
+			memberElement->SetAttribute("id", j.mID);
+			memberElement->SetAttribute("rank", j.mRank);
+			membersElement->LinkEndChild(memberElement);
+		}
+		guildElement->LinkEndChild(membersElement);
+		guildsElement->LinkEndChild(guildElement);
+	}
+
+	document.LinkEndChild(guildsElement);
+	document.SaveFile("./data/guilds.xml");
+}
 
 uint32 GuildManager::getNextGuildID() {
 	return getHighestGuildID() + 1;
@@ -129,4 +166,69 @@ GuildSearchResults GuildManager::getAllGuilds() {
 	}
 
 	return results;
+}
+
+void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) {
+	Guild* guild = _findByID(pGuildID);
+
+	// Check: Guild does not exist. It was probably deleted.
+	if (!guild) {
+		pCharacter->setGuild(nullptr);
+		pCharacter->setGuildID(NO_GUILD);
+		pCharacter->setGuildRank(GuildRanks::Member);
+		return;
+	}
+
+	// Check: Character still belongs to this guild.
+	bool found = false;
+	for (auto i : guild->mMembers) {
+		if (i.mID == pCharacter->getID()) {
+			pCharacter->setGuild(guild);
+			pCharacter->setGuildID(guild->mID); // This should not really be required.
+			pCharacter->setGuildRank(i.mRank); // Character rank may have changed since log in (TODO: Determine if this is even possible).
+
+			// TODO: Notify guild that player is online.
+
+			found = true;
+			break;
+		}
+	}
+
+	// Character was not found in Guild members (save de-sync or removed while offline/zoning?)
+	if (!found) {
+
+	}
+}
+
+Guild* GuildManager::_findByID(const GuildID pID) {
+	for (auto i : mGuilds) {
+		if (i->mID == pID)
+			return i;
+	}
+
+	return nullptr;
+}
+
+void GuildManager::handleMemberRemove(Character* pCharacter, String pRemoveCharacterName) {
+	ARG_PTR_CHECK(pCharacter);
+	ERROR_CONDITION(pCharacter->hasGuild());
+
+	// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
+	// "You must transfer leadership or delete the guild before removing yourself."
+
+	// Self remove.
+	if (pCharacter->getName() == pRemoveCharacterName) {
+		Guild* guild = pCharacter->getGuild();
+
+		// TODO: Remove from members.
+
+		pCharacter->setGuild(nullptr);
+		pCharacter->setGuildID(NO_GUILD);
+		pCharacter->setGuildRank(GuildRanks::Member);
+
+		pCharacter->getConnection()->sendAppearance(SA_GuildID, NO_GUILD);
+		pCharacter->getConnection()->sendAppearance(SA_GuildRank, GuildRanks::Member);
+	}
+
+	// OP_GuildManageRemove
 }

@@ -33,6 +33,8 @@ public:
 	}
 
 	bool initialise();
+	void handleCharacterLogIn(Character* pCharacter, uint32 pGuildID);
+	void handleMemberRemove(Character* pCharacter, String pRemoveCharacterName);
 
 	bool makeGuild(Character* pCharacter, const String pGuildName);
 	std::list<String> getGuildNames();
@@ -43,6 +45,7 @@ public:
 	GuildSearchResults getAllGuilds();
 private:
 	Guild* _findGuildByName(const String pGuildName);
+	Guild* _findByID(const GuildID pID);
 	uint32 getNextGuildID();
 	void _save();
 	std::list<Guild*> mGuilds;
@@ -54,4 +57,5 @@ private:
 	~GuildManager();
 	GuildManager(GuildManager const&);
 	void operator=(GuildManager const&);
+
 };

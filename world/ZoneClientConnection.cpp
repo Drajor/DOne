@@ -1,5 +1,5 @@
 #include "ZoneClientConnection.h"
-#include "Constants.h"
+#include "GuildManager.h"
 #include "Zone.h"
 #include "ZoneData.h"
 #include "Character.h"
@@ -12,7 +12,6 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "Utility.h"
-#include <sstream>
 
 #include "../common/MiscFunctions.h"
 
@@ -280,6 +279,13 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /guildcreate command.
 		_handleGuildCreate(pPacket);
 		break;
+	case OP_GuildInvite:
+		// NOTE: This occurs when a player uses the /guildinvite command.
+		_handleGuildInvite(pPacket);
+	case OP_GuildRemove:
+		// NOTE: This occurs when the player uses the /guildremove command.
+		_handleGuildRemove(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -373,6 +379,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	mCharacter->setConnection(this);
 
 	// REPLY
+	_sendGuildNames();
 	// OP_PlayerProfile
 	_sendPlayerProfile();
 	mZoneConnectionStatus = ZoneConnectionStatus::PlayerProfileSent;
@@ -392,6 +399,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// Tasks
 	// XTargets
 	// Weather
+	
 	_sendWeather();
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneInformationSent;
 }
@@ -468,7 +476,8 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.size = mCharacter->getSize();
 	payload->player.spawn.bodytype = BT_Humanoid;
 	payload->player.spawn.flymode = 0;// FindType(SE_Levitate) ? 2 : 0;
-	payload->player.spawn.lastName[0] = '\0';
+	//payload->player.spawn.lastName[0] = '\0';
+	strcpy(payload->player.spawn.lastName, mCharacter->getLastName().c_str());
 	memset(payload->player.spawn.set_to_0xFF, 0xFF, sizeof(payload->player.spawn.set_to_0xFF));
 	payload->player.spawn.afk = 0;// AFK;
 	payload->player.spawn.lfg = 0;// LFG; // afk and lfg are cleared on zoning on live
@@ -1694,4 +1703,47 @@ void ZoneClientConnection::sendGuildRank() {
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_sendGuildNames() {
+	ERROR_CONDITION(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildsList);
+	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+
+	mStreamInterface->QueuePacket(outPacket);
+	outPacket->pBuffer = nullptr;
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	ERROR_CONDITION(mConnected);
+	ERROR_CONDITION(mCharacter->hasGuild()); // Check: Character has a guild.
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
+
+	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
+
+	ERROR_CONDITION(payload->guildeqid == mCharacter->getGuildID()); // Check: Sanity. Why the fuck does the client send this?
+
+	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
+	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
+
+	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
+}
+
+void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	ERROR_CONDITION(mConnected);
+	ERROR_CONDITION(mCharacter->hasGuild()); // Check: Character has a guild.
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
+
+	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
+	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
+	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
+
+	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
+
+	GuildManager::getInstance().handleMemberRemove(mCharacter, toCharacterName);
 }

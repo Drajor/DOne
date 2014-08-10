@@ -17,6 +17,9 @@ typedef std::stringstream StringStream;
 typedef std::uint32_t GuildID;
 typedef std::uint8_t GuildRank;
 
+static auto MAX_CHARACTER_NAME_LENGTH = 64;
+
+static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
 static const auto MAX_GUILDS = 1000; // This value is arbitrary.

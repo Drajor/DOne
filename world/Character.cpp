@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "GuildManager.h"
 #include "Zone.h"
 #include "Utility.h"
 #include "LogSystem.h"
@@ -49,8 +50,6 @@ mDeltaHeading(0),
 mAnimation(0),
 mAppearance(SpawnAppearanceAnimation::Standing),
 mGM(false),
-mGuildID(0xFFFFFFFF),
-mGuildRank(0xFF),
 mExperience(0),
 mCopper(0),
 mSilver(0),
@@ -118,10 +117,9 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mGold = mProfile->gold;
 	mPlatinum = mProfile->platinum;
 
-	// temp removing guild 
-	mProfile->guild_id = 0xFFFFFFFF;
-	mProfile->guildrank = 0;
-
+	if (mProfile->guild_id != NO_GUILD) {
+		GuildManager::getInstance().handleCharacterLogIn(this, mProfile->guild_id);
+	}
 
 	// Perform any profile patching that needs to be done.
 	_initialiseProfile();
@@ -525,4 +523,12 @@ void Character::setGuildID(GuildID pGuildID) {
 
 void Character::setGuildRank(GuildRank pGuildRank) {
 	mProfile->guildrank = pGuildRank;
+}
+
+GuildRank Character::getGuildRank() {
+	return mProfile->guildrank;
+}
+
+GuildID Character::getGuildID() {
+	return mProfile->guild_id;
 }

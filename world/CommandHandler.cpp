@@ -283,6 +283,19 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class GuildInformationCommand : public Command {
+public:
+	GuildInformationCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #ginfo";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		static const String RankNames[] = { "Member", "Officer", "Leader" };
+		pCharacter->message(MessageType::Yellow, RankNames[pCharacter->getGuildRank()] + " of " + std::to_string(pCharacter->getGuildID()) );
+	}
+};
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -305,7 +318,9 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new GMCommand(100, { "gm" }));
 	mCommands.push_back(new ZoneListCommand(100, { "zonelist", "zlist" }));
 	mCommands.push_back(new ZoneSearchCommand(100, { "zonesearch", "zs", "findzone", "fz" }));
+
 	mCommands.push_back(new GuildSearchCommand(100, { "guildsearch", "gs", "findguild", "fg" }));
+	mCommands.push_back(new GuildInformationCommand(100, { "ginfo" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));

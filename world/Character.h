@@ -57,6 +57,8 @@ public:
 	void setGuild(Guild* pGuild) { mGuild = pGuild; }
 	void setGuildID(GuildID pGuildID);
 	void setGuildRank(GuildRank pGuildRank);
+	GuildRank getGuildRank();
+	GuildID getGuildID();
 
 	// Raid
 	bool hasRaid() { return mRaid != nullptr; }
@@ -134,8 +136,6 @@ public:
 	uint8 getAnonymous();
 	uint8 getGM();
 	void setGM(bool pGM);
-	uint8 getGuildRank() { return mGuildRank; }
-	uint32 getGuildID() { return mGuildID; }
 
 	int32 getCopper() { return mCopper; }
 	int32 getSilver() { return mSilver; }
@@ -224,8 +224,8 @@ private:
 	float mRunSpeed;
 	float mWalkSpeed;
 
-	uint8 mGuildRank;
-	uint32 mGuildID;
+	//uint8 mGuildRank;
+	//uint32 mGuildID;
 
 	int32 mCurrentHP;
 	int32 mMaximumHP;

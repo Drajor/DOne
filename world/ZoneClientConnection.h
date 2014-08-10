@@ -3,8 +3,6 @@
 #include "Constants.h"
 
 #include "../common/timer.h"
-#include <string>
-#include <list>
 
 class EQStreamInterface;
 class EQApplicationPacket;
@@ -99,6 +97,7 @@ private:
 	void _sendTributeUpdate();
 	void _sendInventory();
 	void _sendWeather();
+	void _sendGuildNames();
 
 	void _sendPreLogOutReply();
 	void _sendLogOutReply();
@@ -135,6 +134,8 @@ private:
 	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 	void _handleZoneChange(const EQApplicationPacket* pPacket);
 	void _handleGuildCreate(const EQApplicationPacket* pPacket);
+	void _handleGuildInvite(const EQApplicationPacket* pPacket);
+	void _handleGuildRemove(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
