@@ -10,9 +10,12 @@ struct ExtendedProfile_Struct;
 
 class DataStore {
 public:
-	DataStore();
-	~DataStore();
-	void setProvider(DataProvider* pDataProvider);
+	static DataStore& getInstance() {
+		static DataStore instance;
+		return instance;
+	}
+	bool initialise();
+
 	void update();
 
 	// Account Data
@@ -29,4 +32,9 @@ public:
 	bool saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
 private:
 	DataProvider* mDataProvider; // DataStore is not responsible for deleting.
+
+	DataStore();
+	~DataStore() {};
+	DataStore(DataStore const&);
+	void operator=(DataStore const&);
 };

@@ -15,16 +15,13 @@ class Character;
 class Group;
 class GroupManager;
 class Guild;
-class GuildManager;
 class Raid;
 class RaidManager;
 
 class Zone {
 public:
-	Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID = 0);
+	Zone(uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID = 0);
 	~Zone();
-	
-	ZoneManager* getZoneManager() { return mZoneManager; }
 
 	bool initialise();
 	String getLongName() { return mLongName; }
@@ -86,6 +83,7 @@ public:
 
 	// Guild
 	void notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName);
+	void notifyGuildsChanged();
 
 	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
 	Character* getZoningCharacter(String pCharacterName);
@@ -120,6 +118,7 @@ private:
 
 
 
+
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID;
@@ -133,12 +132,6 @@ private:
 	bool mInitialised; // Flag indicating whether the Zone has been initialised.
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
-	World* mWorld;
-	ZoneManager* mZoneManager;
-	GroupManager* mGroupManager;
-	GuildManager* mGuildManager;
-	RaidManager* mRaidManager;
-	DataStore* mDataStore;
 	std::list<Character*> mCharacters; // List of Player Characters in Zone.
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;

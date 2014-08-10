@@ -513,3 +513,11 @@ void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, 
 void Character::setLinkDead() {
 	mIsLinkDead = true;
 }
+
+void Character::setGuildID(GuildID pGuildID) {
+	mProfile->guild_id = pGuildID;
+}
+
+void Character::setGuildRank(GuildRank pGuildRank) {
+	mProfile->guildrank = pGuildRank;
+}

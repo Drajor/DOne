@@ -238,6 +238,8 @@ ZoneData::~ZoneData(){
 }
 
 bool ZoneData::initialise() {
+	Log::status("[Zone Data] Initialising.");
+
 	TiXmlDocument document;
 	bool loaded = document.LoadFile("zone_data.xml");
 	if (!loaded) {
@@ -258,6 +260,7 @@ bool ZoneData::initialise() {
 		mZoneInformation.push_back(zoneInformation);
 		element = element->NextSiblingElement();
 	}
+
 	StringStream ss; ss << "[Zone Data] Loaded data for " << mZoneInformation.size() << " Zones.";
 	Log::info(ss.str());
 	return true;

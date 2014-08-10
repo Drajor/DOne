@@ -17,17 +17,15 @@
 #include "Constants.h"
 #include "LogSystem.h"
 
-World::World(DataStore* pDataStore) :
+World::World() :
 	mInitialised(false),
 	mLocked(false),
 	mStreamIdentifier(0),
 	mStreamFactory(0),
-	mZoneManager(0),
 	mAccountManager(0),
 	mTCPServer(0),
 	mLoginServerConnection(0),
-	mUCSConnection(0),
-	mDataStore(pDataStore)
+	mUCSConnection(0)
 {
 
 }
@@ -42,7 +40,6 @@ World::~World() {
 	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
-	safe_delete(mZoneManager);
 	safe_delete(mAccountManager);
 	safe_delete(mUCSConnection);
 }
@@ -71,10 +68,9 @@ bool World::initialise()
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
-	mZoneManager = new ZoneManager(this, mDataStore);
-	mZoneManager->initialise();
+	ZoneManager::getInstance().initialise();
 
-	mAccountManager = new AccountManager(mDataStore);
+	mAccountManager = new AccountManager();
 	if (!mAccountManager->initialise()) {
 		Utility::criticalError("Unable to initialise Account Manager");
 		return false;
@@ -111,8 +107,8 @@ void World::update()
 
 	mUCSConnection->update();
 	mLoginServerConnection->update();
-	mDataStore->update();
-	mZoneManager->update();
+	DataStore::getInstance().update();
+	ZoneManager::getInstance().update();
 
 	// Check if any new clients are connecting.
 	_handleIncomingClientConnections();
@@ -246,10 +242,10 @@ int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
 }
 
 bool World::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
-	return mDataStore->getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
+	return DataStore::getInstance().getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
 }
 
-bool World::isCharacterNameUnique(String pCharacterName) { return mDataStore->isCharacterNameUnique(pCharacterName); }
+bool World::isCharacterNameUnique(String pCharacterName) { return DataStore::getInstance().isCharacterNameUnique(pCharacterName); }
 
 bool World::isCharacterNameReserved(String pCharacterName) {
 	for (auto i : mReservedCharacterNames)
@@ -264,12 +260,12 @@ void World::reserveCharacterName(uint32 pWorldAccountID, String pCharacterName) 
 
 bool World::deleteCharacter(uint32 pWorldAccountID, String pCharacterName) {
 	// Verify that character with pCharacterName belongs to pWorldAccountID.
-	bool isOwner = mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
+	bool isOwner = DataStore::getInstance().checkOwnership(pWorldAccountID, pCharacterName);
 	if (!isOwner) {
 		Log::error("Attempt made to delete a character that does not belong to the account owner."); // TODO: More information.. this is haxxors.
 		return false;
 	}
-	return mDataStore->deleteCharacter(pCharacterName);
+	return DataStore::getInstance().deleteCharacter(pCharacterName);
 }
 
 bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {
@@ -339,7 +335,7 @@ bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharC
 	profile.binds[0].z = profile.z;
 	profile.binds[0].heading = profile.heading;
 
-	if (!mDataStore->createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
+	if (!DataStore::getInstance().createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
 		Log::error("Could not create character!"); // pCharacterName
 		return false;
 	}
@@ -349,15 +345,15 @@ bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharC
 
 bool World::isWorldEntryAllowed(uint32 pWorldAccountID, String pCharacterName)
 {
-	return mDataStore->checkOwnership(pWorldAccountID, pCharacterName);
+	return DataStore::getInstance().checkOwnership(pWorldAccountID, pCharacterName);
 }
 
 uint16 World::getZonePort(ZoneID pZoneID, uint16 pInstanceID) {
-	return mZoneManager->getZonePort(pZoneID, pInstanceID);
+	return ZoneManager::getInstance().getZonePort(pZoneID, pInstanceID);
 }
 
 void World::addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
-	mZoneManager->addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
+	ZoneManager::getInstance().addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
 }
 
 ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){

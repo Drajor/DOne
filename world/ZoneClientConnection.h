@@ -33,7 +33,7 @@ public:
 		Character_Select
 	};
 public:
-	ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone);
+	ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone);
 	~ZoneClientConnection();
 	ConnectionOrigin getConnectionOrigin() { return mConnectionOrigin; }
 	bool isConnected();
@@ -80,6 +80,8 @@ public:
 
 	void sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID);
 	void sendZoneChange(uint32 pZoneID, uint16 pInstanceID);
+
+	void sendGuildRank();
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -138,7 +140,6 @@ private:
 	bool mConnected;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface;
-	DataStore* mDataStore;
 	Zone* mZone;
 	Character* mCharacter;
 	ZoneConnectionStatus mZoneConnectionStatus;

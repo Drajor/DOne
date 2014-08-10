@@ -1,10 +1,10 @@
 #include "DataStore.h"
 #include "DataProvider.h"
 
-DataStore::DataStore() : mDataProvider(0) { }
-DataStore::~DataStore() { }
+#include "MySQLDataProvider.h"
 
-void DataStore::setProvider(DataProvider* pDataProvider) { mDataProvider = pDataProvider; }
+DataStore::DataStore() : mDataProvider(0) { }
+
 void DataStore::update() { mDataProvider->update(); }
 bool DataStore::getAccounts(std::list<AccountData*>& pAccounts) { return mDataProvider->getAccounts(pAccounts); }
 bool DataStore::isCharacterNameUnique(String pCharacterName) { return mDataProvider->isCharacterNameUnique(pCharacterName); }
@@ -28,6 +28,11 @@ bool DataStore::createAccount(uint32 pLoginServerAccountID, String pLoginServerA
 
 bool DataStore::saveCharacter(uint32 pCharacterID, PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
 	return mDataProvider->saveCharacter(pCharacterID, pProfile, pExtendedProfile);
+}
+
+bool DataStore::initialise() {
+	mDataProvider = new MySQLDataProvider();
+	return mDataProvider->initialise();
 }
 
 

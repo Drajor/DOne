@@ -55,6 +55,8 @@ public:
 	bool hasGuild() { return mGuild != nullptr; }
 	Guild* getGuild() { return mGuild; }
 	void setGuild(Guild* pGuild) { mGuild = pGuild; }
+	void setGuildID(GuildID pGuildID);
+	void setGuildRank(GuildRank pGuildRank);
 
 	// Raid
 	bool hasRaid() { return mRaid != nullptr; }

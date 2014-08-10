@@ -3,6 +3,8 @@
 #include "World.h"
 #include "ZoneManager.h"
 #include "GroupManager.h"
+#include "GuildManager.h"
+#include "RaidManager.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "Constants.h"
@@ -15,13 +17,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(World* pWorld, ZoneManager* pZoneManager, GroupManager* pGroupManager, GuildManager* pGuildManager, RaidManager* pRaidManager, DataStore* pDataStore, uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID) :
-	mWorld(pWorld),
-	mZoneManager(pZoneManager),
-	mGroupManager(pGroupManager),
-	mGuildManager(pGuildManager),
-	mRaidManager(pRaidManager),
-	mDataStore(pDataStore),
+Zone::Zone(uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID),
@@ -107,7 +103,7 @@ void Zone::update() {
 			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
 
 			// Remove World Authentication - allowing them to log back in.
-			mWorld->removeAuthentication(i->mCharacter->getAuthentication());
+			World::getInstance().removeAuthentication(i->mCharacter->getAuthentication());
 
 			// TODO: Save
 			_sendDespawn(i->mCharacter->getSpawnID(), false);
@@ -194,7 +190,7 @@ void Zone::_updateConnections() {
 
 				// Check: Grouped Character.
 				if (character->hasGroup())
-					mGroupManager->handleCharacterCamped(character);
+					GroupManager::getInstance().handleCharacterCamped(character);
 
 				delete connection;
 				delete character;
@@ -209,7 +205,7 @@ void Zone::_updateConnections() {
 				i = mConnections.erase(i); // Correct iterator.
 				character->onZoneOut();
 				mCharacters.remove(character);
-				mZoneManager->notifyCharacterZoneOut(character);
+				ZoneManager::getInstance().notifyCharacterZoneOut(character);
 
 				delete connection;
 				continue;
@@ -252,7 +248,7 @@ void Zone::_handleIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		Log::info("[Zone] New Zone Client Connection. " + Utility::zoneLogDetails(this));
-		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, mDataStore, this));
+		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this));
 	}
 }
 
@@ -405,7 +401,7 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMe
 }
 
 void Zone::notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
-	mZoneManager->notifyCharacterChatTell(pCharacter, pTargetName, pMessage);
+	ZoneManager::getInstance().notifyCharacterChatTell(pCharacter, pTargetName, pMessage);
 }
 
 bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage) {
@@ -485,7 +481,7 @@ void Zone::requestSave(Character*pCharacter) {
 	// Save taking 7ms - 90ms ... I will have to do something about that eventually.
 	// http://dev.mysql.com/doc/refman/5.5/en/too-many-connections.html
 	// Considering a DB connection per user and just copy data to another thread.
-	if (!mDataStore->saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
+	if (!DataStore::getInstance().saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 	}
@@ -494,7 +490,7 @@ void Zone::requestSave(Character*pCharacter) {
 void Zone::whoRequest(Character* pCharacter, WhoFilter& pFilter) {
 	// /who all
 	if (pFilter.mType == WHO_WORLD) {
-		mZoneManager->whoAllRequest(pCharacter, pFilter);
+		ZoneManager::getInstance().whoAllRequest(pCharacter, pFilter);
 	}
 	// /who
 	else if (pFilter.mType == WHO_ZONE) {
@@ -528,7 +524,7 @@ void Zone::notifyCharacterGroupInvite(Character* pCharacter, const String pToCha
 	}
 
 	// Search all zones.
-	toCharacter = mZoneManager->findCharacter(pToCharacterName, false, this);
+	toCharacter = ZoneManager::getInstance().findCharacter(pToCharacterName, false, this);
 	if (toCharacter) {
 		return;
 	}
@@ -554,7 +550,7 @@ Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZonin
 	if (character) return character;
 
 	// Proceed to global search.
-	return mZoneManager->findCharacter(pCharacterName, pIncludeZoning, this);
+	return ZoneManager::getInstance().findCharacter(pCharacterName, pIncludeZoning, this);
 }
 
 
@@ -568,7 +564,7 @@ void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCha
 		}
 		// Starting a new group.
 		else {
-			mGroupManager->makeGroup(toCharacter, pCharacter);
+			GroupManager::getInstance().makeGroup(toCharacter, pCharacter);
 		}
 	}
 }
@@ -585,13 +581,13 @@ void Zone::notifyCharacterGroupDisband(Character* pCharacter, const String& pRem
 		return;
 	}
 
-	mGroupManager->removeMemberRequest(pCharacter, removeCharacter);
+	GroupManager::getInstance().removeMemberRequest(pCharacter, removeCharacter);
 }
 
 void Zone::notifyCharacterChatGroup(Character* pCharacter, const String pMessage) {
 	// Check: Character has a group.
 	if (pCharacter->hasGroup()) {
-		mGroupManager->handleGroupMessage(pCharacter, pMessage);
+		GroupManager::getInstance().handleGroupMessage(pCharacter, pMessage);
 		return;
 	}
 
@@ -603,7 +599,7 @@ void Zone::notifyCharacterChatGroup(Character* pCharacter, const String pMessage
 void Zone::notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName) {
 	Character* newLeader = findCharacter(pNewLeaderName);
 	if (newLeader) {
-		mGroupManager->handleMakeLeaderRequest(pCharacter, newLeader);
+		GroupManager::getInstance().handleMakeLeaderRequest(pCharacter, newLeader);
 		return;
 	}
 
@@ -624,7 +620,7 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 	mLinkDeadCharacters.push_back(linkdeadCharacter);
 
 	if (pCharacter->hasGroup())
-		mGroupManager->handleCharacterLinkDead(pCharacter); // Notify Group Manager.
+		GroupManager::getInstance().handleCharacterLinkDead(pCharacter); // Notify Group Manager.
 
 	//if (character->hasRaid())
 	//	mRaidManager->handleCharacterLinkDead(character); // Notify Raid Manager.
@@ -636,15 +632,39 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 }
 
 void Zone::notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName) {
-
+	if (GuildManager::getInstance().makeGuild(pCharacter, pGuildName)) {
+		// TODO: Send guilds.
+	}
 }
 
 void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
 	// TODO: Are we expecting this character to zone out?
 
-	mZoneManager->registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
+	ZoneManager::getInstance().registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
 }
 
 Character* Zone::getZoningCharacter(String pCharacterName) {
-	return mZoneManager->getZoningCharacter(pCharacterName);
+	return ZoneManager::getInstance().getZoningCharacter(pCharacterName);
+}
+
+void Zone::notifyGuildsChanged() {
+	//std::list<String> guildNames = mGuildManager->getGuildNames();
+	//std::size_t packetSize = 64 * (guildNames.size()+1);
+
+	std::list<String> guildNames = { "One", "Two", "Three", "Four", "Five" };
+	std::size_t packetSize = 64 + (64 * 1500);
+	//memset()
+	
+	auto outPacket = new EQApplicationPacket(OP_GuildsList, packetSize);
+	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+	memset(outPacket->pBuffer, 0, packetSize);
+	dynamicStructure.movePointer(64);
+	for (auto i : guildNames) {
+		dynamicStructure.writeFixedString(i, MAX_GUILD_NAME_LENGTH);
+	}
+	for (auto i : mConnections) {
+		i->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
 }

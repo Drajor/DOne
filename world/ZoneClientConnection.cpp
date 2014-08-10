@@ -31,10 +31,9 @@ EQApplicationPacket* ZoneClientConnection::mGroupDisbandPacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupLeaderChangePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupUpdateMembersPacket = nullptr;
 
-ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, DataStore* pDataStore, Zone* pZone) :
+ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone) :
 mStreamInterface(pStreamInterface),
 mZone(pZone),
-mDataStore(pDataStore),
 mCharacter(nullptr),
 mCommandHandler(nullptr),
 mZoneConnectionStatus(ZoneConnectionStatus::NONE),
@@ -350,7 +349,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		auto extendedProfile = new ExtendedProfile_Struct();
 		memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
 		uint32 characterID = 0;
-		if (!mDataStore->loadCharacter(characterName, characterID, profile, extendedProfile)) {
+		if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
 			Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
 			dropConnection();
 			safe_delete(profile);
@@ -1670,12 +1669,11 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = 64;
-	static const auto MIN_GUILD_NAME_LENGTH = 4;
 
 	ARG_PTR_CHECK(pPacket);
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 	
-	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), 64);
+	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAX_GUILD_NAME_LENGTH);
 
 	// Check: Minimum length of guild name.
 	if (guildName.length() < MIN_GUILD_NAME_LENGTH) { return; }
@@ -1683,4 +1681,17 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 	if (mCharacter->hasGuild()) { return; }
 
 	mZone->notifyCharacterGuildCreate(mCharacter, guildName);
+}
+
+void ZoneClientConnection::sendGuildRank() {
+	ERROR_CONDITION(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
+	auto payload = reinterpret_cast<GuildSetRank_Struct*>(outPacket->pBuffer);
+	payload->Rank = mCharacter->getGuildRank();
+	payload->Banker = 0;
+	strcpy(payload->MemberName, mCharacter->getName().c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }

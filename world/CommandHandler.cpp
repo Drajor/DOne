@@ -109,7 +109,7 @@ public:
 	};
 
 	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		ZoneSearchResult result = pCharacter->getZone()->getZoneManager()->getAllZones();
+		ZoneSearchResult result = ZoneManager::getInstance().getAllZones();
 		for (auto i : result) {
 			StringStream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
 			pCharacter->getConnection()->sendMessage(MessageType::Aqua, ss.str());

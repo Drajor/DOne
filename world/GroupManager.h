@@ -25,6 +25,11 @@ class Group {
 
 class GroupManager {
 public:
+	static GroupManager& getInstance() {
+		static GroupManager instance;
+		return instance;
+	}
+
 	void makeGroup(Character* pLeader, Character* pMember);
 
 	// pCharacter is making the request to remove pRemoveCharacter.
@@ -40,4 +45,9 @@ private:
 	void _postMemberRemoval(Group* pGroup);
 	
 	std::list<Group*> mGroups;
+
+	GroupManager() {};
+	~GroupManager() {};
+	GroupManager(GroupManager const&);
+	void operator=(GroupManager const&);
 };

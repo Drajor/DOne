@@ -29,8 +29,11 @@ struct ZoneTransfer {
 
 class World {
 public:
-	World(DataStore* pDataStore);
-	~World();
+	static World& getInstance() {
+		static World instance;
+		return instance;
+	}
+
 	bool initialise();
 	void update();
 
@@ -87,9 +90,12 @@ private:
 	UCSConnection* mUCSConnection;
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
-	ZoneManager* mZoneManager;
 	AccountManager* mAccountManager;
-	DataStore* mDataStore;
 
 	std::list<WorldClientConnection*> mClientConnections;
+
+	World();
+	~World();
+	World(World const&);
+	void operator=(World const&);
 };

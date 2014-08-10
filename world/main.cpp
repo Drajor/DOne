@@ -48,57 +48,53 @@
 
 #include "World.h"
 #include "ZoneData.h"
+#include "GuildManager.h"
+#include "ZoneManager.h"
 #include "DataStore.h"
-#include "MySQLDataProvider.h"
 #include "LogSystem.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
 
 int main(int argc, char** argv) {
 	//system("pause");
-	Log::status("World starting!");
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
-	Log::info("Zone Data : Initialising");
+	// Initialise Zone Data.
 	if (!ZoneData::getInstance().initialise()){
-		Log::error("Zone Data : Failed to initialise");
+		Log::error("[Zone Data] Failed to initialise");
 		return 1;
 	}
-	Log::info("Zone Data : Initialised");
-
-	Log::info("Data Provider : Initialising");
-	MySQLDataProvider* dataProvider = new MySQLDataProvider();
-	if (!dataProvider->initialise()) {
-		Log::error("Data Provider : Failed to initialise");
+	// Initialise Guild Manager.
+	if (!GuildManager::getInstance().initialise()) {
+		Log::error("[Guild Manager] Failed to initialise");
 		return 1;
 	}
-	Log::info("Data Provider : Initialised");
-
-	DataStore* dataStore = new DataStore();
-	dataStore->setProvider(dataProvider);
-
-	Log::info("World : Initialising");
-	World* world = new World(dataStore);
-	if (!world->initialise()) {
-		Log::error("World : Failed to initialise");
+	// Initialise Zone Manager.
+	if (!ZoneManager::getInstance().initialise()) {
+		Log::error("[Zone Manager] Failed to initialise");
 		return 1;
 	}
-	Log::info("World : Initialised");
+	// Initialise Data Store.
+	if (!DataStore::getInstance().initialise()) {
+		Log::error("[Data Store] Failed to initialise");
+		return 1;
+	}
+	// Initialise World.
+	if (!World::getInstance().initialise()) {
+		Log::error("[World] Failed to initialise");
+		return 1;
+	}
 
 	while(true) {
 		Timer::SetCurrentTime();
-		world->update();
+		World::getInstance().update();
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		Sleep(15);
+		Sleep(5);
 	}
 	Log::status("World : Shutting down");
-
-	delete world;
-	delete dataStore;
-	delete dataProvider;
 
 	return 0;
 }

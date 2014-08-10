@@ -7,7 +7,7 @@ class DataStore;
 
 class AccountManager {
 public:
-	AccountManager(DataStore* pDataStore);
+	AccountManager();
 	~AccountManager();
 	bool initialise();
 
@@ -20,5 +20,4 @@ private:
 	void _clearAccounts();
 
 	std::list<AccountData*> mAccounts;
-	DataStore* mDataStore;
 };

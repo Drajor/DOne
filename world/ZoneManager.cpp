@@ -10,17 +10,10 @@
 #include "LogSystem.h"
 #include "Utility.h"
 
-ZoneManager::ZoneManager(World* pWorld, DataStore* pDataStore) :
-mWorld(pWorld),
-mDataStore(pDataStore),
-mGroupManager(nullptr),
-mGuildManager(nullptr),
-mRaidManager(nullptr)
-{ }
+ZoneManager::ZoneManager() { }
 
 ZoneManager::~ZoneManager() {
 	ZoneClientConnection::deinitialise();
-	safe_delete(mGroupManager);
 }
 
 
@@ -43,13 +36,14 @@ uint16 ZoneManager::getZonePort(ZoneID pZoneID, uint32 pInstanceID) {
 	return zone->getPort();
 }
 
-void ZoneManager::initialise() {
+bool ZoneManager::initialise() {
+	Log::status("[Zone Manager] Initialising.");
+
 	for (int i = 0; i < 200; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
-	mGroupManager = new GroupManager();
-	mGuildManager = new GuildManager();
-	mRaidManager = new RaidManager();
+
+	return true;
 }
 
 uint32 ZoneManager::_getNextZonePort() {
@@ -75,9 +69,9 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, Strin
 
 Zone* ZoneManager::_makeZone(ZoneID pZoneID, uint32 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
-	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << static_cast<std::uint16_t>(pZoneID) << " InstanceID: " << pInstanceID;
+	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
-	Zone* zone = new Zone(mWorld, this, mGroupManager, mGuildManager, mRaidManager, mDataStore, zonePort, pZoneID, pInstanceID);
+	Zone* zone = new Zone(zonePort, pZoneID, pInstanceID);
 	zone->initialise();
 	mZones.push_back(zone);
 	return zone;
@@ -152,7 +146,7 @@ void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, ui
 	zoneTransfer.mToZoneID = pZoneID;
 	zoneTransfer.mToInstanceID = pInstanceID;
 
-	mWorld->addCharacterZoneTransfer(zoneTransfer);
+	World::getInstance().addCharacterZoneTransfer(zoneTransfer);
 }
 
 Character* ZoneManager::getZoningCharacter(String pCharacterName) {

@@ -60,6 +60,19 @@ namespace Utility {
 			}
 		}
 
+		void writeFixedString(String pData, std::size_t pSize) {
+			if (mWritten + pSize <= mSize) {
+				strcpy(mPointer, pData.c_str());
+				mPointer += pData.length() + 1;
+				mWritten += pData.length() + 1;
+				const std::size_t difference = pSize - (pData.length() + 1);
+				memset(mPointer, 0, difference); // Fill remaining memory with zeros
+				mPointer += difference;
+				mWritten += difference;
+
+			}
+		}
+
 		void movePointer(int pBytes) {
 			// TODO: Check this!
 			mPointer += pBytes;

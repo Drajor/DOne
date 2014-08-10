@@ -3,14 +3,14 @@
 #include "Data.h"
 #include "LogSystem.h"
 
-AccountManager::AccountManager(DataStore* pDataStore) : mDataStore(pDataStore) { }
+AccountManager::AccountManager() { }
 static bool deleteAll(AccountData* pValue) { delete pValue; return true; };
 AccountManager::~AccountManager() {
 	_clearAccounts();
 }
 
 
-bool AccountManager::initialise() { return mDataStore->getAccounts(mAccounts); }
+bool AccountManager::initialise() { return DataStore::getInstance().getAccounts(mAccounts); }
 
 uint32 AccountManager::getWorldAccountID(uint32 pLoginServerAccountID) {
 	for (auto i : mAccounts) {
@@ -37,10 +37,10 @@ bool AccountManager::accountExists(uint32 pLoginServerAccountID) {
 }
 
 bool AccountManager::createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
-	if (mDataStore->createAccount(pLoginServerAccountID, pLoginServerAccountName)) {
+	if (DataStore::getInstance().createAccount(pLoginServerAccountID, pLoginServerAccountName)) {
 		// AccountManagers internal accounts are out of date so lets reload them.
 		_clearAccounts();
-		if (!mDataStore->getAccounts(mAccounts)) {
+		if (!DataStore::getInstance().getAccounts(mAccounts)) {
 			// Everything has gone to shit and the world should really just shut down.
 			Log::error("[Account Manager] getAccounts failed after a new account creation.");
 			return false; // Does not matter what is returned we have no account data now.

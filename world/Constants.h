@@ -14,6 +14,17 @@ typedef std::uint16_t InstanceID; // Zone Instance ID
 typedef std::uint16_t SpawnID;
 typedef std::string String;
 typedef std::stringstream StringStream;
+typedef std::uint32_t GuildID;
+typedef std::uint8_t GuildRank;
+
+static const auto MIN_GUILD_NAME_LENGTH = 4;
+static const auto MAX_GUILD_NAME_LENGTH = 64;
+
+enum GuildRanks : GuildRank {
+	Member = 0,
+	Officer = 1,
+	Leader = 2
+};
 
 enum PlayableRaceIDs {
 	Human = 1,
@@ -98,8 +109,8 @@ enum SpawnAppearanceType : int16 {
 	Levitate = 19,
 	GM = 20,
 	Anonymous = 21,
-	GuildID = 22,
-	GuildRank = 23,
+	SA_GuildID = 22,
+	SA_GuildRank = 23,
 	AFK = 24,
 	Pet = 25,
 	Split = 28,

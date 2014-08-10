@@ -1,19 +1,10 @@
 #pragma once
 
 #include "Constants.h"
-
 #include "ClientAuthentication.h"
-#include <list>
-#include "../common/types.h"
-#include <cstdint>
 
 class WorldClientConnection;
 class Zone;
-class GroupManager;
-class GuildManager;
-class RaidManager;
-class DataStore;
-class World;
 class Character;
 struct WhoFilter;
 
@@ -28,8 +19,12 @@ typedef std::list<ZoneSearchEntry> ZoneSearchResult;
 
 class ZoneManager {
 public:
-	ZoneManager(World* pWorld, DataStore* pDataStore);
-	~ZoneManager();
+	static ZoneManager& getInstance() {
+		static ZoneManager instance;
+		return instance;
+	}
+	bool initialise();
+
 	ZoneSearchResult getAllZones();
 
 	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
@@ -37,7 +32,7 @@ public:
 	void registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
 	Character* getZoningCharacter(String pCharacterName);
 
-	void initialise();
+	
 	void update();
 	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
 	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
@@ -47,14 +42,13 @@ public:
 private:
 	Zone* _makeZone(ZoneID pZoneID, uint32 pInstanceID = 0);
 	uint32 _getNextZonePort();
-	
 
-	World* mWorld;
-	GroupManager* mGroupManager;
-	GuildManager* mGuildManager;
-	RaidManager* mRaidManager;
-	DataStore* mDataStore;
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;
 	std::list<Character*> mZoningCharacters;
+
+	ZoneManager();
+	~ZoneManager();
+	ZoneManager(ZoneManager const&);
+	void operator=(ZoneManager const&);
 };
