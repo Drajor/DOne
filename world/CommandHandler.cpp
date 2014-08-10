@@ -291,8 +291,13 @@ public:
 	};
 
 	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		static const String RankNames[] = { "Member", "Officer", "Leader" };
-		pCharacter->message(MessageType::Yellow, RankNames[pCharacter->getGuildRank()] + " of " + std::to_string(pCharacter->getGuildID()) );
+		if (pCharacter->hasGuild()) {
+			static const String RankNames[] = { "Member", "Officer", "Leader" };
+			pCharacter->message(MessageType::Yellow, RankNames[pCharacter->getGuildRank()] + " of " + std::to_string(pCharacter->getGuildID()));
+		}
+		else {
+			pCharacter->message(MessageType::Yellow, "No Guild");
+		}
 	}
 };
 

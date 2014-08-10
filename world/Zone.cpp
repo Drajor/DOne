@@ -631,12 +631,6 @@ void Zone::_handleCharacterLinkDead(Character* pCharacter) {
 	notifyCharacterLinkDead(pCharacter);
 }
 
-void Zone::notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName) {
-	if (GuildManager::getInstance().makeGuild(pCharacter, pGuildName)) {
-		// TODO: Send guilds.
-	}
-}
-
 void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
 	// TODO: Are we expecting this character to zone out?
 
@@ -657,4 +651,11 @@ void Zone::notifyGuildsChanged() {
 	}
 	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
+}
+
+void Zone::notifyCharacterGuildChange(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildID, pCharacter->getGuildID(), true);
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildRank, pCharacter->getGuildRank(), true);
 }

@@ -80,6 +80,7 @@ public:
 	void sendZoneChange(uint32 pZoneID, uint16 pInstanceID);
 
 	void sendGuildRank();
+	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -134,7 +135,9 @@ private:
 	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 	void _handleZoneChange(const EQApplicationPacket* pPacket);
 	void _handleGuildCreate(const EQApplicationPacket* pPacket);
+	void _handleGuildDelete(const EQApplicationPacket* pPacket);
 	void _handleGuildInvite(const EQApplicationPacket* pPacket);
+	void _handleGuildInviteAccept(const EQApplicationPacket* pPacket);
 	void _handleGuildRemove(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;

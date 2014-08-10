@@ -82,8 +82,8 @@ public:
 	void notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName);
 
 	// Guild
-	void notifyCharacterGuildCreate(Character* pCharacter, const String pGuildName);
 	void notifyGuildsChanged();
+	void notifyCharacterGuildChange(Character* pCharacter);
 
 	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
 	Character* getZoningCharacter(String pCharacterName);
@@ -113,6 +113,7 @@ private:
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 	void _handleCharacterLinkDead(Character* pCharacter);
 	
+
 
 
 

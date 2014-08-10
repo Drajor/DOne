@@ -59,6 +59,11 @@ public:
 	void setGuildRank(GuildRank pGuildRank);
 	GuildRank getGuildRank();
 	GuildID getGuildID();
+	GuildID getPendingGuildInviteID() { return mPendingGuildInviteID; }
+	void setPendingGuildInviteID(GuildID pGuildID) { mPendingGuildInviteID = pGuildID; }
+	String getPendingGuildInviteName() { return mPendingGuildInviteName; }
+	void setPendingGuildInviteName(String pName) { mPendingGuildInviteName = pName; }
+	void clearPendingGuildInvite() { mPendingGuildInviteID = NO_GUILD; mPendingGuildInviteName = ""; }
 
 	// Raid
 	bool hasRaid() { return mRaid != nullptr; }
@@ -258,8 +263,11 @@ private:
 	Timer mAutoSave;
 
 	Group* mGroup;
-	Guild* mGuild;
 	Raid* mRaid;
+
+	Guild* mGuild;
+	GuildID mPendingGuildInviteID;
+	String mPendingGuildInviteName;
 
 	Zone* mZone;
 	ZoneClientConnection* mConnection;
@@ -273,4 +281,6 @@ private:
 	};
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();
+	
+
 };

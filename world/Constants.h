@@ -22,12 +22,13 @@ static auto MAX_CHARACTER_NAME_LENGTH = 64;
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
-static const auto MAX_GUILDS = 1000; // This value is arbitrary.
+static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 
 enum GuildRanks : GuildRank {
 	Member = 0,
 	Officer = 1,
-	Leader = 2
+	Leader = 2,
+	GR_None = 9
 };
 
 enum PlayableRaceIDs {

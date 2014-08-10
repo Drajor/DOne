@@ -34,9 +34,14 @@ public:
 
 	bool initialise();
 	void handleCharacterLogIn(Character* pCharacter, uint32 pGuildID);
-	void handleMemberRemove(Character* pCharacter, String pRemoveCharacterName);
 
-	bool makeGuild(Character* pCharacter, const String pGuildName);
+	void handleCreate(Character* pCharacter, const String pGuildName);
+	void handleDelete(Character* pCharacter);
+	void handleRemove(Character* pCharacter, String pRemoveCharacterName);
+	void handleInviteSent(Character* pCharacter, String pInviteCharacterName);
+	void handleInviteAccept(Character* pCharacter, String pInviterName);
+	void handleInviteDecline(Character* pCharacter, String InviterName);
+
 	std::list<String> getGuildNames();
 
 	char* _getGuildNames() { return &mGuildNames[0][0]; } // For sending OP_GuildsList
@@ -57,5 +62,4 @@ private:
 	~GuildManager();
 	GuildManager(GuildManager const&);
 	void operator=(GuildManager const&);
-
 };

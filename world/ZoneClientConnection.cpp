@@ -272,16 +272,24 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GroupMakeLeader:
 		// NOTE: This occurs when the player uses the /makeleader command.
-		// Note: This occurs when the player uses the context menu on the group window (Roles->Leader).
+		// NOTE: This occurs when the player uses the context menu on the group window (Roles->Leader).
 		_handleGroupMakeLeader(pPacket);
 		break;
 	case OP_GuildCreate:
 		// NOTE: This occurs when the player uses the /guildcreate command.
 		_handleGuildCreate(pPacket);
 		break;
+	case OP_GuildDelete:
+		// Note: This occurs when the player uses the /guilddelete command.
+		_handleGuildDelete(pPacket);
+		break;
 	case OP_GuildInvite:
 		// NOTE: This occurs when a player uses the /guildinvite command.
 		_handleGuildInvite(pPacket);
+	case OP_GuildInviteAccept:
+		// NOTE: This occurs when a player presses 'accept' on the guild invite window.
+		_handleGuildInviteAccept(pPacket);
+		break;
 	case OP_GuildRemove:
 		// NOTE: This occurs when the player uses the /guildremove command.
 		_handleGuildRemove(pPacket);
@@ -1680,16 +1688,22 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 	static const auto EXPECTED_PAYLOAD_SIZE = 64;
 
 	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild() == false);
 	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 	
 	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAX_GUILD_NAME_LENGTH);
 
 	// Check: Minimum length of guild name.
 	if (guildName.length() < MIN_GUILD_NAME_LENGTH) { return; }
-	// Check: Character already has a guild.
-	if (mCharacter->hasGuild()) { return; }
 
-	mZone->notifyCharacterGuildCreate(mCharacter, guildName);
+	GuildManager::getInstance().handleCreate(mCharacter, guildName);
+}
+
+void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+
+	GuildManager::getInstance().handleDelete(mCharacter);
 }
 
 void ZoneClientConnection::sendGuildRank() {
@@ -1731,6 +1745,8 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
 
 	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
+
+	GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
 }
 
 void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
@@ -1745,5 +1761,56 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 
 	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
 
-	GuildManager::getInstance().handleMemberRemove(mCharacter, toCharacterName);
+	GuildManager::getInstance().handleRemove(mCharacter, toCharacterName);
+}
+
+void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
+	EXPECTED(mConnected);
+	EXPECTED(pGuildID != NO_GUILD);
+	EXPECTED(mCharacter->hasGuild() == false);
+	EXPECTED(mCharacter->getPendingGuildInviteID() == pGuildID);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildInvite, sizeof(GuildCommand_Struct));
+	auto payload = reinterpret_cast<GuildCommand_Struct*>(outPacket->pBuffer);
+
+	payload->guildeqid = pGuildID;
+	// NOTE: myname/othername were poor choices for variable names.
+	strcpy(payload->othername, mCharacter->getName().c_str());
+	strcpy(payload->myname, pInviterName.c_str());
+	
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mConnected);
+	if (mCharacter->hasGuild()) { return; } // NOTE: UF sends OP_GuildInvite and OP_GuildInviteAccept(response=2,guildid=0) when using /guildinvite .. not sure why.
+	EXPECTED(mCharacter->getPendingGuildInviteID() != NO_GUILD); // Check: This Character has actually been invited to *A* Guild
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildInviteAccept_Struct));
+
+	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);
+	String characterName = Utility::safeString(payload->newmember, MAX_CHARACTER_NAME_LENGTH);
+	String inviterName = Utility::safeString(payload->inviter, MAX_CHARACTER_NAME_LENGTH);
+
+	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
+	EXPECTED(mCharacter->getPendingGuildInviteName() == inviterName); // Check: This Character is responding to the correct inviter.
+	EXPECTED(mCharacter->getPendingGuildInviteID() == payload->guildeqid); // Check: This Character is responding to the correct Guild invite.
+	
+	static const auto Accept = 0;
+	static const auto Decline = 5;
+
+	// Character is accepting the invite.
+	if (payload->response == Accept) {
+		GuildManager::getInstance().handleInviteAccept(mCharacter, inviterName);
+		return;
+	}
+	// Character is declining the invite.
+	if (payload->response == Decline) {
+		GuildManager::getInstance().handleInviteDecline(mCharacter, inviterName);
+		return;
+	}
+
+	Log::error("[Zone Client Connection] Got unexpected response(" + std::to_string(payload->response) + ") to Guild invite " + Utility::characterLogDetails(mCharacter));
+	mCharacter->clearPendingGuildInvite();
 }

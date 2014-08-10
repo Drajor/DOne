@@ -60,7 +60,9 @@ mGuild(nullptr),
 mRaid(nullptr),
 mIsZoning(false),
 mIsLinkDead(false),
-mIsZoningOut(false)
+mIsZoningOut(false),
+mPendingGuildInviteID(NO_GUILD),
+mPendingGuildInviteName("")
 { }
 Character::~Character() {
 	delete mProfile;
