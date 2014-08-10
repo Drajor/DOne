@@ -211,7 +211,7 @@ Guild* GuildManager::_findByID(const GuildID pID) {
 
 void GuildManager::handleMemberRemove(Character* pCharacter, String pRemoveCharacterName) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION(pCharacter->hasGuild());
+	EXPECTED(pCharacter->hasGuild());
 
 	// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
 	// "You must transfer leadership or delete the guild before removing yourself."

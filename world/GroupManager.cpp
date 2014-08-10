@@ -54,7 +54,7 @@ static const int MAX_NUM_GROUP_MEMBERS = 6;
 void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
 	ARG_PTR_CHECK(pLeader);
 	ARG_PTR_CHECK(pMember);
-	ERROR_CONDITION(!(pLeader->hasGroup() || pMember->hasGroup())); // Both Characters must not have groups.
+	EXPECTED(!(pLeader->hasGroup() || pMember->hasGroup())); // Both Characters must not have groups.
 
 	mGroups.push_back(new Group(pLeader, pMember));
 }
@@ -62,8 +62,8 @@ void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
 void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	ARG_PTR_CHECK(pRemoveCharacter);
-	ERROR_CONDITION(pCharacter->getGroup() && pRemoveCharacter->getGroup()); // Both Characters must have valid groups.
-	ERROR_CONDITION((pCharacter->getGroup() == pRemoveCharacter->getGroup())); // Both Characters must be in the same group.
+	EXPECTED(pCharacter->getGroup() && pRemoveCharacter->getGroup()); // Both Characters must have valid groups.
+	EXPECTED((pCharacter->getGroup() == pRemoveCharacter->getGroup())); // Both Characters must be in the same group.
 	
 	// Character is removing them self from the group.
 	if (pCharacter == pRemoveCharacter) {
@@ -82,7 +82,7 @@ void GroupManager::removeMemberRequest(Character* pCharacter, Character* pRemove
 
 void GroupManager::handleCharacterLinkDead(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+	EXPECTED(pCharacter->getGroup()); // Character must have a valid group.
 
 	Group* group = pCharacter->getGroup();
 	group->removeMember(pCharacter);
@@ -94,7 +94,7 @@ void GroupManager::handleCharacterLinkDead(Character* pCharacter) {
 
 void GroupManager::handleCharacterCamped(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+	EXPECTED(pCharacter->getGroup()); // Character must have a valid group.
 
 	Group* group = pCharacter->getGroup();
 	group->removeMember(pCharacter);
@@ -105,7 +105,7 @@ void GroupManager::handleCharacterCamped(Character* pCharacter) {
 
 void GroupManager::_disbandGroup(Group* pGroup) {
 	ARG_PTR_CHECK(pGroup);
-	ERROR_CONDITION(pGroup->mMembers.size() == 1); // Only disband groups with one member left.
+	EXPECTED(pGroup->mMembers.size() == 1); // Only disband groups with one member left.
 
 	Character* lastMember = *pGroup->mMembers.begin();
 	pGroup->mMembers.clear();
@@ -119,7 +119,7 @@ void GroupManager::_disbandGroup(Group* pGroup) {
 
 void GroupManager::handleGroupMessage(Character* pCharacter, const String pMessage) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION(pCharacter->getGroup()); // Character must have a valid group.
+	EXPECTED(pCharacter->getGroup()); // Character must have a valid group.
 
 	_sendMessage(pCharacter->getGroup(), pCharacter->getName(), pMessage);
 }
@@ -140,9 +140,9 @@ void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessa
 void GroupManager::handleMakeLeaderRequest(Character* pCharacter, Character* pNewLeader) {
 	ARG_PTR_CHECK(pCharacter);
 	ARG_PTR_CHECK(pNewLeader);
-	ERROR_CONDITION(pCharacter->getGroup() && pNewLeader->getGroup()); // Both Characters must have valid groups.
-	ERROR_CONDITION((pCharacter->getGroup() == pNewLeader->getGroup())); // Both Characters must be in the same group.
-	ERROR_CONDITION((pCharacter == pCharacter->getGroup()->mLeader)); // The requesting Character is the group leader.
+	EXPECTED(pCharacter->getGroup() && pNewLeader->getGroup()); // Both Characters must have valid groups.
+	EXPECTED((pCharacter->getGroup() == pNewLeader->getGroup())); // Both Characters must be in the same group.
+	EXPECTED((pCharacter == pCharacter->getGroup()->mLeader)); // The requesting Character is the group leader.
 
 	Group* group = pCharacter->getGroup();
 	group->mLeader = pNewLeader;
@@ -187,8 +187,8 @@ Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 
 void Group::addMember(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION((pCharacter->getGroup() == nullptr)); // Check: Character does not have a group.
-	ERROR_CONDITION((mMembers.size() < MAX_NUM_GROUP_MEMBERS)); // Check: Group is not already full.
+	EXPECTED((pCharacter->getGroup() == nullptr)); // Check: Character does not have a group.
+	EXPECTED((mMembers.size() < MAX_NUM_GROUP_MEMBERS)); // Check: Group is not already full.
 
 	mMembers.push_back(pCharacter);
 	pCharacter->setGroup(this);
@@ -198,8 +198,8 @@ void Group::addMember(Character* pCharacter) {
 
 void Group::removeMember(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
-	ERROR_CONDITION((pCharacter->getGroup() == this)); // Check: Pointer matching (sanity).
-	ERROR_CONDITION(isMember(pCharacter)); // Check: Character is already a member of this group.
+	EXPECTED((pCharacter->getGroup() == this)); // Check: Pointer matching (sanity).
+	EXPECTED(isMember(pCharacter)); // Check: Character is already a member of this group.
 
 	mMembers.remove(pCharacter);
 	pCharacter->setGroup(nullptr);
@@ -215,7 +215,7 @@ void Group::sendMemberLeaveMessage(String pLeaverName) {
 }
 
 void Group::sendGroupLeaderChange() {
-	ERROR_CONDITION(mLeader); // Check: mLeader pointer is valid.
+	EXPECTED(mLeader); // Check: mLeader pointer is valid.
 
 	// TODO: Zoning members.
 	for (auto i : mMembers)
