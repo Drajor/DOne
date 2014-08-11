@@ -12,6 +12,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "Utility.h"
+#include "Limits.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -1685,16 +1686,12 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = 64;
-
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild() == false);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == MAX_GUILD_NAME_LENGTH);
 	
 	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAX_GUILD_NAME_LENGTH);
-
-	// Check: Minimum length of guild name.
-	if (guildName.length() < MIN_GUILD_NAME_LENGTH) { return; }
+	EXPECTED(Limits::guildNameLength(guildName));
 
 	GuildManager::getInstance().handleCreate(mCharacter, guildName);
 }
@@ -1743,8 +1740,9 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 
 	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
 	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
-
-	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
+	EXPECTED(Limits::characterNameLength(toCharacterName)); // NOTE: Client does not check this..
+	EXPECTED(Limits::characterNameLength(fromCharacterName));
+	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
 
 	GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
 }
@@ -1756,10 +1754,12 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
+
 	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
 	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
-
-	if (fromCharacterName != mCharacter->getName()) { return; } // Check: Sanity.
+	EXPECTED(Limits::characterNameLength(toCharacterName));
+	EXPECTED(Limits::characterNameLength(fromCharacterName));
+	EXPECTED(fromCharacterName == mCharacter->getName()) // Check: Sanity.
 
 	GuildManager::getInstance().handleRemove(mCharacter, toCharacterName);
 }
@@ -1790,9 +1790,11 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildInviteAccept_Struct));
 
 	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);
+	
 	String characterName = Utility::safeString(payload->newmember, MAX_CHARACTER_NAME_LENGTH);
 	String inviterName = Utility::safeString(payload->inviter, MAX_CHARACTER_NAME_LENGTH);
-
+	EXPECTED(Limits::characterNameLength(characterName));
+	EXPECTED(Limits::characterNameLength(inviterName));
 	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
 	EXPECTED(mCharacter->getPendingGuildInviteName() == inviterName); // Check: This Character is responding to the correct inviter.
 	EXPECTED(mCharacter->getPendingGuildInviteID() == payload->guildeqid); // Check: This Character is responding to the correct Guild invite.

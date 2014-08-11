@@ -23,7 +23,13 @@ namespace Utility {
 	String zoneLogDetails(Zone* pZone);
 
 	static String safeString(char* pCString, unsigned int pMaxSize) {
-		pCString[pMaxSize - 1] = '\0'; // Ensure there is a null terminator at the very end
+		// strnlen_s - http://msdn.microsoft.com/en-us/library/z50ty2zh.aspx
+		std::size_t strLength = strnlen_s(pCString, pMaxSize);
+		if (strLength == pMaxSize) {
+			// Not null terminated.
+			Log::error("[safeString] Got string missing null terminator.");
+			return "";
+		}
 		return String(pCString);
 	}
 

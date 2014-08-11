@@ -836,20 +836,6 @@ void WorldClientConnection::_queuePacket(const EQApplicationPacket* pPacket, boo
 }
 
 void WorldClientConnection::_sendGuildList() {
-//	EQApplicationPacket *outapp;
-//	outapp = new EQApplicationPacket(OP_GuildsList);
-//
-//	//ask the guild manager to build us a nice guild list packet
-//	outapp->pBuffer = guild_mgr.makeGuildList("", outapp->size);
-//	if(outapp->pBuffer == nullptr) {
-//		clog(GUILDS__ERROR, "Unable to make guild list!");
-//		return;
-//	}
-//
-//	clog(GUILDS__OUT_PACKETS, "Sending OP_GuildsList of length %d", outapp->size);
-////	_pkt(GUILDS__OUT_PACKET_TRACE, outapp);
-//
-//	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
 	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());

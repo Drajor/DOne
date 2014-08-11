@@ -27,6 +27,7 @@ SET(world_sources
 	GroupManager.cpp
 	GuildManager.cpp
 	RaidManager.cpp
+	Limits.cpp
 )
 
 SET(world_headers
@@ -56,6 +57,7 @@ SET(world_headers
 	GroupManager.h
 	GuildManager.h
 	RaidManager.h
+	Limits.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})
