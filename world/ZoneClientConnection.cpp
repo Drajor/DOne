@@ -1786,7 +1786,7 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mConnected);
 	if (mCharacter->hasGuild()) { return; } // NOTE: UF sends OP_GuildInvite and OP_GuildInviteAccept(response=2,guildid=0) when using /guildinvite .. not sure why.
-	EXPECTED(mCharacter->getPendingGuildInviteID() != NO_GUILD); // Check: This Character has actually been invited to *A* Guild
+	EXPECTED(mCharacter->hasPendingGuildInvite()); // Check: This Character has actually been invited to *A* Guild
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildInviteAccept_Struct));
 
 	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);

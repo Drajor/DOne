@@ -59,6 +59,11 @@ public:
 	void setGuildRank(GuildRank pGuildRank);
 	GuildRank getGuildRank();
 	GuildID getGuildID();
+	void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); }
+	void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None); }
+
+	// Pending Guild Invite
+	bool hasPendingGuildInvite() { return mPendingGuildInviteID != NO_GUILD; }
 	GuildID getPendingGuildInviteID() { return mPendingGuildInviteID; }
 	void setPendingGuildInviteID(GuildID pGuildID) { mPendingGuildInviteID = pGuildID; }
 	String getPendingGuildInviteName() { return mPendingGuildInviteName; }

@@ -109,9 +109,7 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	guild->mMembers.push_back({ pCharacter->getID(), GuildRanks::Leader });
 	guild->mOnlineMembers.push_back(pCharacter);
 
-	pCharacter->setGuild(guild);
-	pCharacter->setGuildID(guild->mID);
-	pCharacter->setGuildRank(GuildRanks::Leader);
+	pCharacter->setGuild(guild, guild->mID, GuildRanks::Leader);
 
 	// Notify the Zone of the Character joining.
 	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
@@ -130,9 +128,7 @@ void GuildManager::handleDelete(Character* pCharacter) {
 	Guild* guild = pCharacter->getGuild();
 
 	for (auto i : guild->mOnlineMembers) {
-		i->setGuild(nullptr);
-		i->setGuildID(NO_GUILD);
-		i->setGuildRank(GuildRanks::GR_None);
+		pCharacter->clearGuild();
 
 		// Notify all zones of all online Characters.
 		i->getZone()->notifyCharacterGuildChange(pCharacter);
@@ -171,9 +167,7 @@ void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterNa
 		// Remove Character from online members.
 		guild->mOnlineMembers.remove(pCharacter);
 
-		pCharacter->setGuild(nullptr);
-		pCharacter->setGuildID(NO_GUILD);
-		pCharacter->setGuildRank(GuildRanks::GR_None);
+		pCharacter->clearGuild();
 
 		// Notify the Zone of the Character leaving.
 		pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
@@ -200,12 +194,12 @@ void GuildManager::handleInviteSent(Character* pCharacter, String pInviteCharact
 	}
 	// Character to be invited already has a Guild.
 	if (character->hasGuild()) {
-		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " already has a Guild.");
+		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " already has a guild.");
 		return;
 	}
 	// Character to be invited already has a pending Guild invite.
-	if (character->getPendingGuildInviteID() != NO_GUILD) {
-		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " is considering joining another Guild.");
+	if (character->hasPendingGuildInvite()) {
+		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " is considering joining another guild.");
 		return;
 	}
 
@@ -222,10 +216,7 @@ void GuildManager::handleInviteAccept(Character* pCharacter, String pInviterName
 	guild->mMembers.push_back({ pCharacter->getID(), GuildRanks::Member });
 	guild->mOnlineMembers.push_back(pCharacter);
 
-	pCharacter->setGuild(guild);
-	pCharacter->setGuildID(guild->mID);
-	pCharacter->setGuildRank(GuildRanks::Member);
-
+	pCharacter->setGuild(guild, guild->mID, GuildRanks::Member);
 	pCharacter->clearPendingGuildInvite();
 
 	// TODO: Notify Inviter.
@@ -323,9 +314,7 @@ void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) 
 
 	// Check: Guild does not exist. It was probably deleted.
 	if (!guild) {
-		pCharacter->setGuild(nullptr);
-		pCharacter->setGuildID(NO_GUILD);
-		pCharacter->setGuildRank(GuildRanks::GR_None);
+		pCharacter->clearGuild();
 		return;
 	}
 
@@ -333,9 +322,11 @@ void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) 
 	bool found = false;
 	for (auto i : guild->mMembers) {
 		if (i.mID == pCharacter->getID()) {
-			pCharacter->setGuild(guild);
-			pCharacter->setGuildID(guild->mID); // This should not really be required.
-			pCharacter->setGuildRank(i.mRank); // Character rank may have changed since log in (TODO: Determine if this is even possible).
+			
+			pCharacter->setGuild(guild, guild->mID, i.mRank);
+			//pCharacter->setGuild(guild);
+			//pCharacter->setGuildID(guild->mID); // This should not really be required.
+			//pCharacter->setGuildRank(i.mRank); // Character rank may have changed since log in (TODO: Determine if this is even possible).
 
 			// TODO: Notify guild that player is online.
 			guild->mOnlineMembers.push_back(pCharacter);
@@ -347,9 +338,7 @@ void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) 
 
 	// Character was not found in Guild members (save de-sync or removed while offline/zoning?)
 	if (!found) {
-		pCharacter->setGuild(nullptr);
-		pCharacter->setGuildID(NO_GUILD);
-		pCharacter->setGuildRank(GuildRanks::GR_None);
+		pCharacter->clearGuild();
 	}
 }
 
