@@ -58,8 +58,37 @@ bool GuildManager::initialise() {
 	return true;
 }
 
+void GuildManager::notifyConnect(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	Guild* guild = pCharacter->getGuild();
+	guild->mOnlineMembers.push_back(pCharacter);
+
+	// TODO: Guild Notify
+	// [System] X has come online.
+}
+
+void GuildManager::notifyDisconnect(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	// TODO: Guild Notify
+	// [System] X has gone offline.
+}
+
+void GuildManager::notifyLinkDead(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	Guild* guild = pCharacter->getGuild();
+	guild->mOnlineMembers.remove(pCharacter);
+}
+
+
 void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) {
 	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild() == false);
 
 	// Check: Guild name already exists.
 	if (_findGuildByName(pGuildName)) {
@@ -93,7 +122,6 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	return;
 }
 
-
 void GuildManager::handleDelete(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
@@ -114,6 +142,103 @@ void GuildManager::handleDelete(Character* pCharacter) {
 	delete guild;
 
 	_save();
+}
+
+void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterName) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
+	// "You must transfer leadership or delete the guild before removing yourself."
+
+	// Self remove.
+	if (pCharacter->getName() == pRemoveCharacterName) {
+		// Prevent leader removing them self (requires packet forging).
+		if (pCharacter->getGuildRank() == GuildRanks::Leader) {
+			// TODO: Log error.
+			return;
+		}
+
+		Guild* guild = pCharacter->getGuild();
+
+		// Remove Character from Guild members.
+		for (auto i = guild->mMembers.begin(); i != guild->mMembers.end(); i++) {
+			if (i->mID == pCharacter->getID()) {
+				guild->mMembers.erase(i);
+				break;
+			}
+		}
+		// Remove Character from online members.
+		guild->mOnlineMembers.remove(pCharacter);
+
+		pCharacter->setGuild(nullptr);
+		pCharacter->setGuildID(NO_GUILD);
+		pCharacter->setGuildRank(GuildRanks::GR_None);
+
+		// Notify the Zone of the Character leaving.
+		pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
+	}
+
+	// OP_GuildManageRemove
+	_save();
+}
+
+void GuildManager::handleInviteSent(Character* pCharacter, String pInviteCharacterName) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	auto guild = pCharacter->getGuild();
+
+	// TODO: Check pCharacter is officer/leader.
+
+	auto character = ZoneManager::getInstance().findCharacter(pInviteCharacterName);
+
+	// Character to be invited was not found.
+	if (!character) {
+		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " could not be found.");
+		return;
+	}
+	// Character to be invited already has a Guild.
+	if (character->hasGuild()) {
+		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " already has a Guild.");
+		return;
+	}
+	// Character to be invited already has a pending Guild invite.
+	if (character->getPendingGuildInviteID() != NO_GUILD) {
+		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " is considering joining another Guild.");
+		return;
+	}
+
+	character->setPendingGuildInviteID(guild->mID);
+	character->setPendingGuildInviteName(pCharacter->getName());
+	character->getConnection()->sendGuildInvite(pCharacter->getName(), guild->mID);
+}
+
+void GuildManager::handleInviteAccept(Character* pCharacter, String pInviterName) {
+	ARG_PTR_CHECK(pCharacter);
+	Guild* guild = _findByID(pCharacter->getPendingGuildInviteID());
+	EXPECTED(guild != nullptr);
+
+	guild->mMembers.push_back({ pCharacter->getID(), GuildRanks::Member });
+	guild->mOnlineMembers.push_back(pCharacter);
+
+	pCharacter->setGuild(guild);
+	pCharacter->setGuildID(guild->mID);
+	pCharacter->setGuildRank(GuildRanks::Member);
+
+	pCharacter->clearPendingGuildInvite();
+
+	// TODO: Notify Inviter.
+
+	// Notify the Zone of the Character joining.
+	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
+	pCharacter->getConnection()->sendGuildRank();
+	_save();
+}
+
+void GuildManager::handleInviteDecline(Character* pCharacter, String InviterName) {
+	ARG_PTR_CHECK(pCharacter);
+	pCharacter->clearPendingGuildInvite();
 }
 
 Guild* GuildManager::_findGuildByName(const String pGuildName) {
@@ -235,101 +360,4 @@ Guild* GuildManager::_findByID(const GuildID pID) {
 	}
 
 	return nullptr;
-}
-
-void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterName) {
-	ARG_PTR_CHECK(pCharacter);
-	EXPECTED(pCharacter->hasGuild());
-
-	// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
-	// "You must transfer leadership or delete the guild before removing yourself."
-
-	// Self remove.
-	if (pCharacter->getName() == pRemoveCharacterName) {
-		// Prevent leader removing them self (requires packet forging).
-		if (pCharacter->getGuildRank() == GuildRanks::Leader) {
-			// TODO: Log error.
-			return;
-		}
-
-		Guild* guild = pCharacter->getGuild();
-
-		// Remove Character from Guild members.
-		for (auto i = guild->mMembers.begin(); i != guild->mMembers.end(); i++) {
-			if (i->mID == pCharacter->getID()) {
-				guild->mMembers.erase(i);
-				break;
-			}
-		}
-		// Remove Character from online members.
-		guild->mOnlineMembers.remove(pCharacter);
-
-		pCharacter->setGuild(nullptr);
-		pCharacter->setGuildID(NO_GUILD);
-		pCharacter->setGuildRank(GuildRanks::Member);
-
-		// Notify the Zone of the Character leaving.
-		pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
-	}
-
-	// OP_GuildManageRemove
-	_save();
-}
-
-void GuildManager::handleInviteSent(Character* pCharacter, String pInviteCharacterName) {
-	ARG_PTR_CHECK(pCharacter);
-	EXPECTED(pCharacter->hasGuild());
-
-	auto guild = pCharacter->getGuild();
-	
-	// TODO: Check pCharacter is officer/leader.
-
-	auto character = ZoneManager::getInstance().findCharacter(pInviteCharacterName);
-
-	// Character to be invited was not found.
-	if (!character) {
-		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " could not be found.");
-		return;
-	}
-	// Character to be invited already has a Guild.
-	if (character->hasGuild()) {
-		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " already has a Guild.");
-		return;
-	}
-	// Character to be invited already has a pending Guild invite.
-	if (character->getPendingGuildInviteID() != NO_GUILD) {
-		pCharacter->message(MessageType::Yellow, pInviteCharacterName + " is considering joining another Guild.");
-		return;
-	}
-
-	character->setPendingGuildInviteID(guild->mID);
-	character->setPendingGuildInviteName(pCharacter->getName());
-	character->getConnection()->sendGuildInvite(pCharacter->getName(), guild->mID);
-}
-
-void GuildManager::handleInviteAccept(Character* pCharacter, String pInviterName) {
-	ARG_PTR_CHECK(pCharacter);
-	Guild* guild = _findByID(pCharacter->getPendingGuildInviteID());
-	EXPECTED(guild != nullptr);
-
-	guild->mMembers.push_back({pCharacter->getID(), GuildRanks::Member});
-	guild->mOnlineMembers.push_back(pCharacter);
-
-	pCharacter->setGuild(guild);
-	pCharacter->setGuildID(guild->mID);
-	pCharacter->setGuildRank(GuildRanks::Member);
-	
-	pCharacter->clearPendingGuildInvite();
-
-	// TODO: Notify Inviter.
-
-	// Notify the Zone of the Character joining.
-	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
-	pCharacter->getConnection()->sendGuildRank();
-	_save();
-}
-
-void GuildManager::handleInviteDecline(Character* pCharacter, String InviterName) {
-	ARG_PTR_CHECK(pCharacter);
-	pCharacter->clearPendingGuildInvite();
 }

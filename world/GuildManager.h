@@ -33,6 +33,11 @@ public:
 	}
 
 	bool initialise();
+	
+	void notifyConnect(Character* pCharacter);
+	void notifyDisconnect(Character* pCharacter);
+	void notifyLinkDead(Character* pCharacter);
+
 	void handleCharacterLogIn(Character* pCharacter, uint32 pGuildID);
 
 	void handleCreate(Character* pCharacter, const String pGuildName);

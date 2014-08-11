@@ -1,4 +1,5 @@
 #include "WorldClientConnection.h"
+#include "GuildManager.h"
 
 #include "../common/debug.h"
 #include "../common/EQPacket.h"
@@ -350,7 +351,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 				_sendPostEnterWorld();
 			}
 			else {
-				_sendGuildList();
+				_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
 				_sendLogServer();
 				_sendApproveWorld();
 				_sendEnterWorld(""); // Empty character name when coming from Server Select. 
@@ -849,6 +850,13 @@ void WorldClientConnection::_sendGuildList() {
 ////	_pkt(GUILDS__OUT_PACKET_TRACE, outapp);
 //
 //	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
+	auto outPacket = new EQApplicationPacket(OP_GuildsList);
+	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+
+	mStreamInterface->QueuePacket(outPacket);
+	outPacket->pBuffer = nullptr;
+	safe_delete(outPacket);
 }
 
 // @merth: I have no idea what this struct is for, so it's hardcoded for now
