@@ -132,7 +132,9 @@ Character* ZoneManager::findCharacter(const String pCharacterName, bool pInclude
 	return nullptr;
 }
 
-void ZoneManager::notifyCharacterZoneOut(Character* pCharacter) {
+void ZoneManager::onLeaveZone(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
 	mZoningCharacters.push_back(pCharacter);
 }
 

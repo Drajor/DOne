@@ -1,5 +1,7 @@
 #include "ZoneClientConnection.h"
 #include "GuildManager.h"
+#include "GroupManager.h"
+#include "RaidManager.h"
 #include "Zone.h"
 #include "ZoneData.h"
 #include "Character.h"
@@ -251,6 +253,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleWhoAllRequest(pPacket);
 	case OP_GroupInvite:
 		// NOTE: This occurs when the player presses 'Invite' on the group window.
+		// NOTE: This also occurs when the player uses the /invite command.
+		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
 		_handleGroupInvite(pPacket);
 		break;
 	case OP_GroupInvite2:
@@ -258,6 +262,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GroupFollow:
 		// NOTE: This occurs when the player presses 'Follow' on the group window.
+		// NOTE: This also occurs when the player uses the /invite command when they have a current group invitation.
+		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
 		_handleGroupFollow(pPacket);
 		break;
 	case OP_GroupFollow2:
@@ -265,10 +271,13 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GroupCancelInvite:
 		// NOTE: This occurs when the player presses 'Decline' on the group window.
+		// NOTE: This also occurs when the player uses the /disband command when they have a current group invitation.
+		// NOTE: This also occurs when using the 'Disband' mapped command (Options->Keys).
 		_handleGroupCanelInvite(pPacket);
 		break;
 	case OP_GroupDisband:
-		// Player pressed 'Disband' on group window OR entered /disband
+		// NOTE: This occurs when the player presses 'Disband' on group window.
+		// NOTE: This occurs when the player uses the /disband command.
 		_handleGroupDisband(pPacket);
 		break;
 	case OP_GroupMakeLeader:
@@ -554,6 +563,16 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	_sendZoneServerReady();
 	_sendExpZoneIn();
 	_sendWorldObjectsSent();
+
+	if (mCharacter->hasGuild()) {
+		GuildManager::getInstance().onEnterZone(mCharacter);
+	}
+	if (mCharacter->hasGroup()) {
+		GroupManager::getInstance().onEnterZone(mCharacter);
+	}
+	if (mCharacter->hasRaid()) {
+		RaidManager::getInstance().onEnterZone(mCharacter);
+	}
 }
 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
@@ -763,7 +782,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	case ChannelID::CH_GUILD:
 		break;
 	case ChannelID::CH_GROUP:
-		mZone->notifyCharacterChatGroup(mCharacter, message);
+		GroupManager::getInstance().handleMessage(mCharacter, message);
 		break;
 	case ChannelID::CH_SHOUT:
 		mZone->notifyCharacterChatShout(mCharacter, message);
@@ -900,7 +919,6 @@ void ZoneClientConnection::_sendPreLogOutReply() {
 void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 	_sendLogOutReply();
 	mCharacter->setZoningOut();
-	mZone->notifyCharacterZoneOut(mCharacter);
 
 	// NOTE: Zone picks up the dropped connection next update.
 	dropConnection();
@@ -1415,25 +1433,19 @@ void ZoneClientConnection::sendGuildMessage(const String& pSenderName, const Str
 
 // NOTE: This occurs when the player presses 'Invite' on the group window.
 void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupInvite_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupInvite_Struct));
 
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
-	const String inviterName = Utility::safeString(payload->inviter_name, 64);
-	const String inviteeName = Utility::safeString(payload->invitee_name, 64);
 
-	// Check: Inviter is this Character
-	if (inviterName != mCharacter->getName()) {
-		return;
-	}
-	// Check Invitee is not this Character
-	if (inviteeName == mCharacter->getName()) {
-		return;
-	}
-
-	mZone->notifyCharacterGroupInvite(mCharacter, inviteeName);
+	const String inviterName = Utility::safeString(payload->inviter_name, MAX_CHARACTER_NAME_LENGTH);
+	const String inviteeName = Utility::safeString(payload->invitee_name, MAX_CHARACTER_NAME_LENGTH);
+	EXPECTED(Limits::characterNameLength(inviterName));
+	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(inviterName == mCharacter->getName()); // Check: Spoofing
+	EXPECTED(inviteeName != mCharacter->getName()); // Check: Not inviting ourself
+	
+	GroupManager::getInstance().handleInviteSent(mCharacter, inviteeName);
 }
 
 void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
@@ -1448,37 +1460,35 @@ void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
 	safe_delete(outPacket);
 }
 
-// NOTE: This occurs when the player presses 'Follow' on the group window.
 void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupGeneric_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupGeneric_Struct));
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
-	String inviterName = Utility::safeString(payload->name1, 64); // Character who invited.
-	String inviteeName = Utility::safeString(payload->name2, 64); // Character accepting invite.
+	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH); // Character who invited.
+	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH); // Character accepting invite.
+	EXPECTED(Limits::characterNameLength(inviterName));
+	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
 
-	// TODO: Sanity check?
+	// TODO: This can be spoofed to join groups...
 
-	mZone->notifyCharacterAcceptGroupInvite(mCharacter, inviterName);
+	GroupManager::getInstance().handleAcceptInvite(mCharacter, inviterName);
 }
 
-// NOTE: This occurs when the player presses 'Decline' on the group window.
 void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupCancel_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupCancel_Struct));
 
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
-	String inviteeName = Utility::safeString(payload->name1, 64);
-	String inviterName = Utility::safeString(payload->name2, 64);
-	
-	// TODO: Sanity check?
+	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
+	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
+	EXPECTED(Limits::characterNameLength(inviterName));
+	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
 
-	mZone->notifyCharacterDeclineGroupInvite(mCharacter, inviterName);
+	GroupManager::getInstance().handleDeclineInvite(mCharacter, inviterName);
 }
 
 void ZoneClientConnection::sendGroupCreate() {
@@ -1514,6 +1524,8 @@ void ZoneClientConnection::sendGroupCreate() {
 }
 
 void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
+	EXPECTED(mConnected);
+
 	// Configure.
 	auto payload = reinterpret_cast<GroupLeaderChange_Struct*>(mGroupLeaderChangePacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1524,6 +1536,8 @@ void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
 }
 
 void ZoneClientConnection::sendGroupAcknowledge() {
+	EXPECTED(mConnected);
+
 	static const auto PACKET_SIZE = 4;
 	auto outPacket = new EQApplicationPacket(OP_GroupAcknowledge, PACKET_SIZE);
 
@@ -1532,6 +1546,8 @@ void ZoneClientConnection::sendGroupAcknowledge() {
 }
 
 void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName) {
+	EXPECTED(mConnected);
+
 	auto outPacket = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(outPacket->pBuffer);
 	strcpy(payload->name1, pLeaderCharacterName.c_str());
@@ -1542,6 +1558,8 @@ void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, c
 }
 
 void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
+	EXPECTED(mConnected);
+
 	// Configure.
 	auto payload = reinterpret_cast<GroupJoin_Struct*>(mGroupJoinPacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1554,6 +1572,8 @@ void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
 }
 
 void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
+	EXPECTED(mConnected);
+
 	// Configure.
 	auto payload = reinterpret_cast<GroupUpdate2_Struct*>(mGroupUpdateMembersPacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
@@ -1571,28 +1591,19 @@ void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames)
 }
 
 void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupGeneric_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupGeneric_Struct));
 	
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
-	String removeCharacterName = Utility::safeString(payload->name1, 64);
-	String myCharacterName = Utility::safeString(payload->name2, 64);
 
-	// Check: This Character has a group.
-	if (!mCharacter->hasGroup()) {
-		Log::error("[Zone Client Connection] Got OP_GroupDisband from an non-grouped Character.");
-		return;
-	}
+	String removeCharacterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
+	String myCharacterName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
+	EXPECTED(Limits::characterNameLength(removeCharacterName));
+	EXPECTED(Limits::characterNameLength(myCharacterName));
+	EXPECTED(myCharacterName == mCharacter->getName()); // Check: Sanity
+	EXPECTED(mCharacter->hasGroup());
 
-	// Check: Packet has not been tampered with.
-	if (myCharacterName != mCharacter->getName()) {
-		Log::error("[Zone Client Connection] Name mismatch in _handleGroupDisband.");
-		return;
-	}
-
-	mZone->notifyCharacterGroupDisband(mCharacter, removeCharacterName);
+	GroupManager::getInstance().handleDisband(mCharacter, removeCharacterName);
 }
 
 void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
@@ -1619,26 +1630,19 @@ void ZoneClientConnection::sendGroupDisband() {
 }
 
 void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(GroupMakeLeader_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupMakeLeader_Struct));
+	EXPECTED(mCharacter->hasGroup());
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
 
-	String currentLeader = Utility::safeString(payload->CurrentLeader, 64);
-	String newLeader = Utility::safeString(payload->NewLeader, 64);
+	String currentLeader = Utility::safeString(payload->CurrentLeader, MAX_CHARACTER_NAME_LENGTH);
+	String newLeader = Utility::safeString(payload->NewLeader, MAX_CHARACTER_NAME_LENGTH);
+	EXPECTED(Limits::characterNameLength(currentLeader));
+	EXPECTED(Limits::characterNameLength(newLeader));
+	EXPECTED(currentLeader == mCharacter->getName());
 
-	// Check: Leader names match.
-	if (currentLeader != mCharacter->getName()) {
-		return;
-	}
-	// Check: Character has group.
-	if (!mCharacter->hasGroup()) {
-		return;
-	}
-
-	mZone->notifyCharacterMakeLeaderRequest(mCharacter, newLeader);
+	GroupManager::getInstance().handleMakeLeader(mCharacter, newLeader);
 }
 
 void ZoneClientConnection::sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID) {

@@ -25,6 +25,12 @@ static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
 static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 
+namespace Limits {
+	static const auto MAX_GROUP_MEMBERS = 6;
+}
+
+static const String SYS_NAME = "[System]";
+
 enum GuildRanks : GuildRank {
 	Member = 0,
 	Officer = 1,

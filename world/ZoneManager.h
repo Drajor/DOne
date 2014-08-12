@@ -36,7 +36,7 @@ public:
 	void update();
 	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
 	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
-	void notifyCharacterZoneOut(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:

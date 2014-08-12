@@ -120,7 +120,7 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 	mPlatinum = mProfile->platinum;
 
 	if (mProfile->guild_id != NO_GUILD) {
-		GuildManager::getInstance().handleCharacterLogIn(this, mProfile->guild_id);
+		GuildManager::getInstance().onConnect(this, mProfile->guild_id);
 	}
 
 	// Perform any profile patching that needs to be done.

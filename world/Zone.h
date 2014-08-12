@@ -45,6 +45,9 @@ public:
 
 	void _updateConnections();
 
+
+	
+
 	void _updatePreConnections();
 
 	ZoneID getID() { return mID; }
@@ -53,7 +56,6 @@ public:
 	Character* findCharacter(const String pCharacterName);
 
 	void notifyCharacterZoneIn(Character* pCharacter);
-	void notifyCharacterZoneOut(Character* pCharacter);
 	void notifyCharacterPositionChanged(Character* pCharacter);
 	void notifyCharacterLinkDead(Character* pCharacter);
 	void notifyCharacterAFK(Character* pCharacter);
@@ -65,7 +67,6 @@ public:
 	void notifyCharacterChatSay(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatShout(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatOOC(Character* pCharacter, const String pMessage);
-	void notifyCharacterChatGroup(Character* pCharacter, const String pMessage);
 	void notifyCharacterEmote(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatAuction(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
@@ -75,11 +76,11 @@ public:
 	void notifyCharacterGM(Character* pCharacter);
 
 	// Group
-	void notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName);
-	void notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName);
-	void notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName);
-	void notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName);
-	void notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName);
+	//void notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName);
+	//void notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName);
+	//void notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName);
+	//void notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName);
+	//void notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName);
 
 	// Guild
 	void notifyGuildsChanged();
@@ -111,14 +112,10 @@ private:
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
 	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
-	void _handleCharacterLinkDead(Character* pCharacter);
-	
 
-
-
-
-
-
+	void _onLeaveZone(Character* pCharacter);
+	void _onCamp(Character* pCharacter);
+	void _onLinkdead(Character* pCharacter);
 
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 

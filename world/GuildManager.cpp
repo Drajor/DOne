@@ -58,34 +58,6 @@ bool GuildManager::initialise() {
 	return true;
 }
 
-void GuildManager::notifyConnect(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
-	EXPECTED(pCharacter->hasGuild());
-
-	Guild* guild = pCharacter->getGuild();
-	guild->mOnlineMembers.push_back(pCharacter);
-
-	// TODO: Guild Notify
-	// [System] X has come online.
-}
-
-void GuildManager::notifyDisconnect(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
-	EXPECTED(pCharacter->hasGuild());
-
-	// TODO: Guild Notify
-	// [System] X has gone offline.
-}
-
-void GuildManager::notifyLinkDead(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
-	EXPECTED(pCharacter->hasGuild());
-
-	Guild* guild = pCharacter->getGuild();
-	guild->mOnlineMembers.remove(pCharacter);
-}
-
-
 void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild() == false);
@@ -309,7 +281,7 @@ GuildSearchResults GuildManager::getAllGuilds() {
 	return results;
 }
 
-void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) {
+void GuildManager::onConnect(Character* pCharacter, uint32 pGuildID) {
 	Guild* guild = _findByID(pGuildID);
 
 	// Check: Guild does not exist. It was probably deleted.
@@ -324,11 +296,7 @@ void GuildManager::handleCharacterLogIn(Character* pCharacter, uint32 pGuildID) 
 		if (i.mID == pCharacter->getID()) {
 			
 			pCharacter->setGuild(guild, guild->mID, i.mRank);
-			//pCharacter->setGuild(guild);
-			//pCharacter->setGuildID(guild->mID); // This should not really be required.
-			//pCharacter->setGuildRank(i.mRank); // Character rank may have changed since log in (TODO: Determine if this is even possible).
-
-			// TODO: Notify guild that player is online.
+			_sendMessage(guild, SYS_NAME, pCharacter->getName() + " has come online!");
 			guild->mOnlineMembers.push_back(pCharacter);
 
 			found = true;
@@ -349,4 +317,57 @@ Guild* GuildManager::_findByID(const GuildID pID) {
 	}
 
 	return nullptr;
+}
+
+void GuildManager::onEnterZone(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	// TODO:
+	//SendGuildMembers();
+	//SendGuildURL();
+	//SendGuildChannel();
+}
+
+void GuildManager::onLeaveZone(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+}
+
+void GuildManager::onCamp(Character* pCharacter){
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
+	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
+}
+
+void GuildManager::onLinkdead(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
+	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
+}
+
+void GuildManager::handleMessage(Character* pCharacter, const String& pMessage) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	_sendMessage(pCharacter->getGuild(), pCharacter->getName(), pMessage);
+}
+
+void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude) {
+	ARG_PTR_CHECK(pGuild);
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i == pExclude) continue;;
+
+		// Check: Where a guild member is zoning, queue the message.
+		if (i->isZoning()) {
+			i->addQueuedMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
+			continue;
+		}
+		i->getConnection()->sendGuildMessage(pSenderName, pMessage);
+	}
 }

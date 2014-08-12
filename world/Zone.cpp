@@ -188,10 +188,7 @@ void Zone::_updateConnections() {
 				i = mConnections.erase(i); // Correct iterator.
 				mCharacters.remove(character);
 
-				// Check: Grouped Character.
-				if (character->hasGroup())
-					GroupManager::getInstance().handleCharacterCamped(character);
-
+				_onCamp(character);
 				delete connection;
 				delete character;
 				continue;
@@ -205,8 +202,8 @@ void Zone::_updateConnections() {
 				i = mConnections.erase(i); // Correct iterator.
 				character->onZoneOut();
 				mCharacters.remove(character);
-				ZoneManager::getInstance().notifyCharacterZoneOut(character);
-
+				
+				_onLeaveZone(character);
 				delete connection;
 				continue;
 			}
@@ -216,7 +213,7 @@ void Zone::_updateConnections() {
 				delete connection; // Free.
 				i = mConnections.erase(i); // Correct iterator.
 
-				_handleCharacterLinkDead(character);
+				_onLinkdead(character);
 				continue;
 			}
 		}
@@ -255,14 +252,6 @@ void Zone::_handleIncomingConnections() {
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->setPosition(pX, pY, pZ, 0);
 	pCharacter->getConnection()->sendPosition();
-}
-
-void Zone::notifyCharacterZoneOut(Character* pCharacter) {
-	//_sendDespawn(pCharacter->getSpawnID()); // Notify other players.
-
-	//pCharacter->onZoneOut();
-	//mCharacters.remove(pCharacter);
-	//mZoneManager->notifyCharacterZoneOut(pCharacter);
 }
 
 void Zone::notifyCharacterZoneIn(Character* pCharacter) {
@@ -509,32 +498,6 @@ void Zone::getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter) {
 	pMatches.insert(pMatches.begin(), mCharacters.begin(), mCharacters.end());
 }
 
-void Zone::notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName) {
-	// Search our Zone first.
-	Character* toCharacter = findCharacter(pToCharacterName);
-	if (toCharacter) {
-		// Character already grouped.
-		if (toCharacter->hasGroup()) {
-
-		}
-		else {
-			toCharacter->getConnection()->sendGroupInvite(pCharacter->getName());
-		}
-		return;
-	}
-
-	// Search all zones.
-	toCharacter = ZoneManager::getInstance().findCharacter(pToCharacterName, false, this);
-	if (toCharacter) {
-		return;
-	}
-	
-	// Player was not found (as per Live).
-	StringStream ss;
-	ss << "Player " << pToCharacterName << " was not found.";
-	pCharacter->getConnection()->sendMessage(MessageType::Red, ss.str());
-}
-
 Character* Zone::findCharacter(const String pCharacterName) {
 	for (auto i : mCharacters) {
 		if (i->getName() == pCharacterName)
@@ -551,84 +514,6 @@ Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZonin
 
 	// Proceed to global search.
 	return ZoneManager::getInstance().findCharacter(pCharacterName, pIncludeZoning, this);
-}
-
-
-void Zone::notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName) {
-	// Search our Zone first.
-	Character* toCharacter = findCharacter(pToCharacterName);
-	if (toCharacter) {
-		// Joining existing group.
-		if (toCharacter->hasGroup()) {
-			//mGroupManager->addT
-		}
-		// Starting a new group.
-		else {
-			GroupManager::getInstance().makeGroup(toCharacter, pCharacter);
-		}
-	}
-}
-
-void Zone::notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName)
-{
-	
-}
-
-void Zone::notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName) {
-	Character* removeCharacter = _findCharacter(pRemoveCharacterName); // TODO: Disbanding zoning characters?
-	if (!removeCharacter) {
-		Log::error("[Zone] Attempting to remove Character from group that does not exist.");
-		return;
-	}
-
-	GroupManager::getInstance().removeMemberRequest(pCharacter, removeCharacter);
-}
-
-void Zone::notifyCharacterChatGroup(Character* pCharacter, const String pMessage) {
-	// Check: Character has a group.
-	if (pCharacter->hasGroup()) {
-		GroupManager::getInstance().handleGroupMessage(pCharacter, pMessage);
-		return;
-	}
-
-	// Log: De-sync or hacker
-	StringStream ss; ss << "[Zone] Character(" << pCharacter->getName() << ") sent group message while not grouped.";
-	Log::error(ss.str());
-}
-
-void Zone::notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName) {
-	Character* newLeader = findCharacter(pNewLeaderName);
-	if (newLeader) {
-		GroupManager::getInstance().handleMakeLeaderRequest(pCharacter, newLeader);
-		return;
-	}
-
-	// NOTE: The Character does not exist. (Example /makeleader someonethatdoesntexist)
-}
-
-void Zone::_handleCharacterLinkDead(Character* pCharacter) {
-	ZoneClientConnection* connection = pCharacter->getConnection();
-	pCharacter->setLinkDead();
-
-	// Tidy up Character
-	mCharacters.remove(pCharacter); // Remove from active Character list.
-	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
-
-	LinkDeadCharacter linkdeadCharacter;
-	linkdeadCharacter.mTimer = new Timer(5000);
-	linkdeadCharacter.mCharacter = pCharacter;
-	mLinkDeadCharacters.push_back(linkdeadCharacter);
-
-	if (pCharacter->hasGroup())
-		GroupManager::getInstance().handleCharacterLinkDead(pCharacter); // Notify Group Manager.
-
-	//if (character->hasRaid())
-	//	mRaidManager->handleCharacterLinkDead(character); // Notify Raid Manager.
-
-	//if (character->hasGuild())
-	//	mGuildManager->handleCharacterLinkDead(character); // Notify Guild Manager.
-
-	notifyCharacterLinkDead(pCharacter);
 }
 
 void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
@@ -658,4 +543,59 @@ void Zone::notifyCharacterGuildChange(Character* pCharacter) {
 
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildID, pCharacter->getGuildID(), true);
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildRank, pCharacter->getGuildRank(), true);
+}
+
+void Zone::_onLeaveZone(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
+	ZoneManager::getInstance().onLeaveZone(pCharacter);
+
+	if (pCharacter->hasGuild())
+		GuildManager::getInstance().onLeaveZone(pCharacter);
+
+	if (pCharacter->hasGroup())
+		GroupManager::getInstance().onLeaveZone(pCharacter);
+
+	if (pCharacter->hasRaid())
+		RaidManager::getInstance().onLeaveZone(pCharacter);
+}
+
+void Zone::_onCamp(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
+	if (pCharacter->hasGuild())
+		GuildManager::getInstance().onCamp(pCharacter);
+
+	if (pCharacter->hasGroup())
+		GroupManager::getInstance().onCamp(pCharacter);
+
+	if (pCharacter->hasRaid())
+		RaidManager::getInstance().onCamp(pCharacter);
+}
+
+void Zone::_onLinkdead(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+
+	ZoneClientConnection* connection = pCharacter->getConnection();
+	pCharacter->setLinkDead();
+
+	// Tidy up Character
+	mCharacters.remove(pCharacter); // Remove from active Character list.
+	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
+
+	LinkDeadCharacter linkdeadCharacter;
+	linkdeadCharacter.mTimer = new Timer(5000);
+	linkdeadCharacter.mCharacter = pCharacter;
+	mLinkDeadCharacters.push_back(linkdeadCharacter);
+
+	if (pCharacter->hasGuild())
+		GuildManager::getInstance().onLinkdead(pCharacter);
+
+	if (pCharacter->hasGroup())
+		GroupManager::getInstance().onLinkdead(pCharacter);
+
+	if (pCharacter->hasRaid())
+		RaidManager::getInstance().onLinkdead(pCharacter);
+
+	notifyCharacterLinkDead(pCharacter);
 }

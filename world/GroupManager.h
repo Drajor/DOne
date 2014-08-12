@@ -3,6 +3,7 @@
 #include "Constants.h"
 
 class Character;
+class Zone;
 
 class Group {
 	friend class GroupManager;
@@ -10,15 +11,23 @@ class Group {
 	Group(Character* pLeader, Character* pMember);
 	~Group() {};
 
-	void getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName);
-	bool isMember(Character* pCharacter);
-	void addMember(Character* pCharacter);
-	void removeMember(Character* pCharacter);
-	bool hasLeader() { return mLeader != nullptr; }
+	void sendGroupUpdate(Character* pCharacter);
+	void sendGroupUpdate();
 	void sendMemberLeaveMessage(String pLeaverName);
 	void sendGroupLeaderChange();
-	bool needsDisbanding() { return mMembers.size() == 1; }
 
+	// Adds a Character to the Group.
+	void add(Character* pCharacter);
+	// Removes a Character from the group.
+	void remove(Character* pCharacter);
+
+	void getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName);
+	bool isMember(Character* pCharacter);
+	bool hasLeader() { return mLeader != nullptr; }
+	bool needsDisbanding() { return mMembers.size() == 1; }
+	
+	Character* getMember(const String& pCharacterName);
+	Character* getLeader() { return mLeader; }
 	Character* mLeader;
 	std::list<Character*> mMembers;
 };
@@ -30,19 +39,31 @@ public:
 		return instance;
 	}
 
-	void makeGroup(Character* pLeader, Character* pMember);
+	// Character Packet Events.
+	void handleInviteSent(Character* pCharacter, String pInviteName);
+	void handleAcceptInvite(Character* pCharacter, String pInviterName);
+	void handleDeclineInvite(Character* pCharacter, String pInviterName);
+	void handleDisband(Character* pCharacter, String pRemoveName);
+	void handleMakeLeader(Character* pCharacter, const String& pLeaderName);
+	void handleMessage(Character* pCharacter, const String pMessage);
+	
+	// Character Events.
+	void onEnterZone(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
+	void onCamp(Character* pCharacter);
+	void onLinkdead(Character* pCharacter);
+	void onDeath(Character* pCharacter);
 
-	// pCharacter is making the request to remove pRemoveCharacter.
-	void removeMemberRequest(Character* pCharacter, Character* pRemoveCharacter);
-	void handleGroupMessage(Character* pCharacter, const String pMessage);
-	void handleCharacterLinkDead(Character* pCharacter);
-	void handleCharacterCamped(Character* pCharacter);
-	void handleMakeLeaderRequest(Character* pCharacter, Character* pNewLeader);
 private:
+	void makeGroup(Character* pLeader, Character* pMember);
+	void joinGroup(Group* pGroup, Character* pCharacter);
 
-	void _sendMessage(Group* pGroup, String pSenderName, String pMessage);
+	bool _isLeader(Character* pCharacter);
 	void _disbandGroup(Group* pGroup);
 	void _postMemberRemoval(Group* pGroup);
+
+	void _sendMessage(Group* pGroup, String pSenderName, String pMessage);
+	void _sendZoneMessage(Group* pGroup, Zone* pZone, String pSenderName, String pMessage, Character* pExcludeCharacter = nullptr);
 	
 	std::list<Group*> mGroups;
 

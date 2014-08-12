@@ -33,19 +33,22 @@ public:
 	}
 
 	bool initialise();
-	
-	void notifyConnect(Character* pCharacter);
-	void notifyDisconnect(Character* pCharacter);
-	void notifyLinkDead(Character* pCharacter);
 
-	void handleCharacterLogIn(Character* pCharacter, uint32 pGuildID);
-
+	// Character Packet Events
 	void handleCreate(Character* pCharacter, const String pGuildName);
 	void handleDelete(Character* pCharacter);
 	void handleRemove(Character* pCharacter, String pRemoveCharacterName);
 	void handleInviteSent(Character* pCharacter, String pInviteCharacterName);
 	void handleInviteAccept(Character* pCharacter, String pInviterName);
 	void handleInviteDecline(Character* pCharacter, String InviterName);
+	void handleMessage(Character* pCharacter, const String& pMessage);
+
+	// Character Events
+	void onConnect(Character* pCharacter, uint32 pGuildID);
+	void onEnterZone(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
+	void onCamp(Character* pCharacter);
+	void onLinkdead(Character* pCharacter);
 
 	std::list<String> getGuildNames();
 
@@ -53,7 +56,10 @@ public:
 	GuildID getHighestGuildID();
 
 	GuildSearchResults getAllGuilds();
+
 private:
+	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
+
 	Guild* _findGuildByName(const String pGuildName);
 	Guild* _findByID(const GuildID pID);
 	uint32 getNextGuildID();
