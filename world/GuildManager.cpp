@@ -387,9 +387,11 @@ void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
 	_save();
 }
 
-void GuildManager::handleGetMOTD(Character* pCharacter)
-{
+void GuildManager::handleGetMOTD(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
 
+	_sendMOTD(pCharacter);
 }
 
 void GuildManager::_sendMOTD(Guild* pGuild) {
@@ -400,4 +402,12 @@ void GuildManager::_sendMOTD(Guild* pGuild) {
 		if (i->isZoning()) { continue; }
 		i->getConnection()->sendGuildMOTD(pGuild->mMOTD, pGuild->mMOTDSetter);
 	}
+}
+
+void GuildManager::_sendMOTD(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	Guild* guild = pCharacter->getGuild();
+	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
 }

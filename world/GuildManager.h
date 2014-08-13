@@ -63,6 +63,7 @@ public:
 private:
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
 	void _sendMOTD(Guild* pGuild);
+	void _sendMOTD(Character* pCharacter);
 
 	Guild* _findGuildByName(const String pGuildName);
 	Guild* _findByID(const GuildID pID);

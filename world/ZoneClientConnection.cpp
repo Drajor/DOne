@@ -308,6 +308,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /guildmotd command.
 		_handleSetGuildMOTD(pPacket);
 		break;
+	case OP_GetGuildMOTD:
+		// NOTE: This occurs when the player uses the /getguildmotd command.
+		_handleGetGuildMOTD(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -1854,4 +1858,26 @@ void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOT
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName) {
+	EXPECTED(mConnected);
+	EXPECTED(mCharacter->hasGuild());
+
+	auto outPacket = new EQApplicationPacket(OP_GetGuildMOTDReply, sizeof(GuildMOTD_Struct));
+	auto payload = reinterpret_cast<GuildMOTD_Struct*>(outPacket->pBuffer);
+	payload->unknown0 = 0;
+	strcpy(payload->name, mCharacter->getName().c_str());
+	strcpy(payload->setby_name, pMOTDSetByName.c_str());
+	strcpy(payload->motd, pMOTD.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+
+	GuildManager::getInstance().handleGetMOTD(mCharacter);
 }
