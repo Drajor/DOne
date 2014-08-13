@@ -23,6 +23,7 @@ static auto MAX_CHARACTER_NAME_LENGTH = 64;
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
+static const auto MAX_GUILD_MOTD_LENGTH = 512;
 static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 
 static const SpawnID NO_TARGET = 0;

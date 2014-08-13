@@ -32,6 +32,7 @@ bool GuildManager::initialise() {
 		Utility::stoulSafe(guild->mID, String(guildElement->Attribute("id")));
 		guild->mName = guildElement->Attribute("name");
 		guild->mMOTD = guildElement->Attribute("motd");
+		guild->mMOTD = guildElement->Attribute("motd_setter");
 
 		// Read members data.
 		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
@@ -224,6 +225,7 @@ void GuildManager::_save() {
 		guildElement->SetAttribute("id", i->mID);
 		guildElement->SetAttribute("name", i->mName.c_str());
 		guildElement->SetAttribute("motd", i->mMOTD.c_str());
+		guildElement->SetAttribute("motd_setter", i->mMOTDSetter.c_str());
 
 		TiXmlElement* membersElement = new TiXmlElement("members");
 		for (auto j : i->mMembers) {
@@ -369,5 +371,33 @@ void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const 
 			continue;
 		}
 		i->getConnection()->sendGuildMessage(pSenderName, pMessage);
+	}
+}
+
+void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(pMOTD.length() < MAX_GUILD_MOTD_LENGTH); // NOTE: 'Less-Than' is used instead of 'Less-Than-Or-Equal-To' because std::string::length does not include the null terminator.
+	// EXPECTED: pCharacter has permission.
+
+	Guild* guild = pCharacter->getGuild();
+	guild->mMOTD = pMOTD;
+	guild->mMOTDSetter = pCharacter->getName();
+	_sendMOTD(guild);
+	_save();
+}
+
+void GuildManager::handleGetMOTD(Character* pCharacter)
+{
+
+}
+
+void GuildManager::_sendMOTD(Guild* pGuild) {
+	ARG_PTR_CHECK(pGuild);
+
+	const String motd = pGuild->mMOTD;
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendGuildMOTD(pGuild->mMOTD, pGuild->mMOTDSetter);
 	}
 }

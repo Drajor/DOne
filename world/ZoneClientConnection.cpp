@@ -304,6 +304,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /guildremove command.
 		_handleGuildRemove(pPacket);
 		break;
+	case OP_SetGuildMOTD:
+		// NOTE: This occurs when the player uses the /guildmotd command.
+		_handleSetGuildMOTD(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -1820,4 +1824,34 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 
 	Log::error("[Zone Client Connection] Got unexpected response(" + std::to_string(payload->response) + ") to Guild invite " + Utility::characterLogDetails(mCharacter));
 	mCharacter->clearPendingGuildInvite();
+}
+
+void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mConnected);
+	EXPECTED(mCharacter->hasGuild());
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildMOTD_Struct));
+
+	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
+
+	String characterName = Utility::safeString(payload->name, MAX_CHARACTER_NAME_LENGTH);
+	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity.
+	String motd = Utility::safeString(payload->motd, MAX_GUILD_MOTD_LENGTH);
+
+	GuildManager::getInstance().handleSetMOTD(mCharacter, motd);
+}
+
+void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
+	EXPECTED(mConnected);
+	EXPECTED(mCharacter->hasGuild());
+
+	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
+	auto payload = reinterpret_cast<GuildMOTD_Struct*>(outPacket->pBuffer);
+	payload->unknown0 = 0;
+	strcpy(payload->name, mCharacter->getName().c_str());
+	strcpy(payload->setby_name, pMOTDSetByName.c_str());
+	strcpy(payload->motd, pMOTD.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }

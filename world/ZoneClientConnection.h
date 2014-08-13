@@ -81,6 +81,7 @@ public:
 
 	void sendGuildRank();
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
+	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
@@ -139,6 +140,7 @@ private:
 	void _handleGuildInvite(const EQApplicationPacket* pPacket);
 	void _handleGuildInviteAccept(const EQApplicationPacket* pPacket);
 	void _handleGuildRemove(const EQApplicationPacket* pPacket);
+	void _handleSetGuildMOTD(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

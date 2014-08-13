@@ -21,6 +21,7 @@ private:
 	uint32 mID;
 	String mName;
 	String mMOTD;
+	String mMOTDSetter; // The Character name of who set the current MOTD.
 	std::list<Character*> mOnlineMembers;
 	std::list<Member> mMembers;
 };
@@ -42,6 +43,8 @@ public:
 	void handleInviteAccept(Character* pCharacter, String pInviterName);
 	void handleInviteDecline(Character* pCharacter, String InviterName);
 	void handleMessage(Character* pCharacter, const String& pMessage);
+	void handleSetMOTD(Character* pCharacter, const String& pMOTD);
+	void handleGetMOTD(Character* pCharacter);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);
@@ -59,6 +62,7 @@ public:
 
 private:
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
+	void _sendMOTD(Guild* pGuild);
 
 	Guild* _findGuildByName(const String pGuildName);
 	Guild* _findByID(const GuildID pID);
