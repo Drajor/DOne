@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.h"
+#include "Actor.h"
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
 
@@ -30,37 +30,43 @@ struct Vector4 {
 };
 
 
-class Character {
+class Character : public Actor {
 	friend ZoneClientConnection;
 public:
 	Character(uint32 pCharacterID, ClientAuthentication& pAuthentication);
 	~Character();
-	
+	inline bool isCharacter() { return true; }
+	inline bool isZoning() { return mIsZoning; }
+	inline void setZoning(bool pZoning) { mIsZoning = pZoning; }
+	inline bool isLinkDead() { return mIsLinkDead; }
+	inline void setLinkDead() { mIsLinkDead = true; }
+
+
 	ClientAuthentication getAuthentication() { return mAuthentication; }
 
 	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
-	bool isZoning() { return mIsZoning; }
-	bool isLinkDead() { return mIsLinkDead; }
-	void setLinkDead();
+	
+	
+	
 	bool onZoneIn();
 	bool onZoneOut();
 	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
 
 	// Group
-	bool hasGroup() { return mGroup != nullptr; }
-	Group* getGroup() { return mGroup; }
-	void setGroup(Group* pGroup) { mGroup = pGroup; }
+	inline bool hasGroup() { return mGroup != nullptr; }
+	inline Group* getGroup() { return mGroup; }
+	inline void setGroup(Group* pGroup) { mGroup = pGroup; }
 
 	// Guild
-	bool hasGuild() { return mGuild != nullptr; }
-	Guild* getGuild() { return mGuild; }
-	void setGuild(Guild* pGuild) { mGuild = pGuild; }
+	inline bool hasGuild() { return mGuild != nullptr; }
+	inline Guild* getGuild() { return mGuild; }
+	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
 	void setGuildID(GuildID pGuildID);
 	void setGuildRank(GuildRank pGuildRank);
 	GuildRank getGuildRank();
 	GuildID getGuildID();
-	void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); }
-	void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None); }
+	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); }
+	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None); }
 
 	// Pending Guild Invite
 	bool hasPendingGuildInvite() { return mPendingGuildInviteID != NO_GUILD; }
@@ -71,12 +77,11 @@ public:
 	void clearPendingGuildInvite() { mPendingGuildInviteID = NO_GUILD; mPendingGuildInviteName = ""; }
 
 	// Raid
-	bool hasRaid() { return mRaid != nullptr; }
-	Raid* getRaid() { return mRaid; }
-	void setRaid(Raid* pRaid) { mRaid = pRaid; }
+	inline bool hasRaid() { return mRaid != nullptr; }
+	inline Raid* getRaid() { return mRaid; }
+	inline void setRaid(Raid* pRaid) { mRaid = pRaid; }
 
 	void setZone(Zone* pZone) { mZone = pZone; }
-	void setSpawnID(uint16 pSpawnID) { mSpawnID = pSpawnID; }
 
 	Zone* getZone() { return mZone; }
 	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
@@ -91,7 +96,6 @@ public:
 	String getTitle() { return mTitle; }
 	String getSuffix() { return mSuffix; }
 	uint32 getID() { return mCharacterID; };
-	SpawnID getSpawnID() { return mSpawnID; }
 	// Returns the account status that this Character belongs to.
 	uint32 getStatus() { return mStatus; }
 	PlayerProfile_Struct* getProfile() { return mProfile; }
@@ -221,8 +225,6 @@ private:
 	uint32 mExperience;
 	void _checkForLevelIncrease();
 	void _updateForSave();
-	
-
 	
 	float mSize;
 	uint16 mDeity;

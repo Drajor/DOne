@@ -17,6 +17,8 @@ class GroupManager;
 class Guild;
 class Raid;
 class RaidManager;
+class Actor;
+class NPC;
 
 class Zone {
 public:
@@ -53,7 +55,9 @@ public:
 	ZoneID getID() { return mID; }
 	InstanceID getInstanceID() { return mInstanceID; }
 	uint16 getPort() { return mPort; }
+
 	Character* findCharacter(const String pCharacterName);
+	Actor* findActor(const SpawnID pSpawnID);
 
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void notifyCharacterPositionChanged(Character* pCharacter);
@@ -74,6 +78,8 @@ public:
 	void notifyCharacterLevelIncrease(Character* pCharacter);
 	void notifyCharacterLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
+
+	void handleTarget(Character* pCharacter, SpawnID pSpawnID);
 
 	// Group
 	//void notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName);
@@ -130,14 +136,17 @@ private:
 	bool mInitialised; // Flag indicating whether the Zone has been initialised.
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
-	std::list<Character*> mCharacters; // List of Player Characters in Zone.
+
+	std::list<Character*> mCharacters;
+	std::list<NPC*> mNPCs;
+	std::list<Actor*> mActors;
+
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;
-	//std::list<Character*> mLinkDeadCharacters;
+
 	struct LinkDeadCharacter {
 		Timer* mTimer;
 		Character* mCharacter;
 	};
 	std::list<LinkDeadCharacter> mLinkDeadCharacters;
-	//std::unordered_map<Timer, Character*> mLinkDeadCharacters;
 };

@@ -135,6 +135,7 @@ void Zone::_updatePreConnections() {
 					mConnections.push_back(connection);
 					// Add Character to zone.
 					mCharacters.push_back(character);
+					mActors.push_back(character);
 					// Tell everyone else.
 					notifyCharacterZoneIn(character);
 					// Let Character do what it needs to.
@@ -187,6 +188,7 @@ void Zone::_updateConnections() {
 				// TODO: Save
 				i = mConnections.erase(i); // Correct iterator.
 				mCharacters.remove(character);
+				mActors.remove(character);
 
 				_onCamp(character);
 				delete connection;
@@ -202,6 +204,7 @@ void Zone::_updateConnections() {
 				i = mConnections.erase(i); // Correct iterator.
 				character->onZoneOut();
 				mCharacters.remove(character);
+				mActors.remove(character);
 				
 				_onLeaveZone(character);
 				delete connection;
@@ -581,6 +584,7 @@ void Zone::_onLinkdead(Character* pCharacter) {
 
 	// Tidy up Character
 	mCharacters.remove(pCharacter); // Remove from active Character list.
+	mActors.remove(pCharacter);
 	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
 
 	LinkDeadCharacter linkdeadCharacter;
@@ -598,4 +602,28 @@ void Zone::_onLinkdead(Character* pCharacter) {
 		RaidManager::getInstance().onLinkdead(pCharacter);
 
 	notifyCharacterLinkDead(pCharacter);
+}
+
+void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
+	ARG_PTR_CHECK(pCharacter);
+
+	// Character is clearing their target.
+	if (pSpawnID == NO_TARGET) {
+		pCharacter->setTarget(nullptr);
+		return;
+	}
+
+	Actor* actor = findActor(pSpawnID);
+	if (!actor) { return; } // Ignore for now.
+
+	pCharacter->setTarget(actor);
+}
+
+Actor* Zone::findActor(const SpawnID pSpawnID) {
+	for (auto i : mActors) {
+		if (i->getSpawnID() == pSpawnID)
+			return i;
+	}
+
+	return nullptr;
 }

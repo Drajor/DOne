@@ -64,6 +64,14 @@ public:
 	};
 
 	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.empty()) {
+			Actor* target = pCharacter->getTarget();
+			if (!target || !target->isCharacter()) { return; }
+			Character* characterTarget = static_cast<Character*>(target);
+			pCharacter->message(MessageType::Yellow, "Moving to " + characterTarget->getName() + ".");
+			pCharacter->getZone()->moveCharacter(pCharacter, characterTarget->getX(), characterTarget->getY(), characterTarget->getZ());
+			return;
+		}
 		// Check: Parameters
 		if (pParameters.size() != 3) {
 			invalidParameters(pCharacter, pParameters);

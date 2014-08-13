@@ -25,6 +25,8 @@ static const auto MIN_GUILD_NAME_LENGTH = 4;
 static const auto MAX_GUILD_NAME_LENGTH = 64;
 static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 
+static const SpawnID NO_TARGET = 0;
+
 namespace Limits {
 	static const auto MAX_GROUP_MEMBERS = 6;
 }

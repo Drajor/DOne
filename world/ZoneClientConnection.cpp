@@ -971,11 +971,12 @@ void ZoneClientConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ClientTarget_Struct);
-
 	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(ClientTarget_Struct));
 
+	auto payload = reinterpret_cast<ClientTarget_Struct*>(pPacket->pBuffer);
+
+	mZone->handleTarget(mCharacter, payload->new_target);
 }
 
 void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {

@@ -22,6 +22,10 @@ void GroupManager::joinGroup(Group* pGroup, Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup() == false);
 
+	// UNTESTED!
+
+	pCharacter->getConnection()->sendGroupAcknowledge();
+
 	pGroup->add(pCharacter);
 	pGroup->sendGroupUpdate();
 }

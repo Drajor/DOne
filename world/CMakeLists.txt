@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp zone_data.xml)
-SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Character.h Character.cpp ZoneData.h ZoneData.cpp)
+SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp)
 
 SET(world_sources
 	WorldClientConnection.cpp
@@ -28,6 +28,7 @@ SET(world_sources
 	GuildManager.cpp
 	RaidManager.cpp
 	Limits.cpp
+	NPC.cpp
 )
 
 SET(world_headers
@@ -58,6 +59,8 @@ SET(world_headers
 	GuildManager.h
 	RaidManager.h
 	Limits.h
+	Actor.h
+	NPC.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

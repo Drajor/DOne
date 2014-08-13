@@ -123,27 +123,21 @@ bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struc
 		GuildManager::getInstance().onConnect(this, mProfile->guild_id);
 	}
 
-	// Perform any profile patching that needs to be done.
-	_initialiseProfile();
-
 	return true;
 }
 
-void Character::_initialiseProfile() {
-	// TODO:
-}
-
 bool Character::onZoneIn() {
-	mIsZoning = false;
+	setZoning(false);
 	_processMessageQueue();
 	return true;
 }
 
 bool Character::onZoneOut() {
-	mIsZoning = true;
-	mZone = nullptr;
-	mSpawnID = 0;
-	mConnection = nullptr;
+	setZoning(true);
+	setZone(nullptr);
+	setSpawnID(0);
+	setConnection(nullptr);
+
 	return true;
 }
 
@@ -513,10 +507,6 @@ void Character::_processMessageQueue() {
 
 void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
-}
-
-void Character::setLinkDead() {
-	mIsLinkDead = true;
 }
 
 void Character::setGuildID(GuildID pGuildID) {
