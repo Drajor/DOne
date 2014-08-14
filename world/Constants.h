@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/types.h"
+//#include "../common/types.h"
 #include <cstdint>
 #include <string>
 #include <sstream>
@@ -9,6 +9,17 @@
 #include <unordered_map>
 #include <map>
 
+typedef std::uint8_t byte;
+typedef std::uint8_t uint8;
+typedef std::uint16_t uint16;
+typedef std::uint32_t uint32;
+typedef std::uint64_t uint64;
+typedef std::int8_t int8;
+typedef std::int16_t int16;
+typedef std::int32_t int32;
+typedef std::int64_t int64;
+
+typedef std::uint32_t ClassID;
 typedef std::uint16_t ZoneID;
 typedef std::uint16_t InstanceID; // Zone Instance ID
 typedef std::uint16_t SpawnID;
@@ -21,15 +32,21 @@ static auto MIN_CHARACTER_NAME_LENGTH = 4;
 static auto MAX_CHARACTER_NAME_LENGTH = 64;
 
 static const GuildID NO_GUILD = 0xFFFFFFFF;
-static const auto MIN_GUILD_NAME_LENGTH = 4;
-static const auto MAX_GUILD_NAME_LENGTH = 64;
-static const auto MAX_GUILD_MOTD_LENGTH = 512;
-static const auto MAX_GUILDS = 1500; // This value is arbitrary.
-
 static const SpawnID NO_TARGET = 0;
 
 namespace Limits {
-	static const auto MAX_GROUP_MEMBERS = 6;
+	namespace Guild {
+		static const auto MAX_GUILDS = 1500; // This value is arbitrary.
+		static const auto MIN_NAME_LENGTH = 4;
+		static const auto MAX_NAME_LENGTH = 64;
+		static const auto MAX_MOTD_LENGTH = 512;
+		static const auto MAX_PUBLIC_NOTE_LENGTH = 200; // TODO: Determine what the client UI maximum is.
+		static const auto MAX_PERSONAL_NOTE_LENGTH = 200; // TODO: Determine what the client UI maximum is.
+	}
+	namespace Group {
+		static const auto MAX_MEMBERS = 6;
+	}
+	
 }
 
 static const String SYS_NAME = "[System]";
@@ -60,7 +77,7 @@ enum PlayableRaceIDs {
 	Drakkin = 522
 };
 
-enum PlayableClassIDs {
+enum ClassIDs : ClassID {
 	Warrior = 1,
 	Cleric = 2,
 	Paladin = 3,
@@ -94,7 +111,7 @@ enum ZoneIDs : ZoneID {
 };
 //std::uint16_t ZoneIDToType(ZoneID pZoneID) { return static_cast<std::uint16_t>(pZoneID); }
 
-enum class Statistic : std::uint32_t {
+enum class Statistic : uint32 {
 	Strength,
 	Stamina,
 	Charisma,
@@ -186,7 +203,7 @@ enum BodyType {
 	BT_Special = 67
 };
 
-enum class ChannelID : std::uint32_t {
+enum class ChannelID : uint32 {
 	CH_GUILD = 0, // /gu
 	CH_GROUP = 2, // /g
 	CH_SHOUT = 3, // /shou
@@ -202,7 +219,7 @@ enum class ChannelID : std::uint32_t {
 
 };
 
-enum class MessageType : std::uint32_t {
+enum class MessageType : uint32 {
 	White = 0,
 	Grey = 1,
 	DarkGreen = 2,
@@ -301,7 +318,7 @@ enum class MessageType : std::uint32_t {
 	Stun = 340
 };
 
-enum class StringID : std::uint32_t {
+enum class StringID : uint32 {
 	GENERIC_9_STRINGS = 1,		//%1 %2 %3 %4 %5 %6 %7 %8 %9
 	TARGET_OUT_OF_RANGE = 100,		//Your target is out of range, get closer!
 	TARGET_NOT_FOUND = 101,		//Target player not found.

@@ -575,9 +575,9 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	};
 
 	static const std::list<int> PlayableClasses = {
-		PlayableClassIDs::Warrior,
-		PlayableClassIDs::Cleric,
-		PlayableClassIDs::Wizard,
+		ClassIDs::Warrior,
+		ClassIDs::Cleric,
+		ClassIDs::Wizard,
 	};
 
 	std::list<RaceClassAllocation> raceClassAllocations;
@@ -837,7 +837,7 @@ void WorldClientConnection::_queuePacket(const EQApplicationPacket* pPacket, boo
 
 void WorldClientConnection::_sendGuildList() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
-	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
 	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
 
 	mStreamInterface->QueuePacket(outPacket);

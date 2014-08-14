@@ -50,7 +50,7 @@ public:
 
 		uint32 zoneID = 0;
 		uint32 instanceID = 0;
-		if (Utility::stoulSafe(zoneID, pParameters[0]) && Utility::stoulSafe(instanceID, pParameters[1])) {
+		if (Utility::stou32Safe(zoneID, pParameters[0]) && Utility::stou32Safe(instanceID, pParameters[1])) {
 			pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
 		}
 	}
@@ -141,7 +141,7 @@ public:
 		}
 
 		uint32 expAdd = 0;
-		if (Utility::stoulSafe(expAdd, pParameters[0])) {
+		if (Utility::stou32Safe(expAdd, pParameters[0])) {
 			pCharacter->addExperience(expAdd);
 		}
 	}
@@ -162,7 +162,7 @@ public:
 		}
 
 		uint32 expRemove = 0;
-		if (Utility::stoulSafe(expRemove, pParameters[0])) {
+		if (Utility::stou32Safe(expRemove, pParameters[0])) {
 			pCharacter->removeExperience(expRemove);
 		}
 	}
@@ -197,7 +197,7 @@ public:
 		}
 
 		uint32 level = 0;
-		if (Utility::stoulSafe(level, pParameters[0])) {
+		if (Utility::stou32Safe(level, pParameters[0])) {
 			pCharacter->setLevel(static_cast<uint8>(level));
 		}
 	}
@@ -221,7 +221,7 @@ public:
 		String statName = "unknown";
 		uint32 value = 0;
 		Statistic statistic;
-		if (!Utility::stoulSafe(value, pParameters[1])) {
+		if (!Utility::stou32Safe(value, pParameters[1])) {
 			return;
 		}
 
@@ -379,7 +379,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	// #damage <amount>
 	else if (pCommandName == "damage" && pParameters.size() == 1) {
 		unsigned int damage = 0;
-		if (Utility::stoulSafe(damage, pParameters[0])) {
+		if (Utility::stou32Safe(damage, pParameters[0])) {
 			pCharacter->damage(damage);
 		}
 	}
@@ -387,7 +387,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		if (pParameters.size() == 2) {
 			uint32 appType = 0;
 			uint32 appParameter = 0;
-			if (Utility::stoulSafe(appType, pParameters[0]) && Utility::stoulSafe(appParameter, pParameters[1])) {
+			if (Utility::stou32Safe(appType, pParameters[0]) && Utility::stou32Safe(appParameter, pParameters[1])) {
 				pCharacter->getConnection()->sendAppearance(appType, appParameter);
 			}
 		}
@@ -396,7 +396,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	else if (pCommandName == "anim") {
 		if (pParameters.size() == 1) {
 			uint32 animationID = 0;
-			if (Utility::stoulSafe(animationID, pParameters[0])) {
+			if (Utility::stou32Safe(animationID, pParameters[0])) {
 				pCharacter->doAnimation(animationID);
 			}
 		}

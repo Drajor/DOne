@@ -1449,8 +1449,8 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 
 	const String inviterName = Utility::safeString(payload->inviter_name, MAX_CHARACTER_NAME_LENGTH);
 	const String inviteeName = Utility::safeString(payload->invitee_name, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(inviterName));
-	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(Limits::Character::nameLength(inviterName));
+	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviterName == mCharacter->getName()); // Check: Spoofing
 	EXPECTED(inviteeName != mCharacter->getName()); // Check: Not inviting ourself
 	
@@ -1477,8 +1477,8 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 	
 	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH); // Character who invited.
 	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH); // Character accepting invite.
-	EXPECTED(Limits::characterNameLength(inviterName));
-	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(Limits::Character::nameLength(inviterName));
+	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
 
 	// TODO: This can be spoofed to join groups...
@@ -1493,8 +1493,8 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
 	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
 	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(inviterName));
-	EXPECTED(Limits::characterNameLength(inviteeName));
+	EXPECTED(Limits::Character::nameLength(inviterName));
+	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
 
 	GroupManager::getInstance().handleDeclineInvite(mCharacter, inviterName);
@@ -1607,8 +1607,8 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 
 	String removeCharacterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
 	String myCharacterName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(removeCharacterName));
-	EXPECTED(Limits::characterNameLength(myCharacterName));
+	EXPECTED(Limits::Character::nameLength(removeCharacterName));
+	EXPECTED(Limits::Character::nameLength(myCharacterName));
 	EXPECTED(myCharacterName == mCharacter->getName()); // Check: Sanity
 	EXPECTED(mCharacter->hasGroup());
 
@@ -1647,8 +1647,8 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 
 	String currentLeader = Utility::safeString(payload->CurrentLeader, MAX_CHARACTER_NAME_LENGTH);
 	String newLeader = Utility::safeString(payload->NewLeader, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(currentLeader));
-	EXPECTED(Limits::characterNameLength(newLeader));
+	EXPECTED(Limits::Character::nameLength(currentLeader));
+	EXPECTED(Limits::Character::nameLength(newLeader));
 	EXPECTED(currentLeader == mCharacter->getName());
 
 	GroupManager::getInstance().handleMakeLeader(mCharacter, newLeader);
@@ -1701,10 +1701,10 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild() == false);
-	PACKET_SIZE_CHECK(pPacket->size == MAX_GUILD_NAME_LENGTH);
+	PACKET_SIZE_CHECK(pPacket->size == Limits::Guild::MAX_NAME_LENGTH);
 	
-	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAX_GUILD_NAME_LENGTH);
-	EXPECTED(Limits::guildNameLength(guildName));
+	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Guild::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Guild::nameLength(guildName));
 
 	GuildManager::getInstance().handleCreate(mCharacter, guildName);
 }
@@ -1733,7 +1733,7 @@ void ZoneClientConnection::_sendGuildNames() {
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
-	outPacket->size = MAX_GUILD_NAME_LENGTH + (MAX_GUILD_NAME_LENGTH * MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
 	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
 
 	mStreamInterface->QueuePacket(outPacket);
@@ -1753,8 +1753,8 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 
 	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
 	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(toCharacterName)); // NOTE: Client does not check this..
-	EXPECTED(Limits::characterNameLength(fromCharacterName));
+	EXPECTED(Limits::Character::nameLength(toCharacterName)); // NOTE: Client does not check this..
+	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
 
 	GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
@@ -1770,8 +1770,8 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 
 	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
 	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(toCharacterName));
-	EXPECTED(Limits::characterNameLength(fromCharacterName));
+	EXPECTED(Limits::Character::nameLength(toCharacterName));
+	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()) // Check: Sanity.
 
 	GuildManager::getInstance().handleRemove(mCharacter, toCharacterName);
@@ -1806,8 +1806,8 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 	
 	String characterName = Utility::safeString(payload->newmember, MAX_CHARACTER_NAME_LENGTH);
 	String inviterName = Utility::safeString(payload->inviter, MAX_CHARACTER_NAME_LENGTH);
-	EXPECTED(Limits::characterNameLength(characterName));
-	EXPECTED(Limits::characterNameLength(inviterName));
+	EXPECTED(Limits::Character::nameLength(characterName));
+	EXPECTED(Limits::Character::nameLength(inviterName));
 	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
 	EXPECTED(mCharacter->getPendingGuildInviteName() == inviterName); // Check: This Character is responding to the correct inviter.
 	EXPECTED(mCharacter->getPendingGuildInviteID() == payload->guildeqid); // Check: This Character is responding to the correct Guild invite.
@@ -1840,7 +1840,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 
 	String characterName = Utility::safeString(payload->name, MAX_CHARACTER_NAME_LENGTH);
 	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity.
-	String motd = Utility::safeString(payload->motd, MAX_GUILD_MOTD_LENGTH);
+	String motd = Utility::safeString(payload->motd, Limits::Guild::MAX_MOTD_LENGTH);
 
 	GuildManager::getInstance().handleSetMOTD(mCharacter, motd);
 }
@@ -1880,4 +1880,85 @@ void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacke
 	EXPECTED(mCharacter->hasGuild());
 
 	GuildManager::getInstance().handleGetMOTD(mCharacter);
+}
+
+//struct Internal_GuildMemberEntry_Struct {
+//	//	char	name[64];					//variable length
+//	uint32	level;						//network byte order
+//	uint32	banker;						//1=yes, 0=no, network byte order
+//	uint32	class_;						//network byte order
+//	uint32	rank;						//network byte order
+//	uint32	time_last_on;				//network byte order
+//	uint32	tribute_enable;				//network byte order
+//	uint32	total_tribute;				//total guild tribute donated, network byte order
+//	uint32	last_tribute;				//unix timestamp
+//	//	char	public_note[1];				//variable length.
+//	uint16	zoneinstance;				//network byte order
+//	uint16	zone_id;					//network byte order
+//};
+
+namespace PacketStructures {
+	//struct GuildMemberListEntry {
+	//	char* mName;
+	//	//std::uint32_t mLevel;
+	//	//std::uint32_t mBanker; // 0 = no, 1 = yes
+	//	//ClassID mClass;
+	//	//GuildRank mRank; // Old packet has this as uint32...
+	//	//std::uint32_t mTimeLastOn;
+	//	//std::uint32_t mTributeEnabled;
+	//	//std::uint32_t mTotalTribute;
+	//	//std::uint32_t mLastTribute;
+	//	//char* mPublicNote;
+	//	//InstanceID mInstanceID;
+	//	//ZoneID mZoneID;
+	//	}
+	//// 36
+	//};
+	//static const auto GuildMemberListEntry_Size = sizeof(GuildMemberListEntry);
+}
+
+void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
+	EXPECTED(mConnected);
+
+	// Calculate payload size.
+	std::size_t payloadSize = 0;
+	uint32 namesLength = 0;
+	uint32 notesLength = 0;
+	for (auto i : pGuildMembers) {
+		payloadSize += i->mName.length() + 1;
+		namesLength += i->mName.length();
+		payloadSize += i->mPublicNote.length() + 1;
+		notesLength += i->mPublicNote.length();
+		payloadSize += 36; // MAGIC
+	}
+	// Packet header.
+	payloadSize += MAX_CHARACTER_NAME_LENGTH + 12;
+
+	auto outPacket = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
+	
+	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
+	ds.writeFixedString(mCharacter->getName(), MAX_CHARACTER_NAME_LENGTH);
+	ds.write<uint32>(pGuildMembers.size());
+	ds.write<uint32>(namesLength);
+	ds.write<uint32>(notesLength);
+
+	for (auto i : pGuildMembers) {
+		ds.writeString(i->mName); // Variable length.
+		ds.write<std::uint32_t>(i->mLevel); // 0 + 4 = 4
+		ds.write<std::uint32_t>(i->mBanker ? 1 : 0); // 4 + 4 = 8
+		ds.write<std::uint32_t>(i->mClass); // 8 + 4 = 12
+		ds.write<std::uint32_t>(i->mRank); // 12 + 4 = 16
+		ds.write<std::uint32_t>(i->mTimeLastOn); // 16 + 4 = 20
+		ds.write<std::uint32_t>(i->mTributeEnabled ? 1 : 0); // 20 + 4 = 24
+		ds.write<std::uint32_t>(i->mTotalTribute); // 24 + 4 = 28
+		ds.write<std::uint32_t>(i->mLastTribute); // 28 + 4 = 32
+		ds.writeString(i->mPublicNote); // Variable length.
+		ds.write<std::uint16_t>(i->mInstanceID);  // 32 + 2 = 34
+		ds.write<std::uint16_t>(i->mZoneID); // 34 + 2 = 36
+	}
+	// TODO: Where is Alt?
+
+	mStreamInterface->QueuePacket(outPacket);
+	outPacket->pBuffer = nullptr;
+	safe_delete(outPacket);
 }

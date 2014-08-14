@@ -276,7 +276,7 @@ Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 void Group::add(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED((pCharacter->hasGroup() == false)); // Check: Character does not have a group.
-	EXPECTED((mMembers.size() < Limits::MAX_GROUP_MEMBERS)); // Check: Group is not already full.
+	EXPECTED((mMembers.size() < Limits::Group::MAX_MEMBERS)); // Check: Group is not already full.
 
 	mMembers.push_back(pCharacter);
 	pCharacter->setGroup(this);

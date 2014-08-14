@@ -112,7 +112,7 @@ namespace Utility {
 		return false;
 	}
 
-	static bool stoulSafe(uint32& pValue, String& pString) {
+	static bool stou32Safe(uint32& pValue, String& pString) {
 		try {
 			pValue = std::stoul(pString);
 			return true;
@@ -122,8 +122,6 @@ namespace Utility {
 		}
 		return false;
 	}
-
-	// String To Unsigned 16
 	static bool stou16Safe(std::uint16_t& pValue, String pString) {
 		try {
 			pValue = static_cast<std::uint16_t>(std::stoul(pString));
@@ -132,6 +130,22 @@ namespace Utility {
 		catch (...) {
 			return false;
 		}
+		return false;
+	}
+	static bool stou8Safe(uint8& pValue, String& pString) {
+		try {
+			pValue = static_cast<uint8>(std::stoul(pString));
+			return true;
+		}
+		catch (...) {
+			return false;
+		}
+		return false;
+	}
+	static bool stobool(String& pString) {
+		// TODO: http://msdn.microsoft.com/en-us/library/chd90w8e%28VS.80%29.aspx
+		if (pString == "true" || pString == "1")
+			return true;
 		return false;
 	}
 }

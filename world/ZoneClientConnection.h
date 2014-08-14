@@ -10,6 +10,8 @@ class Zone;
 class Character;
 class DataStore;
 class CommandHandler;
+class Guild;
+struct GuildMember;
 struct NewSpawn_Struct;
 
 static const String EmptyString = String();
@@ -83,6 +85,7 @@ public:
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName);
+	void sendGuildMembers(const std::list<GuildMember*>& pGuildMembers);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.

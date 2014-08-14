@@ -1,6 +1,7 @@
 #include "GuildManager.h"
 
 #include "Utility.h"
+#include "Limits.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "ZoneManager.h"
@@ -13,7 +14,7 @@ bool GuildManager::initialise() {
 	Profile p("GuildManager::initialise");
 	Log::status("[Guild Manager] Initialising.");
 
-	for (auto i = 0; i < MAX_GUILDS; i++) {
+	for (auto i = 0; i < Limits::Guild::MAX_GUILDS; i++) {
 		mGuildNames[i][0] = '\0';
 	}
 
@@ -24,24 +25,55 @@ bool GuildManager::initialise() {
 		return false;
 	}
 
+	// Read Guild data.
 	TiXmlElement* guildElement = document.FirstChildElement("guilds")->FirstChildElement("guild");
 	while (guildElement) {
 		Guild* guild = new Guild(); 
 		mGuilds.push_back(guild);
 
-		Utility::stoulSafe(guild->mID, String(guildElement->Attribute("id")));
+		Utility::stou32Safe(guild->mID, String(guildElement->Attribute("id")));
+		EXPECTED_BOOL(Limits::Guild::ID(guild->mID));
 		guild->mName = guildElement->Attribute("name");
+		EXPECTED_BOOL(Limits::Guild::nameLength(guild->mName));
 		guild->mMOTD = guildElement->Attribute("motd");
-		guild->mMOTD = guildElement->Attribute("motd_setter");
+		EXPECTED_BOOL(Limits::Guild::MOTDLength(guild->mMOTD));
+		guild->mMOTDSetter = guildElement->Attribute("motd_setter");
+		EXPECTED_BOOL(Limits::Character::nameLength(guild->mName));
 
-		// Read members data.
+		// Read GuildMember data.
 		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
 		while (memberElement) {
-			uint32 memberID = 0;
-			uint32 memberRank = 0;
-			Utility::stoulSafe(memberID, String(memberElement->Attribute("id")));
-			Utility::stoulSafe(memberRank, String(memberElement->Attribute("rank")));
-			guild->mMembers.push_back({ memberID, memberRank });
+			GuildMember* member = new GuildMember();
+			EXPECTED_BOOL(Utility::stou32Safe(member->mID, String(memberElement->Attribute("id"))));
+			EXPECTED_BOOL(Utility::stou8Safe(member->mRank, String(memberElement->Attribute("rank"))));
+			EXPECTED_BOOL(Utility::stou32Safe(member->mLevel, String(memberElement->Attribute("level"))));
+			EXPECTED_BOOL(Utility::stou32Safe(member->mClass, String(memberElement->Attribute("class"))));
+			EXPECTED_BOOL(Limits::Character::classID(member->mClass));
+			member->mBanker = Utility::stobool(String(memberElement->Attribute("banker")));
+			EXPECTED_BOOL(Utility::stou32Safe(member->mTimeLastOn, String(memberElement->Attribute("time_last_on"))));
+			member->mTributeEnabled = Utility::stobool(String(memberElement->Attribute("tribute_enabled")));
+			EXPECTED_BOOL(Utility::stou32Safe(member->mTotalTribute, String(memberElement->Attribute("total_tribute"))));
+			EXPECTED_BOOL(Utility::stou32Safe(member->mLastTribute, String(memberElement->Attribute("last_tribute"))));
+
+			member->mName = String(memberElement->Attribute("name"));
+			EXPECTED_BOOL(Limits::Character::nameLength(member->mName));
+			member->mPublicNote = String(memberElement->Attribute("public_note"));
+			EXPECTED_BOOL(Limits::Guild::publicNoteLength(member->mPublicNote));
+
+			guild->mMembers.push_back(member);
+
+			// Read GuildMember::PersonalNotes data.
+			TiXmlElement* noteElement = memberElement->FirstChildElement("notes")->FirstChildElement("note");
+			while (noteElement) {
+				String characterName = noteElement->Attribute("name");
+				EXPECTED_BOOL(Limits::Character::nameLength(characterName));
+				String noteValue = noteElement->Attribute("value");
+				EXPECTED_BOOL(Limits::Guild::personalNoteLength(noteValue));
+				member->mPersonalNotes.push_back({ characterName, noteValue });
+
+				noteElement = noteElement->NextSiblingElement();
+			}
+
 			memberElement = memberElement->NextSiblingElement();
 		}
 
@@ -79,7 +111,10 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	// Tell Zone that something has changed.
 	pCharacter->getZone()->notifyGuildsChanged();
 
-	guild->mMembers.push_back({ pCharacter->getID(), GuildRanks::Leader });
+	GuildMember* member = new GuildMember();
+	member->mID = pCharacter->getID();
+	member->mRank = GuildRanks::Leader;
+	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
 	pCharacter->setGuild(guild, guild->mID, GuildRanks::Leader);
@@ -113,7 +148,7 @@ void GuildManager::handleDelete(Character* pCharacter) {
 	_save();
 }
 
-void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterName) {
+void GuildManager::handleRemove(Character* pCharacter, const String& pRemoveCharacterName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
@@ -132,7 +167,7 @@ void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterNa
 
 		// Remove Character from Guild members.
 		for (auto i = guild->mMembers.begin(); i != guild->mMembers.end(); i++) {
-			if (i->mID == pCharacter->getID()) {
+			if ((*i)->mID == pCharacter->getID()) {
 				guild->mMembers.erase(i);
 				break;
 			}
@@ -150,7 +185,7 @@ void GuildManager::handleRemove(Character* pCharacter, String pRemoveCharacterNa
 	_save();
 }
 
-void GuildManager::handleInviteSent(Character* pCharacter, String pInviteCharacterName) {
+void GuildManager::handleInviteSent(Character* pCharacter, const String& pInviteCharacterName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
@@ -181,12 +216,15 @@ void GuildManager::handleInviteSent(Character* pCharacter, String pInviteCharact
 	character->getConnection()->sendGuildInvite(pCharacter->getName(), guild->mID);
 }
 
-void GuildManager::handleInviteAccept(Character* pCharacter, String pInviterName) {
+void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInviterName) {
 	ARG_PTR_CHECK(pCharacter);
 	Guild* guild = _findByID(pCharacter->getPendingGuildInviteID());
 	EXPECTED(guild != nullptr);
 
-	guild->mMembers.push_back({ pCharacter->getID(), GuildRanks::Member });
+	GuildMember* member = new GuildMember();
+	member->mID = pCharacter->getID();
+	member->mRank = GuildRanks::Member;
+	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
 	pCharacter->setGuild(guild, guild->mID, GuildRanks::Member);
@@ -200,7 +238,7 @@ void GuildManager::handleInviteAccept(Character* pCharacter, String pInviterName
 	_save();
 }
 
-void GuildManager::handleInviteDecline(Character* pCharacter, String InviterName) {
+void GuildManager::handleInviteDecline(Character* pCharacter, const String& InviterName) {
 	ARG_PTR_CHECK(pCharacter);
 	pCharacter->clearPendingGuildInvite();
 }
@@ -230,8 +268,28 @@ void GuildManager::_save() {
 		TiXmlElement* membersElement = new TiXmlElement("members");
 		for (auto j : i->mMembers) {
 			TiXmlElement* memberElement = new TiXmlElement("member");
-			memberElement->SetAttribute("id", j.mID);
-			memberElement->SetAttribute("rank", j.mRank);
+			memberElement->SetAttribute("id", j->mID);
+			memberElement->SetAttribute("rank", j->mRank);
+			memberElement->SetAttribute("level", j->mLevel);
+			memberElement->SetAttribute("banker", j->mBanker);
+			memberElement->SetAttribute("class", j->mClass);
+			memberElement->SetAttribute("time_last_on", j->mTimeLastOn);
+			memberElement->SetAttribute("tribute_enabled", j->mTributeEnabled);
+			memberElement->SetAttribute("total_tribute", j->mTotalTribute);
+			memberElement->SetAttribute("banker", j->mBanker);
+			memberElement->SetAttribute("last_tribute", j->mLastTribute);
+			memberElement->SetAttribute("public_note", j->mPublicNote.c_str());
+			
+			TiXmlElement* notesElement = new TiXmlElement("note");
+			for (auto k : j->mPersonalNotes) {
+				TiXmlElement* noteElement = new TiXmlElement("note");
+				noteElement->SetAttribute("name", k.mName.c_str());
+				noteElement->SetAttribute("value", k.mNote.c_str());
+
+				notesElement->LinkEndChild(noteElement);
+			}
+
+			memberElement->LinkEndChild(notesElement);
 			membersElement->LinkEndChild(memberElement);
 		}
 		guildElement->LinkEndChild(membersElement);
@@ -295,11 +353,17 @@ void GuildManager::onConnect(Character* pCharacter, uint32 pGuildID) {
 	// Check: Character still belongs to this guild.
 	bool found = false;
 	for (auto i : guild->mMembers) {
-		if (i.mID == pCharacter->getID()) {
+		if (i->mID == pCharacter->getID()) {
 			
-			pCharacter->setGuild(guild, guild->mID, i.mRank);
+			pCharacter->setGuild(guild, guild->mID, i->mRank);
 			_sendMessage(guild, SYS_NAME, pCharacter->getName() + " has come online!");
 			guild->mOnlineMembers.push_back(pCharacter);
+
+			// Update member details.
+			// NOTE: Membership information should always be up to date unless there was external changes to the Character.
+			i->mName = pCharacter->getName();
+			i->mClass = pCharacter->getClass();
+			i->mLevel = pCharacter->getLevel();
 
 			found = true;
 			break;
@@ -325,6 +389,16 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
+	// Update member details.
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED(member);
+	Zone* zone = pCharacter->getZone();
+	EXPECTED(zone);
+
+	member->mZoneID = zone->getID();
+	member->mInstanceID = zone->getInstanceID();
+
+	pCharacter->getConnection()->sendGuildMembers(pCharacter->getGuild()->mMembers);
 	// TODO:
 	//SendGuildMembers();
 	//SendGuildURL();
@@ -334,6 +408,8 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 void GuildManager::onLeaveZone(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
+
+	// TODO: Do I need to zero member zone id / instance id?
 }
 
 void GuildManager::onCamp(Character* pCharacter){
@@ -351,6 +427,25 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
 }
+
+void GuildManager::onLevelChange(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	// Update member details.
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED(member);
+
+	uint32 previousLevel = member->mLevel;
+	member->mLevel = pCharacter->getLevel();
+
+	// Notify guild members.
+	if (member->mLevel > previousLevel) {
+		StringStream ss; ss << pCharacter->getName() << " is now level " << member->mLevel << "!";
+		_sendMessage(pCharacter->getGuild(), SYS_NAME, ss.str());
+	}
+}
+
 
 void GuildManager::handleMessage(Character* pCharacter, const String& pMessage) {
 	ARG_PTR_CHECK(pCharacter);
@@ -377,7 +472,7 @@ void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const 
 void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
-	EXPECTED(pMOTD.length() < MAX_GUILD_MOTD_LENGTH); // NOTE: 'Less-Than' is used instead of 'Less-Than-Or-Equal-To' because std::string::length does not include the null terminator.
+	EXPECTED(pMOTD.length() < Limits::Guild::MAX_MOTD_LENGTH); // NOTE: 'Less-Than' is used instead of 'Less-Than-Or-Equal-To' because std::string::length does not include the null terminator.
 	// EXPECTED: pCharacter has permission.
 
 	Guild* guild = pCharacter->getGuild();

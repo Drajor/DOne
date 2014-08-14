@@ -298,6 +298,9 @@ void Character::_checkForLevelIncrease() {
 	while (mExperience >= getExperienceForNextLevel()) {
 		mExperience -= getExperienceForNextLevel();
 		setLevel(mLevel + 1);
+
+		if (hasGuild())
+			GuildManager::getInstance().onLevelChange(this);
 	}
 }
 

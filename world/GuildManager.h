@@ -11,19 +11,47 @@ typedef std::list<GuildSearchEntry> GuildSearchResults;
 
 class Character;
 
-class Guild {
-	friend class GuildManager;
-private:
-	struct Member {
-		uint32 mID; // Character ID
-		GuildRank mRank;
+struct GuildMember {
+	GuildMember() : mID(0), mName(""), mLevel(0), mClass(0), mRank(0), mBanker(false), mTributeEnabled(false), mAlt(false), mTimeLastOn(0), mTotalTribute(0), mLastTribute(0), mPublicNote(""), mZoneID(0), mInstanceID(0) {}
+	uint32 mID; // Character ID
+	String mName;
+	std::uint32_t mLevel; // TODO: Should really be uint16
+	ClassID mClass;
+	GuildRank mRank;
+	bool mBanker;
+	bool mTributeEnabled;
+	bool mAlt;
+	std::uint32_t mTimeLastOn;
+	std::uint32_t mTotalTribute;
+	std::uint32_t mLastTribute;
+	String mPublicNote;
+	ZoneID mZoneID;
+	InstanceID mInstanceID;
+	struct Note {
+		String mName;
+		String mNote;
 	};
+	std::list<Note> mPersonalNotes;
+};
+
+class Guild {
+	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter("") {}
+	friend class GuildManager;
 	uint32 mID;
 	String mName;
 	String mMOTD;
 	String mMOTDSetter; // The Character name of who set the current MOTD.
 	std::list<Character*> mOnlineMembers;
-	std::list<Member> mMembers;
+	std::list<GuildMember*> mMembers;
+
+	GuildMember* getMember(const String& pCharacterName) {
+		for (auto i : mMembers) {
+			if (i->mName == pCharacterName)
+				return i;
+		}
+
+		return nullptr;
+	}
 };
 
 class GuildManager {
@@ -38,10 +66,10 @@ public:
 	// Character Packet Events
 	void handleCreate(Character* pCharacter, const String pGuildName);
 	void handleDelete(Character* pCharacter);
-	void handleRemove(Character* pCharacter, String pRemoveCharacterName);
-	void handleInviteSent(Character* pCharacter, String pInviteCharacterName);
-	void handleInviteAccept(Character* pCharacter, String pInviterName);
-	void handleInviteDecline(Character* pCharacter, String InviterName);
+	void handleRemove(Character* pCharacter, const String& pRemoveCharacterName);
+	void handleInviteSent(Character* pCharacter, const String& pInviteCharacterName);
+	void handleInviteAccept(Character* pCharacter, const String& pInviterName);
+	void handleInviteDecline(Character* pCharacter, const String& InviterName);
 	void handleMessage(Character* pCharacter, const String& pMessage);
 	void handleSetMOTD(Character* pCharacter, const String& pMOTD);
 	void handleGetMOTD(Character* pCharacter);
@@ -52,6 +80,7 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
+	void onLevelChange(Character* pCharacter);
 
 	std::list<String> getGuildNames();
 
@@ -72,7 +101,7 @@ private:
 	std::list<Guild*> mGuilds;
 
 	void _storeGuildName(GuildID pGuildID, String pGuildName);
-	char mGuildNames[MAX_GUILDS][MAX_GUILD_NAME_LENGTH];
+	char mGuildNames[Limits::Guild::MAX_GUILDS][Limits::Guild::MAX_NAME_LENGTH];
 
 	GuildManager() {};
 	~GuildManager();
