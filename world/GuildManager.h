@@ -65,6 +65,9 @@ public:
 
 	bool initialise();
 
+	bool isLeader(Character* pCharacter);
+	bool isOfficer(Character* pCharacter);
+
 	// Character Packet Events
 	void handleCreate(Character* pCharacter, const String pGuildName);
 	void handleDelete(Character* pCharacter);
@@ -75,6 +78,8 @@ public:
 	void handleMessage(Character* pCharacter, const String& pMessage);
 	void handleSetMOTD(Character* pCharacter, const String& pMOTD);
 	void handleGetMOTD(Character* pCharacter);
+	void handleSetURL(Character* pCharacter, const String& pURL);
+	void handleSetChannel(Character* pCharacter, const String& pChannel);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);

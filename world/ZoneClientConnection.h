@@ -141,6 +141,7 @@ private:
 	void _handleGroupDisband(const EQApplicationPacket* pPacket);
 	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 	void _handleZoneChange(const EQApplicationPacket* pPacket);
+
 	void _handleGuildCreate(const EQApplicationPacket* pPacket);
 	void _handleGuildDelete(const EQApplicationPacket* pPacket);
 	void _handleGuildInvite(const EQApplicationPacket* pPacket);
@@ -148,6 +149,7 @@ private:
 	void _handleGuildRemove(const EQApplicationPacket* pPacket);
 	void _handleSetGuildMOTD(const EQApplicationPacket* pPacket);
 	void _handleGetGuildMOTD(const EQApplicationPacket* pPacket);
+	void _handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

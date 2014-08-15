@@ -281,6 +281,7 @@ void GuildManager::_save() {
 		for (auto j : i->mMembers) {
 			TiXmlElement* memberElement = new TiXmlElement("member");
 			memberElement->SetAttribute("id", j->mID);
+			memberElement->SetAttribute("name", j->mName.c_str());
 			memberElement->SetAttribute("rank", j->mRank);
 			memberElement->SetAttribute("level", j->mLevel);
 			memberElement->SetAttribute("banker", j->mBanker);
@@ -292,7 +293,7 @@ void GuildManager::_save() {
 			memberElement->SetAttribute("last_tribute", j->mLastTribute);
 			memberElement->SetAttribute("public_note", j->mPublicNote.c_str());
 			
-			TiXmlElement* notesElement = new TiXmlElement("note");
+			TiXmlElement* notesElement = new TiXmlElement("notes");
 			for (auto k : j->mPersonalNotes) {
 				TiXmlElement* noteElement = new TiXmlElement("note");
 				noteElement->SetAttribute("name", k.mName.c_str());
@@ -417,6 +418,7 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	connection->sendGuildMembers(guild->mMembers);
 	connection->sendGuildURL(guild->mURL);
 	connection->sendGuildChannel(guild->mChannel);
+	connection->sendGuildMOTD(guild->mMOTD, guild->mMOTDSetter);
 }
 
 void GuildManager::onLeaveZone(Character* pCharacter) {
@@ -519,4 +521,44 @@ void GuildManager::_sendMOTD(Character* pCharacter) {
 
 	Guild* guild = pCharacter->getGuild();
 	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
+}
+
+bool GuildManager::isLeader(Character* pCharacter){
+	ARG_PTR_CHECK_BOOL(pCharacter);
+	EXPECTED_BOOL(pCharacter->hasGuild());
+
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED_BOOL(member);
+
+	return member->mRank == GuildRanks::Leader;
+}
+
+bool GuildManager::isOfficer(Character* pCharacter){
+	ARG_PTR_CHECK_BOOL(pCharacter);
+	EXPECTED_BOOL(pCharacter->hasGuild());
+
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED_BOOL(member);
+
+	return member->mRank == GuildRanks::Officer;
+}
+
+void GuildManager::handleSetURL(Character* pCharacter, const String& pURL) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter));
+	EXPECTED(Limits::Guild::urlLength(pURL));
+
+	pCharacter->getGuild()->mURL = pURL;
+	_save();
+}
+
+void GuildManager::handleSetChannel(Character* pCharacter, const String& pChannel) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter));
+	EXPECTED(Limits::Guild::channelLength(pChannel));
+
+	pCharacter->getGuild()->mChannel = pChannel;
+	_save();
 }

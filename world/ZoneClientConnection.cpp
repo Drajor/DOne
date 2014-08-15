@@ -312,6 +312,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /getguildmotd command.
 		_handleGetGuildMOTD(pPacket);
 		break;
+	case OP_GuildUpdateURLAndChannel:
+		// NOTE: 
+		_handleSetGuildURLOrChannel(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -1942,13 +1946,17 @@ struct GuildUpdate {
 	char mText[512];
 	char mUnknown1[3584];
 };
+enum GuildUpdateAction : uint32 {
+	GUILD_URL = 0,
+	GUILD_CHANNEL = 1
+};
 
 void ZoneClientConnection::sendGuildURL(const String& pURL) {
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
 	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
-	payload->mAction = 0;
+	payload->mAction = GuildUpdateAction::GUILD_URL;
 	strcpy(&payload->mText[0], pURL.c_str());
 
 	mStreamInterface->QueuePacket(outPacket);
@@ -1960,9 +1968,30 @@ void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 
 	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
 	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
-	payload->mAction = 1;
+	payload->mAction = GuildUpdateAction::GUILD_CHANNEL;
 	strcpy(&payload->mText[0], pChannel.c_str());
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Only a Guild leader can perform this operation.
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildUpdate));
+
+	auto payload = reinterpret_cast<GuildUpdate*>(pPacket->pBuffer);
+	if (payload->mAction == GUILD_URL) {
+		String url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
+		GuildManager::getInstance().handleSetURL(mCharacter, url);
+	}
+	else if (payload->mAction == GUILD_CHANNEL) {
+		String channel = Utility::safeString(payload->mText, Limits::Guild::MAX_CHANNEL_LENGTH);
+		GuildManager::getInstance().handleSetChannel(mCharacter, channel);
+	}
+	else {
+		StringStream ss; ss << "[Zone Client Connection]Got unknown action value(" << payload->mAction << ") in _handleSetGuildURLOrChannel from " << Utility::characterLogDetails(mCharacter);
+		Log::error(ss.str());
+	}
 }
