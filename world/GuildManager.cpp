@@ -106,7 +106,7 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	EXPECTED(pCharacter->hasGuild() == false);
 
 	// Check: Guild name already exists.
-	if (_findGuildByName(pGuildName)) {
+	if (_findByGuildName(pGuildName)) {
 		pCharacter->getConnection()->sendSimpleMessage(MessageType::Red, StringID::GUILD_NAME_IN_USE);
 		return;
 	}
@@ -253,7 +253,7 @@ void GuildManager::handleInviteDecline(Character* pCharacter, const String& Invi
 	pCharacter->clearPendingGuildInvite();
 }
 
-Guild* GuildManager::_findGuildByName(const String pGuildName) {
+Guild* GuildManager::_findByGuildName(const String& pGuildName) {
 	for (auto i : mGuilds) {
 		if (i->mName == pGuildName)
 			return i;
@@ -415,10 +415,7 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	member->mZoneID = zone->getID();
 	member->mInstanceID = zone->getInstanceID();
 
-	connection->sendGuildMembers(guild->mMembers);
-	connection->sendGuildURL(guild->mURL);
-	connection->sendGuildChannel(guild->mChannel);
-	connection->sendGuildMOTD(guild->mMOTD, guild->mMOTDSetter);
+	_refresh(pCharacter->getGuild());
 }
 
 void GuildManager::onLeaveZone(Character* pCharacter) {
@@ -434,6 +431,8 @@ void GuildManager::onCamp(Character* pCharacter){
 
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
+
+	_refresh(pCharacter->getGuild());
 }
 
 void GuildManager::onLinkdead(Character* pCharacter) {
@@ -442,6 +441,8 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
+
+	_refresh(pCharacter->getGuild());
 }
 
 void GuildManager::onLevelChange(Character* pCharacter) {
@@ -460,6 +461,8 @@ void GuildManager::onLevelChange(Character* pCharacter) {
 		StringStream ss; ss << pCharacter->getName() << " is now level " << member->mLevel << "!";
 		_sendMessage(pCharacter->getGuild(), SYS_NAME, ss.str());
 	}
+
+	_refresh(pCharacter->getGuild());
 }
 
 
@@ -523,6 +526,37 @@ void GuildManager::_sendMOTD(Character* pCharacter) {
 	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
 }
 
+void GuildManager::_refresh(Guild* pGuild) {
+	ARG_PTR_CHECK(pGuild);
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		ZoneClientConnection* connection = i->getConnection();
+		EXPECTED(connection);
+
+		connection->sendGuildMembers(pGuild->mMembers);
+		connection->sendGuildURL(pGuild->mURL);
+		connection->sendGuildChannel(pGuild->mChannel);
+		connection->sendGuildMOTD(pGuild->mMOTD, pGuild->mMOTDSetter);
+	}
+}
+
+void GuildManager::_refresh(Character* pCharacter) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+
+	ZoneClientConnection* connection = pCharacter->getConnection();
+	EXPECTED(connection);
+	Guild* guild = pCharacter->getGuild();
+	EXPECTED(guild);
+
+	connection->sendGuildMembers(guild->mMembers);
+	connection->sendGuildURL(guild->mURL);
+	connection->sendGuildChannel(guild->mChannel);
+	connection->sendGuildMOTD(guild->mMOTD, guild->mMOTDSetter);
+}
+
+
 bool GuildManager::isLeader(Character* pCharacter){
 	ARG_PTR_CHECK_BOOL(pCharacter);
 	EXPECTED_BOOL(pCharacter->hasGuild());
@@ -551,6 +585,7 @@ void GuildManager::handleSetURL(Character* pCharacter, const String& pURL) {
 
 	pCharacter->getGuild()->mURL = pURL;
 	_save();
+	_refresh(pCharacter->getGuild());
 }
 
 void GuildManager::handleSetChannel(Character* pCharacter, const String& pChannel) {
@@ -561,4 +596,22 @@ void GuildManager::handleSetChannel(Character* pCharacter, const String& pChanne
 
 	pCharacter->getGuild()->mChannel = pChannel;
 	_save();
+	_refresh(pCharacter->getGuild());
+}
+
+void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(Limits::Character::nameLength(pCharacterName));
+	EXPECTED(Limits::Guild::publicNoteLength(pNote));
+
+	if (pCharacter->getName() != pCharacterName)
+		EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can change another Character's public note.
+
+	Guild* guild = pCharacter->getGuild();
+	GuildMember* member = guild->getMember(pCharacterName);
+	EXPECTED(member);
+	member->mPublicNote = pNote;
+	_save();
+	_refresh(guild);
 }

@@ -316,6 +316,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: 
 		_handleSetGuildURLOrChannel(pPacket);
 		break;
+	case OP_GuildPublicNote:
+		_handleSetGuildPublicNote(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -1451,8 +1454,8 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
 
-	const String inviterName = Utility::safeString(payload->inviter_name, MAX_CHARACTER_NAME_LENGTH);
-	const String inviteeName = Utility::safeString(payload->invitee_name, MAX_CHARACTER_NAME_LENGTH);
+	const String inviterName = Utility::safeString(payload->inviter_name, Limits::Character::MAX_NAME_LENGTH);
+	const String inviteeName = Utility::safeString(payload->invitee_name, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(inviterName));
 	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviterName == mCharacter->getName()); // Check: Spoofing
@@ -1479,8 +1482,8 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
-	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH); // Character who invited.
-	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH); // Character accepting invite.
+	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH); // Character who invited.
+	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH); // Character accepting invite.
 	EXPECTED(Limits::Character::nameLength(inviterName));
 	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
@@ -1495,8 +1498,8 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupCancel_Struct));
 
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
-	String inviterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
-	String inviteeName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
+	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
+	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(inviterName));
 	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
@@ -1609,8 +1612,8 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 	
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 
-	String removeCharacterName = Utility::safeString(payload->name1, MAX_CHARACTER_NAME_LENGTH);
-	String myCharacterName = Utility::safeString(payload->name2, MAX_CHARACTER_NAME_LENGTH);
+	String removeCharacterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
+	String myCharacterName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(removeCharacterName));
 	EXPECTED(Limits::Character::nameLength(myCharacterName));
 	EXPECTED(myCharacterName == mCharacter->getName()); // Check: Sanity
@@ -1649,8 +1652,8 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
 
-	String currentLeader = Utility::safeString(payload->CurrentLeader, MAX_CHARACTER_NAME_LENGTH);
-	String newLeader = Utility::safeString(payload->NewLeader, MAX_CHARACTER_NAME_LENGTH);
+	String currentLeader = Utility::safeString(payload->CurrentLeader, Limits::Character::MAX_NAME_LENGTH);
+	String newLeader = Utility::safeString(payload->NewLeader, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(currentLeader));
 	EXPECTED(Limits::Character::nameLength(newLeader));
 	EXPECTED(currentLeader == mCharacter->getName());
@@ -1755,8 +1758,8 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 
 	EXPECTED(payload->guildeqid == mCharacter->getGuildID()); // Check: Sanity. Why the fuck does the client send this?
 
-	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
-	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
+	String toCharacterName = Utility::safeString(payload->othername, Limits::Character::MAX_NAME_LENGTH);
+	String fromCharacterName = Utility::safeString(payload->myname, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(toCharacterName)); // NOTE: Client does not check this..
 	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
@@ -1772,8 +1775,8 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
 
-	String toCharacterName = Utility::safeString(payload->othername, MAX_CHARACTER_NAME_LENGTH);
-	String fromCharacterName = Utility::safeString(payload->myname, MAX_CHARACTER_NAME_LENGTH);
+	String toCharacterName = Utility::safeString(payload->othername, Limits::Character::MAX_NAME_LENGTH);
+	String fromCharacterName = Utility::safeString(payload->myname, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(toCharacterName));
 	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()) // Check: Sanity.
@@ -1808,8 +1811,8 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 
 	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);
 	
-	String characterName = Utility::safeString(payload->newmember, MAX_CHARACTER_NAME_LENGTH);
-	String inviterName = Utility::safeString(payload->inviter, MAX_CHARACTER_NAME_LENGTH);
+	String characterName = Utility::safeString(payload->newmember, Limits::Character::MAX_NAME_LENGTH);
+	String inviterName = Utility::safeString(payload->inviter, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(characterName));
 	EXPECTED(Limits::Character::nameLength(inviterName));
 	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
@@ -1842,7 +1845,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
 
-	String characterName = Utility::safeString(payload->name, MAX_CHARACTER_NAME_LENGTH);
+	String characterName = Utility::safeString(payload->name, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity.
 	String motd = Utility::safeString(payload->motd, Limits::Guild::MAX_MOTD_LENGTH);
 
@@ -1908,7 +1911,7 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
 	
 	// Write Header.
-	ds.writeFixedString(mCharacter->getName(), MAX_CHARACTER_NAME_LENGTH);
+	ds.writeFixedString(mCharacter->getName(), Limits::Character::MAX_NAME_LENGTH);
 	ds.write<uint32>(pGuildMembers.size());
 	ds.write<uint32>(namesLength);
 	ds.write<uint32>(notesLength);
@@ -1994,4 +1997,34 @@ void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket
 		StringStream ss; ss << "[Zone Client Connection]Got unknown action value(" << payload->mAction << ") in _handleSetGuildURLOrChannel from " << Utility::characterLogDetails(mCharacter);
 		Log::error(ss.str());
 	}
+}
+
+namespace Payload {
+	struct PublicNote {
+		uint32 mUnknown;
+		char mSenderName[Limits::Character::MAX_NAME_LENGTH];
+		char mTargetName[Limits::Character::MAX_NAME_LENGTH];
+		char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
+	};
+}
+
+void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+	Log::info(std::to_string(pPacket->size));
+	PACKET_SIZE_CHECK(pPacket->size >= sizeof(Payload::PublicNote));
+
+	auto payload = reinterpret_cast<Payload::PublicNote*>(pPacket->pBuffer);
+
+	String senderName = Utility::safeString(payload->mSenderName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(senderName == mCharacter->getName()); // Check: Sanity
+	String targetName = Utility::safeString(payload->mTargetName, Limits::Character::MAX_NAME_LENGTH);
+	String note = Utility::safeString(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
+
+	// Changing the note of someone else, check permission.
+	// TODO: Consider removing. This is really application logic.
+	if (targetName != senderName)
+		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter));
+
+	GuildManager::getInstance().handleSetPublicNote(mCharacter, targetName, note);
 }

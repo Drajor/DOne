@@ -1,7 +1,9 @@
 #include "Limits.h"
 
+std::size_t stringLength(const String& pString) { return pString.length() + 1; }
+
 bool Limits::Character::nameLength(const String& pCharacterName) {
-	return pCharacterName.length() + 1 >= MIN_CHARACTER_NAME_LENGTH && pCharacterName.length() + 1 <= MAX_CHARACTER_NAME_LENGTH;
+	return stringLength(pCharacterName) >= Limits::Character::MIN_NAME_LENGTH && stringLength(pCharacterName) <= Limits::Character::MAX_NAME_LENGTH;
 }
 
 bool Limits::Character::classID(const ClassID pClassID) {
@@ -31,11 +33,11 @@ bool Limits::Character::classID(const ClassID pClassID) {
 }
 
 bool Limits::Guild::nameLength(const String& pGuildName) {
-	return pGuildName.length() + 1 >= Limits::Guild::MIN_NAME_LENGTH && pGuildName.length() + 1 <= Limits::Guild::MAX_NAME_LENGTH;
+	return stringLength(pGuildName) >= Limits::Guild::MIN_NAME_LENGTH && stringLength(pGuildName) <= Limits::Guild::MAX_NAME_LENGTH;
 }
 
 bool Limits::Guild::MOTDLength(const String& pGuildMOTD){
-	return pGuildMOTD.length() + 1 <= Limits::Guild::MAX_MOTD_LENGTH;
+	return stringLength(pGuildMOTD) <= Limits::Guild::MAX_MOTD_LENGTH;
 }
 
 bool Limits::Guild::ID(const GuildID pGuildID) {
@@ -43,17 +45,17 @@ bool Limits::Guild::ID(const GuildID pGuildID) {
 }
 
 bool Limits::Guild::publicNoteLength(const String& pPublicNote) {
-	return pPublicNote.length() + 1 <= Limits::Guild::MAX_PUBLIC_NOTE_LENGTH;
+	return stringLength(pPublicNote) <= Limits::Guild::MAX_PUBLIC_NOTE_LENGTH;
 }
 
 bool Limits::Guild::personalNoteLength(const String& pPersonalNote) {
-	return pPersonalNote.length() + 1 <= Limits::Guild::MAX_PERSONAL_NOTE_LENGTH;
+	return stringLength(pPersonalNote) <= Limits::Guild::MAX_PERSONAL_NOTE_LENGTH;
 }
 
 bool Limits::Guild::urlLength(const String& pURL) {
-	return pURL.length() + 1 < Limits::Guild::MAX_URL_LENGTH;
+	return stringLength(pURL) <= Limits::Guild::MAX_URL_LENGTH;
 }
 
 bool Limits::Guild::channelLength(const String& pChannel) {
-	return pChannel.length() + 1 < Limits::Guild::MAX_CHANNEL_LENGTH;
+	return stringLength(pChannel) <= Limits::Guild::MAX_CHANNEL_LENGTH;
 }

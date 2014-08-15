@@ -28,13 +28,14 @@ typedef std::stringstream StringStream;
 typedef std::uint32_t GuildID;
 typedef std::uint8_t GuildRank;
 
-static auto MIN_CHARACTER_NAME_LENGTH = 4;
-static auto MAX_CHARACTER_NAME_LENGTH = 64;
-
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const SpawnID NO_TARGET = 0;
 
 namespace Limits {
+	namespace Character {
+		static const auto MIN_NAME_LENGTH = 4;
+		static const auto MAX_NAME_LENGTH = 64;
+	}
 	namespace Guild {
 		static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 		static const auto MIN_NAME_LENGTH = 4;
@@ -111,7 +112,6 @@ enum ZoneIDs : ZoneID {
 	HighpassHold = 5,
 	HighKeep = 6
 };
-//std::uint16_t ZoneIDToType(ZoneID pZoneID) { return static_cast<std::uint16_t>(pZoneID); }
 
 enum class Statistic : uint32 {
 	Strength,

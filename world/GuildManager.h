@@ -80,6 +80,7 @@ public:
 	void handleGetMOTD(Character* pCharacter);
 	void handleSetURL(Character* pCharacter, const String& pURL);
 	void handleSetChannel(Character* pCharacter, const String& pChannel);
+	void handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);
@@ -100,8 +101,10 @@ private:
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
 	void _sendMOTD(Guild* pGuild);
 	void _sendMOTD(Character* pCharacter);
+	void _refresh(Guild* pGuild);
+	void _refresh(Character* pCharacter);
 
-	Guild* _findGuildByName(const String pGuildName);
+	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);
 	uint32 getNextGuildID();
 	void _save();
