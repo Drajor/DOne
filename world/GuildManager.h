@@ -27,11 +27,6 @@ struct GuildMember {
 	String mPublicNote;
 	ZoneID mZoneID;
 	InstanceID mInstanceID;
-	struct Note {
-		String mName;
-		String mNote;
-	};
-	std::list<Note> mPersonalNotes;
 };
 
 class Guild {

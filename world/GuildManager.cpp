@@ -71,19 +71,6 @@ bool GuildManager::initialise() {
 			EXPECTED_BOOL(Limits::Guild::publicNoteLength(member->mPublicNote));
 
 			guild->mMembers.push_back(member);
-
-			// Read GuildMember::PersonalNotes data.
-			TiXmlElement* noteElement = memberElement->FirstChildElement("notes")->FirstChildElement("note");
-			while (noteElement) {
-				String characterName = noteElement->Attribute("name");
-				EXPECTED_BOOL(Limits::Character::nameLength(characterName));
-				String noteValue = noteElement->Attribute("value");
-				EXPECTED_BOOL(Limits::Guild::personalNoteLength(noteValue));
-				member->mPersonalNotes.push_back({ characterName, noteValue });
-
-				noteElement = noteElement->NextSiblingElement();
-			}
-
 			memberElement = memberElement->NextSiblingElement();
 		}
 
@@ -292,17 +279,7 @@ void GuildManager::_save() {
 			memberElement->SetAttribute("banker", j->mBanker);
 			memberElement->SetAttribute("last_tribute", j->mLastTribute);
 			memberElement->SetAttribute("public_note", j->mPublicNote.c_str());
-			
-			TiXmlElement* notesElement = new TiXmlElement("notes");
-			for (auto k : j->mPersonalNotes) {
-				TiXmlElement* noteElement = new TiXmlElement("note");
-				noteElement->SetAttribute("name", k.mName.c_str());
-				noteElement->SetAttribute("value", k.mNote.c_str());
 
-				notesElement->LinkEndChild(noteElement);
-			}
-
-			memberElement->LinkEndChild(notesElement);
 			membersElement->LinkEndChild(memberElement);
 		}
 		guildElement->LinkEndChild(membersElement);
