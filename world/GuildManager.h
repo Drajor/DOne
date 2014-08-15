@@ -35,12 +35,14 @@ struct GuildMember {
 };
 
 class Guild {
-	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter("") {}
+	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter(""), mURL(""), mChannel("") {}
 	friend class GuildManager;
 	uint32 mID;
 	String mName;
 	String mMOTD;
 	String mMOTDSetter; // The Character name of who set the current MOTD.
+	String mURL;
+	String mChannel;
 	std::list<Character*> mOnlineMembers;
 	std::list<GuildMember*> mMembers;
 

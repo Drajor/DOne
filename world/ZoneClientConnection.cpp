@@ -1882,83 +1882,87 @@ void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacke
 	GuildManager::getInstance().handleGetMOTD(mCharacter);
 }
 
-//struct Internal_GuildMemberEntry_Struct {
-//	//	char	name[64];					//variable length
-//	uint32	level;						//network byte order
-//	uint32	banker;						//1=yes, 0=no, network byte order
-//	uint32	class_;						//network byte order
-//	uint32	rank;						//network byte order
-//	uint32	time_last_on;				//network byte order
-//	uint32	tribute_enable;				//network byte order
-//	uint32	total_tribute;				//total guild tribute donated, network byte order
-//	uint32	last_tribute;				//unix timestamp
-//	//	char	public_note[1];				//variable length.
-//	uint16	zoneinstance;				//network byte order
-//	uint16	zone_id;					//network byte order
-//};
-
-namespace PacketStructures {
-	//struct GuildMemberListEntry {
-	//	char* mName;
-	//	//std::uint32_t mLevel;
-	//	//std::uint32_t mBanker; // 0 = no, 1 = yes
-	//	//ClassID mClass;
-	//	//GuildRank mRank; // Old packet has this as uint32...
-	//	//std::uint32_t mTimeLastOn;
-	//	//std::uint32_t mTributeEnabled;
-	//	//std::uint32_t mTotalTribute;
-	//	//std::uint32_t mLastTribute;
-	//	//char* mPublicNote;
-	//	//InstanceID mInstanceID;
-	//	//ZoneID mZoneID;
-	//	}
-	//// 36
-	//};
-	//static const auto GuildMemberListEntry_Size = sizeof(GuildMemberListEntry);
-}
-
 void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
 	EXPECTED(mConnected);
 
+	static const auto HeaderSize = 76; // Member count etc.
+	static const auto MemberBodySize = 36; // Level, class etc.
+
 	// Calculate payload size.
-	std::size_t payloadSize = 0;
+	std::size_t payloadSize = HeaderSize + (MemberBodySize * pGuildMembers.size());
 	uint32 namesLength = 0;
 	uint32 notesLength = 0;
 	for (auto i : pGuildMembers) {
 		payloadSize += i->mName.length() + 1;
-		namesLength += i->mName.length();
 		payloadSize += i->mPublicNote.length() + 1;
+		namesLength += i->mName.length();
 		notesLength += i->mPublicNote.length();
-		payloadSize += 36; // MAGIC
 	}
-	// Packet header.
-	payloadSize += MAX_CHARACTER_NAME_LENGTH + 12;
 
 	auto outPacket = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
 	
 	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
+	
+	// Write Header.
 	ds.writeFixedString(mCharacter->getName(), MAX_CHARACTER_NAME_LENGTH);
 	ds.write<uint32>(pGuildMembers.size());
 	ds.write<uint32>(namesLength);
 	ds.write<uint32>(notesLength);
 
+	// Write member data.
 	for (auto i : pGuildMembers) {
-		ds.writeString(i->mName); // Variable length.
-		ds.write<std::uint32_t>(i->mLevel); // 0 + 4 = 4
-		ds.write<std::uint32_t>(i->mBanker ? 1 : 0); // 4 + 4 = 8
-		ds.write<std::uint32_t>(i->mClass); // 8 + 4 = 12
-		ds.write<std::uint32_t>(i->mRank); // 12 + 4 = 16
-		ds.write<std::uint32_t>(i->mTimeLastOn); // 16 + 4 = 20
-		ds.write<std::uint32_t>(i->mTributeEnabled ? 1 : 0); // 20 + 4 = 24
-		ds.write<std::uint32_t>(i->mTotalTribute); // 24 + 4 = 28
-		ds.write<std::uint32_t>(i->mLastTribute); // 28 + 4 = 32
-		ds.writeString(i->mPublicNote); // Variable length.
-		ds.write<std::uint16_t>(i->mInstanceID);  // 32 + 2 = 34
-		ds.write<std::uint16_t>(i->mZoneID); // 34 + 2 = 36
+		ds.write<std::uint32_t>(i->mLevel);
+		ds.write<std::uint32_t>(i->mBanker ? 1 : 0);
+		ds.write<std::uint32_t>(i->mClass);
+		ds.write<std::uint32_t>(i->mRank);
+		ds.write<std::uint32_t>(i->mTimeLastOn);
+		ds.write<std::uint32_t>(i->mTributeEnabled ? 1 : 0);
+		ds.write<std::uint32_t>(i->mTotalTribute);
+		ds.write<std::uint32_t>(i->mLastTribute);
+		ds.write<std::uint16_t>(i->mInstanceID);
+		ds.write<std::uint16_t>(i->mZoneID);
 	}
-	// TODO: Where is Alt?
+	// Write Character names.
+	for (auto i : pGuildMembers) {
+		ds.writeString(i->mName);
+	}
+	// Write public notes.
+	for (auto i : pGuildMembers) {
+		ds.writeString(i->mPublicNote);
+	}
+	EXPECTED(ds.check());
 
 	mStreamInterface->QueuePacket(outPacket);
-	outPacket->pBuffer = nullptr;
+	safe_delete(outPacket);
+}
+
+struct GuildUpdate {
+	uint32 mAction; // 0=URL, 1=Channel
+	char mUnknown0[76];
+	char mText[512];
+	char mUnknown1[3584];
+};
+
+void ZoneClientConnection::sendGuildURL(const String& pURL) {
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
+	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = 0;
+	strcpy(&payload->mText[0], pURL.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
+	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = 1;
+	strcpy(&payload->mText[0], pChannel.c_str());
+
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

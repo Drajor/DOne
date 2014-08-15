@@ -86,6 +86,8 @@ public:
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMembers(const std::list<GuildMember*>& pGuildMembers);
+	void sendGuildURL(const String& pURL);
+	void sendGuildChannel(const String& pChannel);
 
 	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
 	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.

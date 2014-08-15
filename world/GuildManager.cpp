@@ -31,14 +31,24 @@ bool GuildManager::initialise() {
 		Guild* guild = new Guild(); 
 		mGuilds.push_back(guild);
 
+		// ID
 		Utility::stou32Safe(guild->mID, String(guildElement->Attribute("id")));
 		EXPECTED_BOOL(Limits::Guild::ID(guild->mID));
+		// Name
 		guild->mName = guildElement->Attribute("name");
 		EXPECTED_BOOL(Limits::Guild::nameLength(guild->mName));
+		// MOTD
 		guild->mMOTD = guildElement->Attribute("motd");
 		EXPECTED_BOOL(Limits::Guild::MOTDLength(guild->mMOTD));
+		// MOTD Setter
 		guild->mMOTDSetter = guildElement->Attribute("motd_setter");
 		EXPECTED_BOOL(Limits::Character::nameLength(guild->mName));
+		// URL
+		guild->mURL = guildElement->Attribute("url");
+		EXPECTED_BOOL(Limits::Guild::urlLength(guild->mURL));
+		// Channel
+		guild->mChannel = guildElement->Attribute("channel");
+		EXPECTED_BOOL(Limits::Guild::channelLength(guild->mChannel));
 
 		// Read GuildMember data.
 		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
@@ -264,6 +274,8 @@ void GuildManager::_save() {
 		guildElement->SetAttribute("name", i->mName.c_str());
 		guildElement->SetAttribute("motd", i->mMOTD.c_str());
 		guildElement->SetAttribute("motd_setter", i->mMOTDSetter.c_str());
+		guildElement->SetAttribute("url", i->mURL.c_str());
+		guildElement->SetAttribute("channel", i->mChannel.c_str());
 
 		TiXmlElement* membersElement = new TiXmlElement("members");
 		for (auto j : i->mMembers) {
@@ -389,20 +401,22 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
-	// Update member details.
 	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
 	EXPECTED(member);
 	Zone* zone = pCharacter->getZone();
 	EXPECTED(zone);
+	Guild* guild = pCharacter->getGuild();
+	EXPECTED(guild);
+	ZoneClientConnection* connection = pCharacter->getConnection();
+	EXPECTED(connection);
 
+	// Update member details.
 	member->mZoneID = zone->getID();
 	member->mInstanceID = zone->getInstanceID();
 
-	pCharacter->getConnection()->sendGuildMembers(pCharacter->getGuild()->mMembers);
-	// TODO:
-	//SendGuildMembers();
-	//SendGuildURL();
-	//SendGuildChannel();
+	connection->sendGuildMembers(guild->mMembers);
+	connection->sendGuildURL(guild->mURL);
+	connection->sendGuildChannel(guild->mChannel);
 }
 
 void GuildManager::onLeaveZone(Character* pCharacter) {

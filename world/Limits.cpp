@@ -49,3 +49,11 @@ bool Limits::Guild::publicNoteLength(const String& pPublicNote) {
 bool Limits::Guild::personalNoteLength(const String& pPersonalNote) {
 	return pPersonalNote.length() + 1 <= Limits::Guild::MAX_PERSONAL_NOTE_LENGTH;
 }
+
+bool Limits::Guild::urlLength(const String& pURL) {
+	return pURL.length() + 1 < Limits::Guild::MAX_URL_LENGTH;
+}
+
+bool Limits::Guild::channelLength(const String& pChannel) {
+	return pChannel.length() + 1 < Limits::Guild::MAX_CHANNEL_LENGTH;
+}

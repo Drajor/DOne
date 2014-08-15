@@ -86,7 +86,7 @@ namespace Utility {
 		}
 		std::size_t getSize() { return mSize; }
 		std::size_t getBytesWritten() { return mWritten; }
-
+		bool check() { return mWritten == mSize; }
 	private:
 		std::size_t mSize; // maximum number of bytes to be written.
 		std::size_t mWritten; // number of bytes written.

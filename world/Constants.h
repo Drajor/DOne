@@ -42,6 +42,8 @@ namespace Limits {
 		static const auto MAX_MOTD_LENGTH = 512;
 		static const auto MAX_PUBLIC_NOTE_LENGTH = 200; // TODO: Determine what the client UI maximum is.
 		static const auto MAX_PERSONAL_NOTE_LENGTH = 200; // TODO: Determine what the client UI maximum is.
+		static const auto MAX_URL_LENGTH = 512;
+		static const auto MAX_CHANNEL_LENGTH = 512;
 	}
 	namespace Group {
 		static const auto MAX_MEMBERS = 6;
