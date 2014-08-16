@@ -15,6 +15,7 @@
 #ifdef PACKET_PLAY
 #include "../common/eq_packet_structs.h"
 #include "../common/EQPacket.h"
+#include "Payload.h"
 #endif
 
 // Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
@@ -399,6 +400,21 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 			if (Utility::stou32Safe(animationID, pParameters[0])) {
 				pCharacter->doAnimation(animationID);
 			}
+		}
+	}
+	// #gu <number> <text>
+	else if (pCommandName == "gu") {
+		if (pParameters.size() == 2) {
+			uint32 action = 0;
+			Utility::stou32Safe(action, pParameters[0]);
+
+			auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+			auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+			payload->mAction = static_cast<Payload::Guild::GuildUpdate::Action>(action);
+			strcpy(&payload->mText[0], pParameters[1].c_str());
+
+			pCharacter->getConnection()->sendPacket(outPacket);
+			safe_delete(outPacket);
 		}
 	}
 	else {

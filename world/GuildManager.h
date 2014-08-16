@@ -32,9 +32,9 @@ struct GuildMember {
 };
 
 class Guild {
-	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter(""), mURL(""), mChannel("") {}
 	friend class GuildManager;
-	uint32 mID;
+	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter(""), mURL(""), mChannel("") {}
+	GuildID mID;
 	String mName;
 	String mMOTD;
 	String mMOTDSetter; // The Character name of who set the current MOTD.
@@ -97,10 +97,20 @@ public:
 
 private:
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
-	void _sendMOTD(Guild* pGuild);
-	void _sendMOTD(Character* pCharacter);
-	void _refresh(Guild* pGuild);
-	void _refresh(Character* pCharacter);
+
+	// Sends the Guild MOTD to all online members.
+	void _sendMOTD(const Guild* pGuild);
+
+	// Sends the Guild URL to all online members.
+	void _sendURL(Guild* pGuild);
+	
+	// Sends the Guild channel to all online members.
+	void _sendChannel(Guild* pGuild);
+
+	void _sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember);
+	void _sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember);
+	void _sendMOTDReply(Character* pCharacter);
+	void _sendGuildInformation(Character* pCharacter);
 
 	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);

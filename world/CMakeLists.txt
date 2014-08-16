@@ -61,6 +61,7 @@ SET(world_headers
 	Limits.h
 	Actor.h
 	NPC.h
+	Payload.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -15,6 +15,7 @@
 #include "../common/extprofile.h"
 #include "Utility.h"
 #include "Limits.h"
+#include "Payload.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -1724,6 +1725,7 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild());
+	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Check: Permission.
 
 	GuildManager::getInstance().handleDelete(mCharacter);
 }
@@ -1757,6 +1759,7 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
+	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Check: Permission.
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
@@ -1785,6 +1788,10 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 	EXPECTED(Limits::Character::nameLength(toCharacterName));
 	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()) // Check: Sanity.
+
+	// Check: Permission
+	if (toCharacterName != fromCharacterName)
+		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter));
 
 	GuildManager::getInstance().handleRemove(mCharacter, toCharacterName);
 }
@@ -1846,6 +1853,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
+	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Only leader or officers can set the MOTD.
 	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildMOTD_Struct));
 
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
@@ -1948,23 +1956,12 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 	safe_delete(outPacket);
 }
 
-struct GuildUpdate {
-	uint32 mAction; // 0=URL, 1=Channel
-	char mUnknown0[76];
-	char mText[512];
-	char mUnknown1[3584];
-};
-enum GuildUpdateAction : uint32 {
-	GUILD_URL = 0,
-	GUILD_CHANNEL = 1
-};
-
 void ZoneClientConnection::sendGuildURL(const String& pURL) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
-	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
-	payload->mAction = GuildUpdateAction::GUILD_URL;
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = Payload::Guild::GuildUpdate::GUILD_URL;
 	strcpy(&payload->mText[0], pURL.c_str());
 
 	mStreamInterface->QueuePacket(outPacket);
@@ -1974,9 +1971,9 @@ void ZoneClientConnection::sendGuildURL(const String& pURL) {
 void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdate));
-	auto payload = reinterpret_cast<GuildUpdate*>(outPacket->pBuffer);
-	payload->mAction = GuildUpdateAction::GUILD_CHANNEL;
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = Payload::Guild::GuildUpdate::GUILD_CHANNEL;
 	strcpy(&payload->mText[0], pChannel.c_str());
 
 	mStreamInterface->QueuePacket(outPacket);
@@ -1987,9 +1984,9 @@ void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Only a Guild leader can perform this operation.
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildUpdate));
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(Payload::Guild::GuildUpdate));
 
-	auto payload = reinterpret_cast<GuildUpdate*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(pPacket->pBuffer);
 	if (payload->mAction == GUILD_URL) {
 		String url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
 		GuildManager::getInstance().handleSetURL(mCharacter, url);
@@ -2004,22 +2001,13 @@ void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket
 	}
 }
 
-namespace Payload {
-	struct PublicNote {
-		uint32 mUnknown;
-		char mSenderName[Limits::Character::MAX_NAME_LENGTH];
-		char mTargetName[Limits::Character::MAX_NAME_LENGTH];
-		char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
-	};
-}
-
 void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	// TODO: Put an upper-limit check on packet size.
-	PACKET_SIZE_CHECK(pPacket->size >= sizeof(Payload::PublicNote));
+	PACKET_SIZE_CHECK(pPacket->size >= sizeof(Payload::Guild::PublicNote));
 
-	auto payload = reinterpret_cast<Payload::PublicNote*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<Payload::Guild::PublicNote*>(pPacket->pBuffer);
 
 	String senderName = Utility::safeString(payload->mSenderName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(senderName == mCharacter->getName()); // Check: Sanity

@@ -4,6 +4,8 @@
 #include "Limits.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
+#include "../common/EQPacket.h"
+#include "Payload.h"
 #include "ZoneManager.h"
 #include "Zone.h"
 #include "Profile.h"
@@ -393,7 +395,10 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	member->mZoneID = zone->getID();
 	member->mInstanceID = zone->getInstanceID();
 
-	_refresh(pCharacter->getGuild());
+	// Update other members.
+	_sendMemberZoneUpdate(guild, member);
+	// Update Character.
+	_sendGuildInformation(pCharacter);
 }
 
 void GuildManager::onLeaveZone(Character* pCharacter) {
@@ -407,20 +412,36 @@ void GuildManager::onCamp(Character* pCharacter){
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
+	// Update member.
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED(member);
+	member->mZoneID = 0;
+	member->mInstanceID = 0;
+	member->mTimeLastOn = 0; // TODO: Time
+
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
 
-	_refresh(pCharacter->getGuild());
+	// Update other members.
+	_sendMemberZoneUpdate(pCharacter->getGuild(), member);
 }
 
 void GuildManager::onLinkdead(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
+	// Update member.
+	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+	EXPECTED(member);
+	member->mZoneID = 0;
+	member->mInstanceID = 0;
+	member->mTimeLastOn = 0; // TODO: Time
+
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
 
-	_refresh(pCharacter->getGuild());
+	// Update other members.
+	_sendMemberZoneUpdate(pCharacter->getGuild(), member);
 }
 
 void GuildManager::onLevelChange(Character* pCharacter) {
@@ -439,8 +460,9 @@ void GuildManager::onLevelChange(Character* pCharacter) {
 		StringStream ss; ss << pCharacter->getName() << " is now level " << member->mLevel << "!";
 		_sendMessage(pCharacter->getGuild(), SYS_NAME, ss.str());
 	}
-
-	_refresh(pCharacter->getGuild());
+	// Update other members.
+	// NOTE: This does not work.....
+	_sendMemberLevelUpdate(member->mGuild, member);
 }
 
 
@@ -470,7 +492,7 @@ void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(pMOTD.length() < Limits::Guild::MAX_MOTD_LENGTH); // NOTE: 'Less-Than' is used instead of 'Less-Than-Or-Equal-To' because std::string::length does not include the null terminator.
-	// EXPECTED: pCharacter has permission.
+	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can set the MOTD.
 
 	Guild* guild = pCharacter->getGuild();
 	guild->mMOTD = pMOTD;
@@ -483,20 +505,61 @@ void GuildManager::handleGetMOTD(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
-	_sendMOTD(pCharacter);
+	_sendMOTDReply(pCharacter);
 }
 
-void GuildManager::_sendMOTD(Guild* pGuild) {
+void GuildManager::_sendMOTD(const Guild* pGuild) {
 	ARG_PTR_CHECK(pGuild);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(Payload::Guild::MOTD));
+	auto payload = reinterpret_cast<Payload::Guild::MOTD*>(outPacket->pBuffer);
+	strcpy(payload->mSetByName, pGuild->mMOTDSetter.c_str());
+	strcpy(payload->mMOTD, pGuild->mMOTD.c_str());
 
 	const String motd = pGuild->mMOTD;
 	for (auto i : pGuild->mOnlineMembers) {
 		if (i->isZoning()) { continue; }
-		i->getConnection()->sendGuildMOTD(pGuild->mMOTD, pGuild->mMOTDSetter);
+		strcpy(payload->mCharacterName, i->getName().c_str());
+		i->getConnection()->sendPacket(outPacket);
 	}
+
+	safe_delete(outPacket);
 }
 
-void GuildManager::_sendMOTD(Character* pCharacter) {
+void GuildManager::_sendURL(Guild* pGuild) {
+	EXPECTED(pGuild);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = Payload::Guild::GuildUpdate::Action::GUILD_URL;
+	strcpy(&payload->mText[0], pGuild->mURL.c_str());
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}
+
+void GuildManager::_sendChannel(Guild* pGuild) {
+	EXPECTED(pGuild);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	payload->mAction = Payload::Guild::GuildUpdate::Action::GUILD_CHANNEL;
+	strcpy(&payload->mText[0], pGuild->mChannel.c_str());
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}
+
+
+void GuildManager::_sendMOTDReply(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
@@ -504,22 +567,7 @@ void GuildManager::_sendMOTD(Character* pCharacter) {
 	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
 }
 
-void GuildManager::_refresh(Guild* pGuild) {
-	ARG_PTR_CHECK(pGuild);
-
-	for (auto i : pGuild->mOnlineMembers) {
-		if (i->isZoning()) { continue; }
-		ZoneClientConnection* connection = i->getConnection();
-		EXPECTED(connection);
-
-		connection->sendGuildMembers(pGuild->mMembers);
-		connection->sendGuildURL(pGuild->mURL);
-		connection->sendGuildChannel(pGuild->mChannel);
-		connection->sendGuildMOTD(pGuild->mMOTD, pGuild->mMOTDSetter);
-	}
-}
-
-void GuildManager::_refresh(Character* pCharacter) {
+void GuildManager::_sendGuildInformation(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
@@ -532,6 +580,48 @@ void GuildManager::_refresh(Character* pCharacter) {
 	connection->sendGuildURL(guild->mURL);
 	connection->sendGuildChannel(guild->mChannel);
 	connection->sendGuildMOTD(guild->mMOTD, guild->mMOTDSetter);
+}
+
+void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember) {
+	ARG_PTR_CHECK(pGuild);
+	ARG_PTR_CHECK(pMember);
+	EXPECTED(pMember->mGuild == pGuild);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(Payload::Guild::MemberUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::MemberUpdate*>(outPacket->pBuffer);
+
+	payload->mGuildID = pGuild->mID;
+	strcpy(payload->mMemberName, pMember->mName.c_str());
+	payload->mZoneID = pMember->mZoneID;
+	payload->mInstanceID = pMember->mInstanceID;
+	payload->mLastSeen = 0; // TODO: Time
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}
+
+void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember) {
+	ARG_PTR_CHECK(pGuild);
+	ARG_PTR_CHECK(pMember);
+	EXPECTED(pMember->mGuild == pGuild);
+
+	auto outPacket = new EQApplicationPacket(OP_GuildMemberLevelUpdate, sizeof(Payload::Guild::LevelUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::LevelUpdate*>(outPacket->pBuffer);
+
+	payload->mGuildID = pGuild->mID;
+	strcpy(payload->mMemberName, pMember->mName.c_str());
+	payload->mLevel = pMember->mLevel;
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
 }
 
 
@@ -558,23 +648,29 @@ bool GuildManager::isOfficer(Character* pCharacter){
 void GuildManager::handleSetURL(Character* pCharacter, const String& pURL) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
-	EXPECTED(isLeader(pCharacter));
+	EXPECTED(isLeader(pCharacter)); // Only leader can change the url.
 	EXPECTED(Limits::Guild::urlLength(pURL));
 
 	pCharacter->getGuild()->mURL = pURL;
 	_save();
-	_refresh(pCharacter->getGuild());
+
+	// Update other members.
+	_sendURL(pCharacter->getGuild());
+	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has updated the guild URL.");
 }
 
 void GuildManager::handleSetChannel(Character* pCharacter, const String& pChannel) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
-	EXPECTED(isLeader(pCharacter));
+	EXPECTED(isLeader(pCharacter)); // Only leader can change the channel.
 	EXPECTED(Limits::Guild::channelLength(pChannel));
 
 	pCharacter->getGuild()->mChannel = pChannel;
 	_save();
-	_refresh(pCharacter->getGuild());
+
+	// Update other members.
+	_sendChannel(pCharacter->getGuild());
+	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has updated the guild channel.");
 }
 
 void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote) {
@@ -591,7 +687,9 @@ void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCha
 	EXPECTED(member);
 	member->mPublicNote = pNote;
 	_save();
-	_refresh(guild);
+
+	// Update other members.
+	//_sendURL(guild);
 }
 
 void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCharacterName) {
