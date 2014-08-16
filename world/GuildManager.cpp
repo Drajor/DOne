@@ -563,7 +563,6 @@ void GuildManager::_sendChannel(Guild* pGuild) {
 	safe_delete(outPacket);
 }
 
-
 void GuildManager::_sendMOTDReply(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
@@ -637,7 +636,6 @@ void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember
 
 	safe_delete(outPacket);
 }
-
 
 bool GuildManager::isLeader(Character* pCharacter){
 	ARG_PTR_CHECK_BOOL(pCharacter);
@@ -750,6 +748,8 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
 	EXPECTED(Limits::Character::nameLength(pDemoteName));
 
+	bool demoted = false;
+
 	// Officer demotes self.
 	if (pCharacter->getName() == pDemoteName) {
 		EXPECTED(isOfficer(pCharacter));
@@ -757,12 +757,7 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 		GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
 		EXPECTED(member);
 		member->mRank = GuildRanks::Member;
-		// TODO: Notify
-		_save();
-		_sendMessage(pCharacter->getGuild(), SYS_NAME, pDemoteName + " has been demoted. (" + pCharacter->getName() + ")");
-		// TODO: Use _sendMembers until a better way is found.
-		_sendMembers(pCharacter->getGuild());
-		return;
+		demoted = true;
 	}
 	// Leader demotes officer
 	else {
@@ -771,12 +766,24 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 		GuildMember* member = pCharacter->getGuild()->getMember(pDemoteName);
 		EXPECTED(member->mRank == GuildRanks::Officer);
 		member->mRank = GuildRanks::Member;
+		demoted = true;
+	}
+
+	if (demoted) {
 		// TODO: Notify
 		_save();
 		_sendMessage(pCharacter->getGuild(), SYS_NAME, pDemoteName + " has been demoted. (" + pCharacter->getName() + ")");
 		// TODO: Use _sendMembers until a better way is found.
 		_sendMembers(pCharacter->getGuild());
-		return;
+
+		// Update the demoted Character (if they are online)
+		Character* character = pCharacter->getGuild()->getOnlineMember(pDemoteName);
+		if (character) {
+			character->setGuildRank(GuildRanks::Member);
+			if (!character->isZoning())
+				character->getConnection()->sendGuildRank();
+		}
+		// NOTE: If the Character is not online their rank will be updated when they log in.
 	}
 }
 

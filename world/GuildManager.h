@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Character.h"
 
 // For the #guildsearch command.
 struct GuildSearchEntry {
@@ -9,43 +10,48 @@ struct GuildSearchEntry {
 };
 typedef std::list<GuildSearchEntry> GuildSearchResults;
 
-class Character;
 class Guild;
 
 struct GuildMember {
-	GuildMember() : mGuild(nullptr), mID(0), mName(""), mLevel(0), mClass(0), mRank(0), mBanker(false), mTributeEnabled(false), mAlt(false), mTimeLastOn(0), mTotalTribute(0), mLastTribute(0), mPublicNote(""), mZoneID(0), mInstanceID(0) {}
-	Guild* mGuild;
-	uint32 mID; // Character ID
-	String mName;
-	std::uint32_t mLevel; // TODO: Should really be uint16
-	ClassID mClass;
-	GuildRank mRank;
-	bool mBanker;
-	bool mTributeEnabled;
-	bool mAlt;
-	std::uint32_t mTimeLastOn;
-	std::uint32_t mTotalTribute;
-	std::uint32_t mLastTribute;
-	String mPublicNote;
-	ZoneID mZoneID;
-	InstanceID mInstanceID;
+	Guild* mGuild = nullptr;
+	uint32 mID = 0; // Character ID
+	String mName = "";
+	std::uint32_t mLevel = 0; // TODO: Should really be uint16
+	ClassID mClass = 0;
+	GuildRank mRank = GuildRanks::Member;
+	bool mBanker = false;
+	bool mTributeEnabled = false;
+	bool mAlt = false;
+	std::uint32_t mTimeLastOn = 0;
+	std::uint32_t mTotalTribute = 0;
+	std::uint32_t mLastTribute = 0;
+	String mPublicNote = "";
+	ZoneID mZoneID = 0;
+	InstanceID mInstanceID = 0;
 };
 
 class Guild {
 	friend class GuildManager;
-	Guild() : mID(0), mName(""), mMOTD(""), mMOTDSetter(""), mURL(""), mChannel("") {}
-	GuildID mID;
-	String mName;
-	String mMOTD;
-	String mMOTDSetter; // The Character name of who set the current MOTD.
-	String mURL;
-	String mChannel;
+	GuildID mID = 0;
+	String mName = "";
+	String mMOTD = "";
+	String mMOTDSetter = ""; // The Character name of who set the current MOTD.
+	String mURL = "";
+	String mChannel = "";
 	std::list<Character*> mOnlineMembers;
 	std::list<GuildMember*> mMembers;
 
 	GuildMember* getMember(const String& pCharacterName) {
 		for (auto i : mMembers) {
 			if (i->mName == pCharacterName)
+				return i;
+		}
+
+		return nullptr;
+	}
+	Character* getOnlineMember(const String& pCharacterName) {
+		for (auto i : mOnlineMembers) {
+			if (i->getName() == pCharacterName)
 				return i;
 		}
 
