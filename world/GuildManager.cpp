@@ -462,7 +462,10 @@ void GuildManager::onLevelChange(Character* pCharacter) {
 	}
 	// Update other members.
 	// NOTE: This does not work.....
-	_sendMemberLevelUpdate(member->mGuild, member);
+	//_sendMemberLevelUpdate(member->mGuild, member);
+
+	// TODO: Use _sendMembers until a better way is found.
+	_sendMembers(member->mGuild);
 }
 
 
@@ -491,12 +494,14 @@ void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const 
 void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
-	EXPECTED(pMOTD.length() < Limits::Guild::MAX_MOTD_LENGTH); // NOTE: 'Less-Than' is used instead of 'Less-Than-Or-Equal-To' because std::string::length does not include the null terminator.
+	EXPECTED(Limits::Guild::MOTDLength(pMOTD));
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can set the MOTD.
 
 	Guild* guild = pCharacter->getGuild();
 	guild->mMOTD = pMOTD;
 	guild->mMOTDSetter = pCharacter->getName();
+
+	// Update other members.
 	_sendMOTD(guild);
 	_save();
 }
@@ -580,6 +585,15 @@ void GuildManager::_sendGuildInformation(Character* pCharacter) {
 	connection->sendGuildURL(guild->mURL);
 	connection->sendGuildChannel(guild->mChannel);
 	connection->sendGuildMOTD(guild->mMOTD, guild->mMOTDSetter);
+}
+
+void GuildManager::_sendMembers(Guild* pGuild) {
+	ARG_PTR_CHECK(pGuild);
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendGuildMembers(pGuild->mMembers);
+	}
 }
 
 void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember) {
@@ -689,7 +703,8 @@ void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCha
 	_save();
 
 	// Update other members.
-	//_sendURL(guild);
+	// TODO: Use _sendMembers until a better way is found.
+	_sendMembers(guild);
 }
 
 void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCharacterName) {
@@ -727,6 +742,42 @@ void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCha
 
 	if (stringID != StringID::SI_NONE)
 		connection->sendSimpleMessage(MessageType::White, stringID, message);
+}
+
+void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
+	EXPECTED(Limits::Character::nameLength(pDemoteName));
+
+	// Officer demotes self.
+	if (pCharacter->getName() == pDemoteName) {
+		EXPECTED(isOfficer(pCharacter));
+
+		GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+		EXPECTED(member);
+		member->mRank = GuildRanks::Member;
+		// TODO: Notify
+		_save();
+		_sendMessage(pCharacter->getGuild(), SYS_NAME, pDemoteName + " has been demoted. (" + pCharacter->getName() + ")");
+		// TODO: Use _sendMembers until a better way is found.
+		_sendMembers(pCharacter->getGuild());
+		return;
+	}
+	// Leader demotes officer
+	else {
+		EXPECTED(isLeader(pCharacter));
+		
+		GuildMember* member = pCharacter->getGuild()->getMember(pDemoteName);
+		EXPECTED(member->mRank == GuildRanks::Officer);
+		member->mRank = GuildRanks::Member;
+		// TODO: Notify
+		_save();
+		_sendMessage(pCharacter->getGuild(), SYS_NAME, pDemoteName + " has been demoted. (" + pCharacter->getName() + ")");
+		// TODO: Use _sendMembers until a better way is found.
+		_sendMembers(pCharacter->getGuild());
+		return;
+	}
 }
 
 GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {

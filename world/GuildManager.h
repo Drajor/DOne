@@ -79,6 +79,7 @@ public:
 	void handleSetChannel(Character* pCharacter, const String& pChannel);
 	void handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote);
 	void handleStatusRequest(Character* pCharacter, const String& pCharacterName);
+	void handleDemote(Character* pCharacter, const String& pDemoteName);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);
@@ -111,6 +112,7 @@ private:
 	void _sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember);
 	void _sendMOTDReply(Character* pCharacter);
 	void _sendGuildInformation(Character* pCharacter);
+	void _sendMembers(Guild* pGuild);
 
 	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);

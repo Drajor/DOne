@@ -325,6 +325,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /guildstatus command.
 		_handleGetGuildStatus(pPacket);
 		break;
+	case OP_GuildDemote:
+		_handleGuildDemote(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -2034,4 +2037,28 @@ void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPac
 		return;
 	
 	GuildManager::getInstance().handleStatusRequest(mCharacter, targetName);
+}
+
+void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+	PACKET_SIZE_CHECK(Demote::sizeCheck(pPacket->size));
+
+	auto payload = Demote::convert(pPacket->pBuffer);
+
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(characterName));
+	String demoteName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(demoteName));
+
+	// Check: Permission (Only guild leader can demote others).
+	if (characterName != demoteName)
+		EXPECTED(GuildManager::getInstance().isLeader(mCharacter));
+
+	// Check: Leader can not self-demote.
+	if (characterName == demoteName)
+		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) == false);
+
+	GuildManager::getInstance().handleDemote(mCharacter, demoteName);
 }

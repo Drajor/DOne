@@ -10,6 +10,13 @@ enum GuildUpdateAction : uint32 {
 namespace Payload {
 
 	namespace Guild {
+
+		struct Demote {
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
+			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
+			inline static Demote* convert(unsigned char* pData) { return reinterpret_cast<Demote*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(Demote); }
+		};
 		
 		struct LevelUpdate {
 			GuildID mGuildID; // why?!
