@@ -54,6 +54,7 @@ bool GuildManager::initialise() {
 		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
 		while (memberElement) {
 			GuildMember* member = new GuildMember();
+			member->mGuild = guild;
 			EXPECTED_BOOL(Utility::stou32Safe(member->mID, String(memberElement->Attribute("id"))));
 			EXPECTED_BOOL(Utility::stou8Safe(member->mRank, String(memberElement->Attribute("rank"))));
 			EXPECTED_BOOL(Utility::stou32Safe(member->mLevel, String(memberElement->Attribute("level"))));
@@ -591,4 +592,55 @@ void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCha
 	member->mPublicNote = pNote;
 	_save();
 	_refresh(guild);
+}
+
+void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCharacterName) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(Limits::Character::nameLength(pCharacterName));
+
+	ZoneClientConnection* connection = pCharacter->getConnection();
+	EXPECTED(connection);
+
+	// Try to find requested Character.
+	GuildMember* member = _findByCharacterName(pCharacterName);
+	if (!member) {
+		// Character was not found, they either do not exist or do not have a guild.
+		connection->sendSimpleMessage(MessageType::White, StringID::NOT_IN_A_GUILD, pCharacterName);
+		return;
+	}
+
+	StringID stringID = StringID::SI_NONE;
+	String message = "";
+
+	// Same Guild
+	if (member->mGuild == pCharacter->getGuild()) {
+		message = pCharacterName;
+		if (member->mRank == GuildRanks::Leader) { stringID = StringID::LEADER_OF_YOUR_GUILD; }
+		else if (member->mRank == GuildRanks::Officer) { stringID = StringID::OFFICER_OF_YOUR_GUILD; }
+		else if (member->mRank == GuildRanks::Member){ stringID = StringID::MEMBER_OF_YOUR_GUILD; }
+	}
+	// Different Guild
+	else {
+		message = member->mGuild->mName;
+		if (member->mRank == GuildRanks::Leader) { stringID = StringID::LEADER_OF_X_GUILD; }
+		else if (member->mRank == GuildRanks::Officer) { stringID = StringID::OFFICER_OF_X_GUILD; }
+		else if (member->mRank == GuildRanks::Member){ stringID = StringID::MEMBER_OF_X_GUILD; }
+	}
+
+	if (stringID != StringID::SI_NONE)
+		connection->sendSimpleMessage(MessageType::White, stringID, message);
+}
+
+GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
+	EXPECTED_PTR(Limits::Character::nameLength(pCharacterName));
+
+	for (auto i : mGuilds) {
+		for (auto j : i->mMembers) {
+			if (j->mName == pCharacterName)
+				return j;
+		}
+	}
+
+	// Not found.
+	return nullptr;
 }

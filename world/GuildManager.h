@@ -10,9 +10,11 @@ struct GuildSearchEntry {
 typedef std::list<GuildSearchEntry> GuildSearchResults;
 
 class Character;
+class Guild;
 
 struct GuildMember {
-	GuildMember() : mID(0), mName(""), mLevel(0), mClass(0), mRank(0), mBanker(false), mTributeEnabled(false), mAlt(false), mTimeLastOn(0), mTotalTribute(0), mLastTribute(0), mPublicNote(""), mZoneID(0), mInstanceID(0) {}
+	GuildMember() : mGuild(nullptr), mID(0), mName(""), mLevel(0), mClass(0), mRank(0), mBanker(false), mTributeEnabled(false), mAlt(false), mTimeLastOn(0), mTotalTribute(0), mLastTribute(0), mPublicNote(""), mZoneID(0), mInstanceID(0) {}
+	Guild* mGuild;
 	uint32 mID; // Character ID
 	String mName;
 	std::uint32_t mLevel; // TODO: Should really be uint16
@@ -76,6 +78,7 @@ public:
 	void handleSetURL(Character* pCharacter, const String& pURL);
 	void handleSetChannel(Character* pCharacter, const String& pChannel);
 	void handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote);
+	void handleStatusRequest(Character* pCharacter, const String& pCharacterName);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);
@@ -101,6 +104,7 @@ private:
 
 	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);
+	GuildMember* _findByCharacterName(const String& pCharacterName);
 	uint32 getNextGuildID();
 	void _save();
 	std::list<Guild*> mGuilds;

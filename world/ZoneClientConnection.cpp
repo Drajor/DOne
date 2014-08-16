@@ -313,11 +313,16 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleGetGuildMOTD(pPacket);
 		break;
 	case OP_GuildUpdateURLAndChannel:
-		// NOTE: 
+		// NOTE: This occurs via the guild window.
 		_handleSetGuildURLOrChannel(pPacket);
 		break;
 	case OP_GuildPublicNote:
+		// NOTE: This occurs via the guild window.
 		_handleSetGuildPublicNote(pPacket);
+		break;
+	case OP_GuildStatus:
+		// NOTE: This occurs when the player uses the /guildstatus command.
+		_handleGetGuildStatus(pPacket);
 		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
@@ -2011,7 +2016,7 @@ namespace Payload {
 void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
 	ARG_PTR_CHECK(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	Log::info(std::to_string(pPacket->size));
+	// TODO: Put an upper-limit check on packet size.
 	PACKET_SIZE_CHECK(pPacket->size >= sizeof(Payload::PublicNote));
 
 	auto payload = reinterpret_cast<Payload::PublicNote*>(pPacket->pBuffer);
@@ -2022,9 +2027,23 @@ void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* 
 	String note = Utility::safeString(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
 
 	// Changing the note of someone else, check permission.
-	// TODO: Consider removing. This is really application logic.
 	if (targetName != senderName)
 		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter));
 
 	GuildManager::getInstance().handleSetPublicNote(mCharacter, targetName, note);
+}
+
+void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
+	ARG_PTR_CHECK(pPacket);
+	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildStatus_Struct));
+
+	auto payload = reinterpret_cast<GuildStatus_Struct*>(pPacket->pBuffer);
+
+	String targetName = Utility::safeString(payload->Name, Limits::Character::MAX_NAME_LENGTH);
+	
+	// NOTE: UF does not prevent the player from sending smaller than possible names.
+	if (Limits::Character::nameLength(targetName) == false)
+		return;
+	
+	GuildManager::getInstance().handleStatusRequest(mCharacter, targetName);
 }

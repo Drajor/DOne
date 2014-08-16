@@ -151,6 +151,7 @@ private:
 	void _handleGetGuildMOTD(const EQApplicationPacket* pPacket);
 	void _handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
 	void _handleSetGuildPublicNote(const EQApplicationPacket* pPacket);
+	void _handleGetGuildStatus(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

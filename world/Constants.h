@@ -321,6 +321,7 @@ enum class MessageType : uint32 {
 };
 
 enum class StringID : uint32 {
+	SI_NONE = 0,
 	GENERIC_9_STRINGS = 1,		//%1 %2 %3 %4 %5 %6 %7 %8 %9
 	TARGET_OUT_OF_RANGE = 100,		//Your target is out of range, get closer!
 	TARGET_NOT_FOUND = 101,		//Target player not found.
