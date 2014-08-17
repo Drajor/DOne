@@ -806,6 +806,43 @@ void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCha
 		connection->sendSimpleMessage(MessageType::White, stringID, message);
 }
 
+void GuildManager::handlePromote(Character* pCharacter, const String& pPromoteName) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter)); // Only the guild leader can promote others.
+	EXPECTED(Limits::Character::nameLength(pPromoteName));
+	EXPECTED(pCharacter->getName() != pPromoteName); // Check: Sanity.
+
+	GuildMember* member = pCharacter->getGuild()->getMember(pPromoteName);
+	EXPECTED(member);
+
+	if (member->mRank != GuildRanks::Member) {
+		pCharacter->getConnection()->sendMessage(MessageType::Yellow, pPromoteName + " can not be promoted beyond officer.");
+		return;
+	}
+
+	member->mRank = GuildRanks::Officer;
+	pCharacter->getConnection()->sendMessage(MessageType::Yellow, pPromoteName + " has been promoted to officer.");
+
+	_sendMessage(pCharacter->getGuild(), SYS_NAME, pPromoteName + " has been promoted to officer. (" + pCharacter->getName() + ")");
+	// TODO: Use _sendMembers until a better way is found.
+	_sendMembers(pCharacter->getGuild());
+	_save();
+
+	// Update (Online Character promotion).
+	Character* promoteCharacter = ZoneManager::getInstance().findCharacter(pPromoteName);
+	if (promoteCharacter) {
+		promoteCharacter->setGuildRank(GuildRanks::Officer);
+
+		if (promoteCharacter->isZoning() == false) {
+			// Update Character (Rank).
+			promoteCharacter->getConnection()->sendGuildRank();
+			// Update Character Zone (Rank).
+			promoteCharacter->getZone()->notifyCharacterGuildChange(promoteCharacter);
+		}
+	}
+}
+
 void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());

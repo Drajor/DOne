@@ -1780,7 +1780,12 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	EXPECTED(Limits::Character::nameLength(fromCharacterName));
 	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
 
-	GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
+	if (payload->officer == 0)
+		GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
+	if (payload->officer == 1)
+		GuildManager::getInstance().handlePromote(mCharacter, toCharacterName);
+
+	// NOTE: UF requires that the character being promoted is targetted we can verify this later.
 }
 
 void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {

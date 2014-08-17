@@ -10,6 +10,7 @@
 #include <sstream>
 #include "ZoneClientConnection.h"
 #include "Constants.h"
+#include "Limits.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -310,6 +311,47 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+// Allows for cross zone and offline guild promotion.
+class GuildPromoteCommand : public Command {
+public:
+	GuildPromoteCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #guildpromote <name>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
+			if (pCharacter->hasGuild() && pCharacter->getGuildRank() == GuildRanks::Leader) {
+				GuildManager::getInstance().handlePromote(pCharacter, pParameters[0]);
+			}
+			else {
+				pCharacter->message(MessageType::Yellow, "No guild or not guild leader.");
+			}
+		}
+	}
+};
+
+/*****************************************************************************************************************************/
+// Allows for cross zone and offline guild demotion.
+class GuildDemoteCommand : public Command {
+public:
+	GuildDemoteCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #guilddemote <name>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
+			if (pCharacter->hasGuild() && pCharacter->getGuildRank() == GuildRanks::Leader) {
+				GuildManager::getInstance().handleDemote(pCharacter, pParameters[0]);
+			}
+			else {
+				pCharacter->message(MessageType::Yellow, "No guild or not guild leader.");
+			}
+		}
+	}
+};
+
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -335,6 +377,8 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new GuildSearchCommand(100, { "guildsearch", "gs", "findguild", "fg" }));
 	mCommands.push_back(new GuildInformationCommand(100, { "ginfo" }));
+	mCommands.push_back(new GuildPromoteCommand(0, {"guildpromote", "gpromote"}));
+	mCommands.push_back(new GuildDemoteCommand(0, { "guilddemote", "gdemote" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));
