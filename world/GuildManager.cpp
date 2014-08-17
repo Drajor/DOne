@@ -787,6 +787,47 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 	}
 }
 
+void GuildManager::handleSetBanker(Character* pCharacter, const String& pOtherName, const bool pBanker) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter));
+	EXPECTED(Limits::Character::nameLength(pOtherName));
+
+	GuildMember* member = pCharacter->getGuild()->getMember(pOtherName);
+	EXPECTED(member);
+
+	if (member->mBanker != pBanker) {
+		member->mBanker = pBanker;
+		_save();
+		// TODO: Use _sendMembers until a better way is found.
+		_sendMembers(member->mGuild);
+		return;
+	}
+}
+
+void GuildManager::handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt) {
+	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(Limits::Character::nameLength(pAltName));
+
+	GuildMember* member = pCharacter->getGuild()->getMember(pAltName);
+	EXPECTED(member);
+
+	// Check: Return early if member is already an alt.
+	if (member->mAlt == pAlt)
+		return;
+
+	// Check: Permission
+	const bool changingOther = (pCharacter->getName() != pAltName);
+	if (changingOther)
+		EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only the leader or an officer can change the alt status of another member.
+
+	member->mAlt = pAlt;
+	_save();
+	// TODO: Use _sendMembers until a better way is found.
+	_sendMembers(member->mGuild);
+}
+
 GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
 	EXPECTED_PTR(Limits::Character::nameLength(pCharacterName));
 

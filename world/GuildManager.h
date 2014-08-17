@@ -86,6 +86,8 @@ public:
 	void handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote);
 	void handleStatusRequest(Character* pCharacter, const String& pCharacterName);
 	void handleDemote(Character* pCharacter, const String& pDemoteName);
+	void handleSetBanker(Character* pCharacter, const String& pOtherName, const bool pBanker);
+	void handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);

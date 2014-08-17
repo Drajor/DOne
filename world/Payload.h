@@ -14,8 +14,20 @@ namespace Payload {
 		struct Demote {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
+			
 			inline static Demote* convert(unsigned char* pData) { return reinterpret_cast<Demote*>(pData); }
 			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(Demote); }
+		};
+
+		// Used for changing both banker and alt status of a guild member.
+		struct BankerAltStatus {
+			uint32 mUnknown;
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
+			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
+			uint32 mStatus;
+
+			inline static BankerAltStatus* convert(unsigned char* pData) { return reinterpret_cast<BankerAltStatus*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(BankerAltStatus); }
 		};
 		
 		struct LevelUpdate {

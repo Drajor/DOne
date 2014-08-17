@@ -328,6 +328,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_GuildDemote:
 		_handleGuildDemote(pPacket);
 		break;
+	case OP_GuildManageBanker:
+		_handleGuildBanker(pPacket);
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -1935,7 +1938,7 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 	// Write member data.
 	for (auto i : pGuildMembers) {
 		ds.write<std::uint32_t>(i->mLevel);
-		ds.write<std::uint32_t>(i->mBanker ? 1 : 0);
+		ds.write<std::uint32_t>(i->mBanker + i->mAlt * 2);
 		ds.write<std::uint32_t>(i->mClass);
 		ds.write<std::uint32_t>(i->mRank);
 		ds.write<std::uint32_t>(i->mTimeLastOn);
@@ -2049,6 +2052,7 @@ void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket
 
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(characterName));
+	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity
 	String demoteName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(demoteName));
 
@@ -2061,4 +2065,23 @@ void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket
 		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) == false);
 
 	GuildManager::getInstance().handleDemote(mCharacter, demoteName);
+}
+
+void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+	PACKET_SIZE_CHECK(BankerAltStatus::sizeCheck(pPacket->size));
+
+	auto payload = BankerAltStatus::convert(pPacket->pBuffer);
+
+	// NOTE: UD does not send BankerAltStatus::mCharacterName like other packets. /shrug
+	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(otherName));
+
+	bool banker = payload->mStatus & 0x01;
+	bool alt = payload->mStatus & 0x02;
+
+	GuildManager::getInstance().handleSetBanker(mCharacter, otherName, banker);
+	GuildManager::getInstance().handleSetAlt(mCharacter, otherName, alt);
 }
