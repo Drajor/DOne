@@ -109,11 +109,19 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	_storeGuildName(guild->mID, guild->mName);
 
 	// Tell Zone that something has changed.
+	// TODO: This needs to be sent globally
 	pCharacter->getZone()->notifyGuildsChanged();
 
 	GuildMember* member = new GuildMember();
 	member->mID = pCharacter->getID();
 	member->mRank = GuildRanks::Leader;
+	member->mName = pCharacter->getName();
+	member->mClass = pCharacter->getClass();
+	member->mLevel = pCharacter->getLevel();
+	member->mZoneID = pCharacter->getZone()->getID();
+	member->mInstanceID = pCharacter->getZone()->getInstanceID();
+	member->mGuild = guild;
+
 	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
@@ -121,11 +129,8 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 
 	// Notify the Zone of the Character joining.
 	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
-
-	pCharacter->getConnection()->sendGuildRank();
-
+	_sendGuildInformation(pCharacter);
 	_save();
-	return;
 }
 
 void GuildManager::handleDelete(Character* pCharacter) {
@@ -151,47 +156,66 @@ void GuildManager::handleDelete(Character* pCharacter) {
 void GuildManager::handleRemove(Character* pCharacter, const String& pRemoveCharacterName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
 
 	// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
 	// "You must transfer leadership or delete the guild before removing yourself."
 
-	// Self remove.
-	if (pCharacter->getName() == pRemoveCharacterName) {
-		// Prevent leader removing them self (requires packet forging).
-		if (pCharacter->getGuildRank() == GuildRanks::Leader) {
-			// TODO: Log error.
-			return;
+	const bool removeOther = (pCharacter->getName() != pRemoveCharacterName);
+	const bool removeSelf = !removeOther;
+
+	// Check: Prevent leader from removing self.
+	if (removeSelf)
+		EXPECTED(isLeader(pCharacter) == false);
+
+	// Check: Prevent non-leader or non-officer from removing other members.
+	if (removeOther)
+		EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
+
+	Guild* guild = pCharacter->getGuild();
+	EXPECTED(guild);
+	GuildMember* member = guild->getMember(pRemoveCharacterName);
+	EXPECTED(member);
+
+	// Check: Prevent lower or same ranked removal
+	// Allows Leader to remove: Officer + Member
+	// Allows Officer to remove: Member
+	if (removeOther)
+		EXPECTED(member->mRank < pCharacter->getGuildRank());
+
+	guild->mMembers.remove(member);
+	safe_delete(member);
+
+	// If the Character being removed is online we need to update.
+	// NOTE: If the character is not online 
+	Character* removeCharacter = removeSelf ? pCharacter : ZoneManager::getInstance().findCharacter(pRemoveCharacterName, true);
+	if (removeCharacter) {
+		guild->mOnlineMembers.remove(removeCharacter);
+		removeCharacter->clearGuild();
+		if (removeCharacter->isZoning() == false) {
+			removeCharacter->getZone()->notifyCharacterGuildChange(removeCharacter);
+			removeCharacter->getConnection()->sendGuildMembers(std::list<GuildMember*>()); // NOTE: This clears the guild window member list on the removed client.
+			removeCharacter->getConnection()->sendGuildMOTD("", "");
+			removeCharacter->getConnection()->sendGuildChannel("");
+			removeCharacter->getConnection()->sendGuildURL("");
 		}
-
-		Guild* guild = pCharacter->getGuild();
-
-		// Remove Character from Guild members.
-		for (auto i = guild->mMembers.begin(); i != guild->mMembers.end(); i++) {
-			if ((*i)->mID == pCharacter->getID()) {
-				guild->mMembers.erase(i);
-				break;
-			}
-		}
-		// Remove Character from online members.
-		guild->mOnlineMembers.remove(pCharacter);
-
-		pCharacter->clearGuild();
-
-		// Notify the Zone of the Character leaving.
-		pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
 	}
 
-	// OP_GuildManageRemove
+	if (removeOther)
+		pCharacter->getConnection()->sendMessage(MessageType::Yellow, "Successfully removed " + pRemoveCharacterName + " from the guild.");
+
+	// Update other guild members.
+	_sendMemberRemoved(guild, pRemoveCharacterName);
+	_sendMembers(guild);
 	_save();
 }
 
 void GuildManager::handleInviteSent(Character* pCharacter, const String& pInviteCharacterName) {
 	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
 
 	auto guild = pCharacter->getGuild();
-
-	// TODO: Check pCharacter is officer/leader.
 
 	auto character = ZoneManager::getInstance().findCharacter(pInviteCharacterName);
 
@@ -218,29 +242,50 @@ void GuildManager::handleInviteSent(Character* pCharacter, const String& pInvite
 
 void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInviterName) {
 	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter->hasGuild() == false); // Check: Sanity.
+	EXPECTED(pInviterName == pCharacter->getPendingGuildInviteName());
 	Guild* guild = _findByID(pCharacter->getPendingGuildInviteID());
-	EXPECTED(guild != nullptr);
+	EXPECTED(guild);
 
 	GuildMember* member = new GuildMember();
 	member->mID = pCharacter->getID();
+	member->mName = pCharacter->getName();
 	member->mRank = GuildRanks::Member;
+	member->mClass = pCharacter->getClass();
+	member->mLevel = pCharacter->getLevel();
+	member->mGuild = guild;
+	member->mZoneID = pCharacter->getZone()->getID();
+	member->mInstanceID = pCharacter->getZone()->getInstanceID();
+
 	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
 	pCharacter->setGuild(guild, guild->mID, GuildRanks::Member);
 	pCharacter->clearPendingGuildInvite();
 
-	// TODO: Notify Inviter.
+	// Notify the inviter (Zoning characters are ignored for now.)
+	Character* inviter = ZoneManager::getInstance().findCharacter(pInviterName);
+	if (inviter)
+		inviter->message(MessageType::Yellow, pCharacter->getName() + " has accepted your invitation to join the guild.");
 
-	// Notify the Zone of the Character joining.
+	// Update the zone of the joining member.
 	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
-	pCharacter->getConnection()->sendGuildRank();
+	// Update the joining member.
+	_sendGuildInformation(pCharacter);
+	// Update other guild members.
+	_sendMembers(guild);
 	_save();
 }
 
-void GuildManager::handleInviteDecline(Character* pCharacter, const String& InviterName) {
+void GuildManager::handleInviteDecline(Character* pCharacter, const String& pInviterName) {
 	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pInviterName == pCharacter->getPendingGuildInviteName());
 	pCharacter->clearPendingGuildInvite();
+
+	// Notify the inviter (Zoning characters are ignored for now.)
+	Character* inviter = ZoneManager::getInstance().findCharacter(pInviterName);
+	if (inviter)
+		inviter->message(MessageType::Yellow, pCharacter->getName() + " has declined your invitation to join the guild.");
 }
 
 Guild* GuildManager::_findByGuildName(const String& pGuildName) {
@@ -580,6 +625,7 @@ void GuildManager::_sendGuildInformation(Character* pCharacter) {
 	Guild* guild = pCharacter->getGuild();
 	EXPECTED(guild);
 
+	connection->sendGuildRank();
 	connection->sendGuildMembers(guild->mMembers);
 	connection->sendGuildURL(guild->mURL);
 	connection->sendGuildChannel(guild->mChannel);
@@ -594,6 +640,24 @@ void GuildManager::_sendMembers(Guild* pGuild) {
 		i->getConnection()->sendGuildMembers(pGuild->mMembers);
 	}
 }
+
+void GuildManager::_sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName) {
+	ARG_PTR_CHECK(pGuild);
+	EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
+
+	auto outPacket = new EQApplicationPacket(OP_GuildManageRemove, sizeof(Payload::Guild::Remove));
+	auto payload = reinterpret_cast<Payload::Guild::Remove*>(outPacket->pBuffer);
+	payload->mGuildID = pGuild->mID;
+	strcpy(payload->mCharacterName, pRemoveCharacterName.c_str());
+
+	for (auto i : pGuild->mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(outPacket);
+	}
+
+	safe_delete(outPacket);
+}
+
 
 void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember) {
 	ARG_PTR_CHECK(pGuild);

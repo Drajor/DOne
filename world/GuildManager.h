@@ -77,7 +77,7 @@ public:
 	void handleRemove(Character* pCharacter, const String& pRemoveCharacterName);
 	void handleInviteSent(Character* pCharacter, const String& pInviteCharacterName);
 	void handleInviteAccept(Character* pCharacter, const String& pInviterName);
-	void handleInviteDecline(Character* pCharacter, const String& InviterName);
+	void handleInviteDecline(Character* pCharacter, const String& pInviterName);
 	void handleMessage(Character* pCharacter, const String& pMessage);
 	void handleSetMOTD(Character* pCharacter, const String& pMOTD);
 	void handleGetMOTD(Character* pCharacter);
@@ -121,6 +121,7 @@ private:
 	void _sendMOTDReply(Character* pCharacter);
 	void _sendGuildInformation(Character* pCharacter);
 	void _sendMembers(Guild* pGuild);
+	void _sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName);
 
 	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);

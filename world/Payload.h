@@ -29,6 +29,11 @@ namespace Payload {
 			inline static BankerAltStatus* convert(unsigned char* pData) { return reinterpret_cast<BankerAltStatus*>(pData); }
 			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(BankerAltStatus); }
 		};
+
+		struct Remove {
+			GuildID mGuildID;
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+		};
 		
 		struct LevelUpdate {
 			GuildID mGuildID; // why?!

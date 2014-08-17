@@ -807,6 +807,8 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	
 	switch (channel) {
 	case ChannelID::CH_GUILD:
+		EXPECTED(mCharacter->hasGuild());
+		GuildManager::getInstance().handleMessage(mCharacter, message);
 		break;
 	case ChannelID::CH_GROUP:
 		GroupManager::getInstance().handleMessage(mCharacter, message);
@@ -1873,7 +1875,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 
 void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
 	EXPECTED(mConnected);
-	EXPECTED(mCharacter->hasGuild());
+	//EXPECTED(mCharacter->hasGuild());
 
 	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(outPacket->pBuffer);
