@@ -15,5 +15,6 @@ namespace Limits {
 		bool personalNoteLength(const String& pPersonalNote);
 		bool urlLength(const String& pURL);
 		bool channelLength(const String& pChannel);
+		bool rankValid(const GuildRank pRank);
 	}
 }

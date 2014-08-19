@@ -28,3 +28,20 @@ String Utility::zoneLogDetails(Zone* pZone) {
 	ss << "[Zone(Name: " << pZone->getLongName() << " ID:" << static_cast<std::uint16_t>(pZone->getID()) << " InstanceID:" << pZone->getInstanceID() << ")]";
 	return ss.str();
 }
+
+String Utility::guildRankToString(const GuildRank& pRank){
+	switch (pRank)	{
+	case Member:
+		return "Member";
+	case Officer:
+		return "Officer";
+	case Leader:
+		return "Leader";
+	case GR_None:
+		return "None";
+	default:
+		break;
+	}
+
+	return "ERROR";
+}

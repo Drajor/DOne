@@ -154,6 +154,7 @@ private:
 	void _handleGetGuildStatus(const EQApplicationPacket* pPacket);
 	void _handleGuildDemote(const EQApplicationPacket* pPacket);
 	void _handleGuildBanker(const EQApplicationPacket* pPacket);
+	void _handleGuildMakeLeader(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

@@ -22,6 +22,7 @@ namespace Utility {
 
 	String characterLogDetails(Character* pCharacter);
 	String zoneLogDetails(Zone* pZone);
+	String guildRankToString(const GuildRank& pRank);
 
 	static String safeString(char* pCString, unsigned int pMaxSize) {
 		// strnlen_s - http://msdn.microsoft.com/en-us/library/z50ty2zh.aspx

@@ -59,3 +59,16 @@ bool Limits::Guild::urlLength(const String& pURL) {
 bool Limits::Guild::channelLength(const String& pChannel) {
 	return stringLength(pChannel) <= Limits::Guild::MAX_CHANNEL_LENGTH;
 }
+
+bool Limits::Guild::rankValid(const GuildRank pRank) {
+	switch (pRank) {
+	case GuildRanks::Member:
+	case GuildRanks::Officer:
+	case GuildRanks::Leader:
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}

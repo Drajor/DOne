@@ -402,6 +402,7 @@ void GuildManager::onConnect(Character* pCharacter, uint32 pGuildID) {
 			i->mName = pCharacter->getName();
 			i->mClass = pCharacter->getClass();
 			i->mLevel = pCharacter->getLevel();
+			i->mCharacter = pCharacter;
 
 			found = true;
 			break;
@@ -463,6 +464,7 @@ void GuildManager::onCamp(Character* pCharacter){
 	member->mZoneID = 0;
 	member->mInstanceID = 0;
 	member->mTimeLastOn = 0; // TODO: Time
+	member->mCharacter = nullptr;
 
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
@@ -481,6 +483,7 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 	member->mZoneID = 0;
 	member->mInstanceID = 0;
 	member->mTimeLastOn = 0; // TODO: Time
+	member->mCharacter = nullptr;
 
 	pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
 	_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
@@ -821,26 +824,9 @@ void GuildManager::handlePromote(Character* pCharacter, const String& pPromoteNa
 		return;
 	}
 
-	member->mRank = GuildRanks::Officer;
-	pCharacter->getConnection()->sendMessage(MessageType::Yellow, pPromoteName + " has been promoted to officer.");
-
-	_sendMessage(pCharacter->getGuild(), SYS_NAME, pPromoteName + " has been promoted to officer. (" + pCharacter->getName() + ")");
-	// TODO: Use _sendMembers until a better way is found.
+	_changeRank(member, GuildRanks::Officer);
 	_sendMembers(pCharacter->getGuild());
 	_save();
-
-	// Update (Online Character promotion).
-	Character* promoteCharacter = ZoneManager::getInstance().findCharacter(pPromoteName);
-	if (promoteCharacter) {
-		promoteCharacter->setGuildRank(GuildRanks::Officer);
-
-		if (promoteCharacter->isZoning() == false) {
-			// Update Character (Rank).
-			promoteCharacter->getConnection()->sendGuildRank();
-			// Update Character Zone (Rank).
-			promoteCharacter->getZone()->notifyCharacterGuildChange(promoteCharacter);
-		}
-	}
 }
 
 void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName) {
@@ -848,44 +834,26 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
 	EXPECTED(Limits::Character::nameLength(pDemoteName));
-
-	bool demoted = false;
+	Guild* guild = pCharacter->getGuild();
+	EXPECTED(guild);
 
 	// Officer demotes self.
 	if (pCharacter->getName() == pDemoteName) {
 		EXPECTED(isOfficer(pCharacter));
-
-		GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
+		GuildMember* member = guild->getMember(pCharacter->getName());
 		EXPECTED(member);
-		member->mRank = GuildRanks::Member;
-		demoted = true;
+		_changeRank(member, GuildRanks::Member);
 	}
 	// Leader demotes officer
 	else {
 		EXPECTED(isLeader(pCharacter));
-		
-		GuildMember* member = pCharacter->getGuild()->getMember(pDemoteName);
+		GuildMember* member = guild->getMember(pDemoteName);
 		EXPECTED(member->mRank == GuildRanks::Officer);
-		member->mRank = GuildRanks::Member;
-		demoted = true;
+		_changeRank(member, GuildRanks::Member);
 	}
 
-	if (demoted) {
-		// TODO: Notify
-		_save();
-		_sendMessage(pCharacter->getGuild(), SYS_NAME, pDemoteName + " has been demoted. (" + pCharacter->getName() + ")");
-		// TODO: Use _sendMembers until a better way is found.
-		_sendMembers(pCharacter->getGuild());
-
-		// Update the demoted Character (if they are online)
-		Character* character = pCharacter->getGuild()->getOnlineMember(pDemoteName);
-		if (character) {
-			character->setGuildRank(GuildRanks::Member);
-			if (!character->isZoning())
-				character->getConnection()->sendGuildRank();
-		}
-		// NOTE: If the Character is not online their rank will be updated when they log in.
-	}
+	_sendMembers(guild);
+	_save();
 }
 
 void GuildManager::handleSetBanker(Character* pCharacter, const String& pOtherName, const bool pBanker) {
@@ -941,4 +909,55 @@ GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
 
 	// Not found.
 	return nullptr;
+}
+
+void GuildManager::handleMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->hasGuild());
+	EXPECTED(isLeader(pCharacter));
+	EXPECTED(Limits::Character::nameLength(pLeaderName));
+
+	Guild* guild = pCharacter->getGuild();
+	EXPECTED(guild);
+	GuildMember* oldLeader = guild->getMember(pCharacter->getName());
+	EXPECTED(oldLeader);
+	GuildMember* newLeader = guild->getMember(pLeaderName);
+	EXPECTED(newLeader);
+
+	_changeRank(oldLeader, GuildRanks::Officer);
+	_changeRank(newLeader, GuildRanks::Leader);
+	_sendMembers(guild);
+	_save();
+}
+
+void GuildManager::_changeRank(GuildMember* pMember, const GuildRank pNewRank) {
+	EXPECTED(pMember);
+	EXPECTED(Limits::Guild::rankValid(pNewRank));
+
+	Guild* guild = pMember->mGuild;
+	EXPECTED(guild);
+
+	const GuildRank	previousRank = pMember->mRank;
+	pMember->mRank = pNewRank;
+
+	// Check: Character is online, updates required!
+	if (pMember->isOnline()) {
+		Character* character = pMember->mCharacter;
+		EXPECTED(character);
+
+		character->setGuildRank(pNewRank);
+
+		// Check: Character is not zoning, updates required!
+		if (character->isZoning() == false) {
+			// Update Character (Rank).
+			character->getConnection()->sendGuildRank();
+			// Update Character Zone (Rank).
+			character->getZone()->notifyCharacterGuildChange(character);
+		}
+	}
+
+	// Notify online guild members.
+	const String change = previousRank < pNewRank ? "promoted" : "demoted";
+	const String rank = Utility::guildRankToString(pNewRank);
+	_sendMessage(guild, SYS_NAME, pMember->mName + " has been " + change + " to " + rank);
 }

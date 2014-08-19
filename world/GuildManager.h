@@ -28,6 +28,8 @@ struct GuildMember {
 	String mPublicNote = "";
 	ZoneID mZoneID = 0;
 	InstanceID mInstanceID = 0;
+	inline bool isOnline() { return mCharacter != nullptr; }
+	Character* mCharacter = nullptr; // Only valid when the guild member is online.
 };
 
 class Guild {
@@ -89,6 +91,7 @@ public:
 	void handleDemote(Character* pCharacter, const String& pDemoteName);
 	void handleSetBanker(Character* pCharacter, const String& pOtherName, const bool pBanker);
 	void handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt);
+	void handleMakeLeader(Character* pCharacter, const String& pLeaderName);
 
 	// Character Events
 	void onConnect(Character* pCharacter, uint32 pGuildID);
@@ -123,6 +126,8 @@ private:
 	void _sendGuildInformation(Character* pCharacter);
 	void _sendMembers(Guild* pGuild);
 	void _sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName);
+
+	void _changeRank(GuildMember* pMember, const GuildRank pNewRank);
 
 	Guild* _findByGuildName(const String& pGuildName);
 	Guild* _findByID(const GuildID pID);

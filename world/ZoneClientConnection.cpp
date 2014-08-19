@@ -331,6 +331,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_GuildManageBanker:
 		_handleGuildBanker(pPacket);
 		break;
+	case OP_GuildLeader:
+		_handleGuildMakeLeader(pPacket);
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -2082,7 +2084,7 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 
 	auto payload = BankerAltStatus::convert(pPacket->pBuffer);
 
-	// NOTE: UD does not send BankerAltStatus::mCharacterName like other packets. /shrug
+	// NOTE: UF does not send BankerAltStatus::mCharacterName like other packets. /shrug
 	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(otherName));
 
@@ -2091,4 +2093,22 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 
 	GuildManager::getInstance().handleSetBanker(mCharacter, otherName, banker);
 	GuildManager::getInstance().handleSetAlt(mCharacter, otherName, alt);
+}
+
+void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
+	ARG_PTR_CHECK(pPacket);
+	EXPECTED(mCharacter->hasGuild());
+	EXPECTED(GuildManager::getInstance().isLeader(mCharacter));
+	PACKET_SIZE_CHECK(MakeLeader::sizeCheck(pPacket->size));
+
+	auto payload = MakeLeader::convert(pPacket->pBuffer);
+
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(characterName));
+	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
+	String leaderName = Utility::safeString(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(leaderName));
+
+	GuildManager::getInstance().handleMakeLeader(mCharacter, leaderName);
 }

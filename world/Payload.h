@@ -11,6 +11,14 @@ namespace Payload {
 
 	namespace Guild {
 
+		struct MakeLeader{
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+			char mLeaderName[Limits::Character::MAX_NAME_LENGTH];
+
+			inline static MakeLeader* convert(unsigned char* pData) { return reinterpret_cast<MakeLeader*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(MakeLeader); }
+		};
+
 		struct Demote {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
