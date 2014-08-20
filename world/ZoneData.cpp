@@ -252,7 +252,7 @@ bool ZoneData::initialise() {
 		ZoneInformation* zoneInformation = new ZoneInformation();
 		zoneInformation->mShortName = element->Attribute("short_name");
 		zoneInformation->mLongName = element->Attribute("long_name");
-		Utility::stou16Safe(zoneInformation->mID, String(element->Attribute("id")));
+		Utility::stou32Safe(zoneInformation->mID, String(element->Attribute("id")));
 		Utility::stofSafe(zoneInformation->mSafeX, String(element->Attribute("safe_x")));
 		Utility::stofSafe(zoneInformation->mSafeY, String(element->Attribute("safe_y")));
 		Utility::stofSafe(zoneInformation->mSafeZ, String(element->Attribute("safe_z")));
@@ -295,7 +295,7 @@ String ZoneData::getShortName(ZoneID pZoneID){
 	return zoneInformation->mShortName;
 }
 
-std::uint32_t ZoneData::getLongNameStringID(ZoneID pZoneID) {
+uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
 	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
 	if (!zoneInformation) {
 		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;

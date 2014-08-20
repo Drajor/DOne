@@ -36,7 +36,7 @@ namespace Utility {
 	}
 
 	static String StringIDString(StringID pStringID) {
-		return std::to_string(static_cast<std::uint32_t>(pStringID));
+		return std::to_string(static_cast<uint32>(pStringID));
 	}
 
 	class DynamicStructure {
@@ -124,9 +124,9 @@ namespace Utility {
 		}
 		return false;
 	}
-	static bool stou16Safe(std::uint16_t& pValue, String pString) {
+	static bool stou16Safe(uint16& pValue, String pString) {
 		try {
-			pValue = static_cast<std::uint16_t>(std::stoul(pString));
+			pValue = static_cast<uint16>(std::stoul(pString));
 			return true;
 		}
 		catch (...) {
@@ -137,6 +137,16 @@ namespace Utility {
 	static bool stou8Safe(uint8& pValue, String& pString) {
 		try {
 			pValue = static_cast<uint8>(std::stoul(pString));
+			return true;
+		}
+		catch (...) {
+			return false;
+		}
+		return false;
+	}
+	static bool stoi8Safe(int8& pValue, String& pString) {
+		try {
+			pValue = static_cast<int8>(std::stoi(pString));
 			return true;
 		}
 		catch (...) {

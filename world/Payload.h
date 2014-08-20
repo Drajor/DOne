@@ -7,7 +7,75 @@ enum GuildUpdateAction : uint32 {
 	GUILD_CHANNEL = 1
 };
 
+#pragma pack(1)
 namespace Payload {
+
+	namespace World {
+		struct CreateCharacter {
+			uint32 mClass = 0;
+			uint32 mHairColour = 0;
+			uint32 mBeardColour = 0;
+			uint32 mBeardStyle = 0;
+			uint32 mGender = 0;
+			uint32 mRace = 0;
+			uint32 mStartZoneID = 0;
+			uint32 mHairStyle = 0;
+			uint32 mDeity = 0;
+			uint32 mStrength = 0;
+			uint32 mStamina = 0;
+			uint32 mAgility = 0;
+			uint32 mDexterity = 0;
+			uint32 mWisdom = 0;
+			uint32 mIntelligence = 0;
+			uint32 mCharisma = 0;
+			uint32 mFace = 0;
+			uint32 mEyeColour1 = 0;
+			uint32 mEyeColour2 = 0;
+			uint32 mDrakkinHeritage = 0;
+			uint32 mDrakkinTattoo = 0;
+			uint32 mDrakkinDetails = 0;
+
+			inline static CreateCharacter* convert(unsigned char* pData) { return reinterpret_cast<CreateCharacter*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(CreateCharacter); }
+		};
+	}
+
+	namespace LoginServer {
+
+		struct ConnectRequest {
+			uint32 mAccountID = 0;
+			uint32 mWorldID = 0;
+			uint32 mFromID = 0;
+			uint32 mToID = 0;
+
+			inline static ConnectRequest* convert(unsigned char* pData) { return reinterpret_cast<ConnectRequest*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ConnectRequest); }
+		};
+
+		struct ConnectResponse {
+			uint32 mAccountID = 0;
+			uint32 mWorldID = 0;
+			ResponseID mResponse = ResponseID::ALLOWED;
+			uint32 mFromID = 0;
+			uint32 mToID = 0;
+
+			inline static ConnectResponse* convert(unsigned char* pData) { return reinterpret_cast<ConnectResponse*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ConnectResponse); }
+		};
+
+		struct ClientAuthentication {
+			uint32 mAccountID = 0;
+			char mAccountName[Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH];
+			char mKey[Limits::LoginServer::MAX_KEY_LENGTH];
+			uint8 mLoginServerAdmin = 0; // Ignored.
+			int16 mWorldAdmin = 0; // Ignored.
+			uint32 mIP = 0;
+			uint8 mLocal = 0;
+
+			inline static ClientAuthentication* convert(unsigned char* pData) { return reinterpret_cast<ClientAuthentication*>(pData); }
+			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ClientAuthentication); }
+		};
+	}
 
 	namespace Guild {
 
@@ -81,3 +149,4 @@ namespace Payload {
 		};
 	}
 }
+#pragma pack()

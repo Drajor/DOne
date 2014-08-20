@@ -45,6 +45,7 @@
 #include "World.h"
 #include "AccountManager.h"
 #include "LogSystem.h"
+#include "Payload.h"
 
 static const int StatusUpdateInterval = 15000;
 
@@ -152,50 +153,44 @@ bool LoginServerConnection::connect() {
 }
 
 void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(UsertoWorldRequest_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Login Server Connection] Wrong size of UsertoWorldRequest_Struct");
-		return;
-	}
+	using namespace Payload::LoginServer;
+	PACKET_SIZE_CHECK(ConnectRequest::sizeCheck(pPacket->size));
 
-	Log::info("[Login Server Connection] User to World Request");
+	auto payload = ConnectRequest::convert(pPacket->pBuffer);
 
-	auto inPayload = reinterpret_cast<UsertoWorldRequest_Struct*>(pPacket->pBuffer);
-	auto outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(UsertoWorldResponse_Struct));
-	auto outPayload = reinterpret_cast<UsertoWorldResponse_Struct*>(outPacket->pBuffer);
-	outPayload->lsaccountid = inPayload->lsaccountid;
-	outPayload->ToID = inPayload->FromID;
-	outPayload->worldid = inPayload->worldid;
-	// Ask World if this Client can join World.
-	outPayload->response = mWorld->getUserToWorldResponse(inPayload->lsaccountid);
+	auto outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(ConnectResponse));
+	auto outPayload = ConnectResponse::convert(outPacket->pBuffer);
+	outPayload->mAccountID = payload->mAccountID;
+	outPayload->mToID = payload->mFromID;
+	outPayload->mWorldID = payload->mWorldID;
+	//outPayload->mResponse = mWorld->getConnectResponse(payload->mLoginServerAccountID); // Get response from World.
+	outPayload->mResponse = ResponseID::ALLOWED;
+	// NOTE: Currently just allow everyone. If the LS sent the LS account name I would do a proper look up
 
 	_sendPacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) {
-	static const auto EXPECTED_SIZE = sizeof(ServerLSClientAuth);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Login Server Connection] Wrong size of ServerLSClientAuth");
-		return;
-	}
+	//using namespace Payload::LoginServer;
+	auto expectedSize = sizeof(Payload::LoginServer::ClientAuthentication);
+	auto actualSize = pPacket->size;
+	PACKET_SIZE_CHECK(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket->size));
 
-	Log::info("[Login Server Connection] Adding new authentication.");
+	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket->pBuffer);
 
-	auto payload = reinterpret_cast<ServerLSClientAuth*>(pPacket->pBuffer);
 	// Add authentication for the incoming client.
 	ClientAuthentication authentication;
-	authentication.mLoginServerAccountID = payload->lsaccount_id;
-	authentication.mLoginServerAccountName = Utility::safeString(payload->name, 30);
-	authentication.mKey = Utility::safeString(payload->key, 30);
-	authentication.mWorldAdmin = payload->worldadmin;
-	authentication.mIP = payload->ip;
-	authentication.mLocal = payload->local;
+	authentication.mLoginServerAccountID = payload->mAccountID;
+	authentication.mLoginServerAccountName = Utility::safeString(payload->mAccountName, Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH);
+	authentication.mKey = Utility::safeString(payload->mKey, Limits::LoginServer::MAX_KEY_LENGTH);
+	authentication.mWorldAdmin = payload->mWorldAdmin;
+	authentication.mIP = payload->mIP;
+	authentication.mLocal = payload->mLocal;
 	mWorld->addAuthentication(authentication);
 
 	// Check if client does not yet have an account.
-	if (!mWorld->ensureAccountExists(payload->lsaccount_id, payload->name)) {
+	if (!mWorld->ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
 		Log::error("[Login Server Connection] accountCheck failed.");
 	}
 }

@@ -49,17 +49,23 @@
 #include "World.h"
 #include "ZoneData.h"
 #include "GuildManager.h"
+#include "AccountManager.h"
 #include "ZoneManager.h"
 #include "DataStore.h"
 #include "LogSystem.h"
 
 TimeoutManager timeout_manager; // Can't remove this for now...
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)  {
 	//system("pause");
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
+	// Initialise Account Manager.
+	if (!AccountManager::getInstance().initialise()){
+		Log::error("[Account Manager] Failed to initialise");
+		return 1;
+	}
 	// Initialise Zone Data.
 	if (!ZoneData::getInstance().initialise()){
 		Log::error("[Zone Data] Failed to initialise");

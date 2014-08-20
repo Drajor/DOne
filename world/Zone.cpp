@@ -381,7 +381,7 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMe
 	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
 	payload->language = Language::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
-	payload->chan_num = static_cast<std::uint32_t>(pChannel);
+	payload->chan_num = static_cast<uint32>(pChannel);
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pCharacter->getName().c_str());
 
@@ -473,7 +473,8 @@ void Zone::requestSave(Character*pCharacter) {
 	// Save taking 7ms - 90ms ... I will have to do something about that eventually.
 	// http://dev.mysql.com/doc/refman/5.5/en/too-many-connections.html
 	// Considering a DB connection per user and just copy data to another thread.
-	if (!DataStore::getInstance().saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
+	//if (!DataStore::getInstance().saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
+	if (!DataStore::getInstance().saveCharacter(pCharacter->getName(), nullptr)) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 	}

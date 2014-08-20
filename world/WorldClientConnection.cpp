@@ -34,6 +34,9 @@
 #include "Utility.h"
 #include "Constants.h"
 #include "LogSystem.h"
+#include "AccountManager.h"
+#include "Data.h"
+#include "Payload.h"
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -107,192 +110,49 @@ void WorldClientConnection::_sendExpansionInfo() {
 }
 
 void WorldClientConnection::_sendCharacterSelectInfo() {
-	if (ClientVersionBit & BIT_RoFAndLater)
-	{
-		// Can make max char per account into a rule - New to VoA
-		_sendMaxCharCreate(10);
-		_sendMembership();
-		_sendMembershipSettings();
-	}
-
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	auto payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
-	mWorld->getCharacterSelectInfo(mWorldAccountID, payload);
-	_queuePacket(outPacket);
-	safe_delete(outPacket);
-}
+	AccountData* accountData = AccountManager::getInstance().getAccount(mLoginServerAccountID);
+	EXPECTED(accountData);
 
-void WorldClientConnection::_sendMaxCharCreate(int max_chars) {
-	auto outPacket = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
-	auto payload = reinterpret_cast<MaxCharacters_Struct*>(outPacket->pBuffer);
+	//for (auto i = 0; i < MAX_CHARACTERS_CHARSELECT; i++) {
+	int charSlot = 0;
+	for (auto i : accountData->mCharacterData) {
+		strcpy(payload->name[charSlot], i->mName.c_str());
+		payload->race[charSlot] = i->mRace;
+		payload->class_[charSlot] = i->mClass;
+		payload->zone[charSlot] = i->mZoneID;
+		payload->level[charSlot] = i->mLevel;
 
-	payload->max_chars = max_chars;
+		payload->face[charSlot] = i->mFace;
+		payload->gender[charSlot] = i->mGender;
+		payload->beard[charSlot] = i->mBeardStyle;
+		payload->beardcolor[charSlot] = i->mBeardColour;
+		payload->hairstyle[charSlot] = i->mHairStyle;
+		payload->haircolor[charSlot] = i->mHairColour;
+		payload->drakkin_heritage[charSlot] = i->mDrakkinHeritage;
+		payload->drakkin_tattoo[charSlot] = i->mDrakkinTattoo;
+		payload->drakkin_details[charSlot] = i->mDrakkinDetails;
+		payload->deity[charSlot] = i->mDeity;
+		payload->drakkin_tattoo[charSlot] = i->mDrakkinTattoo;
+		payload->eyecolor1[charSlot] = i->mEyeColourLeft;
+		payload->eyecolor2[charSlot] = i->mEyeColourRight;
 
-	_queuePacket(outPacket);
-	safe_delete(outPacket);
-}
 
-void WorldClientConnection::_sendMembership() {
-	auto outPacket = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
-	auto payload = reinterpret_cast<Membership_Struct*>(outPacket->pBuffer);
+		payload->tutorial[charSlot] = 0;
+		payload->gohome[charSlot] = 0;
 
-	/*
-		The remaining entry fields probably hold more membership restriction data that needs to be identified.
-		Here is a possible list based on the EQ Website membership comparison list:
-		1. Spell Ranks Allowed
-		2. Prestige Items Usable
-		3. In-Game Mail Service (send/recieve)
-		4. Parcel Delivery (send/recieve)
-		5. Loyalty Rewards Per-Week (30, 60, Max)
-		6. Mercenary Tiers (Apprentice 1-2, Apprentice All Tiers, All Tiers)
-		7. Neighborhood House
-		8. Active Journal Quests (Tasks?) (10, 15, Max)
-		9. Guild Function (join, join and create)
-		10. Broker System (restricted, unlimited)
-		11. Voice Chat
-		12. Chat Ability
-		13. Progression Server
-		14. Customer Support
-		15. In-Game Popup Advertising
-		That is 15 possible fields, and there are 15 unknowns in the struct...Coincidence?
-	*/
+		// Equipment
+		payload->primary[charSlot] = i->mPrimary;
+		payload->secondary[charSlot] = i->mSecondary;
 
-	payload->membership = 2;				//Hardcode to gold for now. We don't use anything else.
-	payload->races = 0x1ffff;			// Available Races (4110 for silver)
-	payload->classes = 0x1ffff;			// Available Classes (4614 for silver) - Was 0x101ffff
-	payload->entrysize = 21;				// Number of membership setting entries below
-	payload->entries[0] = 0xffffffff;	// Max AA Restriction
-	payload->entries[1] = 0xffffffff;	// Max Level Restriction
-	payload->entries[2] = 0xffffffff;	// Max Char Slots per Account (not used by client?)
-	payload->entries[3] = 0xffffffff;	// 1 for Silver
-	payload->entries[4] = 8;				// Main Inventory Size (0xffffffff on Live for Gold, but limitting to 8 until 10 is supported)
-	payload->entries[5] = 0xffffffff;	// Max Platinum per level
-	payload->entries[6] = 1;				// 0 for Silver
-	payload->entries[7] = 1;				// 0 for Silver
-	payload->entries[8] = 1;				// 1 for Silver
-	payload->entries[9] = 0xffffffff;	// Unknown - Maybe Loyalty Points every 12 hours? 60 per week for Silver
-	payload->entries[10] = 1;			// 1 for Silver
-	payload->entries[11] = 0xffffffff;	// Shared Bank Slots
-	payload->entries[12] = 0xffffffff;	// Unknown - Maybe Max Active Tasks?
-	payload->entries[13] = 1;			// 1 for Silver
-	payload->entries[14] = 1;			// 0 for Silver
-	payload->entries[15] = 1;			// 0 for Silver
-	payload->entries[16] = 1;			// 1 for Silver
-	payload->entries[17] = 1;			// 0 for Silver
-	payload->entries[18] = 1;			// 0 for Silver
-	payload->entries[19] = 0xffffffff;	// 0 for Silver
-	payload->entries[20] = 0xffffffff;	// 0 for Silver
-	payload->exit_url_length = 0;
-	//mc->exit_url = 0; // Used on Live: "http://www.everquest.com/free-to-play/exit-silver"
-
-	_queuePacket(outPacket);
-	safe_delete(outPacket);
-}
-
-void WorldClientConnection::_sendMembershipSettings() {
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendMembershipDetails, sizeof(Membership_Details_Struct));
-	Membership_Details_Struct* payload = reinterpret_cast<Membership_Details_Struct*>(outPacket->pBuffer);
-
-	payload->membership_setting_count = 66;
-	int32 gold_settings[22] = {-1,-1,-1,-1,-1,-1,1,1,1,-1,1,-1,-1,1,1,1,1,1,1,-1,-1,0};
-	uint32 entry_count = 0;
-	for (int setting_id=0; setting_id < 22; setting_id++)
-	{
-		for (int setting_index=0; setting_index < 3; setting_index++)
-		{
-
-			payload->settings[entry_count].setting_index = setting_index;
-			payload->settings[entry_count].setting_id = setting_id;
-			payload->settings[entry_count].setting_value = gold_settings[setting_id];
-			entry_count++;
+		for (auto j = 0; j < Limits::Account::MAX_EQUIPMENT_SLOTS; j++) {
+			payload->cs_colors[charSlot][j].color = i->mEquipment[j].mColour;
+			payload->equip[charSlot][j] = i->mEquipment[j].mMaterial;
 		}
+
+		charSlot++;
 	}
-
-	payload->race_entry_count = 15;
-	payload->class_entry_count = 15;
-
-	uint32 cur_purchase_id = 90287;
-	uint32 cur_purchase_id2 = 90301;
-	uint32 cur_bitwise_value = 1;
-	for (int entry_id=0; entry_id < 15; entry_id++)
-	{
-		if (entry_id == 0)
-		{
-			payload->membership_races[entry_id].purchase_id = 1;
-			payload->membership_races[entry_id].bitwise_entry = 0x1ffff;
-			payload->membership_classes[entry_id].purchase_id = 1;
-			payload->membership_classes[entry_id].bitwise_entry = 0x1ffff;
-		}
-		else
-		{
-			payload->membership_races[entry_id].purchase_id = cur_purchase_id;
-
-			if (entry_id < 3)
-			{
-				payload->membership_classes[entry_id].purchase_id = cur_purchase_id;
-			}
-			else
-			{
-				payload->membership_classes[entry_id].purchase_id = cur_purchase_id2;
-				cur_purchase_id2++;
-			}
-
-			if (entry_id == 1)
-			{
-				payload->membership_races[entry_id].bitwise_entry = 4110;
-				payload->membership_classes[entry_id].bitwise_entry = 4614;
-			}
-			else if (entry_id == 2)
-			{
-				payload->membership_races[entry_id].bitwise_entry = 4110;
-				payload->membership_classes[entry_id].bitwise_entry = 4614;
-			}
-			else
-			{
-				if (entry_id == 12)
-				{
-					// Live Skips 4096
-					cur_bitwise_value *= 2;
-				}
-				payload->membership_races[entry_id].bitwise_entry = cur_bitwise_value;
-				payload->membership_classes[entry_id].bitwise_entry = cur_bitwise_value;
-			}
-			cur_purchase_id++;
-		}
-		cur_bitwise_value *= 2;
-	}
-	payload->exit_url_length = 0;	// Live uses 42
-	//strcpy(eq->exit_url, "http://www.everquest.com/free-to-play/exit");
-	payload->exit_url_length2 = 0;	// Live uses 49
-	//strcpy(eq->exit_url2, "http://www.everquest.com/free-to-play/exit-silver");
-
-	/*
-	Account Access Level Settings
-
-	ID	-	Free	Silver	Gold	-	Possible Setting
-	00	-	250		1000	-1		-	Max AA Restriction
-	01	-	-1		-1		-1		-	Max Level Restriction
-	02	-	2		4		-1		-	Max Char Slots per Account
-	03	-	1		1		-1		-	Max Spell Rank
-	04	-	4		6		-1		-	Main Inventory Size
-	05	-	100		500		-1		-	Max Platinum per level
-	06	-	0		0		1		-	Send Mail?
-	07	-	0		0		1		-	Send Parcels?
-	08	-	1		1		1		-	Voice Chat Unlimited?
-	09	-	2		5		-1		-	Mercenary Tiers
-	10	-	0		1		1		-	Create Guilds?
-	11	-	0		0		-1		-	Shared Bank Slots
-	12	-	9		14		-1		-	Max Journal Quests - 1
-	13	-	0		1		1		-	Neighborhood-House Allowed?
-	14	-	0		0		1		-	Prestige Enabled?
-	15	-	0		0		1		-	Broker System Unlimited?
-	16	-	0		1		1		-	Chat UnRestricted?
-	17	-	0		0		1		-	Progression Server Access?
-	18	-	0		0		1		-	Full Customer Support?
-	19	-	0		0		-1		-	0 for Silver
-	20	-	0		0		-1		-	0 for Silver
-	21	-	0		0		0		-	Unknown 0
-	*/
 
 	_queuePacket(outPacket);
 	safe_delete(outPacket);
@@ -340,6 +200,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	// This is first communication from client after Server Select
 	if (!mAuthenticated) {
 		if (mWorld->checkAuthentication(this, id, key)) {
+			AccountManager::getInstance().ensureAccountLoaded(id);
 			/*
 				OP_GuildsList, OP_LogServer, OP_ApproveWorld
 				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
@@ -366,56 +227,6 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 			return false;
 		}
 	}
-	
-	//loginInfo->login_info->
-
-	////cle = client_list.CheckAuth(id, password);
-	//if (cle) {
-	//	if (cle->AccountID() == 0) {
-	//		return false;
-	//	}
-
-	//	cle->SetOnline();
-
-	//	clog(WORLD__CLIENT,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-	//	clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
-
-	//	if (!pZoning)
-	//		SendGuildList();
-	//	SendLogServer();
-	//	SendApproveWorld();
-	//	SendEnterWorld(cle->name());
-	//	SendPostEnterWorld();
-	//	if (!pZoning) {
-	//		SendExpansionInfo();
-	//		SendCharInfo();
-	//		database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
-	//	}
-
-	//}
-	//else {
-	//	// TODO: Find out how to tell the client wrong username/password
-	//	clog(WORLD__CLIENT_ERR,"Bad/Expired session key '%s'",name);
-	//	return false;
-	//}
-
-	//cle->SetIP(GetIP());
-	//cle->SetOnline();
-
-	//clog(WORLD__CLIENT, "Logged in. Mode=%s", mZoning ? "(Zoning)" : "(CharSel)");
-	//clog(WORLD__CLIENT, "LS Account #%d", cle->getLoginServerAccountID());
-
-	//if (!mZoning)
-	//	SendGuildList();
-	//SendLogServer();
-	//SendApproveWorld();
-	//SendEnterWorld(cle->name());
-	//SendPostEnterWorld();
-	//if (!mZoning) {
-	//	SendExpansionInfo();
-	//	SendCharInfo();
-	//	//database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
-	//}
 
 	return true;
 }
@@ -629,18 +440,13 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 }
 
 bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(CharCreate_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[World Client Connection] Wrong sized CharCreate_Struct, dropping connection.");
-		dropConnection();
-		return false;
-	}
+	using namespace Payload::World;
+	EXPECTED_BOOL(pPacket);
+	PACKET_SIZE_CHECK_BOOL(CreateCharacter::sizeCheck(pPacket->size));
 
-	// If character creation fails we just dump the client. As far as I can tell there is no nice way of handling failure here.
-	auto payload = reinterpret_cast<CharCreate_Struct*>(pPacket->pBuffer);
-	if (!mWorld->createCharacter(mWorldAccountID, mReservedCharacterName, payload)) {
-		Log::error("[World Client Connection] Character creation failed, dropping connection.");
+	auto payload = CreateCharacter::convert(pPacket->pBuffer);
+
+	if (!AccountManager::getInstance().handleCharacterCreate(mLoginServerAccountID, mReservedCharacterName, payload)){
 		dropConnection();
 		return false;
 	}
@@ -658,7 +464,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	String characterName = Utility::safeString(payload->name, 64);
 
 	// Check: Character belongs to this account. This also checks whether the character actually exists.
-	if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
+	//if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
+	if (AccountManager::getInstance().checkOwnership(mLoginServerAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] World refused entry for " << characterName << ", dropping connection.";
 		Log::error(ss.str());
 		dropConnection();
@@ -703,7 +510,7 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	PACKET_SIZE_CHECK_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
 
 	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
-	if (mWorld->deleteCharacter(mWorldAccountID, characterName)) {
+	if (mWorld->deleteCharacter(mLoginServerAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();

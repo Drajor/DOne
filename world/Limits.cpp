@@ -72,3 +72,7 @@ bool Limits::Guild::rankValid(const GuildRank pRank) {
 
 	return false;
 }
+
+bool Limits::LoginServer::accountNameLength(const String& pAccountName) {
+	return stringLength(pAccountName) <= Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH;
+}

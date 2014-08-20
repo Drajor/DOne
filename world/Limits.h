@@ -3,6 +3,9 @@
 #include "Constants.h"
 
 namespace Limits {
+	namespace LoginServer {
+		bool accountNameLength(const String& pAccountName);
+	}
 	namespace Character {
 		bool nameLength(const String& pCharacterName);
 		bool classID(const ClassID pClassID);

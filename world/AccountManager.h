@@ -1,23 +1,52 @@
 #pragma once
 
-#include "Constants.h"
-
-struct AccountData;
-class DataStore;
+#include "Data.h"
+#include "Payload.h"
 
 class AccountManager {
 public:
-	AccountManager();
-	~AccountManager();
+	static AccountManager& getInstance() {
+		static AccountManager instance;
+		return instance;
+	}
+
 	bool initialise();
 
-	// Lookup World Account ID associated with Login Server Account ID. 0 = Not found.
-	uint32 getWorldAccountID(uint32 pLoginServerAccountID);
-	uint32 getStatusFromLoginServerID(uint32 pLoginServerAccountID);
-	bool accountExists(uint32 pLoginServerAccountID);
-	bool createAccount(uint32 pLoginServerAccountID, String pLoginServerAccountName);
-private:
-	void _clearAccounts();
+	AccountData* getAccount(uint32 pAccountID);
+	bool checkOwnership(const uint32 pAccountID, const String& pCharacterName);
+	bool createAccount(const uint32 pAccountID, const String pAccoutName);
 
+	AccountStatus getStatus(const uint32 pAccountID);
+	bool create(const String& pAccountName);
+	bool exists(const uint32 pAccountID);
+
+	bool isCharacterNameUnique(const String& pCharacterName);
+
+	bool handleCharacterCreate(uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
+	bool deleteCharacter(const String& pCharacterName);
+
+	bool ban(const String& pAccountName);
+	bool removeBan(const String& pAccountName);
+
+	bool suspend(const String& pAccountName, const uint32 pSuspendUntil);
+	bool removeSuspend(const String& pAccountName);
+	void ensureAccountLoaded(const uint32 pAccountID);
+private:
+	void _clear();
+	bool _save(AccountData* pAccountData);
+	bool _save();
+
+	AccountData* _load(const String& pAccountName);
+	bool _loadAccount(const String& pAccountName);
+
+	AccountData* _find(const uint32 pAccountID);
+	AccountData* _find(const String& pAccountName);
+
+	std::list<String> mCharacterNames;
 	std::list<AccountData*> mAccounts;
+
+	AccountManager() {};
+	~AccountManager();
+	AccountManager(AccountManager const&);
+	void operator=(AccountManager const&);
 };

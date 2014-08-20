@@ -333,6 +333,15 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GuildLeader:
 		_handleGuildMakeLeader(pPacket);
+		break;
+	case OP_GuildWar:
+		// NOT IMPLEMENTED
+		_unimplementedFeature("OP_GuildWar");
+		break;
+	case OP_GuildPeace:
+		// NOT IMPLEMENTED
+		_unimplementedFeature("OP_GuildPeace");
+		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
 		_handleZoneChange(pPacket);
@@ -402,7 +411,8 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		auto extendedProfile = new ExtendedProfile_Struct();
 		memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
 		uint32 characterID = 0;
-		if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
+		//if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
+		if (!DataStore::getInstance().loadCharacter(characterName, nullptr)) {
 			Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
 			dropConnection();
 			safe_delete(profile);
@@ -906,7 +916,7 @@ void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
 	payload->header[0] = 0x00; // Header used for #emote style messages..
 	payload->header[1] = 0x00; // Play around with these to see other types
 	payload->header[2] = 0x00;
-	payload->msg_type = static_cast<std::uint32_t>(pType);
+	payload->msg_type = static_cast<uint32>(pType);
 	strcpy(payload->message, pMessage.c_str());
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
@@ -1029,8 +1039,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 
 	auto outPacket = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
 	auto payload = reinterpret_cast<SimpleMessage_Struct*>(outPacket->pBuffer);
-	payload->color = static_cast<std::uint32_t>(pType);
-	payload->string_id = static_cast<std::uint32_t>(pStringID);
+	payload->color = static_cast<uint32>(pType);
+	payload->string_id = static_cast<uint32>(pStringID);
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
@@ -1056,8 +1066,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	packetSize += sizeof(FormattedMessage_Struct);
 	auto outPacket = new EQApplicationPacket(OP_FormattedMessage, packetSize);
 	auto payload = reinterpret_cast<FormattedMessage_Struct*>(outPacket->pBuffer);
-	payload->type = static_cast<std::uint32_t>(pType);
-	payload->string_id = static_cast<std::uint32_t>(pStringID);
+	payload->type = static_cast<uint32>(pType);
+	payload->string_id = static_cast<uint32>(pStringID);
 
 	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
 	dynamicStructure.movePointer(sizeof(FormattedMessage_Struct));
@@ -1440,7 +1450,7 @@ void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const St
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
 	payload->language = Language::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
-	payload->chan_num = static_cast<std::uint32_t>(pChannel);
+	payload->chan_num = static_cast<uint32>(pChannel);
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pSenderName.c_str());
 
@@ -1946,16 +1956,16 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 
 	// Write member data.
 	for (auto i : pGuildMembers) {
-		ds.write<std::uint32_t>(i->mLevel);
-		ds.write<std::uint32_t>(i->mBanker + i->mAlt * 2);
-		ds.write<std::uint32_t>(i->mClass);
-		ds.write<std::uint32_t>(i->mRank);
-		ds.write<std::uint32_t>(i->mTimeLastOn);
-		ds.write<std::uint32_t>(i->mTributeEnabled ? 1 : 0);
-		ds.write<std::uint32_t>(i->mTotalTribute);
-		ds.write<std::uint32_t>(i->mLastTribute);
-		ds.write<std::uint16_t>(i->mInstanceID);
-		ds.write<std::uint16_t>(i->mZoneID);
+		ds.write<uint32>(i->mLevel);
+		ds.write<uint32>(i->mBanker + i->mAlt * 2);
+		ds.write<uint32>(i->mClass);
+		ds.write<uint32>(i->mRank);
+		ds.write<uint32>(i->mTimeLastOn);
+		ds.write<uint32>(i->mTributeEnabled ? 1 : 0);
+		ds.write<uint32>(i->mTotalTribute);
+		ds.write<uint32>(i->mLastTribute);
+		ds.write<uint16>(i->mInstanceID);
+		ds.write<uint16>(i->mZoneID);
 	}
 	// Write Character names.
 	for (auto i : pGuildMembers) {
@@ -2111,4 +2121,8 @@ void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPa
 	EXPECTED(Limits::Character::nameLength(leaderName));
 
 	GuildManager::getInstance().handleMakeLeader(mCharacter, leaderName);
+}
+
+void ZoneClientConnection::_unimplementedFeature(String pOpCodeName)
+{
 }

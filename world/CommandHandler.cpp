@@ -39,7 +39,7 @@ std::vector<String> split(const String &s, char delim) {
 /*****************************************************************************************************************************/
 class ZoneCommand : public Command {
 public:
-	ZoneCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zone <Zone ID> <Zone Instance ID>";
 	};
 
@@ -61,7 +61,7 @@ public:
 /*****************************************************************************************************************************/
 class WarpCommand : public Command {
 public:
-	WarpCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	WarpCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #warp <X> <Y> <Z>";
 	};
 
@@ -95,7 +95,7 @@ public:
 /*****************************************************************************************************************************/
 class GMCommand : public Command {
 public:
-	GMCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GMCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #gm on / #gm off";
 	};
 
@@ -115,7 +115,7 @@ public:
 /*****************************************************************************************************************************/
 class ZoneListCommand : public Command {
 public:
-	ZoneListCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zonelist";
 	};
 
@@ -131,7 +131,7 @@ public:
 /*****************************************************************************************************************************/
 class AddExperienceCommand : public Command {
 public:
-	AddExperienceCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #addexp <number>";
 	};
 
@@ -152,7 +152,7 @@ public:
 /*****************************************************************************************************************************/
 class RemoveExperienceCommand : public Command {
 public:
-	RemoveExperienceCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #remexp <number>";
 	};
 
@@ -173,7 +173,7 @@ public:
 /*****************************************************************************************************************************/
 class LocationCommand : public Command {
 public:
-	LocationCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	LocationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #loc";
 	};
 
@@ -187,7 +187,7 @@ public:
 /*****************************************************************************************************************************/
 class LevelCommand : public Command {
 public:
-	LevelCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	LevelCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #level <number>";
 	};
 
@@ -208,7 +208,7 @@ public:
 /*****************************************************************************************************************************/
 class StatsCommand : public Command {
 public:
-	StatsCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	StatsCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage Example: #setstat str 10";
 	};
 
@@ -249,7 +249,7 @@ public:
 /*****************************************************************************************************************************/
 class ZoneSearchCommand : public Command {
 public:
-	ZoneSearchCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #zs <text>";
 	};
 
@@ -271,7 +271,7 @@ public:
 /*****************************************************************************************************************************/
 class GuildSearchCommand : public Command {
 public:
-	GuildSearchCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #guildsearch <optional text>";
 	};
 
@@ -296,7 +296,7 @@ public:
 /*****************************************************************************************************************************/
 class GuildInformationCommand : public Command {
 public:
-	GuildInformationCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildInformationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #ginfo";
 	};
 
@@ -315,7 +315,7 @@ public:
 // Allows for cross zone and offline guild promotion.
 class GuildPromoteCommand : public Command {
 public:
-	GuildPromoteCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #guildpromote <name>";
 	};
 
@@ -335,7 +335,7 @@ public:
 // Allows for cross zone and offline guild demotion.
 class GuildDemoteCommand : public Command {
 public:
-	GuildDemoteCommand(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessage = "Usage: #guilddemote <name>";
 	};
 
@@ -355,7 +355,7 @@ public:
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
-//	YOURCOMMAND(std::uint8_t pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+//	YOURCOMMAND(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 //		mHelpMessage = "Usage: ";
 //	};
 //

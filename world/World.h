@@ -1,11 +1,7 @@
 #pragma once
 
-#include "../common/types.h"
 #include "Constants.h"
 #include "ClientAuthentication.h"
-#include <list>
-#include <map>
-#include <string>
 
 class EmuTCPServer;
 class LoginServerConnection;
@@ -42,7 +38,7 @@ public:
 	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, String pLoginServerKey);
 	void addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
-	bool ensureAccountExists(uint32 pLoginServerAccountID, String pLoginServerAccountName);
+	bool ensureAccountExists(const uint32 pAccountID, const String& pAccountName);
 
 	// Return whether World is connected to the Login Server.
 	bool isLoginServerConnected();
@@ -51,16 +47,16 @@ public:
 	void setLocked(bool pLocked);
 
 	// Login Server requests response for Client who would like to join the World.
-	int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
+	//int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
+	ResponseID getConnectResponse(uint32 pLoginServerAccountID);
 
 	// Character Select Screen
-	bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
+	//bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 	bool isCharacterNameUnique(String pCharacterName);
 	bool isCharacterNameReserved(String pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
-	bool deleteCharacter(uint32 pWorldAccountID, String pCharacterName);
+	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
 	bool createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData);
-	bool isWorldEntryAllowed(uint32 pWorldAccountID, String pCharacterName);
 
 	uint16 getZonePort(ZoneID pZoneID, uint16 pInstanceID = 0);
 	
@@ -74,14 +70,6 @@ private:
 	std::list<ZoneTransfer> mZoneTransfers;
 	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
-
-
-	
-
-
-
-
-
 
 	bool mInitialised;
 	bool mLocked;

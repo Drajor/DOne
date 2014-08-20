@@ -335,7 +335,7 @@ void GuildManager::_save() {
 	}
 
 	document.LinkEndChild(guildsElement);
-	document.SaveFile("./data/guilds.xml");
+	EXPECTED(document.SaveFile("./data/guilds.xml"));
 }
 
 uint32 GuildManager::getNextGuildID() {

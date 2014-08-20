@@ -39,10 +39,6 @@ public:
 	bool getAuthenticated() { return mAuthenticated; }
 	uint32 getIP() { return mIP; }
 	uint16 getPort() { return mPort; }
-	uint32 getWorldAccountID() { return mWorldAccountID; }
-	uint32 getLoginServerAccountID() { return mLoginServerAccountID; }
-	String getLoginServerKey() { return mLoginServerKey; }
-	uint32 getCharacterID() { return mCharacterID; }
 
 	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; mAuthentication.mWorldAccountID = pWorldAccountID; }
 	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; mAuthentication.mLoginServerAccountID = pLoginServerAccountID; }
@@ -54,9 +50,6 @@ private:
 	void _queuePacket(const EQApplicationPacket* app, bool ack_req = true);
 
 	void _sendCharacterSelectInfo();
-	void _sendMaxCharCreate(int max_chars);
-	void _sendMembership();
-	void _sendMembershipSettings();
 	void _sendGuildList();
 	void _sendEnterWorld(String pCharacterName);
 	void _sendExpansionInfo();

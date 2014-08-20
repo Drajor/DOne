@@ -40,7 +40,6 @@ World::~World() {
 	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
-	safe_delete(mAccountManager);
 	safe_delete(mUCSConnection);
 }
 
@@ -69,12 +68,6 @@ bool World::initialise()
 	RegisterAllPatches(*mStreamIdentifier);
 
 	ZoneManager::getInstance().initialise();
-
-	mAccountManager = new AccountManager();
-	if (!mAccountManager->initialise()) {
-		Utility::criticalError("Unable to initialise Account Manager");
-		return false;
-	}
 
 	mTCPServer = new EmuTCPServer();
 	char errbuf[TCPConnection_ErrorBufferSize];
@@ -107,7 +100,6 @@ void World::update()
 
 	mUCSConnection->update();
 	mLoginServerConnection->update();
-	DataStore::getInstance().update();
 	ZoneManager::getInstance().update();
 
 	// Check if any new clients are connecting.
@@ -195,7 +187,6 @@ bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLogi
 			pConnection->setLoginServerAccountID(incClient->mLoginServerAccountID);
 			pConnection->setLoginServerAccountName(incClient->mLoginServerAccountName);
 			pConnection->setLoginServerKey(incClient->mKey);
-			pConnection->setWorldAccountID(mAccountManager->getWorldAccountID(pLoginServerAccountID));
 			return true;
 		}
 	}
@@ -217,35 +208,52 @@ void World::setLocked(bool pLocked) {
 	mLoginServerConnection->sendWorldStatus();
 }
 
-int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
-	static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
-	static const int16 ACCOUNT_STATUS_BANNED = -2;
+//int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
+//	static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
+//	static const int16 ACCOUNT_STATUS_BANNED = -2;
+//
+//	// Fetch the Account Status.
+//	uint32 accountStatus = mAccountManager->getStatusFromLoginServerID(pLoginServerAccountID);
+//
+//	// Account Suspended.
+//	if (accountStatus == ACCOUNT_STATUS_SUSPENDED) return -1;
+//	// Account Banned.
+//	if (accountStatus == ACCOUNT_STATUS_BANNED) return -2;
+//
+//	// Check for existing authentication
+//	// This prevents same account sign in.
+//	if (authenticationExists(pLoginServerAccountID)) return -3;
+//
+//	// Server is Locked (Only GM/Admin may enter)
+//	if (mLocked && accountStatus >= 100) return 1;
+//	// Server is Locked and user is not a GM/Admin.
+//	else if( mLocked && accountStatus < 100) return 0;
+//
+//	return 1; // Speak friend and enter.
+//}
 
+ResponseID World::getConnectResponse(uint32 pLoginServerAccountID) {
 	// Fetch the Account Status.
-	uint32 accountStatus = mAccountManager->getStatusFromLoginServerID(pLoginServerAccountID);
+	uint32 accountStatus = AccountManager::getInstance().getStatus(pLoginServerAccountID);
 
 	// Account Suspended.
-	if (accountStatus == ACCOUNT_STATUS_SUSPENDED) return -1;
+	if (accountStatus == ResponseID::SUSPENDED) return ResponseID::SUSPENDED;
 	// Account Banned.
-	if (accountStatus == ACCOUNT_STATUS_BANNED) return -2;
+	if (accountStatus == ResponseID::BANNED) return ResponseID::BANNED;
 
 	// Check for existing authentication
 	// This prevents same account sign in.
-	if (authenticationExists(pLoginServerAccountID)) return -3;
+	if (authenticationExists(pLoginServerAccountID)) return ResponseID::FULL;
 
 	// Server is Locked (Only GM/Admin may enter)
-	if (mLocked && accountStatus >= 100) return 1;
+	if (mLocked && accountStatus >= LOCK_BYPASS_STATUS) return ResponseID::ALLOWED;
 	// Server is Locked and user is not a GM/Admin.
-	else if( mLocked && accountStatus < 100) return 0;
+	else if (mLocked && accountStatus < LOCK_BYPASS_STATUS) return ResponseID::DENIED;
 
-	return 1; // Speak friend and enter.
+	return ResponseID::ALLOWED; // Speak friend and enter.
 }
 
-bool World::getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData) {
-	return DataStore::getInstance().getCharacterSelectInfo(pWorldAccountID, pCharacterSelectData);
-}
-
-bool World::isCharacterNameUnique(String pCharacterName) { return DataStore::getInstance().isCharacterNameUnique(pCharacterName); }
+bool World::isCharacterNameUnique(String pCharacterName) { return AccountManager::getInstance().isCharacterNameUnique(pCharacterName); }
 
 bool World::isCharacterNameReserved(String pCharacterName) {
 	for (auto i : mReservedCharacterNames)
@@ -258,14 +266,11 @@ void World::reserveCharacterName(uint32 pWorldAccountID, String pCharacterName) 
 	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
 }
 
-bool World::deleteCharacter(uint32 pWorldAccountID, String pCharacterName) {
+bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterName) {
 	// Verify that character with pCharacterName belongs to pWorldAccountID.
-	bool isOwner = DataStore::getInstance().checkOwnership(pWorldAccountID, pCharacterName);
-	if (!isOwner) {
-		Log::error("Attempt made to delete a character that does not belong to the account owner."); // TODO: More information.. this is haxxors.
-		return false;
-	}
-	return DataStore::getInstance().deleteCharacter(pCharacterName);
+	const bool isOwner = AccountManager::getInstance().checkOwnership(pAccountID, pCharacterName);
+	EXPECTED_BOOL(isOwner);
+	return AccountManager::getInstance().deleteCharacter(pCharacterName);
 }
 
 bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {
@@ -335,17 +340,12 @@ bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharC
 	profile.binds[0].z = profile.z;
 	profile.binds[0].heading = profile.heading;
 
-	if (!DataStore::getInstance().createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
-		Log::error("Could not create character!"); // pCharacterName
-		return false;
-	}
+	//if (!DataStore::getInstance().createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
+	//	Log::error("Could not create character!"); // pCharacterName
+	//	return false;
+	//}
 
 	return true;
-}
-
-bool World::isWorldEntryAllowed(uint32 pWorldAccountID, String pCharacterName)
-{
-	return DataStore::getInstance().checkOwnership(pWorldAccountID, pCharacterName);
 }
 
 uint16 World::getZonePort(ZoneID pZoneID, uint16 pInstanceID) {
@@ -365,18 +365,13 @@ ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
 	return 0;
 }
 
-bool World::ensureAccountExists(uint32 pLoginServerAccountID, String pLoginServerAccountName) {
-	// Create Account if this is a new player /dance
-	if (!mAccountManager->accountExists(pLoginServerAccountID)) {
-		// Create account.
-		if (!mAccountManager->createAccount(pLoginServerAccountID, pLoginServerAccountName)) {
-			Log::error("[World] Account creation failed.");
-			return false; // Account does not exist and could not be created.
-		}
-		Log::info("[World] New account created");
-		return true; // Account created.
-	}
-	return true; // Account already exists.
+bool World::ensureAccountExists(const uint32 pAccountID, const String& pAccountName) {
+	if (AccountManager::getInstance().exists(pAccountID))
+		return true; // Account already exists.
+
+	// Create a new Account.
+	EXPECTED_BOOL(AccountManager::getInstance().createAccount(pAccountID, pAccountName));
+	return true;
 }
 
 bool World::getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZoneTransfer) {
@@ -398,4 +393,3 @@ void World::removeZoneTransfer(String& pCharacterName) {
 		}
 	}
 }
-

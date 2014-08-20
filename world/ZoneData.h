@@ -36,7 +36,7 @@ public:
 	bool initialise();
 	String getLongName(ZoneID pZoneID);
 	String getShortName(ZoneID pZoneID);
-	std::uint32_t getLongNameStringID(ZoneID pZoneID);
+	uint32 getLongNameStringID(ZoneID pZoneID);
 
 	ZoneDataSearchResults searchByName(String pSearchText);
 
@@ -44,7 +44,7 @@ private:
 	struct ZoneInformation {
 		ZoneInformation() : mID(0), mLongNameStringID(0), mLongName(""), mShortName(""), mSafeX(0.0f), mSafeY(0.0f), mSafeZ(0.0f) {};
 		ZoneID mID;
-		std::uint32_t mLongNameStringID;
+		uint32 mLongNameStringID;
 		String mLongName;
 		String mShortName;
 		float mSafeX;

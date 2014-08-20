@@ -31,9 +31,9 @@ public:
 	uint32 getLongNameStringID() { return mLongNameStringID; }
 	float getGravity() { return 0.4f; }
 	float getMinimumZ() { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
-	std::uint8_t getZoneType() { return 255; } // Unknown.
+	uint8 getZoneType() { return 255; } // Unknown.
 
-	std::uint32_t getNumCharacters() { return mCharacters.size(); }
+	uint32 getNumCharacters() { return mCharacters.size(); }
 
 	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName);
 	void removeAuthentication(String pCharacterName);

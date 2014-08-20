@@ -1,7 +1,7 @@
 #pragma once
 
 //#include "../common/types.h"
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <sstream>
 #include <list>
@@ -9,29 +9,50 @@
 #include <unordered_map>
 #include <map>
 
-typedef std::uint8_t byte;
-typedef std::uint8_t uint8;
-typedef std::uint16_t uint16;
-typedef std::uint32_t uint32;
-typedef std::uint64_t uint64;
-typedef std::int8_t int8;
-typedef std::int16_t int16;
-typedef std::int32_t int32;
-typedef std::int64_t int64;
+typedef uint8_t byte;
+typedef uint8_t uint8;
+typedef uint16_t uint16;
+typedef uint32_t uint32;
+typedef uint64_t uint64;
+typedef int8_t int8;
+typedef int16_t int16;
+typedef int32_t int32;
+typedef int64_t int64;
 
-typedef std::uint32_t ClassID;
-typedef std::uint16_t ZoneID;
-typedef std::uint16_t InstanceID; // Zone Instance ID
-typedef std::uint16_t SpawnID;
+typedef uint32_t DeityID;
+typedef uint8_t GenderID;
+//typedef uint32 ClassID;
+typedef uint8_t ClassID;
+typedef uint32_t RaceID;
+typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
+typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
+typedef uint16_t InstanceID; // Zone Instance ID
+typedef uint16_t SpawnID;
 typedef std::string String;
 typedef std::stringstream StringStream;
-typedef std::uint32_t GuildID;
-typedef std::uint8_t GuildRank;
+typedef uint32_t GuildID;
+typedef uint8_t GuildRank;
+typedef int8_t AccountStatus;
 
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const SpawnID NO_TARGET = 0;
 
+enum ResponseID : AccountStatus { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNED = -2, FULL = -3 };
+
+static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
+
+//static const auto MAX_CHARACTERS_CHARSELECT = 18;
+//static const auto MAX_EQUIP_SLOTS_CHARSELECT = 9;
+
 namespace Limits {
+	namespace Account {
+		static const auto MAX_NUM_CHARACTERS = 18;
+		static const auto MAX_EQUIPMENT_SLOTS = 9;
+	}
+	namespace LoginServer {
+		static const auto MAX_ACCOUNT_NAME_LENGTH = 30;
+		static const auto MAX_KEY_LENGTH = 30;
+	}
 	namespace Character {
 		static const auto MIN_NAME_LENGTH = 4;
 		static const auto MAX_NAME_LENGTH = 64;

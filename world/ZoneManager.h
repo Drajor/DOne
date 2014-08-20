@@ -13,7 +13,7 @@ struct ZoneSearchEntry {
 	String mName;
 	ZoneID mID;
 	InstanceID mInstanceID;
-	std::uint32_t mNumCharacters;
+	uint32 mNumCharacters;
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;
 

@@ -10,17 +10,17 @@ class Character;
 
 class Command {
 public:
-	Command(std::uint8_t pMinimumStatus, std::list<String> pAliases) : mMinimumStatus(pMinimumStatus), mAliases(pAliases){};
+	Command(uint8 pMinimumStatus, std::list<String> pAliases) : mMinimumStatus(pMinimumStatus), mAliases(pAliases){};
 	virtual ~Command() {};
 	std::list<String>& getAliases() { return mAliases; }
-	std::uint8_t getMinimumStatus() { return mMinimumStatus; }
+	uint8 getMinimumStatus() { return mMinimumStatus; }
 	virtual void handleCommand(Character* pCharacter, CommandParameters pParameters) = 0;
 	virtual void helpMessage(Character* pCharacter);
 protected:
 	virtual void invalidParameters(Character* pCharacter, CommandParameters pParameters);
 	
 	std::list<String> mAliases;
-	std::uint8_t mMinimumStatus;
+	uint8 mMinimumStatus;
 	String mHelpMessage;
 };
 
