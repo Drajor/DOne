@@ -32,6 +32,7 @@
 #include "../common/servertalk.h"
 #include "World.h"
 #include "Utility.h"
+#include "Limits.h"
 #include "Constants.h"
 #include "LogSystem.h"
 #include "AccountManager.h"
@@ -50,13 +51,7 @@
 
 WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld) :
 	mStreamInterface(pStreamInterface),
-	mWorld(pWorld),
-	mAuthenticated(false),
-	mReservedCharacterName(""),
-	mConnectionDropped(false),
-	ClientVersionBit(0),
-	zoneID(0),
-	mCharacterID(0)
+	mWorld(pWorld)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
@@ -112,7 +107,7 @@ void WorldClientConnection::_sendExpansionInfo() {
 void WorldClientConnection::_sendCharacterSelectInfo() {
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
 	auto payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
-	AccountData* accountData = AccountManager::getInstance().getAccount(mLoginServerAccountID);
+	AccountData* accountData = AccountManager::getInstance().getAccount(mAccountID);
 	EXPECTED(accountData);
 
 	//for (auto i = 0; i < MAX_CHARACTERS_CHARSELECT; i++) {
@@ -166,69 +161,50 @@ void WorldClientConnection::_sendPostEnterWorld() {
 }
 
 bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
-	// Check packet size.
-	static const auto EXPECTED_SIZE = sizeof(LoginInfo_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[World Client Connection] Wrong sized LoginInfo_Struct");
-		dropConnection();
-		return false;
+	using namespace Payload::World;
+	EXPECTED_BOOL(pPacket);
+	EXPECTED_BOOL(LoginInformation::sizeCheck(pPacket->size));
+
+	auto payload = LoginInformation::convert(pPacket->pBuffer);
+
+	String accountIDStr = Utility::safeString(payload->mInformation, 19);
+	String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
+
+	uint32 accountID = 0;
+	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
+
+	// Check authentication.
+	EXPECTED_BOOL(mWorld->checkAuthentication(this, accountID, accountKey));
+
+	mZoning = (payload->mZoning == 1);
+	// TODO: Ensure we are expecting a zoning client.
+
+	// Going to: Another Zone
+	if (mZoning) {
+		_sendLogServer();
+		_sendApproveWorld();
+		_sendEnterWorld("Playerzero");
+		_sendPostEnterWorld();
 	}
+	// Going to: Character Selection Screen.
+	else {
+		AccountManager::getInstance().ensureAccountLoaded(accountID);
 
-	auto payload = reinterpret_cast<LoginInfo_Struct*>(pPacket->pBuffer);
-
-	// Quagmire - max len for name is 18, pass 15
-	char name[19] = {0};
-	char key[16] = {0};
-	strn0cpy(name, (char*)payload->login_info,18);
-	strn0cpy(key, (char*)&(payload->login_info[strlen(name)+1]), 15);
-
-	if (strlen(key) <= 1) {
-		// TODO: Find out how to tell the client wrong username/password
-		clog(WORLD__CLIENT_ERR,"Login without a password");
-		return false;
-	}
-
-	mZoning = (payload->zoning == 1);
-
-	uint32 id = atoi(name);
-
-	if (!mWorld->isLoginServerConnected()) {
-		Log::error("[World Client Connection] Not connected to Login Server");
-		return false;
-	}
-
-	// This is first communication from client after Server Select
-	if (!mAuthenticated) {
-		if (mWorld->checkAuthentication(this, id, key)) {
-			AccountManager::getInstance().ensureAccountLoaded(id);
-			/*
-				OP_GuildsList, OP_LogServer, OP_ApproveWorld
-				All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
-			*/
-			if (mZoning) {
-				_sendLogServer();
-				_sendApproveWorld();
-				_sendEnterWorld("Playerzero");
-				_sendPostEnterWorld();
-			}
-			else {
-				_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
-				_sendLogServer();
-				_sendApproveWorld();
-				_sendEnterWorld(""); // Empty character name when coming from Server Select. 
-				_sendPostEnterWorld(); // Required.
-				_sendExpansionInfo(); // Required.
-				_sendCharacterSelectInfo(); // Required.
-			}
-		}
-		else {
-			Log::error("[World Client Connection] Failed to identify incoming client, dropping connection");
-			dropConnection();
-			return false;
-		}
+		_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
+		_sendLogServer();
+		_sendApproveWorld();
+		_sendEnterWorld(""); // Empty character name when coming from Server Select. 
+		_sendPostEnterWorld(); // Required.
+		_sendExpansionInfo(); // Required.
+		_sendCharacterSelectInfo(); // Required.
 	}
 
 	return true;
+
+	/*
+	OP_GuildsList, OP_LogServer, OP_ApproveWorld
+	All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
+	*/
 }
 
 bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
@@ -269,7 +245,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	// Reserve character name.
 	if (valid) {
 		// For the rare chance that more than one user tries to create a character with same name.
-		mWorld->reserveCharacterName(mWorldAccountID, characterName);
+		mWorld->reserveCharacterName(mAccountID, characterName);
 		mReservedCharacterName = characterName;
 	}
 
@@ -446,7 +422,7 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 
 	auto payload = CreateCharacter::convert(pPacket->pBuffer);
 
-	if (!AccountManager::getInstance().handleCharacterCreate(mLoginServerAccountID, mReservedCharacterName, payload)){
+	if (!AccountManager::getInstance().handleCharacterCreate(mAccountID, mReservedCharacterName, payload)){
 		dropConnection();
 		return false;
 	}
@@ -456,21 +432,18 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 }
 
 bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK_BOOL(pPacket);
+	using namespace Payload::World;
+	EXPECTED_BOOL(pPacket);
+	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket->size));
 
-	// Note: Enter Tutorial and Return Home are ignored at the moment.
+	auto payload = EnterWorld::convert(pPacket->pBuffer);
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED_BOOL(Limits::Character::nameLength(characterName));
 
-	auto payload = reinterpret_cast<EnterWorld_Struct*>(pPacket->pBuffer);
-	String characterName = Utility::safeString(payload->name, 64);
+	// Check: Account owns the Character.
+	EXPECTED_BOOL(AccountManager::getInstance().checkOwnership(mAccountID, characterName));
 
-	// Check: Character belongs to this account. This also checks whether the character actually exists.
-	//if (!mWorld->isWorldEntryAllowed(mWorldAccountID, characterName)) { // TODO: We could be storing characterName as part of Authentication and only doing a full check when the client initially connects.
-	if (AccountManager::getInstance().checkOwnership(mLoginServerAccountID, characterName)) {
-		StringStream ss; ss << "[World Client Connection] World refused entry for " << characterName << ", dropping connection.";
-		Log::error(ss.str());
-		dropConnection();
-		return false;
-	}
+	return World::getInstance().handleEnterWorld(this, characterName, mZoning);
 
 	// Client is between zones.
 	if (mZoning) {
@@ -495,6 +468,10 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	}
 	// Client is moving from Character Select / Character Create.
 	else {
+		
+		//CharacterData* characterData = World::getInstance().loadCharacter(characterName);
+		//EXPECTED_BOOL(characterData);
+
 		// TODO: At the moment Characters always go to NQ.
 		mWorld->addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
 		// Send MOTD?
@@ -506,11 +483,12 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 }
 
 bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
+	EXPECTED_BOOL(pPacket);
 	static const auto MAXIMUM_NAME_SIZE = 64;
-	PACKET_SIZE_CHECK_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
+	EXPECTED_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
 
 	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
-	if (mWorld->deleteCharacter(mLoginServerAccountID, characterName)) {
+	if (mWorld->deleteCharacter(mAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();
@@ -617,8 +595,7 @@ bool WorldClientConnection::update() {
 	return ret;
 }
 
-void WorldClientConnection::_sendZoneServerInfo(uint16 pPort)
-{
+void WorldClientConnection::_sendZoneServerInfo(const uint16 pPort) {
 	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	auto payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
 	payload->port = pPort;

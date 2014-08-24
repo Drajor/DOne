@@ -12,15 +12,15 @@ class ZoneManager;
 class AccountManager;
 class DataStore;
 class WorldClientConnection;
-struct CharacterSelect_Struct;
-struct CharCreate_Struct;
+
+struct CharacterData;
 
 struct ZoneTransfer {
-	String mCharacterName;
-	ZoneID mFromZoneID;
-	InstanceID mFromInstanceID;
-	ZoneID mToZoneID;
-	InstanceID mToInstanceID;
+	String mCharacterName = "";
+	ZoneID mFromZoneID = 0;
+	InstanceID mFromInstanceID = 0;
+	ZoneID mToZoneID = 0;
+	InstanceID mToInstanceID = 0;
 };
 
 class World {
@@ -35,7 +35,7 @@ public:
 
 	void addAuthentication(ClientAuthentication& pAuthentication);
 	void removeAuthentication(ClientAuthentication& pAuthentication);
-	bool checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, String pLoginServerKey);
+	bool checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey);
 	void addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
 	bool ensureAccountExists(const uint32 pAccountID, const String& pAccountName);
@@ -56,13 +56,14 @@ public:
 	bool isCharacterNameReserved(String pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
 	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
-	bool createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData);
 
 	uint16 getZonePort(ZoneID pZoneID, uint16 pInstanceID = 0);
 	
-	bool getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZoneTransfer);
+	bool getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer);
 	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
-	void removeZoneTransfer(String& pCharacterName);
+	void removeZoneTransfer(const String& pCharacterName);
+
+	bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
 private:
 	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
@@ -78,7 +79,6 @@ private:
 	UCSConnection* mUCSConnection;
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
-	AccountManager* mAccountManager;
 
 	std::list<WorldClientConnection*> mClientConnections;
 
@@ -86,4 +86,8 @@ private:
 	~World();
 	World(World const&);
 	void operator=(World const&);
+
+
+	bool _handleZoning(WorldClientConnection* pConnection, const String& pCharacterName);
+	bool _handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName);
 };

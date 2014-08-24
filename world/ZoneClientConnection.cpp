@@ -3,6 +3,7 @@
 #include "GroupManager.h"
 #include "RaidManager.h"
 #include "Zone.h"
+#include "ZoneManager.h"
 #include "ZoneData.h"
 #include "Character.h"
 #include "LogSystem.h"
@@ -28,6 +29,7 @@ Known GM Commands
 */
 //ZoneClientConnection::mGroupUpdatePacket = nullptr;
 
+EQApplicationPacket* ZoneClientConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupJoinPacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupLeavePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupDisbandPacket = nullptr;
@@ -56,6 +58,7 @@ ZoneClientConnection::~ZoneClientConnection() {
 }
 
 void ZoneClientConnection::initalise() {
+	mPlayerProfilePacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	mGroupJoinPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	mGroupLeavePacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	mGroupDisbandPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
@@ -64,6 +67,7 @@ void ZoneClientConnection::initalise() {
 }
 
 void ZoneClientConnection::deinitialise() {
+	safe_delete(mPlayerProfilePacket);
 	safe_delete(mGroupJoinPacket);
 	safe_delete(mGroupLeavePacket);
 	safe_delete(mGroupDisbandPacket);
@@ -356,25 +360,15 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
+	EXPECTED(mZoneConnectionStatus == ZoneConnectionStatus::NONE);
+	EXPECTED(ZoneEntry::sizeCheck(pPacket->size));
 
-	// Check that this packet was expected.
-	if (mZoneConnectionStatus != ZoneConnectionStatus::NONE) {
-		Log::error("[Zone Client Connection] Received unexpected OP_ZoneEntry, dropping connection.");
-		dropConnection();
-		return;
-	}
-	// Check packet is the correct size.
-	static const auto EXPECTED_SIZE = sizeof(ClientZoneEntry_Struct);
-	if (pPacket->size != EXPECTED_SIZE) {
-		Log::error("[Zone Client Connection] Received wrong sized ClientZoneEntry_Struct, dropping connection.");
-		dropConnection();
-		return;
-	}
-
-	auto payload = reinterpret_cast<ClientZoneEntry_Struct*>(pPacket->pBuffer);
-	String characterName = Utility::safeString(payload->char_name, 64);
+	auto payload = ZoneEntry::convert(pPacket->pBuffer);
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(characterName));
 
 	// Check that this Zone is expecting this client.
 	if (!mZone->checkAuthentication(characterName)) {
@@ -393,43 +387,49 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
-	// Determine whether Character is zoning or logging in.
-	Character* character = mZone->getZoningCharacter(characterName);
+	// Retrieve Character
+	mCharacter = ZoneManager::getInstance().getZoningCharacter(characterName);
+	EXPECTED(mCharacter);
 
-	// Character is coming from another zone.
-	if (character) {
-		mConnectionOrigin = ConnectionOrigin::Zone;
-		mCharacter = character;
+	// If character is not initialised yet they are loading from the Character Selection Screen.
+	if (mCharacter->isInitialised() == false) {
+		EXPECTED(mCharacter->initialise());
 	}
-	// Character is coming from character select.
-	else {
-		mConnectionOrigin = ConnectionOrigin::Character_Select;
 
-		// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
-		auto profile = new PlayerProfile_Struct();
-		memset(profile, 0, sizeof(PlayerProfile_Struct));
-		auto extendedProfile = new ExtendedProfile_Struct();
-		memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
-		uint32 characterID = 0;
-		//if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
-		if (!DataStore::getInstance().loadCharacter(characterName, nullptr)) {
-			Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
-			dropConnection();
-			safe_delete(profile);
-			safe_delete(extendedProfile);
-			return;
-		}
+	//// Character is coming from another zone.
+	//if (character) {
+	//	mConnectionOrigin = ConnectionOrigin::Zone;
+	//	mCharacter = character;
+	//}
+	//// Character is coming from character select.
+	//else {
+	//	mConnectionOrigin = ConnectionOrigin::Character_Select;
 
-		// We will load this up every time for now but soon this data can be passed between Zones.
-		// Initialise Character.
-		mCharacter = new Character(characterID, authentication);
-		if (!mCharacter->initialise(profile, extendedProfile)) {
-			Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
-			dropConnection();
-			safe_delete(mCharacter);
-			return;
-		}
-	}
+	//	// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
+	//	auto profile = new PlayerProfile_Struct();
+	//	memset(profile, 0, sizeof(PlayerProfile_Struct));
+	//	auto extendedProfile = new ExtendedProfile_Struct();
+	//	memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
+	//	uint32 characterID = 0;
+	//	//if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
+	//	if (!DataStore::getInstance().loadCharacter(characterName, nullptr)) {
+	//		Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
+	//		dropConnection();
+	//		safe_delete(profile);
+	//		safe_delete(extendedProfile);
+	//		return;
+	//	}
+
+	//	// We will load this up every time for now but soon this data can be passed between Zones.
+	//	// Initialise Character.
+	//	mCharacter = new Character(characterID, authentication);
+	//	if (!mCharacter->initialise(profile, extendedProfile)) {
+	//		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
+	//		dropConnection();
+	//		safe_delete(mCharacter);
+	//		return;
+	//	}
+	//}
 
 	mCharacter->setZone(mZone);
 	mCharacter->setSpawnID(mZone->getNextSpawnID());
@@ -475,11 +475,135 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
+	auto payload = reinterpret_cast<PlayerProfile_Struct*>(outPacket->pBuffer);
+	*payload = { 0 }; // Clear memory.
+
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
 	//mCharacter->getProfile()->entityid = mCharacter->getSpawnID();
-	mCharacter->getProfile()->zone_id = mZone->getID();
-	mCharacter->getProfile()->zoneInstance = mZone->getInstanceID();
-	memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
+	//mCharacter->getProfile()->zone_id = mZone->getID();
+	//mCharacter->getProfile()->zoneInstance = mZone->getInstanceID();
+	//memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
+
+	strncpy(payload->name, mCharacter->getName().c_str(), Limits::Character::MAX_NAME_LENGTH);
+	strncpy(payload->last_name, mCharacter->getLastName().c_str(), Limits::Character::MAX_LAST_NAME_LENGTH);
+	payload->gender = mCharacter->getGender();
+	payload->race = mCharacter->getRace();
+	payload->class_ = mCharacter->getClass();
+	payload->level = mCharacter->getLevel();
+	//payload->binds[5];
+	payload->deity = mCharacter->getDeity();
+	payload->guild_id = mCharacter->getGuildID();
+	//payload->birthday;			// characters bday
+	//payload->lastlogin;			// last login or zone time
+	//payload->timePlayedMin;		// in minutes
+	//payload->pvp;
+	//payload->level2;
+	payload->mAnonymous = mCharacter->getAnonymous();
+	payload->gm = mCharacter->getGM() ? 1 : 0;
+	payload->guildrank = mCharacter->getGuildRank();
+	//payload->guildbanker;
+	//payload->intoxication;
+	//payload->spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
+	//payload->abilitySlotRefresh;
+	payload->haircolor = mCharacter->getHairColour();
+	payload->beardcolor = mCharacter->getBeardColour();
+	payload->eyecolor1 = mCharacter->getLeftEyeColour();
+	payload->eyecolor2 = mCharacter->getRightEyeColour();
+	payload->hairstyle = mCharacter->getHairStyle();
+	payload->beard = mCharacter->getBeardStyle();
+	//payload->ability_time_seconds;
+	//payload->ability_number;
+	//payload->ability_time_minutes;
+	//payload->ability_time_hours;
+	//payload->item_material[_MaterialCount];
+	//payload->item_tint[_MaterialCount];
+	//payload->aa_array[MAX_PP_AA_ARRAY];
+	//payload->servername[32];
+	strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
+	strncpy(payload->suffix, mCharacter->getSuffix().c_str(), Limits::Character::MAX_SUFFIX_LENGTH);
+	//payload->guildid2;
+	payload->exp = mCharacter->getExperience();
+	payload->points = 0;
+	payload->mana = mCharacter->getCurrentMana();
+	payload->cur_hp = mCharacter->getCurrentHP();
+	payload->STR = mCharacter->getBaseStatistic(Statistic::Strength);
+	payload->STA = mCharacter->getBaseStatistic(Statistic::Stamina);
+	payload->CHA = mCharacter->getBaseStatistic(Statistic::Charisma);
+	payload->DEX = mCharacter->getBaseStatistic(Statistic::Dexterity);
+	payload->INT = mCharacter->getBaseStatistic(Statistic::Intelligence);
+	payload->AGI = mCharacter->getBaseStatistic(Statistic::Agility);
+	payload->WIS = mCharacter->getBaseStatistic(Statistic::Wisdom);
+	payload->face = 0;
+	//payload->languages[MAX_PP_LANGUAGE];
+	//payload->spell_book[MAX_PP_SPELLBOOK];
+	//payload->mem_spells[MAX_PP_MEMSPELL];
+	payload->y = mCharacter->getY();
+	payload->x = mCharacter->getX();
+	payload->z = mCharacter->getZ();
+	payload->heading = mCharacter->getHeading();
+	payload->platinum = mCharacter->getPlatinum();
+	payload->gold = mCharacter->getGold();
+	payload->silver = mCharacter->getSilver();
+	payload->copper = mCharacter->getCopper();
+	//payload->platinum_bank;		// Platinum Pieces in Bank
+	//payload->gold_bank;			// Gold Pieces in Bank
+	//payload->silver_bank;		// Silver Pieces in Bank
+	//payload->copper_bank;		// Copper Pieces in Bank
+	//payload->platinum_cursor;	// Platinum on cursor
+	//payload->gold_cursor;		// Gold on cursor
+	//payload->silver_cursor;		// Silver on cursor
+	//payload->copper_cursor;		// Copper on cursor
+	//payload->platinum_shared;	// Platinum shared between characters
+	//payload->skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
+	//payload->pvp2;				//
+	//payload->pvptype;			//
+	//payload->ability_down;		// Guessing
+	//payload->autosplit;			//not used right now
+	//payload->zone_change_count;
+	payload->drakkin_heritage = 0;
+	payload->drakkin_tattoo = 0;
+	payload->drakkin_details = 0;
+	//payload->expansions;			// expansion setting, bit field of expansions avaliable
+	//payload->toxicity;			//from drinking potions, seems to increase by 3 each time you drink
+	//payload->unknown5496[16];	//
+	//payload->hunger_level;
+	//payload->thirst_level;
+	//payload->ability_up;
+	payload->zone_id = mZone->getID();
+	payload->zoneInstance = mZone->getInstanceID();
+	//payload->buffs[BUFF_COUNT];	// Buffs currently on the player
+	//payload->groupMembers[6][64];//
+	//payload->entityid;
+	//payload->leadAAActive;
+	//payload->ldon_points_guk;	//client uses these as signed
+	//payload->ldon_points_mir;
+	//payload->ldon_points_mmc;
+	//payload->ldon_points_ruj;
+	//payload->ldon_points_tak;
+	//payload->ldon_points_available;
+	//payload->ldon_wins_guk;
+	//payload->ldon_wins_mir;
+	//payload->ldon_wins_mmc;
+	//payload->ldon_wins_ruj;
+	//payload->ldon_wins_tak;
+	//payload->ldon_losses_guk;
+	//payload->ldon_losses_mir;
+	//payload->ldon_losses_mmc;
+	//payload->ldon_losses_ruj;
+	//payload->ldon_losses_tak;
+	//payload->tribute_time_remaining;	//in miliseconds
+	payload->showhelm = mCharacter->getShowHelm() ? 1 : 0;
+	//payload->career_tribute_points;
+	//payload->tribute_points;
+	//payload->tribute_active;		//1=active
+	//payload->tributes[MAX_PLAYER_TRIBUTES];
+	//payload->disciplines;
+	//payload->recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
+	payload->endurance = mCharacter->getCurrentEndurance();
+	payload->groupAutoconsent = mCharacter->getAutoConsentGroup() ? 1 : 0;
+	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
+	payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
+
 	outPacket->priority = 6;
 	mStreamInterface->FastQueuePacket(&outPacket);
 }

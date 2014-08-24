@@ -37,15 +37,20 @@ public:
 	bool update();
 
 	bool getAuthenticated() { return mAuthenticated; }
-	uint32 getIP() { return mIP; }
-	uint16 getPort() { return mPort; }
+	inline uint32 getIP() { return mIP; }
+	inline uint16 getPort() { return mPort; }
 
-	void setWorldAccountID(uint32 pWorldAccountID) { mWorldAccountID = pWorldAccountID; mAuthentication.mWorldAccountID = pWorldAccountID; }
-	void setLoginServerAccountID(uint32 pLoginServerAccountID) { mLoginServerAccountID = pLoginServerAccountID; mAuthentication.mLoginServerAccountID = pLoginServerAccountID; }
-	void setLoginServerKey(String pLoginServerKey) { mLoginServerKey = pLoginServerKey; mAuthentication.mKey = pLoginServerKey; }
-	void setLoginServerAccountName(String pLoginServerAccountName) { mLoginServerAccountName = pLoginServerAccountName; mAuthentication.mLoginServerAccountName = pLoginServerAccountName; }
-	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; } // This method should only ever be called by World::checkAuthentication
+	inline void setAccountID(const uint32 pAccountID) { mAccountID = pAccountID; mAuthentication.mLoginServerAccountID = pAccountID; }
+	inline void setKey(const String& pKey) { mKey = pKey; mAuthentication.mKey = pKey; }
+	inline void setAccountName(const String& pAccountName) { mAccountName = pAccountName; mAuthentication.mLoginServerAccountName = pAccountName; }
+
+	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; }
+
+	void _sendZoneServerInfo(const uint16 pPort);
+	uint32 getAccountID(){ return mAccountID; }
 private:
+
+	inline void dropConnection() { mConnectionDropped = true; }
 	
 	void _queuePacket(const EQApplicationPacket* app, bool ack_req = true);
 
@@ -57,27 +62,20 @@ private:
 	void _sendApproveWorld();
 	void _sendPostEnterWorld();
 	void _sendZoneUnavailable();
-	void _sendZoneServerInfo(uint16 pPort);
 
-	bool mAuthenticated;
+	bool mAuthenticated = false;
 	ClientAuthentication mAuthentication;
-	uint16 mPort;
-	uint32 mIP;
-	uint32 mWorldAccountID;
-	uint32 mLoginServerAccountID;
-	String mLoginServerAccountName;
-	String mLoginServerKey;
-	uint32 mCharacterID;
-	String mReservedCharacterName;
-	bool mConnectionDropped;
-	
-	
+	uint16 mPort = 0;
+	uint32 mIP = 0;
+	uint32 mAccountID = 0;
+	String mAccountName = "";
+	String mKey = "";
+	String mReservedCharacterName = "";
+	bool mConnectionDropped = false;
 	
 	char	char_name[64];
-	uint32	zoneID;
-	uint32	instanceID;
-	bool	mZoning;
-	uint32 ClientVersionBit;
+	bool mZoning;
+	uint32 ClientVersionBit = 0;
 
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	bool _handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket);
@@ -88,7 +86,7 @@ private:
 	bool _handleSendLoginInfoPacket(const EQApplicationPacket* packet);
 	bool _handleCharacterCreateRequestPacket(const EQApplicationPacket* packet);
 	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);
-	void dropConnection() { mConnectionDropped = true; }
+
 	EQStreamInterface* const mStreamInterface;
 	World* mWorld;
 };

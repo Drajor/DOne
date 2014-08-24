@@ -1,4 +1,5 @@
 #include "World.h"
+#include "Character.h"
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "AccountManager.h"
@@ -22,7 +23,6 @@ World::World() :
 	mLocked(false),
 	mStreamIdentifier(0),
 	mStreamFactory(0),
-	mAccountManager(0),
 	mTCPServer(0),
 	mLoginServerConnection(0),
 	mUCSConnection(0)
@@ -177,16 +177,18 @@ void World::removeAuthentication(ClientAuthentication& pAuthentication) {
 	}
 }
 
-bool World::checkAuthentication(WorldClientConnection* pConnection, uint32 pLoginServerAccountID, String pLoginServerKey) {
+bool World::checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey) {
+	EXPECTED_BOOL(pConnection);
+
 	// Check Incoming Clients that match Account ID / Key
 	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
 		ClientAuthentication* incClient = *i;
-		if (pLoginServerAccountID == incClient->mLoginServerAccountID && pLoginServerKey == incClient->mKey && !pConnection->getAuthenticated()) {
+		if (pAccountID == incClient->mLoginServerAccountID && pKey == incClient->mKey && !pConnection->getAuthenticated()) {
 			// Configure the WorldClientConnection with details from the IncomingClient.
 			pConnection->_setAuthenticated(true);
-			pConnection->setLoginServerAccountID(incClient->mLoginServerAccountID);
-			pConnection->setLoginServerAccountName(incClient->mLoginServerAccountName);
-			pConnection->setLoginServerKey(incClient->mKey);
+			pConnection->setAccountID(incClient->mLoginServerAccountID);
+			pConnection->setAccountName(incClient->mLoginServerAccountName);
+			pConnection->setKey(incClient->mKey);
 			return true;
 		}
 	}
@@ -273,80 +275,80 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	return AccountManager::getInstance().deleteCharacter(pCharacterName);
 }
 
-bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {
-	// Find reserved name.
-	auto i = mReservedCharacterNames.find(pWorldAccountID);
-	if (i == mReservedCharacterNames.end()) {
-		Log::error("Reserved character name not found during character creation!");
-		return false;
-	} else {
-		mReservedCharacterNames.erase(pWorldAccountID);
-	}
-
-	// Create and configure profile.
-	PlayerProfile_Struct profile;
-	memset(&profile, 0, sizeof(PlayerProfile_Struct));
-	strcpy(profile.name, pCharacterName.c_str());
-
-	ExtendedProfile_Struct extendedProfile;
-	memset(&extendedProfile, 0, sizeof(ExtendedProfile_Struct));
-	// TODO: Check Validity!
-	
-	profile.race = pData->race;
-	profile.class_ = pData->class_;
-	profile.gender = pData->gender;
-	profile.deity = pData->deity;
-	profile.STR = pData->STR;
-	profile.STA = pData->STA;
-	profile.AGI = pData->AGI;
-	profile.DEX = pData->DEX;
-	profile.WIS = pData->WIS;
-	profile.INT = pData->INT;
-	profile.CHA = pData->CHA;
-	profile.face = pData->face;
-	profile.eyecolor1 = pData->eyecolor1;
-	profile.eyecolor2 = pData->eyecolor2;
-	profile.hairstyle = pData->hairstyle;
-	profile.haircolor = pData->haircolor;
-	profile.beard = pData->beard;
-	profile.beardcolor = pData->beardcolor;
-	profile.drakkin_heritage = pData->drakkin_heritage;
-	profile.drakkin_tattoo = pData->drakkin_tattoo;
-	profile.drakkin_details = pData->drakkin_details;
-	profile.birthday = 0; // TODO:
-	profile.lastlogin = 0; // TODO:
-	profile.level = 1;
-	profile.points = 5;
-	profile.cur_hp = 1000;
-	profile.hunger_level = 6000;
-	profile.thirst_level = 6000;
-	profile.zone_id = ZoneIDs::NorthQeynos;
-	profile.x = 0;
-	profile.y = 0;
-	profile.z = 0;
-
-	for (int i = 0; i < MAX_PP_SPELLBOOK; i++)
-		profile.spell_book[i] = 0xFFFFFFFF;
-
-	for (int i = 0; i < MAX_PP_MEMSPELL; i++)
-		profile.mem_spells[i] = 0xFFFFFFFF;
-
-	for (int i = 0; i < BUFF_COUNT; i++)
-		profile.buffs[i].spellid = 0xFFFF;
-
-	profile.binds[0].zoneId = profile.zone_id;
-	profile.binds[0].x = profile.x;
-	profile.binds[0].y = profile.y;
-	profile.binds[0].z = profile.z;
-	profile.binds[0].heading = profile.heading;
-
-	//if (!DataStore::getInstance().createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
-	//	Log::error("Could not create character!"); // pCharacterName
-	//	return false;
-	//}
-
-	return true;
-}
+//bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {
+//	// Find reserved name.
+//	auto i = mReservedCharacterNames.find(pWorldAccountID);
+//	if (i == mReservedCharacterNames.end()) {
+//		Log::error("Reserved character name not found during character creation!");
+//		return false;
+//	} else {
+//		mReservedCharacterNames.erase(pWorldAccountID);
+//	}
+//
+//	// Create and configure profile.
+//	PlayerProfile_Struct profile;
+//	memset(&profile, 0, sizeof(PlayerProfile_Struct));
+//	strcpy(profile.name, pCharacterName.c_str());
+//
+//	ExtendedProfile_Struct extendedProfile;
+//	memset(&extendedProfile, 0, sizeof(ExtendedProfile_Struct));
+//	// TODO: Check Validity!
+//	
+//	profile.race = pData->race;
+//	profile.class_ = pData->class_;
+//	profile.gender = pData->gender;
+//	profile.deity = pData->deity;
+//	profile.STR = pData->STR;
+//	profile.STA = pData->STA;
+//	profile.AGI = pData->AGI;
+//	profile.DEX = pData->DEX;
+//	profile.WIS = pData->WIS;
+//	profile.INT = pData->INT;
+//	profile.CHA = pData->CHA;
+//	profile.face = pData->face;
+//	profile.eyecolor1 = pData->eyecolor1;
+//	profile.eyecolor2 = pData->eyecolor2;
+//	profile.hairstyle = pData->hairstyle;
+//	profile.haircolor = pData->haircolor;
+//	profile.beard = pData->beard;
+//	profile.beardcolor = pData->beardcolor;
+//	profile.drakkin_heritage = pData->drakkin_heritage;
+//	profile.drakkin_tattoo = pData->drakkin_tattoo;
+//	profile.drakkin_details = pData->drakkin_details;
+//	profile.birthday = 0; // TODO:
+//	profile.lastlogin = 0; // TODO:
+//	profile.level = 1;
+//	profile.points = 5;
+//	profile.cur_hp = 1000;
+//	profile.hunger_level = 6000;
+//	profile.thirst_level = 6000;
+//	profile.zone_id = ZoneIDs::NorthQeynos;
+//	profile.x = 0;
+//	profile.y = 0;
+//	profile.z = 0;
+//
+//	for (int i = 0; i < MAX_PP_SPELLBOOK; i++)
+//		profile.spell_book[i] = 0xFFFFFFFF;
+//
+//	for (int i = 0; i < MAX_PP_MEMSPELL; i++)
+//		profile.mem_spells[i] = 0xFFFFFFFF;
+//
+//	for (int i = 0; i < BUFF_COUNT; i++)
+//		profile.buffs[i].spellid = 0xFFFF;
+//
+//	profile.binds[0].zoneId = profile.zone_id;
+//	profile.binds[0].x = profile.x;
+//	profile.binds[0].y = profile.y;
+//	profile.binds[0].z = profile.z;
+//	profile.binds[0].heading = profile.heading;
+//
+//	//if (!DataStore::getInstance().createCharacter(pWorldAccountID, pCharacterName, &profile, &extendedProfile)) {
+//	//	Log::error("Could not create character!"); // pCharacterName
+//	//	return false;
+//	//}
+//
+//	return true;
+//}
 
 uint16 World::getZonePort(ZoneID pZoneID, uint16 pInstanceID) {
 	return ZoneManager::getInstance().getZonePort(pZoneID, pInstanceID);
@@ -374,7 +376,7 @@ bool World::ensureAccountExists(const uint32 pAccountID, const String& pAccountN
 	return true;
 }
 
-bool World::getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZoneTransfer) {
+bool World::getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer) {
 	for (auto i : mZoneTransfers) {
 		if (i.mCharacterName == pCharacterName) {
 			pZoneTransfer = i;
@@ -385,11 +387,56 @@ bool World::getCharacterZoneTransfer(String& pCharacterName, ZoneTransfer& pZone
 	return false;
 }
 
-void World::removeZoneTransfer(String& pCharacterName) {
+void World::removeZoneTransfer(const String& pCharacterName) {
 	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
 		if (i->mCharacterName == pCharacterName) {
 			mZoneTransfers.erase(i);
 			return;
 		}
 	}
+}
+
+bool World::handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning) {
+	EXPECTED_BOOL(pConnection);
+
+	if (pZoning)
+		return _handleZoning(pConnection, pCharacterName);
+
+	return _handleEnterWorld(pConnection, pCharacterName);
+}
+
+bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCharacterName) {
+	EXPECTED_BOOL(pConnection);
+
+	ZoneTransfer zoneTransfer;
+	EXPECTED_BOOL(getCharacterZoneTransfer(pCharacterName, zoneTransfer));
+	removeZoneTransfer(pCharacterName);
+	//addZoneAuthentication()
+	// Add Zone Authentication.
+
+	return true;
+}
+
+bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName) {
+	EXPECTED_BOOL(pConnection);
+
+	// Load Character data
+	CharacterData* characterData = new CharacterData();
+	if (!DataStore::getInstance().loadCharacter(pCharacterName, characterData)) {
+		delete characterData;
+		return false;
+	}
+
+	// Create Character
+	Character* character = new Character(characterData);
+
+	// Register ZoneTransfer
+	ZoneManager::getInstance().registerZoneTransfer(character, characterData->mZoneID, characterData->mInstanceID);
+	addZoneAuthentication(*findAuthentication(pConnection->getAccountID()), pCharacterName, characterData->mZoneID, characterData->mInstanceID);
+	ZoneManager::getInstance().onLeaveZone(character);
+
+	// Send the client off to the Zone.
+	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(characterData->mZoneID, characterData->mInstanceID));
+
+	return true;
 }

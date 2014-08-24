@@ -58,6 +58,10 @@ TimeoutManager timeout_manager; // Can't remove this for now...
 
 int main(int argc, char** argv)  {
 	//system("pause");
+	//CharacterData* characterData = new CharacterData();
+	//DataStore::getInstance().loadCharacter("Playerzero", characterData);
+
+	
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 

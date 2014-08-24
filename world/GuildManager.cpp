@@ -57,7 +57,6 @@ bool GuildManager::initialise() {
 		while (memberElement) {
 			GuildMember* member = new GuildMember();
 			member->mGuild = guild;
-			EXPECTED_BOOL(Utility::stou32Safe(member->mID, String(memberElement->Attribute("id"))));
 			EXPECTED_BOOL(Utility::stou8Safe(member->mRank, String(memberElement->Attribute("rank"))));
 			EXPECTED_BOOL(Utility::stou32Safe(member->mLevel, String(memberElement->Attribute("level"))));
 			EXPECTED_BOOL(Utility::stou32Safe(member->mClass, String(memberElement->Attribute("class"))));
@@ -113,7 +112,6 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	pCharacter->getZone()->notifyGuildsChanged();
 
 	GuildMember* member = new GuildMember();
-	member->mID = pCharacter->getID();
 	member->mRank = GuildRanks::Leader;
 	member->mName = pCharacter->getName();
 	member->mClass = pCharacter->getClass();
@@ -248,7 +246,6 @@ void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInvi
 	EXPECTED(guild);
 
 	GuildMember* member = new GuildMember();
-	member->mID = pCharacter->getID();
 	member->mName = pCharacter->getName();
 	member->mRank = GuildRanks::Member;
 	member->mClass = pCharacter->getClass();
@@ -315,7 +312,6 @@ void GuildManager::_save() {
 		TiXmlElement* membersElement = new TiXmlElement("members");
 		for (auto j : i->mMembers) {
 			TiXmlElement* memberElement = new TiXmlElement("member");
-			memberElement->SetAttribute("id", j->mID);
 			memberElement->SetAttribute("name", j->mName.c_str());
 			memberElement->SetAttribute("rank", j->mRank);
 			memberElement->SetAttribute("level", j->mLevel);
@@ -391,7 +387,7 @@ void GuildManager::onConnect(Character* pCharacter, uint32 pGuildID) {
 	// Check: Character still belongs to this guild.
 	bool found = false;
 	for (auto i : guild->mMembers) {
-		if (i->mID == pCharacter->getID()) {
+		if (i->mName == pCharacter->getName()) {
 			
 			pCharacter->setGuild(guild, guild->mID, i->mRank);
 			_sendMessage(guild, SYS_NAME, pCharacter->getName() + " has come online!");

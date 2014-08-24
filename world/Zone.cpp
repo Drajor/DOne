@@ -526,10 +526,6 @@ void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint
 	ZoneManager::getInstance().registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
 }
 
-Character* Zone::getZoningCharacter(String pCharacterName) {
-	return ZoneManager::getInstance().getZoningCharacter(pCharacterName);
-}
-
 void Zone::notifyGuildsChanged() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.

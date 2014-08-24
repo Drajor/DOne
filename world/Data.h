@@ -40,7 +40,60 @@ struct AccountData {
 };
 
 struct CharacterData {
+	String mName = "";
+	uint32 mLevel = 1;
+	ClassID mClass = ClassIDs::Warrior;
+	uint32 mExperience = 0;
+	String mLastName = "";
+	String mTitle = "";
+	String mSuffix = "";
+	bool mGM = false;
 
+	ZoneID mZoneID = 0; // TODO: Choose a good default.
+	InstanceID mInstanceID = 0;
+	float mX = 0.0f;
+	float mY = 0.0f;
+	float mZ = 0.0f;
+	float mHeading = 0.0f;
+
+	GuildID mGuildID = NO_GUILD;
+	GuildRank mGuildRank = GuildRanks::GR_None;
+
+	RaceID mRace = 0;
+	GenderID mGender = 0;
+	FaceID mFace = 0;
+	uint8 mHairStyle = 0;
+	uint8 mHairColour = 0;
+	uint8 mBeardStyle = 0;
+	uint8 mBeardColour = 0;
+	uint8 mEyeColourLeft = 0;
+	uint8 mEyeColourRight = 0;
+	uint32 mDrakkinHeritage = 0;
+	uint32 mDrakkinTattoo = 0;
+	uint32 mDrakkinDetails = 0;
+
+	// Currency
+	uint32 mPlatinumCharacter = 0;
+	uint32 mPlatinumBank = 0;
+	uint32 mPlatinumCursor = 0;
+	uint32 mGoldCharacter = 0;
+	uint32 mGoldBank = 0;
+	uint32 mGoldCursor = 0;
+	uint32 mSilverCharacter = 0;
+	uint32 mSilverBank = 0;
+	uint32 mSilverCursor = 0;
+	uint32 mCopperCharacter = 0;
+	uint32 mCopperBank = 0;
+	uint32 mCopperCursor = 0;
+
+	// Stats
+	uint32 mStrength = 0;
+	uint32 mStamina = 0;
+	uint32 mCharisma = 0;
+	uint32 mDexterity = 0;
+	uint32 mIntelligence = 0;
+	uint32 mAgility = 0;
+	uint32 mWisdom = 0;
 };
 
 //struct AccountData {

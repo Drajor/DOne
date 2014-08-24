@@ -56,6 +56,9 @@ namespace Limits {
 	namespace Character {
 		static const auto MIN_NAME_LENGTH = 4;
 		static const auto MAX_NAME_LENGTH = 64;
+		static const auto MAX_TITLE_LENGTH = 32;
+		static const auto MAX_SUFFIX_LENGTH = 32;
+		static const auto MAX_LAST_NAME_LENGTH = 32;
 	}
 	namespace Guild {
 		static const auto MAX_GUILDS = 1500; // This value is arbitrary.

@@ -10,8 +10,53 @@ enum GuildUpdateAction : uint32 {
 #pragma pack(1)
 namespace Payload {
 
+	template <typename T>
+	struct FixedSizedPayload {
+		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
+		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
+	};
+
+	template <typename T>
+	struct VariableLengthPayload {
+		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
+	};
+
+	namespace Zone {
+
+		struct ZoneEntry : public FixedSizedPayload<ZoneEntry> {
+			uint32 mUnknown = 0;
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+		};
+	}
+
 	namespace World {
-		struct CreateCharacter {
+
+		//struct LoginInfo_Struct {
+		//	/*000*/	char	login_info[64];
+		//	/*064*/	uint8	unknown064[124];
+		//	/*188*/	uint8	zoning;			// 01 if zoning, 00 if not
+		//	/*189*/	uint8	unknown189[275];
+		//	/*488*/
+		//};
+
+		struct LoginInformation : public FixedSizedPayload<LoginInformation> {
+			char mInformation[64]; // Account ID and Account Key
+			uint8 mUnknown0[124];
+			uint8 mZoning;
+			uint8 mUnknown1[275];
+		};
+
+		struct EnterWorld : public FixedSizedPayload<EnterWorld> {
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+			uint32 mTutorial = 0;
+			uint32 mReturnHome = 0;
+		};
+
+		struct DeleteCharacter : VariableLengthPayload<DeleteCharacter> {
+			char* mCharacterName = 0;
+		};
+
+		struct CreateCharacter : public FixedSizedPayload<CreateCharacter> {
 			uint32 mClass = 0;
 			uint32 mHairColour = 0;
 			uint32 mBeardColour = 0;
@@ -34,36 +79,27 @@ namespace Payload {
 			uint32 mDrakkinHeritage = 0;
 			uint32 mDrakkinTattoo = 0;
 			uint32 mDrakkinDetails = 0;
-
-			inline static CreateCharacter* convert(unsigned char* pData) { return reinterpret_cast<CreateCharacter*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(CreateCharacter); }
 		};
 	}
 
 	namespace LoginServer {
 
-		struct ConnectRequest {
+		struct ConnectRequest : public FixedSizedPayload<ConnectRequest> {
 			uint32 mAccountID = 0;
 			uint32 mWorldID = 0;
 			uint32 mFromID = 0;
 			uint32 mToID = 0;
-
-			inline static ConnectRequest* convert(unsigned char* pData) { return reinterpret_cast<ConnectRequest*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ConnectRequest); }
 		};
 
-		struct ConnectResponse {
+		struct ConnectResponse : public FixedSizedPayload<ConnectResponse> {
 			uint32 mAccountID = 0;
 			uint32 mWorldID = 0;
 			ResponseID mResponse = ResponseID::ALLOWED;
 			uint32 mFromID = 0;
 			uint32 mToID = 0;
-
-			inline static ConnectResponse* convert(unsigned char* pData) { return reinterpret_cast<ConnectResponse*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ConnectResponse); }
 		};
 
-		struct ClientAuthentication {
+		struct ClientAuthentication : public FixedSizedPayload<ClientAuthentication> {
 			uint32 mAccountID = 0;
 			char mAccountName[Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH];
 			char mKey[Limits::LoginServer::MAX_KEY_LENGTH];
@@ -71,9 +107,6 @@ namespace Payload {
 			int16 mWorldAdmin = 0; // Ignored.
 			uint32 mIP = 0;
 			uint8 mLocal = 0;
-
-			inline static ClientAuthentication* convert(unsigned char* pData) { return reinterpret_cast<ClientAuthentication*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(ClientAuthentication); }
 		};
 	}
 

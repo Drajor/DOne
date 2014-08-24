@@ -172,6 +172,8 @@ private:
 		static void deinitialise();
 	private:
 	
+	static EQApplicationPacket* mPlayerProfilePacket;
+
 	static EQApplicationPacket* mGroupJoinPacket;
 	static EQApplicationPacket* mGroupLeavePacket;
 	static EQApplicationPacket* mGroupDisbandPacket;

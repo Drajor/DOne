@@ -93,7 +93,6 @@ public:
 	void notifyCharacterGuildChange(Character* pCharacter);
 
 	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
-	Character* getZoningCharacter(String pCharacterName);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }

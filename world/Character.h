@@ -10,8 +10,8 @@ class Guild;
 class Raid;
 class EQStreamInterface;
 class ZoneClientConnection;
-struct PlayerProfile_Struct;
-struct ExtendedProfile_Struct;
+
+struct CharacterData;
 
 struct Vector3 {
 	Vector3() : x(0.0f), y(0.0f), z(0.0f) {};
@@ -33,9 +33,10 @@ struct Vector4 {
 class Character : public Actor {
 	friend ZoneClientConnection;
 public:
-	Character(uint32 pCharacterID, ClientAuthentication& pAuthentication);
+	Character(CharacterData* pCharacterData);
 	~Character();
 	inline bool isCharacter() { return true; }
+	inline bool isInitialised() { return mInitialised; }
 	inline bool isZoning() { return mIsZoning; }
 	inline void setZoning(bool pZoning) { mIsZoning = pZoning; }
 	inline bool isLinkDead() { return mIsLinkDead; }
@@ -44,7 +45,7 @@ public:
 
 	ClientAuthentication getAuthentication() { return mAuthentication; }
 
-	bool initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile);
+	bool initialise();
 	
 	
 	
@@ -61,10 +62,10 @@ public:
 	inline bool hasGuild() { return mGuild != nullptr; }
 	inline Guild* getGuild() { return mGuild; }
 	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
-	void setGuildID(GuildID pGuildID);
-	void setGuildRank(GuildRank pGuildRank);
-	GuildRank getGuildRank();
-	GuildID getGuildID();
+	inline void setGuildID(GuildID pGuildID) { mGuildID = pGuildID; };
+	inline void setGuildRank(GuildRank pGuildRank) { mGuildRank = pGuildRank; };
+	inline const GuildRank getGuildRank() { return mGuildRank; };
+	inline const GuildID getGuildID() { return mGuildID; };
 	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); }
 	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None); }
 
@@ -91,26 +92,22 @@ public:
 
 	void setStanding(bool pStanding);
 
-	String getName() { return mName; }
-	String getLastName() { return mLastName; }
-	String getTitle() { return mTitle; }
-	String getSuffix() { return mSuffix; }
-	uint32 getID() { return mCharacterID; };
-	// Returns the account status that this Character belongs to.
-	uint32 getStatus() { return mStatus; }
-	PlayerProfile_Struct* getProfile() { return mProfile; }
-	ExtendedProfile_Struct* getExtendedProfile() { return mExtendedProfile; }
+	inline const String& getName() { return mName; }
+	inline const String& getLastName() { return mLastName; }
+	inline const String& getTitle() { return mTitle; }
+	inline const String& getSuffix() { return mSuffix; }
+	inline const uint32 getStatus() { return mStatus; }
 	
 	void startCamp();
-	void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
-	bool getCampComplete() { return mCampComplete; }
-	void setZoningOut() { mIsZoningOut = true; }
-	bool isZoningOut() { return mIsZoningOut; }
+	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
+	inline bool getCampComplete() { return mCampComplete; }
+	inline void setZoningOut() { mIsZoningOut = true; }
+	inline bool isZoningOut() { return mIsZoningOut; }
 
-	void setAFK(bool pAFK);
-	bool getAFK();
-	void setShowHelm(bool pShowHelm);
-	bool getShowHelm();
+	inline void setAFK(bool pAFK) { mAFK = pAFK; };
+	inline bool getAFK() { return mAFK; };
+	inline void setShowHelm(bool pShowHelm) { mShowHelm = pShowHelm; };
+	inline bool getShowHelm() { return mShowHelm; };
 
 	void message(MessageType pType, String pMessage);
 	
@@ -146,19 +143,19 @@ public:
 	int32 getAnimation() { return mAnimation; }
 	SpawnAppearanceAnimation getAppearance() { return mAppearance; }
 	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
-	void setAnonymous(uint8 pAnonymous);
-	uint8 getAnonymous();
+	inline void setAnonymous(uint8 pAnonymous) { mAnonymous = pAnonymous; }
+	inline uint8 getAnonymous() { return mAnonymous; };
 	uint8 getGM();
 	void setGM(bool pGM);
 
-	int32 getCopper() { return mCopper; }
-	int32 getSilver() { return mSilver; }
-	int32 getGold() { return mGold; }
-	int32 getPlatinum() { return mPlatinum; }
+	inline const int32 getCopper() { return mCopper; }
+	inline const int32 getSilver() { return mSilver; }
+	inline const int32 getGold() { return mGold; }
+	inline const int32 getPlatinum() { return mPlatinum; }
 
 	// Target Group Buff
-	void setTGB(bool pTGB) { mTGB = pTGB; }
-	bool getTGB() { return mTGB; }
+	inline void setTGB(bool pTGB) { mTGB = pTGB; }
+	inline bool getTGB() { return mTGB; }
 
 	// Healing
 	void healPercentage(int pPercent);
@@ -200,86 +197,116 @@ public:
 	uint32 getAgility() { return 0; };
 	uint32 getWisdom() { return 0; };
 	uint32 getStatistic(Statistic pStatistic);
+
+	inline const bool getAutoConsentGroup() { return mAutoConsentGroup; }
+	inline const bool getAutoConsentRaid() { return mAutoConsentRaid; }
+	inline const bool getAutoConsentGuild() { return mAutoConsentGuild; }
+
+	uint8 getLeftEyeColour() { return mLeftEyeColour; }
+	uint8 getRightEyeColour() { return mRightEyeColour; }
+	uint8 getBeardStyle() { return mBeardStyle; }
+	uint8 getBeardColour() { return mBeardColour; }
+	uint8 getHairStyle() { return mHairStyle; }
+	uint8 getHairColour() { return mHairColour; }
 private:
 
 	void _initialiseProfile();
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
+	bool mInitialised = false;
 	ClientAuthentication mAuthentication;
-	bool mIsZoning;
-	bool mIsLinkDead;
-	float mX;
-	float mY;
-	float mZ;
-	float mHeading;
-	int32 mDeltaX;
-	int32 mDeltaY;
-	int32 mDeltaZ;
-	int32 mDeltaHeading;
-	int32 mAnimation;
-	SpawnAppearanceAnimation mAppearance;
-	void _updateProfilePosition();
+	bool mIsZoning = false;
+	bool mIsLinkDead = false;
+	float mX = 0.0f;
+	float mY = 0.0f;
+	float mZ = 0.0f;
+	float mHeading = 0.0f;
+	int32 mDeltaX = 0;
+	int32 mDeltaY = 0;
+	int32 mDeltaZ = 0;
+	int32 mDeltaHeading = 0;
+	int32 mAnimation = 0;
+	SpawnAppearanceAnimation mAppearance = Standing;
 	
 
 	uint32 mExperience;
 	void _checkForLevelIncrease();
 	void _updateForSave();
 	
-	float mSize;
-	uint16 mDeity;
-	uint8 mLevel;
-	uint8 mClass;
-	uint32 mRace;
-	uint32 mOriginalRace; // Race that was loaded from Profile.
-	uint8 mGender;
-	float mRunSpeed;
-	float mWalkSpeed;
+	float mSize = 5.0f;
+	uint16 mDeity = 394;
+	uint8 mLevel = 1;
+	ClassID mClass = ClassIDs::Warrior;
+	uint32 mRace = 1;
+	uint32 mOriginalRace = 1;
+	GenderID mGender = 1;
+	float mRunSpeed = 0.7f;
+	float mWalkSpeed = 0.35f;
+	uint8 mAnonymous = 0;
 
-	//uint8 mGuildRank;
-	//uint32 mGuildID;
+	uint8 mRightEyeColour = 0;
+	uint8 mLeftEyeColour = 0;
 
-	int32 mCurrentHP;
-	int32 mMaximumHP;
-	int32 mCurrentMana;
-	int32 mMaximumMana;
-	int32 mCurrentEndurance;
-	int32 mMaximumEndurance;
+	uint8 mBeardStyle = 0;
+	uint8 mBeardColour = 0;
+	uint8 mHairStyle = 0;
+	uint8 mHairColour = 0;
 
-	int32 mCopper;
-	int32 mSilver;
-	int32 mGold;
-	int32 mPlatinum;
+	GuildRank mGuildRank = GR_None;
+	GuildID mGuildID = NO_GUILD;
 
-	const uint32 mCharacterID;
-	SpawnID mSpawnID;
-	String mName;
-	String mLastName;
-	String mTitle;
-	String mSuffix;
-	bool mGM;
-	bool mStanding;
-	bool mAFK;
-	bool mIsZoningOut;
-	bool mCampComplete; // Flag indicating whether this character logged out via /camp
-	bool mTGB;
-	uint32 mStatus;
+	int32 mCurrentHP = 100;
+	int32 mMaximumHP = 100;
+	int32 mCurrentMana = 100;
+	int32 mMaximumMana = 100;
+	int32 mCurrentEndurance = 100;
+	int32 mMaximumEndurance = 100;
+
+	int32 mCopper = 0;
+	int32 mSilver = 0;
+	int32 mGold = 0;
+	int32 mPlatinum = 0;
+
+	uint32 mBaseStrength = 0;
+	uint32 mBaseStamina = 0;
+	uint32 mBaseCharisma = 0;
+	uint32 mBaseDexterity = 0;
+	uint32 mBaseIntelligence = 0;
+	uint32 mBaseAgility = 0;
+	uint32 mBaseWisdom = 0;
+
+	SpawnID mSpawnID = 0;
+	String mName = "";
+	String mLastName = "";
+	String mTitle = "";
+	String mSuffix = "";
+	bool mGM = false;
+	bool mStanding = true;
+	bool mAFK = false;
+	bool mIsZoningOut = false;
+	bool mCampComplete = false; // Flag indicating whether this character logged out via /camp
+	bool mTGB = false;
+	bool mShowHelm = false;
+	bool mAutoConsentGroup = false;
+	bool mAutoConsentRaid = false;
+	bool mAutoConsentGuild = false;
+	uint32 mStatus = 0;
 	Timer mCampTimer; // 30 seconds.
 
 	Timer mSuperGMPower;
 	Timer mAutoSave;
 
-	Group* mGroup;
-	Raid* mRaid;
+	Group* mGroup = nullptr;
+	Raid* mRaid = nullptr;
 
-	Guild* mGuild;
-	GuildID mPendingGuildInviteID;
-	String mPendingGuildInviteName;
+	Guild* mGuild = nullptr;
+	GuildID mPendingGuildInviteID = NO_GUILD;
+	String mPendingGuildInviteName = "";
 
-	Zone* mZone;
-	ZoneClientConnection* mConnection;
-	PlayerProfile_Struct* mProfile;
-	ExtendedProfile_Struct* mExtendedProfile;
+	Zone* mZone = nullptr;
+	ZoneClientConnection* mConnection = nullptr;
+	CharacterData* mData = nullptr;
 
 	struct QueuedChannelMessage {
 		const ChannelID mChannelID;

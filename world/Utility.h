@@ -160,4 +160,32 @@ namespace Utility {
 			return true;
 		return false;
 	}
+
+	namespace stdext {
+		inline int32_t stoi(const String& pString) { return std::stoi(pString, 0); }
+		inline uint32_t stou(const String& pString) { return std::stoul(pString, 0); }
+		inline float stof(const String& pString) { return std::stof(pString, 0); }
+		inline double stod(const String& pString) { return std::stod(pString, 0); }
+
+
+		template <typename T, typename F>
+		inline bool stoExecute(T& pValue, const std::string& pString, F&& pFunction) {
+			try {
+				pValue = static_cast<T>(pFunction(pString));
+				return true;
+			}
+			catch (...) {
+				return false;
+			}
+		}
+	}
+
+	inline bool stoSafe(int32_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(int16_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(int8_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(uint32_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(uint16_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(uint8_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(float& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stof); }
+	inline bool stoSafe(double& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stod); }
 }

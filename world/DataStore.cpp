@@ -4,57 +4,64 @@
 
 #include "../common/tinyxml/tinyxml.h"
 
-static bool readRequiredAttribute(TiXmlElement* pElement, const String& pAttributeName, uint32& pAttributeValue) {
+template <typename T>
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
 	}
+	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		Log::error("attribute not found in readRequiredAttribute");
-		return false;
+		// Attribute required.
+		if (pRequired) {
+			Log::error("attribute not found in readRequiredAttribute");
+			return false;
+		}
+		// Attribute not required.
+		return true;
 	}
-	return Utility::stou32Safe(pAttributeValue, String(attribute));
+	return Utility::stoSafe(pAttributeValue, String(attribute));
 }
 
-static bool readRequiredAttribute(TiXmlElement* pElement, const String& pAttributeName, String& pAttributeValue) {
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, String& pAttributeValue, bool pRequired = true) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
 	}
+	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		Log::error("attribute not found in readRequiredAttribute");
-		return false;
+		// Attribute required.
+		if (pRequired) {
+			Log::error("attribute not found in readRequiredAttribute");
+			return false;
+		}
+		// Attribute not required.
+		return true;
 	}
 	pAttributeValue = attribute;
 	return true;
 }
 
-static bool readRequiredAttribute(TiXmlElement* pElement, const String& pAttributeName, int8& pAttributeValue) {
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, bool& pAttributeValue, bool pRequired = true) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
 	}
+	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		Log::error("attribute not found in readRequiredAttribute");
-		return false;
+		// Attribute required.
+		if (pRequired) {
+			Log::error("attribute not found in readRequiredAttribute");
+			return false;
+		}
+		// Attribute not required.
+		return true;
 	}
-	return Utility::stoi8Safe(pAttributeValue, String(attribute));
-}
-
-static bool readRequiredAttribute(TiXmlElement* pElement, const String& pAttributeName, uint8& pAttributeValue) {
-	if (!pElement) {
-		Log::error("null pElement in readRequiredAttribute");
-		return false;
-	}
-	const char* attribute = pElement->Attribute(pAttributeName.c_str());
-	if (!attribute) {
-		Log::error("attribute not found in readRequiredAttribute");
-		return false;
-	}
-	return Utility::stou8Safe(pAttributeValue, String(attribute));
+	pAttributeValue = attribute == "1";
+	return true;
 }
 
 bool DataStore::initialise() {
@@ -80,13 +87,13 @@ bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
 		auto accountData = new AccountData();
 		pAccounts.push_back(accountData);
 
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "id", accountData->mAccountID));
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "name", accountData->mAccountName));
+		EXPECTED_BOOL(readAttribute(accountElement, "id", accountData->mAccountID));
+		EXPECTED_BOOL(readAttribute(accountElement, "name", accountData->mAccountName));
 		EXPECTED_BOOL(Limits::LoginServer::accountNameLength(accountData->mAccountName));
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "status", accountData->mStatus));
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "suspend_until", accountData->mSuspendedUntil));
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "last_login", accountData->mLastLogin));
-		EXPECTED_BOOL(readRequiredAttribute(accountElement, "created", accountData->mCreated));
+		EXPECTED_BOOL(readAttribute(accountElement, "status", accountData->mStatus));
+		EXPECTED_BOOL(readAttribute(accountElement, "suspend_until", accountData->mSuspendedUntil));
+		EXPECTED_BOOL(readAttribute(accountElement, "last_login", accountData->mLastLogin));
+		EXPECTED_BOOL(readAttribute(accountElement, "created", accountData->mCreated));
 		
 		accountElement = accountElement->NextSiblingElement("account");
 	}
@@ -138,36 +145,36 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 		pAccount->mCharacterData.push_back(characterData);
 
 		// Read the basic/visual information about each character.
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "name", characterData->mName));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "race", characterData->mRace));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "class", characterData->mClass));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "level", characterData->mLevel));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "gender", characterData->mGender));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "deity", characterData->mDeity));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "zone", characterData->mZoneID));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "face", characterData->mFace));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "hair_style", characterData->mHairStyle));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "hair_colour", characterData->mHairColour));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "beard_style", characterData->mBeardStyle));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "beard_colour", characterData->mBeardColour));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "eye_colour1", characterData->mEyeColourLeft));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "eye_colour2", characterData->mEyeColourRight));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "drakkin_heritage", characterData->mDrakkinHeritage));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "drakkin_tattoo", characterData->mDrakkinTattoo));
-		EXPECTED_BOOL(readRequiredAttribute(characterElement, "drakkin_details", characterData->mDrakkinDetails));
+		EXPECTED_BOOL(readAttribute(characterElement, "name", characterData->mName));
+		EXPECTED_BOOL(readAttribute(characterElement, "race", characterData->mRace));
+		EXPECTED_BOOL(readAttribute(characterElement, "class", characterData->mClass));
+		EXPECTED_BOOL(readAttribute(characterElement, "level", characterData->mLevel));
+		EXPECTED_BOOL(readAttribute(characterElement, "gender", characterData->mGender));
+		EXPECTED_BOOL(readAttribute(characterElement, "deity", characterData->mDeity));
+		EXPECTED_BOOL(readAttribute(characterElement, "zone", characterData->mZoneID));
+		EXPECTED_BOOL(readAttribute(characterElement, "face", characterData->mFace));
+		EXPECTED_BOOL(readAttribute(characterElement, "hair_style", characterData->mHairStyle));
+		EXPECTED_BOOL(readAttribute(characterElement, "hair_colour", characterData->mHairColour));
+		EXPECTED_BOOL(readAttribute(characterElement, "beard_style", characterData->mBeardStyle));
+		EXPECTED_BOOL(readAttribute(characterElement, "beard_colour", characterData->mBeardColour));
+		EXPECTED_BOOL(readAttribute(characterElement, "eye_colour1", characterData->mEyeColourLeft));
+		EXPECTED_BOOL(readAttribute(characterElement, "eye_colour2", characterData->mEyeColourRight));
+		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_heritage", characterData->mDrakkinHeritage));
+		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_tattoo", characterData->mDrakkinTattoo));
+		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_details", characterData->mDrakkinDetails));
 
 		// Read the equipment information about each character.
 		auto equipmentElement = characterElement->FirstChildElement("equipment");
 		EXPECTED_BOOL(equipmentElement);
-		EXPECTED_BOOL(readRequiredAttribute(equipmentElement, "primary", characterData->mPrimary)); // IDFile of item in primary slot.
-		EXPECTED_BOOL(readRequiredAttribute(equipmentElement, "secondary", characterData->mSecondary)); // IDFile of item in secondary slot.
+		EXPECTED_BOOL(readAttribute(equipmentElement, "primary", characterData->mPrimary)); // IDFile of item in primary slot.
+		EXPECTED_BOOL(readAttribute(equipmentElement, "secondary", characterData->mSecondary)); // IDFile of item in secondary slot.
 
 		auto slotElement = equipmentElement->FirstChildElement("slot");
 		auto slotCount = 0;
 		EXPECTED_BOOL(slotElement);
 		while (slotElement && slotCount < Limits::Account::MAX_EQUIPMENT_SLOTS) {
-			EXPECTED_BOOL(readRequiredAttribute(slotElement, "material", characterData->mEquipment[slotCount].mMaterial));
-			EXPECTED_BOOL(readRequiredAttribute(slotElement, "colour", characterData->mEquipment[slotCount].mColour));
+			EXPECTED_BOOL(readAttribute(slotElement, "material", characterData->mEquipment[slotCount].mMaterial));
+			EXPECTED_BOOL(readAttribute(slotElement, "colour", characterData->mEquipment[slotCount].mColour));
 			slotCount++;
 			slotElement = slotElement->NextSiblingElement("slot");
 		}
@@ -226,8 +233,139 @@ bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
 	return true;
 }
 
-bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData)
-{
+namespace CharacterDataXML {
+	namespace Tag {
+		static const auto Character = "character";
+		static const auto Stats = "stats";
+		static const auto Visual = "visual";
+		static const auto Guild = "guild";
+		static const auto Currency = "currency";
+	}
+	namespace Attribute {
+		// Tag::Character
+		static const auto Name = "name";
+		static const auto GM = "gm";
+		static const auto Level = "level";
+		static const auto Class = "class";
+		static const auto Zone = "zone";
+		static const auto X = "x";
+		static const auto Y = "y";
+		static const auto Z = "z";
+		static const auto Heading = "heading";
+		static const auto Experience = "experience";
+		static const auto LastName = "last_name";
+		static const auto Title = "title";
+		static const auto Suffix = "suffix";
+		// Tag::Stats
+		static const auto Strength = "strength";
+		static const auto Stamina = "stamina";
+		static const auto Charisma = "charisma";
+		static const auto Dexterity = "dexterity";
+		static const auto Intelligence = "intelligence";
+		static const auto Agility = "agility";
+		static const auto Wisdom = "wisdom";
+		// Tag::Visual
+		static const auto Race = "race";
+		static const auto Gender = "gender";
+		static const auto Face = "face";
+		static const auto HairStyle = "hair_style";
+		static const auto HairColour = "hair_colour";
+		static const auto BeardStyle = "beard_style";
+		static const auto BeardColour = "beard_colour";
+		static const auto EyeColour1 = "eye_colour1";
+		static const auto EyeColour2 = "eye_colour2";
+		static const auto DrakkinHeritage = "drakkin_heritage";
+		static const auto DrakkinTattoo = "drakkin_tattoo";
+		static const auto DrakkinDetails = "drakkin_Details";
+		// Tag::Guild
+		static const auto GuildID = "id";
+		static const auto GuildRank = "rank";
+		// Tag::Currency
+		static const auto PlatinumCharacter = "platinum_character";
+		static const auto PlatinumBank = "platinum_bank";
+		static const auto PlatinumCursor = "platinum_cursor";
+		static const auto GoldCharacter = "gold_character";
+		static const auto GoldBank = "gold_bank";
+		static const auto GoldCursor = "gold_cursor";
+		static const auto SilverCharacter = "silver_character";
+		static const auto SilverBank = "silver_bank";
+		static const auto SilverCursor = "silver_cursor";
+		static const auto CopperCharacter = "copper_character";
+		static const auto CopperBank = "copper_bank";
+		static const auto CopperCursor = "copper_cursor";
+	}
+}
+
+bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
+	using namespace CharacterDataXML;
+	EXPECTED_BOOL(pCharacterData);
+	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
+	EXPECTED_BOOL(document.LoadFile());
+
+	// Tag::Character
+	auto characterElement = document.FirstChildElement(Tag::Character);
+	EXPECTED_BOOL(characterElement);
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacterData->mName));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacterData->mGM));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, pCharacterData->mLevel));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacterData->mClass));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacterData->mZoneID));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::X, pCharacterData->mX));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Y, pCharacterData->mY));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Z, pCharacterData->mZ));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Heading, pCharacterData->mHeading));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Experience, pCharacterData->mExperience));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacterData->mLastName));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacterData->mTitle));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacterData->mSuffix));
+
+	// Tag::Stats
+	auto statsElement = characterElement->FirstChildElement(Tag::Stats);
+	EXPECTED_BOOL(statsElement);
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Strength, pCharacterData->mStrength));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Stamina, pCharacterData->mStamina));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Charisma, pCharacterData->mCharisma));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Intelligence, pCharacterData->mIntelligence));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Agility, pCharacterData->mAgility));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Wisdom, pCharacterData->mWisdom));
+
+	// Tag::Visual
+	auto visualElement = characterElement->FirstChildElement(Tag::Visual);
+	EXPECTED_BOOL(visualElement);
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Race, pCharacterData->mRace));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Gender, pCharacterData->mGender));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Face, pCharacterData->mFace));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairStyle, pCharacterData->mHairStyle));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairColour, pCharacterData->mHairColour));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardStyle, pCharacterData->mBeardStyle));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardColour, pCharacterData->mBeardColour));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour1, pCharacterData->mEyeColourLeft));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour2, pCharacterData->mEyeColourRight));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo));
+	
+	// Tag::Guild
+	auto guildElement = characterElement->FirstChildElement(Tag::Guild);
+	EXPECTED_BOOL(guildElement);
+	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildID, pCharacterData->mGuildID));
+	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildRank, pCharacterData->mGuildRank));
+
+	// Tag::Currency
+	auto currencyElement = characterElement->FirstChildElement(Tag::Currency);
+	EXPECTED_BOOL(currencyElement);
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCharacter, pCharacterData->mPlatinumCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumBank, pCharacterData->mPlatinumBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCursor, pCharacterData->mPlatinumCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCharacter, pCharacterData->mGoldCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldBank, pCharacterData->mGoldBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCursor, pCharacterData->mGoldCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCharacter, pCharacterData->mSilverCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverBank, pCharacterData->mSilverBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCursor, pCharacterData->mSilverCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCharacter, pCharacterData->mCopperCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperBank, pCharacterData->mCopperBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCursor, pCharacterData->mCopperCursor));
+
 	return true;
 }
 

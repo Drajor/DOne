@@ -14,7 +14,6 @@ class Guild;
 
 struct GuildMember {
 	Guild* mGuild = nullptr;
-	uint32 mID = 0; // Character ID
 	String mName = "";
 	uint32 mLevel = 0; // TODO: Should really be uint16
 	uint32 mClass = 0; // For some reason Guilds use uint32 instead of uint8 for player class.

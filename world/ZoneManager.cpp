@@ -133,7 +133,7 @@ Character* ZoneManager::findCharacter(const String pCharacterName, bool pInclude
 }
 
 void ZoneManager::onLeaveZone(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	mZoningCharacters.push_back(pCharacter);
 }
@@ -143,10 +143,20 @@ void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, ui
 
 	ZoneTransfer zoneTransfer;
 	zoneTransfer.mCharacterName = pCharacter->getName();
-	zoneTransfer.mFromZoneID = pCharacter->getZone()->getID();
-	zoneTransfer.mFromInstanceID = pCharacter->getZone()->getInstanceID();
 	zoneTransfer.mToZoneID = pZoneID;
 	zoneTransfer.mToInstanceID = pInstanceID;
+
+	Zone* zone = pCharacter->getZone();
+	// Character is moving from one zone to another.
+	if (zone) {
+		zoneTransfer.mFromZoneID = pCharacter->getZone()->getID();
+		zoneTransfer.mFromInstanceID = pCharacter->getZone()->getInstanceID();
+	}
+	// Character is moving from Character Select to a zone.
+	else {
+		zoneTransfer.mFromZoneID = 0;
+		zoneTransfer.mFromInstanceID = 0;
+	}
 
 	World::getInstance().addCharacterZoneTransfer(zoneTransfer);
 }

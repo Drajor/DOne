@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "Data.h"
 #include "GuildManager.h"
 #include "Zone.h"
 #include "Utility.h"
@@ -9,64 +10,12 @@
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
-Character::Character(uint32 pCharacterID, ClientAuthentication& pAuthentication) :
-mCharacterID(pCharacterID),
-mAuthentication(pAuthentication),
-mProfile(0),
-mExtendedProfile(0),
-mName("soandso"),
-mLastName(""),
-mTitle(""),
-mSuffix(""),
-mRace(0),
-mOriginalRace(0),
-mRunSpeed(0.7f),
-mWalkSpeed(0.35f),
-mClass(0),
-mGender(0),
-mLevel(1),
-mDeity(394), // Agnostic
-mSize(5.0f),
-mStanding(true),
-mAFK(false),
-mCampComplete(false),
-mTGB(false),
-mStatus(0),
-mZone(nullptr),
-mCurrentHP(100),
-mMaximumHP(100),
-mCurrentMana(100),
-mMaximumMana(100),
-mCurrentEndurance(100),
-mMaximumEndurance(100),
-mX(0.0f),
-mY(0.0f),
-mZ(0.0f),
-mHeading(0.0f),
-mDeltaX(0),
-mDeltaY(0),
-mDeltaZ(0),
-mDeltaHeading(0),
-mAnimation(0),
-mAppearance(SpawnAppearanceAnimation::Standing),
-mGM(false),
-mExperience(0),
-mCopper(0),
-mSilver(0),
-mGold(0),
-mPlatinum(0),
-mGroup(nullptr),
-mGuild(nullptr),
-mRaid(nullptr),
-mIsZoning(false),
-mIsLinkDead(false),
-mIsZoningOut(false),
-mPendingGuildInviteID(NO_GUILD),
-mPendingGuildInviteName("")
-{ }
+Character::Character(CharacterData* pCharacterData) :mData(pCharacterData) {
+	EXPECTED(mData);
+	mName = pCharacterData->mName; // NOTE: This is required for ID before initialise has been called.
+}
+
 Character::~Character() {
-	delete mProfile;
-	delete mExtendedProfile;
 }
 
 void Character::update() {
@@ -83,46 +32,55 @@ void Character::update() {
 	}
 }
 
-bool Character::initialise(PlayerProfile_Struct* pProfile, ExtendedProfile_Struct* pExtendedProfile) {
-	mProfile = pProfile;
-	mExtendedProfile = pExtendedProfile;
+bool Character::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
 
-	mName = mProfile->name;
-	mLastName = mProfile->last_name;
-	mTitle = mProfile->title;
-	mSuffix = mProfile->suffix;
-	mOriginalRace = mRace = mProfile->race;
-	mClass = mProfile->class_;
-	mGender = mProfile->gender;
-	mLevel = mProfile->level;
-	mStatus = 255;
-	mGM = (mProfile->gm == 1);
-	mGM = true; // testing!
+	mName = mData->mName;
+	mLastName = mData->mLastName;
+	mTitle = mData->mTitle;
+	mSuffix = mData->mSuffix;
+	mRace = mData->mRace;
+	mOriginalRace = mRace;
+	mGM = true; // mData->mGM; (testing).
+	mClass = mData->mClass;
+	mGender = mData->mGender;
+	mLevel = mData->mLevel;
+	mStatus = 255; // mData->mStatus; (testing)
 
-	mX = mProfile->x;
-	mY = mProfile->y;
-	mZ = mProfile->z;
-	mHeading = mProfile->heading;
-	mDeltaX = 0;
-	mDeltaY = 0;
-	mDeltaZ = 0;
-	mDeltaHeading = 0;
+	mX = mData->mX;
+	mY = mData->mY;
+	mZ = mData->mZ;
+	mHeading = mData->mHeading;
+
+	mBeardStyle = mData->mBeardStyle;
+	mBeardColour = mData->mBeardColour;
+	mHairStyle = mData->mHairStyle;
+	mHairColour = mData->mHairColour;
+
 	mSize = Character::getDefaultSize(mRace);
 
-	mExperience = mProfile->exp;
+	mExperience = mData->mExperience;
 
-	//mSuperGMPower.Start(2000);
+	mPlatinum = mData->mPlatinumCharacter;
+	mGold = mData->mGoldCharacter;
+	mSilver = mData->mSilverCharacter;
+	mCopper = mData->mCopperCharacter;
+
+	mBaseStrength = mData->mStrength;
+	mBaseStamina = mData->mStamina;
+	mBaseCharisma = mData->mCharisma;
+	mBaseDexterity = mData->mDexterity;
+	mBaseIntelligence = mData->mIntelligence;
+	mBaseAgility = mData->mAgility;
+	mBaseWisdom = mData->mWisdom;
+
 	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 
-	mCopper = mProfile->copper;
-	mSilver = mProfile->silver;
-	mGold = mProfile->gold;
-	mPlatinum = mProfile->platinum;
-
-	if (mProfile->guild_id != NO_GUILD) {
-		GuildManager::getInstance().onConnect(this, mProfile->guild_id);
+	if (mData->mGuildID != NO_GUILD) {
+		GuildManager::getInstance().onConnect(this, mData->mGuildID);
 	}
 
+	mInitialised = true;
 	return true;
 }
 
@@ -157,21 +115,6 @@ void Character::startCamp() {
 	mCampTimer.Start(29000, true);
 }
 
-void Character::setAFK(bool pAFK) {
-	mAFK = pAFK;
-}
-
-bool Character::getAFK() {
-	return mAFK;
-}
-
-void Character::setShowHelm(bool pShowHelm) {
-	mProfile->showhelm = pShowHelm ? 1 : 0;
-}
-bool Character::getShowHelm() {
-	return mProfile->showhelm == 1;
-}
-
 void Character::message(MessageType pType, String pMessage)
 {
 	mConnection->sendMessage(pType, pMessage);
@@ -182,14 +125,12 @@ void Character::setPosition(float pX, float pY, float pZ, float pHeading) {
 	mY = pY;
 	mZ = pZ;
 	mHeading = pHeading;
-	_updateProfilePosition();
 }
 
 void Character::setPosition(Vector3& pPosition) {
 	mX = pPosition.x;
 	mY = pPosition.y;
 	mZ = pPosition.z;
-	_updateProfilePosition();
 }
 
 void Character::setPosition(Vector4& pPosition) {
@@ -197,19 +138,10 @@ void Character::setPosition(Vector4& pPosition) {
 	mY = pPosition.y;
 	mZ = pPosition.z;
 	mHeading = pPosition.h;
-	_updateProfilePosition();
 }
 
 void Character::setHeading(float pHeading) {
 	mHeading = pHeading;
-	_updateProfilePosition();
-}
-
-void Character::_updateProfilePosition() {
-	mProfile->x = mX;
-	mProfile->y = mY;
-	mProfile->z = mZ;
-	mProfile->heading = mHeading;
 }
 
 void Character::healPercentage(int pPercent) {
@@ -220,15 +152,6 @@ void Character::damage(uint32 pAmount) {
 	mCurrentHP -= pAmount;
 	mConnection->sendHPUpdate();
 }
-
-void Character::setAnonymous(uint8 pAnonymous) {
-	mProfile->mAnonymous = pAnonymous;
-}
-
-uint8 Character::getAnonymous() {
-	return mProfile->mAnonymous;
-}
-
 
 void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
 {
@@ -244,9 +167,7 @@ uint8 Character::getGM() {
 
 void Character::setGM(bool pGM) {
 	mGM = pGM;
-	mProfile->gm = getGM();
 }
-
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);
@@ -271,7 +192,6 @@ void Character::addExperience(uint32 pExperience) {
 	mExperience += pExperience;
 	mConnection->sendExperienceGain();
 	_checkForLevelIncrease();
-	mProfile->exp = mExperience;
 	// Update user experience bar.
 	mConnection->sendExperienceUpdate();
 }
@@ -286,7 +206,6 @@ void Character::removeExperience(uint32 pExperience) {
 	}
 
 	mExperience -= pExperience;
-	mProfile->exp = mExperience;
 
 	// Send user a message.
 	mConnection->sendExperienceLoss();
@@ -380,65 +299,71 @@ float Character::getDefaultSize(uint32 pRace) {
 }
 
 void Character::_updateForSave() {
-	// Ensure profile is updated for save.
+	EXPECTED(mData);
+	EXPECTED(mZone);
 
-	// TODO: Consider checking the ranges of these strings before saving.
-	strcpy(mProfile->name, getName().c_str());
-	strcpy(mProfile->last_name, getLastName().c_str());
-	strcpy(mProfile->title, getTitle().c_str());
-	strcpy(mProfile->suffix, getSuffix().c_str());
+	mData->mGM = mGM;
+	mData->mName = mName;
+	mData->mLastName = mLastName;
+	mData->mTitle = mTitle;
+	mData->mSuffix = mSuffix;
 
-	mProfile->gm = getGM();
-	mProfile->class_ = getClass();
-	mProfile->race = getOriginalRace();
-	mProfile->deity = getDeity();
-	mProfile->gender = getGender();
-	mProfile->mAnonymous = getAnonymous();
-	mProfile->showhelm = getShowHelm();
+	mData->mLevel = mLevel;
+	mData->mExperience = mExperience;
 
-	mProfile->copper = getCopper();
-	mProfile->silver = getSilver();
-	mProfile->gold = getGold();
-	mProfile->platinum = getPlatinum();
-	
-	mProfile->x = getX();
-	mProfile->y = getY();
-	mProfile->z = getZ();
-	mProfile->heading = getHeading();
+	mData->mRace = mOriginalRace;
+	mData->mClass = mClass;
 
-	mProfile->level = getLevel();
-	mProfile->exp = getExperience();
+	// TODO: Visual
+	mData->mGender = mGender;
 
-	mProfile->zone_id = mZone->getID();
-	mProfile->zoneInstance = mZone->getInstanceID();
+	mData->mPlatinumCharacter = mPlatinum;
+	mData->mGoldCharacter = mGold;
+	mData->mSilverCharacter = mSilver;
+	mData->mCopperCharacter = mCopper;
 
-	mProfile->guild_id = getGuildID();
-	mProfile->guildrank = getGuildID();
+	mData->mZoneID = mZone->getID();
+	mData->mInstanceID = mZone->getInstanceID();
+	mData->mX = mX;
+	mData->mY = mY;
+	mData->mZ = mZ;
+	mData->mHeading = mHeading;
+
+	mData->mStrength = mBaseStrength;
+	mData->mStamina = mBaseStamina;
+	mData->mCharisma = mBaseCharisma;
+	mData->mDexterity = mBaseDexterity;
+	mData->mIntelligence = mBaseIntelligence;
+	mData->mAgility = mBaseAgility;
+	mData->mWisdom = mBaseWisdom;
+
+	//mData->mGuildID = mGuildID;
+	//mData->mGuildRank = mGuildRank;
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {
 	switch (pStatistic)
 	{
 	case Statistic::Strength:
-		return mProfile->STR;
+		return mBaseStrength;
 		break;
 	case Statistic::Stamina:
-		return mProfile->STA;
+		return mBaseStamina;
 		break;
 	case Statistic::Charisma:
-		return mProfile->CHA;
+		return mBaseCharisma;
 		break;
 	case Statistic::Dexterity:
-		return mProfile->DEX;
+		return mBaseDexterity;
 		break;
 	case Statistic::Intelligence:
-		return mProfile->INT;
+		return mBaseIntelligence;
 		break;
 	case Statistic::Agility:
-		return mProfile->AGI;
+		return mBaseAgility;
 		break;
 	case Statistic::Wisdom:
-		return mProfile->WIS;
+		return mBaseWisdom;
 		break;
 	default:
 		Log::error("[Character] Unknown Statistic in getBaseStatistic.");
@@ -451,25 +376,25 @@ uint32 Character::getBaseStatistic(Statistic pStatistic) {
 void Character::setBaseStatistic(Statistic pStatistic, uint32 pValue) {
 	switch (pStatistic) {
 	case Statistic::Strength:
-		mProfile->STR = pValue;
+		mBaseStrength = pValue;
 		break;
 	case Statistic::Stamina:
-		mProfile->STA = pValue;
+		mBaseStamina = pValue;
 		break;
 	case Statistic::Charisma:
-		mProfile->CHA = pValue;
+		mBaseCharisma = pValue;
 		break;
 	case Statistic::Dexterity:
-		mProfile->DEX = pValue;
+		mBaseDexterity = pValue;
 		break;
 	case Statistic::Intelligence:
-		mProfile->INT = pValue;
+		mBaseIntelligence = pValue;
 		break;
 	case Statistic::Agility:
-		mProfile->AGI = pValue;
+		mBaseAgility = pValue;
 		break;
 	case Statistic::Wisdom:
-		mProfile->WIS = pValue;
+		mBaseWisdom = pValue;
 		break;
 	default:
 		Log::error("[Character] Unknown Statistic in setBaseStatistic.");
@@ -510,20 +435,4 @@ void Character::_processMessageQueue() {
 
 void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
-}
-
-void Character::setGuildID(GuildID pGuildID) {
-	mProfile->guild_id = pGuildID;
-}
-
-void Character::setGuildRank(GuildRank pGuildRank) {
-	mProfile->guildrank = pGuildRank;
-}
-
-GuildRank Character::getGuildRank() {
-	return mProfile->guildrank;
-}
-
-GuildID Character::getGuildID() {
-	return mProfile->guild_id;
 }
