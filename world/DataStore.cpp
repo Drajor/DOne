@@ -1,6 +1,7 @@
 #include "DataStore.h"
 #include "Utility.h"
 #include "Limits.h"
+#include "Profile.h"
 
 #include "../common/tinyxml/tinyxml.h"
 
@@ -70,6 +71,7 @@ bool DataStore::initialise() {
 }
 
 bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
+	Profile p("DataStore::loadAccounts");
 	EXPECTED_BOOL(pAccounts.empty());
 	TiXmlDocument document("./data/accounts.xml");
 	EXPECTED_BOOL(document.LoadFile());
@@ -102,6 +104,7 @@ bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
 }
 
 bool DataStore::saveAccounts(std::list<AccountData*>& pAccounts) {
+	Profile p("DataStore::saveAccounts");
 	TiXmlDocument document("./data/accounts.xml");
 
 	auto accountsElement = new TiXmlElement("accounts");
@@ -124,6 +127,7 @@ bool DataStore::saveAccounts(std::list<AccountData*>& pAccounts) {
 }
 
 bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
+	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
@@ -188,6 +192,7 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 }
 
 bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
+	Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 
@@ -297,6 +302,7 @@ namespace CharacterDataXML {
 }
 
 bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
+	Profile p("DataStore::loadCharacter");
 	using namespace CharacterDataXML;
 	EXPECTED_BOOL(pCharacterData);
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
@@ -369,8 +375,73 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	return true;
 }
 
-bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData)
-{
+bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData) {
+	Profile p("DataStore::saveCharacter");
+	using namespace CharacterDataXML;
+
+	EXPECTED_BOOL(pCharacterData);
+	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
+
+	// Tag::Character
+	auto characterElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Character)));
+	characterElement->SetAttribute(Attribute::Name, pCharacterData->mName.c_str());
+	characterElement->SetAttribute(Attribute::GM, pCharacterData->mGM);
+	characterElement->SetAttribute(Attribute::Level, pCharacterData->mLevel);
+	characterElement->SetAttribute(Attribute::Class, pCharacterData->mClass);
+	characterElement->SetAttribute(Attribute::Zone, pCharacterData->mZoneID);
+	characterElement->SetAttribute(Attribute::X, pCharacterData->mX);
+	characterElement->SetAttribute(Attribute::Y, pCharacterData->mY);
+	characterElement->SetAttribute(Attribute::Z, pCharacterData->mZ);
+	characterElement->SetAttribute(Attribute::Heading, pCharacterData->mHeading);
+	characterElement->SetAttribute(Attribute::Experience, pCharacterData->mExperience);
+	characterElement->SetAttribute(Attribute::LastName, pCharacterData->mLastName.c_str());
+	characterElement->SetAttribute(Attribute::Title, pCharacterData->mTitle.c_str());
+	characterElement->SetAttribute(Attribute::Suffix, pCharacterData->mSuffix.c_str());
+
+	// Tag::Stats
+	auto statsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Stats)));
+	statsElement->SetAttribute(Attribute::Strength, pCharacterData->mStrength);
+	statsElement->SetAttribute(Attribute::Stamina, pCharacterData->mStamina);
+	statsElement->SetAttribute(Attribute::Charisma, pCharacterData->mCharisma);
+	statsElement->SetAttribute(Attribute::Intelligence, pCharacterData->mIntelligence);
+	statsElement->SetAttribute(Attribute::Agility, pCharacterData->mAgility);
+	statsElement->SetAttribute(Attribute::Wisdom, pCharacterData->mWisdom);
+
+	// Tag::Visual
+	auto visualElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Visual)));
+	visualElement->SetAttribute(Attribute::Race, pCharacterData->mRace);
+	visualElement->SetAttribute(Attribute::Gender, pCharacterData->mGender);
+	visualElement->SetAttribute(Attribute::Face, pCharacterData->mFace);
+	visualElement->SetAttribute(Attribute::HairStyle, pCharacterData->mHairStyle);
+	visualElement->SetAttribute(Attribute::HairColour, pCharacterData->mHairColour);
+	visualElement->SetAttribute(Attribute::BeardStyle, pCharacterData->mBeardStyle);
+	visualElement->SetAttribute(Attribute::BeardColour, pCharacterData->mBeardColour);
+	visualElement->SetAttribute(Attribute::EyeColour1, pCharacterData->mEyeColourLeft);
+	visualElement->SetAttribute(Attribute::EyeColour2, pCharacterData->mEyeColourRight);
+	visualElement->SetAttribute(Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage);
+	visualElement->SetAttribute(Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo);
+
+	// Tag::Guild
+	auto guildElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Guild)));
+	guildElement->SetAttribute(Attribute::GuildID, pCharacterData->mGuildID);
+	guildElement->SetAttribute(Attribute::GuildRank, pCharacterData->mGuildRank);
+
+	// Tag::Currency
+	auto currencyElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Currency)));
+	currencyElement->SetAttribute(Attribute::PlatinumCharacter, pCharacterData->mPlatinumCharacter);
+	currencyElement->SetAttribute(Attribute::PlatinumBank, pCharacterData->mPlatinumBank);
+	currencyElement->SetAttribute(Attribute::PlatinumCursor, pCharacterData->mPlatinumCursor);
+	currencyElement->SetAttribute(Attribute::GoldCharacter, pCharacterData->mGoldCharacter);
+	currencyElement->SetAttribute(Attribute::GoldBank, pCharacterData->mGoldBank);
+	currencyElement->SetAttribute(Attribute::GoldCursor, pCharacterData->mGoldCursor);
+	currencyElement->SetAttribute(Attribute::SilverCharacter, pCharacterData->mSilverCharacter);
+	currencyElement->SetAttribute(Attribute::SilverBank, pCharacterData->mSilverBank);
+	currencyElement->SetAttribute(Attribute::SilverCursor, pCharacterData->mSilverCursor);
+	currencyElement->SetAttribute(Attribute::CopperCharacter, pCharacterData->mCopperCharacter);
+	currencyElement->SetAttribute(Attribute::CopperBank, pCharacterData->mCopperBank);
+	currencyElement->SetAttribute(Attribute::CopperCursor, pCharacterData->mCopperCursor);
+
+	EXPECTED_BOOL(document.SaveFile());
 	return true;
 }
 

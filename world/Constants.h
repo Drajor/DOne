@@ -78,6 +78,12 @@ namespace Limits {
 
 static const String SYS_NAME = "[System]";
 
+enum AnonType : uint8 {
+	AT_None = 0,
+	AT_Roleplay = 1,
+	AT_Anonymous = 2
+};
+
 enum GuildRanks : GuildRank {
 	Member = 0,
 	Officer = 1,
@@ -145,12 +151,6 @@ enum class Statistic : uint32 {
 	Intelligence,
 	Agility,
 	Wisdom
-};
-
-enum Anonymous{
-	ANON_None = 0,
-	ANON_Roleplay = 1,
-	ANON_Anonymous = 2
 };
 
 enum SpawnAppearanceType : int16 {

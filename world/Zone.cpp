@@ -297,13 +297,13 @@ void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
 }
 
 
-void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->getAFK()); }
+void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->isAFK()); }
 void Zone::notifyCharacterShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
 void Zone::notifyCharacterAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
 void Zone::notifyCharacterStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Standing); }
 void Zone::notifyCharacterSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
 void Zone::notifyCharacterCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
-void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->getGM(), true); }
+void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->isGM(), true); }
 void Zone::notifyCharacterLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
 
 void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
@@ -474,7 +474,7 @@ void Zone::requestSave(Character*pCharacter) {
 	// http://dev.mysql.com/doc/refman/5.5/en/too-many-connections.html
 	// Considering a DB connection per user and just copy data to another thread.
 	//if (!DataStore::getInstance().saveCharacter(pCharacter->getID(), pCharacter->getProfile(), pCharacter->getExtendedProfile())) {
-	if (!DataStore::getInstance().saveCharacter(pCharacter->getName(), nullptr)) {
+	if (!DataStore::getInstance().saveCharacter(pCharacter->getName(), pCharacter->getData())) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 	}

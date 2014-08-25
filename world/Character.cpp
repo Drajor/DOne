@@ -56,6 +56,10 @@ bool Character::initialise() {
 	mBeardColour = mData->mBeardColour;
 	mHairStyle = mData->mHairStyle;
 	mHairColour = mData->mHairColour;
+	mFaceStyle = mData->mFace;
+	mDrakkinHeritage = mData->mDrakkinHeritage;
+	mDrakkinTattoo = mData->mDrakkinTattoo;
+	mDrakkinDetails = mData->mDrakkinDetails;
 
 	mSize = Character::getDefaultSize(mRace);
 
@@ -159,14 +163,6 @@ void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, i
 	mDeltaY = pDeltaY;
 	mDeltaZ = pDeltaZ;
 	mDeltaHeading = pDeltaHeading;
-}
-
-uint8 Character::getGM() {
-	return mGM ? 1 : 0;
-}
-
-void Character::setGM(bool pGM) {
-	mGM = pGM;
 }
 
 void Character::doAnimation(uint8 pAnimationID) {
@@ -314,13 +310,25 @@ void Character::_updateForSave() {
 	mData->mRace = mOriginalRace;
 	mData->mClass = mClass;
 
-	// TODO: Visual
+	mData->mBeardStyle = mBeardStyle;
+	mData->mBeardColour = mBeardColour;
+	mData->mHairStyle = mHairStyle;
+	mData->mHairColour = mHairColour;
+	mData->mEyeColourLeft = mLeftEyeColour;
+	mData->mEyeColourRight = mRightEyeColour;
+	mData->mFace = mFaceStyle;
+	mData->mDrakkinHeritage = mDrakkinHeritage;
+	mData->mDrakkinTattoo = mDrakkinTattoo;
+	mData->mDrakkinDetails = mDrakkinDetails;
+
 	mData->mGender = mGender;
 
 	mData->mPlatinumCharacter = mPlatinum;
 	mData->mGoldCharacter = mGold;
 	mData->mSilverCharacter = mSilver;
 	mData->mCopperCharacter = mCopper;
+
+	// TODO: Bank / Cursor currency
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
@@ -337,8 +345,8 @@ void Character::_updateForSave() {
 	mData->mAgility = mBaseAgility;
 	mData->mWisdom = mBaseWisdom;
 
-	//mData->mGuildID = mGuildID;
-	//mData->mGuildRank = mGuildRank;
+	mData->mGuildID = mGuildID;
+	mData->mGuildRank = mGuildRank;
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

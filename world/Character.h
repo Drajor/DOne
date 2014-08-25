@@ -105,9 +105,11 @@ public:
 	inline bool isZoningOut() { return mIsZoningOut; }
 
 	inline void setAFK(bool pAFK) { mAFK = pAFK; };
-	inline bool getAFK() { return mAFK; };
+	inline const bool isAFK() const { return mAFK; };
+	inline void setLFG(bool pLFG) { mLFG = pLFG; }
+	inline const bool isLFG() const { return mLFG; }
 	inline void setShowHelm(bool pShowHelm) { mShowHelm = pShowHelm; };
-	inline bool getShowHelm() { return mShowHelm; };
+	inline const bool getShowHelm() { return mShowHelm; };
 
 	void message(MessageType pType, String pMessage);
 	
@@ -143,19 +145,19 @@ public:
 	int32 getAnimation() { return mAnimation; }
 	SpawnAppearanceAnimation getAppearance() { return mAppearance; }
 	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
-	inline void setAnonymous(uint8 pAnonymous) { mAnonymous = pAnonymous; }
-	inline uint8 getAnonymous() { return mAnonymous; };
-	uint8 getGM();
-	void setGM(bool pGM);
+	inline void setAnonymous(AnonType pAnonymous) { mAnonymous = pAnonymous; }
+	inline AnonType getAnonymous() { return mAnonymous; };
+	inline const bool isGM() const { return mGM; };
+	inline void setGM(const bool pGM) { mGM = pGM; }
 
-	inline const int32 getCopper() { return mCopper; }
-	inline const int32 getSilver() { return mSilver; }
-	inline const int32 getGold() { return mGold; }
-	inline const int32 getPlatinum() { return mPlatinum; }
+	inline const int32 getCopper() const { return mCopper; }
+	inline const int32 getSilver() const { return mSilver; }
+	inline const int32 getGold() const { return mGold; }
+	inline const int32 getPlatinum() const { return mPlatinum; }
 
 	// Target Group Buff
 	inline void setTGB(bool pTGB) { mTGB = pTGB; }
-	inline bool getTGB() { return mTGB; }
+	inline const bool getTGB() const { return mTGB; }
 
 	// Healing
 	void healPercentage(int pPercent);
@@ -202,12 +204,18 @@ public:
 	inline const bool getAutoConsentRaid() { return mAutoConsentRaid; }
 	inline const bool getAutoConsentGuild() { return mAutoConsentGuild; }
 
-	uint8 getLeftEyeColour() { return mLeftEyeColour; }
-	uint8 getRightEyeColour() { return mRightEyeColour; }
-	uint8 getBeardStyle() { return mBeardStyle; }
-	uint8 getBeardColour() { return mBeardColour; }
-	uint8 getHairStyle() { return mHairStyle; }
-	uint8 getHairColour() { return mHairColour; }
+	inline const uint8 getLeftEyeColour() { return mLeftEyeColour; }
+	inline const uint8 getRightEyeColour() { return mRightEyeColour; }
+	inline const uint8 getBeardStyle() { return mBeardStyle; }
+	inline const uint8 getBeardColour() { return mBeardColour; }
+	inline const uint8 getHairStyle() { return mHairStyle; }
+	inline const uint8 getHairColour() { return mHairColour; }
+	inline const uint8 getFaceStyle() { return mFaceStyle; }
+	inline const uint32 getDrakkinHeritage() { return mDrakkinHeritage; }
+	inline const uint32 getDrakkinTattoo() { return mDrakkinTattoo; }
+	inline const uint32 getDrakkinDetails() { return mDrakkinDetails; }
+
+	const CharacterData* getData() { return mData; }
 private:
 
 	void _initialiseProfile();
@@ -243,15 +251,18 @@ private:
 	GenderID mGender = 1;
 	float mRunSpeed = 0.7f;
 	float mWalkSpeed = 0.35f;
-	uint8 mAnonymous = 0;
+	AnonType mAnonymous = AnonType::AT_None;
 
 	uint8 mRightEyeColour = 0;
 	uint8 mLeftEyeColour = 0;
-
+	uint8 mFaceStyle = 0;
 	uint8 mBeardStyle = 0;
 	uint8 mBeardColour = 0;
 	uint8 mHairStyle = 0;
 	uint8 mHairColour = 0;
+	uint32 mDrakkinHeritage = 0;
+	uint32 mDrakkinTattoo = 0;
+	uint32 mDrakkinDetails = 0;
 
 	GuildRank mGuildRank = GR_None;
 	GuildID mGuildID = NO_GUILD;
@@ -284,6 +295,7 @@ private:
 	bool mGM = false;
 	bool mStanding = true;
 	bool mAFK = false;
+	bool mLFG = false;
 	bool mIsZoningOut = false;
 	bool mCampComplete = false; // Flag indicating whether this character logged out via /camp
 	bool mTGB = false;

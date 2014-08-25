@@ -396,41 +396,6 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 		EXPECTED(mCharacter->initialise());
 	}
 
-	//// Character is coming from another zone.
-	//if (character) {
-	//	mConnectionOrigin = ConnectionOrigin::Zone;
-	//	mCharacter = character;
-	//}
-	//// Character is coming from character select.
-	//else {
-	//	mConnectionOrigin = ConnectionOrigin::Character_Select;
-
-	//	// Load Character. (Character becomes responsible for this memory AFTER Character::initialise)
-	//	auto profile = new PlayerProfile_Struct();
-	//	memset(profile, 0, sizeof(PlayerProfile_Struct));
-	//	auto extendedProfile = new ExtendedProfile_Struct();
-	//	memset(extendedProfile, 0, sizeof(ExtendedProfile_Struct));
-	//	uint32 characterID = 0;
-	//	//if (!DataStore::getInstance().loadCharacter(characterName, characterID, profile, extendedProfile)) {
-	//	if (!DataStore::getInstance().loadCharacter(characterName, nullptr)) {
-	//		Log::error("[Zone Client Connection] Failed to load character, dropping connection.");
-	//		dropConnection();
-	//		safe_delete(profile);
-	//		safe_delete(extendedProfile);
-	//		return;
-	//	}
-
-	//	// We will load this up every time for now but soon this data can be passed between Zones.
-	//	// Initialise Character.
-	//	mCharacter = new Character(characterID, authentication);
-	//	if (!mCharacter->initialise(profile, extendedProfile)) {
-	//		Log::error("[Zone Client Connection] Initialising Character failed, dropping connection.");
-	//		dropConnection();
-	//		safe_delete(mCharacter);
-	//		return;
-	//	}
-	//}
-
 	mCharacter->setZone(mZone);
 	mCharacter->setSpawnID(mZone->getNextSpawnID());
 	mCharacter->setConnection(this);
@@ -479,10 +444,6 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	*payload = { 0 }; // Clear memory.
 
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
-	//mCharacter->getProfile()->entityid = mCharacter->getSpawnID();
-	//mCharacter->getProfile()->zone_id = mZone->getID();
-	//mCharacter->getProfile()->zoneInstance = mZone->getInstanceID();
-	//memcpy(outPacket->pBuffer, mCharacter->getProfile(), outPacket->size);
 
 	strncpy(payload->name, mCharacter->getName().c_str(), Limits::Character::MAX_NAME_LENGTH);
 	strncpy(payload->last_name, mCharacter->getLastName().c_str(), Limits::Character::MAX_LAST_NAME_LENGTH);
@@ -499,7 +460,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->pvp;
 	//payload->level2;
 	payload->mAnonymous = mCharacter->getAnonymous();
-	payload->gm = mCharacter->getGM() ? 1 : 0;
+	payload->gm = mCharacter->isGM() ? 1 : 0;
 	payload->guildrank = mCharacter->getGuildRank();
 	//payload->guildbanker;
 	//payload->intoxication;
@@ -615,10 +576,14 @@ void ZoneClientConnection::_sendZoneEntry() {
 	auto payload = (ServerZoneEntry_Struct*)outPacket->pBuffer;
 
 	strcpy(payload->player.spawn.name, mCharacter->getName().c_str());
-	payload->player.spawn.heading = 0;//FloatToEQ19(heading);
-	payload->player.spawn.x = 0; //FloatToEQ19(x_pos);//((int32)x_pos)<<3;
-	payload->player.spawn.y = 0; // FloatToEQ19(y_pos);//((int32)y_pos)<<3;
-	payload->player.spawn.z = 0; // FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	//payload->player.spawn.heading = 0;//FloatToEQ19(heading);
+	//payload->player.spawn.x = 0; //FloatToEQ19(x_pos);//((int32)x_pos)<<3;
+	//payload->player.spawn.y = 0; // FloatToEQ19(y_pos);//((int32)y_pos)<<3;
+	//payload->player.spawn.z = 0; // FloatToEQ19(z_pos);//((int32)z_pos)<<3;
+	payload->player.spawn.heading = FloatToEQ19(mCharacter->getHeading());;
+	payload->player.spawn.x = FloatToEQ19(mCharacter->getX());
+	payload->player.spawn.y = FloatToEQ19(mCharacter->getY());;
+	payload->player.spawn.z = FloatToEQ19(mCharacter->getZ());;
 	payload->player.spawn.spawnId = mCharacter->getSpawnID();
 	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
 	payload->player.spawn.max_hp = 100;		//this field needs a better name
@@ -640,34 +605,31 @@ void ZoneClientConnection::_sendZoneEntry() {
 
 	payload->player.spawn.petOwnerId = 0;// ownerid;
 
-	payload->player.spawn.haircolor = 0; // haircolor;
-	payload->player.spawn.beardcolor = 0; // beardcolor;
-	payload->player.spawn.eyecolor1 = 0; //eyecolor1;
-	payload->player.spawn.eyecolor2 = 0; // eyecolor2;
-	payload->player.spawn.hairstyle = 0; // hairstyle;
-	payload->player.spawn.face = 0; // luclinface;
-	payload->player.spawn.beard = 0; // beard;
+	payload->player.spawn.haircolor = mCharacter->getHairColour();
+	payload->player.spawn.beardcolor = mCharacter->getBeardColour();
+	payload->player.spawn.eyecolor1 = mCharacter->getLeftEyeColour();
+	payload->player.spawn.eyecolor2 = mCharacter->getRightEyeColour();
+	payload->player.spawn.hairstyle = mCharacter->getHairStyle();
+	payload->player.spawn.face = mCharacter->getFaceStyle();
+	payload->player.spawn.beard = mCharacter->getBeardStyle();
 	payload->player.spawn.StandState = mCharacter->getAppearance();
-	payload->player.spawn.drakkin_heritage = 0; // drakkin_heritage;
-	payload->player.spawn.drakkin_tattoo = 0; // drakkin_tattoo;
-	payload->player.spawn.drakkin_details = 0; // drakkin_details;
+	payload->player.spawn.drakkin_heritage = mCharacter->getDrakkinHeritage();
+	payload->player.spawn.drakkin_tattoo = mCharacter->getDrakkinTattoo();
+	payload->player.spawn.drakkin_details = mCharacter->getDrakkinDetails();
 	payload->player.spawn.equip_chest2 = 0; // texture;
 	payload->player.spawn.helm = 0;//helmtexture;
 	payload->player.spawn.guildrank = mCharacter->getGuildRank();
 	payload->player.spawn.size = mCharacter->getSize();
 	payload->player.spawn.bodytype = BT_Humanoid;
 	payload->player.spawn.flymode = 0;// FindType(SE_Levitate) ? 2 : 0;
-	//payload->player.spawn.lastName[0] = '\0';
 	strcpy(payload->player.spawn.lastName, mCharacter->getLastName().c_str());
 	memset(payload->player.spawn.set_to_0xFF, 0xFF, sizeof(payload->player.spawn.set_to_0xFF));
-	payload->player.spawn.afk = 0;// AFK;
-	payload->player.spawn.lfg = 0;// LFG; // afk and lfg are cleared on zoning on live
+	payload->player.spawn.afk = mCharacter->isAFK() ? 1 : 0;
+	payload->player.spawn.lfg = mCharacter->isLFG() ? 1 : 0;
 	payload->player.spawn.anon = mCharacter->getAnonymous();
-	payload->player.spawn.gm = mCharacter->getGM();
+	payload->player.spawn.gm = mCharacter->isGM() ? 1 : 0;
 	payload->player.spawn.guildID = mCharacter->getGuildID();
 	payload->player.spawn.is_pet = 0;
-	payload->player.spawn.curHp = 1;
-	payload->player.spawn.NPC = 0;
 	payload->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
 	outPacket->priority = 6;
 	mStreamInterface->FastQueuePacket(&outPacket);
@@ -860,7 +822,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		// 0 = Normal, 1 = Anonymous, 2 = Roleplay
 		if (actionParameter >= 0 && actionParameter <= 2) {
 			// Update character and notify zone.
-			mCharacter->setAnonymous(actionParameter);
+			mCharacter->setAnonymous(static_cast<AnonType>(actionParameter)); // TODO: Checked cast
 			mZone->notifyCharacterAnonymous(mCharacter);
 		}
 		// Anything else is ignored.
@@ -1272,7 +1234,7 @@ void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
 void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
 	EXPECTED(mConnected);
 
-	pSpawn->spawn.gm = mCharacter->getGM();
+	pSpawn->spawn.gm = mCharacter->isGM() ? 1 : 0;
 	pSpawn->spawn.anon = mCharacter->getAnonymous();
 	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
 	pSpawn->spawn.x = FloatToEQ19(mCharacter->getX());
@@ -1501,18 +1463,18 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		FS_ANONYMOUS = 5024,		//% T1[ANONYMOUS] % 2 % 3
 		FS_DEFAULT = 5025		//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
 	};
-	const bool receiverIsGM = mCharacter->getGM() == 1 ? true : false;
+	const bool receiverIsGM = mCharacter->isGM() == 1 ? true : false;
 	for (auto i : pMatches) {
 		// NOTE: The write methods below *MUST* stay in order.
 
 		// Determine Format String ID.
 		uint32 formatString = FS_DEFAULT;
-		if (i->getAnonymous() != ANON_None) {
+		if (i->getAnonymous() != AT_None) {
 			// Player is /roleplay
-			if (i->getAnonymous() == ANON_Roleplay) 
+			if (i->getAnonymous() == AT_Roleplay) 
 				formatString = FS_ROLEPLAY;
 			// Player is /anonymous
-			if (i->getAnonymous() == ANON_Anonymous)
+			if (i->getAnonymous() == AT_Anonymous)
 				formatString = FS_ANONYMOUS;
 
 			// Allows GM to see through anonymous.

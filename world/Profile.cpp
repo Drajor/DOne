@@ -20,8 +20,8 @@ Profile::~Profile()
 	QueryPerformanceCounter(&li);
 	double ms = double(li.QuadPart - mStart) / mFrequency;
 
-	//StringStream ss;
-	//ss << "[Profile " << mName << "] Completed in " << ms << " ms";
-	//Log::info(ss.str());
+	StringStream ss;
+	ss << "[Profile " << mName << "] Completed in " << ms << " ms";
+	Log::info(ss.str());
 }
 
