@@ -132,7 +132,7 @@ void World::_handleIncomingClientConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		// TODO: Add Banned IPs check.
 		Log::info("[World] Incoming Connection");
-		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface, this));
+		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface));
 	}
 }
 
@@ -148,17 +148,6 @@ void World::_checkUCSConnection() {
 		}
 	}
 }
-
-//void World::addAuthentication(uint32 pLoginServerID, String pLoginServerAccountName, String pLoginServerKey, int16 pWorldAdmin, uint32 pIP, uint8 pLocal) {
-//	ClientAuthentication* client = new ClientAuthentication();
-//	client->mAccountID = pLoginServerID;
-//	client->mAccountName = pLoginServerAccountName;
-//	client->mKey = pLoginServerKey;
-//	client->mWorldAdmin = pWorldAdmin;
-//	client->mIP = pIP;
-//	client->mLocal = pLocal;
-//	mAuthenticatedClients.push_back(client);
-//}
 
 void World::addAuthentication(ClientAuthentication& pAuthentication) {
 	// Save our copy

@@ -49,9 +49,8 @@
 	#include <unistd.h>
 #endif
 
-WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld) :
-	mStreamInterface(pStreamInterface),
-	mWorld(pWorld)
+WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface) :
+	mStreamInterface(pStreamInterface)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
@@ -174,7 +173,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
 
 	// Check authentication.
-	EXPECTED_BOOL(mWorld->checkAuthentication(this, accountID, accountKey));
+	EXPECTED_BOOL(World::getInstance().checkAuthentication(this, accountID, accountKey));
 
 	mZoning = (payload->mZoning == 1);
 	// TODO: Ensure we are expecting a zoning client.
@@ -235,17 +234,17 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		}
 	}
 	// Check if name already in use.
-	if (valid && !mWorld->isCharacterNameUnique(characterName)) {
+	if (valid && !World::getInstance().isCharacterNameUnique(characterName)) {
 		valid = false;
 	}
 	// Check if name is reserved.
-	if (valid && mWorld->isCharacterNameReserved(characterName)) {
+	if (valid && World::getInstance().isCharacterNameReserved(characterName)) {
 		valid = false;
 	}
 	// Reserve character name.
 	if (valid) {
 		// For the rare chance that more than one user tries to create a character with same name.
-		mWorld->reserveCharacterName(mAccountID, characterName);
+		World::getInstance().reserveCharacterName(mAccountID, characterName);
 		mReservedCharacterName = characterName;
 	}
 
@@ -449,12 +448,12 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	if (mZoning) {
 		// Retrieve zone change data.
 		ZoneTransfer zoneTransfer;
-		if (mWorld->getCharacterZoneTransfer(characterName, zoneTransfer)) {
-			mWorld->removeZoneTransfer(characterName); // Remove zone transfer authority.
+		if (World::getInstance().getCharacterZoneTransfer(characterName, zoneTransfer)) {
+			World::getInstance().removeZoneTransfer(characterName); // Remove zone transfer authority.
 			// Add authentication to the zone the character is going to.
-			mWorld->addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
+			World::getInstance().addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
 			// Tell client which Zone to connect to.
-			_sendZoneServerInfo(mWorld->getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
+			_sendZoneServerInfo(World::getInstance().getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
 
 			return true;
 		}
@@ -473,22 +472,24 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		//EXPECTED_BOOL(characterData);
 
 		// TODO: At the moment Characters always go to NQ.
-		mWorld->addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
+		World::getInstance().addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
 		// Send MOTD?
 		// Send ChatServer?
 		// Send ChatServer2?
-		_sendZoneServerInfo(mWorld->getZonePort(ZoneIDs::NorthQeynos, 0));
+		_sendZoneServerInfo(World::getInstance().getZonePort(ZoneIDs::NorthQeynos, 0));
 		return true;
 	}
 }
 
 bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
+	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
-	static const auto MAXIMUM_NAME_SIZE = 64;
-	EXPECTED_BOOL(pPacket->size < MAXIMUM_NAME_SIZE);
+	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
 
-	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), MAXIMUM_NAME_SIZE);
-	if (mWorld->deleteCharacter(mAccountID, characterName)) {
+	auto payload = DeleteCharacter::convert(pPacket->pBuffer);
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+
+	if (World::getInstance().deleteCharacter(mAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();

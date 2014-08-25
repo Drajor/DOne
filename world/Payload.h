@@ -54,6 +54,9 @@ namespace Payload {
 
 		struct DeleteCharacter : VariableLengthPayload<DeleteCharacter> {
 			char* mCharacterName = 0;
+			static const bool sizeCheck(const std::size_t pSize) {
+				return pSize >= Limits::Character::MIN_NAME_LENGTH && pSize <= Limits::Character::MAX_NAME_LENGTH;
+			}
 		};
 
 		struct CreateCharacter : public FixedSizedPayload<CreateCharacter> {

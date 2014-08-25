@@ -27,11 +27,10 @@
 
 class EQApplicationPacket;
 class EQStreamInterface;
-class World;
 
 class WorldClientConnection {
 public:
-	WorldClientConnection(EQStreamInterface* pStreamInterface, World* pWorld);
+	WorldClientConnection(EQStreamInterface* pStreamInterface);
 	~WorldClientConnection();
 
 	bool update();
@@ -41,13 +40,13 @@ public:
 	inline uint16 getPort() { return mPort; }
 
 	inline void setAccountID(const uint32 pAccountID) { mAccountID = pAccountID; mAuthentication.mLoginServerAccountID = pAccountID; }
+	inline const uint32 getAccountID(){ return mAccountID; }
 	inline void setKey(const String& pKey) { mKey = pKey; mAuthentication.mKey = pKey; }
 	inline void setAccountName(const String& pAccountName) { mAccountName = pAccountName; mAuthentication.mLoginServerAccountName = pAccountName; }
 
 	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; }
 
 	void _sendZoneServerInfo(const uint16 pPort);
-	uint32 getAccountID(){ return mAccountID; }
 private:
 
 	inline void dropConnection() { mConnectionDropped = true; }
@@ -88,7 +87,6 @@ private:
 	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);
 
 	EQStreamInterface* const mStreamInterface;
-	World* mWorld;
 };
 
 #endif
