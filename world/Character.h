@@ -216,6 +216,17 @@ public:
 	inline const uint32 getDrakkinTattoo() const { return mDrakkinTattoo; }
 	inline const uint32 getDrakkinDetails() const { return mDrakkinDetails; }
 
+	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mLeftEyeColour = pLeftEyeColour; }
+	inline void setRightEyeColour(const uint8 pRightEyeColour) { mRightEyeColour = pRightEyeColour; }
+	inline void setBeardStyle(const uint8 pBeardStyle) { mBeardStyle = pBeardStyle; }
+	inline void setBeardColour(const uint8 pBeardColour) { mBeardColour = pBeardColour; }
+	inline void setHairStyle(const uint8 pHairStyle) { mHairStyle = pHairStyle; }
+	inline void setHairColour(const uint8 pHairColour) { mHairColour = pHairColour; }
+	inline void setFaceStyle(const uint8 pFaceStyle) { mFaceStyle = pFaceStyle; }
+	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mDrakkinHeritage = pDrakkinHeritage; }
+	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mDrakkinTattoo = pDrakkinTattoo; }
+	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mDrakkinDetails = pDrakkinDetails; }
+
 	const CharacterData* getData() const { return mData; }
 private:
 

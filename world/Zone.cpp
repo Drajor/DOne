@@ -625,3 +625,7 @@ Actor* Zone::findActor(const SpawnID pSpawnID) {
 
 	return nullptr;
 }
+
+void Zone::handleFaceChange(Character* pCharacter) {
+	// TODO: Notify others in zone.
+}

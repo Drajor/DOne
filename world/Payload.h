@@ -27,17 +27,22 @@ namespace Payload {
 			uint32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
+
+		struct FaceChange : public FixedSizedPayload<FaceChange> {
+			uint8 mHairColour = 0;
+			uint8 mBeardColour = 0;
+			uint8 mLeftEyeColour = 0;
+			uint8 mRightEyeColour = 0;
+			uint8 mHairStyle = 0;
+			uint8 mBeardStyle = 0;
+			uint8 mFaceStyle = 0;
+			uint32 mDrakkinHeritage = 0;
+			uint32 mDrakkinTattoo = 0;
+			uint32 mDrakkinDetails = 0;
+		};
 	}
 
 	namespace World {
-
-		//struct LoginInfo_Struct {
-		//	/*000*/	char	login_info[64];
-		//	/*064*/	uint8	unknown064[124];
-		//	/*188*/	uint8	zoning;			// 01 if zoning, 00 if not
-		//	/*189*/	uint8	unknown189[275];
-		//	/*488*/
-		//};
 
 		struct LoginInformation : public FixedSizedPayload<LoginInformation> {
 			char mInformation[64]; // Account ID and Account Key

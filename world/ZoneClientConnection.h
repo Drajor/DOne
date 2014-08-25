@@ -141,6 +141,7 @@ private:
 	void _handleGroupDisband(const EQApplicationPacket* pPacket);
 	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 	void _handleZoneChange(const EQApplicationPacket* pPacket);
+	void _handleFaceChange(const EQApplicationPacket* pPacket);
 
 	void _handleGuildCreate(const EQApplicationPacket* pPacket);
 	void _handleGuildDelete(const EQApplicationPacket* pPacket);

@@ -254,6 +254,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_SaveOnZoneReq:
 		Utility::print("[UNHANDLED OP_SaveOnZoneReq]");
 		break;
+	case OP_FaceChange:
+		_handleFaceChange(pPacket);
+		break;
 	case OP_WhoAllRequest:
 		_handleWhoAllRequest(pPacket);
 	case OP_GroupInvite:
@@ -2193,10 +2196,10 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 
 void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter));
-	PACKET_SIZE_CHECK(MakeLeader::sizeCheck(pPacket->size));
+	EXPECTED(MakeLeader::sizeCheck(pPacket->size));
 
 	auto payload = MakeLeader::convert(pPacket->pBuffer);
 
@@ -2211,4 +2214,28 @@ void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPa
 
 void ZoneClientConnection::_unimplementedFeature(String pOpCodeName)
 {
+}
+
+void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(FaceChange::sizeCheck(pPacket->size));
+
+	auto payload = FaceChange::convert(pPacket->pBuffer);
+
+	// TODO: Validation of values?
+
+	mCharacter->setHairColour(payload->mHairColour);
+	mCharacter->setBeardColour(payload->mBeardColour);
+	mCharacter->setLeftEyeColour(payload->mLeftEyeColour);
+	mCharacter->setRightEyeColour(payload->mRightEyeColour);
+	mCharacter->setHairStyle(payload->mHairStyle);
+	mCharacter->setBeardStyle(payload->mBeardStyle);
+	mCharacter->setFaceStyle(payload->mFaceStyle);
+	mCharacter->setDrakkinHeritage(payload->mDrakkinHeritage);
+	mCharacter->setDrakkinTattoo(payload->mDrakkinTattoo);
+	mCharacter->setDrakkinDetails(payload->mDrakkinDetails);
+
+	// Notify Zone.
+	mZone->handleFaceChange(mCharacter);
 }

@@ -81,13 +81,7 @@ public:
 	void notifyCharacterGM(Character* pCharacter);
 
 	void handleTarget(Character* pCharacter, SpawnID pSpawnID);
-
-	// Group
-	//void notifyCharacterGroupInvite(Character* pCharacter, const String pToCharacterName);
-	//void notifyCharacterAcceptGroupInvite(Character* pCharacter, String pToCharacterName);
-	//void notifyCharacterDeclineGroupInvite(Character* pCharacter, String pToCharacterName);
-	//void notifyCharacterGroupDisband(Character* pCharacter, const String& pRemoveCharacterName);
-	//void notifyCharacterMakeLeaderRequest(Character* pCharacter, String pNewLeaderName);
+	void handleFaceChange(Character* pCharacter);
 
 	// Guild
 	void notifyGuildsChanged();
@@ -122,7 +116,6 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
-
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID;
