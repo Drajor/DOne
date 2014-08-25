@@ -33,13 +33,14 @@ struct Vector4 {
 class Character : public Actor {
 	friend ZoneClientConnection;
 public:
-	Character(CharacterData* pCharacterData);
+	Character(const uint32 pAccountID, CharacterData* pCharacterData);
 	~Character();
-	inline bool isCharacter() { return true; }
-	inline bool isInitialised() { return mInitialised; }
-	inline bool isZoning() { return mIsZoning; }
-	inline void setZoning(bool pZoning) { mIsZoning = pZoning; }
-	inline bool isLinkDead() { return mIsLinkDead; }
+	inline const uint32 getAccountID() const { return mAccountID; }
+	inline const bool isCharacter() const { return true; }
+	inline const bool isInitialised() const { return mInitialised; }
+	inline const bool isZoning() const { return mIsZoning; }
+	inline void setZoning(const bool pZoning) { mIsZoning = pZoning; }
+	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
 
 
@@ -84,7 +85,7 @@ public:
 
 	void setZone(Zone* pZone) { mZone = pZone; }
 
-	Zone* getZone() { return mZone; }
+	Zone* getZone() const { return mZone; }
 	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
 	ZoneClientConnection* getConnection() { return mConnection; }
 	
@@ -92,11 +93,11 @@ public:
 
 	void setStanding(bool pStanding);
 
-	inline const String& getName() { return mName; }
-	inline const String& getLastName() { return mLastName; }
-	inline const String& getTitle() { return mTitle; }
-	inline const String& getSuffix() { return mSuffix; }
-	inline const uint32 getStatus() { return mStatus; }
+	inline const String& getName() const { return mName; }
+	inline const String& getLastName() const { return mLastName; }
+	inline const String& getTitle() const { return mTitle; }
+	inline const String& getSuffix() const { return mSuffix; }
+	inline const uint32 getStatus() const { return mStatus; }
 	
 	void startCamp();
 	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
@@ -130,23 +131,23 @@ public:
 	void setPosition(Vector3& pPosition);
 	void setPosition(Vector4& pPosition);
 
-	float getHeading() { return mHeading; }
-	int32 getDeltaHeading() { return mDeltaHeading; }
+	const float getHeading() const { return mHeading; }
+	const int32 getDeltaHeading() const { return mDeltaHeading; }
 	void setHeading(float pHeading);
-	uint32 getRace() { return mRace; }
-	uint32 getOriginalRace() { return mOriginalRace; }
-	float getRunSpeed() { return mRunSpeed; }
-	float getWalkSpeed() { return mWalkSpeed; }
-	uint8 getClass() { return mClass; }
-	uint8 getGender() { return mGender; }
-	uint8 getLevel() { return mLevel; }
-	uint16 getDeity() { return mDeity; }
-	float getSize() { return mSize; }
-	int32 getAnimation() { return mAnimation; }
-	SpawnAppearanceAnimation getAppearance() { return mAppearance; }
-	void setAnimation(int32 pAnimation) { mAnimation = pAnimation; }
-	inline void setAnonymous(AnonType pAnonymous) { mAnonymous = pAnonymous; }
-	inline AnonType getAnonymous() { return mAnonymous; };
+	const uint32 getRace() const { return mRace; }
+	const uint32 getOriginalRace() const { return mOriginalRace; }
+	const float getRunSpeed() const { return mRunSpeed; }
+	const float getWalkSpeed() const { return mWalkSpeed; }
+	const uint8 getClass() const { return mClass; }
+	const uint8 getGender() const { return mGender; }
+	const uint8 getLevel() const { return mLevel; }
+	const uint16 getDeity() const { return mDeity; }
+	const float getSize() const { return mSize; }
+	const int32 getAnimation() const { return mAnimation; }
+	const SpawnAppearanceAnimation getAppearance() const { return mAppearance; }
+	void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
+	inline void setAnonymous(const AnonType pAnonymous) { mAnonymous = pAnonymous; }
+	inline const AnonType getAnonymous() const { return mAnonymous; };
 	inline const bool isGM() const { return mGM; };
 	inline void setGM(const bool pGM) { mGM = pGM; }
 
@@ -200,28 +201,29 @@ public:
 	uint32 getWisdom() { return 0; };
 	uint32 getStatistic(Statistic pStatistic);
 
-	inline const bool getAutoConsentGroup() { return mAutoConsentGroup; }
-	inline const bool getAutoConsentRaid() { return mAutoConsentRaid; }
-	inline const bool getAutoConsentGuild() { return mAutoConsentGuild; }
+	inline const bool getAutoConsentGroup() const { return mAutoConsentGroup; }
+	inline const bool getAutoConsentRaid() const { return mAutoConsentRaid; }
+	inline const bool getAutoConsentGuild() const { return mAutoConsentGuild; }
 
-	inline const uint8 getLeftEyeColour() { return mLeftEyeColour; }
-	inline const uint8 getRightEyeColour() { return mRightEyeColour; }
-	inline const uint8 getBeardStyle() { return mBeardStyle; }
-	inline const uint8 getBeardColour() { return mBeardColour; }
-	inline const uint8 getHairStyle() { return mHairStyle; }
-	inline const uint8 getHairColour() { return mHairColour; }
-	inline const uint8 getFaceStyle() { return mFaceStyle; }
-	inline const uint32 getDrakkinHeritage() { return mDrakkinHeritage; }
-	inline const uint32 getDrakkinTattoo() { return mDrakkinTattoo; }
-	inline const uint32 getDrakkinDetails() { return mDrakkinDetails; }
+	inline const uint8 getLeftEyeColour() const { return mLeftEyeColour; }
+	inline const uint8 getRightEyeColour() const { return mRightEyeColour; }
+	inline const uint8 getBeardStyle() const { return mBeardStyle; }
+	inline const uint8 getBeardColour() const { return mBeardColour; }
+	inline const uint8 getHairStyle() const { return mHairStyle; }
+	inline const uint8 getHairColour() const { return mHairColour; }
+	inline const uint8 getFaceStyle() const { return mFaceStyle; }
+	inline const uint32 getDrakkinHeritage() const { return mDrakkinHeritage; }
+	inline const uint32 getDrakkinTattoo() const { return mDrakkinTattoo; }
+	inline const uint32 getDrakkinDetails() const { return mDrakkinDetails; }
 
-	const CharacterData* getData() { return mData; }
+	const CharacterData* getData() const { return mData; }
 private:
 
 	void _initialiseProfile();
 
 	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
 
+	const uint32 mAccountID;
 	bool mInitialised = false;
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;

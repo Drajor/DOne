@@ -3,6 +3,7 @@
 #include "Data.h"
 #include "Payload.h"
 
+class Character;
 class AccountManager {
 public:
 	static AccountManager& getInstance() {
@@ -24,6 +25,7 @@ public:
 
 	bool handleCharacterCreate(uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
 	bool deleteCharacter(const String& pCharacterName);
+	const bool updateCharacter(const uint32 pAccountID, const Character* pCharacter);
 
 	bool ban(const String& pAccountName);
 	bool removeBan(const String& pAccountName);

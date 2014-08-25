@@ -417,7 +417,7 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	}
 
 	// Create Character
-	Character* character = new Character(characterData);
+	Character* character = new Character(pConnection->getAccountID(), characterData);
 
 	// Register ZoneTransfer
 	ZoneManager::getInstance().registerZoneTransfer(character, characterData->mZoneID, characterData->mInstanceID);

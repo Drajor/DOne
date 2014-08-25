@@ -22,18 +22,21 @@ class NPC;
 
 class Zone {
 public:
-	Zone(uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID = 0);
+	Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID = 0);
 	~Zone();
 
 	bool initialise();
-	String getLongName() { return mLongName; }
-	String getShortName() { return mShortName; }
-	uint32 getLongNameStringID() { return mLongNameStringID; }
-	float getGravity() { return 0.4f; }
-	float getMinimumZ() { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
-	uint8 getZoneType() { return 255; } // Unknown.
 
-	uint32 getNumCharacters() { return mCharacters.size(); }
+	inline const String& getLongName() const { return mLongName; }
+	inline const String& getShortName() const { return mShortName; }
+	inline const uint32 getLongNameStringID() const { return mLongNameStringID; }
+	inline const float getGravity() const { return 0.4f; }
+	inline const float getMinimumZ() const { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
+	inline const uint8 getZoneType() const { return 255; } // Unknown.
+	inline const uint32 getNumCharacters() const { return mCharacters.size(); }
+	inline const ZoneID getID() const { return mID; }
+	inline const InstanceID getInstanceID() const { return mInstanceID; }
+	inline const uint16 getPort() const { return mPort; }
 
 	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName);
 	void removeAuthentication(String pCharacterName);
@@ -52,9 +55,7 @@ public:
 
 	void _updatePreConnections();
 
-	ZoneID getID() { return mID; }
-	InstanceID getInstanceID() { return mInstanceID; }
-	uint16 getPort() { return mPort; }
+
 
 	Character* findCharacter(const String pCharacterName);
 	Actor* findActor(const SpawnID pSpawnID);
@@ -128,9 +129,9 @@ private:
 	String mLongName;
 	String mShortName;
 	uint16 mNextSpawnID;
-	ZoneID mID;
-	InstanceID mInstanceID;
-	uint32 mPort;
+	const ZoneID mID;
+	const InstanceID mInstanceID;
+	const uint32 mPort;
 
 	bool mInitialised; // Flag indicating whether the Zone has been initialised.
 	EQStreamFactory* mStreamFactory;

@@ -6,6 +6,9 @@
 #include "Profile.h"
 #include "Payload.h"
 
+#include "Character.h"
+#include "Zone.h"
+
 #include "Shlwapi.h"
 
 static bool deleteAll(AccountData* pValue) { delete pValue; return true; };
@@ -167,4 +170,45 @@ void AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
 bool AccountManager::handleCharacterCreate(uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload)
 {
 	return true;
+}
+
+const bool AccountManager::updateCharacter(const uint32 pAccountID, const Character* pCharacter) {
+	EXPECTED_BOOL(pCharacter);
+	AccountData* accountData = _find(pAccountID);
+	EXPECTED_BOOL(accountData);
+	EXPECTED_BOOL(accountData->mCharacterDataLoaded);
+
+	AccountData::CharacterData* accountCharacterData = nullptr;
+	for (auto i : accountData->mCharacterData) {
+		if (i->mName == pCharacter->getName()) {
+			accountCharacterData = i;
+			break;
+		}
+	}
+	EXPECTED_BOOL(accountCharacterData);
+	EXPECTED_BOOL(pCharacter->getZone());
+
+	accountCharacterData->mName = pCharacter->getName();
+	accountCharacterData->mLevel = pCharacter->getLevel();
+	accountCharacterData->mClass = pCharacter->getClass();
+	accountCharacterData->mRace = pCharacter->getRace();
+	accountCharacterData->mGender = pCharacter->getGender();
+	accountCharacterData->mDeity = pCharacter->getDeity();
+	accountCharacterData->mZoneID = pCharacter->getZone()->getID();
+	accountCharacterData->mFace = pCharacter->getFaceStyle();
+	accountCharacterData->mHairStyle = pCharacter->getHairStyle();
+	accountCharacterData->mHairColour = pCharacter->getHairColour();
+	accountCharacterData->mBeardStyle = pCharacter->getBeardStyle();
+	accountCharacterData->mBeardColour = pCharacter->getBeardColour();
+	accountCharacterData->mEyeColourLeft = pCharacter->getLeftEyeColour();
+	accountCharacterData->mEyeColourRight = pCharacter->getRightEyeColour();
+	accountCharacterData->mDrakkinHeritage = pCharacter->getDrakkinHeritage();
+	accountCharacterData->mDrakkinTattoo = pCharacter->getDrakkinTattoo();
+	accountCharacterData->mDrakkinDetails = pCharacter->getDrakkinDetails();
+	accountCharacterData->mPrimary = 0; // TODO: Items
+	accountCharacterData->mSecondary = 0; // TODO: Items
+
+	// TODO: Materials
+
+	EXPECTED_BOOL(_save(accountData));
 }

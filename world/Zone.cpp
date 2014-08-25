@@ -1,6 +1,7 @@
 #include "Zone.h"
 #include "ZoneData.h"
 #include "World.h"
+#include "AccountManager.h"
 #include "ZoneManager.h"
 #include "GroupManager.h"
 #include "GuildManager.h"
@@ -17,7 +18,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 
-Zone::Zone(uint32 pPort, ZoneID pZoneID, InstanceID pInstanceID) :
+Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID),
@@ -473,7 +474,11 @@ void Zone::requestSave(Character*pCharacter) {
 	if (!DataStore::getInstance().saveCharacter(pCharacter->getName(), pCharacter->getData())) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
+		return;
 	}
+
+	// Update the Account
+	AccountManager::getInstance().updateCharacter(pCharacter->getAccountID(), pCharacter);
 }
 
 void Zone::whoRequest(Character* pCharacter, WhoFilter& pFilter) {
