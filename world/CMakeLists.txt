@@ -29,6 +29,7 @@ SET(world_sources
 	RaidManager.cpp
 	Limits.cpp
 	NPC.cpp
+	Scene.cpp
 )
 
 SET(world_headers
@@ -62,6 +63,9 @@ SET(world_headers
 	Actor.h
 	NPC.h
 	Payload.h
+	Data.h
+	Scene.h
+	Vector3.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

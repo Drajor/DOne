@@ -47,9 +47,9 @@ bool Character::initialise() {
 	mLevel = mData->mLevel;
 	mStatus = 255; // mData->mStatus; (testing)
 
-	mX = mData->mX;
-	mY = mData->mY;
-	mZ = mData->mZ;
+	mPosition.x = mData->mX;
+	mPosition.y = mData->mY;
+	mPosition.z = mData->mZ;
 	mHeading = mData->mHeading;
 
 	mBeardStyle = mData->mBeardStyle;
@@ -125,23 +125,16 @@ void Character::message(MessageType pType, String pMessage)
 }
 
 void Character::setPosition(float pX, float pY, float pZ, float pHeading) {
-	mX = pX;
-	mY = pY;
-	mZ = pZ;
+	mPosition.x = pX;
+	mPosition.y = pY;
+	mPosition.z = pZ;
 	mHeading = pHeading;
 }
 
 void Character::setPosition(Vector3& pPosition) {
-	mX = pPosition.x;
-	mY = pPosition.y;
-	mZ = pPosition.z;
-}
-
-void Character::setPosition(Vector4& pPosition) {
-	mX = pPosition.x;
-	mY = pPosition.y;
-	mZ = pPosition.z;
-	mHeading = pPosition.h;
+	mPosition.x = pPosition.x;
+	mPosition.y = pPosition.y;
+	mPosition.z = pPosition.z;
 }
 
 void Character::setHeading(float pHeading) {
@@ -332,9 +325,9 @@ void Character::_updateForSave() {
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
-	mData->mX = mX;
-	mData->mY = mY;
-	mData->mZ = mZ;
+	mData->mX = mPosition.x;
+	mData->mY = mPosition.y;
+	mData->mZ = mPosition.z;
 	mData->mHeading = mHeading;
 
 	mData->mStrength = mBaseStrength;

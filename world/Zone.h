@@ -19,6 +19,7 @@ class Raid;
 class RaidManager;
 class Actor;
 class NPC;
+class Scene;
 
 class Zone {
 public:
@@ -99,6 +100,8 @@ public:
 	void requestSave(Character* pCharacter);
 
 	
+	void handleVisibilityAdd(Character* pCharacter, Character* pAddCharacter);
+	void handleVisibilityRemove(Character* pCharacter, Character* pRemoveCharacter);
 	
 private:
 
@@ -130,6 +133,7 @@ private:
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 
+	Scene* mScene = nullptr;
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
 	std::list<Actor*> mActors;

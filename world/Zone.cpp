@@ -17,6 +17,7 @@
 #include "../common/patches/patches.h"
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
+#include "Scene.h"
 
 Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID) :
 	mPort(pPort),
@@ -52,6 +53,8 @@ bool Zone::initialise() {
 	mLongNameStringID = ZoneData::getInstance().getLongNameStringID(mID);
 	mLongName = ZoneData::getInstance().getLongName(mID);
 	mShortName = ZoneData::getInstance().getShortName(mID);
+
+	mScene = new Scene(this);
 
 	mInitialised = true;
 	return true;
@@ -259,40 +262,61 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 }
 
 void Zone::notifyCharacterZoneIn(Character* pCharacter) {
-	// Notify players in zone.
-	ZoneClientConnection* sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = sender->makeCharacterSpawnPacket();
-	for (auto i : mConnections) {
-		if(i != sender)
-			i->sendPacket(outPacket);
-	}
-	safe_delete(outPacket);
+	EXPECTED(pCharacter);
+	EXPECTED(mScene);
 
-	// Notify character zoning in of zone spawns.
-	const unsigned int numCharacters = mConnections.size();
-	if (numCharacters > 1) {
-		EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, sizeof(NewSpawn_Struct)* numCharacters);
-		NewSpawn_Struct* spawns = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
-		int index = 0;
-		for (auto i : mConnections) {
-			i->populateSpawnStruct(&spawns[index]);
-			index++;
-		}
+	// Add Character to Scene.
+	mScene->add(pCharacter);
 
-		sender->sendPacket(outPacket);
-		safe_delete(outPacket);
-	}
+	//// Send pCharacter Spawn to anyone who can see them.
+	//EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterSpawnPacket();
+	//for (auto i : pCharacter->getVisibleTo()) {
+	//	i->getConnection()->sendPacket(outPacket);
+	//}
+
+	//return;
+	//// Notify players in zone.
+	//ZoneClientConnection* sender = pCharacter->getConnection();
+	//EQApplicationPacket* outPacket = sender->makeCharacterSpawnPacket();
+	//for (auto i : mConnections) {
+	//	if(i != sender)
+	//		i->sendPacket(outPacket);
+	//}
+	//safe_delete(outPacket);
+
+	//// Notify character zoning in of zone spawns.
+	//const unsigned int numCharacters = mConnections.size();
+	//if (numCharacters > 1) {
+	//	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, sizeof(NewSpawn_Struct)* numCharacters);
+	//	NewSpawn_Struct* spawns = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
+	//	int index = 0;
+	//	for (auto i : mConnections) {
+	//		i->populateSpawnStruct(&spawns[index]);
+	//		index++;
+	//	}
+
+	//	sender->sendPacket(outPacket);
+	//	safe_delete(outPacket);
+	//}
 	
 }
 
 
 void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
 	// Notify players in zone.
-	ZoneClientConnection* sender = pCharacter->getConnection();
+	//ZoneClientConnection* sender = pCharacter->getConnection();
+	//EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
+	//for (auto i : mConnections) {
+	//	if (i != sender)
+	//		i->sendPacket(outPacket);
+	//}
+	//safe_delete(outPacket);
+	mScene->update(pCharacter);
+
+	// Visible To update.
 	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
-	for (auto i : mConnections) {
-		if (i != sender)
-			i->sendPacket(outPacket);
+	for (auto i : pCharacter->getVisibleTo()) {
+		i->getConnection()->sendPacket(outPacket);
 	}
 	safe_delete(outPacket);
 }
@@ -628,4 +652,31 @@ Actor* Zone::findActor(const SpawnID pSpawnID) {
 
 void Zone::handleFaceChange(Character* pCharacter) {
 	// TODO: Notify others in zone.
+}
+
+void Zone::handleVisibilityAdd(Character* pCharacter, Character* pAddCharacter) {
+	EXPECTED(pCharacter);
+	EXPECTED(pAddCharacter);
+
+	Log::info(pCharacter->getName() + " can now see " + pAddCharacter->getName());
+
+	// 
+	auto outPacket = pAddCharacter->getConnection()->makeCharacterSpawnPacket();
+	pCharacter->getConnection()->sendPacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void Zone::handleVisibilityRemove(Character* pCharacter, Character* pRemoveCharacter) {
+	EXPECTED(pCharacter);
+	EXPECTED(pRemoveCharacter);
+
+	Log::info(pCharacter->getName() + " can no longer see " + pRemoveCharacter->getName());
+
+	// 
+	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
+	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
+	payload->spawn_id = pRemoveCharacter->getSpawnID();
+	payload->Decay = 0;
+	pCharacter->getConnection()->sendPacket(outPacket);
+	safe_delete(outPacket);
 }

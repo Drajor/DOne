@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Actor.h"
+#include "Utility.h"
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
 
@@ -12,23 +13,6 @@ class EQStreamInterface;
 class ZoneClientConnection;
 
 struct CharacterData;
-
-struct Vector3 {
-	Vector3() : x(0.0f), y(0.0f), z(0.0f) {};
-	Vector3(float pX, float pY, float pZ) : x(pX), y(pY), z(pZ) {};
-	float x;
-	float y;
-	float z;
-};
-struct Vector4 {
-	Vector4() : x(0.0f), y(0.0f), z(0.0f), h(0.0f) {};
-	Vector4(float pX, float pY, float pZ, float pH) : x(pX), y(pY), z(pZ), h(pH) {};
-	float x;
-	float y;
-	float z;
-	float h;
-};
-
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -118,18 +102,16 @@ public:
 
 	// Position and Heading
 	void setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading);
-	Vector3 getPosition3() { return Vector3(mX, mY, mZ); };
-	Vector4 getPosition4() { return Vector4(mX, mY, mZ, mHeading); };
-	float getX() { return mX; }
-	float getY() { return mY; }
-	float getZ() { return mZ; }
+	Vector3 getPosition3() { return mPosition; };
+	float getX() { return mPosition.x; }
+	float getY() { return mPosition.y; }
+	float getZ() { return mPosition.z; }
 	int32 getDeltaX() { return mDeltaX; }
 	int32 getDeltaY() { return mDeltaY; }
 	int32 getDeltaZ() { return mDeltaZ; }
 
 	void setPosition(float pX, float pY, float pZ, float pHeading);
 	void setPosition(Vector3& pPosition);
-	void setPosition(Vector4& pPosition);
 
 	const float getHeading() const { return mHeading; }
 	const int32 getDeltaHeading() const { return mDeltaHeading; }
@@ -227,6 +209,14 @@ public:
 	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mDrakkinTattoo = pDrakkinTattoo; }
 	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mDrakkinDetails = pDrakkinDetails; }
 
+	inline const float getVisibleRange() const { return mVisibleRange; }
+	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
+	//inline std::list<Character*>& getVisible() { return mVisible; }
+	inline std::list<Character*>& getVisibleTo() { return mVisibleTo; }
+
+	inline void addVisibleTo(Character* pCharacter) { EXPECTED(pCharacter); EXPECTED(pCharacter != this); mVisibleTo.push_back(pCharacter); }
+	inline void removeVisibleTo(Character* pCharacter) { EXPECTED(pCharacter); EXPECTED(mVisibleTo.empty() == false); std::size_t oSize = mVisibleTo.size(); mVisibleTo.remove(pCharacter); EXPECTED(mVisibleTo.size() == oSize - 1); }
+
 	const CharacterData* getData() const { return mData; }
 private:
 
@@ -239,9 +229,6 @@ private:
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
-	float mX = 0.0f;
-	float mY = 0.0f;
-	float mZ = 0.0f;
 	float mHeading = 0.0f;
 	int32 mDeltaX = 0;
 	int32 mDeltaY = 0;
@@ -341,5 +328,7 @@ private:
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();
 	
-
+	float mVisibleRange = 30.0f;
+	//std::list<Character*> mVisible; // List of Characters who this Character can see.
+	std::list<Character*> mVisibleTo; // List of Characters who can see this Character.
 };

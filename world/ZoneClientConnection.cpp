@@ -255,6 +255,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("[UNHANDLED OP_SaveOnZoneReq]");
 		break;
 	case OP_FaceChange:
+		// NOTE: This occurs when the player presses 'Accept' in the Face interface.
 		_handleFaceChange(pPacket);
 		break;
 	case OP_WhoAllRequest:
