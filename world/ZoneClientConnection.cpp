@@ -452,11 +452,11 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	strncpy(payload->name, mCharacter->getName().c_str(), Limits::Character::MAX_NAME_LENGTH);
 	strncpy(payload->last_name, mCharacter->getLastName().c_str(), Limits::Character::MAX_LAST_NAME_LENGTH);
 	payload->gender = mCharacter->getGender();
-	payload->race = mCharacter->getRace();
+	payload->race = mCharacter->getRaceID();
 	payload->class_ = mCharacter->getClass();
 	payload->level = mCharacter->getLevel();
 	//payload->binds[5];
-	payload->deity = mCharacter->getDeity();
+	payload->deity = mCharacter->getDeityID();
 	payload->guild_id = mCharacter->getGuildID();
 	//payload->birthday;			// characters bday
 	//payload->lastlogin;			// last login or zone time
@@ -464,7 +464,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->pvp;
 	//payload->level2;
 	payload->mAnonymous = mCharacter->getAnonymous();
-	payload->gm = mCharacter->isGM() ? 1 : 0;
+	payload->gm = mCharacter->getIsGM() ? 1 : 0;
 	payload->guildrank = mCharacter->getGuildRank();
 	//payload->guildbanker;
 	//payload->intoxication;
@@ -591,13 +591,13 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.spawnId = mCharacter->getSpawnID();
 	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
 	payload->player.spawn.max_hp = 100;		//this field needs a better name
-	payload->player.spawn.race = mCharacter->getRace();
+	payload->player.spawn.race = mCharacter->getRaceID();
 	payload->player.spawn.runspeed = mCharacter->getRunSpeed();
 	payload->player.spawn.walkspeed = mCharacter->getWalkSpeed();
 	payload->player.spawn.class_ = mCharacter->getClass();
 	payload->player.spawn.gender = mCharacter->getGender();
 	payload->player.spawn.level = mCharacter->getLevel();
-	payload->player.spawn.deity = mCharacter->getDeity();
+	payload->player.spawn.deity = mCharacter->getDeityID();
 	payload->player.spawn.animation = 0;
 	payload->player.spawn.findable = 0;
 	payload->player.spawn.light = 1;
@@ -631,7 +631,7 @@ void ZoneClientConnection::_sendZoneEntry() {
 	payload->player.spawn.afk = mCharacter->isAFK() ? 1 : 0;
 	payload->player.spawn.lfg = mCharacter->isLFG() ? 1 : 0;
 	payload->player.spawn.anon = mCharacter->getAnonymous();
-	payload->player.spawn.gm = mCharacter->isGM() ? 1 : 0;
+	payload->player.spawn.gm = mCharacter->getIsGM() ? 1 : 0;
 	payload->player.spawn.guildID = mCharacter->getGuildID();
 	payload->player.spawn.is_pet = 0;
 	payload->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
@@ -835,12 +835,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	case SpawnAppearanceType::AFK:
 		if (actionParameter == 0) {
 			// Update character and notify zone.
-			mCharacter->setAFK(false);
+			mCharacter->setIsAFK(false);
 			mZone->notifyCharacterAFK(mCharacter);
 		}
 		else if (actionParameter == 1) {
 			// Update character and notify zone.
-			mCharacter->setAFK(true);
+			mCharacter->setIsAFK(true);
 			mZone->notifyCharacterAFK(mCharacter);
 		}
 		// Anything else is ignored.
@@ -1238,7 +1238,7 @@ void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
 void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
 	EXPECTED(mConnected);
 
-	pSpawn->spawn.gm = mCharacter->isGM() ? 1 : 0;
+	pSpawn->spawn.gm = mCharacter->getIsGM() ? 1 : 0;
 	pSpawn->spawn.anon = mCharacter->getAnonymous();
 	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
 	pSpawn->spawn.x = FloatToEQ19(mCharacter->getX());
@@ -1247,13 +1247,13 @@ void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
 	pSpawn->spawn.spawnId = mCharacter->getSpawnID();
 	pSpawn->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
 	pSpawn->spawn.max_hp = 100;
-	pSpawn->spawn.race = mCharacter->getRace();
+	pSpawn->spawn.race = mCharacter->getRaceID();
 	pSpawn->spawn.runspeed = mCharacter->getRunSpeed();
 	pSpawn->spawn.walkspeed = mCharacter->getWalkSpeed();
 	pSpawn->spawn.class_ = mCharacter->getClass();
 	pSpawn->spawn.gender = mCharacter->getGender();
 	pSpawn->spawn.level = mCharacter->getLevel();
-	pSpawn->spawn.deity = mCharacter->getDeity();
+	pSpawn->spawn.deity = mCharacter->getDeityID();
 	pSpawn->spawn.animation = mCharacter->getAnimation();
 	pSpawn->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
 	pSpawn->spawn.light = 1; // TODO: Items
@@ -1467,7 +1467,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		FS_ANONYMOUS = 5024,		//% T1[ANONYMOUS] % 2 % 3
 		FS_DEFAULT = 5025		//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
 	};
-	const bool receiverIsGM = mCharacter->isGM() == 1 ? true : false;
+	const bool receiverIsGM = mCharacter->getIsGM() == 1 ? true : false;
 	for (auto i : pMatches) {
 		// NOTE: The write methods below *MUST* stay in order.
 
@@ -1513,7 +1513,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		dynamicStructure.write<uint32>(4); // zone (Not sure what this does).
 		dynamicStructure.write<uint32>(i->getClass()); // class_
 		dynamicStructure.write<uint32>(i->getLevel()); // level
-		dynamicStructure.write<uint32>(i->getRace()); // race
+		dynamicStructure.write<uint32>(i->getRaceID()); // race
 		dynamicStructure.writeString(FakeAccount); // account
 		//dynamicStructure.write<uint32>(0); // account
 		dynamicStructure.write<uint32>(0); // unknown100

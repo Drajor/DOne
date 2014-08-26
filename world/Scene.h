@@ -13,6 +13,11 @@ public:
 	const bool add(Actor* pActor);
 	const bool remove(Actor* pActor);
 	const bool update(Actor* pActor); // NOTE: Called when an Actor moves
+
+	// Search (whole Scene) for Characters within pRange of pCharacter.
+	void queryRange(Character* pCharacter, std::list<Character*>& pResult, const float pRange) {};
+	// Search Characters visible to pCharacter within pRange of pCharacter
+	void queryRangeVisible(Character* pCharacter, std::list<Character*>& pResult, const float pRange) {};
 private:
 	void _updateCharacter(Character* pCharacter);
 	void _updateNPC(NPC* pNPC);

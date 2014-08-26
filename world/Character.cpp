@@ -13,6 +13,10 @@ static const int AUTO_SAVE_FREQUENCY = 10000;
 Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : mAccountID(pAccountID), mData(pCharacterData) {
 	EXPECTED(mData);
 	mName = pCharacterData->mName; // NOTE: This is required for ID before initialise has been called.
+
+	setRunSpeed(0.7f);
+	setWalkSpeed(0.35f);
+	setBodyType(BT_Humanoid);
 }
 
 Character::~Character() {
@@ -20,7 +24,7 @@ Character::~Character() {
 
 void Character::update() {
 
-	if (mGM) {
+	if (getIsGM()) {
 		if (mSuperGMPower.Check()) {
 			mZone->notifyCharacterLevelIncrease(this);
 		}
@@ -39,29 +43,28 @@ bool Character::initialise() {
 	mLastName = mData->mLastName;
 	mTitle = mData->mTitle;
 	mSuffix = mData->mSuffix;
-	mRace = mData->mRace;
-	mOriginalRace = mRace;
-	mGM = true; // mData->mGM; (testing).
-	mClass = mData->mClass;
-	mGender = mData->mGender;
-	mLevel = mData->mLevel;
-	mStatus = 255; // mData->mStatus; (testing)
+	setRaceID(mData->mRace);
+	setIsGM(mData->mGM);
+	setClass(mData->mClass);
+	setGender(mData->mGender);
+	setLevel(mData->mLevel);
+	mData->mStatus;
 
 	mPosition.x = mData->mX;
 	mPosition.y = mData->mY;
 	mPosition.z = mData->mZ;
 	mHeading = mData->mHeading;
 
-	mBeardStyle = mData->mBeardStyle;
-	mBeardColour = mData->mBeardColour;
-	mHairStyle = mData->mHairStyle;
-	mHairColour = mData->mHairColour;
-	mFaceStyle = mData->mFace;
-	mDrakkinHeritage = mData->mDrakkinHeritage;
-	mDrakkinTattoo = mData->mDrakkinTattoo;
-	mDrakkinDetails = mData->mDrakkinDetails;
+	setBeardStyle(mData->mBeardStyle);
+	setBeardColour(mData->mBeardColour);
+	setHairStyle(mData->mHairStyle);
+	setHairColour(mData->mHairColour);
+	setFaceStyle(mData->mFace);
+	setDrakkinHeritage(mData->mDrakkinHeritage);
+	setDrakkinTattoo(mData->mDrakkinTattoo);
+	setDrakkinDetails(mData->mDrakkinDetails);
 
-	mSize = Character::getDefaultSize(mRace);
+	setSize(Character::getDefaultSize(getRaceID()));
 
 	mExperience = mData->mExperience;
 
@@ -164,7 +167,7 @@ void Character::doAnimation(uint8 pAnimationID) {
 
 void Character::addExperience(uint32 pExperience) {
 	// Handle special case where Character is max level / experience.
-	if (mLevel == Character::getMaxCharacterLevel()) {
+	if (getLevel() == Character::getMaxCharacterLevel()) {
 		// Character is already at max exp - 1
 		if (mExperience == getExperienceForNextLevel() - 1) {
 			message(MessageType::LightBlue, "You can no longer gain experience.");
@@ -205,7 +208,7 @@ void Character::removeExperience(uint32 pExperience) {
 void Character::_checkForLevelIncrease() {
 	while (mExperience >= getExperienceForNextLevel()) {
 		mExperience -= getExperienceForNextLevel();
-		setLevel(mLevel + 1);
+		setLevel(getLevel() + 1);
 
 		if (hasGuild())
 			GuildManager::getInstance().onLevelChange(this);
@@ -219,17 +222,17 @@ void Character::setLevel(uint8 pLevel) {
 	}
 	
 	// Increasing.
-	if (pLevel > mLevel) {
-		mLevel = pLevel;
+	if (pLevel > getLevel()) {
+		setLevel(pLevel);
 		// Notify user.
 		mConnection->sendLevelUpdate();
 		mConnection->sendLevelGain();
 		// Notify zone.
 		mZone->notifyCharacterLevelIncrease(this);
 	}
-	else if (pLevel < mLevel) {
+	else if (pLevel < getLevel()) {
 		mExperience = 0; // to be safe.
-		mLevel = pLevel;
+		setLevel(pLevel);
 		// Notify user.
 		mConnection->sendLevelUpdate();
 		mConnection->sendLevelLost();
@@ -291,30 +294,30 @@ void Character::_updateForSave() {
 	EXPECTED(mData);
 	EXPECTED(mZone);
 
-	mData->mGM = mGM;
+	mData->mGM = getIsGM();
 	mData->mName = mName;
 	mData->mLastName = mLastName;
 	mData->mTitle = mTitle;
 	mData->mSuffix = mSuffix;
 
-	mData->mLevel = mLevel;
+	mData->mLevel = getLevel();
 	mData->mExperience = mExperience;
 
-	mData->mRace = mOriginalRace;
-	mData->mClass = mClass;
+	mData->mRace = getRaceID();
+	mData->mClass = getClass();
 
-	mData->mBeardStyle = mBeardStyle;
-	mData->mBeardColour = mBeardColour;
-	mData->mHairStyle = mHairStyle;
-	mData->mHairColour = mHairColour;
-	mData->mEyeColourLeft = mLeftEyeColour;
-	mData->mEyeColourRight = mRightEyeColour;
-	mData->mFace = mFaceStyle;
-	mData->mDrakkinHeritage = mDrakkinHeritage;
-	mData->mDrakkinTattoo = mDrakkinTattoo;
-	mData->mDrakkinDetails = mDrakkinDetails;
+	mData->mBeardStyle = getBeardStyle();
+	mData->mBeardColour = getBeardColour();
+	mData->mHairStyle = getHairStyle();
+	mData->mHairColour = getHairColour();
+	mData->mEyeColourLeft = getLeftEyeColour();
+	mData->mEyeColourRight = getRightEyeColour();
+	mData->mFace = getFaceStyle();
+	mData->mDrakkinHeritage = getDrakkinHeritage();
+	mData->mDrakkinTattoo = getDrakkinTattoo();
+	mData->mDrakkinDetails = getDrakkinDetails();
 
-	mData->mGender = mGender;
+	mData->mGender = getGender();
 
 	mData->mPlatinumCharacter = mPlatinum;
 	mData->mGoldCharacter = mGold;
@@ -338,8 +341,8 @@ void Character::_updateForSave() {
 	mData->mAgility = mBaseAgility;
 	mData->mWisdom = mBaseWisdom;
 
-	mData->mGuildID = mGuildID;
-	mData->mGuildRank = mGuildRank;
+	mData->mGuildID = getGuildID();
+	mData->mGuildRank = getGuildRank();
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {
@@ -436,4 +439,17 @@ void Character::_processMessageQueue() {
 
 void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
+}
+
+void Character::addVisibleTo(Character* pCharacter)
+{
+	EXPECTED(pCharacter); EXPECTED(pCharacter != this); mVisibleTo.push_back(pCharacter);
+}
+
+void Character::removeVisibleTo(Character* pCharacter) {
+	EXPECTED(pCharacter);
+	EXPECTED(mVisibleTo.empty() == false);
+	std::size_t oSize = mVisibleTo.size();
+	mVisibleTo.remove(pCharacter);
+	EXPECTED(mVisibleTo.size() == oSize - 1);
 }

@@ -191,9 +191,9 @@ const bool AccountManager::updateCharacter(const uint32 pAccountID, const Charac
 	accountCharacterData->mName = pCharacter->getName();
 	accountCharacterData->mLevel = pCharacter->getLevel();
 	accountCharacterData->mClass = pCharacter->getClass();
-	accountCharacterData->mRace = pCharacter->getRace();
+	accountCharacterData->mRace = pCharacter->getRaceID();
 	accountCharacterData->mGender = pCharacter->getGender();
-	accountCharacterData->mDeity = pCharacter->getDeity();
+	accountCharacterData->mDeity = pCharacter->getDeityID();
 	accountCharacterData->mZoneID = pCharacter->getZone()->getID();
 	accountCharacterData->mFace = pCharacter->getFaceStyle();
 	accountCharacterData->mHairStyle = pCharacter->getHairStyle();

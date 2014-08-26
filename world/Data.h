@@ -48,6 +48,7 @@ struct CharacterData {
 	String mTitle = "";
 	String mSuffix = "";
 	bool mGM = false;
+	uint8 mStatus = 0;
 
 	ZoneID mZoneID = 0; // TODO: Choose a good default.
 	InstanceID mInstanceID = 0;

@@ -7,6 +7,21 @@ enum GuildUpdateAction : uint32 {
 	GUILD_CHANNEL = 1
 };
 
+struct Colour
+{
+	union
+	{
+		struct
+		{
+			uint8 mBlue;
+			uint8 mGreen;
+			uint8 mRed;
+			uint8 mUseTint;	// if there's a tint this is FF
+		} mRGB;
+		uint32 mColour;
+	};
+};
+
 #pragma pack(1)
 namespace Payload {
 
@@ -189,5 +204,111 @@ namespace Payload {
 			uint32 mLastSeen;
 		};
 	}
+
+	struct SpawnData {
+		uint8 mUnnknown0 = 0;
+		GMStatus mGM = GM_OFF;
+		uint8 mUnknown1 = 0;
+		AATitle mAATitle = NONE;
+		uint8 mUnknown2 = 0;
+		AnonType mAnonymous = AT_None;
+		uint8 mFaceStyle = 0;
+		char name[Limits::Character::MAX_NAME_LENGTH];
+		DeityID mDeity = 0;
+		uint16 unknown3 = 0;
+		float mSize = 5.0f;
+		uint32 mUnknown4;
+		ActorType mActorType;
+		uint8 mIsInvisible = 0;
+		uint8 mHairColor = 0;
+		uint8 mCurrentHP;
+		uint8 max_hp;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+		uint8 mIsFindable = 0;
+		uint8 mUnknown5[5];
+		/*0094*/ signed	deltaHeading : 10;	// change in heading
+		/*????*/ signed	x : 19;				// x coord
+		/*????*/ signed	padding0054 : 3;		// ***Placeholder
+		/*0098*/ signed	y : 19;				// y coord
+		/*????*/ signed	animation : 10;		// animation
+		/*????*/ signed	padding0058 : 3;		// ***Placeholder
+		/*0102*/ signed	z : 19;				// z coord
+		/*????*/ signed	deltaY : 13;			// change in y
+		/*0106*/ signed	deltaX : 13;			// change in x
+		/*????*/ unsigned	heading : 12;		// heading
+		/*????*/ signed	padding0066 : 7;		// ***Placeholder
+		/*0110*/ signed	deltaZ : 13;			// change in z
+		/*????*/ signed	padding0070 : 19;		// ***Placeholder
+		uint8 mLeftEyeColour = 0;
+		uint8 mUnknown6[11];
+		uint8 mStandState = 0;	// stand state for SoF+ 0x64 for normal animation
+		uint32 mDrakkinHeritage = 0;
+		uint32 mDrakkinTattoo = 0;
+		uint32 mDrakkinDetails = 0;
+		uint8 mShowHelm = 0;
+		uint8 mUnknown7[4];
+		uint8 mIsNPC = 0;
+		uint8 mHairStyle = 0;
+		uint8 mBeardStyle = 0;
+		uint8 mUnknown8[4];
+		uint8 mLevel = 1;
+		uint8 mUnknown9[4];
+		uint8 mBeardColour = 0;
+		char mSuffix[Limits::Character::MAX_SUFFIX_LENGTH];
+		SpawnID mOwnerSpawnID = 0;
+		GuildRank mGuildRank = GR_None;
+		uint8 mUnknown10[3];
+		uint32 mEquipmentMaterials[MAX_MATERIAL_SLOTS];
+		float mRunSpeed = 1.0f;
+		uint8 mIsAFK = 0;
+		GuildID mGuildID = NO_GUILD;
+		char mTitle[Limits::Character::MAX_TITLE_LENGTH];
+		uint8 mUnknown11 = 0;
+		uint8 set_to_0xFF[8];	// ***Placeholder (all ff)
+		uint8 mHelmTexture = 0;
+		RaceID mRace = 0;
+		uint32 mUnknown12 = 0;
+		char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
+		float mWalkSpeed = 0.5f;
+		uint8 mUnknown13 = 0;
+		uint8 mIsPet = 0;
+		uint8 mLight = 0;
+		ClassID mClass = Warrior;
+		uint8 mRightEyeColour = 0;
+		FlyMode mFlyMode = FM_NONE;
+		GenderID mGender = G_FEMALE;
+		BodyType mBodyType = BT_Humanoid;
+		uint8 mUnknown14[3];
+		union
+		{
+			/*0339*/ uint8 equip_chest2;	// Second place in packet for chest texture (usually 0xFF in live packets)
+			// Not sure why there are 2 of them, but it effects chest texture!
+			/*0339*/ uint8 mount_color;		// drogmor: 0=white, 1=black, 2=green, 3=red
+			// horse: 0=brown, 1=white, 2=black, 3=tan
+		};
+		uint32 mSpawnID = 0;
+		uint8 mUnknown15[3];
+		uint8 mIsMercenary = 0;
+		Colour mEquipmentColours[MAX_MATERIAL_SLOTS];
+		uint8 mIsLFG = 0;
+		bool mIsDestructibleObject = false;
+		char DestructibleModel[64];	// Model of the Destructible Object - Required - Seen "DEST_TNT_G"
+		char DestructibleName2[64];	// Secondary name - Not Required - Seen "a_tent"
+		char DestructibleString[64];	// Unknown - Not Required - Seen "ZoneActor_01186"
+		uint32 DestructibleAppearance;	// Damage Appearance
+		uint32 DestructibleUnk1;
+		uint32 DestructibleID1;
+		uint32 DestructibleID2;
+		uint32 DestructibleID3;
+		uint32 DestructibleID4;
+		uint32 DestructibleUnk2;
+		uint32 DestructibleUnk3;
+		uint32 DestructibleUnk4;
+		uint32 DestructibleUnk5;
+		uint32 DestructibleUnk6;
+		uint32 DestructibleUnk7;
+		uint8 DestructibleUnk8;
+		uint32 DestructibleUnk9;
+
+	};
 }
 #pragma pack()

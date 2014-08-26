@@ -19,7 +19,7 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
-typedef uint32_t DeityID;
+typedef uint16_t DeityID;
 typedef uint8_t GenderID;
 //typedef uint32 ClassID;
 typedef uint8_t ClassID;
@@ -77,6 +77,42 @@ namespace Limits {
 }
 
 static const String SYS_NAME = "[System]";
+
+enum MaterialSlot : uint8 {
+	Mat_Head,
+	Mat_Chest,
+	Mat_Arms,
+	Mat_Wrist,
+	Mat_Hands,
+	Mat_Legs,
+	Mat_Feet,
+	Mat_Primary,
+	Mat_Secondary
+};
+static const auto MAX_MATERIAL_SLOTS = 9;
+
+enum FlyMode : uint8 {
+	FM_NONE = 0
+};
+
+enum ActorType : uint8 {
+	AT_PLAYER,
+	AT_NPC,
+	AT_PLAYER_CORPSE,
+	AT_NPC_CORPSE
+};
+
+enum GMStatus : uint8 {
+	GM_ON,
+	GM_OFF
+};
+
+enum AATitle : uint8 {
+	NONE,
+	GENERAL,
+	ARCHETYPE,
+	CLASS
+};
 
 enum AnonType : uint8 {
 	AT_None = 0,
@@ -187,7 +223,12 @@ enum SpawnAppearanceAnimation : int16 {
 	Death = 115
 };
 
-enum BodyType {
+enum Gender : GenderID {
+	G_MALE,
+	G_FEMALE
+};
+
+enum BodyType : uint8 {
 	BT_Humanoid = 1,
 	BT_Lycanthrope = 2,
 	BT_Undead = 3,

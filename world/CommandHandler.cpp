@@ -107,7 +107,7 @@ public:
 		}
 
 		bool gm = pParameters[0] == "on";
-		pCharacter->setGM(gm);
+		pCharacter->setIsGM(gm);
 		pCharacter->getZone()->notifyCharacterGM(pCharacter);
 	}
 };

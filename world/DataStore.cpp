@@ -250,6 +250,7 @@ namespace CharacterDataXML {
 		// Tag::Character
 		static const auto Name = "name";
 		static const auto GM = "gm";
+		static const auto Status = "status";
 		static const auto Level = "level";
 		static const auto Class = "class";
 		static const auto Zone = "zone";
@@ -313,6 +314,7 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(characterElement);
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacterData->mName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacterData->mGM));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Status, pCharacterData->mStatus));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, pCharacterData->mLevel));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacterData->mClass));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacterData->mZoneID));
@@ -386,6 +388,7 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	auto characterElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Character)));
 	characterElement->SetAttribute(Attribute::Name, pCharacterData->mName.c_str());
 	characterElement->SetAttribute(Attribute::GM, pCharacterData->mGM);
+	characterElement->SetAttribute(Attribute::Status, pCharacterData->mStatus);
 	characterElement->SetAttribute(Attribute::Level, pCharacterData->mLevel);
 	characterElement->SetAttribute(Attribute::Class, pCharacterData->mClass);
 	characterElement->SetAttribute(Attribute::Zone, pCharacterData->mZoneID);
