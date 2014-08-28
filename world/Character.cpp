@@ -68,12 +68,12 @@ bool Character::initialise() {
 
 	setSize(Character::getDefaultSize(getRaceID()));
 
-	mExperience = mData->mExperience;
+	setExperience(mData->mExperience);
 
-	mPlatinum = mData->mPlatinumCharacter;
-	mGold = mData->mGoldCharacter;
-	mSilver = mData->mSilverCharacter;
-	mCopper = mData->mCopperCharacter;
+	setPlatinum(mData->mPlatinumCharacter);
+	setGold(mData->mGoldCharacter);
+	setSilver(mData->mSilverCharacter);
+	setCopper(mData->mCopperCharacter);
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -87,6 +87,11 @@ bool Character::initialise() {
 
 	if (mData->mGuildID != NO_GUILD) {
 		GuildManager::getInstance().onConnect(this, mData->mGuildID);
+	}
+
+	// Armor Dye
+	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
+		setColour(i, mData->mDyes[i]);
 	}
 
 	mInitialised = true;
@@ -213,7 +218,7 @@ void Character::_checkForLevelIncrease() {
 //	
 //}
 
-uint32 Character::getExperienceRatio() {
+const uint32 Character::getExperienceRatio() const {
 	// Protect against division by zero.
 	uint32 next = getExperienceForNextLevel();
 	if (next == 0) {
@@ -224,8 +229,7 @@ uint32 Character::getExperienceRatio() {
 	return 330.0f * (mExperience / static_cast<float>(next));
 }
 
-uint32 Character::getExperienceForLevel(uint8 pLevel)
-{
+const uint32 Character::getExperienceForLevel(const uint8 pLevel) {
 	return (pLevel * pLevel) * 20;
 }
 
@@ -272,7 +276,7 @@ void Character::_updateForSave() {
 	mData->mSuffix = getSuffix();
 
 	mData->mLevel = getLevel();
-	mData->mExperience = mExperience;
+	mData->mExperience = getExperience();
 
 	mData->mRace = getRaceID();
 	mData->mClass = getClass();
@@ -290,10 +294,10 @@ void Character::_updateForSave() {
 
 	mData->mGender = getGender();
 
-	mData->mPlatinumCharacter = mPlatinum;
-	mData->mGoldCharacter = mGold;
-	mData->mSilverCharacter = mSilver;
-	mData->mCopperCharacter = mCopper;
+	mData->mPlatinumCharacter = getPlatinum();
+	mData->mGoldCharacter = getGold();
+	mData->mSilverCharacter = getSilver();
+	mData->mCopperCharacter = getCopper();
 
 	// TODO: Bank / Cursor currency
 
@@ -314,6 +318,11 @@ void Character::_updateForSave() {
 
 	mData->mGuildID = getGuildID();
 	mData->mGuildRank = getGuildRank();
+
+	// Armor Dye
+	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
+		mData->mDyes[i] = getColour(i).mColour;
+	}
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

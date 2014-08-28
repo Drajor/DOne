@@ -91,6 +91,7 @@ enum MaterialSlot : uint8 {
 	Mat_Secondary
 };
 static const auto MAX_MATERIAL_SLOTS = 9;
+static const auto MAX_ARMOR_DYE_SLOTS = 7;
 
 enum FlyMode : uint8 {
 	FM_NONE = 0

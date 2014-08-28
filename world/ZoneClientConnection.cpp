@@ -482,6 +482,10 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->ability_time_hours;
 	//payload->item_material[_MaterialCount];
 	//payload->item_tint[_MaterialCount];
+	for (int i = 0; i < MAX_MATERIAL_SLOTS; i++) {
+		payload->item_tint[i].color = mCharacter->getColour(i).mColour;
+		//payload->item_material = mCharacter->getMaterial(i);
+	}
 	//payload->aa_array[MAX_PP_AA_ARRAY];
 	//payload->servername[32];
 	strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
@@ -525,9 +529,9 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->ability_down;		// Guessing
 	//payload->autosplit;			//not used right now
 	//payload->zone_change_count;
-	payload->drakkin_heritage = 0;
-	payload->drakkin_tattoo = 0;
-	payload->drakkin_details = 0;
+	payload->drakkin_heritage = mCharacter->getDrakkinHeritage();
+	payload->drakkin_tattoo = mCharacter->getDrakkinTattoo();
+	payload->drakkin_details = mCharacter->getDrakkinDetails();
 	//payload->expansions;			// expansion setting, bit field of expansions avaliable
 	//payload->toxicity;			//from drinking potions, seems to increase by 3 each time you drink
 	//payload->unknown5496[16];	//

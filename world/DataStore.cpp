@@ -243,6 +243,8 @@ namespace CharacterDataXML {
 		static const auto Character = "character";
 		static const auto Stats = "stats";
 		static const auto Visual = "visual";
+		static const auto Dyes = "dyes";
+		static const auto Dye = "dye";
 		static const auto Guild = "guild";
 		static const auto Currency = "currency";
 	}
@@ -283,6 +285,8 @@ namespace CharacterDataXML {
 		static const auto DrakkinHeritage = "drakkin_heritage";
 		static const auto DrakkinTattoo = "drakkin_tattoo";
 		static const auto DrakkinDetails = "drakkin_Details";
+		// Tag::Dye
+		static const auto Colour = "colour";
 		// Tag::Guild
 		static const auto GuildID = "id";
 		static const auto GuildRank = "rank";
@@ -351,6 +355,18 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour2, pCharacterData->mEyeColourRight));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo));
+
+	// Tag::Dyes
+	auto dyesElement = characterElement->FirstChildElement(Tag::Dyes);
+	EXPECTED_BOOL(dyesElement);
+	int slotID = 0;
+	auto dyeElement = dyesElement->FirstChildElement(Tag::Dye);
+	while (dyeElement) {
+		EXPECTED_BOOL(readAttribute(dyeElement, Attribute::Colour, pCharacterData->mDyes[slotID]));
+		slotID++;
+		dyeElement = dyeElement->NextSiblingElement(Tag::Dye);
+	}
+	EXPECTED_BOOL(slotID == MAX_ARMOR_DYE_SLOTS); // Check all 7 slots were read.
 	
 	// Tag::Guild
 	auto guildElement = characterElement->FirstChildElement(Tag::Guild);
@@ -423,6 +439,14 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	visualElement->SetAttribute(Attribute::EyeColour2, pCharacterData->mEyeColourRight);
 	visualElement->SetAttribute(Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage);
 	visualElement->SetAttribute(Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo);
+
+	// Tag::Dyes
+	auto dyesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Dyes)));
+	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
+		// Tag::Dye
+		auto dyeElement = static_cast<TiXmlElement*>(dyesElement->LinkEndChild(new TiXmlElement(Tag::Dye)));
+		dyeElement->SetAttribute(Attribute::Colour, pCharacterData->mDyes[i]);
+	}
 
 	// Tag::Guild
 	auto guildElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Guild)));

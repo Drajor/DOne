@@ -60,6 +60,8 @@ struct CharacterData {
 	GuildID mGuildID = NO_GUILD;
 	GuildRank mGuildRank = GuildRanks::GR_None;
 
+	uint32 mDyes[MAX_ARMOR_DYE_SLOTS];
+
 	RaceID mRace = 0;
 	GenderID mGender = 0;
 	FaceID mFace = 0;

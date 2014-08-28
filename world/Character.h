@@ -81,11 +81,6 @@ public:
 
 	void message(MessageType pType, String pMessage);
 
-	inline const int32 getCopper() const { return mCopper; }
-	inline const int32 getSilver() const { return mSilver; }
-	inline const int32 getGold() const { return mGold; }
-	inline const int32 getPlatinum() const { return mPlatinum; }
-
 	// Target Group Buff
 	inline void setTGB(bool pTGB) { mTGB = pTGB; }
 	inline const bool getTGB() const { return mTGB; }
@@ -106,13 +101,15 @@ public:
 	void doAnimation(uint8 pAnimationID);
 
 	// Experience
-	uint32 getExperience() { return mExperience; }
-	uint32 getExperienceRatio();
+	inline const uint32 getExperience() const { return mExperience; }
+	inline void setExperience(const uint32 pExperience) { mExperience = pExperience; }
+	const uint32 getExperienceRatio() const;
 	void addExperience(uint32 pExperience);
 	void removeExperience(uint32 pExperience);
-	uint32 getExperienceForNextLevel() { return Character::getExperienceForLevel(getLevel() + 1); }
-	static uint32 getExperienceForLevel(uint8 pLevel);
-	static uint8 getMaxCharacterLevel() { return 20; }
+	inline const uint32 getExperienceForNextLevel() const { return Character::getExperienceForLevel(getLevel() + 1); }
+	
+	static const uint32 getExperienceForLevel(const uint8 pLevel);
+	static inline const uint8 getMaxCharacterLevel() { return 20; }
 
 	static float getDefaultSize(uint32 pRace);
 
@@ -160,11 +157,6 @@ private:
 	int32 mMaximumMana = 100;
 	int32 mCurrentEndurance = 100;
 	int32 mMaximumEndurance = 100;
-
-	int32 mCopper = 0;
-	int32 mSilver = 0;
-	int32 mGold = 0;
-	int32 mPlatinum = 0;
 
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;

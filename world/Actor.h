@@ -69,6 +69,15 @@ public:
 	inline const String& getSuffix() const { return mSuffix; }
 	inline void setSuffix(const String& pSuffix) { mSuffix = pSuffix; _setSuffix(pSuffix.c_str()); }
 
+	inline const int32 getCopper() const { return mCopper; }
+	inline void setCopper(const int32 pCopper) { mCopper = pCopper; }
+	inline const int32 getSilver() const { return mSilver; }
+	inline void setSilver(const int32 pSilver) { mSilver = pSilver; }
+	inline const int32 getGold() const { return mGold; }
+	inline void setGold(const int32 pGold) { mGold = pGold; }
+	inline const int32 getPlatinum() const { return mPlatinum; }
+	inline void setPlatinum(const int32 pPlatinum) { mPlatinum = pPlatinum; }
+
 	inline void _syncPosition() {
 		// Current
 		mSpawnData.x = FUCK::xFloatToEQ19(mPosition.x);
@@ -216,13 +225,17 @@ public:
 	inline const BodyType getBodyType() const { return mSpawnData.mBodyType; }
 	inline void setBodyType(const BodyType pBodyType) { mSpawnData.mBodyType = pBodyType; }
 
-	inline const Colour getColour(const MaterialSlot pMaterialSlot) const {
+	inline const Colour getColour(const int pSlotID) const {
 		// TODO: Guard this.
-		return mSpawnData.mEquipmentColours[pMaterialSlot];
+		return mSpawnData.mEquipmentColours[pSlotID];
 	}
-	inline void setColour(const MaterialSlot pMaterialSlot, const Colour pColour) {
+	inline void setColour(const int pSlotID, const Colour pColour) {
 		// TODO: Guard this.
-		mSpawnData.mEquipmentColours[pMaterialSlot] = pColour;
+		mSpawnData.mEquipmentColours[pSlotID] = pColour;
+	}
+	inline void setColour(const int pSlotID, const uint32 pColour) {
+		// TODO: Guard this.
+		mSpawnData.mEquipmentColours[pSlotID].mColour = pColour;
 	}
 
 	inline const bool isLFG() const { return mSpawnData.mIsLFG == 1; }
@@ -238,6 +251,11 @@ protected:
 	Actor* mTarget = nullptr;
 	Payload::SpawnData mSpawnData;
 private:
+
+	int32 mCopper = 0;
+	int32 mSilver = 0;
+	int32 mGold = 0;
+	int32 mPlatinum = 0;
 
 	String mName = "";
 	String mLastName = "";
