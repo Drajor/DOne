@@ -351,6 +351,25 @@ public:
 	}
 };
 
+class WearChangeCommand : public Command {
+public:
+	WearChangeCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #wc <slot> <material> <colour>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() == 3) {
+			uint32 slotID = 0;
+			uint32 materialID = 0;
+			uint32 colour = 0;
+			bool ok = Utility::stou32Safe(slotID, pParameters[0]) && Utility::stou32Safe(materialID, pParameters[1]) && Utility::stou32Safe(colour, pParameters[2]);
+			if (ok) {
+				pCharacter->getConnection()->sendWearChange(pCharacter->getSpawnID(), slotID, materialID, colour);
+			}
+		}
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -385,6 +404,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new LevelCommand(100, { "level", "setlevel" "lvl" }));
 	mCommands.push_back(new StatsCommand(100, { "setstat" }));
 
+	mCommands.push_back(new WearChangeCommand(100, { "wc" }));
 	mCommands.push_back(new LocationCommand(100, { "loc" }));
 }
 

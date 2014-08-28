@@ -53,6 +53,8 @@ public:
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHPUpdate();
 
+	void sendWearChange(const uint16 pSpawnID, const uint8 pSlotID, const uint32 pMaterialID, const uint32 pColour);
+
 	void sendExperienceUpdate();
 	void sendExperienceGain();
 	void sendExperienceLoss();

@@ -49,7 +49,7 @@ bool Character::initialise() {
 	setClass(mData->mClass);
 	setGender(mData->mGender);
 	setLevel(mData->mLevel);
-	mData->mStatus;
+	setStatus(mData->mStatus);
 
 	mPosition.x = mData->mX;
 	mPosition.y = mData->mY;

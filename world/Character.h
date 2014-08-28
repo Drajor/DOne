@@ -71,6 +71,7 @@ public:
 
 	void setStanding(bool pStanding);
 	inline const uint32 getStatus() const { return mStatus; }
+	inline void setStatus(const uint32 pStatus) { mStatus = pStatus; }
 	
 	void startCamp();
 	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }

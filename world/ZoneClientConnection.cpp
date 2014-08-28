@@ -2193,3 +2193,17 @@ void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket)
 	// Notify Zone.
 	mZone->handleFaceChange(mCharacter);
 }
+
+void ZoneClientConnection::sendWearChange(const uint16 pSpawnID, const uint8 pSlotID, const uint32 pMaterialID, const uint32 pColour) {
+	using namespace Payload::Zone;
+	auto outPacket = new EQApplicationPacket(OP_WearChange, sizeof(WearChange));
+	auto payload = WearChange::convert(outPacket->pBuffer);
+
+	payload->mSpawnID = pSpawnID;
+	payload->mSlotID = pSlotID;
+	payload->mMaterialID = pMaterialID;
+	payload->mColour.mColour = pColour;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}

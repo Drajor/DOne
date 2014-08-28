@@ -55,6 +55,17 @@ namespace Payload {
 			uint32 mDrakkinTattoo = 0;
 			uint32 mDrakkinDetails = 0;
 		};
+
+		struct WearChange : public FixedSizedPayload<WearChange> {
+			uint16 mSpawnID = 0;
+			uint32 mMaterialID = 0;
+			uint32 mUnused0 = 0;
+			uint32 mUnused1 = 0;
+			uint32 mUnused2 = 0;
+			uint32 mUnused3 = 0;
+			Colour mColour;
+			uint8 mSlotID = 0;
+		};
 	}
 
 	namespace World {
