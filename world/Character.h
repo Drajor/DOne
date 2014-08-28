@@ -90,21 +90,21 @@ public:
 
 
 	// Position and Heading
-	void setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading);
-	Vector3 getPosition3() { return mPosition; };
-	float getX() { return mPosition.x; }
-	float getY() { return mPosition.y; }
-	float getZ() { return mPosition.z; }
-	int32 getDeltaX() { return mDeltaX; }
-	int32 getDeltaY() { return mDeltaY; }
-	int32 getDeltaZ() { return mDeltaZ; }
+	//void setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading);
+	//Vector3 getPosition3() { return mPosition; };
+	//float getX() { return mPosition.x; }
+	//float getY() { return mPosition.y; }
+	//float getZ() { return mPosition.z; }
+	//int32 getDeltaX() { return mDeltaX; }
+	//int32 getDeltaY() { return mDeltaY; }
+	//int32 getDeltaZ() { return mDeltaZ; }
 
 	void setPosition(float pX, float pY, float pZ, float pHeading);
 	void setPosition(Vector3& pPosition);
 
-	const float getHeading() const { return mHeading; }
-	const int32 getDeltaHeading() const { return mDeltaHeading; }
-	void setHeading(float pHeading);
+	//const float getHeading() const { return mHeading; }
+	//const int32 getDeltaHeading() const { return mDeltaHeading; }
+	//void setHeading(float pHeading);
 	//const uint32 getRace() const { return mRace; }
 	//const uint32 getOriginalRace() const { return mOriginalRace; }
 	//const uint8 getClass() const { return mClass; }
@@ -112,9 +112,9 @@ public:
 	//const uint8 getLevel() const { return mLevel; }
 	////const uint16 getDeity() const { return mDeity; }
 	//const float getSize() const { return mSize; }
-	const int32 getAnimation() const { return mAnimation; }
+	//const int32 getAnimation() const { return mAnimation; }
 	const SpawnAppearanceAnimation getAppearance() const { return mAppearance; }
-	void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
+	//void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
 
 	inline const int32 getCopper() const { return mCopper; }
 	inline const int32 getSilver() const { return mSilver; }
@@ -190,12 +190,12 @@ private:
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
-	float mHeading = 0.0f;
-	int32 mDeltaX = 0;
-	int32 mDeltaY = 0;
-	int32 mDeltaZ = 0;
-	int32 mDeltaHeading = 0;
-	int32 mAnimation = 0;
+	//float mHeading = 0.0f;
+	//int32 mDeltaX = 0;
+	//int32 mDeltaY = 0;
+	//int32 mDeltaZ = 0;
+	//int32 mDeltaHeading = 0;
+	//int32 mAnimation = 0;
 	SpawnAppearanceAnimation mAppearance = Standing;
 	
 

@@ -13,10 +13,12 @@ static const int AUTO_SAVE_FREQUENCY = 10000;
 Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : mAccountID(pAccountID), mData(pCharacterData) {
 	EXPECTED(mData);
 	mName = pCharacterData->mName; // NOTE: This is required for ID before initialise has been called.
+	_setName(mName.c_str());
 
 	setRunSpeed(0.7f);
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
+	setActorType(AT_PLAYER);
 }
 
 Character::~Character() {
@@ -39,7 +41,6 @@ void Character::update() {
 bool Character::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
-	mName = mData->mName;
 	mLastName = mData->mLastName;
 	mTitle = mData->mTitle;
 	mSuffix = mData->mSuffix;
@@ -54,6 +55,7 @@ bool Character::initialise() {
 	mPosition.y = mData->mY;
 	mPosition.z = mData->mZ;
 	mHeading = mData->mHeading;
+	_syncPosition();
 
 	setBeardStyle(mData->mBeardStyle);
 	setBeardColour(mData->mBeardColour);
@@ -140,9 +142,9 @@ void Character::setPosition(Vector3& pPosition) {
 	mPosition.z = pPosition.z;
 }
 
-void Character::setHeading(float pHeading) {
-	mHeading = pHeading;
-}
+//void Character::setHeading(float pHeading) {
+//	mHeading = pHeading;
+//}
 
 void Character::healPercentage(int pPercent) {
 	mConnection->sendHPUpdate();
@@ -153,13 +155,13 @@ void Character::damage(uint32 pAmount) {
 	mConnection->sendHPUpdate();
 }
 
-void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
-{
-	mDeltaX = pDeltaX;
-	mDeltaY = pDeltaY;
-	mDeltaZ = pDeltaZ;
-	mDeltaHeading = pDeltaHeading;
-}
+//void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
+//{
+//	mDeltaX = pDeltaX;
+//	mDeltaY = pDeltaY;
+//	mDeltaZ = pDeltaZ;
+//	mDeltaHeading = pDeltaHeading;
+//}
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);

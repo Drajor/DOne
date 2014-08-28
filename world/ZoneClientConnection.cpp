@@ -576,67 +576,12 @@ void ZoneClientConnection::_sendPlayerProfile() {
 void ZoneClientConnection::_sendZoneEntry() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
-	auto payload = (ServerZoneEntry_Struct*)outPacket->pBuffer;
-
-	strcpy(payload->player.spawn.name, mCharacter->getName().c_str());
-	//payload->player.spawn.heading = 0;//FloatToEQ19(heading);
-	//payload->player.spawn.x = 0; //FloatToEQ19(x_pos);//((int32)x_pos)<<3;
-	//payload->player.spawn.y = 0; // FloatToEQ19(y_pos);//((int32)y_pos)<<3;
-	//payload->player.spawn.z = 0; // FloatToEQ19(z_pos);//((int32)z_pos)<<3;
-	payload->player.spawn.heading = FloatToEQ19(mCharacter->getHeading());;
-	payload->player.spawn.x = FloatToEQ19(mCharacter->getX());
-	payload->player.spawn.y = FloatToEQ19(mCharacter->getY());;
-	payload->player.spawn.z = FloatToEQ19(mCharacter->getZ());;
-	payload->player.spawn.spawnId = mCharacter->getSpawnID();
-	payload->player.spawn.curHp = 50;// static_cast<uint8>(GetHPRatio());
-	payload->player.spawn.max_hp = 100;		//this field needs a better name
-	payload->player.spawn.race = mCharacter->getRaceID();
-	payload->player.spawn.runspeed = mCharacter->getRunSpeed();
-	payload->player.spawn.walkspeed = mCharacter->getWalkSpeed();
-	payload->player.spawn.class_ = mCharacter->getClass();
-	payload->player.spawn.gender = mCharacter->getGender();
-	payload->player.spawn.level = mCharacter->getLevel();
-	payload->player.spawn.deity = mCharacter->getDeityID();
-	payload->player.spawn.animation = 0;
-	payload->player.spawn.findable = 0;
-	payload->player.spawn.light = 1;
-	payload->player.spawn.showhelm = mCharacter->getShowHelm();
-
-	payload->player.spawn.invis = 0; // (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
-	payload->player.spawn.NPC = 0; // isClient() ? 0 : 1;
-	payload->player.spawn.IsMercenary = 0;
-
-	payload->player.spawn.petOwnerId = 0;// ownerid;
-
-	payload->player.spawn.haircolor = mCharacter->getHairColour();
-	payload->player.spawn.beardcolor = mCharacter->getBeardColour();
-	payload->player.spawn.eyecolor1 = mCharacter->getLeftEyeColour();
-	payload->player.spawn.eyecolor2 = mCharacter->getRightEyeColour();
-	payload->player.spawn.hairstyle = mCharacter->getHairStyle();
-	payload->player.spawn.face = mCharacter->getFaceStyle();
-	payload->player.spawn.beard = mCharacter->getBeardStyle();
-	payload->player.spawn.StandState = mCharacter->getAppearance();
-	payload->player.spawn.drakkin_heritage = mCharacter->getDrakkinHeritage();
-	payload->player.spawn.drakkin_tattoo = mCharacter->getDrakkinTattoo();
-	payload->player.spawn.drakkin_details = mCharacter->getDrakkinDetails();
-	payload->player.spawn.equip_chest2 = 0; // texture;
-	payload->player.spawn.helm = 0;//helmtexture;
-	payload->player.spawn.guildrank = mCharacter->getGuildRank();
-	payload->player.spawn.size = mCharacter->getSize();
-	payload->player.spawn.bodytype = BT_Humanoid;
-	payload->player.spawn.flymode = 0;// FindType(SE_Levitate) ? 2 : 0;
-	strcpy(payload->player.spawn.lastName, mCharacter->getLastName().c_str());
-	memset(payload->player.spawn.set_to_0xFF, 0xFF, sizeof(payload->player.spawn.set_to_0xFF));
-	payload->player.spawn.afk = mCharacter->isAFK() ? 1 : 0;
-	payload->player.spawn.lfg = mCharacter->isLFG() ? 1 : 0;
-	payload->player.spawn.anon = mCharacter->getAnonymous();
-	payload->player.spawn.gm = mCharacter->getIsGM() ? 1 : 0;
-	payload->player.spawn.guildID = mCharacter->getGuildID();
-	payload->player.spawn.is_pet = 0;
-	payload->player.spawn.z += 6;	//arbitrary lift, seems to help spawning under zone.
-	outPacket->priority = 6;
-	mStreamInterface->FastQueuePacket(&outPacket);
+	mCharacter->_syncPosition();
+	
+	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, mCharacter->getActorData(), sizeof(Payload::SpawnData));
+	mStreamInterface->QueuePacket(outPacket);
+	outPacket->pBuffer = nullptr;
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendZoneSpawns() {
@@ -768,7 +713,7 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	if (mCharacter->getX() != payload->x_pos || mCharacter->getY() != payload->y_pos || mCharacter->getZ() != payload->z_pos || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
 		mCharacter->setPosition(payload->x_pos, payload->y_pos, payload->z_pos, EQ19toFloat(payload->heading));
 		mCharacter->setAnimation(payload->animation);
-		mCharacter->setPositionDeltas(payload->delta_x, payload->delta_y, payload->delta_z, payload->delta_heading);
+		mCharacter->setPositionDelta(Vector3(payload->delta_x, payload->delta_y, payload->delta_z));
 		mZone->notifyCharacterPositionChanged(mCharacter);
 
 		// Restart the force send timer.
@@ -967,12 +912,12 @@ void ZoneClientConnection::sendPosition() {
 	payload->x_pos = FloatToEQ19(mCharacter->getX());
 	payload->y_pos = FloatToEQ19(mCharacter->getY());
 	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaX()));
-	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaY()));
-	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaZ()));
+	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getXDelta()));
+	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getYDelta()));
+	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getZDelta()));
 	payload->heading = FloatToEQ19(static_cast<float>(mCharacter->getHeading()));
 	payload->animation = 0;
-	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaHeading()));
+	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getHeadingDelta()));
 	payload->padding0002 = 0;
 	payload->padding0006 = 7;
 	payload->padding0014 = 0x7f;
@@ -1197,14 +1142,14 @@ void ZoneClientConnection::sendHPUpdate() {
 	safe_delete(outPacket);
 }
 
-EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
-	EXPECTED_BOOL(mConnected);
-
-	auto outPacket = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
-	auto payload = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
-	populateSpawnStruct(payload);
-	return outPacket;
-}
+//EQApplicationPacket* ZoneClientConnection::makeCharacterSpawnPacket() {
+//	EXPECTED_BOOL(mConnected);
+//
+//	auto outPacket = new EQApplicationPacket(OP_NewSpawn, sizeof(NewSpawn_Struct));
+//	auto payload = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
+//	populateSpawnStruct(payload);
+//	return outPacket;
+//}
 
 EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
 	//ERROR_CONDITION(mConnected);
@@ -1215,16 +1160,16 @@ EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
 	payload->x_pos = FloatToEQ19(mCharacter->getX());
 	payload->y_pos = FloatToEQ19(mCharacter->getY());
 	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaX()));
-	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaY()));
-	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaZ()));
+	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getXDelta()));
+	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getYDelta()));
+	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getZDelta()));
 	payload->heading = FloatToEQ19(mCharacter->getHeading());
 	payload->padding0002 = 0;
 	payload->padding0006 = 7;
 	payload->padding0014 = 0x7f;
 	payload->padding0018 = 0x5df27;
 	payload->animation = mCharacter->getAnimation();
-	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getDeltaHeading()));
+	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getHeadingDelta()));
 
 	return outPacket;
 }
@@ -1235,58 +1180,58 @@ void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
 	mStreamInterface->QueuePacket(pPacket);
 }
 
-void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
-	EXPECTED(mConnected);
-
-	pSpawn->spawn.gm = mCharacter->getIsGM() ? 1 : 0;
-	pSpawn->spawn.anon = mCharacter->getAnonymous();
-	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
-	pSpawn->spawn.x = FloatToEQ19(mCharacter->getX());
-	pSpawn->spawn.y = FloatToEQ19(mCharacter->getY());
-	pSpawn->spawn.z = FloatToEQ19(mCharacter->getZ());
-	pSpawn->spawn.spawnId = mCharacter->getSpawnID();
-	pSpawn->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
-	pSpawn->spawn.max_hp = 100;
-	pSpawn->spawn.race = mCharacter->getRaceID();
-	pSpawn->spawn.runspeed = mCharacter->getRunSpeed();
-	pSpawn->spawn.walkspeed = mCharacter->getWalkSpeed();
-	pSpawn->spawn.class_ = mCharacter->getClass();
-	pSpawn->spawn.gender = mCharacter->getGender();
-	pSpawn->spawn.level = mCharacter->getLevel();
-	pSpawn->spawn.deity = mCharacter->getDeityID();
-	pSpawn->spawn.animation = mCharacter->getAnimation();
-	pSpawn->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
-	pSpawn->spawn.light = 1; // TODO: Items
-	pSpawn->spawn.showhelm = mCharacter->getShowHelm();
-	pSpawn->spawn.invis = 0;	// TODO: GM Hide?
-	pSpawn->spawn.NPC = 0;
-	pSpawn->spawn.IsMercenary = 0;
-	pSpawn->spawn.petOwnerId = 0;
-	// TODO: Below Appearances
-	pSpawn->spawn.haircolor = 0;
-	pSpawn->spawn.beardcolor = 0;
-	pSpawn->spawn.eyecolor1 = 0;
-	pSpawn->spawn.eyecolor2 = 0;
-	pSpawn->spawn.hairstyle = 0;
-	pSpawn->spawn.face = 0;
-	pSpawn->spawn.beard = 0;
-	pSpawn->spawn.StandState = mCharacter->getAppearance();
-	pSpawn->spawn.drakkin_heritage = 0;
-	pSpawn->spawn.drakkin_tattoo = 0;
-	pSpawn->spawn.drakkin_details = 0;
-	pSpawn->spawn.equip_chest2 = 0;
-	pSpawn->spawn.helm = 0;
-	// TODO: Look at old helm stuff when Items
-	pSpawn->spawn.guildrank = mCharacter->getGuildRank();
-	pSpawn->spawn.size = mCharacter->getSize();
-	pSpawn->spawn.bodytype = BT_Humanoid;
-	pSpawn->spawn.flymode = 0;
-	pSpawn->spawn.guildID = mCharacter->getGuildID();
-	strcpy(pSpawn->spawn.name, mCharacter->getName().c_str());
-	strcpy(pSpawn->spawn.lastName, mCharacter->getLastName().c_str());
-	// TODO: Equipment materials when Items.
-	memset(pSpawn->spawn.set_to_0xFF, 0xFF, sizeof(pSpawn->spawn.set_to_0xFF));
-}
+//void ZoneClientConnection::populateSpawnStruct(NewSpawn_Struct* pSpawn) {
+//	EXPECTED(mConnected);
+//
+//	pSpawn->spawn.gm = mCharacter->getIsGM() ? 1 : 0;
+//	pSpawn->spawn.anon = mCharacter->getAnonymous();
+//	pSpawn->spawn.heading = FloatToEQ19(mCharacter->getHeading());
+//	pSpawn->spawn.x = FloatToEQ19(mCharacter->getX());
+//	pSpawn->spawn.y = FloatToEQ19(mCharacter->getY());
+//	pSpawn->spawn.z = FloatToEQ19(mCharacter->getZ());
+//	pSpawn->spawn.spawnId = mCharacter->getSpawnID();
+//	pSpawn->spawn.curHp = 10; //static_cast<uint8>(GetHPRatio()); // TODO:
+//	pSpawn->spawn.max_hp = 100;
+//	pSpawn->spawn.race = mCharacter->getRaceID();
+//	pSpawn->spawn.runspeed = mCharacter->getRunSpeed();
+//	pSpawn->spawn.walkspeed = mCharacter->getWalkSpeed();
+//	pSpawn->spawn.class_ = mCharacter->getClass();
+//	pSpawn->spawn.gender = mCharacter->getGender();
+//	pSpawn->spawn.level = mCharacter->getLevel();
+//	pSpawn->spawn.deity = mCharacter->getDeityID();
+//	pSpawn->spawn.animation = mCharacter->getAnimation();
+//	pSpawn->spawn.findable = 0; // TODO: I don't think PCs are ever findable.
+//	pSpawn->spawn.light = 1; // TODO: Items
+//	pSpawn->spawn.showhelm = mCharacter->getShowHelm();
+//	pSpawn->spawn.invis = 0;	// TODO: GM Hide?
+//	pSpawn->spawn.NPC = 0;
+//	pSpawn->spawn.IsMercenary = 0;
+//	pSpawn->spawn.petOwnerId = 0;
+//	// TODO: Below Appearances
+//	pSpawn->spawn.haircolor = 0;
+//	pSpawn->spawn.beardcolor = 0;
+//	pSpawn->spawn.eyecolor1 = 0;
+//	pSpawn->spawn.eyecolor2 = 0;
+//	pSpawn->spawn.hairstyle = 0;
+//	pSpawn->spawn.face = 0;
+//	pSpawn->spawn.beard = 0;
+//	pSpawn->spawn.StandState = mCharacter->getAppearance();
+//	pSpawn->spawn.drakkin_heritage = 0;
+//	pSpawn->spawn.drakkin_tattoo = 0;
+//	pSpawn->spawn.drakkin_details = 0;
+//	pSpawn->spawn.equip_chest2 = 0;
+//	pSpawn->spawn.helm = 0;
+//	// TODO: Look at old helm stuff when Items
+//	pSpawn->spawn.guildrank = mCharacter->getGuildRank();
+//	pSpawn->spawn.size = mCharacter->getSize();
+//	pSpawn->spawn.bodytype = BT_Humanoid;
+//	pSpawn->spawn.flymode = 0;
+//	pSpawn->spawn.guildID = mCharacter->getGuildID();
+//	strcpy(pSpawn->spawn.name, mCharacter->getName().c_str());
+//	strcpy(pSpawn->spawn.lastName, mCharacter->getLastName().c_str());
+//	// TODO: Equipment materials when Items.
+//	memset(pSpawn->spawn.set_to_0xFF, 0xFF, sizeof(pSpawn->spawn.set_to_0xFF));
+//}
 
 void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Emote_Struct);
