@@ -6,9 +6,37 @@ class Zone;
 #include "Payload.h"
 #include "Vector3.h"
 
+namespace FUCK {
+	static inline const float xEQ19toFloat(const int d)
+	{
+		return (float(d) / float(1 << 3));
+	}
+
+	static inline const int xFloatToEQ19(float d)
+	{
+		return int(d*float(1 << 3));
+	}
+
+	static inline const float xEQ13toFloat(int d)
+	{
+		return (float(d) / float(1 << 2));
+	}
+
+	static inline const float xNewEQ13toFloat(int d)
+	{
+		return (float(d) / float(1 << 6));
+	}
+
+	static inline const int xNewFloatToEQ13(float d)
+	{
+		return int(d*float(1 << 6));
+	}
+}
+
+
 class Actor {
 public:
-	Actor() : mTarget(nullptr) {};
+	Actor();;
 	virtual ~Actor() {};
 
 	inline virtual const bool isCharacter() const { return false; }
@@ -20,7 +48,6 @@ public:
 	inline static T cast(Actor* pActor) {
 		return static_cast<T>(pActor);
 	}
-	inline const Vector3& getPosition() const { return mPosition; }
 	inline const float distanceTo(const Actor* pActor) {
 		return mPosition.distance(pActor->mPosition);
 	}
@@ -28,21 +55,68 @@ public:
 		return mPosition.squareDistance(pActor->mPosition);
 	}
 
-	inline const Payload::SpawnData* getSpawnData() const { return &mSpawnData; }
+	//inline const Payload::SpawnData* getSpawnData() const { return &mSpawnData; }
+	inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
 
 	inline const SpawnID getSpawnID() const { return mSpawnData.mSpawnID; }
 	inline void setSpawnID(const SpawnID pSpawnID) { mSpawnData.mSpawnID = pSpawnID; }
 
 	// Name
+	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	// Suffix
 	// Title
 	// Last Name
+
+	inline void _syncPosition() {
+		// Current
+		mSpawnData.x = FUCK::xFloatToEQ19(mPosition.x);
+		mSpawnData.y = FUCK::xFloatToEQ19(mPosition.y);
+		mSpawnData.z = FUCK::xFloatToEQ19(mPosition.z);
+		mSpawnData.heading = FUCK::xFloatToEQ19(mHeading);
+		// Delta
+		mSpawnData.deltaX = FUCK::xNewFloatToEQ13(mPositionDelta.x);
+		mSpawnData.deltaY = FUCK::xNewFloatToEQ13(mPositionDelta.y);
+		mSpawnData.deltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
+		mSpawnData.deltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
+	}
+
+	//inline void _setPosition(const float pX, const float pY, const float pZ) {
+	//	mSpawnData.x = FloatToEQ19(pX);
+	//	mSpawnData.y = FloatToEQ19(pY);
+	//	mSpawnData.z = FloatToEQ19(pZ);
+	//}
+	//inline void _setHeading(const float pHeading) {
+	//	mSpawnData.heading = FloatToEQ19(pHeading);
+	//}
+	//inline void _setPositionDeltas(const float pX, const float pY, const float pZ) {
+	//	mSpawnData.deltaX = NewFloatToEQ13(pX);
+	//	mSpawnData.deltaY = NewFloatToEQ13(pY);
+	//	mSpawnData.deltaZ = NewFloatToEQ13(pZ);
+	//}
+
+	inline const Vector3& getPosition() const { return mPosition; }
+	inline void setPosition(const Vector3& pPosition) { mPosition = pPosition; }
+	inline const Vector3& getPositionDelta() const { return mPositionDelta; }
+	inline void setPositionDelta(const Vector3& pPositionDelta) { mPositionDelta = pPositionDelta; }
+	inline const float getX() const { return mPosition.x; }
+	inline const float getY() const { return mPosition.y; }
+	inline const float getZ() const { return mPosition.z; }
+	inline const float getXDelta() const { return mPositionDelta.x; }
+	inline const float getYDelta() const { return mPositionDelta.y; }
+	inline const float getZDelta() const { return mPositionDelta.z; }
+	inline const float getHeading() const { return mHeading; }
+	inline void setHeading(const float pHeading) { mHeading = pHeading; }
+	inline const float getHeadingDelta() const { return mHeadingDelta; }
+	inline void setHeadingDelta(const float pHeadingDelta) { mHeadingDelta = pHeadingDelta; }
+
+	inline const int32 getAnimation() const { return mAnimation; }
+	inline void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
 
 	// Visual
 	inline const uint8 getFaceStyle() const { return mSpawnData.mFaceStyle; }
 	inline const uint8 getLeftEyeColour() const { return mSpawnData.mLeftEyeColour; }
 	inline const uint8 getRightEyeColour() const { return mSpawnData.mRightEyeColour; }
-	inline const uint8 getHairStyle() const { return mSpawnData.mHairColor; }
+	inline const uint8 getHairStyle() const { return mSpawnData.mHairStyle; }
 	inline const uint8 getBeardStyle() const { return mSpawnData.mBeardStyle; }
 	inline const uint8 getHairColour() const { return mSpawnData.mHairColor; }
 	inline const uint8 getBeardColour() const { return mSpawnData.mBeardColour; }
@@ -167,7 +241,12 @@ public:
 
 protected:
 	Vector3 mPosition;
-	Actor* mTarget;
+	float mHeading = 0.0f;
+	Vector3 mPositionDelta;
+	float mHeadingDelta = 0.0f;
+	int32 mAnimation = 0;
+
+	Actor* mTarget = nullptr;
 
 	// mSpawnData is sent directly 
 	Payload::SpawnData mSpawnData;

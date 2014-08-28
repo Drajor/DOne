@@ -213,18 +213,18 @@ namespace Payload {
 		uint8 mUnknown2 = 0;
 		AnonType mAnonymous = AT_None;
 		uint8 mFaceStyle = 0;
-		char name[Limits::Character::MAX_NAME_LENGTH];
+		char mName[Limits::Character::MAX_NAME_LENGTH];
 		DeityID mDeity = 0;
 		uint16 unknown3 = 0;
 		float mSize = 5.0f;
-		uint32 mUnknown4;
-		ActorType mActorType;
+		uint32 mUnknown4 = 0;
+		ActorType mActorType = AT_PLAYER;
 		uint8 mIsInvisible = 0;
 		uint8 mHairColor = 0;
-		uint8 mCurrentHP;
-		uint8 max_hp;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
+		uint8 mCurrentHP = 100;
+		uint8 max_hp = 100;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
 		uint8 mIsFindable = 0;
-		uint8 mUnknown5[5];
+		uint8 mUnknown5[5]; // TODO: I suspect this can be set as spawn ID and the memory used for position updates.
 		/*0094*/ signed	deltaHeading : 10;	// change in heading
 		/*????*/ signed	x : 19;				// x coord
 		/*????*/ signed	padding0054 : 3;		// ***Placeholder
@@ -280,7 +280,7 @@ namespace Payload {
 		uint8 mUnknown14[3];
 		union
 		{
-			/*0339*/ uint8 equip_chest2;	// Second place in packet for chest texture (usually 0xFF in live packets)
+			/*0339*/ uint8 equip_chest2 = 0;	// Second place in packet for chest texture (usually 0xFF in live packets)
 			// Not sure why there are 2 of them, but it effects chest texture!
 			/*0339*/ uint8 mount_color;		// drogmor: 0=white, 1=black, 2=green, 3=red
 			// horse: 0=brown, 1=white, 2=black, 3=tan
@@ -294,20 +294,20 @@ namespace Payload {
 		char DestructibleModel[64];	// Model of the Destructible Object - Required - Seen "DEST_TNT_G"
 		char DestructibleName2[64];	// Secondary name - Not Required - Seen "a_tent"
 		char DestructibleString[64];	// Unknown - Not Required - Seen "ZoneActor_01186"
-		uint32 DestructibleAppearance;	// Damage Appearance
-		uint32 DestructibleUnk1;
-		uint32 DestructibleID1;
-		uint32 DestructibleID2;
-		uint32 DestructibleID3;
-		uint32 DestructibleID4;
-		uint32 DestructibleUnk2;
-		uint32 DestructibleUnk3;
-		uint32 DestructibleUnk4;
-		uint32 DestructibleUnk5;
-		uint32 DestructibleUnk6;
-		uint32 DestructibleUnk7;
-		uint8 DestructibleUnk8;
-		uint32 DestructibleUnk9;
+		uint32 DestructibleAppearance = 0;	// Damage Appearance
+		uint32 DestructibleUnk1 = 0;
+		uint32 DestructibleID1 = 0;
+		uint32 DestructibleID2 = 0;
+		uint32 DestructibleID3 = 0;
+		uint32 DestructibleID4 = 0;
+		uint32 DestructibleUnk2 = 0;
+		uint32 DestructibleUnk3 = 0;
+		uint32 DestructibleUnk4 = 0;
+		uint32 DestructibleUnk5 = 0;
+		uint32 DestructibleUnk6 = 0;
+		uint32 DestructibleUnk7 = 0;
+		uint8 DestructibleUnk8 = 0;
+		uint32 DestructibleUnk9 = 0;
 
 	};
 }

@@ -19,7 +19,7 @@ typedef int16_t int16;
 typedef int32_t int32;
 typedef int64_t int64;
 
-typedef uint16_t DeityID;
+typedef uint16 DeityID;
 typedef uint8_t GenderID;
 //typedef uint32 ClassID;
 typedef uint8_t ClassID;
@@ -27,7 +27,8 @@ typedef uint32_t RaceID;
 typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
 typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
 typedef uint16_t InstanceID; // Zone Instance ID
-typedef uint16_t SpawnID;
+//typedef uint16_t SpawnID;
+typedef uint32 SpawnID;
 typedef std::string String;
 typedef std::stringstream StringStream;
 typedef uint32_t GuildID;

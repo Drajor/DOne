@@ -661,8 +661,10 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Character* pAddCharacter) 
 	Log::info(pCharacter->getName() + " can now see " + pAddCharacter->getName());
 
 	// 
-	auto outPacket = pAddCharacter->getConnection()->makeCharacterSpawnPacket();
+	//auto outPacket = pAddCharacter->getConnection()->makeCharacterSpawnPacket();
+	auto outPacket = new EQApplicationPacket(OP_NewSpawn, pAddCharacter->getActorData(), sizeof(Payload::SpawnData));
 	pCharacter->getConnection()->sendPacket(outPacket);
+	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 
