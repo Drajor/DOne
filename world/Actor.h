@@ -55,17 +55,19 @@ public:
 		return mPosition.squareDistance(pActor->mPosition);
 	}
 
-	//inline const Payload::SpawnData* getSpawnData() const { return &mSpawnData; }
 	inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
 
 	inline const SpawnID getSpawnID() const { return mSpawnData.mSpawnID; }
 	inline void setSpawnID(const SpawnID pSpawnID) { mSpawnData.mSpawnID = pSpawnID; }
 
-	// Name
-	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
-	// Suffix
-	// Title
-	// Last Name
+	inline const String& getName() const { return mName; }
+	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
+	inline const String& getLastName() const { return mLastName; }
+	inline void setLastName(const String& pLastName) { mLastName = pLastName; _setLastName(pLastName.c_str()); }
+	inline const String& getTitle() const { return mTitle; }
+	inline void setTitle(const String& pTitle) { mTitle = pTitle; _setTitle(pTitle.c_str()); }
+	inline const String& getSuffix() const { return mSuffix; }
+	inline void setSuffix(const String& pSuffix) { mSuffix = pSuffix; _setSuffix(pSuffix.c_str()); }
 
 	inline void _syncPosition() {
 		// Current
@@ -79,20 +81,6 @@ public:
 		mSpawnData.deltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
 		mSpawnData.deltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
 	}
-
-	//inline void _setPosition(const float pX, const float pY, const float pZ) {
-	//	mSpawnData.x = FloatToEQ19(pX);
-	//	mSpawnData.y = FloatToEQ19(pY);
-	//	mSpawnData.z = FloatToEQ19(pZ);
-	//}
-	//inline void _setHeading(const float pHeading) {
-	//	mSpawnData.heading = FloatToEQ19(pHeading);
-	//}
-	//inline void _setPositionDeltas(const float pX, const float pY, const float pZ) {
-	//	mSpawnData.deltaX = NewFloatToEQ13(pX);
-	//	mSpawnData.deltaY = NewFloatToEQ13(pY);
-	//	mSpawnData.deltaZ = NewFloatToEQ13(pZ);
-	//}
 
 	inline const Vector3& getPosition() const { return mPosition; }
 	inline void setPosition(const Vector3& pPosition) { mPosition = pPosition; }
@@ -111,6 +99,9 @@ public:
 
 	inline const int32 getAnimation() const { return mAnimation; }
 	inline void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
+
+	inline const uint8 getStandingState() const { return mSpawnData.mStandState; }
+	inline void setStandingState(const uint8 pStandingState) { mSpawnData.mStandState = pStandingState; }
 
 	// Visual
 	inline const uint8 getFaceStyle() const { return mSpawnData.mFaceStyle; }
@@ -170,8 +161,6 @@ public:
 
 	inline const bool isFindable() const { return mSpawnData.mIsFindable == 1; }
 	inline void setIsFindable(const bool pFindable) { mSpawnData.mIsFindable = pFindable ? 1 : 0; }
-
-	// TODO Position / Deltas.
 
 	inline const uint8 getStandState() const { return mSpawnData.mStandState; }
 	inline void setStandState(const uint8 pStandState) { mSpawnData.mStandState = pStandState; }
@@ -247,8 +236,16 @@ protected:
 	int32 mAnimation = 0;
 
 	Actor* mTarget = nullptr;
-
-	// mSpawnData is sent directly 
 	Payload::SpawnData mSpawnData;
 private:
+
+	String mName = "";
+	String mLastName = "";
+	String mTitle = "";
+	String mSuffix = "";
+
+	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
+	inline void _setLastName(const char* pLastName) { strncpy(mSpawnData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
+	inline void _setTitle(const char* pTitle) { strncpy(mSpawnData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
+	inline void _setSuffix(const char* pSuffix) { strncpy(mSpawnData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 };

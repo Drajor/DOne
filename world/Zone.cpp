@@ -257,7 +257,7 @@ void Zone::_handleIncomingConnections() {
 }
 
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
-	pCharacter->setPosition(pX, pY, pZ, 0);
+	pCharacter->setPosition(Vector3(pX, pY, pZ));
 	pCharacter->getConnection()->sendPosition();
 }
 

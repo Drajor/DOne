@@ -12,13 +12,13 @@ static const int AUTO_SAVE_FREQUENCY = 10000;
 
 Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : mAccountID(pAccountID), mData(pCharacterData) {
 	EXPECTED(mData);
-	mName = pCharacterData->mName; // NOTE: This is required for ID before initialise has been called.
-	_setName(mName.c_str());
+	setName(pCharacterData->mName); // NOTE: This is required for ID before initialise has been called.
 
 	setRunSpeed(0.7f);
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
 	setActorType(AT_PLAYER);
+	setIsNPC(false);
 }
 
 Character::~Character() {
@@ -41,9 +41,9 @@ void Character::update() {
 bool Character::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
-	mLastName = mData->mLastName;
-	mTitle = mData->mTitle;
-	mSuffix = mData->mSuffix;
+	setLastName(mData->mLastName);
+	setTitle(mData->mTitle);
+	setSuffix(mData->mSuffix);
 	setRaceID(mData->mRace);
 	setIsGM(mData->mGM);
 	setClass(mData->mClass);
@@ -110,14 +110,8 @@ bool Character::onZoneOut() {
 
 void Character::setStanding(bool pStanding) {
 	mStanding = pStanding;
-	if (mStanding) {
-		mCampTimer.Disable();
-		_setAppearance(Standing);
-	}
-	else {
-		_setAppearance(Sitting);
-	}
-		
+	if (mStanding)
+		mCampTimer.Disable();		
 }
 
 void Character::startCamp() {
@@ -129,23 +123,6 @@ void Character::message(MessageType pType, String pMessage)
 	mConnection->sendMessage(pType, pMessage);
 }
 
-void Character::setPosition(float pX, float pY, float pZ, float pHeading) {
-	mPosition.x = pX;
-	mPosition.y = pY;
-	mPosition.z = pZ;
-	mHeading = pHeading;
-}
-
-void Character::setPosition(Vector3& pPosition) {
-	mPosition.x = pPosition.x;
-	mPosition.y = pPosition.y;
-	mPosition.z = pPosition.z;
-}
-
-//void Character::setHeading(float pHeading) {
-//	mHeading = pHeading;
-//}
-
 void Character::healPercentage(int pPercent) {
 	mConnection->sendHPUpdate();
 }
@@ -154,14 +131,6 @@ void Character::damage(uint32 pAmount) {
 	mCurrentHP -= pAmount;
 	mConnection->sendHPUpdate();
 }
-
-//void Character::setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading)
-//{
-//	mDeltaX = pDeltaX;
-//	mDeltaY = pDeltaY;
-//	mDeltaZ = pDeltaZ;
-//	mDeltaHeading = pDeltaHeading;
-//}
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);
@@ -217,32 +186,32 @@ void Character::_checkForLevelIncrease() {
 	}
 }
 
-void Character::setLevel(uint8 pLevel) {
-	// Ensure not going above maximum level.
-	if (pLevel > Character::getMaxCharacterLevel()){
-		pLevel = Character::getMaxCharacterLevel();
-	}
-	
-	// Increasing.
-	if (pLevel > getLevel()) {
-		setLevel(pLevel);
-		// Notify user.
-		mConnection->sendLevelUpdate();
-		mConnection->sendLevelGain();
-		// Notify zone.
-		mZone->notifyCharacterLevelIncrease(this);
-	}
-	else if (pLevel < getLevel()) {
-		mExperience = 0; // to be safe.
-		setLevel(pLevel);
-		// Notify user.
-		mConnection->sendLevelUpdate();
-		mConnection->sendLevelLost();
-		// Notify zone.
-		mZone->notifyCharacterLevelDecrease(this);
-	}
-	
-}
+//void Character::setLevel(uint8 pLevel) {
+//	// Ensure not going above maximum level.
+//	if (pLevel > Character::getMaxCharacterLevel()){
+//		pLevel = Character::getMaxCharacterLevel();
+//	}
+//	
+//	// Increasing.
+//	if (pLevel > getLevel()) {
+//		setLevel(pLevel);
+//		// Notify user.
+//		mConnection->sendLevelUpdate();
+//		mConnection->sendLevelGain();
+//		// Notify zone.
+//		mZone->notifyCharacterLevelIncrease(this);
+//	}
+//	else if (pLevel < getLevel()) {
+//		mExperience = 0; // to be safe.
+//		setLevel(pLevel);
+//		// Notify user.
+//		mConnection->sendLevelUpdate();
+//		mConnection->sendLevelLost();
+//		// Notify zone.
+//		mZone->notifyCharacterLevelDecrease(this);
+//	}
+//	
+//}
 
 uint32 Character::getExperienceRatio() {
 	// Protect against division by zero.
@@ -297,10 +266,10 @@ void Character::_updateForSave() {
 	EXPECTED(mZone);
 
 	mData->mGM = getIsGM();
-	mData->mName = mName;
-	mData->mLastName = mLastName;
-	mData->mTitle = mTitle;
-	mData->mSuffix = mSuffix;
+	mData->mName = getName();
+	mData->mLastName = getLastName();
+	mData->mTitle = getTitle();
+	mData->mSuffix = getSuffix();
 
 	mData->mLevel = getLevel();
 	mData->mExperience = mExperience;

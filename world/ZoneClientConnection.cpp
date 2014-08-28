@@ -711,9 +711,12 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	auto payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
 
 	if (mCharacter->getX() != payload->x_pos || mCharacter->getY() != payload->y_pos || mCharacter->getZ() != payload->z_pos || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
-		mCharacter->setPosition(payload->x_pos, payload->y_pos, payload->z_pos, EQ19toFloat(payload->heading));
+		//mCharacter->setPosition(payload->x_pos, payload->y_pos, payload->z_pos, EQ19toFloat(payload->heading));
+		mCharacter->setPosition(Vector3(payload->x_pos, payload->y_pos, payload->z_pos));
+		mCharacter->setHeading(EQ19toFloat(payload->heading));
 		mCharacter->setAnimation(payload->animation);
 		mCharacter->setPositionDelta(Vector3(payload->delta_x, payload->delta_y, payload->delta_z));
+		mCharacter->setHeadingDelta(NewEQ13toFloat(payload->delta_heading));
 		mZone->notifyCharacterPositionChanged(mCharacter);
 
 		// Restart the force send timer.
@@ -744,21 +747,26 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		case SpawnAppearanceAnimation::Standing:
 			mCharacter->setStanding(true);
 			mZone->notifyCharacterStanding(mCharacter);
+			mCharacter->setStandingState(Standing);
 			break;
 		case SpawnAppearanceAnimation::Freeze:
+			mCharacter->setStandingState(Freeze);
 			break;
 		case SpawnAppearanceAnimation::Looting:
+			mCharacter->setStandingState(Looting);
 			break;
 		case SpawnAppearanceAnimation::Sitting:
 			mCharacter->setStanding(false);
 			mZone->notifyCharacterSitting(mCharacter);
+			mCharacter->setStandingState(Sitting);
 			break;
 		case SpawnAppearanceAnimation::Crouch:
 			// Crouch or Jump triggers this.
 			mZone->notifyCharacterCrouching(mCharacter);
-			mCharacter->_setAppearance(Crouch); // TODO: May eventually need to do something like mCharacter->setCrouching(true); 
+			mCharacter->setStandingState(Crouch);
 			break;
 		case SpawnAppearanceAnimation::Death:
+			mCharacter->setStandingState(Death);
 			break;
 		default:
 			StringStream ss;

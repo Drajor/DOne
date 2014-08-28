@@ -32,8 +32,6 @@ public:
 
 	bool initialise();
 	
-	
-	
 	bool onZoneIn();
 	bool onZoneOut();
 	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
@@ -72,11 +70,6 @@ public:
 	void update();
 
 	void setStanding(bool pStanding);
-
-	inline const String& getName() const { return mName; }
-	inline const String& getLastName() const { return mLastName; }
-	inline const String& getTitle() const { return mTitle; }
-	inline const String& getSuffix() const { return mSuffix; }
 	inline const uint32 getStatus() const { return mStatus; }
 	
 	void startCamp();
@@ -86,35 +79,6 @@ public:
 	inline bool isZoningOut() { return mIsZoningOut; }
 
 	void message(MessageType pType, String pMessage);
-	
-
-
-	// Position and Heading
-	//void setPositionDeltas(float pDeltaX, float pDeltaY, float pDeltaZ, int32 pDeltaHeading);
-	//Vector3 getPosition3() { return mPosition; };
-	//float getX() { return mPosition.x; }
-	//float getY() { return mPosition.y; }
-	//float getZ() { return mPosition.z; }
-	//int32 getDeltaX() { return mDeltaX; }
-	//int32 getDeltaY() { return mDeltaY; }
-	//int32 getDeltaZ() { return mDeltaZ; }
-
-	void setPosition(float pX, float pY, float pZ, float pHeading);
-	void setPosition(Vector3& pPosition);
-
-	//const float getHeading() const { return mHeading; }
-	//const int32 getDeltaHeading() const { return mDeltaHeading; }
-	//void setHeading(float pHeading);
-	//const uint32 getRace() const { return mRace; }
-	//const uint32 getOriginalRace() const { return mOriginalRace; }
-	//const uint8 getClass() const { return mClass; }
-	//const uint8 getGender() const { return mGender; }
-	//const uint8 getLevel() const { return mLevel; }
-	////const uint16 getDeity() const { return mDeity; }
-	//const float getSize() const { return mSize; }
-	//const int32 getAnimation() const { return mAnimation; }
-	const SpawnAppearanceAnimation getAppearance() const { return mAppearance; }
-	//void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
 
 	inline const int32 getCopper() const { return mCopper; }
 	inline const int32 getSilver() const { return mSilver; }
@@ -148,7 +112,6 @@ public:
 	uint32 getExperienceForNextLevel() { return Character::getExperienceForLevel(getLevel() + 1); }
 	static uint32 getExperienceForLevel(uint8 pLevel);
 	static uint8 getMaxCharacterLevel() { return 20; }
-	void setLevel(uint8 pLevel);
 
 	static float getDefaultSize(uint32 pRace);
 
@@ -172,7 +135,6 @@ public:
 
 	inline const float getVisibleRange() const { return mVisibleRange; }
 	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
-	//inline std::list<Character*>& getVisible() { return mVisible; }
 	inline std::list<Character*>& getVisibleTo() { return mVisibleTo; }
 
 	void addVisibleTo(Character* pCharacter);
@@ -181,52 +143,15 @@ public:
 	const CharacterData* getData() const { return mData; }
 private:
 
-	void _initialiseProfile();
-
-	void _setAppearance(SpawnAppearanceAnimation pAppearance) { mAppearance = pAppearance; }
-
 	const uint32 mAccountID;
 	bool mInitialised = false;
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
-	//float mHeading = 0.0f;
-	//int32 mDeltaX = 0;
-	//int32 mDeltaY = 0;
-	//int32 mDeltaZ = 0;
-	//int32 mDeltaHeading = 0;
-	//int32 mAnimation = 0;
-	SpawnAppearanceAnimation mAppearance = Standing;
-	
 
-	uint32 mExperience;
+	uint32 mExperience = 0;
 	void _checkForLevelIncrease();
 	void _updateForSave();
-	
-	//float mSize = 5.0f;
-	//uint16 mDeity = 394;
-	//uint8 mLevel = 1;
-	//ClassID mClass = ClassIDs::Warrior;
-	//uint32 mRace = 1;
-	//uint32 mOriginalRace = 1;
-	//GenderID mGender = 1;
-	//float mRunSpeed = 0.7f;
-	//float mWalkSpeed = 0.35f;
-	//AnonType mAnonymous = AnonType::AT_None;
-
-	//uint8 mRightEyeColour = 0;
-	//uint8 mLeftEyeColour = 0;
-	//uint8 mFaceStyle = 0;
-	//uint8 mBeardStyle = 0;
-	//uint8 mBeardColour = 0;
-	//uint8 mHairStyle = 0;
-	//uint8 mHairColour = 0;
-	//uint32 mDrakkinHeritage = 0;
-	//uint32 mDrakkinTattoo = 0;
-	//uint32 mDrakkinDetails = 0;
-
-	//GuildRank mGuildRank = GR_None;
-	//GuildID mGuildID = NO_GUILD;
 
 	int32 mCurrentHP = 100;
 	int32 mMaximumHP = 100;
@@ -248,10 +173,6 @@ private:
 	uint32 mBaseAgility = 0;
 	uint32 mBaseWisdom = 0;
 
-	String mName = "";
-	String mLastName = "";
-	String mTitle = "";
-	String mSuffix = "";
 	bool mStanding = true;
 	bool mIsZoningOut = false;
 	bool mCampComplete = false; // Flag indicating whether this character logged out via /camp
@@ -285,6 +206,5 @@ private:
 	void _processMessageQueue();
 	
 	float mVisibleRange = 30.0f;
-	//std::list<Character*> mVisible; // List of Characters who this Character can see.
 	std::list<Character*> mVisibleTo; // List of Characters who can see this Character.
 };

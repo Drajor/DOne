@@ -240,7 +240,7 @@ namespace Payload {
 		/*????*/ signed	padding0070 : 19;		// ***Placeholder
 		uint8 mLeftEyeColour = 0;
 		uint8 mUnknown6[11];
-		uint8 mStandState = 0;	// stand state for SoF+ 0x64 for normal animation
+		uint8 mStandState = 100;	// stand state for SoF+ 0x64 for normal animation
 		uint32 mDrakkinHeritage = 0;
 		uint32 mDrakkinTattoo = 0;
 		uint32 mDrakkinDetails = 0;
