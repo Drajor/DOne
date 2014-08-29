@@ -264,6 +264,9 @@ namespace CharacterDataXML {
 		static const auto LastName = "last_name";
 		static const auto Title = "title";
 		static const auto Suffix = "suffix";
+		static const auto AutoConsentGroup = "auto_consent_group";
+		static const auto AutoConsentRaid = "auto_consent_raid";
+		static const auto AutoConsentGuild = "auto_consent_guild";
 		// Tag::Stats
 		static const auto Strength = "strength";
 		static const auto Stamina = "stamina";
@@ -330,6 +333,9 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacterData->mLastName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacterData->mTitle));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacterData->mSuffix));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGroup, pCharacterData->mAutoConsentGroup));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentRaid, pCharacterData->mAutoConsentRaid));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGuild, pCharacterData->mAutoConsentGuild));
 
 	// Tag::Stats
 	auto statsElement = characterElement->FirstChildElement(Tag::Stats);
@@ -416,6 +422,9 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	characterElement->SetAttribute(Attribute::LastName, pCharacterData->mLastName.c_str());
 	characterElement->SetAttribute(Attribute::Title, pCharacterData->mTitle.c_str());
 	characterElement->SetAttribute(Attribute::Suffix, pCharacterData->mSuffix.c_str());
+	characterElement->SetAttribute(Attribute::AutoConsentGroup, pCharacterData->mAutoConsentGroup);
+	characterElement->SetAttribute(Attribute::AutoConsentRaid, pCharacterData->mAutoConsentRaid);
+	characterElement->SetAttribute(Attribute::AutoConsentGuild, pCharacterData->mAutoConsentGuild);
 
 	// Tag::Stats
 	auto statsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Stats)));

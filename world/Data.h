@@ -97,6 +97,10 @@ struct CharacterData {
 	uint32 mIntelligence = 0;
 	uint32 mAgility = 0;
 	uint32 mWisdom = 0;
+
+	bool mAutoConsentGroup = false;
+	bool mAutoConsentRaid = false;
+	bool mAutoConsentGuild = false;
 };
 
 //struct AccountData {

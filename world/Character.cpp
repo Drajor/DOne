@@ -94,6 +94,10 @@ bool Character::initialise() {
 		setColour(i, mData->mDyes[i]);
 	}
 
+	setAutoConsentGroup(mData->mAutoConsentGroup);
+	setAutoConsentRaid(mData->mAutoConsentRaid);
+	setAutoConsentGuild(mData->mAutoConsentGuild);
+
 	mInitialised = true;
 	return true;
 }
@@ -323,6 +327,10 @@ void Character::_updateForSave() {
 	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
 		mData->mDyes[i] = getColour(i).mColour;
 	}
+
+	mData->mAutoConsentGroup = getAutoConsentGroup();
+	mData->mAutoConsentRaid = getAutoConsentRaid();
+	mData->mAutoConsentGuild = getAutoConsentGuild();
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

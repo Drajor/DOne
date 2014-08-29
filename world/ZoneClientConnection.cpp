@@ -832,6 +832,15 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		break;
 	case SpawnAppearanceType::Light:
 		break;
+	case SpawnAppearanceType::AutoConsentGroup:
+		mCharacter->setAutoConsentGroup(actionParameter == 1);
+		break;
+	case SpawnAppearanceType::AutoConsentGuild:
+		mCharacter->setAutoConsentGuild(actionParameter == 1);
+		break;
+	case SpawnAppearanceType::AutoConsentRaid:
+		mCharacter->setAutoConsentRaid(actionParameter == 1);
+		break;
 	default:
 		StringStream ss;
 		ss << "[Zone Client Connection] Got unexpected SpawnAppearanceTypes : " << actionType;

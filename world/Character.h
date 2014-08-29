@@ -127,9 +127,13 @@ public:
 	uint32 getWisdom() { return 0; };
 	uint32 getStatistic(Statistic pStatistic);
 
+	// Consent
 	inline const bool getAutoConsentGroup() const { return mAutoConsentGroup; }
+	inline void setAutoConsentGroup(const bool pConsent) { mAutoConsentGroup = pConsent; }
 	inline const bool getAutoConsentRaid() const { return mAutoConsentRaid; }
+	inline void setAutoConsentRaid(const bool pConsent) { mAutoConsentRaid = pConsent; }
 	inline const bool getAutoConsentGuild() const { return mAutoConsentGuild; }
+	inline void setAutoConsentGuild(const bool pConsent) { mAutoConsentGuild = pConsent; }
 
 	inline const float getVisibleRange() const { return mVisibleRange; }
 	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }

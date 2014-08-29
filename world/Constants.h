@@ -212,8 +212,12 @@ enum SpawnAppearanceType : int16 {
 	Split = 28,
 	Size = 29,
 	NPCName = 31, // 1 = Trader <PlayerName>
+	AutoConsentGroup = 40,
+	AutoConsentRaid = 41,
+	AutoConsentGuild = 42,
 	ShowHelm = 43,
-	DamageState = 44
+	DamageState = 44,
+	EQPlayersAutoUpdate = 45,
 };
 
 enum SpawnAppearanceAnimation : int16 {
