@@ -62,7 +62,7 @@ public:
 	Actor* findActor(const SpawnID pSpawnID);
 
 	void notifyCharacterZoneIn(Character* pCharacter);
-	void notifyCharacterPositionChanged(Character* pCharacter);
+	void handleActorPositionChange(Actor* pActor);
 	void notifyCharacterLinkDead(Character* pCharacter);
 	void notifyCharacterAFK(Character* pCharacter);
 	void notifyCharacterShowHelm(Character* pCharacter);

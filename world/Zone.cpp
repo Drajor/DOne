@@ -302,22 +302,17 @@ void Zone::notifyCharacterZoneIn(Character* pCharacter) {
 }
 
 
-void Zone::notifyCharacterPositionChanged(Character* pCharacter) {
-	// Notify players in zone.
-	//ZoneClientConnection* sender = pCharacter->getConnection();
-	//EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
-	//for (auto i : mConnections) {
-	//	if (i != sender)
-	//		i->sendPacket(outPacket);
-	//}
-	//safe_delete(outPacket);
-	mScene->update(pCharacter);
+void Zone::handleActorPositionChange(Actor* pActor) {
+	// Update Scene with Actor movement
+	mScene->update(pActor);
 
-	// Visible To update.
-	EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterPositionUpdate();
-	for (auto i : pCharacter->getVisibleTo()) {
+	pActor->_syncPosition();
+	// Update any Character visible to pActor.
+	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, pActor->getPositionData(), 22); // sizeof(PlayerPositionUpdateServer_Struct)
+	for (auto i : pActor->getVisibleTo()) {
 		i->getConnection()->sendPacket(outPacket);
 	}
+	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 

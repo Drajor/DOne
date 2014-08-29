@@ -33,7 +33,7 @@ namespace FUCK {
 	}
 }
 
-
+class Character;
 class Actor {
 public:
 	Actor();;
@@ -56,9 +56,17 @@ public:
 	}
 
 	inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
+	inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mSpawnData.mSpawnID2); }
+
+	inline const float getVisibleRange() const { return mVisibleRange; }
+	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
+	inline std::list<Character*>& getVisibleTo() { return mVisibleTo; }
+
+	inline void addVisibleTo(Character* pCharacter) { mVisibleTo.push_back(pCharacter); }
+	inline void removeVisibleTo(Character* pCharacter) { mVisibleTo.remove(pCharacter); }
 
 	inline const SpawnID getSpawnID() const { return mSpawnData.mSpawnID; }
-	inline void setSpawnID(const SpawnID pSpawnID) { mSpawnData.mSpawnID = pSpawnID; }
+	inline void setSpawnID(const SpawnID pSpawnID) { mSpawnData.mSpawnID = pSpawnID; mSpawnData.mSpawnID2 = pSpawnID; }
 
 	inline const String& getName() const { return mName; }
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
@@ -261,6 +269,9 @@ private:
 	String mLastName = "";
 	String mTitle = "";
 	String mSuffix = "";
+
+	float mVisibleRange = 30.0f;
+	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
 
 	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mSpawnData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }

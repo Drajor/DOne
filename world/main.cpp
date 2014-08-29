@@ -55,8 +55,8 @@
 #include "LogSystem.h"
 
 //#include "Payload.h"
-//#include "../common/eq_packet_structs.h"
-//#include <iostream>
+#include "../common/eq_packet_structs.h"
+#include <iostream>
 //#include "Actor.h"
 
 
@@ -71,6 +71,8 @@ int main(int argc, char** argv)  {
 	//CharacterData* characterData = new CharacterData();
 	//DataStore::getInstance().loadCharacter("Playerzero", characterData);
 
+	//std::cout << sizeof(PlayerPositionUpdateServer_Struct) << std::endl;
+	//system("pause");
 	
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();

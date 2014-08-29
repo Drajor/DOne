@@ -135,13 +135,6 @@ public:
 	inline const bool getAutoConsentGuild() const { return mAutoConsentGuild; }
 	inline void setAutoConsentGuild(const bool pConsent) { mAutoConsentGuild = pConsent; }
 
-	inline const float getVisibleRange() const { return mVisibleRange; }
-	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
-	inline std::list<Character*>& getVisibleTo() { return mVisibleTo; }
-
-	void addVisibleTo(Character* pCharacter);
-	void removeVisibleTo(Character* pCharacter);
-
 	const CharacterData* getData() const { return mData; }
 private:
 
@@ -201,7 +194,4 @@ private:
 	};
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();
-	
-	float mVisibleRange = 30.0f;
-	std::list<Character*> mVisibleTo; // List of Characters who can see this Character.
 };

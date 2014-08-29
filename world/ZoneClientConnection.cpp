@@ -93,7 +93,7 @@ void ZoneClientConnection::update() {
 
 	// [UF] When a character has been standing still for too long they disappear. Here we force send the position to stop that.
 	if (mForceSendPositionTimer.Check()) {
-		mZone->notifyCharacterPositionChanged(mCharacter);
+		mZone->handleActorPositionChange(mCharacter);
 	}
 
 	EQApplicationPacket* packet = 0;
@@ -721,7 +721,7 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 		mCharacter->setAnimation(payload->animation);
 		mCharacter->setPositionDelta(Vector3(payload->delta_x, payload->delta_y, payload->delta_z));
 		mCharacter->setHeadingDelta(NewEQ13toFloat(payload->delta_heading));
-		mZone->notifyCharacterPositionChanged(mCharacter);
+		mZone->handleActorPositionChange(mCharacter);
 
 		// Restart the force send timer.
 		mForceSendPositionTimer.Start();
@@ -1172,28 +1172,28 @@ void ZoneClientConnection::sendHPUpdate() {
 //	return outPacket;
 //}
 
-EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
-	//ERROR_CONDITION(mConnected);
-
-	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	auto payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
-	payload->spawn_id = mCharacter->getSpawnID();
-	payload->x_pos = FloatToEQ19(mCharacter->getX());
-	payload->y_pos = FloatToEQ19(mCharacter->getY());
-	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getXDelta()));
-	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getYDelta()));
-	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getZDelta()));
-	payload->heading = FloatToEQ19(mCharacter->getHeading());
-	payload->padding0002 = 0;
-	payload->padding0006 = 7;
-	payload->padding0014 = 0x7f;
-	payload->padding0018 = 0x5df27;
-	payload->animation = mCharacter->getAnimation();
-	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getHeadingDelta()));
-
-	return outPacket;
-}
+//EQApplicationPacket* ZoneClientConnection::makeCharacterPositionUpdate() {
+//	//ERROR_CONDITION(mConnected);
+//
+//	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+//	auto payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
+//	payload->spawn_id = mCharacter->getSpawnID();
+//	payload->x_pos = FloatToEQ19(mCharacter->getX());
+//	payload->y_pos = FloatToEQ19(mCharacter->getY());
+//	payload->z_pos = FloatToEQ19(mCharacter->getZ());
+//	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getXDelta()));
+//	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getYDelta()));
+//	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getZDelta()));
+//	payload->heading = FloatToEQ19(mCharacter->getHeading());
+//	payload->padding0002 = 0;
+//	payload->padding0006 = 7;
+//	payload->padding0014 = 0x7f;
+//	payload->padding0018 = 0x5df27;
+//	payload->animation = mCharacter->getAnimation();
+//	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getHeadingDelta()));
+//
+//	return outPacket;
+//}
 
 
 void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {

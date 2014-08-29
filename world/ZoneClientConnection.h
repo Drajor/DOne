@@ -91,10 +91,6 @@ public:
 	void sendGuildURL(const String& pURL);
 	void sendGuildChannel(const String& pChannel);
 
-	void populateSpawnStruct(NewSpawn_Struct* pSpawn);
-	EQApplicationPacket* makeCharacterSpawnPacket(); // Caller is responsible for memory deallocation.
-	EQApplicationPacket* makeCharacterPositionUpdate(); // Caller is responsible for memory deallocation.
-
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:

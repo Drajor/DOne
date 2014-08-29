@@ -235,7 +235,8 @@ namespace Payload {
 		uint8 mCurrentHP = 100;
 		uint8 max_hp = 100;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
 		uint8 mIsFindable = 0;
-		uint8 mUnknown5[5]; // TODO: I suspect this can be set as spawn ID and the memory used for position updates.
+		uint8 mUnknown5[3]; // TODO: I suspect this can be set as spawn ID and the memory used for position updates.
+		uint16 mSpawnID2 = 0;
 		/*0094*/ signed	deltaHeading : 10;	// change in heading
 		/*????*/ signed	x : 19;				// x coord
 		/*????*/ signed	padding0054 : 3;		// ***Placeholder

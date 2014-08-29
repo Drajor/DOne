@@ -428,16 +428,3 @@ void Character::_processMessageQueue() {
 void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
 }
-
-void Character::addVisibleTo(Character* pCharacter)
-{
-	EXPECTED(pCharacter); EXPECTED(pCharacter != this); mVisibleTo.push_back(pCharacter);
-}
-
-void Character::removeVisibleTo(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(mVisibleTo.empty() == false);
-	std::size_t oSize = mVisibleTo.size();
-	mVisibleTo.remove(pCharacter);
-	EXPECTED(mVisibleTo.size() == oSize - 1);
-}
