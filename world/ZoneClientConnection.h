@@ -155,6 +155,8 @@ private:
 	void _handleGuildBanker(const EQApplicationPacket* pPacket);
 	void _handleGuildMakeLeader(const EQApplicationPacket* pPacket);
 
+	void _handleAutoAttack(const EQApplicationPacket* pPacket);
+
 	void _unimplementedFeature(String pOpCodeName);
 
 	ConnectionOrigin mConnectionOrigin;

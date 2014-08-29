@@ -66,6 +66,11 @@ namespace Payload {
 			Colour mColour;
 			uint8 mSlotID = 0;
 		};
+
+		struct AutoAttack : public FixedSizedPayload<AutoAttack> {
+			bool mAttacking = false;
+			char mUnknown[3];
+		};
 	}
 
 	namespace World {
