@@ -61,6 +61,9 @@ public:
 	Character* findCharacter(const String pCharacterName);
 	Actor* findActor(const SpawnID pSpawnID);
 
+	void addActor(Actor* pActor);
+	void removeActor(Actor* pActor);
+
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void handleActorPositionChange(Actor* pActor);
 	void notifyCharacterLinkDead(Character* pCharacter);
@@ -100,8 +103,8 @@ public:
 	void requestSave(Character* pCharacter);
 
 	
-	void handleVisibilityAdd(Character* pCharacter, Character* pAddCharacter);
-	void handleVisibilityRemove(Character* pCharacter, Character* pRemoveCharacter);
+	void handleVisibilityAdd(Character* pCharacter, Actor* pAddActor);
+	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
 	
 private:
 

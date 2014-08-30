@@ -1,5 +1,6 @@
 #include "CommandHandler.h"
 #include "Character.h"
+#include "NPC.h"
 #include "Zone.h"
 #include "ZoneData.h"
 #include "ZoneManager.h"
@@ -466,20 +467,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 			}
 		}
 	}
-	// #gu <number> <text>
-	else if (pCommandName == "gu") {
-		if (pParameters.size() == 2) {
-			uint32 action = 0;
-			Utility::stou32Safe(action, pParameters[0]);
-
-			auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-			auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
-			payload->mAction = static_cast<Payload::Guild::GuildUpdate::Action>(action);
-			strcpy(&payload->mText[0], pParameters[1].c_str());
-
-			pCharacter->getConnection()->sendPacket(outPacket);
-			safe_delete(outPacket);
-		}
+	else if (pCommandName == "npc") {
+		NPC* npc = new NPC();
+		npc->setZone(pCharacter->getZone());
+		npc->initialise();
+		npc->setPosition(pCharacter->getPosition());
+		pCharacter->getZone()->addActor(npc);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

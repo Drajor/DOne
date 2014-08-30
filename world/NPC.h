@@ -4,6 +4,9 @@
 
 class NPC : public Actor {
 public:
-	inline bool isNPC() { return true; }
+	NPC();
+	inline const bool isNPC() const { return true; }
+	const bool initialise();
+
 private:
 };

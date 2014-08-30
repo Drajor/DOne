@@ -23,6 +23,8 @@ private:
 	void _updateNPC(NPC* pNPC);
 	void onCharacterAdded(Character* pCharacter);
 	void onCharacterRemoved(Character* pCharacter);
+	void onNPCAdded(NPC* pNPC);
+	void onNPCRemoved(NPC* pNPC);
 	void queryCharacters(Character* pCharacter, std::list<Character*>& pCharacters);
 	Zone* mZone;
 	std::list<Character*> mCharacters;

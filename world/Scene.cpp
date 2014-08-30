@@ -45,7 +45,9 @@ const bool Scene::add(Actor* pActor) {
 
 	// NPC being added to Scene.
 	if (pActor->isNPC()) {
-		mNPCs.push_back(Actor::cast<NPC*>(pActor));
+		NPC* npc = Actor::cast<NPC*>(pActor);
+		mNPCs.push_back(npc);
+		onNPCAdded(npc);
 		return true;
 	}
 
@@ -92,6 +94,25 @@ void Scene::onCharacterAdded(Character* pCharacter) {
 void Scene::onCharacterRemoved(Character* pCharacter) {
 	EXPECTED(pCharacter);
 }
+
+void Scene::onNPCAdded(NPC* pNPC) {
+	// Query for Characters near npc
+
+	// NOTE: Brute force for now, the fancy stuff comes later.
+	for (auto i : mCharacters) {
+		const float squareVisibility = i->getVisibleRange() * i->getVisibleRange();
+		if (i->squareDistanceTo(pNPC) <= squareVisibility){
+			pNPC->addVisibleTo(i); // NPC pNPC is now visible to Character i
+			mZone->handleVisibilityAdd(i, pNPC);
+		}
+	}
+}
+
+void Scene::onNPCRemoved(NPC* pNPC)
+{
+
+}
+
 
 void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pCharacters) {
 	EXPECTED(pCharacter);

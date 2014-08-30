@@ -1,7 +1,5 @@
 #pragma once
 
-class Zone;
-
 #include "Constants.h"
 #include "Payload.h"
 #include "Vector3.h"
@@ -34,13 +32,17 @@ namespace FUCK {
 }
 
 class Character;
+class Zone;
 class Actor {
 public:
 	Actor();;
 	virtual ~Actor() {};
 
+	void setZone(Zone* pZone) { mZone = pZone; }
+	Zone* getZone() const { return mZone; }
+
 	inline virtual const bool isCharacter() const { return false; }
-	inline virtual bool isNPC() const { return false; }
+	inline virtual const bool isNPC() const { return false; }
 	inline void setTarget(Actor* pActor) { mTarget = pActor; }
 	inline Actor* getTarget() const { return mTarget; }
 	inline const bool hasTarget() const { return mTarget != nullptr; }
@@ -262,6 +264,7 @@ protected:
 
 	Actor* mTarget = nullptr;
 	Payload::SpawnData mSpawnData;
+	Zone* mZone = nullptr;
 private:
 
 	int32 mCopper = 0;

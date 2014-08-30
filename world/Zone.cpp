@@ -649,31 +649,40 @@ void Zone::handleFaceChange(Character* pCharacter) {
 	// TODO: Notify others in zone.
 }
 
-void Zone::handleVisibilityAdd(Character* pCharacter, Character* pAddCharacter) {
+void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	EXPECTED(pCharacter);
-	EXPECTED(pAddCharacter);
+	EXPECTED(pAddActor);
 
-	Log::info(pCharacter->getName() + " can now see " + pAddCharacter->getName());
+	Log::info(pCharacter->getName() + " can now see " + pAddActor->getName());
 
-	// 
-	//auto outPacket = pAddCharacter->getConnection()->makeCharacterSpawnPacket();
-	auto outPacket = new EQApplicationPacket(OP_NewSpawn, pAddCharacter->getActorData(), sizeof(Payload::SpawnData));
+	pAddActor->_syncPosition();
+	auto outPacket = new EQApplicationPacket(OP_NewSpawn, pAddActor->getActorData(), sizeof(Payload::SpawnData));
 	pCharacter->getConnection()->sendPacket(outPacket);
 	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 
-void Zone::handleVisibilityRemove(Character* pCharacter, Character* pRemoveCharacter) {
+void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
 	EXPECTED(pCharacter);
-	EXPECTED(pRemoveCharacter);
+	EXPECTED(pRemoveActor);
 
-	Log::info(pCharacter->getName() + " can no longer see " + pRemoveCharacter->getName());
+	Log::info(pCharacter->getName() + " can no longer see " + pRemoveActor->getName());
 
 	// 
 	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
 	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
-	payload->spawn_id = pRemoveCharacter->getSpawnID();
-	payload->Decay = 0;
+	payload->spawn_id = pRemoveActor->getSpawnID();
+	payload->Decay = 1;
 	pCharacter->getConnection()->sendPacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void Zone::addActor(Actor* pActor) {
+	EXPECTED(pActor);
+
+	mScene->add(pActor);
+}
+
+void Zone::removeActor(Actor* pActor) {
+
 }

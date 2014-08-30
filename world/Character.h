@@ -61,9 +61,6 @@ public:
 	inline Raid* getRaid() { return mRaid; }
 	inline void setRaid(Raid* pRaid) { mRaid = pRaid; }
 
-	void setZone(Zone* pZone) { mZone = pZone; }
-
-	Zone* getZone() const { return mZone; }
 	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
 	ZoneClientConnection* getConnection() { return mConnection; }
 	
@@ -203,7 +200,6 @@ private:
 	GuildID mPendingGuildInviteID = NO_GUILD;
 	String mPendingGuildInviteName = "";
 
-	Zone* mZone = nullptr;
 	ZoneClientConnection* mConnection = nullptr;
 	CharacterData* mData = nullptr;
 
