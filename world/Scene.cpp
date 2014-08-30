@@ -103,6 +103,7 @@ void Scene::onNPCAdded(NPC* pNPC) {
 		const float squareVisibility = i->getVisibleRange() * i->getVisibleRange();
 		if (i->squareDistanceTo(pNPC) <= squareVisibility){
 			pNPC->addVisibleTo(i); // NPC pNPC is now visible to Character i
+			i->addVisibleNPC(pNPC);
 			mZone->handleVisibilityAdd(i, pNPC);
 		}
 	}
@@ -128,6 +129,20 @@ void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pChara
 	}
 }
 
+void Scene::queryNPCs(Character* pCharacter, std::list<NPC*>& pNPCs) {
+	EXPECTED(pCharacter);
+	EXPECTED(pNPCs.empty());
+
+	const float squareVisibility = pCharacter->getVisibleRange() * pCharacter->getVisibleRange();
+
+	// NOTE: Brute force for now, the fancy stuff comes later.
+	for (auto i : mNPCs) {
+		if (i->squareDistanceTo(pCharacter) <= squareVisibility){
+			pNPCs.push_back(i);
+		}
+	}
+}
+
 const bool Scene::update(Actor* pActor) {
 	// Character
 	if (pActor->isCharacter()) {
@@ -146,6 +161,7 @@ const bool Scene::update(Actor* pActor) {
 }
 
 void Scene::_updateCharacter(Character* pCharacter) {
+	// Characters.
 	std::list<Character*> visibleNew;
 	queryCharacters(pCharacter, visibleNew);
 	std::list<Character*> added;
@@ -169,6 +185,28 @@ void Scene::_updateCharacter(Character* pCharacter) {
 		// Notify Zone that these Characters no longer see each other.
 		mZone->handleVisibilityRemove(pCharacter, i);
 		mZone->handleVisibilityRemove(i, pCharacter);
+	}
+
+	// NPCs.
+	std::list<NPC*> visibleNewNPC;
+	queryNPCs(pCharacter, visibleNewNPC);
+	std::list<NPC*> addedNPC;
+	std::list<NPC*> removedNPC;
+
+	diff(visibleNewNPC, pCharacter->getVisibleNPCs(), addedNPC, removedNPC);
+
+	for (auto i : addedNPC) {
+		i->addVisibleTo(pCharacter);
+		pCharacter->addVisibleNPC(i);
+
+		mZone->handleVisibilityAdd(pCharacter, i);
+
+	}
+	for (auto i : removedNPC) {
+		i->removeVisibleTo(pCharacter);
+		pCharacter->removeVisibleNPC(i);
+
+		mZone->handleVisibilityRemove(pCharacter, i);
 	}
 }
 

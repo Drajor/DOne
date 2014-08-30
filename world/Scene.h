@@ -26,6 +26,7 @@ private:
 	void onNPCAdded(NPC* pNPC);
 	void onNPCRemoved(NPC* pNPC);
 	void queryCharacters(Character* pCharacter, std::list<Character*>& pCharacters);
+	void queryNPCs(Character* pCharacter, std::list<NPC*>& pNPCs);
 	Zone* mZone;
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;

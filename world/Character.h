@@ -6,6 +6,7 @@
 #include "../common/timer.h"
 
 class Zone;
+class NPC;
 class Group;
 class Guild;
 class Raid;
@@ -144,6 +145,10 @@ public:
 	inline void addEbonCrystals(const uint32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
 	inline void removeEbonCrystals(const uint32 pCrystals) { mEbonCrystals -= pCrystals; } // TODO: This needs to be guarded.
 
+	inline void addVisibleNPC(NPC* pNPC) { mVisibleNPCs.push_back(pNPC); }
+	inline void removeVisibleNPC(NPC* pNPC) { mVisibleNPCs.remove(pNPC); }
+	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
+
 	const CharacterData* getData() const { return mData; }
 private:
 
@@ -202,6 +207,8 @@ private:
 
 	ZoneClientConnection* mConnection = nullptr;
 	CharacterData* mData = nullptr;
+
+	std::list<NPC*> mVisibleNPCs; // NPCs that are visible to this Character
 
 	struct QueuedChannelMessage {
 		const ChannelID mChannelID;
