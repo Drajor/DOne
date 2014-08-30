@@ -197,13 +197,17 @@ public:
 	inline const GuildRank getGuildRank() const { return mSpawnData.mGuildRank; }
 	inline void setGuildRank(const GuildRank pGuildRank) { mSpawnData.mGuildRank = pGuildRank; }
 
-	inline const uint32 getMaterial(const MaterialSlot pMaterialSlot) const {
+	inline const uint32 getMaterial(const MaterialSlot pSlotID) const {
 		// TODO: Guard this.
-		return mSpawnData.mEquipmentMaterials[pMaterialSlot];
+		return mSpawnData.mEquipmentMaterials[pSlotID];
 	}
-	inline void setMaterial(const MaterialSlot pMaterialSlot, const uint32 pMaterial) {
+	inline const uint32 getMaterial(const int pSlotID) const {
 		// TODO: Guard this.
-		mSpawnData.mEquipmentMaterials[pMaterialSlot] = pMaterial;
+		return mSpawnData.mEquipmentMaterials[pSlotID];
+	}
+	inline void setMaterial(const MaterialSlot pSlotID, const uint32 pMaterial) {
+		// TODO: Guard this.
+		mSpawnData.mEquipmentMaterials[pSlotID] = pMaterial;
 	}
 
 	inline const float getRunSpeed() const { return mSpawnData.mRunSpeed; }

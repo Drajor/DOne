@@ -490,7 +490,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->item_tint[_MaterialCount];
 	for (int i = 0; i < MAX_MATERIAL_SLOTS; i++) {
 		payload->item_tint[i].color = mCharacter->getColour(i).mColour;
-		//payload->item_material = mCharacter->getMaterial(i);
+		payload->item_material[i] = mCharacter->getMaterial(i);
 	}
 	//payload->aa_array[MAX_PP_AA_ARRAY];
 	//payload->servername[32];
@@ -508,7 +508,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->INT = mCharacter->getBaseStatistic(Statistic::Intelligence);
 	payload->AGI = mCharacter->getBaseStatistic(Statistic::Agility);
 	payload->WIS = mCharacter->getBaseStatistic(Statistic::Wisdom);
-	payload->face = 0;
+	payload->face = mCharacter->getFaceStyle();
 	//payload->languages[MAX_PP_LANGUAGE];
 	//payload->spell_book[MAX_PP_SPELLBOOK];
 	//payload->mem_spells[MAX_PP_MEMSPELL];
@@ -538,7 +538,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->drakkin_heritage = mCharacter->getDrakkinHeritage();
 	payload->drakkin_tattoo = mCharacter->getDrakkinTattoo();
 	payload->drakkin_details = mCharacter->getDrakkinDetails();
-	//payload->expansions;			// expansion setting, bit field of expansions avaliable
+	//payload->expansions = ;
 	//payload->toxicity;			//from drinking potions, seems to increase by 3 each time you drink
 	//payload->unknown5496[16];	//
 	//payload->hunger_level;
@@ -575,6 +575,12 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->disciplines;
 	//payload->recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 	payload->endurance = mCharacter->getCurrentEndurance();
+
+	payload->currentRadCrystals = mCharacter->getRadiantCrystals();
+	payload->careerRadCrystals = mCharacter->getTotalRadiantCrystals();
+	payload->currentEbonCrystals = mCharacter->getEbonCrystals();
+	payload->careerEbonCrystals = mCharacter->getTotalEbonCrystals();
+
 	payload->groupAutoconsent = mCharacter->getAutoConsentGroup() ? 1 : 0;
 	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
 	payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
@@ -2129,7 +2135,7 @@ void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket)
 
 void ZoneClientConnection::sendWearChange(const uint16 pSpawnID, const uint8 pSlotID, const uint32 pMaterialID, const uint32 pColour) {
 	using namespace Payload::Zone;
-	auto outPacket = new EQApplicationPacket(OP_WearChange, sizeof(WearChange));
+	auto outPacket = new EQApplicationPacket(OP_WearChange, WearChange::size());
 	auto payload = WearChange::convert(outPacket->pBuffer);
 
 	payload->mSpawnID = pSpawnID;

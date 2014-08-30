@@ -135,6 +135,18 @@ public:
 	inline const bool getAutoConsentGuild() const { return mAutoConsentGuild; }
 	inline void setAutoConsentGuild(const bool pConsent) { mAutoConsentGuild = pConsent; }
 
+	// Radiant Crystals.
+	inline const uint32 getRadiantCrystals() const { return mRadiantCrystals; }
+	inline const uint32 getTotalRadiantCrystals() const { return mTotalRadiantCrystals; }
+	inline void addRadiantCrystals(const uint32 pCrystals) { mRadiantCrystals += pCrystals; mTotalRadiantCrystals += pCrystals; }
+	inline void removeRadiantCrystals(const uint32 pCrystals) { mRadiantCrystals -= pCrystals; } // TODO: This needs to be guarded.
+
+	// Ebon Crystals.
+	inline const uint32 getEbonCrystals() const { return mEbonCrystals; }
+	inline const uint32 getTotalEbonCrystals() const { return mTotalEbonCrystals; }
+	inline void addEbonCrystals(const uint32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
+	inline void removeEbonCrystals(const uint32 pCrystals) { mEbonCrystals -= pCrystals; } // TODO: This needs to be guarded.
+
 	const CharacterData* getData() const { return mData; }
 private:
 
@@ -147,6 +159,14 @@ private:
 	uint32 mExperience = 0;
 	void _checkForLevelIncrease();
 	void _updateForSave();
+
+	uint32 mRadiantCrystals = 0;
+	uint32 mTotalRadiantCrystals = 0;
+	inline void _setRadiantCrystals(const uint32 pCurrent, const uint32 pTotal) { mRadiantCrystals = pCurrent; mTotalRadiantCrystals = pTotal; }
+
+	uint32 mEbonCrystals = 0;
+	uint32 mTotalEbonCrystals = 0;
+	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
 	int32 mCurrentHP = 100;
 	int32 mMaximumHP = 100;

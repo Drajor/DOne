@@ -98,6 +98,9 @@ bool Character::initialise() {
 	setAutoConsentRaid(mData->mAutoConsentRaid);
 	setAutoConsentGuild(mData->mAutoConsentGuild);
 
+	_setRadiantCrystals(mData->mRadiantCrystals, mData->mTotalRadiantCrystals);
+	_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
+
 	mInitialised = true;
 	return true;
 }
@@ -331,6 +334,11 @@ void Character::_updateForSave() {
 	mData->mAutoConsentGroup = getAutoConsentGroup();
 	mData->mAutoConsentRaid = getAutoConsentRaid();
 	mData->mAutoConsentGuild = getAutoConsentGuild();
+
+	mData->mRadiantCrystals = getRadiantCrystals();
+	mData->mTotalRadiantCrystals = getTotalRadiantCrystals();
+	mData->mEbonCrystals = getEbonCrystals();
+	mData->mTotalEbonCrystals = getTotalRadiantCrystals();
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

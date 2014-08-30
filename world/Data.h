@@ -101,6 +101,11 @@ struct CharacterData {
 	bool mAutoConsentGroup = false;
 	bool mAutoConsentRaid = false;
 	bool mAutoConsentGuild = false;
+
+	uint32 mRadiantCrystals = 0;
+	uint32 mTotalRadiantCrystals = 0;
+	uint32 mEbonCrystals = 0;
+	uint32 mTotalEbonCrystals = 0;
 };
 
 //struct AccountData {

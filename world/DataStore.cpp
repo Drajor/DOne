@@ -247,6 +247,9 @@ namespace CharacterDataXML {
 		static const auto Dye = "dye";
 		static const auto Guild = "guild";
 		static const auto Currency = "currency";
+		static const auto Crystals = "crystals";
+		static const auto Radiant = "radiant";
+		static const auto Ebon = "ebon";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -306,6 +309,9 @@ namespace CharacterDataXML {
 		static const auto CopperCharacter = "copper_character";
 		static const auto CopperBank = "copper_bank";
 		static const auto CopperCursor = "copper_cursor";
+		// Tag::Crystals / Radiant / Ebon
+		static const auto Current = "current";
+		static const auto Total = "total";
 	}
 }
 
@@ -396,6 +402,20 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperBank, pCharacterData->mCopperBank));
 	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCursor, pCharacterData->mCopperCursor));
 
+	// Tag::Crystals
+	auto crystalsElement = characterElement->FirstChildElement(Tag::Crystals);
+	EXPECTED_BOOL(crystalsElement);
+	// Tag::Radiant
+	auto radiantElement = crystalsElement->FirstChildElement(Tag::Radiant);
+	EXPECTED_BOOL(radiantElement);
+	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Current, pCharacterData->mRadiantCrystals));
+	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Total, pCharacterData->mTotalRadiantCrystals));
+	// Tag::Ebon
+	auto ebonElement = crystalsElement->FirstChildElement(Tag::Ebon);
+	EXPECTED_BOOL(ebonElement);
+	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Current, pCharacterData->mEbonCrystals));
+	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Total, pCharacterData->mTotalEbonCrystals));
+
 	return true;
 }
 
@@ -476,6 +496,17 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	currencyElement->SetAttribute(Attribute::CopperCharacter, pCharacterData->mCopperCharacter);
 	currencyElement->SetAttribute(Attribute::CopperBank, pCharacterData->mCopperBank);
 	currencyElement->SetAttribute(Attribute::CopperCursor, pCharacterData->mCopperCursor);
+
+	// Tag::Crystals
+	auto crystalsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Crystals)));
+	// Tag::Radiant
+	auto radiantElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Radiant)));
+	radiantElement->SetAttribute(Attribute::Current, pCharacterData->mRadiantCrystals);
+	radiantElement->SetAttribute(Attribute::Total, pCharacterData->mTotalRadiantCrystals);
+	// Tag::Ebon
+	auto ebonElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Ebon)));
+	ebonElement->SetAttribute(Attribute::Current, pCharacterData->mEbonCrystals);
+	ebonElement->SetAttribute(Attribute::Total, pCharacterData->mTotalEbonCrystals);
 
 	EXPECTED_BOOL(document.SaveFile());
 	return true;

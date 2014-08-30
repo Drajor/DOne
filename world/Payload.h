@@ -36,6 +36,11 @@ namespace Payload {
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 	};
 
+	template <typename T>
+	struct ServerToClient {
+		inline static const std::size_t size() { return sizeof(T); }
+	};
+
 	namespace Zone {
 
 		struct ZoneEntry : public FixedSizedPayload<ZoneEntry> {
@@ -43,6 +48,7 @@ namespace Payload {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
 
+		// C->S
 		struct FaceChange : public FixedSizedPayload<FaceChange> {
 			uint8 mHairColour = 0;
 			uint8 mBeardColour = 0;
@@ -56,7 +62,8 @@ namespace Payload {
 			uint32 mDrakkinDetails = 0;
 		};
 
-		struct WearChange : public FixedSizedPayload<WearChange> {
+		// S->C
+		struct WearChange : public FixedSizedPayload<WearChange>, public ServerToClient<WearChange> {
 			uint16 mSpawnID = 0;
 			uint32 mMaterialID = 0;
 			uint32 mUnused0 = 0;
@@ -66,7 +73,8 @@ namespace Payload {
 			Colour mColour;
 			uint8 mSlotID = 0;
 		};
-
+		
+		// C->S
 		struct AutoAttack : public FixedSizedPayload<AutoAttack> {
 			bool mAttacking = false;
 			char mUnknown[3];
@@ -75,6 +83,7 @@ namespace Payload {
 
 	namespace World {
 
+		// C->S
 		struct LoginInformation : public FixedSizedPayload<LoginInformation> {
 			char mInformation[64]; // Account ID and Account Key
 			uint8 mUnknown0[124];
@@ -82,13 +91,15 @@ namespace Payload {
 			uint8 mUnknown1[275];
 		};
 
+		// C->S
 		struct EnterWorld : public FixedSizedPayload<EnterWorld> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint32 mTutorial = 0;
 			uint32 mReturnHome = 0;
 		};
 
-		struct DeleteCharacter : VariableLengthPayload<DeleteCharacter> {
+		// C->S
+		struct DeleteCharacter : public VariableLengthPayload<DeleteCharacter> {
 			char* mCharacterName = 0;
 			static const bool sizeCheck(const std::size_t pSize) {
 				return pSize >= Limits::Character::MIN_NAME_LENGTH && pSize <= Limits::Character::MAX_NAME_LENGTH;
@@ -151,34 +162,26 @@ namespace Payload {
 
 	namespace Guild {
 
-		struct MakeLeader{
+		struct MakeLeader : public FixedSizedPayload<MakeLeader> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			char mLeaderName[Limits::Character::MAX_NAME_LENGTH];
-
-			inline static MakeLeader* convert(unsigned char* pData) { return reinterpret_cast<MakeLeader*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(MakeLeader); }
 		};
 
-		struct Demote {
+		struct Demote : public FixedSizedPayload<Demote> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
-			
-			inline static Demote* convert(unsigned char* pData) { return reinterpret_cast<Demote*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(Demote); }
 		};
 
 		// Used for changing both banker and alt status of a guild member.
-		struct BankerAltStatus {
-			uint32 mUnknown;
+		struct BankerAltStatus : public FixedSizedPayload<BankerAltStatus> {
+			uint32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
 			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
-			uint32 mStatus;
-
-			inline static BankerAltStatus* convert(unsigned char* pData) { return reinterpret_cast<BankerAltStatus*>(pData); }
-			inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(BankerAltStatus); }
+			uint32 mStatus = 0;
 		};
 
-		struct Remove {
+		// S->C
+		struct Remove : public FixedSizedPayload<Remove>, public ServerToClient<Remove> {
 			GuildID mGuildID;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};

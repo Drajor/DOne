@@ -641,11 +641,13 @@ void GuildManager::_sendMembers(Guild* pGuild) {
 }
 
 void GuildManager::_sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName) {
+	using namespace Payload::Guild;
 	ARG_PTR_CHECK(pGuild);
 	EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
 
-	auto outPacket = new EQApplicationPacket(OP_GuildManageRemove, sizeof(Payload::Guild::Remove));
-	auto payload = reinterpret_cast<Payload::Guild::Remove*>(outPacket->pBuffer);
+	auto outPacket = new EQApplicationPacket(OP_GuildManageRemove, Remove::size());
+	auto payload = Remove::convert(outPacket->pBuffer);
+
 	payload->mGuildID = pGuild->mID;
 	strcpy(payload->mCharacterName, pRemoveCharacterName.c_str());
 
