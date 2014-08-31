@@ -512,6 +512,48 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	return true;
 }
 
+namespace SpawnPointDataXML {
+	namespace Tag {
+		static const auto SpawnPoints = "spawn_points";
+		static const auto SpawnPoint = "spawn_point";
+	}
+	namespace Attribute {
+		// Tag::SpawnPoint
+		static const auto X = "x";
+		static const auto Y = "y";
+		static const auto Z = "z";
+		static const auto Heading = "heading";
+	}
+}
+
+bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints) {
+	Profile p("DataStore::loadSpawnPointData");
+	using namespace SpawnPointDataXML;
+
+	EXPECTED_BOOL(pSpawnPoints.empty());
+
+	TiXmlDocument document(String("./data/zones/" + pZoneShortName + "/spawn_points.xml").c_str());
+	EXPECTED_BOOL(document.LoadFile());
+
+	// Tag::SpawnPoints
+	auto spawnPointsElement = document.FirstChildElement(Tag::SpawnPoints);
+	EXPECTED_BOOL(spawnPointsElement);
+
+	auto spawnPointElement = spawnPointsElement->FirstChildElement(Tag::SpawnPoint);
+	while (spawnPointElement) {
+		SpawnPointData* sp = new SpawnPointData();
+		pSpawnPoints.push_back(sp);
+		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::X, sp->mPosition.x));
+		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Y, sp->mPosition.y));
+		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Z, sp->mPosition.z));
+		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Heading, sp->mHeading));
+
+		spawnPointElement = spawnPointElement->NextSiblingElement(Tag::SpawnPoint);
+	}
+
+	return true;
+}
+
 
 
 

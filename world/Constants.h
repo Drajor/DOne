@@ -45,6 +45,8 @@ static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypa
 //static const auto MAX_CHARACTERS_CHARSELECT = 18;
 //static const auto MAX_EQUIP_SLOTS_CHARSELECT = 9;
 
+static const uint32 DEFAULT_RESPAWN_TIME = 5; // In seconds, 5 minutes.
+
 namespace Limits {
 	namespace Account {
 		static const auto MAX_NUM_CHARACTERS = 18;

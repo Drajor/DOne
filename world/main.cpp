@@ -63,15 +63,6 @@
 TimeoutManager timeout_manager; // Can't remove this for now...
 
 int main(int argc, char** argv)  {
-	//Payload::SpawnData sp;
-	//Actor a;
-	//std::cout << sizeof(Spawn_Struct) << std::endl;
-	//std::cout << sizeof(Payload::SpawnData) << std::endl;
-	//system("pause");
-	//CharacterData* characterData = new CharacterData();
-	//DataStore::getInstance().loadCharacter("Playerzero", characterData);
-
-	//std::cout << sizeof(PlayerPositionUpdateServer_Struct) << std::endl;
 	//system("pause");
 	
 	RegisterExecutablePlatform(ExePlatformWorld);

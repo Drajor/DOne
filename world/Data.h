@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Vector3.h"
 
 struct AccountData {
 	uint32 mAccountID = 0;		// Provided by Login Server
@@ -108,14 +109,13 @@ struct CharacterData {
 	uint32 mTotalEbonCrystals = 0;
 };
 
-//struct AccountData {
-//	uint32 mWorldAccountID;
-//	uint32 mLoginServerAccountID;
-//	std::string mName;
-//	std::string mCharacterName;
-//	uint32 mSharedPlatinum;
-//	int32 mStatus;
-//	bool mGMSpeed;
-//	bool mHidden;
-//	// mSuspendUntil
-//};
+struct SpawnGroupData {
+	uint32 mID = 0;
+};
+
+struct SpawnPointData {
+	Vector3 mPosition;
+	float mHeading = 0.0f;
+	uint32 mSpawnGroupID = 0;
+	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
+};
