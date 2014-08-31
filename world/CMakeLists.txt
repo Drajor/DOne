@@ -1,25 +1,21 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp DataProvider.h MySQLDataProvider.h MySQLDataProvider.cpp zone_data.xml)
+SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp zone_data.xml)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp)
 
 SET(world_sources
-	WorldClientConnection.cpp
 	CMakeLists.txt
+	WorldClientConnection.cpp
 	LoginServerConnection.cpp
 	main.cpp
-	UCSConnection.cpp
 	Utility.cpp
 	ZoneManager.cpp
 	Zone.cpp
 	Character.cpp
 	World.cpp
 	DataStore.cpp
-	MySQLDataProvider.cpp
 	AccountManager.cpp
-	DatabaseConnection.cpp
 	LogSystem.cpp
-	Configuration.cpp
 	CommandHandler.cpp
 	Profile.cpp
 	ZoneClientConnection.cpp
@@ -35,23 +31,16 @@ SET(world_sources
 
 SET(world_headers
 	WorldClientConnection.h
-	CMakeLists.txt
 	LoginServerConnection.h
-	UCSConnection.h
-	WorldTCPConnection.h
 	Utility.h
 	ZoneManager.h
 	Zone.h
 	Character.h
 	World.h
 	DataStore.h
-	DataProvider.h
-	MySQLDataProvider.h
 	AccountManager.h
-	DatabaseConnection.h
 	Constants.h
 	LogSystem.h
-	Configuration.h
 	CommandHandler.h
 	Profile.h
 	ZoneClientConnection.h

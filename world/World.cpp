@@ -5,7 +5,6 @@
 #include "AccountManager.h"
 #include "DataStore.h"
 #include "LoginServerConnection.h"
-#include "UCSConnection.h"
 
 #include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
@@ -24,8 +23,7 @@ World::World() :
 	mStreamIdentifier(0),
 	mStreamFactory(0),
 	mTCPServer(0),
-	mLoginServerConnection(0),
-	mUCSConnection(0)
+	mLoginServerConnection(0)
 {
 
 }
@@ -33,14 +31,12 @@ World::World() :
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
 	if (mTCPServer) mTCPServer->Close();
-	if (mUCSConnection) mUCSConnection->disconnect();
 	// TODO: Close LoginServerConnection?
 
 	safe_delete(mTCPServer);
 	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
-	safe_delete(mUCSConnection);
 }
 
 bool World::initialise()
@@ -73,8 +69,6 @@ bool World::initialise()
 	char errbuf[TCPConnection_ErrorBufferSize];
 	mTCPServer->Open(9000, errbuf);
 
-	mUCSConnection = new UCSConnection();
-
 	mInitialised = true;
 	return true;
 	/*
@@ -94,11 +88,8 @@ bool World::initialise()
 	*/
 }
 
-void World::update()
-{
-	_checkUCSConnection();
+void World::update() {
 
-	mUCSConnection->update();
 	mLoginServerConnection->update();
 	ZoneManager::getInstance().update();
 
@@ -138,15 +129,6 @@ void World::_handleIncomingClientConnections() {
 
 bool World::isLoginServerConnected() {
 	return mLoginServerConnection->isConnected();
-}
-
-void World::_checkUCSConnection() {
-	EmuTCPConnection* tcpConnection = 0;
-	while ((tcpConnection = mTCPServer->NewQueuePop())) {
-		if (tcpConnection->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
-			mUCSConnection->setConnection(tcpConnection);
-		}
-	}
 }
 
 void World::addAuthentication(ClientAuthentication& pAuthentication) {

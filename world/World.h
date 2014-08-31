@@ -5,7 +5,6 @@
 
 class EmuTCPServer;
 class LoginServerConnection;
-class UCSConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
 class ZoneManager;
@@ -69,14 +68,12 @@ private:
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, String> mReservedCharacterNames;
 	std::list<ZoneTransfer> mZoneTransfers;
-	void _checkUCSConnection();
 	void _handleIncomingClientConnections();
 
 	bool mInitialised;
 	bool mLocked;
 	EmuTCPServer* mTCPServer;
 	LoginServerConnection* mLoginServerConnection;
-	UCSConnection* mUCSConnection;
 	EQStreamFactory* mStreamFactory;
 	EQStreamIdentifier* mStreamIdentifier;
 
