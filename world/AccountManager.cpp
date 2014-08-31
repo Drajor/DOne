@@ -40,6 +40,8 @@ bool AccountManager::createAccount(const uint32 pAccountID, const String pAccout
 	mAccounts.push_back(accountData);
 	_save();
 	_save(accountData);
+
+	return true;
 }
 
 void AccountManager::_clear() {
@@ -47,11 +49,15 @@ void AccountManager::_clear() {
 }
 bool AccountManager::_save() {
 	EXPECTED_BOOL(DataStore::getInstance().saveAccounts(mAccounts));
+
+	return true;
 }
 
 bool AccountManager::_save(AccountData* pAccountData) {
 	EXPECTED_BOOL(pAccountData);
 	EXPECTED_BOOL(DataStore::getInstance().saveAccountCharacterData(pAccountData));
+
+	return true;
 }
 
 bool AccountManager::_loadAccount(const String& pAccountName) {
@@ -211,4 +217,6 @@ const bool AccountManager::updateCharacter(const uint32 pAccountID, const Charac
 	// TODO: Materials
 
 	EXPECTED_BOOL(_save(accountData));
+
+	return true;
 }

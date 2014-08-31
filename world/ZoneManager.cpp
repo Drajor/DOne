@@ -10,8 +10,6 @@
 #include "LogSystem.h"
 #include "Utility.h"
 
-ZoneManager::ZoneManager() { }
-
 ZoneManager::~ZoneManager() {
 	ZoneClientConnection::deinitialise();
 }
@@ -46,7 +44,7 @@ bool ZoneManager::initialise() {
 	return true;
 }
 
-uint32 ZoneManager::_getNextZonePort() {
+const uint32 ZoneManager::_getNextZonePort() {
 	uint32 port = *mAvailableZonePorts.begin();
 	mAvailableZonePorts.pop_front();
 	return port;
@@ -67,7 +65,7 @@ void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, Strin
 	zone->addAuthentication(pAuthentication, pCharacterName);
 }
 
-Zone* ZoneManager::_makeZone(ZoneID pZoneID, uint32 pInstanceID) {
+Zone* ZoneManager::_makeZone(const ZoneID pZoneID, const uint32 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
 	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());

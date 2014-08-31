@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Singleton.h"
 #include "Character.h"
 
 // For the #guildsearch command.
@@ -60,13 +61,14 @@ class Guild {
 	}
 };
 
-class GuildManager {
+class GuildManager : public Singleton<GuildManager> {
+private:
+	friend class Singleton<GuildManager>;
+	GuildManager() {};
+	~GuildManager();
+	GuildManager(GuildManager const&); // Do not implement.
+	void operator=(GuildManager const&); // Do not implement.
 public:
-	static GuildManager& getInstance() {
-		static GuildManager instance;
-		return instance;
-	}
-
 	bool initialise();
 
 	bool isLeader(Character* pCharacter);
@@ -137,9 +139,4 @@ private:
 
 	void _storeGuildName(GuildID pGuildID, String pGuildName);
 	char mGuildNames[Limits::Guild::MAX_GUILDS][Limits::Guild::MAX_NAME_LENGTH];
-
-	GuildManager() {};
-	~GuildManager();
-	GuildManager(GuildManager const&);
-	void operator=(GuildManager const&);
 };

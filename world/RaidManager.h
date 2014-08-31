@@ -1,30 +1,28 @@
 #pragma once
 
 #include "Constants.h"
+#include "Singleton.h"
 
 class Character;
+class Raid;
 
-class Raid {
-
-};
-
-class RaidManager {
+class RaidManager : public Singleton<RaidManager> {
+private:
+	friend class Singleton<RaidManager>;
+	RaidManager() {};
+	~RaidManager() {};
+	RaidManager(RaidManager const&); // Do not implement.
+	void operator=(RaidManager const&); // Do not implement.
 public:
-	static RaidManager& getInstance() {
-		static RaidManager instance;
-		return instance;
-	}
 
-	void onEnterZone(Character* pCharacter);;
-	void onLeaveZone(Character* pCharacter);;
+	void onEnterZone(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
 
 private:
-	RaidManager() {};
-	~RaidManager() {};
-	RaidManager(RaidManager const&);
-	void operator=(RaidManager const&);
-	
+};
+
+class Raid {
 
 };

@@ -76,3 +76,23 @@ bool Limits::Guild::rankValid(const GuildRank pRank) {
 bool Limits::LoginServer::accountNameLength(const String& pAccountName) {
 	return stringLength(pAccountName) <= Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH;
 }
+
+bool Limits::World::shortNameLength(const String& pShortName) {
+	return true;
+	// TODO: Find exact values.
+}
+
+bool Limits::World::longNameLength(const String& pLongName) {
+	return true;
+	// TODO: Find exact values.
+}
+
+bool Limits::World::lsAccountNameLength(const String& pAccountName) {
+	return true;
+	// TODO: Find exact length.
+}
+
+bool Limits::World::lsAccountPasswordLength(const String& pAccountPassword) {
+	return true;
+	// TODO: Find exact length.
+}

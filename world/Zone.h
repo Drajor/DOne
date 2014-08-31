@@ -124,17 +124,17 @@ private:
 	void _onLinkdead(Character* pCharacter);
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
-	uint32 mLongNameStringID;
-	String mLongName;
-	String mShortName;
-	uint16 mNextSpawnID;
+	uint32 mLongNameStringID = 0;
+	String mLongName = "";
+	String mShortName = "";
+	uint16 mNextSpawnID = 1;
 	const ZoneID mID;
 	const InstanceID mInstanceID;
 	const uint32 mPort;
 
-	bool mInitialised; // Flag indicating whether the Zone has been initialised.
-	EQStreamFactory* mStreamFactory;
-	EQStreamIdentifier* mStreamIdentifier;
+	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
+	EQStreamFactory* mStreamFactory = nullptr;
+	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
 	Scene* mScene = nullptr;
 	std::list<Character*> mCharacters;

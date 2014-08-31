@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Constants.h"
+#include "Singleton.h"
 #include "Data.h"
 
 namespace Payload {
@@ -9,13 +11,14 @@ namespace Payload {
 }
 class Character;
 
-class AccountManager {
+class AccountManager : public Singleton<AccountManager> {
+private:
+	friend class Singleton<AccountManager>;
+	AccountManager() {};
+	~AccountManager();
+	AccountManager(AccountManager const&); // Do not implement.
+	void operator=(AccountManager const&); // Do not implement.
 public:
-	static AccountManager& getInstance() {
-		static AccountManager instance;
-		return instance;
-	}
-
 	bool initialise();
 
 	AccountData* getAccount(uint32 pAccountID);
@@ -51,9 +54,4 @@ private:
 
 	std::list<String> mCharacterNames;
 	std::list<AccountData*> mAccounts;
-
-	AccountManager() {};
-	~AccountManager();
-	AccountManager(AccountManager const&);
-	void operator=(AccountManager const&);
 };

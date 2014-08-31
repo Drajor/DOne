@@ -22,19 +22,14 @@
 Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
-	mInstanceID(pInstanceID),
-	mInitialised(false),
-	mStreamFactory(nullptr),
-	mStreamIdentifier(nullptr),
-	mNextSpawnID(1),
-	mLongName("Unknown Zone"),
-	mShortName("Unknown Zone")
+	mInstanceID(pInstanceID)
 {
 }
 
 Zone::~Zone() {
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
+	safe_delete(mScene);
 }
 
 bool Zone::initialise() {
@@ -43,16 +38,14 @@ bool Zone::initialise() {
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
-	if (!mStreamFactory->Open(mPort)) {
-		return false;
-	}
+	EXPECTED_BOOL(mStreamFactory->Open(mPort));
 
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
-	mLongNameStringID = ZoneData::getInstance().getLongNameStringID(mID);
-	mLongName = ZoneData::getInstance().getLongName(mID);
-	mShortName = ZoneData::getInstance().getShortName(mID);
+	EXPECTED_BOOL(ZoneData::getInstance().getLongNameStringID(mID, mLongNameStringID));
+	EXPECTED_BOOL(ZoneData::getInstance().getLongName(mID, mLongName));
+	EXPECTED_BOOL(ZoneData::getInstance().getShortName(mID, mShortName));
 
 	mScene = new Scene(this);
 

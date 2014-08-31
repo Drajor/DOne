@@ -1,28 +1,29 @@
 #pragma once
 
 #include "Constants.h"
+#include "Singleton.h"
 #include "ClientAuthentication.h"
 
-class WorldClientConnection;
 class Zone;
 class Character;
 struct WhoFilter;
 
 struct ZoneSearchEntry {
-	ZoneSearchEntry() : mName(""), mID(ZoneIDs::NoZone), mInstanceID(0), mNumCharacters(0) {};
-	String mName;
-	ZoneID mID;
-	InstanceID mInstanceID;
-	uint32 mNumCharacters;
+	String mName = "";
+	ZoneID mID = ZoneIDs::NoZone;
+	InstanceID mInstanceID = 0;
+	uint32 mNumCharacters = 0;
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;
 
-class ZoneManager {
+class ZoneManager : public Singleton<ZoneManager> {
+private:
+	friend class Singleton<ZoneManager>;
+	ZoneManager() {};
+	~ZoneManager();
+	ZoneManager(ZoneManager const&); // Do not implement.
+	void operator=(ZoneManager const&); // Do not implement.
 public:
-	static ZoneManager& getInstance() {
-		static ZoneManager instance;
-		return instance;
-	}
 	bool initialise();
 
 	ZoneSearchResult getAllZones();
@@ -40,15 +41,10 @@ public:
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:
-	Zone* _makeZone(ZoneID pZoneID, uint32 pInstanceID = 0);
-	uint32 _getNextZonePort();
+	Zone* _makeZone(const ZoneID pZoneID, const uint32 pInstanceID = 0);
+	const uint32 _getNextZonePort();
 
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;
 	std::list<Character*> mZoningCharacters;
-
-	ZoneManager();
-	~ZoneManager();
-	ZoneManager(ZoneManager const&);
-	void operator=(ZoneManager const&);
 };

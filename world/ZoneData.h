@@ -1,62 +1,56 @@
 #pragma once
 
 #include "Constants.h"
+#include "Singleton.h"
+#include "Vector3.h"
 
 // For the #zonesearch command.
 struct ZoneDataSearchEntry {
 	ZoneID mID;
 	String mShortName;
 	String mLongName;
-};
+}; // NOTE: No initializer due to PoD rules.
 typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
 struct ZonePoint {
-	ZoneID mID;
-	float mX;
-	float mY;
-	float mZ;
+	ZoneID mID = 0;
+	Vector3 mPosition;
 	float mHeading;
 
-	float mDestinationX;
-	float mDestinationY;
-	float mDestinationZ;
-	float mDestinationHeading;
+	Vector3 mDestinationPosition;
+	float mDestinationHeading = 0.0f;
 
-	ZoneID mDestinationZoneID;
-	InstanceID mDestinationInstanceID;
+	ZoneID mDestinationZoneID = 0;
+	InstanceID mDestinationInstanceID = 0;
 };
 
-class ZoneData {
+class ZoneData : public Singleton<ZoneData> {
+private:
+	friend class Singleton<ZoneData>;
+	ZoneData() {};
+	~ZoneData();
+	ZoneData(ZoneData const&); // Do not implement.
+	void operator=(ZoneData const&); // Do not implement.
 public:
-	static ZoneData& getInstance() {
-		static ZoneData instance;
-		return instance;
-	}
 
 	bool initialise();
-	String getLongName(ZoneID pZoneID);
-	String getShortName(ZoneID pZoneID);
-	uint32 getLongNameStringID(ZoneID pZoneID);
+	const bool getLongName(const ZoneID pZoneID, String& pLongName);
+	const bool getShortName(const ZoneID pZoneID, String& pShortName);
+	const bool getLongNameStringID(const ZoneID pZoneID, uint32& pStringID);
 
 	ZoneDataSearchResults searchByName(String pSearchText);
 
 private:
 	struct ZoneInformation {
-		ZoneInformation() : mID(0), mLongNameStringID(0), mLongName(""), mShortName(""), mSafeX(0.0f), mSafeY(0.0f), mSafeZ(0.0f) {};
-		ZoneID mID;
-		uint32 mLongNameStringID;
-		String mLongName;
-		String mShortName;
-		float mSafeX;
-		float mSafeY;
-		float mSafeZ;
+		ZoneID mID = 0;
+		uint32 mLongNameStringID = 0;
+		String mLongName = "";
+		String mShortName = "";
+		float mSafeX = 0.0f;
+		float mSafeY = 0.0f;
+		float mSafeZ = 0.0f;
 		std::list<ZonePoint*> mZonePoints;
 	};
 	std::list<ZoneInformation*> mZoneInformation;
-	ZoneInformation* findZoneInformation(ZoneID pZoneID);
-
-	ZoneData() {};
-	~ZoneData();
-	ZoneData(ZoneData const&);
-	void operator=(ZoneData const&);
+	ZoneInformation* _find(const ZoneID pZoneID) const;
 };

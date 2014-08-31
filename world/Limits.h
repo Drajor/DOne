@@ -3,6 +3,15 @@
 #include "Constants.h"
 
 namespace Limits {
+	namespace World {
+		bool shortNameLength(const String& pShortName);
+		bool longNameLength(const String& pLongName);
+		bool lsAccountNameLength(const String& pAccountName);
+		bool lsAccountPasswordLength(const String& pAccountPassword);
+	}
+	namespace UCS {
+
+	}
 	namespace LoginServer {
 		bool accountNameLength(const String& pAccountName);
 	}

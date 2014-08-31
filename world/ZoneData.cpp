@@ -266,7 +266,7 @@ bool ZoneData::initialise() {
 	return true;
 }
 
-ZoneData::ZoneInformation* ZoneData::findZoneInformation(ZoneID pZoneID) {
+ZoneData::ZoneInformation* ZoneData::_find(const ZoneID pZoneID) const {
 	for (auto i : mZoneInformation) {
 		if (pZoneID == i->mID)
 			return i;
@@ -275,34 +275,25 @@ ZoneData::ZoneInformation* ZoneData::findZoneInformation(ZoneID pZoneID) {
 	return nullptr;
 }
 
-String ZoneData::getLongName(ZoneID pZoneID) {
-	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
-	if (!zoneInformation) {
-		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-		Log::error(ss.str());
-		return "";
-	}
-	return zoneInformation->mLongName;
+const bool ZoneData::getLongName(const ZoneID pZoneID, String& pLongName) {
+	ZoneInformation* zoneInformation = _find(pZoneID);
+	EXPECTED_BOOL(zoneInformation);
+	pLongName = zoneInformation->mLongName;
+	return true;
 }
 
-String ZoneData::getShortName(ZoneID pZoneID){
-	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
-	if (!zoneInformation) {
-		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-		Log::error(ss.str());
-		return "";
-	}
-	return zoneInformation->mShortName;
+const bool ZoneData::getShortName(const ZoneID pZoneID, String& pShortName){
+	ZoneInformation* zoneInformation = _find(pZoneID);
+	EXPECTED_BOOL(zoneInformation);
+	pShortName = zoneInformation->mShortName;
+	return true;
 }
 
-uint32 ZoneData::getLongNameStringID(ZoneID pZoneID) {
-	ZoneInformation* zoneInformation = findZoneInformation(pZoneID);
-	if (!zoneInformation) {
-		StringStream ss; ss << "[Zone Data] Invalid zone ID (" << pZoneID << ") passed to " __FUNCTION__;
-		Log::error(ss.str());
-		return 0;
-	}
-	return zoneInformation->mLongNameStringID;
+const bool ZoneData::getLongNameStringID(const ZoneID pZoneID, uint32& pStringID) {
+	ZoneInformation* zoneInformation = _find(pZoneID);
+	EXPECTED_BOOL(zoneInformation);
+	pStringID = zoneInformation->mLongNameStringID;
+	return true;
 }
 
 ZoneDataSearchResults ZoneData::searchByName(String pSearchText) {

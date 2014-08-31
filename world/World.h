@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Singleton.h"
 #include "ClientAuthentication.h"
 
 class LoginServerConnection;
@@ -21,13 +22,14 @@ struct ZoneTransfer {
 	InstanceID mToInstanceID = 0;
 };
 
-class World {
+class World : public Singleton<World> {
+private:
+	friend class Singleton<World>;
+	World() { };
+	~World();
+	World(World const&); // Do not implement.
+	void operator=(World const&); // Do not implement.
 public:
-	static World& getInstance() {
-		static World instance;
-		return instance;
-	}
-
 	bool initialise();
 	void update();
 
@@ -74,12 +76,6 @@ private:
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
 	std::list<WorldClientConnection*> mClientConnections;
-
-	World() { };
-	~World();
-	World(World const&);
-	void operator=(World const&);
-
 
 	bool _handleZoning(WorldClientConnection* pConnection, const String& pCharacterName);
 	bool _handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName);
