@@ -3,7 +3,6 @@
 #include "Constants.h"
 #include "ClientAuthentication.h"
 
-class EmuTCPServer;
 class LoginServerConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
@@ -46,11 +45,9 @@ public:
 	void setLocked(bool pLocked);
 
 	// Login Server requests response for Client who would like to join the World.
-	//int16 getUserToWorldResponse(uint32 pLoginServerAccountID);
 	ResponseID getConnectResponse(uint32 pLoginServerAccountID);
 
 	// Character Select Screen
-	//bool getCharacterSelectInfo(uint32 pWorldAccountID, CharacterSelect_Struct* pCharacterSelectData);
 	bool isCharacterNameUnique(String pCharacterName);
 	bool isCharacterNameReserved(String pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
@@ -70,16 +67,15 @@ private:
 	std::list<ZoneTransfer> mZoneTransfers;
 	void _handleIncomingClientConnections();
 
-	bool mInitialised;
-	bool mLocked;
-	EmuTCPServer* mTCPServer;
-	LoginServerConnection* mLoginServerConnection;
-	EQStreamFactory* mStreamFactory;
-	EQStreamIdentifier* mStreamIdentifier;
+	bool mInitialised = false;
+	bool mLocked = false;
+	LoginServerConnection* mLoginServerConnection = nullptr;
+	EQStreamFactory* mStreamFactory = nullptr;
+	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
 	std::list<WorldClientConnection*> mClientConnections;
 
-	World();
+	World() { };
 	~World();
 	World(World const&);
 	void operator=(World const&);

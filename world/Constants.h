@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "../common/types.h"
 #include <stdint.h>
 #include <string>
 #include <sstream>
@@ -28,7 +27,7 @@ typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
 typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
 typedef uint16_t InstanceID; // Zone Instance ID
 //typedef uint16_t SpawnID;
-typedef uint32 SpawnID;
+typedef uint32 SpawnID; // Fucked at the moment, I need to remove this.
 typedef std::string String;
 typedef std::stringstream StringStream;
 typedef uint32_t GuildID;
@@ -42,12 +41,12 @@ enum ResponseID : AccountStatus { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNE
 
 static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
 
-//static const auto MAX_CHARACTERS_CHARSELECT = 18;
-//static const auto MAX_EQUIP_SLOTS_CHARSELECT = 9;
-
 static const uint32 DEFAULT_RESPAWN_TIME = 5; // In seconds, 5 minutes.
 
 namespace Limits {
+	namespace World {
+		static const auto PORT = 9000; // [Client Limitation] World must use port 9000
+	}
 	namespace Account {
 		static const auto MAX_NUM_CHARACTERS = 18;
 		static const auto MAX_EQUIPMENT_SLOTS = 9;

@@ -46,17 +46,12 @@
 #include "AccountManager.h"
 #include "LogSystem.h"
 #include "Payload.h"
+#include "Settings.h"
 
 static const int StatusUpdateInterval = 15000;
 
-LoginServerConnection::LoginServerConnection(World* pWorld, String pAddress, uint16 pPort, String pAccountName, String pPassword) :
-	mStatusUpdateTimer(StatusUpdateInterval),
-	mWorld(pWorld),
-	mTCPConnection(0),
-	mLoginServerAddress(pAddress),
-	mLoginAccount(pAccountName),
-	mLoginPassword(pPassword),
-	mLoginServerPort(pPort)
+LoginServerConnection::LoginServerConnection() :
+	mStatusUpdateTimer(StatusUpdateInterval)
 {
 	mTCPConnection = new EmuTCPConnection(true);
 	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
@@ -130,18 +125,18 @@ bool LoginServerConnection::initialise() {
 bool LoginServerConnection::connect() {
 	char errbuf[TCPConnection_ErrorBufferSize];
 
-	mLoginServerIP = ResolveIP(mLoginServerAddress.c_str(), errbuf);
+	mLoginServerIP = ResolveIP(Settings::getLSAddress().c_str(), errbuf);
 	if (mLoginServerIP == 0) {
 		Log::error("[Login Server Connection] Unable to resolve Login Server IP");
 		return false;
 	}
 
-	if (mLoginServerPort == 0) {
+	if (Settings::getLSPort() == 0) {
 		Log::error("[Login Server Connection] Login Server port not set.");
 		return false;
 	}
 
-	if (mTCPConnection->ConnectIP(mLoginServerIP, mLoginServerPort, errbuf)) {
+	if (mTCPConnection->ConnectIP(mLoginServerIP, Settings::getLSPort(), errbuf)) {
 		_sendWorldInformation();
 		sendWorldStatus();
 		Log::status("[Login Server Connection] Connected to Login Server");
@@ -187,10 +182,10 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 	authentication.mWorldAdmin = payload->mWorldAdmin;
 	authentication.mIP = payload->mIP;
 	authentication.mLocal = payload->mLocal;
-	mWorld->addAuthentication(authentication);
+	World::getInstance().addAuthentication(authentication);
 
 	// Check if client does not yet have an account.
-	if (!mWorld->ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
+	if (!World::getInstance().ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
 		Log::error("[Login Server Connection] accountCheck failed.");
 	}
 }
@@ -200,10 +195,10 @@ void LoginServerConnection::_sendWorldInformation() {
 	auto payload = reinterpret_cast<ServerNewLSInfo_Struct*>(outPacket->pBuffer);
 	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
 	strcpy(payload->serverversion, LOGIN_VERSION);
-	strcpy(payload->name, "DrajorTest"); // TODO: (Configuration)
-	strcpy(payload->shortname, "[TEST] Drajor");
-	strcpy(payload->account, mLoginAccount.c_str());
-	strcpy(payload->password, mLoginPassword.c_str());
+	strcpy(payload->name, Settings::getServerLongName().c_str());
+	strcpy(payload->shortname, Settings::getServerShortName().c_str());
+	strcpy(payload->account, Settings::getLSAccountName().c_str());
+	strcpy(payload->password, Settings::getLSPassword().c_str());
 
 	_sendPacket(outPacket);
 	safe_delete(outPacket);
@@ -213,7 +208,7 @@ void LoginServerConnection::sendWorldStatus() {
 	auto outPacket = new ServerPacket(ServerOP_LSStatus, sizeof(ServerLSStatus_Struct));
 	auto payload = reinterpret_cast<ServerLSStatus_Struct*>(outPacket->pBuffer);
 
-	if (mWorld->getLocked())
+	if (World::getInstance().getLocked())
 		payload->status = -2;
 	else payload->status = 100;
 

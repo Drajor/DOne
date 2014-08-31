@@ -5,12 +5,10 @@
 
 class EmuTCPConnection;
 class ServerPacket;
-class World;
-class AccountManager;
 
 class LoginServerConnection{
 public:
-	LoginServerConnection(World* pWorld, String pAddress, uint16 pPort, String pAccountName, String pPassword);
+	LoginServerConnection();
 	~LoginServerConnection();
 
 	bool initialise();
@@ -28,12 +26,7 @@ private:
 	void _handleLoginServerClientAuth(ServerPacket* pPacket);
 	void _handleUserToWorldRequest(ServerPacket * pPacket);
 
-	World* mWorld;
-	EmuTCPConnection* mTCPConnection;
-	String mLoginServerAddress;
-	uint32 mLoginServerIP;
-	uint16 mLoginServerPort;
-	String mLoginAccount;
-	String mLoginPassword;
+	EmuTCPConnection* mTCPConnection = nullptr;
+	uint32 mLoginServerIP = 0;
 	Timer mStatusUpdateTimer;
 };

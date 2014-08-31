@@ -1,0 +1,4 @@
+<settings>
+	<world short_name="ChangeThis" long_name="ChangeThisToo" locked="0" />
+	<login_server account_name="YourUsername" password="YourPassword" address="127.0.0.1" port="5998" />
+</settings>

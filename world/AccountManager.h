@@ -1,9 +1,14 @@
 #pragma once
 
 #include "Data.h"
-#include "Payload.h"
 
+namespace Payload {
+	namespace World {
+		struct CreateCharacter;
+	}
+}
 class Character;
+
 class AccountManager {
 public:
 	static AccountManager& getInstance() {

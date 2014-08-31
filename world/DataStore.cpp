@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "Profile.h"
+#include "Settings.h"
 
 #include "../common/tinyxml/tinyxml.h"
 
@@ -554,6 +555,69 @@ bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<Spawn
 	return true;
 }
 
+namespace SettingsDataXML {
+	namespace Tag {
+		static const auto Settings = "settings";
+		static const auto World = "world";
+		static const auto LoginServer = "login_server";
+	}
+	namespace Attribute {
+		// Tag::Server
+		static const auto ShortName = "short_name";
+		static const auto LongName = "long_name";
+		static const auto Locked = "locked";
+		// Tag::LoginServer
+		static const auto AccountName = "account_name";
+		static const auto Password = "password";
+		static const auto Address = "address";
+		static const auto Port = "port";
+	}
+}
 
+bool DataStore::loadSettings() {
+	using namespace SettingsDataXML;
+	TiXmlDocument document(String("./data/settings.xml").c_str());
+	EXPECTED_BOOL(document.LoadFile());
 
+	// Tag::Settings
+	auto settingsElement = document.FirstChildElement(Tag::Settings);
+	EXPECTED_BOOL(settingsElement);
 
+	// Tag::Server
+	auto worldElement = settingsElement->FirstChildElement(Tag::World);
+	EXPECTED_BOOL(worldElement);
+
+	String shortName = "";
+	EXPECTED_BOOL(readAttribute(worldElement, Attribute::ShortName, shortName));
+	EXPECTED_BOOL(Settings::_setServerShortName(shortName));
+
+	String longName = "";
+	EXPECTED_BOOL(readAttribute(worldElement, Attribute::LongName, longName));
+	EXPECTED_BOOL(Settings::_setServerLongName(longName));
+
+	bool locked = false;
+	EXPECTED_BOOL(readAttribute(worldElement, Attribute::Locked, locked));
+	EXPECTED_BOOL(Settings::_setLocked(locked));
+
+	// Tag::LoginServer
+	auto loginServerElement = settingsElement->FirstChildElement(Tag::LoginServer);
+	EXPECTED_BOOL(loginServerElement);
+
+	String lsAccountName = "";
+	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::AccountName, lsAccountName));
+	EXPECTED_BOOL(Settings::_setLSAccountName(lsAccountName));
+
+	String lsPassword = "";
+	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::Password, lsPassword));
+	EXPECTED_BOOL(Settings::_setLSPassword(lsPassword));
+
+	String lsAddress = "";
+	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::Address, lsAddress));
+	EXPECTED_BOOL(Settings::_setLSPassword(lsAccountName));
+
+	uint16 lsPort = 0;
+	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::Port, lsPort));
+	EXPECTED_BOOL(Settings::_setLSPort(lsPort));
+
+	return true;
+}

@@ -27,6 +27,7 @@ SET(world_sources
 	NPC.cpp
 	Scene.cpp
 	Actor.cpp
+	Settings.cpp
 )
 
 SET(world_headers
@@ -57,6 +58,7 @@ SET(world_headers
 	Scene.h
 	Vector3.h
 	SpawnPoint.h
+	Settings.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -15,6 +15,9 @@ public:
 		return instance;
 	}
 	bool initialise();
+	
+	// Settings
+	static bool loadSettings();
 
 	// Account Data
 	bool loadAccounts(std::list<AccountData*>& pAccounts);

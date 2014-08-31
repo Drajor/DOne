@@ -6,7 +6,6 @@
 #include "DataStore.h"
 #include "LoginServerConnection.h"
 
-#include "../common/EmuTCPServer.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
 #include "../common/patches/patches.h"
@@ -14,39 +13,27 @@
 #include "../common/extprofile.h"
 
 #include "WorldClientConnection.h"
-#include "Constants.h"
 #include "LogSystem.h"
-
-World::World() :
-	mInitialised(false),
-	mLocked(false),
-	mStreamIdentifier(0),
-	mStreamFactory(0),
-	mTCPServer(0),
-	mLoginServerConnection(0)
-{
-
-}
+#include "Settings.h"
 
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
-	if (mTCPServer) mTCPServer->Close();
 	// TODO: Close LoginServerConnection?
 
-	safe_delete(mTCPServer);
 	safe_delete(mLoginServerConnection);
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
 }
 
-bool World::initialise()
-{
+bool World::initialise() {
 	// Prevent multiple initialisation.
 	if (mInitialised) return false;
 
+	mLocked = Settings::getLocked();
+
 	// Create our connection to the Login Server
 	Log::status("[WORLD] Login Server Connection : Initialising");
-	mLoginServerConnection = new LoginServerConnection(this, "127.0.0.1", 5998, "Admin", "Password");
+	mLoginServerConnection = new LoginServerConnection();
 	if (!mLoginServerConnection->initialise()) {
 		Log::error("[WORLD] Login Server Connection : Failed to initialise");
 		return false;
@@ -54,7 +41,7 @@ bool World::initialise()
 	Log::status("[WORLD] Login Server Connection : Initialised");
 
 	// Create and initialise EQStreamFactory.
-	mStreamFactory = new EQStreamFactory(WorldStream, 9000); // [Client Limitation] World must use port 9000
+	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::PORT);
 	if (!mStreamFactory->Open()) {
 		Utility::criticalError("Unable to open World Stream");
 		return false;
@@ -64,10 +51,6 @@ bool World::initialise()
 	RegisterAllPatches(*mStreamIdentifier);
 
 	ZoneManager::getInstance().initialise();
-
-	mTCPServer = new EmuTCPServer();
-	char errbuf[TCPConnection_ErrorBufferSize];
-	mTCPServer->Open(9000, errbuf);
 
 	mInitialised = true;
 	return true;
@@ -180,30 +163,6 @@ void World::setLocked(bool pLocked) {
 	// Notify Login Server!
 	mLoginServerConnection->sendWorldStatus();
 }
-
-//int16 World::getUserToWorldResponse(uint32 pLoginServerAccountID) {
-//	static const int16 ACCOUNT_STATUS_SUSPENDED = -1;
-//	static const int16 ACCOUNT_STATUS_BANNED = -2;
-//
-//	// Fetch the Account Status.
-//	uint32 accountStatus = mAccountManager->getStatusFromLoginServerID(pLoginServerAccountID);
-//
-//	// Account Suspended.
-//	if (accountStatus == ACCOUNT_STATUS_SUSPENDED) return -1;
-//	// Account Banned.
-//	if (accountStatus == ACCOUNT_STATUS_BANNED) return -2;
-//
-//	// Check for existing authentication
-//	// This prevents same account sign in.
-//	if (authenticationExists(pLoginServerAccountID)) return -3;
-//
-//	// Server is Locked (Only GM/Admin may enter)
-//	if (mLocked && accountStatus >= 100) return 1;
-//	// Server is Locked and user is not a GM/Admin.
-//	else if( mLocked && accountStatus < 100) return 0;
-//
-//	return 1; // Speak friend and enter.
-//}
 
 ResponseID World::getConnectResponse(uint32 pLoginServerAccountID) {
 	// Fetch the Account Status.
