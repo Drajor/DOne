@@ -150,6 +150,11 @@ public:
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
 
 	const CharacterData* getData() const { return mData; }
+
+	inline const bool isCaster() const { return Utility::isCaster(getClass()); }
+	inline const bool isHybrid() const { return Utility::isHybrid(getClass()); }
+	inline const bool isMelee() const { return Utility::isMelee(getClass()); }
+	inline const bool canTaunt() const { return Utility::canClassTaunt(getClass()); }
 private:
 
 	const uint32 mAccountID;

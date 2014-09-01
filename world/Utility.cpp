@@ -8,11 +8,6 @@ void Utility::print(String pMessage)
 	std::cout << pMessage << std::endl;
 }
 
-void Utility::criticalError(String pMessage)
-{
-	print("[Critical Error] " + pMessage);
-}
-
 String Utility::characterLogDetails(Character* pCharacter) {
 	if (pCharacter == nullptr) return "[NULL CHARACTER POINTER]";
 

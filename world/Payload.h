@@ -79,6 +79,75 @@ namespace Payload {
 			bool mAttacking = false;
 			char mUnknown[3];
 		};
+
+		// C->S
+		struct MemoriseSpell : public FixedSizedPayload<MemoriseSpell> {
+			uint32 mSpellBookSlot = 0;
+			uint32 mSpellID = 0;
+			uint32 mScribing = 0;	// 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
+			uint32 mUnknown0 = 0;
+		};
+
+		// C<->S
+		struct DeleteSpell : public FixedSizedPayload<DeleteSpell> {
+			int16 mSpellBookSlot = 0;
+			uint8 mUnknown0[2];
+			uint8 mSuccess = 0;
+			uint8 mUnknown1[3];
+		};
+
+		// C->S
+		struct LoadSpellSet : public FixedSizedPayload<LoadSpellSet> {
+			uint32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+			uint32 mUnknown0 = 0;
+		};
+
+		// C->S
+		struct SwapSpell : public FixedSizedPayload<SwapSpell> {
+			uint32 mFromSpellBookSlot = 0;
+			uint32 mToSpellBookSlot = 0;
+		};
+
+		// C->S
+		struct CastSpell : public FixedSizedPayload<CastSpell> {
+			uint32 mSlot = 0;
+			uint32 mSpellID = 0;
+			uint32 mInventorySlot = 0; // slot for clicky item, 0xFFFF = normal cast
+			uint32 mTargetID; // SpawnID?
+			uint8 mUnknown0[4];
+		};
+
+		// C->S
+		struct CombatAbility : public FixedSizedPayload<CombatAbility> {
+			uint32 mTargetID = 0;
+			uint32 mAttack = 0;
+			uint32 mSkill = 0;
+		};
+
+		// C->S
+		struct Taunt : FixedSizedPayload<Taunt> {
+			uint32 mSpawnID = 0;
+		};
+
+		// C<->S
+		// Yes the Client sends this for some magical reason.
+		struct Consider : FixedSizedPayload<Consider> {
+			uint32 mSpawnID = 0;
+			uint32 mTargetSpawnID = 0;
+			uint32 mFaction = 0;
+			uint32 mTargetLevel = 1;
+			int32 cur_hp = 0; // Ignore.
+			int32 max_hp = 0; // Ignore.
+			uint8 mIsPVP; // 0/1
+			uint8 mUnknown0[3];
+		};
+
+		// C->S
+		struct Surname : public FixedSizedPayload<Surname> {
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+			uint32 mUnknown0 = 0;
+			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
+		};
 	}
 
 	namespace World {

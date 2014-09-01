@@ -360,6 +360,37 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_AutoAttack2:
 		// Ignore. This sent directly after OP_AutoAttack. I don't know why.
 		break;
+		// Spells Begin
+	case OP_MemorizeSpell:
+		_handleMemoriseSpell(pPacket);
+		break;
+	case OP_DeleteSpell:
+		_handleDeleteSpell(pPacket);
+		break;
+	case OP_LoadSpellSet:
+		_handleLoadSpellSet(pPacket);
+		break;
+	case OP_SwapSpell:
+		_handleSwapSpell(pPacket);
+		break;
+	case OP_CastSpell:
+		_handleCastSpell(pPacket);
+		// Spells End
+	case OP_CombatAbility:
+		_handleCombatAbility(pPacket);
+		break;
+	case OP_Taunt:
+		_handleTaunt(pPacket);
+		break;
+	case OP_Consider:
+		_handleConsider(pPacket);
+		break;
+	case OP_ConsiderCorpse:
+		_handleConsiderCorpse(pPacket);
+		break;
+	case OP_Surname:
+		_handleSurname(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -2160,4 +2191,115 @@ void ZoneClientConnection::_handleAutoAttack(const EQApplicationPacket* pPacket)
 	}
 
 	Log::info("Attack OFF");
+}
+
+void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MemoriseSpell::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+
+	auto payload = MemoriseSpell::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(DeleteSpell::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+
+	auto payload = DeleteSpell::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(LoadSpellSet::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+
+	auto payload = LoadSpellSet::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(SwapSpell::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+
+	auto payload = SwapSpell::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(CastSpell::sizeCheck(pPacket->size));
+
+	auto payload = CastSpell::convert(pPacket->pBuffer);
+
+	if (payload->mInventorySlot == 0xFFFF)
+		EXPECTED(mCharacter->isCaster());
+}
+
+void ZoneClientConnection::_handleCombatAbility(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(CombatAbility::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->hasTarget());
+
+	auto payload = CombatAbility::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
+}
+
+void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Taunt::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->hasTarget());
+	EXPECTED(mCharacter->getTarget()->isNPC());
+	EXPECTED(mCharacter->canTaunt());
+
+	auto payload = Taunt::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mSpawnID == mCharacter->getTarget()->getSpawnID());
+}
+
+void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Consider::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->hasTarget());
+
+	auto payload = Consider::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID())
+}
+
+void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Consider::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->hasTarget());
+	EXPECTED(mCharacter->getTarget()->isCorpse());
+
+	auto payload = Consider::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID())
+}
+
+void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Surname::sizeCheck(pPacket->size));
+
+	auto payload = Surname::convert(pPacket->pBuffer);
+
+	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	EXPECTED(Limits::Character::nameLength(characterName));
+	EXPECTED(characterName == mCharacter->getName());
+
+	String lastName = Utility::safeString(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
+
+	// TODO: Test this.
+	mCharacter->setLastName(lastName);
 }

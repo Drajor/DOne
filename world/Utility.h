@@ -19,7 +19,59 @@ class Character;
 class Zone;
 namespace Utility {
 	void print(String pMessage);
-	void criticalError(String pMessage);
+
+	inline const bool isCaster(ClassID pClassID) {
+		switch (pClassID) {
+		case Warrior:
+		case Monk:
+		case Rogue:
+		case Berserker:
+			return false;
+		default:
+			break;
+		}
+		return true;
+	}
+
+	// Hybrid: A class that can both cast spells and use disciplines.
+	inline const bool isHybrid(const ClassID pClassID) {
+		switch (pClassID) {
+		case Paladin:
+		case Ranger:
+		case Shadowknight:
+		case Bard:
+		case Beastlord:
+			return true;
+		default:
+			break;
+		}
+		return false;
+	}
+
+	inline const bool isMelee(const ClassID pClassID) {
+		switch (pClassID) {
+		case Warrior:
+		case Monk:
+		case Rogue:
+		case Berserker:
+			return true;
+		default:
+			break;
+		}
+		return false;
+	}
+
+	inline const bool canClassTaunt(const ClassID pClassID) {
+		switch (pClassID) {
+		case Warrior:
+		case Paladin:
+		case Shadowknight:
+			return true;
+		default:
+			break;
+		}
+		return false;
+	}
 
 	String characterLogDetails(Character* pCharacter);
 	String zoneLogDetails(Zone* pZone);

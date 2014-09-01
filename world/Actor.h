@@ -42,7 +42,10 @@ public:
 	Zone* getZone() const { return mZone; }
 
 	inline virtual const bool isCharacter() const { return false; }
+	inline virtual const bool isCharacterCorpse() const { return false; }
 	inline virtual const bool isNPC() const { return false; }
+	inline virtual const bool isNPCCorpse() const { return false; }
+	inline const bool isCorpse() const { return (isCharacterCorpse() || isNPCCorpse()); }
 	inline void setTarget(Actor* pActor) { mTarget = pActor; }
 	inline Actor* getTarget() const { return mTarget; }
 	inline const bool hasTarget() const { return mTarget != nullptr; }

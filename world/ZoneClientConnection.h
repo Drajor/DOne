@@ -159,6 +159,20 @@ private:
 
 	void _unimplementedFeature(String pOpCodeName);
 
+	void _handleMemoriseSpell(const EQApplicationPacket* pPacket);
+	void _handleDeleteSpell(const EQApplicationPacket* pPacket);
+	void _handleLoadSpellSet(const EQApplicationPacket* pPacket);
+	void _handleSwapSpell(const EQApplicationPacket* pPacket);
+	void _handleCastSpell(const EQApplicationPacket* pPacket);
+
+	void _handleCombatAbility(const EQApplicationPacket* pPacket);
+	void _handleTaunt(const EQApplicationPacket* pPacket);
+
+	void _handleConsider(const EQApplicationPacket* pPacket);
+	void _handleConsiderCorpse(const EQApplicationPacket* pPacket);
+
+	void _handleSurname(const EQApplicationPacket* pPacket);
+
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
 	Timer mForceSendPositionTimer;
