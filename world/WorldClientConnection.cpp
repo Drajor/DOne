@@ -38,6 +38,7 @@
 #include "AccountManager.h"
 #include "Data.h"
 #include "Payload.h"
+#include "Settings.h"
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -69,19 +70,12 @@ WorldClientConnection::~WorldClientConnection() {
 void WorldClientConnection::_sendLogServer() {
 	auto outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
 	auto payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
-	strcpy(payload->worldshortname, "ShortNameToDo"); // TODO:
 
-	if(RuleB(Mail, EnableMailSystem))
-		payload->enablemail = 1;
-
-	if(RuleB(Chat, EnableVoiceMacros))
-		payload->enablevoicemacros = 1;
-
-	payload->enable_pvp = (RuleI(World, PVPSettings));
-
-	if(RuleB(World, IsGMPetitionWindowEnabled))
-		payload->enable_petition_wnd = 1;
-
+	strcpy(payload->worldshortname, Settings::getServerShortName().c_str());	
+	payload->enablemail = 1;
+	payload->enablevoicemacros = 1;
+	payload->enable_pvp = 0;
+	payload->enable_petition_wnd = 1;
 	payload->enable_FV = 0;
 
 	_queuePacket(outPacket);
@@ -444,41 +438,55 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 
 	return World::getInstance().handleEnterWorld(this, characterName, mZoning);
 
-	// Client is between zones.
-	if (mZoning) {
-		// Retrieve zone change data.
-		ZoneTransfer zoneTransfer;
-		if (World::getInstance().getCharacterZoneTransfer(characterName, zoneTransfer)) {
-			World::getInstance().removeZoneTransfer(characterName); // Remove zone transfer authority.
-			// Add authentication to the zone the character is going to.
-			World::getInstance().addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
-			// Tell client which Zone to connect to.
-			_sendZoneServerInfo(World::getInstance().getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
+	//// Client is between zones.
+	//if (mZoning) {
+	//	// Retrieve zone change data.
+	//	ZoneTransfer zoneTransfer;
+	//	if (World::getInstance().getCharacterZoneTransfer(characterName, zoneTransfer)) {
+	//		World::getInstance().removeZoneTransfer(characterName); // Remove zone transfer authority.
+	//		// Add authentication to the zone the character is going to.
+	//		World::getInstance().addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
+	//		// Tell client which Zone to connect to.
+	//		_sendZoneServerInfo(World::getInstance().getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
 
-			return true;
-		}
-		// Failed to find ZoneTransfer data for character.
-		else {
-			StringStream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
-			Log::error(ss.str());
-			dropConnection();
-			return false;
-		}
-	}
-	// Client is moving from Character Select / Character Create.
-	else {
-		
-		//CharacterData* characterData = World::getInstance().loadCharacter(characterName);
-		//EXPECTED_BOOL(characterData);
+	//		return true;
+	//	}
+	//	// Failed to find ZoneTransfer data for character.
+	//	else {
+	//		StringStream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
+	//		Log::error(ss.str());
+	//		dropConnection();
+	//		return false;
+	//	}
+	//}
+	//// Client is moving from Character Select / Character Create.
+	//else {
+	//	
+	//	//CharacterData* characterData = World::getInstance().loadCharacter(characterName);
+	//	//EXPECTED_BOOL(characterData);
 
-		// TODO: At the moment Characters always go to NQ.
-		World::getInstance().addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
-		// Send MOTD?
-		// Send ChatServer?
-		// Send ChatServer2?
-		_sendZoneServerInfo(World::getInstance().getZonePort(ZoneIDs::NorthQeynos, 0));
-		return true;
-	}
+	//	// TODO: At the moment Characters always go to NQ.
+	//	World::getInstance().addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
+	//	// Send MOTD?
+	//	// Send ChatServer?
+	//	// Send ChatServer2?
+	//	_sendChatServer();
+	//	_sendZoneServerInfo(World::getInstance().getZonePort(ZoneIDs::NorthQeynos, 0));
+	//	return true;
+	//}
+}
+
+void WorldClientConnection::_sendChatServer(const String& pCharacterName) {
+	std::stringstream ss;
+	ss << "127.0.0.1" << "," << Settings::getUCSPort() << "," << Settings::getServerShortName() << "." << pCharacterName << ",";
+	ss << "U" << std::hex << std::setfill('0') << std::setw(8) << 34; // TODO: Set up mail key
+	String data = ss.str();
+	auto outPacket = new EQApplicationPacket(OP_SetChatServer, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()+1);
+	auto outPacket2 = new EQApplicationPacket(OP_SetChatServer2, reinterpret_cast<const unsigned char*>(data.c_str()), data.length() + 1);
+	_queuePacket(outPacket);
+	_queuePacket(outPacket2);
+	safe_delete(outPacket);
+	safe_delete(outPacket2);
 }
 
 bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {

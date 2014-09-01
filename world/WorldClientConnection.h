@@ -46,6 +46,7 @@ public:
 
 	void _setAuthenticated(bool pIdentified) { mAuthenticated = pIdentified; }
 
+	void _sendChatServer(const String& pCharacterName);
 	void _sendZoneServerInfo(const uint16 pPort);
 private:
 

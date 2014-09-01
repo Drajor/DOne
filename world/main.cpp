@@ -11,6 +11,7 @@
 #include "ZoneManager.h"
 #include "DataStore.h"
 #include "LogSystem.h"
+#include "UCS.h"
 
 TimeoutManager timeout_manager;
 
@@ -27,6 +28,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(ZoneManager::getInstance().initialise());
 	EXPECTED_MAIN(DataStore::getInstance().initialise());
 	EXPECTED_MAIN(World::getInstance().initialise());
+	EXPECTED_MAIN(UCS::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

@@ -45,7 +45,7 @@ static const uint32 DEFAULT_RESPAWN_TIME = 5; // In seconds, 5 minutes.
 
 namespace Limits {
 	namespace World {
-		static const auto PORT = 9000; // [Client Limitation] World must use port 9000
+		static const auto Port = 9000; // [Client Limitation] World must use port 9000
 	}
 	namespace Account {
 		static const auto MAX_NUM_CHARACTERS = 18;

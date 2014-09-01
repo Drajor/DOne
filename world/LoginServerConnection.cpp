@@ -109,6 +109,7 @@ void LoginServerConnection::update() {
 }
 
 bool LoginServerConnection::initialise() {
+	Log::status("[Login Server Connection] Initialising.");
 	if (isConnected()) return true;
 
 	if (_isConnectReady()) {
@@ -119,6 +120,7 @@ bool LoginServerConnection::initialise() {
 		return false;
 	}
 
+	Log::status("[Login Server Connection] Initialised.");
 	return true;
 }
 

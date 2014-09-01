@@ -560,6 +560,7 @@ namespace SettingsDataXML {
 		static const auto Settings = "settings";
 		static const auto World = "world";
 		static const auto LoginServer = "login_server";
+		static const auto UCS = "ucs";
 	}
 	namespace Attribute {
 		// Tag::Server
@@ -570,7 +571,7 @@ namespace SettingsDataXML {
 		static const auto AccountName = "account_name";
 		static const auto Password = "password";
 		static const auto Address = "address";
-		static const auto Port = "port";
+		static const auto Port = "port"; // Tag::UCS uses.
 	}
 }
 
@@ -613,11 +614,19 @@ bool DataStore::loadSettings() {
 
 	String lsAddress = "";
 	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::Address, lsAddress));
-	EXPECTED_BOOL(Settings::_setLSPassword(lsAccountName));
+	EXPECTED_BOOL(Settings::_setLSAddress(lsAddress));
 
 	uint16 lsPort = 0;
 	EXPECTED_BOOL(readAttribute(loginServerElement, Attribute::Port, lsPort));
 	EXPECTED_BOOL(Settings::_setLSPort(lsPort));
+
+	// Tag::UCS
+	auto ucsElement = settingsElement->FirstChildElement(Tag::UCS);
+	EXPECTED_BOOL(ucsElement);
+
+	uint16 ucsPort = 0;
+	EXPECTED_BOOL(readAttribute(ucsElement, Attribute::Port, ucsPort));
+	EXPECTED_BOOL(Settings::_setUCSPort(ucsPort));
 
 	return true;
 }

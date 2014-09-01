@@ -9,6 +9,7 @@ String Settings::mLoginServerAccountName = "";
 String Settings::mLoginServerPassword = "";
 String Settings::mLoginServerAddress = "";
 uint16 Settings::mLoginServerPort = 0;
+uint16 Settings::mUCSPort = 0;
 
 const bool Settings::_setServerShortName(const String& pServerShortName) {
 	EXPECTED_BOOL(Limits::World::shortNameLength(pServerShortName));

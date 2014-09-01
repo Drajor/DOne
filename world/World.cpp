@@ -5,6 +5,7 @@
 #include "AccountManager.h"
 #include "DataStore.h"
 #include "LoginServerConnection.h"
+#include "UCS.h"
 
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -26,55 +27,35 @@ World::~World() {
 }
 
 bool World::initialise() {
-	// Prevent multiple initialisation.
-	if (mInitialised) return false;
+	Log::status("[World] Initialising.");
+	EXPECTED_BOOL(mInitialised == false);
 
 	mLocked = Settings::getLocked();
 
 	// Create our connection to the Login Server
-	Log::status("[WORLD] Login Server Connection : Initialising");
 	mLoginServerConnection = new LoginServerConnection();
-	if (!mLoginServerConnection->initialise()) {
-		Log::error("[WORLD] Login Server Connection : Failed to initialise");
-		return false;
-	}
-	Log::status("[WORLD] Login Server Connection : Initialised");
+	EXPECTED_BOOL(mLoginServerConnection->initialise());
 
 	// Create and initialise EQStreamFactory.
-	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::PORT);
-	if (!mStreamFactory->Open()) {
-		Utility::criticalError("Unable to open World Stream");
-		return false;
-	}
+	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::Port);
+	EXPECTED_BOOL(mStreamFactory->Open());
+	Log::info("[World] Listening on port " + std::to_string(Limits::World::Port));
 
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
-	ZoneManager::getInstance().initialise();
+	EXPECTED_BOOL(ZoneManager::getInstance().initialise());
 
 	mInitialised = true;
+	Log::status("[World] Initialised.");
 	return true;
-	/*
-	Tasks which previously occurred at startup.
-	- Load World Config
-	- Load Log Settings
-	- Load Variables
-	- Load Zone Names
-	- Clear groups from DB
-	- Clear raids
-	- Clear raid details
-	- Load Items
-	- Load Guilds
-	- Load Ruleset
-	- Delete stale player corpses.
-	- Purge expired instances.
-	*/
 }
 
 void World::update() {
 
 	mLoginServerConnection->update();
 	ZoneManager::getInstance().update();
+	UCS::getInstance().update();
 
 	// Check if any new clients are connecting.
 	_handleIncomingClientConnections();
@@ -366,6 +347,7 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	ZoneManager::getInstance().onLeaveZone(character);
 
 	// Send the client off to the Zone.
+	pConnection->_sendChatServer(pCharacterName);;
 	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(characterData->mZoneID, characterData->mInstanceID));
 
 	return true;
