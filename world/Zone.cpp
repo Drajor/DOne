@@ -708,3 +708,32 @@ void Zone::handleSurnameChange(Actor* pActor) {
 
 	safe_delete(outPacket);
 }
+
+void Zone::handleTitleChanged(Character* pCharacter, TitleOption pOption) {
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
+
+	auto outPacket = new EQApplicationPacket(OP_SetTitleReply, TitleUpdate::size());
+	auto payload = TitleUpdate::convert(outPacket->pBuffer);
+
+	payload->mSpawnID = pCharacter->getSpawnID();
+
+	if (pOption == TitleOption::TO_Title) {
+		payload->mOption = TitleUpdate::UPDATE_PREFIX;
+		strcpy(payload->mTitle, pCharacter->getPrefix().c_str());
+
+	}
+	else {
+		payload->mOption = TitleUpdate::UPDATE_SUFFIX;
+		strcpy(payload->mTitle, pCharacter->getSuffix().c_str());
+	}
+
+	// Update Character.
+	pCharacter->getConnection()->sendPacket(outPacket);
+
+	// Update anyone who can see pCharacter.
+	for (auto i : pCharacter->getVisibleTo())
+		i->getConnection()->sendPacket(outPacket);
+
+	safe_delete(outPacket);
+}

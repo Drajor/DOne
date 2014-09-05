@@ -14,8 +14,6 @@ class Guild;
 struct GuildMember;
 struct NewSpawn_Struct;
 
-static const String EmptyString = String();
-
 class ZoneClientConnection {
 public:
 	enum ZoneConnectionStatus {
@@ -177,6 +175,9 @@ private:
 	void _handleSurname(const EQApplicationPacket* pPacket);
 	void _handleClearSurname(const EQApplicationPacket* pPacket);
 	void _handleGMLastName(const EQApplicationPacket* pPacket);
+
+	void _handleSetTitle(const EQApplicationPacket* pPacket);
+	void _handleRequestTitles(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

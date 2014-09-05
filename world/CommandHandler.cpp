@@ -535,6 +535,30 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 
 		safe_delete(outPacket);
 	}
+	else if (pCommandName == "title") {
+		if (!pCharacter->hasTarget()) {
+			return;
+		}
+		Actor* changeActor = pCharacter->getTarget();
+
+		auto outPacket = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+		auto payload = reinterpret_cast<SetTitleReply_Struct*>(outPacket->pBuffer);
+		//payload->is_suffix = 1;
+		Utility::stoSafe(payload->is_suffix, pParameters[1]);
+		strcpy(payload->title, pParameters[0].c_str());
+		payload->entity_id = changeActor->getSpawnID();
+
+		pCharacter->getConnection()->sendPacket(outPacket);
+		safe_delete(outPacket);
+
+		//struct SetTitleReply_Struct {
+		//	uint32	is_suffix;	//guessed: 0 = prefix, 1 = suffix
+		//	char	title[32];
+		//	uint32	entity_id;
+		//};
+
+
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

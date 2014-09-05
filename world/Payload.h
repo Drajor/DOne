@@ -56,6 +56,23 @@ namespace Payload {
 		};
 
 		// C->S
+		// Based on: SetTitle_Struct
+		struct SetTitle : public FixedSizedPayload<SetTitle> {
+			enum : uint32 { SET_PREFIX = 0, SET_SUFFIX = 1 };
+			uint32 mOption = SET_PREFIX;
+			uint32 mTitleID = 0;
+		};
+
+		// S->C
+		// Based on: SetTitleReply_Struct
+		struct TitleUpdate : public FixedLength_And_ServerToClient<TitleUpdate> {
+			enum : uint32 { UPDATE_PREFIX = 0, UPDATE_SUFFIX = 1 };
+			uint32 mOption = UPDATE_PREFIX;
+			char mTitle[32];
+			uint32 mSpawnID = 0;
+		};
+
+		// C->S
 		struct FaceChange : public FixedSizedPayload<FaceChange> {
 			uint8 mHairColour = 0;
 			uint8 mBeardColour = 0;

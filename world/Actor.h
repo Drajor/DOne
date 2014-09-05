@@ -79,8 +79,8 @@ public:
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
 	inline const String& getLastName() const { return mLastName; }
 	inline void setLastName(const String& pLastName) { mLastName = pLastName; _setLastName(pLastName.c_str()); }
-	inline const String& getTitle() const { return mTitle; }
-	inline void setTitle(const String& pTitle) { mTitle = pTitle; _setTitle(pTitle.c_str()); }
+	inline const String& getPrefix() const { return mPrefix; }
+	inline void setPrefix(const String& pPrefix) { mPrefix = pPrefix; _setPrefix(pPrefix.c_str()); }
 	inline const String& getSuffix() const { return mSuffix; }
 	inline void setSuffix(const String& pSuffix) { mSuffix = pSuffix; _setSuffix(pSuffix.c_str()); }
 
@@ -279,7 +279,7 @@ private:
 
 	String mName = "";
 	String mLastName = "";
-	String mTitle = "";
+	String mPrefix = "";
 	String mSuffix = "";
 
 	float mVisibleRange = 30.0f;
@@ -287,6 +287,6 @@ private:
 
 	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mSpawnData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
-	inline void _setTitle(const char* pTitle) { strncpy(mSpawnData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
+	inline void _setPrefix(const char* pTitle) { strncpy(mSpawnData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
 	inline void _setSuffix(const char* pSuffix) { strncpy(mSpawnData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 };

@@ -107,7 +107,8 @@ public:
 	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
 
 	void handleSurnameChange(Actor* pActor);
-	
+	void handleTitleChanged(Character* pCharacter, TitleOption pOption);
+
 private:
 
 	// Performs a global Character search.
@@ -124,6 +125,7 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
+
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID = 0;

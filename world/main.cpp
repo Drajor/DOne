@@ -9,6 +9,7 @@
 #include "GuildManager.h"
 #include "AccountManager.h"
 #include "ZoneManager.h"
+#include "TitleManager.h"
 #include "DataStore.h"
 #include "LogSystem.h"
 #include "UCS.h"
@@ -36,6 +37,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(DataStore::getInstance().initialise());
 	EXPECTED_MAIN(World::getInstance().initialise());
 	EXPECTED_MAIN(UCS::getInstance().initialise());
+	EXPECTED_MAIN(TitleManager::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

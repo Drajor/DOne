@@ -31,6 +31,7 @@ SET(world_sources
 	Settings.cpp
 	UCS.cpp
 	UCSClientConnection.cpp
+	TitleManager.cpp
 )
 
 SET(world_headers
@@ -65,6 +66,7 @@ SET(world_headers
 	UCS.h
 	UCSClientConnection.h
 	Singleton.h
+	TitleManager.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

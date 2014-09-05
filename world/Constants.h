@@ -34,6 +34,8 @@ typedef uint32_t GuildID;
 typedef uint8_t GuildRank;
 typedef int8_t AccountStatus;
 
+static const String EmptyString = String("");
+
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 static const SpawnID NO_TARGET = 0;
 
@@ -82,6 +84,11 @@ namespace Limits {
 }
 
 static const String SYS_NAME = "[System]";
+
+enum class TitleOption {
+	TO_Title,
+	TO_Suffix
+};
 
 enum MaterialSlot : uint8 {
 	Mat_Head,

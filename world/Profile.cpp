@@ -2,11 +2,7 @@
 #include <windows.h>
 #include "LogSystem.h"
 
-Profile::Profile(String pName) :
-mName(pName),
-mStart(0),
-mFrequency(0.0f)
-{
+Profile::Profile(String pName) : mName(pName) {
 	LARGE_INTEGER li;
 	QueryPerformanceFrequency(&li);
 	mFrequency = double(li.QuadPart) / 1000.0;

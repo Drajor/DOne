@@ -7,7 +7,7 @@ public:
 	Profile(String pName);
 	~Profile();
 private:
-	String mName;
-	__int64 mStart;
-	double mFrequency;
+	String mName = "unnamed";
+	__int64 mStart = 0;
+	double mFrequency = 0.0f;
 };

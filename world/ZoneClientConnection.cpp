@@ -2,6 +2,7 @@
 #include "GuildManager.h"
 #include "GroupManager.h"
 #include "RaidManager.h"
+#include "TitleManager.h"
 #include "Zone.h"
 #include "ZoneManager.h"
 #include "ZoneData.h"
@@ -400,6 +401,14 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player uses the /lastname command.
 		_handleGMLastName(pPacket);
 		break;
+	case OP_SetTitle:
+		// NOTE: This occurs when the player presses the 'Change Title', 'Clear Title', 'Change Suffix' or 'Clear Suffix' buttons.
+		_handleSetTitle(pPacket);
+		break;
+	case OP_RequestTitles:
+		// NOTE: This occurs when the player opens the title window.
+		_handleRequestTitles(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -534,7 +543,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	}
 	//payload->aa_array[MAX_PP_AA_ARRAY];
 	//payload->servername[32];
-	strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
+	strncpy(payload->title, mCharacter->getPrefix().c_str(), Limits::Character::MAX_TITLE_LENGTH);
 	strncpy(payload->suffix, mCharacter->getSuffix().c_str(), Limits::Character::MAX_SUFFIX_LENGTH);
 	//payload->guildid2;
 	payload->exp = mCharacter->getExperience();
@@ -2347,4 +2356,74 @@ void ZoneClientConnection::_handleClearSurname(const EQApplicationPacket* pPacke
 	mCharacter->setLastName("");
 	// Update Zone.
 	mZone->handleSurnameChange(mCharacter);
+}
+
+void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(SetTitle::sizeCheck(pPacket->size));
+	
+	auto payload = SetTitle::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mOption == SetTitle::SET_PREFIX || payload->mOption == SetTitle::SET_SUFFIX);
+
+	// TODO: Check eligibility
+
+	// Prefix changing.
+	if (payload->mOption == SetTitle::SET_PREFIX) {
+		String prefix = "";
+
+		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
+		if (payload->mTitleID != 0)
+			prefix = TitleManager::getInstance().getPrefix(payload->mTitleID);
+
+		// Update Character.
+		mCharacter->setPrefix(prefix);
+	}
+
+	// Suffix changing.
+	if (payload->mOption == SetTitle::SET_SUFFIX) {
+		String suffix = "";
+
+		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Suffix' button.
+		if (payload->mTitleID != 0)
+			suffix = TitleManager::getInstance().getSuffix(payload->mTitleID);
+
+		// Update Character.
+		mCharacter->setSuffix(suffix);
+	}
+
+	// Update Zone.
+	TitleOption t = payload->mOption == SetTitle::SET_PREFIX ? TitleOption::TO_Title : TitleOption::TO_Suffix;
+	mZone->handleTitleChanged(mCharacter, t);
+	
+}
+
+void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+
+	auto availableTitles = TitleManager::getInstance().getTitles(mCharacter);
+	if (availableTitles.empty())
+		return;
+
+	int payloadSize = sizeof(uint32); // 4 bytes: store the number of titles.
+	for (auto i : availableTitles) {
+		payloadSize += sizeof(uint32); // Title ID
+		payloadSize += i->mPrefix.length() + 1; // +1 for null terminator.
+		payloadSize += i->mSuffix.length() + 1; // +1 for null terminator.
+	}
+
+	auto outPacket = new EQApplicationPacket(OP_SendTitleList, payloadSize);
+	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
+	
+	ds.write<uint32>(availableTitles.size());
+	for (auto i : availableTitles) {
+		ds.write<uint32>(i->mID);
+		ds.writeString(i->mPrefix);
+		ds.writeString(i->mSuffix);
+	}
+
+	EXPECTED(ds.check());
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }

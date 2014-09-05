@@ -42,7 +42,7 @@ bool Character::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
 	setLastName(mData->mLastName);
-	setTitle(mData->mTitle);
+	setPrefix(mData->mTitle);
 	setSuffix(mData->mSuffix);
 	setRaceID(mData->mRace);
 	setIsGM(mData->mGM);
@@ -279,7 +279,7 @@ void Character::_updateForSave() {
 	mData->mGM = getIsGM();
 	mData->mName = getName();
 	mData->mLastName = getLastName();
-	mData->mTitle = getTitle();
+	mData->mTitle = getPrefix();
 	mData->mSuffix = getSuffix();
 
 	mData->mLevel = getLevel();
