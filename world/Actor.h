@@ -49,6 +49,7 @@ public:
 	inline void setTarget(Actor* pActor) { mTarget = pActor; }
 	inline Actor* getTarget() const { return mTarget; }
 	inline const bool hasTarget() const { return mTarget != nullptr; }
+	inline const bool targetIsCharacter() const { return mTarget ? mTarget->isCharacter() : false; }
 	template <typename T>
 	inline static T cast(Actor* pActor) {
 		return static_cast<T>(pActor);
@@ -66,6 +67,7 @@ public:
 	inline const float getVisibleRange() const { return mVisibleRange; }
 	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
 	inline std::list<Character*>& getVisibleTo() { return mVisibleTo; }
+	inline const bool isSeen() const { return mVisibleTo.empty() == false; }
 
 	inline void addVisibleTo(Character* pCharacter) { mVisibleTo.push_back(pCharacter); }
 	inline void removeVisibleTo(Character* pCharacter) { mVisibleTo.remove(pCharacter); }

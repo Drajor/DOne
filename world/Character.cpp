@@ -436,3 +436,7 @@ void Character::_processMessageQueue() {
 void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
 }
+
+void Character::notify(const String& pMessage) {
+	mConnection->sendMessage(MessageType::Yellow, pMessage);
+}

@@ -389,7 +389,16 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleConsiderCorpse(pPacket);
 		break;
 	case OP_Surname:
+		// NOTE: This occurs when the player uses the /surname command.
 		_handleSurname(pPacket);
+		break;
+	case OP_ClearSurname:
+		// NOTE: This occurs when the player uses the /surname command with no text
+		_handleClearSurname(pPacket);
+		break;
+	case OP_GMLastName:
+		// NOTE: This occurs when the player uses the /lastname command.
+		_handleGMLastName(pPacket);
 		break;
 	default:
 		StringStream ss;
@@ -2266,13 +2275,13 @@ void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
 
 void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
+	
 	EXPECTED(pPacket);
-	EXPECTED(Consider::sizeCheck(pPacket->size));
 	EXPECTED(mCharacter->hasTarget());
 
 	auto payload = Consider::convert(pPacket->pBuffer);
 
-	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID())
+	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID());
 }
 
 void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
@@ -2284,13 +2293,14 @@ void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPac
 
 	auto payload = Consider::convert(pPacket->pBuffer);
 
-	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID())
+	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID());
 }
 
 void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Surname::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->getLevel() >= Limits::Character::MIN_LEVEL_SURNAME); // Hacker!
 
 	auto payload = Surname::convert(pPacket->pBuffer);
 
@@ -2299,7 +2309,42 @@ void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	EXPECTED(characterName == mCharacter->getName());
 
 	String lastName = Utility::safeString(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
+	EXPECTED(Limits::Character::surnameLengthClient(lastName)); // Match Client check.
+	// TODO: Check for special characters / Captialisation.
 
-	// TODO: Test this.
+	// Update Character.
 	mCharacter->setLastName(lastName);
+	sendSurnameApproval(true);
+	// Update Zone.
+	mZone->handleSurnameChange(mCharacter);
+	
+}
+
+void ZoneClientConnection::sendSurnameApproval(const bool pSuccess) {
+	// NOTE: This packet notifies the client that their surname was approved.
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_Surname, Surname::size());
+	auto payload = Surname::convert(outPacket->pBuffer);
+
+	strcpy(payload->mCharacterName, mCharacter->getName().c_str());
+	strcpy(payload->mLastName, mCharacter->getLastName().c_str());
+	payload->mApproved = pSuccess ? 1 : 0;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleGMLastName(const EQApplicationPacket* pPacket) {
+	mCharacter->notify("Please use the command system.");
+}
+
+void ZoneClientConnection::_handleClearSurname(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+
+	// Update Character.
+	mCharacter->setLastName("");
+	// Update Zone.
+	mZone->handleSurnameChange(mCharacter);
 }

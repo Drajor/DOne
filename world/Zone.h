@@ -105,13 +105,15 @@ public:
 	
 	void handleVisibilityAdd(Character* pCharacter, Actor* pAddActor);
 	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
+
+	void handleSurnameChange(Actor* pActor);
 	
 private:
 
 	// Performs a global Character search.
 	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
 
-	void _sendDespawn(uint16 pSpawnID, bool pDecay = false);
+	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage);
 	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendLevelAppearance(Character* pCharacter);

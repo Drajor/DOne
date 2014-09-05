@@ -15,6 +15,10 @@
 #define PACKET_SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
 #define PACKET_SIZE_CHECK_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[PACKET_SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
 
+//void CHEATER(Character* pCharacter, const String& pReason) {
+//
+//}
+
 class Character;
 class Zone;
 namespace Utility {

@@ -6,6 +6,14 @@ bool Limits::Character::nameLength(const String& pCharacterName) {
 	return stringLength(pCharacterName) >= Limits::Character::MIN_NAME_LENGTH && stringLength(pCharacterName) <= Limits::Character::MAX_NAME_LENGTH;
 }
 
+bool Limits::Character::surnameLengthPayload(const String& pSurname) {
+	return stringLength(pSurname) <= Limits::Character::MAX_LAST_NAME_LENGTH;
+}
+
+bool Limits::Character::surnameLengthClient(const String& pSurname) {
+	return stringLength(pSurname) <= Limits::Character::MAX_LAST_NAME_CLIENT_LENGTH;
+}
+
 bool Limits::Character::classID(const ClassID pClassID) {
 	switch (pClassID) {
 	case ClassIDs::Warrior:

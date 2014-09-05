@@ -15,7 +15,14 @@
 
 TimeoutManager timeout_manager;
 
+//#include "Payload.h"
+//#include "../common/eq_packet_structs.h"
+//#include <iostream>
+
 int main(int argc, char** argv)  {
+	//std::cout << Payload::Zone::Surname::size() << std::endl;
+	//std::cout << sizeof(Payload::Zone::Surname) << std::endl;
+	//std::cout << sizeof(Surname_Struct) << std::endl;
 	//system("pause");
 	
 	RegisterExecutablePlatform(ExePlatformWorld);

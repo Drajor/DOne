@@ -91,6 +91,8 @@ public:
 	void sendGuildURL(const String& pURL);
 	void sendGuildChannel(const String& pChannel);
 
+	void sendSurnameApproval(const bool pSuccess);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
@@ -169,9 +171,12 @@ private:
 	void _handleTaunt(const EQApplicationPacket* pPacket);
 
 	void _handleConsider(const EQApplicationPacket* pPacket);
+
 	void _handleConsiderCorpse(const EQApplicationPacket* pPacket);
 
 	void _handleSurname(const EQApplicationPacket* pPacket);
+	void _handleClearSurname(const EQApplicationPacket* pPacket);
+	void _handleGMLastName(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

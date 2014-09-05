@@ -155,6 +155,8 @@ public:
 	inline const bool isHybrid() const { return Utility::isHybrid(getClass()); }
 	inline const bool isMelee() const { return Utility::isMelee(getClass()); }
 	inline const bool canTaunt() const { return Utility::canClassTaunt(getClass()); }
+
+	void notify(const String& pMessage);
 private:
 
 	const uint32 mAccountID;

@@ -17,6 +17,8 @@ namespace Limits {
 	}
 	namespace Character {
 		bool nameLength(const String& pCharacterName);
+		bool surnameLengthPayload(const String& pSurname);
+		bool surnameLengthClient(const String& pSurname);
 		bool classID(const ClassID pClassID);
 	}
 	namespace Guild {

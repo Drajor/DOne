@@ -371,6 +371,34 @@ public:
 	}
 };
 
+class SurnameCommand : public Command {
+public:
+	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #surname <name>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() == 1) {
+			const bool hasTarget = pCharacter->hasTarget();
+
+			// Check: Has a target.
+			if (!hasTarget) {
+				pCharacter->notify("You must target an actor.");
+				return;
+			}
+			Actor* changeActor = pCharacter->getTarget();
+
+			// Check: Length.
+			if (!Limits::Character::surnameLengthClient(pParameters[0])) {
+				pCharacter->notify("Length invalid");
+				return;
+			}
+			changeActor->setLastName(pParameters[0]);
+			changeActor->getZone()->handleSurnameChange(changeActor);
+		}
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -407,6 +435,8 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new WearChangeCommand(100, { "wc" }));
 	mCommands.push_back(new LocationCommand(100, { "loc" }));
+
+	mCommands.push_back(new SurnameCommand(100, { "surname" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -473,6 +503,37 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		npc->initialise();
 		npc->setPosition(pCharacter->getPosition());
 		pCharacter->getZone()->addActor(npc);
+		pCharacter->notify(std::to_string(npc->getSpawnID()));
+	}
+	else if (pCommandName == "sn") {
+		using namespace Payload::Zone;
+		auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());
+		auto payload = SurnameUpdate::convert(outPacket->pBuffer);
+
+		strcpy(payload->mCharaterName, pParameters[0].c_str());
+		strcpy(payload->mGMName, pCharacter->getName().c_str());
+		strcpy(payload->mLastName, pParameters[1].c_str());
+
+		Utility::stoSafe(payload->mUnknown0[0], pParameters[2]);
+		Utility::stoSafe(payload->mUnknown0[1], pParameters[3]);
+		Utility::stoSafe(payload->mUnknown0[2], pParameters[4]);
+		Utility::stoSafe(payload->mUnknown0[3], pParameters[5]);
+
+		pCharacter->getConnection()->sendPacket(outPacket);
+	}
+	else if (pCommandName == "rn") {
+		auto outPacket = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
+		memset(outPacket->pBuffer, 0, sizeof(outPacket->pBuffer));
+		auto payload = reinterpret_cast<MobRename_Struct*>(outPacket->pBuffer);
+		strcpy(payload->old_name, pParameters[0].c_str());
+		strcpy(payload->old_name_again, pParameters[1].c_str());
+		strcpy(payload->new_name, pParameters[2].c_str());
+
+		Utility::stoSafe(payload->unknown192, pParameters[3]);
+		Utility::stoSafe(payload->unknown196, pParameters[4]);
+		pCharacter->getConnection()->sendPacket(outPacket);
+
+		safe_delete(outPacket);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

@@ -376,7 +376,7 @@ void Zone::notifyCharacterEmote(Character* pCharacter, const String pMessage) {
 	safe_delete(outPacket);
 }
 
-void Zone::_sendDespawn(uint16 pSpawnID, bool pDecay) {
+void Zone::_sendDespawn(const uint16 pSpawnID, const bool pDecay) {
 	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
 	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
 	payload->spawn_id = pSpawnID;
@@ -624,8 +624,7 @@ void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
 	}
 
 	Actor* actor = findActor(pSpawnID);
-	if (!actor) { return; } // Ignore for now.
-
+	EXPECTED(actor);
 	pCharacter->setTarget(actor);
 }
 
@@ -674,8 +673,38 @@ void Zone::addActor(Actor* pActor) {
 	EXPECTED(pActor);
 
 	mScene->add(pActor);
+	mActors.push_back(pActor);
 }
 
 void Zone::removeActor(Actor* pActor) {
 
+}
+
+void Zone::handleSurnameChange(Actor* pActor) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());
+	auto payload = SurnameUpdate::convert(outPacket->pBuffer);
+
+	strcpy(payload->mCharaterName, pActor->getName().c_str());
+	strcpy(payload->mGMName, pActor->getName().c_str());
+	strcpy(payload->mLastName, pActor->getLastName().c_str());
+
+	payload->mUnknown0[0] = 1;
+	payload->mUnknown0[1] = 1;
+	payload->mUnknown0[2] = 1;
+	payload->mUnknown0[3] = 1;
+
+	// Character surname changed.
+	if (pActor->isCharacter()) {
+		Character* character = Actor::cast<Character*>(pActor);
+		character->getConnection()->sendPacket(outPacket);
+	}
+
+	// Update anyone who can see pActor.
+	for (auto i : pActor->getVisibleTo())
+		i->getConnection()->sendPacket(outPacket);
+
+	safe_delete(outPacket);
 }

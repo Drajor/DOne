@@ -37,7 +37,14 @@ namespace Payload {
 	};
 
 	template <typename T>
-	struct ServerToClient {
+	class ServerToClient {
+	public: inline static const std::size_t size() { return sizeof(T); }
+	};
+
+	template <typename T>
+	struct FixedLength_And_ServerToClient {
+		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
+		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
 		inline static const std::size_t size() { return sizeof(T); }
 	};
 
@@ -142,11 +149,20 @@ namespace Payload {
 			uint8 mUnknown0[3];
 		};
 
-		// C->S
-		struct Surname : public FixedSizedPayload<Surname> {
+		// C<->S
+		struct Surname : public FixedLength_And_ServerToClient<Surname> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-			uint32 mUnknown0 = 0;
+			uint32 mApproved = 0;
 			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
+		};
+
+		// S->C
+		// Based on: GMLastName_Struct
+		struct SurnameUpdate : public FixedLength_And_ServerToClient<SurnameUpdate> {
+			char mCharaterName[Limits::Character::MAX_NAME_LENGTH];
+			char mGMName[Limits::Character::MAX_NAME_LENGTH];
+			char mLastName[Limits::Character::MAX_NAME_LENGTH];
+			uint16 mUnknown0[4];
 		};
 	}
 

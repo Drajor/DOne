@@ -15,7 +15,8 @@ const bool NPC::initialise() {
 	EXPECTED_BOOL(getSpawnID() == 0);
 	setSpawnID(mZone->getNextSpawnID());
 
-	setName("Bob");
+	String baseName = "Bob";
+	setName(baseName+std::to_string(getSpawnID()));
 	setRaceID(6);
 	setClass(ClassIDs::Cleric);
 
