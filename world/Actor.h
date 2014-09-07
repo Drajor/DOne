@@ -133,7 +133,7 @@ public:
 	inline const uint8 getRightEyeColour() const { return mSpawnData.mRightEyeColour; }
 	inline const uint8 getHairStyle() const { return mSpawnData.mHairStyle; }
 	inline const uint8 getBeardStyle() const { return mSpawnData.mBeardStyle; }
-	inline const uint8 getHairColour() const { return mSpawnData.mHairColor; }
+	inline const uint8 getHairColour() const { return mSpawnData.mHairColour; }
 	inline const uint8 getBeardColour() const { return mSpawnData.mBeardColour; }
 	inline const uint32 getDrakkinHeritage() const { return mSpawnData.mDrakkinHeritage; }
 	inline const uint32 getDrakkinTattoo() const { return mSpawnData.mDrakkinTattoo; }
@@ -144,7 +144,7 @@ public:
 	inline void setRightEyeColour(const uint8 pRightEyeColour) { mSpawnData.mRightEyeColour = pRightEyeColour; }
 	inline void setHairStyle(const uint8 pHairStyle) { mSpawnData.mHairStyle = pHairStyle; }
 	inline void setBeardStyle(const uint8 pBeardStyle) { mSpawnData.mBeardStyle = pBeardStyle; }
-	inline void setHairColour(const uint8 pHairColour) { mSpawnData.mHairColor = pHairColour; }
+	inline void setHairColour(const uint8 pHairColour) { mSpawnData.mHairColour = pHairColour; }
 	inline void setBeardColour(const uint8 pBeardColour) { mSpawnData.mBeardColour = pBeardColour; }
 	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mSpawnData.mDrakkinHeritage = pDrakkinHeritage; }
 	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mSpawnData.mDrakkinTattoo = pDrakkinTattoo; }

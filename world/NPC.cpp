@@ -19,6 +19,7 @@ const bool NPC::initialise() {
 	setName(baseName+std::to_string(getSpawnID()));
 	setRaceID(6);
 	setClass(ClassIDs::Cleric);
+	//setIsGM(true);
 
 	return true;
 }

@@ -21,6 +21,10 @@ namespace Limits {
 		bool surnameLengthClient(const String& pSurname);
 		bool classID(const ClassID pClassID);
 	}
+	namespace SpellBook {
+		const bool slotValid(const uint16 pSlot);
+		const bool spellIDValid(const uint32 pSpellID);
+	}
 	namespace Guild {
 		bool ID(const GuildID pGuildID);
 		bool MOTDLength(const String& pGuildMOTD);

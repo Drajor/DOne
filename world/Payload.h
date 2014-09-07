@@ -113,7 +113,7 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct DeleteSpell : public FixedSizedPayload<DeleteSpell> {
+		struct DeleteSpell : public FixedLength_And_ServerToClient<DeleteSpell> {
 			int16 mSpellBookSlot = 0;
 			uint8 mUnknown0[2];
 			uint8 mSuccess = 0;
@@ -341,11 +341,11 @@ namespace Payload {
 		uint32 mUnknown4 = 0;
 		ActorType mActorType = AT_PLAYER;
 		uint8 mIsInvisible = 0;
-		uint8 mHairColor = 0;
+		uint8 mHairColour = 0;
 		uint8 mCurrentHP = 100;
 		uint8 max_hp = 100;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
 		uint8 mIsFindable = 0;
-		uint8 mUnknown5[3]; // TODO: I suspect this can be set as spawn ID and the memory used for position updates.
+		uint8 mUnknown5[3];
 		uint16 mSpawnID2 = 0;
 		/*0094*/ signed	deltaHeading : 10;	// change in heading
 		/*????*/ signed	x : 19;				// x coord

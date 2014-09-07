@@ -67,6 +67,9 @@ namespace Limits {
 		static const auto MAX_SPELLS_MEMED = 9; // Maximum number of spells that can be on the spell bar.
 		static const uint8 MIN_LEVEL_SURNAME = 20; // The minimum level to change surname.
 	}
+	namespace SpellBook {
+		static const auto MAX_SLOTS = 480;
+	}
 	namespace Guild {
 		static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 		static const auto MIN_NAME_LENGTH = 4;
@@ -116,8 +119,8 @@ enum ActorType : uint8 {
 };
 
 enum GMStatus : uint8 {
-	GM_ON,
-	GM_OFF
+	GM_OFF,
+	GM_ON
 };
 
 enum AATitle : uint8 {
@@ -205,6 +208,7 @@ enum class Statistic : uint32 {
 enum SpawnAppearanceType : int16 {
 	Die = 0,
 	WhoLevel = 1,
+	SAT_UNKNOWN0 = 2, // V=0 hp drops to 0%, V=1 hp goes to 100%
 	Invisible = 3,
 	PVP = 4,
 	Light = 5,

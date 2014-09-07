@@ -104,3 +104,11 @@ bool Limits::World::lsAccountPasswordLength(const String& pAccountPassword) {
 	return true;
 	// TODO: Find exact length.
 }
+
+const bool Limits::SpellBook::slotValid(const uint16 pSlot) {
+	return pSlot < Limits::SpellBook::MAX_SLOTS;
+}
+
+const bool Limits::SpellBook::spellIDValid(const uint32 pSpellID) {
+	return true; // TODO:
+}

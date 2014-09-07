@@ -47,4 +47,7 @@ Actor::Actor() {
 	mSpawnData.DestructibleName2[0] = '\0';
 	mSpawnData.DestructibleString[0] = '\0';
 
+	//mSpawnData.mUnknown5[0] = 1;
+	//mSpawnData.mUnknown5[1] = 1;
+	//mSpawnData.mUnknown5[2] = 1;
 }

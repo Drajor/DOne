@@ -560,6 +560,15 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->face = mCharacter->getFaceStyle();
 	//payload->languages[MAX_PP_LANGUAGE];
 	//payload->spell_book[MAX_PP_SPELLBOOK];
+	//payload->spell_book[3] = 17;
+
+	// Copy spell book data into profile.
+	if (mCharacter->isCaster()) {
+		const std::vector<uint32> spellbook = mCharacter->getSpellBookData();
+		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
+			payload->spell_book[i] = spellbook[i];
+	}
+	
 	//payload->mem_spells[MAX_PP_MEMSPELL];
 	payload->y = mCharacter->getY();
 	payload->x = mCharacter->getX();
@@ -892,6 +901,10 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	case SpawnAppearanceType::Size:
 		break;
 	case SpawnAppearanceType::Light:
+		break;
+	case SpawnAppearanceType::PVP:
+		Log::info("Got PVP");
+		// NOTE: Not sure if this even possible.
 		break;
 	case SpawnAppearanceType::AutoConsentGroup:
 		mCharacter->setAutoConsentGroup(actionParameter == 1);
@@ -2227,6 +2240,8 @@ void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket
 	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
 
 	auto payload = DeleteSpell::convert(pPacket->pBuffer);
+	const bool success = mCharacter->handleDeleteSpell(payload->mSpellBookSlot);
+	sendDeleteSpellDelete(payload->mSpellBookSlot, success);
 }
 
 void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
@@ -2424,6 +2439,19 @@ void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPack
 	}
 
 	EXPECTED(ds.check());
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_DeleteSpell, DeleteSpell::size());
+	auto payload = DeleteSpell::convert(outPacket->pBuffer);
+	payload->mSpellBookSlot = pSlot;
+	payload->mSuccess = pSuccess ? 1 : 0;
+
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

@@ -14,6 +14,7 @@ class EQStreamInterface;
 class ZoneClientConnection;
 
 struct CharacterData;
+class SpellBook;
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -156,6 +157,8 @@ public:
 	inline const bool isMelee() const { return Utility::isMelee(getClass()); }
 	inline const bool canTaunt() const { return Utility::canClassTaunt(getClass()); }
 
+	const bool handleDeleteSpell(const int16 pSlot);
+
 	void notify(const String& pMessage);
 private:
 
@@ -214,6 +217,7 @@ private:
 
 	ZoneClientConnection* mConnection = nullptr;
 	CharacterData* mData = nullptr;
+	
 
 	std::list<NPC*> mVisibleNPCs; // NPCs that are visible to this Character
 
@@ -224,4 +228,20 @@ private:
 	};
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();
+	class SpellBook {
+	public:
+		SpellBook() {
+			mSpellIDs.resize(Limits::SpellBook::MAX_SLOTS);
+			//mSpellIDs.reserve(Limits::SpellBook::MAX_SLOTS);
+			for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
+				mSpellIDs[i] = 0;
+		}
+		const std::vector<uint32>& getData() const { return mSpellIDs; }
+		void setSpell(const uint16 pSlot, const uint32 pSpellID);
+		const bool deleteSpell(const uint16 pSlot);
+	private:
+		std::vector<uint32> mSpellIDs;
+	};
+	SpellBook* mSpellBook = nullptr;
+	const std::vector<uint32> getSpellBookData() const;
 };

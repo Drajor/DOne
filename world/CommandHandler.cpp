@@ -499,9 +499,17 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	}
 	else if (pCommandName == "npc") {
 		NPC* npc = new NPC();
+		//uint8 at = 0;
+		//Utility::stoSafe(at, pParameters[0]);
+		//uint8 c = 0;
+		//Utility::stoSafe(c, pParameters[0]);
 		npc->setZone(pCharacter->getZone());
 		npc->initialise();
 		npc->setPosition(pCharacter->getPosition());
+		//npc->setClass(c);
+		//npc->setActorType(static_cast<ActorType>(at));
+		//npc->setAATitle(static_cast<AATitle>(aa));
+		//npc->setis
 		pCharacter->getZone()->addActor(npc);
 		pCharacter->notify(std::to_string(npc->getSpawnID()));
 	}
@@ -558,6 +566,16 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		//};
 
 
+	}
+	else if (pCommandName == "sa") {
+		EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* appearance = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
+		appearance->spawn_id = pCharacter->getTarget()->getSpawnID();
+		Utility::stoSafe(appearance->type, pParameters[0]);
+		Utility::stoSafe(appearance->parameter, pParameters[1]);
+
+		pCharacter->getConnection()->sendPacket(outPacket);
+		safe_delete(outPacket);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

@@ -7,6 +7,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 #include "ZoneClientConnection.h"
+#include "Limits.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -101,6 +102,12 @@ bool Character::initialise() {
 	_setRadiantCrystals(mData->mRadiantCrystals, mData->mTotalRadiantCrystals);
 	_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
 
+	if (isCaster()) {
+		mSpellBook = new SpellBook();
+		// TODO: Copy data into spell book.
+		mSpellBook->setSpell(3, 17);
+	}
+
 	mInitialised = true;
 	return true;
 }
@@ -130,8 +137,7 @@ void Character::startCamp() {
 	mCampTimer.Start(29000, true);
 }
 
-void Character::message(MessageType pType, String pMessage)
-{
+void Character::message(MessageType pType, String pMessage) {
 	mConnection->sendMessage(pType, pMessage);
 }
 
@@ -439,4 +445,31 @@ void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, 
 
 void Character::notify(const String& pMessage) {
 	mConnection->sendMessage(MessageType::Yellow, pMessage);
+}
+
+const bool Character::handleDeleteSpell(const int16 pSlot) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook);
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
+	
+	return mSpellBook->deleteSpell(pSlot);
+}
+
+const std::vector<uint32> Character::getSpellBookData() const {
+	return mSpellBook->getData();
+}
+
+const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
+	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);
+
+	mSpellIDs[pSlot] = 0;
+	return true;
+}
+
+void Character::SpellBook::setSpell(const uint16 pSlot, const uint32 pSpellID) {
+	EXPECTED(Limits::SpellBook::slotValid(pSlot));
+	EXPECTED(Limits::SpellBook::spellIDValid(pSpellID));
+
+	mSpellIDs[pSlot] = pSpellID;
 }
