@@ -251,6 +251,8 @@ namespace CharacterDataXML {
 		static const auto Crystals = "crystals";
 		static const auto Radiant = "radiant";
 		static const auto Ebon = "ebon";
+		static const auto SpellBook = "spellbook";
+		static const auto SpellBookSlot = "sb_slot";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -313,6 +315,9 @@ namespace CharacterDataXML {
 		// Tag::Crystals / Radiant / Ebon
 		static const auto Current = "current";
 		static const auto Total = "total";
+		// Tag::SpellBook
+		static const auto SpellBookSlot = "slot";
+		static const auto SpellBookSpell = "id";
 	}
 }
 
@@ -417,6 +422,26 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Current, pCharacterData->mEbonCrystals));
 	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Total, pCharacterData->mTotalEbonCrystals));
 
+	// Caster Only
+	if (Utility::isCaster(pCharacterData->mClass)) {
+		// Tag::SpellBook
+		auto spellbookElement = characterElement->FirstChildElement(Tag::SpellBook);
+		EXPECTED_BOOL(spellbookElement);
+		auto slotElement = spellbookElement->FirstChildElement(Tag::SpellBookSlot);
+		while (slotElement) {
+			uint32 spellID = 0;
+			uint32 slotID = 0;
+			EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSlot, slotID));
+			EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSpell, spellID));
+			EXPECTED_BOOL(Limits::SpellBook::slotValid(slotID));
+			EXPECTED_BOOL(Limits::SpellBook::spellIDValid(spellID));
+
+			pCharacterData->mSpellBook[slotID] = spellID;
+
+			slotElement = slotElement->NextSiblingElement(Tag::SpellBookSlot);
+		}
+	}
+
 	return true;
 }
 
@@ -508,6 +533,19 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	auto ebonElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Ebon)));
 	ebonElement->SetAttribute(Attribute::Current, pCharacterData->mEbonCrystals);
 	ebonElement->SetAttribute(Attribute::Total, pCharacterData->mTotalEbonCrystals);
+
+	// Tag::SpellBook
+	if (Utility::isCaster(pCharacterData->mClass)){
+		auto spellbookElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::SpellBook)));
+		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
+			if (pCharacterData->mSpellBook[i] == 0)
+				continue;
+			
+			auto slotElement = static_cast<TiXmlElement*>(spellbookElement->LinkEndChild(new TiXmlElement(Tag::SpellBookSlot)));
+			slotElement->SetAttribute(Attribute::SpellBookSlot, i);
+			slotElement->SetAttribute(Attribute::SpellBookSpell, pCharacterData->mSpellBook[i]);
+		}
+	}
 
 	EXPECTED_BOOL(document.SaveFile());
 	return true;

@@ -103,10 +103,12 @@ bool Character::initialise() {
 	_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
 
 	if (isCaster()) {
+		// Create and initialise SpellBook.
 		mSpellBook = new SpellBook();
-		// TODO: Copy data into spell book.
-		mSpellBook->setSpell(3, 17);
-		mSpellBook->setSpell(4, 19);
+		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
+			if (mData->mSpellBook[i] != 0)
+				mSpellBook->setSpell(i, mData->mSpellBook[i]);
+		}
 	}
 
 	mInitialised = true;
@@ -346,6 +348,13 @@ void Character::_updateForSave() {
 	mData->mTotalRadiantCrystals = getTotalRadiantCrystals();
 	mData->mEbonCrystals = getEbonCrystals();
 	mData->mTotalEbonCrystals = getTotalRadiantCrystals();
+
+	// Spell Book
+	if (mSpellBook) {
+		const std::vector<uint32> spellBook = mSpellBook->getData();
+		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
+			mData->mSpellBook[i] = spellBook[i];
+	}
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

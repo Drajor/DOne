@@ -41,6 +41,9 @@ struct AccountData {
 };
 
 struct CharacterData {
+	CharacterData() {
+		mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
+	}
 	String mName = "";
 	uint32 mLevel = 1;
 	ClassID mClass = ClassIDs::Warrior;
@@ -107,6 +110,8 @@ struct CharacterData {
 	uint32 mTotalRadiantCrystals = 0;
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
+
+	std::vector<uint32> mSpellBook;
 };
 
 struct SpawnGroupData {
