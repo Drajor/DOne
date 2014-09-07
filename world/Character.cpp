@@ -106,6 +106,7 @@ bool Character::initialise() {
 		mSpellBook = new SpellBook();
 		// TODO: Copy data into spell book.
 		mSpellBook->setSpell(3, 17);
+		mSpellBook->setSpell(4, 19);
 	}
 
 	mInitialised = true;
@@ -459,6 +460,15 @@ const std::vector<uint32> Character::getSpellBookData() const {
 	return mSpellBook->getData();
 }
 
+const bool Character::handleSwapSpells(const uint16 pFrom, const uint16 pTo) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook);
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pFrom));
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pTo));
+
+	return mSpellBook->swapSpells(pFrom, pTo);
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);
@@ -472,4 +482,15 @@ void Character::SpellBook::setSpell(const uint16 pSlot, const uint32 pSpellID) {
 	EXPECTED(Limits::SpellBook::spellIDValid(pSpellID));
 
 	mSpellIDs[pSlot] = pSpellID;
+}
+
+const bool Character::SpellBook::swapSpells(const uint16 pFrom, const uint16 pTo) {
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pFrom));
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pTo));
+
+	const uint32 temp = mSpellIDs[pTo];
+	mSpellIDs[pTo] = mSpellIDs[pFrom];
+	mSpellIDs[pFrom] = temp;
+
+	return true;
 }

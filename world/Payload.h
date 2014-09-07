@@ -128,8 +128,8 @@ namespace Payload {
 
 		// C->S
 		struct SwapSpell : public FixedSizedPayload<SwapSpell> {
-			uint32 mFromSpellBookSlot = 0;
-			uint32 mToSpellBookSlot = 0;
+			uint32 mFrom = 0;
+			uint32 mTo = 0;
 		};
 
 		// C->S

@@ -158,6 +158,7 @@ public:
 	inline const bool canTaunt() const { return Utility::canClassTaunt(getClass()); }
 
 	const bool handleDeleteSpell(const int16 pSlot);
+	const bool handleSwapSpells(const uint16 pFrom, const uint16 pTo);
 
 	void notify(const String& pMessage);
 private:
@@ -239,6 +240,7 @@ private:
 		const std::vector<uint32>& getData() const { return mSpellIDs; }
 		void setSpell(const uint16 pSlot, const uint32 pSpellID);
 		const bool deleteSpell(const uint16 pSlot);
+		const bool swapSpells(const uint16 pFrom, const uint16 pTo);
 	private:
 		std::vector<uint32> mSpellIDs;
 	};

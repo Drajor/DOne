@@ -2260,6 +2260,10 @@ void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) 
 	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
 
 	auto payload = SwapSpell::convert(pPacket->pBuffer);
+	EXPECTED(mCharacter->handleSwapSpells(payload->mFrom, payload->mTo));
+
+	// Client requires a reply.
+	mStreamInterface->QueuePacket(pPacket);
 }
 
 void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
