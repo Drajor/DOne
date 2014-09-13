@@ -29,6 +29,8 @@ public:
 	bool create(const String& pAccountName);
 	bool exists(const uint32 pAccountID);
 
+	// Returns the number of Characters belonging to the Account.
+	const uint32 getNumCharacters(const uint32 pAccountID);
 	bool isCharacterNameUnique(const String& pCharacterName);
 
 	bool handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
@@ -51,7 +53,6 @@ private:
 
 	AccountData* _find(const uint32 pAccountID);
 	AccountData* _find(const String& pAccountName);
-
 	std::list<String> mCharacterNames;
 	std::list<AccountData*> mAccounts;
 };

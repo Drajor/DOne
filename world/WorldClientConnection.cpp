@@ -202,7 +202,15 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 }
 
 bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
-	// TODO: Check this packet size.
+	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
+	// So we check here and just reject the name if the account is at max.
+	// It would be better if I could figure out how the client limits it and duplicate that.
+	if (AccountManager::getInstance().getNumCharacters(mAccountID) >= Limits::Account::MAX_NUM_CHARACTERS) {
+		auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
+		outPacket->pBuffer[0] = 0;
+		_queuePacket(outPacket);
+		return true;
+	}
 	
 	snprintf(char_name, 64, "%s", (char*)pPacket->pBuffer);
 	// TODO: Consider why race and class are sent here?

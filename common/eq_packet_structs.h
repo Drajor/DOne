@@ -150,31 +150,31 @@ struct Color_Struct
 **
 */
 struct CharacterSelect_Struct {
-/*0000*/	uint32	race[10];				// Characters Race
-/*0040*/	Color_Struct	cs_colors[10][9];	// Characters Equipment Colors
-/*0400*/	uint8	beardcolor[10];			// Characters beard Color
-/*0410*/	uint8	hairstyle[10];			// Characters hair style
-/*0420*/	uint32	equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
-/*0780*/	uint32	secondary[10];			// Characters secondary IDFile number
-/*0820*/	uint32	drakkin_heritage[10];		// added for SoF
-/*0860*/	uint32	drakkin_tattoo[10];			// added for SoF
-/*0900*/	uint32	drakkin_details[10];		// added for SoF
-/*0940*/	uint32	deity[10];				// Characters Deity
-/*0980*/	uint8	gohome[10];				// 1=Go Home available, 0=not
-/*0990*/	uint8	tutorial[10];			// 1=Tutorial available, 0=not
-/*1000*/	uint8	beard[10];				// Characters Beard Type
-/*1010*/	uint8	unknown902[10];			// 10x ff
-/*1020*/	uint32	primary[10];			// Characters primary IDFile number
-/*1060*/	uint8	haircolor[10];			// Characters Hair Color
+/*0000*/	uint32	race[18];				// Characters Race
+/*0040*/	Color_Struct	cs_colors[18][9];	// Characters Equipment Colors
+/*0400*/	uint8	beardcolor[18];			// Characters beard Color
+/*0410*/	uint8	hairstyle[18];			// Characters hair style
+/*0420*/	uint32	equip[18][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
+/*0780*/	uint32	secondary[18];			// Characters secondary IDFile number
+/*0820*/	uint32	drakkin_heritage[18];		// added for SoF
+/*0860*/	uint32	drakkin_tattoo[18];			// added for SoF
+/*0900*/	uint32	drakkin_details[18];		// added for SoF
+/*0940*/	uint32	deity[18];				// Characters Deity
+/*0980*/	uint8	gohome[18];				// 1=Go Home available, 0=not
+/*0990*/	uint8	tutorial[18];			// 1=Tutorial available, 0=not
+/*1000*/	uint8	beard[18];				// Characters Beard Type
+/*1010*/	uint8	unknown902[18];			// 10x ff
+/*1020*/	uint32	primary[18];			// Characters primary IDFile number
+/*1060*/	uint8	haircolor[18];			// Characters Hair Color
 /*1070*/	uint8	unknown0962[2];			// 2x 00
-/*1072*/	uint32	zone[10];				// Characters Current Zone
-/*1112*/	uint8	class_[10];				// Characters Classes
-/*1022*/	uint8	face[10];				// Characters Face Type
-/*1032*/	char	name[10][64];			// Characters Names
-/*1672*/	uint8	gender[10];				// Characters Gender
-/*1682*/	uint8	eyecolor1[10];			// Characters Eye Color
-/*1692*/	uint8	eyecolor2[10];			// Characters Eye 2 Color
-/*1702*/	uint8	level[10];				// Characters Levels
+/*1072*/	uint32	zone[18];				// Characters Current Zone
+/*1112*/	uint8	class_[18];				// Characters Classes
+/*1022*/	uint8	face[18];				// Characters Face Type
+/*1032*/	char	name[18][64];			// Characters Names
+/*1672*/	uint8	gender[18];				// Characters Gender
+/*1682*/	uint8	eyecolor1[18];			// Characters Eye Color
+/*1692*/	uint8	eyecolor2[18];			// Characters Eye 2 Color
+/*1702*/	uint8	level[18];				// Characters Levels
 /*1712*/
 };
 

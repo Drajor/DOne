@@ -293,3 +293,12 @@ const bool AccountManager::updateCharacter(const uint32 pAccountID, const Charac
 
 	return true;
 }
+
+const uint32 AccountManager::getNumCharacters(const uint32 pAccountID) {
+	auto account = _find(pAccountID);
+	if (!account) {
+		Log::error("Failed to find account with id " + std::to_string(pAccountID));
+		return 0;
+	}
+	return account->mCharacterData.size();
+}

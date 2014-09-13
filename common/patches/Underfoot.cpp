@@ -298,7 +298,7 @@ ENCODE(OP_SendCharInfo) {
 
 	int char_count;
 	int namelen = 0;
-	for(char_count = 0; char_count < 10; char_count++) {
+	for(char_count = 0; char_count < 18; char_count++) {
 		if(emu->name[char_count][0] == '\0')
 			break;
 		if(strcmp(emu->name[char_count], "<none>") == 0)
@@ -316,7 +316,7 @@ ENCODE(OP_SendCharInfo) {
 	//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
 
 	eq->char_count = char_count;
-	eq->total_chars = 10;
+	eq->total_chars = 18;
 
 	unsigned char *bufptr = (unsigned char *) eq->entries;
 	int r;
