@@ -38,8 +38,8 @@ bool AccountManager::createAccount(const uint32 pAccountID, const String pAccout
 	accountData->mStatus = ResponseID::ALLOWED;
 
 	mAccounts.push_back(accountData);
-	_save();
-	_save(accountData);
+	EXPECTED_BOOL(_save());
+	EXPECTED_BOOL(_save(accountData));
 
 	return true;
 }
@@ -69,7 +69,6 @@ bool AccountManager::_loadAccount(const String& pAccountName) {
 bool AccountManager::exists(const uint32 pAccountID){
 	AccountData* account = _find(pAccountID);
 	return account ? true : false;
-	//return PathFileExists(String("./data/accounts/" + pAccountName + ".xml").c_str());
 }
 
 AccountData* AccountManager::_load(const String& pAccountName) {
@@ -77,11 +76,28 @@ AccountData* AccountManager::_load(const String& pAccountName) {
 }
 
 AccountStatus AccountManager::getStatus(const uint32 pAccountID) {
-	AccountData* account = _find(pAccountID);
+	auto account = _find(pAccountID);
 	return account ? account->mStatus : ResponseID::ALLOWED;
 }
 
-bool AccountManager::deleteCharacter(const String& pCharacterName) {
+bool AccountManager::deleteCharacter(const uint32 pAccountID, const String& pCharacterName) {
+	auto account = _find(pAccountID);
+	EXPECTED_BOOL(account);
+	EXPECTED_BOOL(DataStore::getInstance().deleteCharacter(pCharacterName));
+
+	// Remove from AccountData
+	bool removed = false;
+	for (auto i : account->mCharacterData) {
+		if (i->mName == pCharacterName) {
+			delete i;
+			account->mCharacterData.remove(i);
+			removed = true;
+			break;
+		}
+	}
+	EXPECTED_BOOL(removed); // Check: Sanity.
+	EXPECTED_BOOL(_save(account)); // Save.
+
 	return true;
 }
 

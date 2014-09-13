@@ -174,7 +174,7 @@ bool World::isCharacterNameReserved(String pCharacterName) {
 	return false;
 }
 
-void World::reserveCharacterName(uint32 pWorldAccountID, String pCharacterName) {
+void World::reserveCharacterName(const uint32 pWorldAccountID, const String pCharacterName) {
 	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
 }
 
@@ -182,7 +182,7 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	// Verify that character with pCharacterName belongs to pWorldAccountID.
 	const bool isOwner = AccountManager::getInstance().checkOwnership(pAccountID, pCharacterName);
 	EXPECTED_BOOL(isOwner);
-	return AccountManager::getInstance().deleteCharacter(pCharacterName);
+	return AccountManager::getInstance().deleteCharacter(pAccountID, pCharacterName);
 }
 
 //bool World::createCharacter(uint32 pWorldAccountID, String pCharacterName, CharCreate_Struct* pData) {

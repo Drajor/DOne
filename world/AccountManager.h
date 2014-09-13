@@ -32,7 +32,7 @@ public:
 	bool isCharacterNameUnique(const String& pCharacterName);
 
 	bool handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
-	bool deleteCharacter(const String& pCharacterName);
+	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
 	const bool updateCharacter(const uint32 pAccountID, const Character* pCharacter);
 
 	bool ban(const String& pAccountName);

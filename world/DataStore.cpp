@@ -382,7 +382,7 @@ namespace CharacterDataXML {
 #undef SCA
 }
 
-bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
+const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
 	Profile p("DataStore::loadCharacter");
 	using namespace CharacterDataXML;
 	EXPECTED_BOOL(pCharacterData);
@@ -506,7 +506,7 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	return true;
 }
 
-bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData) {
+const bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData) {
 	Profile p("DataStore::saveCharacter");
 	using namespace CharacterDataXML;
 
@@ -804,6 +804,17 @@ bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearance
 
 		appearanceElement = appearanceElement->NextSiblingElement(Tag::Appearance);
 	}
+
+	return true;
+}
+
+const bool DataStore::deleteCharacter(const String& pCharacterName) {
+	const String existingFile = "./data/characters/" + pCharacterName + ".xml";
+	const String newFile = "./data/characters/deleted/" + std::to_string(Utility::Time::now()) + "_" + pCharacterName + ".xml";
+	// Copy the character xml to the deleted directory.
+	EXPECTED_BOOL(CopyFile(existingFile.c_str(), newFile.c_str(), true));
+	// Delete the character file.
+	EXPECTED_BOOL(DeleteFile(existingFile.c_str()));
 
 	return true;
 }

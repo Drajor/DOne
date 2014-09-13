@@ -26,8 +26,9 @@ public:
 	bool saveAccountCharacterData(AccountData* pAccount);
 
 	// Character Data
-	bool loadCharacter(const String& pCharacterName, CharacterData* pCharacterData);
-	bool saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData);
+	const bool loadCharacter(const String& pCharacterName, CharacterData* pCharacterData);
+	const bool saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData);
+	const bool deleteCharacter(const String& pCharacterName);
 
 	// Spawn Points
 	bool loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints);

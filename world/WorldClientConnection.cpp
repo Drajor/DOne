@@ -495,8 +495,8 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
 
-	auto payload = DeleteCharacter::convert(pPacket->pBuffer);
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	//auto payload = DeleteCharacter::convert(pPacket->pBuffer);
+	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Character::MAX_NAME_LENGTH);
 
 	if (World::getInstance().deleteCharacter(mAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
