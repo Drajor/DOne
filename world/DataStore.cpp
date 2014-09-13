@@ -71,15 +71,35 @@ bool DataStore::initialise() {
 	return true;
 }
 
+namespace AccountDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/accounts.xml";
+	namespace Tag {
+		SCA Accounts = "accounts";
+		SCA Account = "account";
+	}
+	namespace Attribute {
+		// Tag::Account
+		SCA ID = "id";
+		SCA Name = "name";
+		SCA Status = "status";
+		SCA SuspendedUntil = "suspend_until";
+		SCA LastLogin = "last_login";
+		SCA Created = "created";
+	}
+#undef SCA
+}
+
 bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
+	using namespace AccountDataXML;
 	Profile p("DataStore::loadAccounts");
 	EXPECTED_BOOL(pAccounts.empty());
-	TiXmlDocument document("./data/accounts.xml");
+	TiXmlDocument document(AccountDataXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
-	auto accountsElement = document.FirstChildElement("accounts");
+	auto accountsElement = document.FirstChildElement(Tag::Accounts);
 	EXPECTED_BOOL(accountsElement);
-	auto accountElement = accountsElement->FirstChildElement("account");
+	auto accountElement = accountsElement->FirstChildElement(Tag::Account);
 	
 	// There are no accounts yet.
 	if (!accountElement)
@@ -90,54 +110,92 @@ bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
 		auto accountData = new AccountData();
 		pAccounts.push_back(accountData);
 
-		EXPECTED_BOOL(readAttribute(accountElement, "id", accountData->mAccountID));
-		EXPECTED_BOOL(readAttribute(accountElement, "name", accountData->mAccountName));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::ID, accountData->mAccountID));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Name, accountData->mAccountName));
 		EXPECTED_BOOL(Limits::LoginServer::accountNameLength(accountData->mAccountName));
-		EXPECTED_BOOL(readAttribute(accountElement, "status", accountData->mStatus));
-		EXPECTED_BOOL(readAttribute(accountElement, "suspend_until", accountData->mSuspendedUntil));
-		EXPECTED_BOOL(readAttribute(accountElement, "last_login", accountData->mLastLogin));
-		EXPECTED_BOOL(readAttribute(accountElement, "created", accountData->mCreated));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Status, accountData->mStatus));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::SuspendedUntil, accountData->mSuspendedUntil));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Created, accountData->mCreated));
 		
-		accountElement = accountElement->NextSiblingElement("account");
+		accountElement = accountElement->NextSiblingElement(Tag::Account);
 	}
 	
 	return true;
 }
 
 bool DataStore::saveAccounts(std::list<AccountData*>& pAccounts) {
+	using namespace AccountDataXML;
 	Profile p("DataStore::saveAccounts");
-	TiXmlDocument document("./data/accounts.xml");
+	TiXmlDocument document(FileLocation);
 
-	auto accountsElement = new TiXmlElement("accounts");
+	auto accountsElement = new TiXmlElement(Tag::Accounts);
 	document.LinkEndChild(accountsElement);
 
 	for (auto i : pAccounts) {
-		auto accountElement = new TiXmlElement("account");
-		accountsElement->LinkEndChild(accountsElement);
+		auto accountElement = new TiXmlElement(Tag::Account);
+		accountsElement->LinkEndChild(accountElement);
 
-		accountElement->SetAttribute("id", std::to_string(i->mAccountID).c_str());
-		accountElement->SetAttribute("name", i->mAccountName.c_str());
-		accountElement->SetAttribute("status", i->mStatus);
-		accountElement->SetAttribute("suspend_until", std::to_string(i->mSuspendedUntil).c_str());
-		accountElement->SetAttribute("last_login", std::to_string(i->mLastLogin).c_str());
-		accountElement->SetAttribute("created", std::to_string(i->mCreated).c_str());
+		accountElement->SetAttribute(Attribute::ID, std::to_string(i->mAccountID).c_str());
+		accountElement->SetAttribute(Attribute::Name, i->mAccountName.c_str());
+		accountElement->SetAttribute(Attribute::Status, i->mStatus);
+		accountElement->SetAttribute(Attribute::SuspendedUntil, std::to_string(i->mSuspendedUntil).c_str());
+		accountElement->SetAttribute(Attribute::Created, std::to_string(i->mCreated).c_str());
 	}
 
 	EXPECTED_BOOL(document.SaveFile());
 	return true;
 }
 
+namespace AccountCharacterDataXML {
+#define SCA static const auto
+	namespace Tag {
+		SCA Account = "account";
+		SCA Characters = "characters";
+		SCA Character = "character";
+		SCA Equipment = "equipment";
+		SCA Slot = "slot";
+	}
+	namespace Attribute {
+		// Tag::Character
+		SCA Name = "name";
+		SCA Race = "race";
+		SCA Class = "class";
+		SCA Level = "level";
+		SCA Gender = "gender";
+		SCA Deity = "deity";
+		SCA Zone = "zone";
+		SCA FaceStyle = "face";
+		SCA HairStyle = "hair_style";
+		SCA HairColour = "hair_colour";
+		SCA BeardStyle = "beard_style";
+		SCA BeardColour = "beard_colour";
+		SCA LeftEyeColour = "eye_colour1";
+		SCA RightEyeColour = "eye_colour2";
+		SCA DrakkinHeritage = "drakkin_heritage";
+		SCA DrakkinTattoo = "drakkin_tattoo";
+		SCA DrakkinDetails = "drakkin_details";
+		// Tag::Equipment
+		SCA Primary = "primary";
+		SCA Secondary = "secondary";
+		// Tag::Slot
+		SCA Material = "material";
+		SCA Colour = "colour";
+	}
+#undef SCA
+}
+
 bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
+	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
 
-	auto accountElement = document.FirstChildElement("account");
+	auto accountElement = document.FirstChildElement(Tag::Account);
 	EXPECTED_BOOL(accountElement);
-	auto charactersElement = accountElement->FirstChildElement("characters");
+	auto charactersElement = accountElement->FirstChildElement(Tag::Characters);
 	EXPECTED_BOOL(charactersElement);
-	auto characterElement = charactersElement->FirstChildElement("character");
+	auto characterElement = charactersElement->FirstChildElement(Tag::Character);
 
 	// There are no characters yet.
 	if (!characterElement)
@@ -150,88 +208,89 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 		pAccount->mCharacterData.push_back(characterData);
 
 		// Read the basic/visual information about each character.
-		EXPECTED_BOOL(readAttribute(characterElement, "name", characterData->mName));
-		EXPECTED_BOOL(readAttribute(characterElement, "race", characterData->mRace));
-		EXPECTED_BOOL(readAttribute(characterElement, "class", characterData->mClass));
-		EXPECTED_BOOL(readAttribute(characterElement, "level", characterData->mLevel));
-		EXPECTED_BOOL(readAttribute(characterElement, "gender", characterData->mGender));
-		EXPECTED_BOOL(readAttribute(characterElement, "deity", characterData->mDeity));
-		EXPECTED_BOOL(readAttribute(characterElement, "zone", characterData->mZoneID));
-		EXPECTED_BOOL(readAttribute(characterElement, "face", characterData->mFace));
-		EXPECTED_BOOL(readAttribute(characterElement, "hair_style", characterData->mHairStyle));
-		EXPECTED_BOOL(readAttribute(characterElement, "hair_colour", characterData->mHairColour));
-		EXPECTED_BOOL(readAttribute(characterElement, "beard_style", characterData->mBeardStyle));
-		EXPECTED_BOOL(readAttribute(characterElement, "beard_colour", characterData->mBeardColour));
-		EXPECTED_BOOL(readAttribute(characterElement, "eye_colour1", characterData->mEyeColourLeft));
-		EXPECTED_BOOL(readAttribute(characterElement, "eye_colour2", characterData->mEyeColourRight));
-		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_heritage", characterData->mDrakkinHeritage));
-		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_tattoo", characterData->mDrakkinTattoo));
-		EXPECTED_BOOL(readAttribute(characterElement, "drakkin_details", characterData->mDrakkinDetails));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, characterData->mName));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Race, characterData->mRace));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, characterData->mClass));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, characterData->mLevel));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Gender, characterData->mGender));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Deity, characterData->mDeity));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, characterData->mZoneID));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::FaceStyle, characterData->mFaceStyle));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::HairStyle, characterData->mHairStyle));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::HairColour, characterData->mHairColour));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::BeardStyle, characterData->mBeardStyle));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::BeardColour, characterData->mBeardColour));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::LeftEyeColour, characterData->mEyeColourLeft));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::RightEyeColour, characterData->mEyeColourRight));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinHeritage, characterData->mDrakkinHeritage));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinTattoo, characterData->mDrakkinTattoo));
+		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinDetails, characterData->mDrakkinDetails));
 
 		// Read the equipment information about each character.
-		auto equipmentElement = characterElement->FirstChildElement("equipment");
+		auto equipmentElement = characterElement->FirstChildElement(Tag::Equipment);
 		EXPECTED_BOOL(equipmentElement);
-		EXPECTED_BOOL(readAttribute(equipmentElement, "primary", characterData->mPrimary)); // IDFile of item in primary slot.
-		EXPECTED_BOOL(readAttribute(equipmentElement, "secondary", characterData->mSecondary)); // IDFile of item in secondary slot.
+		EXPECTED_BOOL(readAttribute(equipmentElement, Attribute::Primary, characterData->mPrimary)); // IDFile of item in primary slot.
+		EXPECTED_BOOL(readAttribute(equipmentElement, Attribute::Secondary, characterData->mSecondary)); // IDFile of item in secondary slot.
 
-		auto slotElement = equipmentElement->FirstChildElement("slot");
+		auto slotElement = equipmentElement->FirstChildElement(Tag::Slot);
 		auto slotCount = 0;
 		EXPECTED_BOOL(slotElement);
 		while (slotElement && slotCount < Limits::Account::MAX_EQUIPMENT_SLOTS) {
-			EXPECTED_BOOL(readAttribute(slotElement, "material", characterData->mEquipment[slotCount].mMaterial));
-			EXPECTED_BOOL(readAttribute(slotElement, "colour", characterData->mEquipment[slotCount].mColour));
+			EXPECTED_BOOL(readAttribute(slotElement, Attribute::Material, characterData->mEquipment[slotCount].mMaterial));
+			EXPECTED_BOOL(readAttribute(slotElement, Attribute::Colour, characterData->mEquipment[slotCount].mColour));
 			slotCount++;
-			slotElement = slotElement->NextSiblingElement("slot");
+			slotElement = slotElement->NextSiblingElement(Tag::Slot);
 		}
 		EXPECTED_BOOL(slotCount == Limits::Account::MAX_EQUIPMENT_SLOTS); // Check that we read the correct amount of slot data.
 
 		characterSlot++;
-		characterElement = characterElement->NextSiblingElement("character");
+		characterElement = characterElement->NextSiblingElement(Tag::Character);
 	}
 
 	return true;
 }
 
 bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
+	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 
-	auto accountElement = document.LinkEndChild(new TiXmlElement("account"));
-	auto charactersElement = accountElement->LinkEndChild(new TiXmlElement("characters"));
+	auto accountElement = document.LinkEndChild(new TiXmlElement(Tag::Account));
+	auto charactersElement = accountElement->LinkEndChild(new TiXmlElement(Tag::Characters));
 	
 	// Write 
 	for (auto i : pAccount->mCharacterData) {
-		auto characterElement = static_cast<TiXmlElement*>(charactersElement->LinkEndChild(new TiXmlElement("character")));
+		auto characterElement = static_cast<TiXmlElement*>(charactersElement->LinkEndChild(new TiXmlElement(Tag::Character)));
 
-		characterElement->SetAttribute("name", i->mName.c_str());
-		characterElement->SetAttribute("race", i->mRace);
-		characterElement->SetAttribute("class", i->mClass);
-		characterElement->SetAttribute("level", i->mLevel);
-		characterElement->SetAttribute("gender", i->mGender);
-		characterElement->SetAttribute("deity", i->mDeity);
-		characterElement->SetAttribute("zone", i->mZoneID);
-		characterElement->SetAttribute("face", i->mFace);
-		characterElement->SetAttribute("gender", i->mGender);
-		characterElement->SetAttribute("hair_style", i->mHairStyle);
-		characterElement->SetAttribute("hair_colour", i->mHairColour);
-		characterElement->SetAttribute("beard_style", i->mBeardStyle);
-		characterElement->SetAttribute("beard_colour", i->mBeardColour);
-		characterElement->SetAttribute("eye_colour1", i->mEyeColourLeft);
-		characterElement->SetAttribute("eye_colour2", i->mEyeColourRight);
-		characterElement->SetAttribute("drakkin_heritage", i->mDrakkinHeritage);
-		characterElement->SetAttribute("drakkin_tattoo", i->mDrakkinTattoo);
-		characterElement->SetAttribute("drakkin_details", i->mDrakkinDetails);
+		characterElement->SetAttribute(Attribute::Name, i->mName.c_str());
+		characterElement->SetAttribute(Attribute::Race, i->mRace);
+		characterElement->SetAttribute(Attribute::Class, i->mClass);
+		characterElement->SetAttribute(Attribute::Level, i->mLevel);
+		characterElement->SetAttribute(Attribute::Gender, i->mGender);
+		characterElement->SetAttribute(Attribute::Deity, i->mDeity);
+		characterElement->SetAttribute(Attribute::Zone, i->mZoneID);
+		characterElement->SetAttribute(Attribute::FaceStyle, i->mFaceStyle);
+		characterElement->SetAttribute(Attribute::Gender, i->mGender);
+		characterElement->SetAttribute(Attribute::HairStyle, i->mHairStyle);
+		characterElement->SetAttribute(Attribute::HairColour, i->mHairColour);
+		characterElement->SetAttribute(Attribute::BeardStyle, i->mBeardStyle);
+		characterElement->SetAttribute(Attribute::BeardColour, i->mBeardColour);
+		characterElement->SetAttribute(Attribute::LeftEyeColour, i->mEyeColourLeft);
+		characterElement->SetAttribute(Attribute::RightEyeColour, i->mEyeColourRight);
+		characterElement->SetAttribute(Attribute::DrakkinHeritage, i->mDrakkinHeritage);
+		characterElement->SetAttribute(Attribute::DrakkinTattoo, i->mDrakkinTattoo);
+		characterElement->SetAttribute(Attribute::DrakkinDetails, i->mDrakkinDetails);
 
-		auto equipmentElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement("equipment")));
-		equipmentElement->SetAttribute("primary", i->mPrimary);
-		equipmentElement->SetAttribute("secondary", i->mSecondary);
+		auto equipmentElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Equipment)));
+		equipmentElement->SetAttribute(Attribute::Primary, i->mPrimary);
+		equipmentElement->SetAttribute(Attribute::Secondary, i->mSecondary);
 
 		// Write equipment material / colours.
 		for (int j = 0; j < Limits::Account::MAX_EQUIPMENT_SLOTS; j++) {
-			auto slotElement = static_cast<TiXmlElement*>(equipmentElement->LinkEndChild(new TiXmlElement("slot")));
-			slotElement->SetAttribute("material", i->mEquipment[j].mMaterial);
-			slotElement->SetAttribute("colour", i->mEquipment[j].mColour);
+			auto slotElement = static_cast<TiXmlElement*>(equipmentElement->LinkEndChild(new TiXmlElement(Tag::Slot)));
+			slotElement->SetAttribute(Attribute::Material, i->mEquipment[j].mMaterial);
+			slotElement->SetAttribute(Attribute::Colour, i->mEquipment[j].mColour);
 		}
 	}
 
@@ -240,85 +299,87 @@ bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
 }
 
 namespace CharacterDataXML {
+#define SCA static const auto
 	namespace Tag {
-		static const auto Character = "character";
-		static const auto Stats = "stats";
-		static const auto Visual = "visual";
-		static const auto Dyes = "dyes";
-		static const auto Dye = "dye";
-		static const auto Guild = "guild";
-		static const auto Currency = "currency";
-		static const auto Crystals = "crystals";
-		static const auto Radiant = "radiant";
-		static const auto Ebon = "ebon";
-		static const auto SpellBook = "spellbook";
-		static const auto SpellBookSlot = "sb_slot";
+		SCA Character = "character";
+		SCA Stats = "stats";
+		SCA Visual = "visual";
+		SCA Dyes = "dyes";
+		SCA Dye = "dye";
+		SCA Guild = "guild";
+		SCA Currency = "currency";
+		SCA Crystals = "crystals";
+		SCA Radiant = "radiant";
+		SCA Ebon = "ebon";
+		SCA SpellBook = "spellbook";
+		SCA SpellBookSlot = "sb_slot";
 	}
 	namespace Attribute {
 		// Tag::Character
-		static const auto Name = "name";
-		static const auto GM = "gm";
-		static const auto Status = "status";
-		static const auto Level = "level";
-		static const auto Class = "class";
-		static const auto Zone = "zone";
-		static const auto X = "x";
-		static const auto Y = "y";
-		static const auto Z = "z";
-		static const auto Heading = "heading";
-		static const auto Experience = "experience";
-		static const auto LastName = "last_name";
-		static const auto Title = "title";
-		static const auto Suffix = "suffix";
-		static const auto AutoConsentGroup = "auto_consent_group";
-		static const auto AutoConsentRaid = "auto_consent_raid";
-		static const auto AutoConsentGuild = "auto_consent_guild";
+		SCA Name = "name";
+		SCA GM = "gm";
+		SCA Status = "status";
+		SCA Level = "level";
+		SCA Class = "class";
+		SCA Zone = "zone";
+		SCA X = "x";
+		SCA Y = "y";
+		SCA Z = "z";
+		SCA Heading = "heading";
+		SCA Experience = "experience";
+		SCA LastName = "last_name";
+		SCA Title = "title";
+		SCA Suffix = "suffix";
+		SCA AutoConsentGroup = "auto_consent_group";
+		SCA AutoConsentRaid = "auto_consent_raid";
+		SCA AutoConsentGuild = "auto_consent_guild";
 		// Tag::Stats
-		static const auto Strength = "strength";
-		static const auto Stamina = "stamina";
-		static const auto Charisma = "charisma";
-		static const auto Dexterity = "dexterity";
-		static const auto Intelligence = "intelligence";
-		static const auto Agility = "agility";
-		static const auto Wisdom = "wisdom";
+		SCA Strength = "strength";
+		SCA Stamina = "stamina";
+		SCA Charisma = "charisma";
+		SCA Dexterity = "dexterity";
+		SCA Intelligence = "intelligence";
+		SCA Agility = "agility";
+		SCA Wisdom = "wisdom";
 		// Tag::Visual
-		static const auto Race = "race";
-		static const auto Gender = "gender";
-		static const auto Face = "face";
-		static const auto HairStyle = "hair_style";
-		static const auto HairColour = "hair_colour";
-		static const auto BeardStyle = "beard_style";
-		static const auto BeardColour = "beard_colour";
-		static const auto EyeColour1 = "eye_colour1";
-		static const auto EyeColour2 = "eye_colour2";
-		static const auto DrakkinHeritage = "drakkin_heritage";
-		static const auto DrakkinTattoo = "drakkin_tattoo";
-		static const auto DrakkinDetails = "drakkin_Details";
+		SCA Race = "race";
+		SCA Gender = "gender";
+		SCA Face = "face";
+		SCA HairStyle = "hair_style";
+		SCA HairColour = "hair_colour";
+		SCA BeardStyle = "beard_style";
+		SCA BeardColour = "beard_colour";
+		SCA EyeColour1 = "eye_colour1";
+		SCA EyeColour2 = "eye_colour2";
+		SCA DrakkinHeritage = "drakkin_heritage";
+		SCA DrakkinTattoo = "drakkin_tattoo";
+		SCA DrakkinDetails = "drakkin_Details";
 		// Tag::Dye
-		static const auto Colour = "colour";
+		SCA Colour = "colour";
 		// Tag::Guild
-		static const auto GuildID = "id";
-		static const auto GuildRank = "rank";
+		SCA GuildID = "id";
+		SCA GuildRank = "rank";
 		// Tag::Currency
-		static const auto PlatinumCharacter = "platinum_character";
-		static const auto PlatinumBank = "platinum_bank";
-		static const auto PlatinumCursor = "platinum_cursor";
-		static const auto GoldCharacter = "gold_character";
-		static const auto GoldBank = "gold_bank";
-		static const auto GoldCursor = "gold_cursor";
-		static const auto SilverCharacter = "silver_character";
-		static const auto SilverBank = "silver_bank";
-		static const auto SilverCursor = "silver_cursor";
-		static const auto CopperCharacter = "copper_character";
-		static const auto CopperBank = "copper_bank";
-		static const auto CopperCursor = "copper_cursor";
+		SCA PlatinumCharacter = "platinum_character";
+		SCA PlatinumBank = "platinum_bank";
+		SCA PlatinumCursor = "platinum_cursor";
+		SCA GoldCharacter = "gold_character";
+		SCA GoldBank = "gold_bank";
+		SCA GoldCursor = "gold_cursor";
+		SCA SilverCharacter = "silver_character";
+		SCA SilverBank = "silver_bank";
+		SCA SilverCursor = "silver_cursor";
+		SCA CopperCharacter = "copper_character";
+		SCA CopperBank = "copper_bank";
+		SCA CopperCursor = "copper_cursor";
 		// Tag::Crystals / Radiant / Ebon
-		static const auto Current = "current";
-		static const auto Total = "total";
+		SCA Current = "current";
+		SCA Total = "total";
 		// Tag::SpellBook
-		static const auto SpellBookSlot = "slot";
-		static const auto SpellBookSpell = "id";
+		SCA SpellBookSlot = "slot";
+		SCA SpellBookSpell = "id";
 	}
+#undef SCA
 }
 
 bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
@@ -364,7 +425,7 @@ bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pChar
 	EXPECTED_BOOL(visualElement);
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Race, pCharacterData->mRace));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Gender, pCharacterData->mGender));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Face, pCharacterData->mFace));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Face, pCharacterData->mFaceStyle));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairStyle, pCharacterData->mHairStyle));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairColour, pCharacterData->mHairColour));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardStyle, pCharacterData->mBeardStyle));
@@ -485,7 +546,7 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 	auto visualElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Visual)));
 	visualElement->SetAttribute(Attribute::Race, pCharacterData->mRace);
 	visualElement->SetAttribute(Attribute::Gender, pCharacterData->mGender);
-	visualElement->SetAttribute(Attribute::Face, pCharacterData->mFace);
+	visualElement->SetAttribute(Attribute::Face, pCharacterData->mFaceStyle);
 	visualElement->SetAttribute(Attribute::HairStyle, pCharacterData->mHairStyle);
 	visualElement->SetAttribute(Attribute::HairColour, pCharacterData->mHairColour);
 	visualElement->SetAttribute(Attribute::BeardStyle, pCharacterData->mBeardStyle);
@@ -552,17 +613,19 @@ bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData*
 }
 
 namespace SpawnPointDataXML {
+#define SCA static const auto
 	namespace Tag {
-		static const auto SpawnPoints = "spawn_points";
-		static const auto SpawnPoint = "spawn_point";
+		SCA SpawnPoints = "spawn_points";
+		SCA SpawnPoint = "spawn_point";
 	}
 	namespace Attribute {
 		// Tag::SpawnPoint
-		static const auto X = "x";
-		static const auto Y = "y";
-		static const auto Z = "z";
-		static const auto Heading = "heading";
+		SCA X = "x";
+		SCA Y = "y";
+		SCA Z = "z";
+		SCA Heading = "heading";
 	}
+#undef SCA
 }
 
 bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints) {
@@ -594,28 +657,31 @@ bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<Spawn
 }
 
 namespace SettingsDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/settings.xml";
 	namespace Tag {
-		static const auto Settings = "settings";
-		static const auto World = "world";
-		static const auto LoginServer = "login_server";
-		static const auto UCS = "ucs";
+		SCA Settings = "settings";
+		SCA World = "world";
+		SCA LoginServer = "login_server";
+		SCA UCS = "ucs";
 	}
 	namespace Attribute {
 		// Tag::Server
-		static const auto ShortName = "short_name";
-		static const auto LongName = "long_name";
-		static const auto Locked = "locked";
+		SCA ShortName = "short_name";
+		SCA LongName = "long_name";
+		SCA Locked = "locked";
 		// Tag::LoginServer
-		static const auto AccountName = "account_name";
-		static const auto Password = "password";
-		static const auto Address = "address";
-		static const auto Port = "port"; // Tag::UCS uses.
+		SCA AccountName = "account_name";
+		SCA Password = "password";
+		SCA Address = "address";
+		SCA Port = "port"; // Tag::UCS uses.
 	}
+#undef SCA
 }
 
 bool DataStore::loadSettings() {
 	using namespace SettingsDataXML;
-	TiXmlDocument document(String("./data/settings.xml").c_str());
+	TiXmlDocument document(SettingsDataXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	// Tag::Settings
@@ -665,6 +731,79 @@ bool DataStore::loadSettings() {
 	uint16 ucsPort = 0;
 	EXPECTED_BOOL(readAttribute(ucsElement, Attribute::Port, ucsPort));
 	EXPECTED_BOOL(Settings::_setUCSPort(ucsPort));
+
+	return true;
+}
+
+namespace NPCAppearanceDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/npc/appearances.xml";
+	namespace Tag {
+		SCA Appearances = "appearances";
+		SCA Appearance = "appearance";
+	}
+	namespace Attribute {
+		// Tag::Appearance
+		SCA ID = "id";
+		SCA Parent = "parent";
+		SCA Race = "race";
+		SCA Gender = "gender";
+		SCA BodyType = "body_type";
+		SCA Size = "size";
+		SCA FaceStyle = "face_style";
+		SCA HairStyle = "hair_style";
+		SCA BeardStyle = "beard_style";
+		SCA HairColour = "hair_colour";
+		SCA BeardColour = "beard_colour";
+		SCA LeftEyeColour = "eye_colour_left";
+		SCA RightEyeColour = "eye_colour_right";
+		SCA DrakkinHeritage = "drakkin_heritage";
+		SCA DrakkinTattoo = "drakkin_tattoo";
+		SCA DrakkinDetails = "drakkin_details";
+		SCA HelmTexture = "helm_texture";
+	}
+#undef SCA
+}
+
+bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances) {
+	using namespace NPCAppearanceDataXML;
+	Profile p("DataStore::loadNPCAppearanceData");
+	EXPECTED_BOOL(pAppearances.empty());
+	TiXmlDocument document(NPCAppearanceDataXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto appearancesElement = document.FirstChildElement(Tag::Appearances);
+	EXPECTED_BOOL(appearancesElement);
+	auto appearanceElement = appearancesElement->FirstChildElement(Tag::Appearance);
+
+	while (appearanceElement) {
+		auto d = new NPCAppearanceData();
+		pAppearances.push_back(d);
+
+		// Required.
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::ID, d->mID));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Parent, d->mParentID));
+
+		// Optional.
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Race, d->mRaceID, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Gender, d->mGender, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BodyType, d->mBodyType, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Size, d->mSize, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::FaceStyle, d->mFaceStyle, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairStyle, d->mHairStyle, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardStyle, d->mBeardStyle, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairColour, d->mHairColour, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardColour, d->mBeardColour, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::LeftEyeColour, d->mEyeColourLeft, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinHeritage, d->mDrakkinHeritage, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinTattoo, d->mDrakkinTattoo, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinDetails, d->mDrakkinDetails, false));
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HelmTexture, d->mHelmTexture, false));
+
+		appearanceElement = appearanceElement->NextSiblingElement(Tag::Appearance);
+	}
 
 	return true;
 }

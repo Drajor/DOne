@@ -34,7 +34,7 @@ bool AccountManager::createAccount(const uint32 pAccountID, const String pAccout
 	AccountData* accountData = new AccountData();
 	accountData->mAccountID = pAccountID;
 	accountData->mAccountName = pAccoutName;
-	accountData->mCreated = 0; // TODO: now
+	accountData->mCreated = Utility::Time::now();
 	accountData->mStatus = ResponseID::ALLOWED;
 
 	mAccounts.push_back(accountData);
@@ -173,8 +173,65 @@ void AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
 	accountData->mCharacterDataLoaded = true;
 }
 
-bool AccountManager::handleCharacterCreate(uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload)
-{
+bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
+	EXPECTED_BOOL(pPayload);
+
+	// Find Account that is creating the Character.
+	auto accountData = _find(pAccountID);
+	EXPECTED_BOOL(accountData);
+	EXPECTED_BOOL(isCharacterNameUnique(pCharacterName));
+
+	// Create CharacterData for the new Character.
+
+	auto characterData = new CharacterData();
+	characterData->mName = pCharacterName;
+	characterData->mClass = pPayload->mClass; // TODO: Sanity check
+	characterData->mZoneID = 1; // TODO:
+
+	// Appearance Data
+	characterData->mRace = pPayload->mRace; // TODO: Sanity
+	characterData->mGender = pPayload->mGender; // Sanity 0/1
+	characterData->mFaceStyle = pPayload->mFaceStyle;
+	characterData->mHairStyle = pPayload->mHairStyle;
+	characterData->mBeardStyle = pPayload->mBeardStyle;
+	characterData->mHairColour = pPayload->mHairColour;
+	characterData->mBeardColour = pPayload->mBeardColour;
+	characterData->mEyeColourLeft = pPayload->mEyeColour1;
+	characterData->mEyeColourRight = pPayload->mEyeColour2;
+	characterData->mDrakkinHeritage = pPayload->mDrakkinHeritage;
+	characterData->mDrakkinTattoo = pPayload->mDrakkinTattoo;
+	characterData->mDrakkinDetails = pPayload->mDrakkinDetails;
+	characterData->mDeity = pPayload->mDeity; // TODO: Sanity
+
+	EXPECTED_BOOL(DataStore::getInstance().saveCharacter(pCharacterName, characterData));
+
+	// Create Account::CharacterData for the new Character.
+	
+	auto accountCharacterData = new AccountData::CharacterData();
+	accountCharacterData->mName = pCharacterName;
+	accountCharacterData->mLevel = characterData->mLevel;
+	accountCharacterData->mRace = characterData->mRace;
+	accountCharacterData->mClass = characterData->mClass;
+	accountCharacterData->mDeity = characterData->mDeity;
+	accountCharacterData->mZoneID = characterData->mZoneID;
+	accountCharacterData->mGender = characterData->mGender;
+	accountCharacterData->mFaceStyle = characterData->mFaceStyle;
+	accountCharacterData->mHairStyle = characterData->mHairStyle;
+	accountCharacterData->mHairColour = characterData->mHairColour;
+	accountCharacterData->mBeardStyle = characterData->mBeardStyle;
+	accountCharacterData->mBeardColour = characterData->mBeardColour;
+	accountCharacterData->mEyeColourLeft = characterData->mEyeColourLeft;
+	accountCharacterData->mEyeColourRight = characterData->mEyeColourRight;
+	accountCharacterData->mDrakkinHeritage = characterData->mDrakkinHeritage;
+	accountCharacterData->mDrakkinTattoo = characterData->mDrakkinTattoo;
+	accountCharacterData->mDrakkinDetails = characterData->mDrakkinDetails;
+	accountCharacterData->mPrimary = 0; // TODO: Items
+	accountCharacterData->mSecondary = 0; // TODO: Items
+
+	// TODO: Materials
+
+	accountData->mCharacterData.push_back(accountCharacterData);
+	EXPECTED_BOOL(_save(accountData));
 	return true;
 }
 
@@ -201,7 +258,7 @@ const bool AccountManager::updateCharacter(const uint32 pAccountID, const Charac
 	accountCharacterData->mGender = pCharacter->getGender();
 	accountCharacterData->mDeity = pCharacter->getDeityID();
 	accountCharacterData->mZoneID = pCharacter->getZone()->getID();
-	accountCharacterData->mFace = pCharacter->getFaceStyle();
+	accountCharacterData->mFaceStyle = pCharacter->getFaceStyle();
 	accountCharacterData->mHairStyle = pCharacter->getHairStyle();
 	accountCharacterData->mHairColour = pCharacter->getHairColour();
 	accountCharacterData->mBeardStyle = pCharacter->getBeardStyle();

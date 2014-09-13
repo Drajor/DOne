@@ -8,7 +8,6 @@ struct AccountData {
 	String mAccountName = "";	// Provided by Login Server
 	AccountStatus mStatus = 0;
 	uint32 mSuspendedUntil = 0;
-	uint32 mLastLogin = 0;
 	uint32 mCreated = 0;
 	struct CharacterData {
 		String mName = "<none>";
@@ -18,7 +17,7 @@ struct AccountData {
 		GenderID mGender = 0;
 		DeityID mDeity = 0;
 		ZoneID mZoneID = 0;
-		FaceID mFace = 0;
+		FaceID mFaceStyle = 0;
 		uint8 mHairStyle = 0;
 		uint8 mHairColour = 0;
 		uint8 mBeardStyle = 0;
@@ -66,9 +65,10 @@ struct CharacterData {
 
 	uint32 mDyes[MAX_ARMOR_DYE_SLOTS];
 
+	uint16 mDeity = 0;
 	RaceID mRace = 0;
 	GenderID mGender = 0;
-	FaceID mFace = 0;
+	FaceID mFaceStyle = 0;
 	uint8 mHairStyle = 0;
 	uint8 mHairColour = 0;
 	uint8 mBeardStyle = 0;
@@ -123,4 +123,30 @@ struct SpawnPointData {
 	float mHeading = 0.0f;
 	uint32 mSpawnGroupID = 0;
 	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
+};
+
+struct NPCAppearanceData {
+	uint32 mID = 0;
+	uint32 mParentID = 0;
+
+	uint32 mRaceID = 0;
+	uint8 mGender = Gender::G_FEMALE;
+	uint8 mBodyType = BodyType::BT_Humanoid;
+	float mSize = 5.0f;
+
+	FaceID mFaceStyle = 0;
+	uint8 mHairStyle = 0;
+	uint8 mHairColour = 0;
+	uint8 mBeardStyle = 0;
+	uint8 mBeardColour = 0;
+	uint8 mEyeColourLeft = 0;
+	uint8 mEyeColourRight = 0;
+	uint32 mDrakkinHeritage = 0;
+	uint32 mDrakkinTattoo = 0;
+	uint32 mDrakkinDetails = 0;
+
+	uint8 mHelmTexture = 0;
+
+	uint32 mPrimaryMaterial = 0;
+	uint32 mSecondaryMaterial = 0;
 };

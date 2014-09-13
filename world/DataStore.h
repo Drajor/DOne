@@ -31,6 +31,9 @@ public:
 
 	// Spawn Points
 	bool loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints);
+
+	// NPC
+	bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
 	
 private:
 

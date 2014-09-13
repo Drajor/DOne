@@ -1,7 +1,9 @@
 #include "Utility.h"
 #include "Character.h"
 #include "Zone.h"
+
 #include <iostream>
+#include <ctime>
 
 void Utility::print(String pMessage)
 {
@@ -39,4 +41,8 @@ String Utility::guildRankToString(const GuildRank& pRank){
 	}
 
 	return "ERROR";
+}
+
+int32 Utility::Time::now() {
+	return static_cast<int32>(std::time(nullptr));
 }

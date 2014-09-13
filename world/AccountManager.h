@@ -31,7 +31,7 @@ public:
 
 	bool isCharacterNameUnique(const String& pCharacterName);
 
-	bool handleCharacterCreate(uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
+	bool handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
 	bool deleteCharacter(const String& pCharacterName);
 	const bool updateCharacter(const uint32 pAccountID, const Character* pCharacter);
 

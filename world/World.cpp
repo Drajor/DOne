@@ -114,12 +114,11 @@ void World::removeAuthentication(ClientAuthentication& pAuthentication) {
 
 bool World::checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey) {
 	EXPECTED_BOOL(pConnection);
+	EXPECTED_BOOL(!pConnection->getAuthenticated());
 
-	// Check Incoming Clients that match Account ID / Key
 	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
 		ClientAuthentication* incClient = *i;
-		if (pAccountID == incClient->mLoginServerAccountID && pKey == incClient->mKey && !pConnection->getAuthenticated()) {
-			// Configure the WorldClientConnection with details from the IncomingClient.
+		if (pAccountID == incClient->mLoginServerAccountID && pKey == incClient->mKey) {
 			pConnection->_setAuthenticated(true);
 			pConnection->setAccountID(incClient->mLoginServerAccountID);
 			pConnection->setAccountName(incClient->mLoginServerAccountName);

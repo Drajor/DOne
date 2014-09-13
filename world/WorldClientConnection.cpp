@@ -112,7 +112,7 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 		payload->zone[charSlot] = i->mZoneID;
 		payload->level[charSlot] = i->mLevel;
 
-		payload->face[charSlot] = i->mFace;
+		payload->face[charSlot] = i->mFaceStyle;
 		payload->gender[charSlot] = i->mGender;
 		payload->beard[charSlot] = i->mBeardStyle;
 		payload->beardcolor[charSlot] = i->mBeardColour;
@@ -167,6 +167,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
 
 	// Check authentication.
+	// NOTE: This ensures that World is expecting a connection from this account.
 	EXPECTED_BOOL(World::getInstance().checkAuthentication(this, accountID, accountKey));
 
 	mZoning = (payload->mZoning == 1);
@@ -518,6 +519,8 @@ bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* p
 }
 
 bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+	EXPECTED_BOOL(pPacket);
+
 	// Check if unidentified and sending something other than OP_SendLoginInfo
 	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
 	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
@@ -526,45 +529,34 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	}
 
 	EmuOpcode opcode = pPacket->GetOpcode();
-	switch(opcode)
-	{
+	switch(opcode) {
 		case OP_AckPacket:
 		case OP_World_Client_CRC1:
 		case OP_World_Client_CRC2:
-		{
 			return true;
-		}
-		case OP_SendLoginInfo: {
+		case OP_SendLoginInfo:
+			// NOTE: Sent when Client initially connects (Moving from Server Selection to Character Selection).
+			// NOTE: Sent when Client is moving from one zone to another.
 			return _handleSendLoginInfoPacket(pPacket);
-		}
-		case OP_ApproveName: {
+		case OP_ApproveName:
 			return _handleNameApprovalPacket(pPacket);
-		}
-		case OP_RandomNameGenerator: {
+		case OP_RandomNameGenerator:
 			return _handleGenerateRandomNamePacket(pPacket);
-		}
-		case OP_CharacterCreateRequest: {
+		case OP_CharacterCreateRequest:
 			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
 			return _handleCharacterCreateRequestPacket(pPacket);
-		}
-		case OP_CharacterCreate: {
+		case OP_CharacterCreate:
 			return _handleCharacterCreatePacket(pPacket);
-		}
-		case OP_EnterWorld: {
+		case OP_EnterWorld:
 			return _handleEnterWorldPacket(pPacket);
-		}
 		case OP_DeleteCharacter:
-		{
 			return _handleDeleteCharacterPacket(pPacket);
-		}
-		case OP_WorldComplete: {
+		case OP_WorldComplete:
 			mStreamInterface->Close();
 			return true;
-		}
-		case OP_ZoneChange: {
+		case OP_ZoneChange:
 			// HoT sends this to world while zoning and wants it echoed back.
 			return _handleZoneChangePacket(pPacket);
-		}
 		case OP_LoginUnknown1:
 		case OP_LoginUnknown2:
 		case OP_CrashDump:
@@ -572,15 +564,11 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		case OP_LoginComplete:
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
-		{
-			// Essentially we are just 'eating' these packets, indicating
-			// they are handled.
 			return true;
-		}
-		default: {
-			Log::error("[World Client Connection] Got unexpected packet, ignoring.");
+		default:
+			// Ignore.
+			//Log::error("[World Client Connection] Got unexpected packet, ignoring.");
 			return true;
-		}
 	}
 	return true;
 }

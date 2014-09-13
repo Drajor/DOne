@@ -1,0 +1,36 @@
+<appearances>
+	<!-- default -->
+	<appearance id="1" parent="0" race="1" gender="0" body_type="1" size="6.0" face_style="0" hair_style="0" beard_style="0" hair_colour="0" beard_colour="0" eye_colour_left="0" eye_colour_right="0" drakkin_heritage="0" drakkin_tattoo="0" drakkin_details="0" helm_texture="0" />
+	<!-- generic human -->
+	<appearance id="2" parent="1" race="1" size="6.0" />
+	<!-- generic barbarian -->
+	<appearance id="3" parent="1" race="2" size="7.0" />
+	<!-- generic erudite -->
+	<appearance id="4" parent="1" race="3" size="6.0" />
+	<!-- generic wood elf -->
+	<appearance id="5" parent="1" race="4" size="5.0" />
+	<!-- generic high elf -->
+	<appearance id="6" parent="1" race="5" size="6.0" />
+	<!-- generic dark elf -->
+	<appearance id="7" parent="1" race="6" size="5.0" />
+	<!-- generic half elf -->
+	<appearance id="8" parent="1" race="7" size="5.5" />
+	<!-- generic dwarf -->
+	<appearance id="9" parent="1" race="8" size="4.0" />
+	<!-- generic troll -->
+	<appearance id="10" parent="1" race="9" size="8.0" />
+	<!-- generic ogre -->
+	<appearance id="11" parent="1" race="10" size="9.0" />
+	<!-- generic halfling -->
+	<appearance id="12" parent="1" race="11" size="3.5" />
+	<!-- generic gnome -->
+	<appearance id="13" parent="1" race="12" size="3.0" />
+	<!-- generic iksar -->
+	<appearance id="14" parent="1" race="128" size="6.0" />
+	<!-- generic vahshir -->
+	<appearance id="15" parent="1" race="130" size="7.0" />
+	<!-- generic froglok -->
+	<appearance id="16" parent="1" race="330" size="5.0" />
+	<!-- generic drakkin -->
+	<appearance id="17" parent="1" race="522" size="6.0" />
+</appearances>

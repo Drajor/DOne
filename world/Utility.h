@@ -22,6 +22,9 @@
 class Character;
 class Zone;
 namespace Utility {
+	namespace Time {
+		int32 now();
+	}
 	void print(String pMessage);
 
 	inline const bool isCaster(ClassID pClassID) {

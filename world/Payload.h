@@ -225,7 +225,7 @@ namespace Payload {
 			uint32 mWisdom = 0;
 			uint32 mIntelligence = 0;
 			uint32 mCharisma = 0;
-			uint32 mFace = 0;
+			uint32 mFaceStyle = 0;
 			uint32 mEyeColour1 = 0;
 			uint32 mEyeColour2 = 0;
 			uint32 mDrakkinHeritage = 0;

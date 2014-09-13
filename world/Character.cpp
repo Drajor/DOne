@@ -62,7 +62,7 @@ bool Character::initialise() {
 	setBeardColour(mData->mBeardColour);
 	setHairStyle(mData->mHairStyle);
 	setHairColour(mData->mHairColour);
-	setFaceStyle(mData->mFace);
+	setFaceStyle(mData->mFaceStyle);
 	setDrakkinHeritage(mData->mDrakkinHeritage);
 	setDrakkinTattoo(mData->mDrakkinTattoo);
 	setDrakkinDetails(mData->mDrakkinDetails);
@@ -303,7 +303,7 @@ void Character::_updateForSave() {
 	mData->mHairColour = getHairColour();
 	mData->mEyeColourLeft = getLeftEyeColour();
 	mData->mEyeColourRight = getRightEyeColour();
-	mData->mFace = getFaceStyle();
+	mData->mFaceStyle = getFaceStyle();
 	mData->mDrakkinHeritage = getDrakkinHeritage();
 	mData->mDrakkinTattoo = getDrakkinTattoo();
 	mData->mDrakkinDetails = getDrakkinDetails();
