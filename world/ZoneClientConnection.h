@@ -93,6 +93,7 @@ public:
 
 	void sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess);
 	void sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID);
+	void sendUnmemoriseSpell(const uint16 pSlot);
 
 	void sendPacket(EQApplicationPacket* pPacket);
 

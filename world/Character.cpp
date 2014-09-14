@@ -499,11 +499,19 @@ const bool Character::handleMemoriseSpell(const uint16 pSlot, const uint32 pSpel
 
 	// Notify Client (required).
 	mConnection->sendMemoriseSpell(pSlot, pSpellID);
-
 	return true;
 }
 
 const bool Character::handleUnmemoriseSpell(const uint16 pSlot) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook && mSpellBar);
+	EXPECTED_BOOL(Limits::SpellBar::slotValid(pSlot));
+
+	// Update Spell Bar.
+	mSpellBar->setSpell(pSlot, 0);
+
+	// Notify Client (required).
+	mConnection->sendUnmemoriseSpell(pSlot);
 	return true;
 }
 

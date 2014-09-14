@@ -2493,3 +2493,17 @@ void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pS
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
+
+void ZoneClientConnection::sendUnmemoriseSpell(const uint16 pSlot) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
+	auto payload = MemoriseSpell::convert(outPacket->pBuffer);
+	payload->mAction = MemoriseSpell::UNMEMORISE;
+	payload->mSlot = pSlot;
+	payload->mSpellID = 0;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
