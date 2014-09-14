@@ -92,6 +92,7 @@ public:
 	void sendSurnameApproval(const bool pSuccess);
 
 	void sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess);
+	void sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID);
 
 	void sendPacket(EQApplicationPacket* pPacket);
 

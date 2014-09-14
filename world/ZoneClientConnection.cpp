@@ -2236,6 +2236,21 @@ void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPack
 	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
 
 	auto payload = MemoriseSpell::convert(pPacket->pBuffer);
+
+	switch (payload->mAction){
+	case MemoriseSpell::SCRIBE:
+		EXPECTED(mCharacter->handleScribeSpell(payload->mSlot, payload->mSpellID));
+		break;
+	case MemoriseSpell::MEMORISE:
+		EXPECTED(mCharacter->handleMemoriseSpell(payload->mSlot, payload->mSpellID));
+		break;
+	case MemoriseSpell::UNMEMORISE:
+		EXPECTED(mCharacter->handleUnmemoriseSpell(payload->mSlot));
+		break;
+	default:
+		Log::error("Unknown action in _handleMemoriseSpell from " + Utility::characterLogDetails(mCharacter));
+		break;
+	}
 }
 
 void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
@@ -2460,6 +2475,20 @@ void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool 
 	auto payload = DeleteSpell::convert(outPacket->pBuffer);
 	payload->mSpellBookSlot = pSlot;
 	payload->mSuccess = pSuccess ? 1 : 0;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
+	auto payload = MemoriseSpell::convert(outPacket->pBuffer);
+	payload->mAction = MemoriseSpell::MEMORISE;
+	payload->mSlot = pSlot;
+	payload->mSpellID = pSpellID;
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);

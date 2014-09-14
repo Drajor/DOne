@@ -488,6 +488,30 @@ const bool Character::handleSwapSpells(const uint16 pFrom, const uint16 pTo) {
 	return mSpellBook->swapSpells(pFrom, pTo);
 }
 
+const bool Character::handleMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook && mSpellBar);
+	EXPECTED_BOOL(Limits::SpellBar::slotValid(pSlot));
+	EXPECTED_BOOL(mSpellBook->hasSpell(pSpellID));
+
+	// Update Spell Bar.
+	mSpellBar->setSpell(pSlot, pSpellID);
+
+	// Notify Client (required).
+	mConnection->sendMemoriseSpell(pSlot, pSpellID);
+
+	return true;
+}
+
+const bool Character::handleUnmemoriseSpell(const uint16 pSlot) {
+	return true;
+}
+
+const bool Character::handleScribeSpell(const uint16 pSlot, const uint32 pSpellID) {
+	// TODO: Items
+	return true;
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);
@@ -512,6 +536,15 @@ const bool Character::SpellBook::swapSpells(const uint16 pFrom, const uint16 pTo
 	mSpellIDs[pFrom] = temp;
 
 	return true;
+}
+
+const bool Character::SpellBook::hasSpell(const uint32 pSpellID) {
+	for (auto i : mSpellIDs){
+		if (i == pSpellID)
+			return true;
+	}
+
+	return false;
 }
 
 void Character::SpellBar::setSpell(const uint16 pSlot, const uint32 pSpellID) {

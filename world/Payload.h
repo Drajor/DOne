@@ -104,11 +104,13 @@ namespace Payload {
 			char mUnknown[3];
 		};
 
-		// C->S
-		struct MemoriseSpell : public FixedSizedPayload<MemoriseSpell> {
-			uint32 mSpellBookSlot = 0;
+		// C<->S
+		// Based on: MemorizeSpell_Struct
+		struct MemoriseSpell : public FixedLength_And_ServerToClient<MemoriseSpell> {
+			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2 };
+			uint32 mSlot = 0;
 			uint32 mSpellID = 0;
-			uint32 mScribing = 0;	// 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
+			Action mAction = SCRIBE;
 			uint32 mUnknown0 = 0;
 		};
 

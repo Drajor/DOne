@@ -157,8 +157,20 @@ public:
 	inline const bool isMelee() const { return Utility::isMelee(getClass()); }
 	inline const bool canTaunt() const { return Utility::canClassTaunt(getClass()); }
 
+	// Deletes a spell from the Spell Book.
 	const bool handleDeleteSpell(const int16 pSlot);
+
+	// Swaps two spells in the Spell Book.
 	const bool handleSwapSpells(const uint16 pFrom, const uint16 pTo);
+
+	// Adds a spell to the Spell Bar.
+	const bool handleMemoriseSpell(const uint16 pSlot, const uint32 pSpellID);
+
+	// Removes a spell from the Spell Bar.
+	const bool handleUnmemoriseSpell(const uint16 pSlot);
+
+	// Adds a spell to the Spell Book.
+	const bool handleScribeSpell(const uint16 pSlot, const uint32 pSpellID);
 
 	void notify(const String& pMessage);
 private:
@@ -242,6 +254,7 @@ private:
 		void setSpell(const uint16 pSlot, const uint32 pSpellID);
 		const bool deleteSpell(const uint16 pSlot);
 		const bool swapSpells(const uint16 pFrom, const uint16 pTo);
+		const bool hasSpell(const uint32 pSpellID);
 	private:
 		std::vector<uint32> mSpellIDs;
 	};
