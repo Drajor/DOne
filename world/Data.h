@@ -4,6 +4,25 @@
 #include "Vector3.h"
 
 struct AccountData {
+	AccountData() {
+		setRaceUnlocked(PlayableRaceIDs::Human, true);
+		setRaceUnlocked(PlayableRaceIDs::Barbarian, false);
+		setRaceUnlocked(PlayableRaceIDs::Erudite, false);
+		setRaceUnlocked(PlayableRaceIDs::WoodElf, false);
+		setRaceUnlocked(PlayableRaceIDs::HighElf, false);
+		setRaceUnlocked(PlayableRaceIDs::DarkElf, false);
+		setRaceUnlocked(PlayableRaceIDs::HalfElf, false);
+		setRaceUnlocked(PlayableRaceIDs::Dwarf, false);
+		setRaceUnlocked(PlayableRaceIDs::Troll, false);
+		setRaceUnlocked(PlayableRaceIDs::Ogre, false);
+		setRaceUnlocked(PlayableRaceIDs::Halfling, false);
+		setRaceUnlocked(PlayableRaceIDs::Iksar, false);
+		setRaceUnlocked(PlayableRaceIDs::Vahshir, false);
+		setRaceUnlocked(PlayableRaceIDs::Froglok, false);
+		setRaceUnlocked(PlayableRaceIDs::Drakkin, false);
+	}
+	void setRaceUnlocked(const uint32 pRaceID, const bool pLocked) { mRacesUnlocked.push_back(std::make_pair(pRaceID, pLocked)); }
+
 	uint32 mAccountID = 0;		// Provided by Login Server
 	String mAccountName = "";	// Provided by Login Server
 	AccountStatus mStatus = 0;
@@ -36,12 +55,14 @@ struct AccountData {
 		Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
 	};
 	std::list<CharacterData*> mCharacterData;
+	std::list<std::pair<uint32, bool>> mRacesUnlocked;
 	bool mCharacterDataLoaded = false;
 };
 
 struct CharacterData {
 	CharacterData() {
 		mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
+		mSpellBar.resize(Limits::SpellBar::MAX_SLOTS);
 	}
 	String mName = "";
 	uint32 mLevel = 1;
@@ -112,6 +133,7 @@ struct CharacterData {
 	uint32 mTotalEbonCrystals = 0;
 
 	std::vector<uint32> mSpellBook;
+	std::vector<uint32> mSpellBar;
 };
 
 struct SpawnGroupData {

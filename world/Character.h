@@ -229,11 +229,12 @@ private:
 	};
 	std::list<QueuedChannelMessage> mMessageQueue;
 	void _processMessageQueue();
+
+	// Spell Book
 	class SpellBook {
 	public:
 		SpellBook() {
 			mSpellIDs.resize(Limits::SpellBook::MAX_SLOTS);
-			//mSpellIDs.reserve(Limits::SpellBook::MAX_SLOTS);
 			for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
 				mSpellIDs[i] = 0;
 		}
@@ -246,4 +247,20 @@ private:
 	};
 	SpellBook* mSpellBook = nullptr;
 	const std::vector<uint32> getSpellBookData() const;
+
+	// Spell Bar
+	class SpellBar {
+	public:
+		SpellBar() {
+			mSpellIDs.resize(Limits::SpellBar::MAX_SLOTS);
+			for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
+				mSpellIDs[i] = 0;
+		}
+		const std::vector<uint32>& getData() const { return mSpellIDs; }
+		void setSpell(const uint16 pSlot, const uint32 pSpellID);
+	private:
+		std::vector<uint32> mSpellIDs;
+	};
+	SpellBar* mSpellBar = nullptr;
+	const std::vector<uint32> getSpellBarData() const;
 };

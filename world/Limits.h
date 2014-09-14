@@ -25,6 +25,10 @@ namespace Limits {
 		const bool slotValid(const uint16 pSlot);
 		const bool spellIDValid(const uint32 pSpellID);
 	}
+	namespace SpellBar {
+		const bool slotValid(const uint16 pSlot);
+		const bool spellIDValid(const uint32 pSpellID);
+	}
 	namespace Guild {
 		bool ID(const GuildID pGuildID);
 		bool MOTDLength(const String& pGuildMOTD);

@@ -109,6 +109,12 @@ bool Character::initialise() {
 			if (mData->mSpellBook[i] != 0)
 				mSpellBook->setSpell(i, mData->mSpellBook[i]);
 		}
+		// Create and initialise SpellBar.
+		mSpellBar = new SpellBar();
+		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++) {
+			if (mData->mSpellBar[i] != 0)
+				mSpellBar->setSpell(i, mData->mSpellBar[i]);
+		}
 	}
 
 	mInitialised = true;
@@ -469,6 +475,10 @@ const std::vector<uint32> Character::getSpellBookData() const {
 	return mSpellBook->getData();
 }
 
+const std::vector<uint32> Character::getSpellBarData() const {
+	return mSpellBar->getData();
+}
+
 const bool Character::handleSwapSpells(const uint16 pFrom, const uint16 pTo) {
 	EXPECTED_BOOL(isCaster());
 	EXPECTED_BOOL(mSpellBook);
@@ -502,4 +512,11 @@ const bool Character::SpellBook::swapSpells(const uint16 pFrom, const uint16 pTo
 	mSpellIDs[pFrom] = temp;
 
 	return true;
+}
+
+void Character::SpellBar::setSpell(const uint16 pSlot, const uint32 pSpellID) {
+	EXPECTED(Limits::SpellBar::slotValid(pSlot));
+	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
+
+	mSpellIDs[pSlot] = pSpellID;
 }

@@ -112,3 +112,11 @@ const bool Limits::SpellBook::slotValid(const uint16 pSlot) {
 const bool Limits::SpellBook::spellIDValid(const uint32 pSpellID) {
 	return true; // TODO:
 }
+
+const bool Limits::SpellBar::slotValid(const uint16 pSlot) {
+	return pSlot < Limits::SpellBar::MAX_SLOTS;
+}
+
+const bool Limits::SpellBar::spellIDValid(const uint32 pSpellID) {
+	return true; // TODO:
+}

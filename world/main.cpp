@@ -17,7 +17,7 @@
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
-	system("pause");
+	//system("pause");
 	
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();

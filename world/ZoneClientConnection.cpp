@@ -568,7 +568,12 @@ void ZoneClientConnection::_sendPlayerProfile() {
 		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
 			payload->spell_book[i] = spellbook[i];
 	}
-	
+	// Copy spell bar data into profile.
+	if (mCharacter->isCaster()) {
+		const std::vector<uint32> spellbar = mCharacter->getSpellBarData();
+		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
+			payload->mem_spells[i] = spellbar[i];
+	}
 	//payload->mem_spells[MAX_PP_MEMSPELL];
 	payload->y = mCharacter->getY();
 	payload->x = mCharacter->getX();

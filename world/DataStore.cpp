@@ -313,6 +313,8 @@ namespace CharacterDataXML {
 		SCA Ebon = "ebon";
 		SCA SpellBook = "spellbook";
 		SCA SpellBookSlot = "sb_slot";
+		SCA SpellBar = "spellbar";
+		SCA SpellBarSlot = "sb_slot";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -378,6 +380,9 @@ namespace CharacterDataXML {
 		// Tag::SpellBook
 		SCA SpellBookSlot = "slot";
 		SCA SpellBookSpell = "id";
+		// Tag::SpellBar
+		SCA SpellBarSlot = "slot";
+		SCA SpellBarSpell = "id";
 	}
 #undef SCA
 }
@@ -486,20 +491,40 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	// Caster Only
 	if (Utility::isCaster(pCharacterData->mClass)) {
 		// Tag::SpellBook
-		auto spellbookElement = characterElement->FirstChildElement(Tag::SpellBook);
-		EXPECTED_BOOL(spellbookElement);
-		auto slotElement = spellbookElement->FirstChildElement(Tag::SpellBookSlot);
-		while (slotElement) {
-			uint32 spellID = 0;
-			uint32 slotID = 0;
-			EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSlot, slotID));
-			EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSpell, spellID));
-			EXPECTED_BOOL(Limits::SpellBook::slotValid(slotID));
-			EXPECTED_BOOL(Limits::SpellBook::spellIDValid(spellID));
+		{
+			auto spellbookElement = characterElement->FirstChildElement(Tag::SpellBook);
+			EXPECTED_BOOL(spellbookElement);
+			auto slotElement = spellbookElement->FirstChildElement(Tag::SpellBookSlot);
+			while (slotElement) {
+				uint32 spellID = 0;
+				uint32 slotID = 0;
+				EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSlot, slotID));
+				EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBookSpell, spellID));
+				EXPECTED_BOOL(Limits::SpellBook::slotValid(slotID));
+				EXPECTED_BOOL(Limits::SpellBook::spellIDValid(spellID));
 
-			pCharacterData->mSpellBook[slotID] = spellID;
+				pCharacterData->mSpellBook[slotID] = spellID;
 
-			slotElement = slotElement->NextSiblingElement(Tag::SpellBookSlot);
+				slotElement = slotElement->NextSiblingElement(Tag::SpellBookSlot);
+			}
+		}
+		{
+			// Tag::SpellBar
+			auto spellBarElement = characterElement->FirstChildElement(Tag::SpellBar);
+			EXPECTED_BOOL(spellBarElement);
+			auto slotElement = spellBarElement->FirstChildElement(Tag::SpellBarSlot);
+			while (slotElement) {
+				uint32 spellID = 0;
+				uint32 slotID = 0;
+				EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBarSlot, slotID));
+				EXPECTED_BOOL(readAttribute(slotElement, Attribute::SpellBarSpell, spellID));
+				EXPECTED_BOOL(Limits::SpellBar::slotValid(slotID));
+				EXPECTED_BOOL(Limits::SpellBar::spellIDValid(spellID));
+
+				pCharacterData->mSpellBar[slotID] = spellID;
+
+				slotElement = slotElement->NextSiblingElement(Tag::SpellBarSlot);
+			}
 		}
 	}
 
@@ -595,8 +620,9 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	ebonElement->SetAttribute(Attribute::Current, pCharacterData->mEbonCrystals);
 	ebonElement->SetAttribute(Attribute::Total, pCharacterData->mTotalEbonCrystals);
 
-	// Tag::SpellBook
+	// Caster Only
 	if (Utility::isCaster(pCharacterData->mClass)){
+		// Tag::SpellBook
 		auto spellbookElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::SpellBook)));
 		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
 			if (pCharacterData->mSpellBook[i] == 0)
@@ -605,6 +631,16 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 			auto slotElement = static_cast<TiXmlElement*>(spellbookElement->LinkEndChild(new TiXmlElement(Tag::SpellBookSlot)));
 			slotElement->SetAttribute(Attribute::SpellBookSlot, i);
 			slotElement->SetAttribute(Attribute::SpellBookSpell, pCharacterData->mSpellBook[i]);
+		}
+		// Tag::SpellBar
+		auto spellbarElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::SpellBar)));
+		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++) {
+			if (pCharacterData->mSpellBar[i] == 0)
+				continue;
+
+			auto slotElement = static_cast<TiXmlElement*>(spellbarElement->LinkEndChild(new TiXmlElement(Tag::SpellBarSlot)));
+			slotElement->SetAttribute(Attribute::SpellBarSlot, i);
+			slotElement->SetAttribute(Attribute::SpellBarSpell, pCharacterData->mSpellBar[i]);
 		}
 	}
 

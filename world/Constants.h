@@ -70,6 +70,9 @@ namespace Limits {
 	namespace SpellBook {
 		static const auto MAX_SLOTS = 480;
 	}
+	namespace SpellBar {
+		static const auto MAX_SLOTS = 9;
+	}
 	namespace Guild {
 		static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 		static const auto MIN_NAME_LENGTH = 4;
