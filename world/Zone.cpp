@@ -185,8 +185,12 @@ void Zone::_updateConnections() {
 			if (character->getCampComplete()) {
 				Log::info("[Zone] Character camped. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
 
-				_sendDespawn(character->getSpawnID()); // Notify other players.
-				// TODO: Save
+				mScene->remove(character);
+
+				// Save
+				character->_updateForSave();
+				requestSave(character);
+
 				i = mConnections.erase(i); // Correct iterator.
 				mCharacters.remove(character);
 				mActors.remove(character);
