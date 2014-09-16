@@ -14,6 +14,7 @@ class EQStreamInterface;
 class ZoneClientConnection;
 
 struct CharacterData;
+struct SpellData;
 class SpellBook;
 
 class Character : public Actor {
@@ -153,6 +154,8 @@ public:
 	inline const bool isCasting() const { return mIsCasting; }
 	const bool hasSpell(const uint16 pSlot, const uint32 pSpellID) const;
 	const bool canCast(const uint32 pSpellID) const;
+	const bool preCastingChecks(const SpellData* pSpell);
+	const bool postCastingChecks(const SpellData* pSpell);
 	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
 	const bool finishCasting();
 

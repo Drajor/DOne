@@ -120,3 +120,7 @@ const bool Limits::SpellBar::slotValid(const uint16 pSlot) {
 const bool Limits::SpellBar::spellIDValid(const uint32 pSpellID) {
 	return true; // TODO:
 }
+
+const bool Limits::Spells::spellIDValid(const uint16 pSpellID) {
+	return true;
+}

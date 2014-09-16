@@ -110,7 +110,8 @@ public:
 	void handleSurnameChange(Actor* pActor);
 	void handleTitleChanged(Character* pCharacter, TitleOption pOption);
 
-	void handleCasting(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
+	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
+	void handleCastingFinished(Actor* pActor);
 
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 

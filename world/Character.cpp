@@ -1,5 +1,6 @@
 #include "Character.h"
 #include "Data.h"
+#include "SpellDataStore.h"
 #include "GuildManager.h"
 #include "Zone.h"
 #include "Utility.h"
@@ -557,15 +558,46 @@ const bool Character::finishCasting() {
 	EXPECTED_BOOL(isCaster());
 	EXPECTED_BOOL(isCasting());
 
+	// Update Zone.
+	mZone->handleCastingFinished(this);
+
 	mConnection->sendRefreshSpellBar(mCastingSlot, mCastingSpellID);
 	mConnection->sendEnableSpellBar(mCastingSpellID);
-	mConnection->sendSpellCastOn(); // temp
+	//mConnection->sendSpellCastOn(); // temp
 
 	mIsCasting = false;
 	mCastingSlot = 0;
 	mCastingSpellID = 0;
 	mCastingTimer.Disable();
 
+	return true;
+}
+
+const bool Character::preCastingChecks(const SpellData* pSpell) {
+	EXPECTED_BOOL(pSpell);
+
+	// Check: Caster has enough mana.
+	// TODO: Adjusted mana cost for focus effects.
+	if (getCurrentMana() < pSpell->mManaCost) {
+		return false;
+	}
+
+	// Check: Caster class and level.
+	if (Spell::canClassUse(pSpell, getClass(), getLevel()) == false) {
+		return false;
+	}
+
+	// Check: Spell is allowed to be cast in Zone.
+	if (Spell::zoneAllowed(pSpell, mZone)) {
+		return false;
+	}
+
+	// Target is valid.
+
+	return true;
+}
+
+const bool Character::postCastingChecks(const SpellData* pSpell) {
 	return true;
 }
 

@@ -1,6 +1,7 @@
 #include "SpellDataStore.h"
 #include "DataStore.h"
 #include "Utility.h"
+#include "Limits.h"
 #include "Data.h"
 #include "Profile.h"
 
@@ -19,3 +20,32 @@ const bool SpellDataStore::initialise() {
 	return true;
 }
 
+const SpellData* SpellDataStore::getData(const uint16 pSpellID) {
+	EXPECTED_PTR(Limits::Spells::spellIDValid(pSpellID));
+	
+	auto spell = &mSpellData[pSpellID];
+	EXPECTED_PTR(spell);
+	EXPECTED_PTR(spell->mInUse);
+
+	return spell;
+}
+
+namespace Spell {
+	const SpellData* get(const uint16 pSpellID) {
+		return SpellDataStore::getInstance().getData(pSpellID);
+	}
+
+	const bool canClassUse(const SpellData* pSpell, const uint8 pClassID, const uint8 pLevel) {
+		EXPECTED_BOOL(pSpell);
+		EXPECTED_BOOL(Limits::Character::classID(pClassID));
+		return pSpell->mRequiredClassLevels[pClassID] <= pLevel;
+	}
+
+	const bool zoneAllowed(const SpellData* pSpell, const Zone* pZone) {
+		EXPECTED_BOOL(pSpell);
+		EXPECTED_BOOL(pZone);
+		// TODO:
+		return true;
+	}
+
+}

@@ -183,4 +183,26 @@ struct SpellData {
 	String mCastOnYouMessage = ""; // "You are completely healed."
 	String mCastOnOtherMessage = ""; // " is completely healed."
 	String mFadeMessage = "";
+
+	uint32 mManaCost = 0;
+
+	// Class required levels.
+	uint8 mWarriorLevel = 255;
+	uint8 mClericLevel = 255;
+	uint8 mPaladinLevel = 255;
+	uint8 mRangerLevel = 255;
+	uint8 mShadowKnightLevel = 255;
+	uint8 mDruidLevel = 255;
+	uint8 mMonkLevel = 255;
+	uint8 mBardLevel = 255;
+	uint8 mRogueLevel = 255;
+	uint8 mShamanLevel = 255;
+	uint8 mNecromancerLevel = 255;
+	uint8 mWizardLevel = 255;
+	uint8 mMagicianLevel = 255;
+	uint8 mEnchanterLevel = 255;
+	uint8 mBeastlordLevel = 255;
+	uint8 mBerserkerLevel = 255;
+	uint8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
+
 };

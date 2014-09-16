@@ -10,6 +10,7 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
+#include "SpellDataStore.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "../common/types.h"
@@ -734,7 +735,7 @@ void Zone::handleTitleChanged(Character* pCharacter, TitleOption pOption) {
 	safe_delete(outPacket);
 }
 
-void Zone::handleCasting(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
+void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(Limits::SpellBar::slotValid(pSlot));
 	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
@@ -744,9 +745,20 @@ void Zone::handleCasting(Character* pCharacter, const uint16 pSlot, const uint32
 	EXPECTED(pCharacter->hasSpell(pSlot, pSpellID)); // Check: pCharacter has the spell on the Spell Bar.
 	EXPECTED(pCharacter->canCast(pSpellID)); // Check: pCharacter can cast the spell.
 
+	auto spellData = Spell::get(pSpellID);
+	EXPECTED(spellData);
+
+	// Check: Pre-Conditions for casting
+	if (pCharacter->preCastingChecks(spellData) == false) {
+
+		//return; TODO: Once we have things sorted out more.
+	}
+
 	// Update Character state.
 	EXPECTED(pCharacter->beginCasting(pSlot, pSpellID));
-	
+
+	//spellData->mID = 2;
+
 	auto outPacket = new EQApplicationPacket(OP_BeginCast, BeginCast::size());
 	auto payload = BeginCast::convert(outPacket->pBuffer);
 	payload->mSpawnID = pCharacter->getSpawnID();
@@ -757,6 +769,33 @@ void Zone::handleCasting(Character* pCharacter, const uint16 pSlot, const uint32
 	sendToVisible(pCharacter, outPacket, true);
 	safe_delete(outPacket);
 }
+
+void Zone::handleCastingFinished(Actor* pActor) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto outPacket = new EQApplicationPacket(OP_Action, Action::size());
+	auto payload = Action::convert(outPacket->pBuffer);
+
+	payload->mTargetSpawnID = pActor->getSpawnID();
+	payload->mSourceSpawnID = payload->mTargetSpawnID; // TODO:
+	payload->mSpellID = 1000; // TODO:
+	payload->mType = 231; // Spell = 231
+	payload->buff_unknown = 0;
+
+	// Character has finished casting.
+	if (pActor->isCharacter()) {
+		Character* character = Actor::cast<Character*>(pActor);
+		character->getConnection()->sendPacket(outPacket);
+	}
+
+	// Update anyone who can see pActor.
+	for (auto i : pActor->getVisibleTo())
+		i->getConnection()->sendPacket(outPacket);
+
+	safe_delete(outPacket);
+}
+
 
 void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender) {
 	EXPECTED(pCharacter);
