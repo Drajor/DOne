@@ -172,3 +172,15 @@ struct NPCAppearanceData {
 	uint32 mPrimaryMaterial = 0;
 	uint32 mSecondaryMaterial = 0;
 };
+
+struct SpellData {
+	bool mInUse = false;
+	uint32 mID = 0;
+	String mName = "";
+
+	String mYouCastMessage = "";
+	String mOtherCastsMessage = "";
+	String mCastOnYouMessage = ""; // "You are completely healed."
+	String mCastOnOtherMessage = ""; // " is completely healed."
+	String mFadeMessage = "";
+};

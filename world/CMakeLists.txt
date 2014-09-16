@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp zone_data.xml)
-SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp)
+SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp SpellDataStore.h SpellDataStore.cpp)
 SOURCE_GROUP(UCS FILES UCS.h UCS.cpp UCSClientConnection.h UCSClientConnection.cpp)
 
 SET(world_sources
@@ -32,6 +32,7 @@ SET(world_sources
 	UCS.cpp
 	UCSClientConnection.cpp
 	TitleManager.cpp
+	SpellDataStore.cpp
 )
 
 SET(world_headers
@@ -67,6 +68,7 @@ SET(world_headers
 	UCSClientConnection.h
 	Singleton.h
 	TitleManager.h
+	SpellDataStore.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

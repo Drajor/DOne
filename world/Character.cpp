@@ -33,6 +33,12 @@ void Character::update() {
 		}
 	}
 
+	if (isCasting()) {
+		if (mCastingTimer.Check()) {
+			finishCasting();
+		}
+	}
+
 	if (mAutoSave.Check()) {
 		_updateForSave();
 		mZone->requestSave(this);
@@ -108,6 +114,8 @@ bool Character::initialise() {
 		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
 			if (mData->mSpellBook[i] != 0)
 				mSpellBook->setSpell(i, mData->mSpellBook[i]);
+
+			mSpellBook->setSpell(0, 1000); // Testing.
 		}
 		// Create and initialise SpellBar.
 		mSpellBar = new SpellBar();
@@ -520,6 +528,47 @@ const bool Character::handleScribeSpell(const uint16 pSlot, const uint32 pSpellI
 	return true;
 }
 
+const bool Character::hasSpell(const uint16 pSlot, const uint32 pSpellID) const {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBar);
+
+	const bool matches = mSpellBar->getSpellID(pSlot) == pSpellID;
+	return matches;
+}
+
+const bool Character::canCast(const uint32 pSpellID) const {
+	// TODO: Check spell level / class etc.
+	return true;
+}
+
+const bool Character::beginCasting(const uint16 pSlot, const uint32 pSpellID) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(isCasting() == false);
+
+	mIsCasting = true;
+	mCastingSlot = pSlot;
+	mCastingSpellID = pSpellID;
+	mCastingTimer.Start(1000);
+
+	return true;
+}
+
+const bool Character::finishCasting() {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(isCasting());
+
+	mConnection->sendRefreshSpellBar(mCastingSlot, mCastingSpellID);
+	mConnection->sendEnableSpellBar(mCastingSpellID);
+	mConnection->sendSpellCastOn(); // temp
+
+	mIsCasting = false;
+	mCastingSlot = 0;
+	mCastingSpellID = 0;
+	mCastingTimer.Disable();
+
+	return true;
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);
@@ -560,4 +609,11 @@ void Character::SpellBar::setSpell(const uint16 pSlot, const uint32 pSpellID) {
 	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
 
 	mSpellIDs[pSlot] = pSpellID;
+}
+
+const uint32 Character::SpellBar::getSpellID(const uint16 pSlot) const {
+	if (Limits::SpellBar::slotValid(pSlot) == false) {
+		return 0;
+	}
+	return mSpellIDs[pSlot];
 }

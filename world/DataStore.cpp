@@ -854,3 +854,46 @@ const bool DataStore::deleteCharacter(const String& pCharacterName) {
 
 	return true;
 }
+
+namespace SpellDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/spells.xml";
+	namespace Tag {
+		SCA Spells = "spells";
+		SCA Spell = "spell";
+	}
+	namespace Attribute {
+		// Tag::Spell
+		SCA ID = "id";
+		SCA Name = "name";
+	}
+#undef SCA
+}
+
+const bool DataStore::loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded) {
+	using namespace SpellDataXML;
+	EXPECTED_BOOL(pSpellData);
+	Profile p("DataStore::loadSpells");
+
+	pNumSpellsLoaded = 0;
+	TiXmlDocument document(SpellDataXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto spellsElement = document.FirstChildElement(Tag::Spells);
+	EXPECTED_BOOL(spellsElement);
+	auto spellElement = spellsElement->FirstChildElement(Tag::Spell);
+
+	while (spellElement) {
+		auto spellID = 0;
+		EXPECTED_BOOL(readAttribute(spellElement, Attribute::ID, spellID));
+		EXPECTED_BOOL(spellID > 0 && spellID < Limits::Spells::MAX_SPELL_ID);
+		SpellData* currentSpell = &pSpellData[spellID];
+		currentSpell->mInUse = true;
+		currentSpell->mID = spellID;
+
+		spellElement = spellElement->NextSiblingElement(Tag::Spell);
+		pNumSpellsLoaded++;
+	}
+
+	return true;
+}

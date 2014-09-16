@@ -67,6 +67,9 @@ namespace Limits {
 		static const auto MAX_SPELLS_MEMED = 9; // Maximum number of spells that can be on the spell bar.
 		static const uint8 MIN_LEVEL_SURNAME = 20; // The minimum level to change surname.
 	}
+	namespace Spells {
+		static const auto MAX_SPELL_ID = 50000;
+	}
 	namespace SpellBook {
 		static const auto MAX_SLOTS = 480;
 	}

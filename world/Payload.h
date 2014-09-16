@@ -107,7 +107,7 @@ namespace Payload {
 		// C<->S
 		// Based on: MemorizeSpell_Struct
 		struct MemoriseSpell : public FixedLength_And_ServerToClient<MemoriseSpell> {
-			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2 };
+			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
 			uint32 mSlot = 0;
 			uint32 mSpellID = 0;
 			Action mAction = SCRIBE;
@@ -143,7 +143,51 @@ namespace Payload {
 			uint8 mUnknown0[4];
 		};
 
+		// S->C
+		// Based on: BeginCast_Struct
+		struct BeginCast : public FixedLength_And_ServerToClient<BeginCast> {
+			uint16 mSpawnID = 0; // Caster
+			uint16 mSpellID = 0;
+			uint32 mCastTime = 0; // MS
+		};
+
+		// S->C
+		// Based on: InterruptCast_Struct
+		struct InterruptCast : public FixedLength_And_ServerToClient<InterruptCast> {
+			uint32 mSpawnID = 0;
+			uint32 mMessageID = 0;
+			char mMessage[0];
+		};
+
+		// S->C
+		// Based on: ManaChange_Struct
+		struct ManaChange : public FixedLength_And_ServerToClient<ManaChange> {
+			uint32 mMana = 0;
+			uint32 mEndurance = 0;
+			uint32 mSpellID = 0;
+			uint32 mUnknown0 = 0;
+		};
+
+		// S->C
+		// Based on: Action_Struct
+		struct Action : public FixedLength_And_ServerToClient<Action> {
+			uint16 mTargetSpawnID = 0;
+			uint16 mSourceSpawnID = 0;
+			uint16 mCasterLevel = 1;
+			uint16 instrument_mod = 0;
+			uint32 bard_focus_id = 0;
+			uint16 mUnknown0 = 0;
+			uint32 mSequence = 0;
+			uint32 mUnknown1 = 0;
+			uint8 mType = 0;		// 231 (0xE7) for spells
+			uint32 mUnknown2 = 0;
+			uint16 mSpellID = 0; // uint16?? hmm
+			uint8 mUnknown3 = 0;
+			uint8 buff_unknown = 0;	// if this is 4, a buff icon is made
+		};
+
 		// C->S
+		// Based on: CombatAbility_Struct
 		struct CombatAbility : public FixedSizedPayload<CombatAbility> {
 			uint32 mTargetID = 0;
 			uint32 mAttack = 0;

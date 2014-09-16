@@ -35,6 +35,9 @@ public:
 
 	// NPC
 	bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
+
+	// Spells
+	const bool loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded);
 	
 private:
 

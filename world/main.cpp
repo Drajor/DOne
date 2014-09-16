@@ -11,6 +11,7 @@
 #include "ZoneManager.h"
 #include "TitleManager.h"
 #include "DataStore.h"
+#include "SpellDataStore.h"
 #include "LogSystem.h"
 #include "UCS.h"
 
@@ -31,6 +32,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(World::getInstance().initialise());
 	EXPECTED_MAIN(UCS::getInstance().initialise());
 	EXPECTED_MAIN(TitleManager::getInstance().initialise());
+	EXPECTED_MAIN(SpellDataStore::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

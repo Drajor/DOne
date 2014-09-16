@@ -150,6 +150,12 @@ public:
 	inline void removeVisibleNPC(NPC* pNPC) { mVisibleNPCs.remove(pNPC); }
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
 
+	inline const bool isCasting() const { return mIsCasting; }
+	const bool hasSpell(const uint16 pSlot, const uint32 pSpellID) const;
+	const bool canCast(const uint32 pSpellID) const;
+	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
+	const bool finishCasting();
+
 	const CharacterData* getData() const { return mData; }
 
 	inline const bool isCaster() const { return Utility::isCaster(getClass()); }
@@ -207,6 +213,11 @@ private:
 	uint32 mBaseIntelligence = 0;
 	uint32 mBaseAgility = 0;
 	uint32 mBaseWisdom = 0;
+
+	bool mIsCasting = false;
+	uint32 mCastingSpellID = 0;
+	uint16 mCastingSlot = 0; // The Spell Bar slot ID used to cast a spell
+	Timer mCastingTimer;
 
 	bool mStanding = true;
 	bool mIsZoningOut = false;
@@ -271,6 +282,7 @@ private:
 		}
 		const std::vector<uint32>& getData() const { return mSpellIDs; }
 		void setSpell(const uint16 pSlot, const uint32 pSpellID);
+		const uint32 getSpellID(const uint16 pSlot) const;
 	private:
 		std::vector<uint32> mSpellIDs;
 	};

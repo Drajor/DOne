@@ -6,6 +6,7 @@
 
 class EQStreamFactory;
 class EQStreamIdentifier;
+class EQApplicationPacket;
 class DataStore;
 class ZoneClientConnection;
 
@@ -109,6 +110,10 @@ public:
 	void handleSurnameChange(Actor* pActor);
 	void handleTitleChanged(Character* pCharacter, TitleOption pOption);
 
+	void handleCasting(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
+
+	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
+
 private:
 
 	// Performs a global Character search.
@@ -125,7 +130,6 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
-
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID = 0;

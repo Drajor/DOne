@@ -11,6 +11,7 @@
 #include "Constants.h"
 #include "DataStore.h"
 #include "Utility.h"
+#include "Limits.h"
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -728,12 +729,44 @@ void Zone::handleTitleChanged(Character* pCharacter, TitleOption pOption) {
 		strcpy(payload->mTitle, pCharacter->getSuffix().c_str());
 	}
 
+	// Update Character + those visible to
+	sendToVisible(pCharacter, outPacket, true);
+	safe_delete(outPacket);
+}
+
+void Zone::handleCasting(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
+	using namespace Payload::Zone;
+	EXPECTED(Limits::SpellBar::slotValid(pSlot));
+	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isCaster());
+	EXPECTED(pCharacter->isCasting() == false);
+	EXPECTED(pCharacter->hasSpell(pSlot, pSpellID)); // Check: pCharacter has the spell on the Spell Bar.
+	EXPECTED(pCharacter->canCast(pSpellID)); // Check: pCharacter can cast the spell.
+
+	// Update Character state.
+	EXPECTED(pCharacter->beginCasting(pSlot, pSpellID));
+	
+	auto outPacket = new EQApplicationPacket(OP_BeginCast, BeginCast::size());
+	auto payload = BeginCast::convert(outPacket->pBuffer);
+	payload->mSpawnID = pCharacter->getSpawnID();
+	payload->mSpellID = pSpellID;
+	payload->mCastTime = 500; // TODO:
+
+	// Update Character + those visible to
+	sendToVisible(pCharacter, outPacket, true);
+	safe_delete(outPacket);
+}
+
+void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender) {
+	EXPECTED(pCharacter);
+	EXPECTED(pPacket);
+
 	// Update Character.
-	pCharacter->getConnection()->sendPacket(outPacket);
+	if (pIncludeSender)
+		pCharacter->getConnection()->sendPacket(pPacket);
 
 	// Update anyone who can see pCharacter.
 	for (auto i : pCharacter->getVisibleTo())
-		i->getConnection()->sendPacket(outPacket);
-
-	safe_delete(outPacket);
+		i->getConnection()->sendPacket(pPacket);
 }

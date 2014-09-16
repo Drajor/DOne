@@ -376,6 +376,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_CastSpell:
 		_handleCastSpell(pPacket);
+		break;
 		// Spells End
 	case OP_CombatAbility:
 		_handleCombatAbility(pPacket);
@@ -2290,11 +2291,54 @@ void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) 
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(CastSpell::sizeCheck(pPacket->size));
-
+	EXPECTED(mCharacter->isCasting() == false);
+	
 	auto payload = CastSpell::convert(pPacket->pBuffer);
 
 	if (payload->mInventorySlot == 0xFFFF)
 		EXPECTED(mCharacter->isCaster());
+
+	// Check: Target validity
+	if (mCharacter->hasTarget()) {
+		// Match spawn IDs
+		EXPECTED(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
+	}
+	else {
+		// Expect both zero.
+		EXPECTED(payload->mTargetID == 0);
+	}
+
+	EXPECTED(Limits::SpellBar::slotValid(payload->mSlot));
+	EXPECTED(Limits::SpellBar::spellIDValid(payload->mSpellID));
+
+	//mCharacter->v
+	// We need to check that slot and spell id match.
+	// We need to check that class, level etc are valid.
+
+	// Casting from Spell Bar.
+	mZone->handleCasting(mCharacter, payload->mSlot, payload->mSpellID);
+	//mCharacter->handleCastSpell();
+	//sendInterruptCast();
+
+	//auto outPacket = new EQApplicationPacket(OP_BeginCast, BeginCast::size());
+	//auto outPayload = BeginCast::convert(outPacket->pBuffer);
+	//outPayload->mSpawnID = mCharacter->getSpawnID();
+	//outPayload->mSpellID = 1000;
+	//outPayload->mCastTime = 50;
+	//mStreamInterface->QueuePacket(outPacket);
+	//safe_delete(outPacket);
+
+	//EQApplicationPacket *outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
+	//ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
+	//manachange->new_mana = mCharacter->getCurrentMana();
+	//manachange->spell_id = 1000;
+	//manachange->stamina = mCharacter->getCurrentEndurance();
+	//outapp->priority = 6;
+	//mStreamInterface->QueuePacket(outapp);
+	//safe_delete(outapp);
+
+
+
 }
 
 void ZoneClientConnection::_handleCombatAbility(const EQApplicationPacket* pPacket) {
@@ -2480,13 +2524,13 @@ void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool 
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
+void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
 	auto payload = MemoriseSpell::convert(outPacket->pBuffer);
-	payload->mAction = MemoriseSpell::MEMORISE;
+	payload->mAction = static_cast<MemoriseSpell::Action>(pAction);
 	payload->mSlot = pSlot;
 	payload->mSpellID = pSpellID;
 
@@ -2494,15 +2538,57 @@ void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pS
 	safe_delete(outPacket);
 }
 
+void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::MEMORISE);
+}
+
 void ZoneClientConnection::sendUnmemoriseSpell(const uint16 pSlot) {
+	_sendMemoriseSpell(pSlot, 0, Payload::Zone::MemoriseSpell::UNMEMORISE);
+}
+
+void ZoneClientConnection::sendInterruptCast() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
-	auto payload = MemoriseSpell::convert(outPacket->pBuffer);
-	payload->mAction = MemoriseSpell::UNMEMORISE;
-	payload->mSlot = pSlot;
-	payload->mSpellID = 0;
+	auto outPacket = new EQApplicationPacket(OP_InterruptCast, InterruptCast::size());
+	auto payload = InterruptCast::convert(outPacket->pBuffer);
+	payload->mSpawnID = mCharacter->getSpawnID();
+	payload->mMessageID = static_cast<uint32>(StringID::INTERRUPT_SPELL);
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID) {
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SPELLBAR_REFRESH);
+}
+
+void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_ManaChange, ManaChange::size());
+	auto payload = ManaChange::convert(outPacket->pBuffer);
+	payload->mMana = mCharacter->getCurrentMana();
+	payload->mEndurance = mCharacter->getCurrentEndurance();
+	payload->mSpellID = pSpellID;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendSpellCastOn() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_Action, Action::size());
+	auto payload = Action::convert(outPacket->pBuffer);
+
+	payload->mTargetSpawnID = mCharacter->getSpawnID();
+	payload->mSourceSpawnID = payload->mTargetSpawnID;
+	payload->mSpellID = 1000;
+	payload->mType = 231; // Spell = 231
+	payload->buff_unknown = 0;
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
