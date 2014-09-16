@@ -29,9 +29,9 @@ uint16 ZoneManager::getZonePort(ZoneID pZoneID, uint32 pInstanceID) {
 		}
 	}
 
-	// Zone was not found, create it.
-	Zone* zone = _makeZone(pZoneID, pInstanceID);
-	return zone->getPort();
+	// NOTE: If this occurs then something is happening out of order.
+	Log::error("Returning Zero Port!");
+	return 0;
 }
 
 bool ZoneManager::initialise() {
@@ -44,6 +44,16 @@ bool ZoneManager::initialise() {
 	return true;
 }
 
+
+const bool ZoneManager::isZoneAvailable(const ZoneID pZoneID, const InstanceID pInstanceID) {
+	Zone* zone = _search(pZoneID, pInstanceID);
+	if (zone)
+		return true;
+
+	return _makeZone(zone, pZoneID, pInstanceID);
+}
+
+
 const uint32 ZoneManager::_getNextZonePort() {
 	uint32 port = *mAvailableZonePorts.begin();
 	mAvailableZonePorts.pop_front();
@@ -51,28 +61,34 @@ const uint32 ZoneManager::_getNextZonePort() {
 	// TODO: Error check this ;)
 }
 
-void ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
+const bool ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
 	bool zoneFound = false;
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
 			i->addAuthentication(pAuthentication, pCharacterName);
-			return;
+			return true;
 		}
 	}
 
-	// Zone was not found, create it.
-	Zone* zone = _makeZone(pZoneID, pInstanceID);
-	zone->addAuthentication(pAuthentication, pCharacterName);
+	return false;
 }
 
-Zone* ZoneManager::_makeZone(const ZoneID pZoneID, const uint32 pInstanceID) {
+const bool ZoneManager::_makeZone(Zone* pZone, const ZoneID pZoneID, const uint32 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
 	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
 	Zone* zone = new Zone(zonePort, pZoneID, pInstanceID);
-	zone->initialise();
+	
+	// Check: Zone initialises correctly.
+	if (!zone->initialise()) {
+		mAvailableZonePorts.push_front(zonePort);
+		delete zone;
+		return false;
+	}
+	
+	pZone = zone;
 	mZones.push_back(zone);
-	return zone;
+	return true;
 }
 
 void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
@@ -130,10 +146,23 @@ Character* ZoneManager::findCharacter(const String pCharacterName, bool pInclude
 	return nullptr;
 }
 
-void ZoneManager::onLeaveZone(Character* pCharacter) {
+void ZoneManager::addZoningCharacter(Character* pCharacter) {
 	EXPECTED(pCharacter);
 
 	mZoningCharacters.push_back(pCharacter);
+}
+
+const bool ZoneManager::removeZoningCharacter(const String& pCharacterName) {
+	for (auto i : mZoningCharacters) {
+		if (i->getName() == pCharacterName) {
+			mZoningCharacters.remove(i);
+			return true;
+		}
+	}
+
+	// NOTE: This should only occur if there is a bug.
+	Log::error("[Zone Manager] removeZoningCharacter failed for " + pCharacterName);
+	return false;
 }
 
 void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
@@ -159,7 +188,7 @@ void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, ui
 	World::getInstance().addCharacterZoneTransfer(zoneTransfer);
 }
 
-Character* ZoneManager::getZoningCharacter(String pCharacterName) {
+Character* ZoneManager::getZoningCharacter(const String& pCharacterName) {
 	for (auto i : mZoningCharacters) {
 		if (i->getName() == pCharacterName)
 			return i;
@@ -180,4 +209,13 @@ ZoneSearchResult ZoneManager::getAllZones() {
 	}
 
 	return result;
+}
+
+Zone* ZoneManager::_search(const ZoneID pZoneID, const uint32 pInstanceID) {
+	for (auto i : mZones) {
+		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID)
+			return i;
+	}
+
+	return nullptr;
 }

@@ -93,6 +93,13 @@ void Scene::onCharacterAdded(Character* pCharacter) {
 
 void Scene::onCharacterRemoved(Character* pCharacter) {
 	EXPECTED(pCharacter);
+	Log::info("Removing " + pCharacter->getName() + " from the scene.");
+
+	// Remove pCharacter from everyone who can see pCharacter.
+	for (auto i : pCharacter->getVisibleTo()) {
+		mZone->handleVisibilityRemove(i, pCharacter);
+		i->removeVisibleTo(pCharacter);
+	}
 }
 
 void Scene::onNPCAdded(NPC* pNPC) {

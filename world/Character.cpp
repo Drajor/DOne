@@ -30,7 +30,7 @@ void Character::update() {
 
 	if (getIsGM()) {
 		if (mSuperGMPower.Check()) {
-			mZone->notifyCharacterLevelIncrease(this);
+			mZone->handleLevelIncrease(this);
 		}
 	}
 
@@ -606,6 +606,12 @@ const bool Character::preCastingChecks(const SpellData* pSpell) {
 
 const bool Character::postCastingChecks(const SpellData* pSpell) {
 	return true;
+}
+
+const bool Character::send(EQApplicationPacket* pPacket) {
+	EXPECTED_BOOL(mConnection);
+	EXPECTED_BOOL(mIsLinkDead == false);
+	mConnection->sendPacket(pPacket);
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

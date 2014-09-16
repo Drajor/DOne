@@ -67,13 +67,14 @@ public:
 
 	void notifyCharacterZoneIn(Character* pCharacter);
 	void handleActorPositionChange(Actor* pActor);
-	void notifyCharacterLinkDead(Character* pCharacter);
-	void notifyCharacterAFK(Character* pCharacter);
-	void notifyCharacterShowHelm(Character* pCharacter);
-	void notifyCharacterAnonymous(Character* pCharacter);
-	void notifyCharacterStanding(Character* pCharacter);
-	void notifyCharacterSitting(Character* pCharacter);
-	void notifyCharacterCrouching(Character* pCharacter);
+	void handleLinkDead(Character* pCharacter);
+	void handleAFK(Character* pCharacter);
+	void handleShowHelm(Character* pCharacter);
+	void handleAnonymous(Character* pCharacter);
+	void handleStanding(Character* pCharacter);
+	void handleSitting(Character* pCharacter);
+	void handleCrouching(Character* pCharacter);
+
 	void notifyCharacterChatSay(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatShout(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatOOC(Character* pCharacter, const String pMessage);
@@ -81,8 +82,8 @@ public:
 	void notifyCharacterChatAuction(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
-	void notifyCharacterLevelIncrease(Character* pCharacter);
-	void notifyCharacterLevelDecrease(Character* pCharacter);
+	void handleLevelIncrease(Character* pCharacter);
+	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
 	void handleTarget(Character* pCharacter, SpawnID pSpawnID);
@@ -113,6 +114,7 @@ public:
 	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
 	void handleCastingFinished(Actor* pActor);
 
+	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 
 private:

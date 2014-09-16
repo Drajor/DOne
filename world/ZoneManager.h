@@ -25,25 +25,28 @@ private:
 	void operator=(ZoneManager const&); // Do not implement.
 public:
 	bool initialise();
+	const bool isZoneAvailable(const ZoneID pZoneID, const InstanceID pInstanceID);
 
 	ZoneSearchResult getAllZones();
 
-	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
+	const bool addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	
 	void registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
-	Character* getZoningCharacter(String pCharacterName);
+	
+	void addZoningCharacter(Character* pCharacter);
+	const bool removeZoningCharacter(const String& pCharacterName);
+	Character* getZoningCharacter(const String& pCharacterName);
 
 	
 	void update();
 	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
 	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
-	void onLeaveZone(Character* pCharacter);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 private:
-	Zone* _makeZone(const ZoneID pZoneID, const uint32 pInstanceID = 0);
+	Zone* _search(const ZoneID pZoneID, const uint32 pInstanceID);
+	const bool _makeZone(Zone* pZone, const ZoneID pZoneID, const uint32 pInstanceID = 0);
 	const uint32 _getNextZonePort();
-
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;
 	std::list<Character*> mZoningCharacters;

@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "Singleton.h"
+#include "LogSystem.h"
 #include "ClientAuthentication.h"
 
 class LoginServerConnection;
@@ -25,7 +26,7 @@ struct ZoneTransfer {
 class World : public Singleton<World> {
 private:
 	friend class Singleton<World>;
-	World() { };
+	World() : mLog("[World]") { };
 	~World();
 	World(World const&); // Do not implement.
 	void operator=(World const&); // Do not implement.
@@ -36,7 +37,7 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication);
 	void removeAuthentication(ClientAuthentication& pAuthentication);
 	bool checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey);
-	void addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
+	const bool addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
 	bool ensureAccountExists(const uint32 pAccountID, const String& pAccountName);
 
@@ -54,15 +55,14 @@ public:
 	bool isCharacterNameReserved(String pCharacterName);
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
 	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
-
-	uint16 getZonePort(ZoneID pZoneID, uint16 pInstanceID = 0);
 	
 	bool getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer);
 	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
 	void removeZoneTransfer(const String& pCharacterName);
 
-	bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
+	const bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
 private:
+	LogContext mLog;
 	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, String> mReservedCharacterNames;

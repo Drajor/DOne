@@ -445,44 +445,21 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 	// Check: Account owns the Character.
 	EXPECTED_BOOL(AccountManager::getInstance().checkOwnership(mAccountID, characterName));
 
-	return World::getInstance().handleEnterWorld(this, characterName, mZoning);
+	bool success = World::getInstance().handleEnterWorld(this, characterName, mZoning);
 
-	//// Client is between zones.
-	//if (mZoning) {
-	//	// Retrieve zone change data.
-	//	ZoneTransfer zoneTransfer;
-	//	if (World::getInstance().getCharacterZoneTransfer(characterName, zoneTransfer)) {
-	//		World::getInstance().removeZoneTransfer(characterName); // Remove zone transfer authority.
-	//		// Add authentication to the zone the character is going to.
-	//		World::getInstance().addZoneAuthentication(mAuthentication, characterName, zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID);
-	//		// Tell client which Zone to connect to.
-	//		_sendZoneServerInfo(World::getInstance().getZonePort(zoneTransfer.mToZoneID, zoneTransfer.mToInstanceID));
-
-	//		return true;
-	//	}
-	//	// Failed to find ZoneTransfer data for character.
-	//	else {
-	//		StringStream ss; ss << "[World Client Connection] Unable to retrieve ZoneTransfer for " << characterName << ", dropping connection.";
-	//		Log::error(ss.str());
-	//		dropConnection();
-	//		return false;
-	//	}
-	//}
-	//// Client is moving from Character Select / Character Create.
-	//else {
-	//	
-	//	//CharacterData* characterData = World::getInstance().loadCharacter(characterName);
-	//	//EXPECTED_BOOL(characterData);
-
-	//	// TODO: At the moment Characters always go to NQ.
-	//	World::getInstance().addZoneAuthentication(mAuthentication, characterName, ZoneIDs::NorthQeynos, 0);
-	//	// Send MOTD?
-	//	// Send ChatServer?
-	//	// Send ChatServer2?
-	//	_sendChatServer();
-	//	_sendZoneServerInfo(World::getInstance().getZonePort(ZoneIDs::NorthQeynos, 0));
-	//	return true;
-	//}
+	// World Entry Failed
+	if (!success) {
+		// Character Select to World -OR- Character Create to World.
+		if (!mZoning) {
+			_sendZoneUnavailable();
+			_sendCharacterSelectInfo();
+			// NOTE: This just bumps the client to Character Select screen.
+			return true;
+		}
+		// Zoning
+		// TODO: Not sure how to handle this yet, beyond dropping the connection.
+		return true;
+	}
 }
 
 void WorldClientConnection::_sendChatServer(const String& pCharacterName) {

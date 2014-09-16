@@ -10,12 +10,14 @@ class NPC;
 class Group;
 class Guild;
 class Raid;
+class EQApplicationPacket;
 class EQStreamInterface;
 class ZoneClientConnection;
 
 struct CharacterData;
 struct SpellData;
 class SpellBook;
+
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -66,6 +68,7 @@ public:
 
 	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
 	ZoneClientConnection* getConnection() { return mConnection; }
+	const bool send(EQApplicationPacket* pPacket);
 	
 	void update();
 
@@ -182,6 +185,7 @@ public:
 	const bool handleScribeSpell(const uint16 pSlot, const uint32 pSpellID);
 
 	void notify(const String& pMessage);
+	void _updateForSave();
 private:
 
 	const uint32 mAccountID;
@@ -192,7 +196,6 @@ private:
 
 	uint32 mExperience = 0;
 	void _checkForLevelIncrease();
-	void _updateForSave();
 
 	uint32 mRadiantCrystals = 0;
 	uint32 mTotalRadiantCrystals = 0;

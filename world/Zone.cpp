@@ -35,8 +35,7 @@ Zone::~Zone() {
 }
 
 bool Zone::initialise() {
-	// Prevent multiple initialisation.
-	if (mInitialised) return false;
+	EXPECTED_BOOL(mInitialised == false);
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
@@ -104,8 +103,11 @@ void Zone::update() {
 			// Remove World Authentication - allowing them to log back in.
 			World::getInstance().removeAuthentication(i->mCharacter->getAuthentication());
 
-			// TODO: Save
-			_sendDespawn(i->mCharacter->getSpawnID(), false);
+			// Save
+			i->mCharacter->_updateForSave();
+			requestSave(i->mCharacter);
+
+			mScene->remove(i->mCharacter);
 			delete i->mTimer;
 			delete i->mCharacter;
 			i = mLinkDeadCharacters.erase(i);
@@ -262,40 +264,7 @@ void Zone::notifyCharacterZoneIn(Character* pCharacter) {
 
 	// Add Character to Scene.
 	mScene->add(pCharacter);
-
-	//// Send pCharacter Spawn to anyone who can see them.
-	//EQApplicationPacket* outPacket = pCharacter->getConnection()->makeCharacterSpawnPacket();
-	//for (auto i : pCharacter->getVisibleTo()) {
-	//	i->getConnection()->sendPacket(outPacket);
-	//}
-
-	//return;
-	//// Notify players in zone.
-	//ZoneClientConnection* sender = pCharacter->getConnection();
-	//EQApplicationPacket* outPacket = sender->makeCharacterSpawnPacket();
-	//for (auto i : mConnections) {
-	//	if(i != sender)
-	//		i->sendPacket(outPacket);
-	//}
-	//safe_delete(outPacket);
-
-	//// Notify character zoning in of zone spawns.
-	//const unsigned int numCharacters = mConnections.size();
-	//if (numCharacters > 1) {
-	//	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ZoneSpawns, sizeof(NewSpawn_Struct)* numCharacters);
-	//	NewSpawn_Struct* spawns = reinterpret_cast<NewSpawn_Struct*>(outPacket->pBuffer);
-	//	int index = 0;
-	//	for (auto i : mConnections) {
-	//		i->populateSpawnStruct(&spawns[index]);
-	//		index++;
-	//	}
-
-	//	sender->sendPacket(outPacket);
-	//	safe_delete(outPacket);
-	//}
-	
 }
-
 
 void Zone::handleActorPositionChange(Actor* pActor) {
 	// Update Scene with Actor movement
@@ -305,41 +274,34 @@ void Zone::handleActorPositionChange(Actor* pActor) {
 	// Update any Character visible to pActor.
 	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, pActor->getPositionData(), 22); // sizeof(PlayerPositionUpdateServer_Struct)
 	for (auto i : pActor->getVisibleTo()) {
-		i->getConnection()->sendPacket(outPacket);
+		if (i->isLinkDead() == false)
+			i->getConnection()->sendPacket(outPacket);
 	}
 	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 
 
-void Zone::notifyCharacterAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->isAFK()); }
-void Zone::notifyCharacterShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
-void Zone::notifyCharacterAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
-void Zone::notifyCharacterStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Standing); }
-void Zone::notifyCharacterSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
-void Zone::notifyCharacterCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
+void Zone::handleAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->isAFK()); }
+void Zone::handleShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
+void Zone::handleAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
+void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Standing); }
+void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Sitting); }
+void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Animation, SpawnAppearanceAnimation::Crouch); }
 void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->getIsGM() ? 1 : 0, true); }
-void Zone::notifyCharacterLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
+void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
 
 void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
-	const ZoneClientConnection* sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* appearance = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
-	appearance->spawn_id = pCharacter->getSpawnID();
-	appearance->type = pType;
-	appearance->parameter = pParameter;
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
 
-	if (pIncludeSender) {
-		for (auto i : mConnections) {
-			i->sendPacket(outPacket);
-		}
-	}
-	else {
-		for (auto i : mConnections) {
-			if (i != sender)
-				i->sendPacket(outPacket);
-		}
-	}
+	auto outPacket = new EQApplicationPacket(OP_SpawnAppearance, SpawnAppearance::size());
+	auto payload = SpawnAppearance::convert(outPacket->pBuffer);
+	payload->mSpawnID = pCharacter->getSpawnID();
+	payload->mType = pType;
+	payload->mParameter = pParameter;
+
+	sendToVisible(pCharacter, outPacket, pIncludeSender);
 	safe_delete(outPacket);
 }
 
@@ -424,39 +386,33 @@ bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, con
 }
 
 void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender) {
-	auto sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	Animation_Struct* payload = reinterpret_cast<Animation_Struct*>(outPacket->pBuffer);
-	payload->spawnid = pCharacter->getSpawnID();
-	payload->action = pAction;
-	payload->value = pAnimationID;
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
 
-	if (pIncludeSender) {
-		for (auto i : mConnections) {
-			i->sendPacket(outPacket);
-		}
-	}
-	else {
-		for (auto i : mConnections) {
-			if ( i != sender)
-				i->sendPacket(outPacket);
-		}
-	}
+	auto outPacket = new EQApplicationPacket(OP_Animation, Payload::Zone::Animation::size());
+	auto payload = Payload::Zone::Animation::convert(outPacket->pBuffer);
+	payload->mSpawnID = pCharacter->getSpawnID();
+	payload->mAction = pAction;
+	payload->mValue = pAnimationID;
+
+	sendToVisible(pCharacter, outPacket, pIncludeSender);
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterLevelIncrease(Character* pCharacter) {
+void Zone::handleLevelIncrease(Character* pCharacter) {
 	// Notify user client.
 	_sendCharacterLevel(pCharacter);
 	_sendLevelAppearance(pCharacter);
 }
 
-void Zone::notifyCharacterLevelDecrease(Character* pCharacter) {
+void Zone::handleLevelDecrease(Character* pCharacter) {
 	// Notify user client.
 	_sendCharacterLevel(pCharacter);
 }
 
 void Zone::_sendLevelAppearance(Character* pCharacter) {
+	EXPECTED(pCharacter);
+
 	auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
 	auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
 	payload->parm1 = 0x4D;
@@ -473,10 +429,7 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 	payload->value4b = 1;
 	payload->value5a = 2;
 
-	for (auto i : mConnections) {
-		i->sendPacket(outPacket);
-	}
-
+	sendToVisible(pCharacter, outPacket, true);
 	safe_delete(outPacket);
 }
 
@@ -563,7 +516,8 @@ void Zone::notifyCharacterGuildChange(Character* pCharacter) {
 void Zone::_onLeaveZone(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 
-	ZoneManager::getInstance().onLeaveZone(pCharacter);
+	// Store Character during zoning.
+	ZoneManager::getInstance().addZoningCharacter(pCharacter);
 
 	if (pCharacter->hasGuild())
 		GuildManager::getInstance().onLeaveZone(pCharacter);
@@ -591,7 +545,6 @@ void Zone::_onCamp(Character* pCharacter) {
 void Zone::_onLinkdead(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 
-	ZoneClientConnection* connection = pCharacter->getConnection();
 	pCharacter->setLinkDead();
 
 	// Tidy up Character
@@ -613,11 +566,11 @@ void Zone::_onLinkdead(Character* pCharacter) {
 	if (pCharacter->hasRaid())
 		RaidManager::getInstance().onLinkdead(pCharacter);
 
-	notifyCharacterLinkDead(pCharacter);
+	handleLinkDead(pCharacter);
 }
 
 void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	// Character is clearing their target.
 	if (pSpawnID == NO_TARGET) {
@@ -700,13 +653,12 @@ void Zone::handleSurnameChange(Actor* pActor) {
 
 	// Character surname changed.
 	if (pActor->isCharacter()) {
-		Character* character = Actor::cast<Character*>(pActor);
-		character->getConnection()->sendPacket(outPacket);
+		sendToVisible(Actor::cast<Character*>(pActor), outPacket, true);
 	}
-
-	// Update anyone who can see pActor.
-	for (auto i : pActor->getVisibleTo())
-		i->getConnection()->sendPacket(outPacket);
+	// NPC surname changed.
+	else {
+		sendToVisible(pActor, outPacket);
+	}
 
 	safe_delete(outPacket);
 }
@@ -785,13 +737,12 @@ void Zone::handleCastingFinished(Actor* pActor) {
 
 	// Character has finished casting.
 	if (pActor->isCharacter()) {
-		Character* character = Actor::cast<Character*>(pActor);
-		character->getConnection()->sendPacket(outPacket);
+		sendToVisible(Actor::cast<Character*>(pActor), outPacket, true);
 	}
-
-	// Update anyone who can see pActor.
-	for (auto i : pActor->getVisibleTo())
-		i->getConnection()->sendPacket(outPacket);
+	// NPC has finished casting.
+	else {
+		sendToVisible(pActor, outPacket);
+	}
 
 	safe_delete(outPacket);
 }
@@ -806,6 +757,13 @@ void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bo
 		pCharacter->getConnection()->sendPacket(pPacket);
 
 	// Update anyone who can see pCharacter.
-	for (auto i : pCharacter->getVisibleTo())
+	sendToVisible(pCharacter, pPacket);
+}
+
+void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+
+	// Update anyone who can see pActor.
+	for (auto i : pActor->getVisibleTo())
 		i->getConnection()->sendPacket(pPacket);
 }

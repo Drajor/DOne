@@ -429,6 +429,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	auto payload = ZoneEntry::convert(pPacket->pBuffer);
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(characterName));
+	Log::info("Got ZoneEntry from " + characterName);
 
 	// Check that this Zone is expecting this client.
 	if (!mZone->checkAuthentication(characterName)) {
@@ -450,6 +451,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// Retrieve Character
 	mCharacter = ZoneManager::getInstance().getZoningCharacter(characterName);
 	EXPECTED(mCharacter);
+	EXPECTED(ZoneManager::getInstance().removeZoningCharacter(mCharacter->getName()));
 
 	// If character is not initialised yet they are loading from the Character Selection Screen.
 	if (mCharacter->isInitialised() == false) {
@@ -826,7 +828,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		switch (actionParameter) {
 		case SpawnAppearanceAnimation::Standing:
 			mCharacter->setStanding(true);
-			mZone->notifyCharacterStanding(mCharacter);
+			mZone->handleStanding(mCharacter);
 			mCharacter->setStandingState(Standing);
 			break;
 		case SpawnAppearanceAnimation::Freeze:
@@ -837,12 +839,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 			break;
 		case SpawnAppearanceAnimation::Sitting:
 			mCharacter->setStanding(false);
-			mZone->notifyCharacterSitting(mCharacter);
+			mZone->handleSitting(mCharacter);
 			mCharacter->setStandingState(Sitting);
 			break;
 		case SpawnAppearanceAnimation::Crouch:
 			// Crouch or Jump triggers this.
-			mZone->notifyCharacterCrouching(mCharacter);
+			mZone->handleCrouching(mCharacter);
 			mCharacter->setStandingState(Crouch);
 			break;
 		case SpawnAppearanceAnimation::Death:
@@ -860,7 +862,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter >= 0 && actionParameter <= 2) {
 			// Update character and notify zone.
 			mCharacter->setAnonymous(static_cast<AnonType>(actionParameter)); // TODO: Checked cast
-			mZone->notifyCharacterAnonymous(mCharacter);
+			mZone->handleAnonymous(mCharacter);
 		}
 		// Anything else is ignored.
 		break;
@@ -869,12 +871,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setIsAFK(false);
-			mZone->notifyCharacterAFK(mCharacter);
+			mZone->handleAFK(mCharacter);
 		}
 		else if (actionParameter == 1) {
 			// Update character and notify zone.
 			mCharacter->setIsAFK(true);
-			mZone->notifyCharacterAFK(mCharacter);
+			mZone->handleAFK(mCharacter);
 		}
 		// Anything else is ignored.
 		break;
@@ -882,12 +884,12 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setShowHelm(false);
-			mZone->notifyCharacterShowHelm(mCharacter);
+			mZone->handleShowHelm(mCharacter);
 		}
 		else if (actionParameter == 1) {
 			// Update character and notify zone.
 			mCharacter->setShowHelm(true);
-			mZone->notifyCharacterShowHelm(mCharacter);
+			mZone->handleShowHelm(mCharacter);
 		}
 		// Anything else is ignored.
 		break;
