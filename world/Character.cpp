@@ -370,6 +370,13 @@ void Character::_updateForSave() {
 		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
 			mData->mSpellBook[i] = spellBook[i];
 	}
+
+	// Spell Bar
+	if (mSpellBar) {
+		const std::vector<uint32> spellBar = mSpellBar->getData();
+		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
+			mData->mSpellBar[i] = spellBar[i];
+	}
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {
