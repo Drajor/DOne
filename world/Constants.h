@@ -77,6 +77,7 @@ namespace Limits {
 	namespace SpellBar {
 		static const auto MAX_SLOTS = 9;
 	}
+
 	namespace Guild {
 		static const auto MAX_GUILDS = 1500; // This value is arbitrary.
 		static const auto MIN_NAME_LENGTH = 4;
@@ -95,7 +96,7 @@ namespace Limits {
 
 static const String SYS_NAME = "[System]";
 
-enum Skills {
+enum Skills : uint32 {
 	OneHandBlunt = 0,
 	OneHandSlashing,
 	TwoHandBlunt,
@@ -171,7 +172,15 @@ enum Skills {
 	Berserking,
 	Taunt,
 	Frenzy,
+
+	CommonTongue = 100,
 };
+namespace Limits {
+	namespace Skills {
+		static const auto MIN_ID = 0;
+		static const auto MAX_ID = ::Skills::Frenzy;
+	}
+}
 
 enum class TitleOption {
 	TO_Title,

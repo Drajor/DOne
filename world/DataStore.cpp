@@ -315,6 +315,8 @@ namespace CharacterDataXML {
 		SCA SpellBookSlot = "sb_slot";
 		SCA SpellBar = "spellbar";
 		SCA SpellBarSlot = "sb_slot";
+		SCA Skills = "skills";
+		SCA Skill = "skill";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -383,6 +385,9 @@ namespace CharacterDataXML {
 		// Tag::SpellBar
 		SCA SpellBarSlot = "slot";
 		SCA SpellBarSpell = "id";
+		// Tag::Skill
+		SCA SkillID = "id";
+		SCA SkillValue = "value";
 	}
 #undef SCA
 }
@@ -587,6 +592,16 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 		// Tag::Dye
 		auto dyeElement = static_cast<TiXmlElement*>(dyesElement->LinkEndChild(new TiXmlElement(Tag::Dye)));
 		dyeElement->SetAttribute(Attribute::Colour, pCharacterData->mDyes[i]);
+	}
+
+	// Tag::Skills
+	auto skillsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Skills)));
+	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
+		if (pCharacterData->mSkills[i] == 0) continue;
+		// Tag::Skill
+		auto skillElement = static_cast<TiXmlElement*>(skillsElement->LinkEndChild(new TiXmlElement(Tag::Skill)));
+		skillElement->SetAttribute(Attribute::SkillID, i);
+		skillElement->SetAttribute(Attribute::SkillValue, pCharacterData->mSkills[i]);
 	}
 
 	// Tag::Guild

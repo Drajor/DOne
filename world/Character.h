@@ -184,6 +184,10 @@ public:
 	// Adds a spell to the Spell Book.
 	const bool handleScribeSpell(const uint16 pSlot, const uint32 pSpellID);
 
+	const uint32 getSkill(const uint32 pSkillID) const;
+	const bool setSkill(const uint32 pSkillID, const uint32 pValue);
+	const uint32 getAdjustedSkill(const uint32 pSkillID) const;
+
 	void notify(const String& pMessage);
 	void _updateForSave();
 private:
@@ -224,6 +228,8 @@ private:
 	uint32 mCastingSpellID = 0;
 	uint16 mCastingSlot = 0; // The Spell Bar slot ID used to cast a spell
 	Timer mCastingTimer;
+
+	uint32 mSkills[Limits::Skills::MAX_ID];
 
 	bool mStanding = true;
 	bool mIsZoningOut = false;

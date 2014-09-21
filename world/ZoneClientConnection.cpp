@@ -562,12 +562,15 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->WIS = mCharacter->getBaseStatistic(Statistic::Wisdom);
 	payload->face = mCharacter->getFaceStyle();
 	//payload->languages[MAX_PP_LANGUAGE];
-	//payload->spell_book[MAX_PP_SPELLBOOK];
-	//payload->spell_book[3] = 17;
 
-	payload->skills[Skills::Meditate] = 1000;
-	payload->skills[Skills::SenseHeading] = 1000;
-	payload->skills[Skills::Swimming] = 1000;
+	mCharacter->setSkill(Skills::Meditate, 1000);
+	mCharacter->setSkill(Skills::SenseHeading, 1000);
+	mCharacter->setSkill(Skills::Swimming, 1000);
+
+	// Copy skills into profile.
+	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
+		payload->skills[i] = mCharacter->getAdjustedSkill(i);
+	}
 
 	// Copy spell book data into profile.
 	if (mCharacter->isCaster()) {
@@ -2555,6 +2558,20 @@ void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
+
+void ZoneClientConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_SkillUpdate, SkillUpdate::size());
+	auto payload = SkillUpdate::convert(outPacket->pBuffer);
+	payload->mID = pSkillID;
+	payload->mValue = pValue;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
 //
 //void ZoneClientConnection::sendSpellCastOn() {
 //	using namespace Payload::Zone;

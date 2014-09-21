@@ -1,4 +1,5 @@
 #include "Utility.h"
+#include "Limits.h"
 #include "Character.h"
 #include "Zone.h"
 
@@ -45,4 +46,15 @@ String Utility::guildRankToString(const GuildRank& pRank){
 
 int32 Utility::Time::now() {
 	return static_cast<int32>(std::time(nullptr));
+}
+
+const String& Utility::Skills::fromID(const uint32 pSkillID) {
+	// Check: pSkillID is in range.
+	if (!Limits::Skills::validID(pSkillID)) {
+		static auto BadSkillID = "BadSkillID";
+		Log::error("Skill ID out of range: " + std::to_string(pSkillID) );
+		return BadSkillID;
+	}
+
+	return SkillStrings[pSkillID];
 }

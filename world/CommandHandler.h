@@ -14,10 +14,11 @@ public:
 	virtual ~Command() {};
 	std::list<String>& getAliases() { return mAliases; }
 	uint8 getMinimumStatus() { return mMinimumStatus; }
-	virtual void handleCommand(Character* pCharacter, CommandParameters pParameters) = 0;
+	virtual const bool handleCommand(Character* pCharacter, CommandParameters pParameters) = 0;
 	virtual void helpMessage(Character* pCharacter);
 protected:
 	virtual void invalidParameters(Character* pCharacter, CommandParameters pParameters);
+	virtual void conversionError(Character* pCharacter, String& pParameter);
 	
 	std::list<String> mAliases;
 	uint8 mMinimumStatus;

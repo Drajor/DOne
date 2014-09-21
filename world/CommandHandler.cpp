@@ -44,18 +44,23 @@ public:
 		mHelpMessage = "Usage: #zone <Zone ID> <Zone Instance ID>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		// Check: Parameters
 		if (pParameters.size() != 2) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		uint32 zoneID = 0;
 		uint32 instanceID = 0;
-		if (Utility::stou32Safe(zoneID, pParameters[0]) && Utility::stou32Safe(instanceID, pParameters[1])) {
-			pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
+		const bool ok = Utility::stou32Safe(zoneID, pParameters[0]) && Utility::stou32Safe(instanceID, pParameters[1]);
+		if (!ok) {
+			// TODO: Parameter error.
+			return false;
 		}
+
+		pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
+		return true;
 	}
 };
 
@@ -66,30 +71,33 @@ public:
 		mHelpMessage = "Usage: #warp <X> <Y> <Z>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		if (pParameters.empty()) {
 			Actor* target = pCharacter->getTarget();
-			if (!target || !target->isCharacter()) { return; }
+			if (!target || !target->isCharacter()) { return false; }
 			Character* characterTarget = static_cast<Character*>(target);
 			pCharacter->message(MessageType::Yellow, "Moving to " + characterTarget->getName() + ".");
 			pCharacter->getZone()->moveCharacter(pCharacter, characterTarget->getX(), characterTarget->getY(), characterTarget->getZ());
-			return;
+			return true;
 		}
-		// Check: Parameters
+		// Check: Parameter #
 		if (pParameters.size() != 3) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		float x = 0.0f;
 		float y = 0.0f;
 		float z = 0.0f;
-		if (Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2])) {
-			pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
-		}
-		else {
+		// Check: Parameter conversion.
+		const bool ok = Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2]);
+		if (!ok) {
 			pCharacter->message(MessageType::Red, "There was a problem with your parameters.");
+			return false;
 		}
+
+		pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
+		return true;
 	}
 };
 
@@ -100,16 +108,17 @@ public:
 		mHelpMessage = "Usage: #gm on / #gm off";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		bool gm = pParameters[0] == "on";
 		pCharacter->setIsGM(gm);
 		pCharacter->getZone()->notifyCharacterGM(pCharacter);
+		return true;
 	}
 };
 
@@ -120,12 +129,14 @@ public:
 		mHelpMessage = "Usage: #zonelist";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		ZoneSearchResult result = ZoneManager::getInstance().getAllZones();
 		for (auto i : result) {
 			StringStream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
 			pCharacter->getConnection()->sendMessage(MessageType::Aqua, ss.str());
 		}
+
+		return true;
 	}
 };
 
@@ -136,17 +147,22 @@ public:
 		mHelpMessage = "Usage: #addexp <number>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		uint32 expAdd = 0;
-		if (Utility::stou32Safe(expAdd, pParameters[0])) {
-			pCharacter->addExperience(expAdd);
+		// Check: Parameter conversion.
+		const bool ok = Utility::stou32Safe(expAdd, pParameters[0]);
+		if (!ok) {
+			return false;
 		}
+
+		pCharacter->addExperience(expAdd);
+		return true;
 	}
 };
 
@@ -157,17 +173,22 @@ public:
 		mHelpMessage = "Usage: #remexp <number>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		uint32 expRemove = 0;
-		if (Utility::stou32Safe(expRemove, pParameters[0])) {
-			pCharacter->removeExperience(expRemove);
+		// Check: Parameter conversion.
+		const bool ok = Utility::stou32Safe(expRemove, pParameters[0]);
+		if (!ok) {
+			return false;
 		}
+
+		pCharacter->removeExperience(expRemove);
+		return true;
 	}
 };
 
@@ -178,10 +199,12 @@ public:
 		mHelpMessage = "Usage: #loc";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		StringStream ss;
 		ss << "Your location is " << pCharacter->getX() << ", " << pCharacter->getY() << ", " << pCharacter->getZ();
 		pCharacter->message(MessageType::White, ss.str());
+
+		return true;
 	}
 };
 
@@ -192,17 +215,22 @@ public:
 		mHelpMessage = "Usage: #level <number>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		uint32 level = 0;
-		if (Utility::stou32Safe(level, pParameters[0])) {
-			pCharacter->setLevel(static_cast<uint8>(level));
+		// Check: Parameter conversion.
+		const bool ok = Utility::stou32Safe(level, pParameters[0]);
+		if (!ok) {
+			return false;
 		}
+
+		pCharacter->setLevel(static_cast<uint8>(level));
+		return true;
 	}
 };
 
@@ -213,19 +241,21 @@ public:
 		mHelpMessage = "Usage Example: #setstat str 10";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 2) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		String statStr = pParameters[0];
 		String statName = "unknown";
 		uint32 value = 0;
 		Statistic statistic;
-		if (!Utility::stou32Safe(value, pParameters[1])) {
-			return;
+		// Check: Parameter conversion.
+		const bool ok = Utility::stou32Safe(value, pParameters[1]);
+		if (!ok) {
+			return false;
 		}
 
 		// Determine which statistic is changing.
@@ -237,13 +267,15 @@ public:
 		else if (statStr == "agi") { statistic = Statistic::Agility; statName = "agility"; }
 		else if (statStr == "wis") { statistic = Statistic::Wisdom; statName = "wisdom"; }
 		else {
-			return;
+			return false;
 		}
 
 		StringStream ss;
 		ss << "Changing " << pCharacter->getName() << "'s " << statName << " from " << pCharacter->getBaseStatistic(statistic) << " to " << value;
 		pCharacter->message(MessageType::LightGreen, ss.str());
 		pCharacter->setBaseStatistic(statistic, value);
+
+		return true;
 	}
 };
 
@@ -254,11 +286,11 @@ public:
 		mHelpMessage = "Usage: #zs <text>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		// Check: Parameters
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 
 		ZoneDataSearchResults results = ZoneData::getInstance().searchByName(pParameters[0]);
@@ -266,6 +298,8 @@ public:
 		for (auto i : results){
 			pCharacter->message(MessageType::Yellow, "[Zone " + std::to_string(i.mID) + "] " + i.mShortName + " | " + i.mLongName );
 		}
+
+		return true;
 	}
 };
 
@@ -276,7 +310,7 @@ public:
 		mHelpMessage = "Usage: #guildsearch <optional text>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		// Get all guilds.
 		if (pParameters.size() == 0) {
 			GuildSearchResults results = GuildManager::getInstance().getAllGuilds();
@@ -289,7 +323,7 @@ public:
 		}
 		else {
 			invalidParameters(pCharacter, pParameters);
-			return;
+			return false;
 		}
 	}
 };
@@ -301,7 +335,7 @@ public:
 		mHelpMessage = "Usage: #ginfo";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		if (pCharacter->hasGuild()) {
 			static const String RankNames[] = { "Member", "Officer", "Leader" };
 			pCharacter->message(MessageType::Yellow, RankNames[pCharacter->getGuildRank()] + " of " + std::to_string(pCharacter->getGuildID()));
@@ -309,6 +343,8 @@ public:
 		else {
 			pCharacter->message(MessageType::Yellow, "No Guild");
 		}
+
+		return true;
 	}
 };
 
@@ -320,7 +356,7 @@ public:
 		mHelpMessage = "Usage: #guildpromote <name>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
 			if (pCharacter->hasGuild() && pCharacter->getGuildRank() == GuildRanks::Leader) {
 				GuildManager::getInstance().handlePromote(pCharacter, pParameters[0]);
@@ -328,7 +364,11 @@ public:
 			else {
 				pCharacter->message(MessageType::Yellow, "No guild or not guild leader.");
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 };
 
@@ -340,7 +380,7 @@ public:
 		mHelpMessage = "Usage: #guilddemote <name>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
 			if (pCharacter->hasGuild() && pCharacter->getGuildRank() == GuildRanks::Leader) {
 				GuildManager::getInstance().handleDemote(pCharacter, pParameters[0]);
@@ -348,7 +388,11 @@ public:
 			else {
 				pCharacter->message(MessageType::Yellow, "No guild or not guild leader.");
 			}
+
+			return true;
 		}
+
+		return false;
 	}
 };
 
@@ -358,16 +402,23 @@ public:
 		mHelpMessage = "Usage: #wc <slot> <material> <colour>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		if (pParameters.size() == 3) {
-			uint32 slotID = 0;
-			uint32 materialID = 0;
-			uint32 colour = 0;
-			bool ok = Utility::stou32Safe(slotID, pParameters[0]) && Utility::stou32Safe(materialID, pParameters[1]) && Utility::stou32Safe(colour, pParameters[2]);
-			if (ok) {
-				pCharacter->getConnection()->sendWearChange(pCharacter->getSpawnID(), slotID, materialID, colour);
-			}
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() != 3) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
 		}
+
+		uint32 slotID = 0;
+		uint32 materialID = 0;
+		uint32 colour = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(slotID, pParameters[0]) && Utility::stou32Safe(materialID, pParameters[1]) && Utility::stou32Safe(colour, pParameters[2]);
+		if (!ok) {
+			return false;
+		}
+
+		pCharacter->getConnection()->sendWearChange(pCharacter->getSpawnID(), slotID, materialID, colour);
+		return true;
 	}
 };
 
@@ -377,25 +428,30 @@ public:
 		mHelpMessage = "Usage: #surname <name>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		if (pParameters.size() == 1) {
-			const bool hasTarget = pCharacter->hasTarget();
-
-			// Check: Has a target.
-			if (!hasTarget) {
-				pCharacter->notify("You must target an actor.");
-				return;
-			}
-			Actor* changeActor = pCharacter->getTarget();
-
-			// Check: Length.
-			if (!Limits::Character::surnameLengthClient(pParameters[0])) {
-				pCharacter->notify("Length invalid");
-				return;
-			}
-			changeActor->setLastName(pParameters[0]);
-			changeActor->getZone()->handleSurnameChange(changeActor);
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
 		}
+		const bool hasTarget = pCharacter->hasTarget();
+
+		// Check: Has a target.
+		if (!hasTarget) {
+			pCharacter->notify("You must target an actor.");
+			return false;
+		}
+		Actor* changeActor = pCharacter->getTarget();
+
+		// Check: Length.
+		if (!Limits::Character::surnameLengthClient(pParameters[0])) {
+			pCharacter->notify("Length invalid");
+			return false;
+		}
+
+		changeActor->setLastName(pParameters[0]);
+		changeActor->getZone()->handleSurnameChange(changeActor);
+		return true;
 	}
 };
 
@@ -405,10 +461,99 @@ public:
 		mHelpMessage = "Usage: #findspell <name>";
 	};
 
-	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
-		if (pParameters.size() != 1) return;
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
 
 		// TODO:
+	}
+};
+
+class SetSkillCommand : public Command {
+public:
+	SetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #setskill <id> <value>";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 2) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		uint32 skillID = 0;
+		uint32 skillValue = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(skillID, pParameters[0]) && Utility::stou32Safe(skillValue, pParameters[1]);
+		if (!ok) {
+			return false;
+		}
+
+		// Check: Skill ID is valid.
+		if (!Limits::Skills::validID(skillID)) {
+			pCharacter->notify("Skill ID out of range: " + std::to_string(skillID));
+			return false;
+		}
+		if (!pCharacter->setSkill(skillID, skillValue)) {
+			return false;
+		}
+
+		pCharacter->getConnection()->sendSkillValue(skillID, skillValue);
+		return true;
+	}
+};
+
+class GetSkillCommand : public Command {
+public:
+	GetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #getskill <id>";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		uint32 skillID = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(skillID, pParameters[0]);
+		if (!ok) {
+			conversionError(pCharacter, pParameters[0]);
+			return false;
+		}
+
+		// Check: Skill ID is valid.
+		if (!Limits::Skills::validID(skillID)) {
+			pCharacter->notify("Skill ID out of range: " + std::to_string(skillID));
+			return false;
+		}
+
+		// TODO: Target Based.
+		// TODO: Base and adjusted skill levels.
+
+		String skillName = Utility::Skills::fromID(skillID);
+		uint32 skillValue = pCharacter->getSkill(skillID);
+		pCharacter->notify("Your " + skillName + " is " + std::to_string(skillValue));
+		return true;
+	}
+};
+
+class SkillListCommand : public Command {
+public:
+	SkillListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #skills";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		for (int i = 0; i < Limits::Skills::MAX_ID; i++)
+			pCharacter->notify(std::to_string(i) + " - " + Utility::Skills::fromID(i));
+		return true;
 	}
 };
 
@@ -420,7 +565,7 @@ public:
 //		mHelpMessage = "Usage: ";
 //	};
 //
-//	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+//	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
 //		// Check: Parameters
 //		if (pParameters.size() != 1) {
 //			invalidParameters(pCharacter, pParameters);
@@ -450,6 +595,12 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new LocationCommand(100, { "loc" }));
 
 	mCommands.push_back(new SurnameCommand(100, { "surname" }));
+
+	mCommands.push_back(new FindSpellCommand(100, { "findspell", "fs" }));
+
+	mCommands.push_back(new SetSkillCommand(100, { "setskill" }));
+	mCommands.push_back(new GetSkillCommand(100, { "getskill" }));
+	mCommands.push_back(new SkillListCommand(100, { "skills" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -590,6 +741,14 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->getConnection()->sendPacket(outPacket);
 		safe_delete(outPacket);
 	}
+	else if (pCommandName == "setskill") {
+		uint32 skillID = 0;
+		uint32 skillValue = 0;
+		Utility::stoSafe(skillID, pParameters[0]);
+		Utility::stoSafe(skillValue, pParameters[1]);
+
+		pCharacter->getConnection()->sendSkillValue(skillID, skillValue);
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}
@@ -612,6 +771,10 @@ CommandHandler::~CommandHandler() {
 
 void Command::invalidParameters(Character* pCharacter, CommandParameters pParameters) {
 	pCharacter->getConnection()->sendMessage(MessageType::Red, "Command parameters were invalid.");
+}
+
+void Command::conversionError(Character* pCharacter, String& pParameter) {
+	pCharacter->getConnection()->sendMessage(MessageType::Red, "Command parameter conversion failed for" + pParameter);
 }
 
 void Command::helpMessage(Character* pCharacter) {

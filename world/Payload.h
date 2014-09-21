@@ -242,6 +242,13 @@ namespace Payload {
 			uint8 mAction = 0;
 			uint8 mValue = 0;
 		};
+
+		// S->C
+		// Based on: SkillUpdate_Struct
+		struct SkillUpdate : public FixedLength_And_ServerToClient<SkillUpdate> {
+			uint32 mID = 0;
+			uint32 mValue = 0;
+		};
 	}
 
 	namespace World {

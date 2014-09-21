@@ -21,6 +21,8 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	setBodyType(BT_Humanoid);
 	setActorType(AT_PLAYER);
 	setIsNPC(false);
+
+	for (auto& i : mSkills) i = 0;
 }
 
 Character::~Character() {
@@ -91,10 +93,13 @@ bool Character::initialise() {
 	mBaseAgility = mData->mAgility;
 	mBaseWisdom = mData->mWisdom;
 
-	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
-
 	if (mData->mGuildID != NO_GUILD) {
 		GuildManager::getInstance().onConnect(this, mData->mGuildID);
+	}
+
+	// Skills
+	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
+		setSkill(i, mData->mSkills[i]);
 	}
 
 	// Armor Dye
@@ -126,6 +131,7 @@ bool Character::initialise() {
 		}
 	}
 
+	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 	mInitialised = true;
 	return true;
 }
@@ -346,6 +352,10 @@ void Character::_updateForSave() {
 	mData->mIntelligence = mBaseIntelligence;
 	mData->mAgility = mBaseAgility;
 	mData->mWisdom = mBaseWisdom;
+
+	// Skills
+	for (int i = 0; i < Limits::Skills::MAX_ID; i++)
+		mData->mSkills[i] = getSkill(i);
 
 	mData->mGuildID = getGuildID();
 	mData->mGuildRank = getGuildRank();
@@ -612,6 +622,28 @@ const bool Character::send(EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(mConnection);
 	EXPECTED_BOOL(mIsLinkDead == false);
 	mConnection->sendPacket(pPacket);
+}
+
+const uint32 Character::getSkill(const uint32 pSkillID) const {
+	if (!Limits::Skills::validID(pSkillID)) {
+		Log::error("Skill ID out of range: " + std::to_string(pSkillID));
+		return 0;
+	}
+
+	return mSkills[pSkillID];
+}
+
+const bool Character::setSkill(const uint32 pSkillID, const uint32 pValue) {
+	EXPECTED_BOOL(Limits::Skills::validID(pSkillID));
+
+	mSkills[pSkillID] = pValue;
+
+	return true;
+}
+
+const uint32 Character::getAdjustedSkill(const uint32 pSkillID) const {
+	// TODO: For now defer to base skill level.
+	return getSkill(pSkillID);
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

@@ -99,6 +99,8 @@ public:
 	void sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID);
 	void sendEnableSpellBar(const uint32 pSpellID);
 
+	void sendSkillValue(const uint32 pSkillID, const uint32 pValue);
+
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);
