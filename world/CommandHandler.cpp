@@ -399,6 +399,19 @@ public:
 	}
 };
 
+class FindSpellCommand : public Command {
+public:
+	FindSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #findspell <name>";
+	};
+
+	void handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		if (pParameters.size() != 1) return;
+
+		// TODO:
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {

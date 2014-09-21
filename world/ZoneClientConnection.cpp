@@ -565,6 +565,10 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->spell_book[MAX_PP_SPELLBOOK];
 	//payload->spell_book[3] = 17;
 
+	payload->skills[Skills::Meditate] = 1000;
+	payload->skills[Skills::SenseHeading] = 1000;
+	payload->skills[Skills::Swimming] = 1000;
+
 	// Copy spell book data into profile.
 	if (mCharacter->isCaster()) {
 		const std::vector<uint32> spellbook = mCharacter->getSpellBookData();
@@ -577,7 +581,6 @@ void ZoneClientConnection::_sendPlayerProfile() {
 		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
 			payload->mem_spells[i] = spellbar[i];
 	}
-	//payload->mem_spells[MAX_PP_MEMSPELL];
 	payload->y = mCharacter->getY();
 	payload->x = mCharacter->getX();
 	payload->z = mCharacter->getZ();
@@ -824,7 +827,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 
 	switch (actionType) {
 		// Handle animation.
-	case SpawnAppearanceType::Animation:
+	case SpawnAppearanceType::SA_Animation:
 		switch (actionParameter) {
 		case SpawnAppearanceAnimation::Standing:
 			mCharacter->setStanding(true);
@@ -902,15 +905,15 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		break;
 	case SpawnAppearanceType::DamageState:
 		break;
-	case SpawnAppearanceType::Sneak:
+	case SpawnAppearanceType::SA_Sneak:
 		break;
-	case SpawnAppearanceType::Invisible:
+	case SpawnAppearanceType::SA_Invisible:
 		break;
 	case SpawnAppearanceType::Size:
 		break;
-	case SpawnAppearanceType::Light:
+	case SpawnAppearanceType::SA_Light:
 		break;
-	case SpawnAppearanceType::PVP:
+	case SpawnAppearanceType::SA_PVP:
 		Log::info("Got PVP");
 		// NOTE: Not sure if this even possible.
 		break;
