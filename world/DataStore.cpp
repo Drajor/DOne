@@ -62,7 +62,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
-	pAttributeValue = attribute == "1";
+	pAttributeValue = String(attribute) == "1";
 	return true;
 }
 
