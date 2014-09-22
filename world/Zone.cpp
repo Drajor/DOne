@@ -20,6 +20,7 @@
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 #include "Scene.h"
+#include "SpawnPoint.h"
 
 Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID) :
 	mPort(pPort),
@@ -32,9 +33,11 @@ Zone::~Zone() {
 	safe_delete(mStreamFactory);
 	safe_delete(mStreamIdentifier);
 	safe_delete(mScene);
+
+	mSpawnPoints.remove_if(Utility::containerEntryDelete<SpawnPoint*>);
 }
 
-bool Zone::initialise() {
+const bool Zone::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
 	// Create and initialise EQStreamFactory.
@@ -44,13 +47,75 @@ bool Zone::initialise() {
 	mStreamIdentifier = new EQStreamIdentifier;
 	RegisterAllPatches(*mStreamIdentifier);
 
+	mScene = new Scene(this);
+
 	EXPECTED_BOOL(ZoneData::getInstance().getLongNameStringID(mID, mLongNameStringID));
 	EXPECTED_BOOL(ZoneData::getInstance().getLongName(mID, mLongName));
 	EXPECTED_BOOL(ZoneData::getInstance().getShortName(mID, mShortName));
 
-	mScene = new Scene(this);
+	EXPECTED_BOOL(loadSpawnPoints());
+	EXPECTED_BOOL(populate());
 
 	mInitialised = true;
+	return true;
+}
+
+const bool Zone::loadSpawnPoints() {
+	std::list<SpawnPointData*> spawnPointData;
+	if (!DataStore::getInstance().loadSpawnPointData(mShortName, spawnPointData)) {
+		// NOTE: If loadSpawnPointData fails we need to free any memory allocated.
+		for (auto i : spawnPointData)
+			delete i;
+
+		return false;
+	}
+
+	// Create Zone spawn points.
+	for (auto i : spawnPointData) {
+		auto spawnPoint = new SpawnPoint();
+		spawnPoint->setPosition(i->mPosition);
+		spawnPoint->setHeading(i->mHeading);
+		mSpawnPoints.push_back(spawnPoint);
+	}
+
+	// Free data memory.
+	for (auto i : spawnPointData)
+		delete i;
+
+	return true;
+}
+
+const bool Zone::populate() {
+	EXPECTED_BOOL(mPopulated == false);
+
+	for (auto i : mSpawnPoints) {
+		NPC* npc = new NPC();
+		npc->setZone(this);
+		npc->initialise();
+		npc->setPosition(i->getPosition());
+		npc->setHeading(i->getHeading());
+
+		i->setNPC(npc);
+		addActor(npc);
+	}
+
+	mPopulated = true;
+	return true;
+}
+
+const bool Zone::depopulate() {
+	EXPECTED_BOOL(mPopulated);
+
+	for (auto i : mSpawnPoints) {
+		auto npc = i->getNPC();
+		if (npc) {
+			i->setNPC(nullptr);
+			removeActor(npc);
+			delete npc;
+		}
+	}
+
+	mPopulated = false;
 	return true;
 }
 
@@ -637,7 +702,9 @@ void Zone::addActor(Actor* pActor) {
 }
 
 void Zone::removeActor(Actor* pActor) {
-
+	EXPECTED(pActor);
+	mScene->remove(pActor);
+	mActors.remove(pActor);
 }
 
 void Zone::handleSurnameChange(Actor* pActor) {

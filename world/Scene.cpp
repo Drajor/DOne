@@ -68,7 +68,9 @@ const bool Scene::remove(Actor* pActor) {
 
 	// NPC being removed from Scene.
 	if (pActor->isNPC()) {
-		mNPCs.remove(Actor::cast<NPC*>(pActor));
+		NPC* npc = Actor::cast<NPC*>(pActor);
+		mNPCs.remove(npc);
+		onNPCRemoved(npc);
 		return true;
 	}
 
@@ -116,9 +118,13 @@ void Scene::onNPCAdded(NPC* pNPC) {
 	}
 }
 
-void Scene::onNPCRemoved(NPC* pNPC)
-{
+void Scene::onNPCRemoved(NPC* pNPC) {
 
+	// Update any Character that can see pNPC.
+	for (auto i : pNPC->getVisibleTo()) {
+		mZone->handleVisibilityRemove(i, pNPC);
+		i->removeVisibleNPC(pNPC);
+	}
 }
 
 

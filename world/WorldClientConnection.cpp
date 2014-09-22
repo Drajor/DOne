@@ -461,7 +461,7 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		return true;
 	}
 
-	return false;
+	return success;
 }
 
 void WorldClientConnection::_sendChatServer(const String& pCharacterName) {

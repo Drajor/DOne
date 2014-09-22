@@ -641,6 +641,48 @@ public:
 	}
 };
 
+class DepopulateCommand : public Command {
+public:
+	DepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #depop";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		pCharacter->notify("Depopulating Zone...");
+		pCharacter->getZone()->depopulate();
+		return false;
+	}
+};
+
+class PopulateCommand : public Command {
+public:
+	PopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #pop";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		pCharacter->notify("Populating Zone...");
+		pCharacter->getZone()->populate();
+		return true;
+	}
+};
+
+class RepopulateCommand : public Command {
+public:
+	RepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #repop";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		pCharacter->notify("Repopulating Zone...");
+		pCharacter->notify("Depopulating Zone...");
+		pCharacter->getZone()->depopulate();
+		pCharacter->notify("Populating Zone...");
+		pCharacter->getZone()->populate();
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -689,6 +731,10 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new SetLanguageCommand(100, { "setlanguage" }));
 	mCommands.push_back(new GetLanguageCommand(100, { "getlanguage" }));
 	mCommands.push_back(new LanguageListCommand(100, { "languages" }));
+
+	mCommands.push_back(new PopulateCommand(100, { "pop" }));
+	mCommands.push_back(new DepopulateCommand(100, { "depop" }));
+	mCommands.push_back(new RepopulateCommand(100, { "repop" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {

@@ -21,13 +21,14 @@ class RaidManager;
 class Actor;
 class NPC;
 class Scene;
+class SpawnPoint;
 
 class Zone {
 public:
 	Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID = 0);
 	~Zone();
 
-	bool initialise();
+	const bool initialise();
 
 	inline const String& getLongName() const { return mLongName; }
 	inline const String& getShortName() const { return mShortName; }
@@ -117,7 +118,12 @@ public:
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 
+	const bool populate();
+	const bool depopulate();
+
 private:
+
+	const bool loadSpawnPoints();
 
 	// Performs a global Character search.
 	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
@@ -144,6 +150,7 @@ private:
 	const uint32 mPort;
 
 	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
+	bool mPopulated = false;
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
@@ -151,6 +158,7 @@ private:
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
 	std::list<Actor*> mActors;
+	std::list<SpawnPoint*> mSpawnPoints;
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;

@@ -51,7 +51,7 @@ int32 Utility::Time::now() {
 const String& Utility::Skills::fromID(const uint32 pSkillID) {
 	// Check: pSkillID is in range.
 	if (!Limits::Skills::validID(pSkillID)) {
-		static auto BadSkillID = "BadSkillID";
+		static const String BadSkillID = "BadSkillID";
 		Log::error("Skill ID out of range: " + std::to_string(pSkillID) );
 		return BadSkillID;
 	}
@@ -62,7 +62,7 @@ const String& Utility::Skills::fromID(const uint32 pSkillID) {
 const String& Utility::Languages::fromID(const uint32 pLanguageID) {
 	// Check: pLanguageID is in range.
 	if (!Limits::Languages::validID(pLanguageID)) {
-		static auto BadLanguageID = "BadLanguageID";
+		static const String BadLanguageID = "BadLanguageID";
 		Log::error("Language ID out of range: " + std::to_string(pLanguageID));
 		return BadLanguageID;
 	}
