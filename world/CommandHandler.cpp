@@ -1,4 +1,5 @@
 #include "CommandHandler.h"
+#include "World.h"
 #include "Character.h"
 #include "NPC.h"
 #include "Zone.h"
@@ -683,6 +684,34 @@ public:
 	}
 };
 
+class WorldLockCommand : public Command {
+public:
+	WorldLockCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #lock 1/0";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		uint32 lock = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(lock, pParameters[0]);
+		if (!ok) {
+			conversionError(pCharacter, pParameters[0]);
+			return false;
+		}
+		bool locked = lock == 1 ? true : false;
+		World::getInstance().setLocked(locked);
+		String s = locked ? "Locked" : "Unlocked";
+		pCharacter->notify("World " + s);
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -701,6 +730,8 @@ public:
 //};
 
 void CommandHandler::initialise() {
+	mCommands.push_back(new WorldLockCommand(255, { "lock" }));
+
 	mCommands.push_back(new ZoneCommand(100, { "zone", "z" }));
 	mCommands.push_back(new WarpCommand(100, { "warp", "goto", "go" }));
 	mCommands.push_back(new GMCommand(100, { "gm" }));
