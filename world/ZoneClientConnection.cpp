@@ -410,6 +410,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player opens the title window.
 		_handleRequestTitles(pPacket);
 		break;
+	case OP_LootRequest:
+		_handleBeginLootRequest(pPacket);
+		break;
+	case OP_EndLootRequest:
+		_handleEndLootRequest(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -2575,6 +2581,50 @@ void ZoneClientConnection::sendSkillValue(const uint32 pSkillID, const uint32 pV
 	auto payload = SkillUpdate::convert(outPacket->pBuffer);
 	payload->mID = pSkillID;
 	payload->mValue = pValue;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleBeginLootRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(LootBeginRequest::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isLooting() == false);
+
+	auto payload = LootBeginRequest::convert(pPacket->pBuffer);
+	const uint32 corpseSpawnID = payload->mSpawnID;
+	mZone->handleBeginLootRequest(mCharacter, corpseSpawnID);
+}
+
+void ZoneClientConnection::_handleEndLootRequest(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+	EXPECTED(mCharacter->isLooting());
+
+	mZone->handleEndLootRequest(mCharacter);
+	//// TODO: Do we need to go back through Zone?
+	//mCharacter->setLooting(false);
+	//sendLootComplete();
+}
+
+void ZoneClientConnection::sendLootComplete() {
+	EXPECTED(mConnected);
+	auto outPacket = new EQApplicationPacket(OP_LootComplete, 0);
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, uint32 pGold, uint32 pSilver, uint32 pCopper) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_MoneyOnCorpse, LootResponse::size());
+	auto payload = LootResponse::convert(outPacket->pBuffer);
+	payload->mResponse = pResponse;
+	payload->mPlatinum = pPlatinum;
+	payload->mGold = pGold;
+	payload->mSilver = pSilver;
+	payload->mCopper = pCopper;
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);

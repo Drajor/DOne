@@ -712,6 +712,27 @@ public:
 	}
 };
 
+class KillCommand : public Command {
+public:
+	KillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #kill";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		Actor* target = pCharacter->getTarget();
+
+		// Check: Has a target.
+		if (!target){
+			pCharacter->notify("You need to target something first.");
+			return true;
+		}
+
+		if (target->isNPC()) {
+			pCharacter->getZone()->handleDeath(target);
+		}
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -766,6 +787,8 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new PopulateCommand(100, { "pop" }));
 	mCommands.push_back(new DepopulateCommand(100, { "depop" }));
 	mCommands.push_back(new RepopulateCommand(100, { "repop" }));
+
+	mCommands.push_back(new KillCommand(100, { "kill" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -913,6 +936,39 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		Utility::stoSafe(skillValue, pParameters[1]);
 
 		pCharacter->getConnection()->sendSkillValue(skillID, skillValue);
+	}
+	else if (pCommandName == "corpse") {
+		uint8 response = 0;
+		uint8 unk0 = 0;
+		uint8 unk1 = 0;
+		uint8 unk2 = 0;
+
+		Utility::stoSafe(response, pParameters[0]);
+		Utility::stoSafe(unk0, pParameters[1]);
+		Utility::stoSafe(unk1, pParameters[2]);
+		Utility::stoSafe(unk2, pParameters[3]);
+
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
+		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*)outapp->pBuffer;
+		d->response = response;
+		d->unknown1 = unk0;
+		d->unknown2 = unk1;
+		d->unknown3 = unk2;
+
+		// 3 = LOOT
+		// 4 = "You cannot loot while a hostile create is aware of your presence"
+		// 5 = "You are too far away to loot that corpse"
+		// 6 = Nothing
+		// 7 = Nothing
+		// 8 = LOOT
+		// 9 = LOOT
+		// 10 = LOOT
+
+		pCharacter->getConnection()->sendPacket(outapp);
+		safe_delete(outapp);
+	}
+	else if (pCommandName == "com") {
+		pCharacter->getConnection()->sendLootComplete();
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

@@ -102,6 +102,9 @@ public:
 	void sendSkillValue(const uint32 pSkillID, const uint32 pValue);
 	void sendLanguageValue(const uint32 pLanguageID, const uint32 pValue) { sendSkillValue(pLanguageID + 100, pValue); }
 
+	void sendLootComplete();
+	void sendLootResponse(uint8 pResponse, uint32 pPlatinum = 0, uint32 pGold = 0, uint32 pSilver = 0, uint32 pCopper = 0);
+
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);
@@ -191,6 +194,9 @@ private:
 
 	void _handleSetTitle(const EQApplicationPacket* pPacket);
 	void _handleRequestTitles(const EQApplicationPacket* pPacket);
+
+	void _handleBeginLootRequest(const EQApplicationPacket* pPacket);
+	void _handleEndLootRequest(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

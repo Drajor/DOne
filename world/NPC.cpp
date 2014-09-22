@@ -24,3 +24,10 @@ const bool NPC::initialise() {
 	return true;
 }
 
+const bool NPC::onDeath() {
+	setActorType(AT_NPC_CORPSE);
+	setName(getName() + "'s corpse");
+
+	return true;
+}
+

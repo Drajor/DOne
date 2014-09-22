@@ -61,6 +61,8 @@ public:
 		return mPosition.squareDistance(pActor->mPosition);
 	}
 
+	virtual const bool onDeath() = 0;
+
 	inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
 	inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mSpawnData.mSpawnID2); }
 
@@ -260,6 +262,11 @@ public:
 	inline const bool isLFG() const { return mSpawnData.mIsLFG == 1; }
 	inline void setIsLFG(const bool pIsLFG) { mSpawnData.mIsLFG = pIsLFG ? 1 : 0; }
 
+	// Looting
+	inline const bool hasLooter() const { return mLooter != nullptr; }
+	inline Character* getLooter() const { return mLooter; }
+	inline void setLooter(Character* pCharacter) { mLooter = pCharacter; }
+
 protected:
 	Vector3 mPosition;
 	float mHeading = 0.0f;
@@ -268,6 +275,7 @@ protected:
 	int32 mAnimation = 0;
 
 	Actor* mTarget = nullptr;
+	Character* mLooter = nullptr;
 	Payload::SpawnData mSpawnData;
 	Zone* mZone = nullptr;
 private:

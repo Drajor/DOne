@@ -249,6 +249,47 @@ namespace Payload {
 			uint32 mID = 0;
 			uint32 mValue = 0;
 		};
+
+		// S->C
+		// Based on: Death_Struct
+		struct Death : public FixedLength_And_ServerToClient<Death> {
+			uint32 mSpawnID = 0;
+			uint32 mKillerSpawnID = 0;
+			uint32 mCorpseID = 0; // ??
+			uint32 mBindZoneID = 0;
+			uint32 mSpellID = 0xFFFFFFFF;
+			uint32 mSkillID = 0;
+			uint32 mDamage = 0;
+			uint32 mUnknown0 = 0;
+		};
+
+		// C->S
+		struct LootBeginRequest : public FixedSizedPayload<LootBeginRequest> {
+			uint32 mSpawnID = 0;
+		};
+		// C->S
+		struct LootEndRequest : public FixedSizedPayload<LootEndRequest> {
+			uint32 mSpawnID = 0;
+		};
+
+		// Based on: moneyOnCorpseStruct
+		struct LootResponse : public FixedLength_And_ServerToClient<LootResponse> {
+			enum Response : uint8 { 
+				ALREADY = 0,
+				LOOT = 1,
+				DENY = 2,
+				TOO_FAR = 3,
+				HOSTILE = 7, // "You cannot loot while a hostile create is aware of your presence"
+			};
+			uint8 mResponse = DENY;
+			uint8 mUnknown0 = 0x5a;
+			uint8 mUnknown1 = 0x40;
+			uint8 mUnknown2 = 0;
+			uint32 mPlatinum = 0;
+			uint32 mGold = 0;
+			uint32 mSilver = 0;
+			uint32 mCopper = 0;
+		};
 	}
 
 	namespace World {

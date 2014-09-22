@@ -39,6 +39,7 @@ public:
 	
 	bool onZoneIn();
 	bool onZoneOut();
+	const bool onDeath() { return true; };
 	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
 
 	// Group
@@ -193,6 +194,10 @@ public:
 
 	void notify(const String& pMessage);
 	void _updateForSave();
+
+	inline const bool isLooting() const { return mLootingCorpse != nullptr; }
+	inline void setLootingCorpse(Actor* pCorpse) { mLootingCorpse = pCorpse; }
+	inline Actor* getLootingCorpse() { return mLootingCorpse; }
 private:
 
 	const uint32 mAccountID;
@@ -200,6 +205,7 @@ private:
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
+	Actor* mLootingCorpse = nullptr;
 
 	uint32 mExperience = 0;
 	void _checkForLevelIncrease();

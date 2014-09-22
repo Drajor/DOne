@@ -586,6 +586,14 @@ void Zone::notifyCharacterGuildChange(Character* pCharacter) {
 void Zone::_onLeaveZone(Character* pCharacter) {
 	ARG_PTR_CHECK(pCharacter);
 
+	// Handle: Character leaving zone while looting.
+	// (UNTESTED)
+	if (pCharacter->isLooting()) {
+		Actor* corpse = pCharacter->getLootingCorpse();
+		corpse->setLooter(nullptr);
+		pCharacter->setLootingCorpse(nullptr);
+	}
+
 	// Store Character during zoning.
 	ZoneManager::getInstance().addZoningCharacter(pCharacter);
 
@@ -621,6 +629,14 @@ void Zone::_onLinkdead(Character* pCharacter) {
 	mCharacters.remove(pCharacter); // Remove from active Character list.
 	mActors.remove(pCharacter);
 	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
+
+	// Handle: Character going LD while looting.
+	// (UNTESTED)
+	if (pCharacter->isLooting()) {
+		Actor* corpse = pCharacter->getLootingCorpse();
+		corpse->setLooter(nullptr);
+		pCharacter->setLootingCorpse(nullptr);
+	}
 
 	LinkDeadCharacter linkdeadCharacter;
 	linkdeadCharacter.mTimer = new Timer(5000);
@@ -838,4 +854,93 @@ void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
 	// Update anyone who can see pActor.
 	for (auto i : pActor->getVisibleTo())
 		i->getConnection()->sendPacket(pPacket);
+}
+
+void Zone::handleDeath(Actor* pActor) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto outPacket = new EQApplicationPacket(OP_Death, Death::size());
+	auto payload = Death::convert(outPacket->pBuffer);
+	payload->mSpawnID = pActor->getSpawnID();
+	payload->mKillerSpawnID = 0;
+
+	sendToVisible(pActor, outPacket);
+	safe_delete(outPacket);
+
+	pActor->onDeath();
+
+	//Death_Struct* d = (Death_Struct*)app->pBuffer;
+	//d->spawn_id = getID();
+	//d->killer_id = killerMob ? killerMob->getID() : 0;
+	//d->bindzoneid = 0;
+	//d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
+	//d->attack_skill = SkillDamageTypes[attack_skill];
+	//d->damage = damage;
+	//app->priority = 6;
+}
+
+void Zone::handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isLooting() == false);
+
+	// Check: Actor exists.
+	Actor* actor = findActor(pCorpseSpawnID);
+	if (!actor) {
+		pCharacter->notify("Corpse could not be found.");
+		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+		return;
+	}
+
+	// Check: Actor is a corpse.
+	if (!actor->isCorpse()) {
+		pCharacter->notify("You can not loot that.");
+		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+		return;
+	}
+
+	// Handle: Looting an NPC corpse.
+	if (actor->isNPCCorpse()) {
+		// Check: Is pCharacter close enough to loot.
+		if (pCharacter->squareDistanceTo(actor) > 625) { // TODO: Magic.
+			pCharacter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
+			return;
+		}
+		// Check: Is pCharacter allowed to loot this corpse?
+		if (false) {
+			pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+			return;
+		}
+		// Check: Is someone already looting this corpse?
+		if (actor->hasLooter()) {
+			pCharacter->getConnection()->sendLootResponse(LootResponse::ALREADY);
+			return;
+		}
+
+		pCharacter->setLootingCorpse(actor);
+		actor->setLooter(pCharacter);
+
+		pCharacter->getConnection()->sendLootResponse(LootResponse::LOOT, 10, 9, 8, 7);
+
+		return;
+	}
+
+	// Handle: Looting a Character corpse.
+	if (actor->isCharacterCorpse()) {
+
+		return;
+	}
+}
+
+void Zone::handleEndLootRequest(Character* pCharacter) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isLooting());
+	Actor* corpse = pCharacter->getLootingCorpse();
+	EXPECTED(corpse);
+	EXPECTED(corpse->getLooter() == pCharacter);
+
+	corpse->setLooter(nullptr);
+	pCharacter->setLootingCorpse(nullptr);
+	pCharacter->getConnection()->sendLootComplete();
 }

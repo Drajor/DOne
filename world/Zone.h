@@ -90,6 +90,8 @@ public:
 	void handleTarget(Character* pCharacter, SpawnID pSpawnID);
 	void handleFaceChange(Character* pCharacter);
 
+	void handleDeath(Actor* pActor);
+
 	// Guild
 	void notifyGuildsChanged();
 	void notifyCharacterGuildChange(Character* pCharacter);
@@ -121,6 +123,8 @@ public:
 	const bool populate();
 	const bool depopulate();
 
+	void handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID);
+	void handleEndLootRequest(Character* pCharacter);
 private:
 
 	const bool loadSpawnPoints();
