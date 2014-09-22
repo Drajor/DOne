@@ -460,6 +460,8 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 		// TODO: Not sure how to handle this yet, beyond dropping the connection.
 		return true;
 	}
+
+	return false;
 }
 
 void WorldClientConnection::_sendChatServer(const String& pCharacterName) {

@@ -35,6 +35,9 @@ namespace Limits {
 	namespace Skills {
 		const bool validID(const uint32 pSkillID);
 	}
+	namespace Languages {
+		const bool validID(const uint32 pLanguageID);
+	}
 	namespace Guild {
 		bool ID(const GuildID pGuildID);
 		bool MOTDLength(const String& pGuildMOTD);

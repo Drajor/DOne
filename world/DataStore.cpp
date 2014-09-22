@@ -317,6 +317,8 @@ namespace CharacterDataXML {
 		SCA SpellBarSlot = "sb_slot";
 		SCA Skills = "skills";
 		SCA Skill = "skill";
+		SCA Lanaguages = "languages";
+		SCA Language = "language";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -388,6 +390,9 @@ namespace CharacterDataXML {
 		// Tag::Skill
 		SCA SkillID = "id";
 		SCA SkillValue = "value";
+		// Tag::Language
+		SCA LanguageID = "id";
+		SCA LanguageValue = "value";
 	}
 #undef SCA
 }
@@ -456,6 +461,38 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 		dyeElement = dyeElement->NextSiblingElement(Tag::Dye);
 	}
 	EXPECTED_BOOL(slotID == MAX_ARMOR_DYE_SLOTS); // Check all 7 slots were read.
+
+	// Tag::Skills
+	auto skillsElement = characterElement->FirstChildElement(Tag::Skills);
+	EXPECTED_BOOL(skillsElement);
+	auto skillElement = skillsElement->FirstChildElement(Tag::Skill);
+	while (skillElement) {
+		// Tag::Skill
+		uint32 skillID = 0;
+		uint32 skillValue = 0;
+		EXPECTED_BOOL(readAttribute(skillElement, Attribute::SkillID, skillID));
+		EXPECTED_BOOL(readAttribute(skillElement, Attribute::SkillValue, skillValue));
+		EXPECTED_BOOL(Limits::Skills::validID(skillID));
+		pCharacterData->mSkills[skillID] = skillValue;
+
+		skillElement = skillElement->NextSiblingElement(Tag::Skill);
+	}
+
+	// Tag::Languages
+	auto languagesElement = characterElement->FirstChildElement(Tag::Lanaguages);
+	EXPECTED_BOOL(languagesElement);
+	auto languageElement = languagesElement->FirstChildElement(Tag::Language);
+	while (languageElement) {
+		// Tag::Language
+		uint32 languageID = 0;
+		uint32 languageValue = 0;
+		EXPECTED_BOOL(readAttribute(languageElement, Attribute::LanguageID, languageID));
+		EXPECTED_BOOL(readAttribute(languageElement, Attribute::LanguageValue, languageValue));
+		EXPECTED_BOOL(Limits::Languages::validID(languageID));
+		pCharacterData->mLanguages[languageID] = languageValue;
+
+		languageElement = languageElement->NextSiblingElement(Tag::Language);
+	}
 	
 	// Tag::Guild
 	auto guildElement = characterElement->FirstChildElement(Tag::Guild);
@@ -602,6 +639,16 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 		auto skillElement = static_cast<TiXmlElement*>(skillsElement->LinkEndChild(new TiXmlElement(Tag::Skill)));
 		skillElement->SetAttribute(Attribute::SkillID, i);
 		skillElement->SetAttribute(Attribute::SkillValue, pCharacterData->mSkills[i]);
+	}
+
+	// Tag::Languages
+	auto LanguagesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Lanaguages)));
+	for (int i = 0; i < Limits::Languages::MAX_ID; i++) {
+		if (pCharacterData->mLanguages[i] == 0) continue;
+		// Tag::Language
+		auto languageElement = static_cast<TiXmlElement*>(LanguagesElement->LinkEndChild(new TiXmlElement(Tag::Language)));
+		languageElement->SetAttribute(Attribute::LanguageID, i);
+		languageElement->SetAttribute(Attribute::LanguageValue, pCharacterData->mLanguages[i]);
 	}
 
 	// Tag::Guild

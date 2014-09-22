@@ -557,6 +557,90 @@ public:
 	}
 };
 
+class SetLanguageCommand : public Command {
+public:
+	SetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #setlanguage <id> <value>";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 2) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		uint32 languageID = 0;
+		uint32 languageValue = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(languageID, pParameters[0]) && Utility::stou32Safe(languageValue, pParameters[1]);
+		if (!ok) {
+			return false;
+		}
+
+		// Check: Language ID is valid.
+		if (!Limits::Languages::validID(languageID)) {
+			pCharacter->notify("Language ID out of range: " + std::to_string(languageID));
+			return false;
+		}
+		if (!pCharacter->setLanguage(languageID, languageValue)) {
+			return false;
+		}
+
+		pCharacter->getConnection()->sendLanguageValue(languageID , languageValue);
+		return true;
+	}
+};
+
+class GetLanguageCommand : public Command {
+public:
+	GetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #getlanguage <id>";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		uint32 languageID = 0;
+		// Check: Parameter conversion.
+		bool ok = Utility::stou32Safe(languageID, pParameters[0]);
+		if (!ok) {
+			conversionError(pCharacter, pParameters[0]);
+			return false;
+		}
+
+		// Check: Language ID is valid.
+		if (!Limits::Languages::validID(languageID)) {
+			pCharacter->notify("Language ID out of range: " + std::to_string(languageID));
+			return false;
+		}
+
+		// TODO: Target Based.
+
+		String languageName = Utility::Languages::fromID(languageID);
+		uint32 languageValue = pCharacter->getLanguage(languageID);
+		pCharacter->notify("Your " + languageName + " is " + std::to_string(languageValue));
+		return true;
+	}
+};
+
+class LanguageListCommand : public Command {
+public:
+	LanguageListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessage = "Usage: #languages";
+	};
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		for (int i = 0; i < Limits::Languages::MAX_ID; i++)
+			pCharacter->notify(std::to_string(i) + " - " + Utility::Languages::fromID(i));
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -566,10 +650,10 @@ public:
 //	};
 //
 //	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
-//		// Check: Parameters
+//		// Check: Parameter #
 //		if (pParameters.size() != 1) {
 //			invalidParameters(pCharacter, pParameters);
-//			return;
+//			return false;
 //		}
 //	}
 //};
@@ -601,6 +685,10 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new SetSkillCommand(100, { "setskill" }));
 	mCommands.push_back(new GetSkillCommand(100, { "getskill" }));
 	mCommands.push_back(new SkillListCommand(100, { "skills" }));
+
+	mCommands.push_back(new SetLanguageCommand(100, { "setlanguage" }));
+	mCommands.push_back(new GetLanguageCommand(100, { "getlanguage" }));
+	mCommands.push_back(new LanguageListCommand(100, { "languages" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {

@@ -567,9 +567,17 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	mCharacter->setSkill(Skills::SenseHeading, 1000);
 	mCharacter->setSkill(Skills::Swimming, 1000);
 
+	mCharacter->setLanguage(Languages::COMMON_TONGUE_LANG, 100);
+	mCharacter->setLanguage(Languages::BARBARIAN_LANG, 100);
+
 	// Copy skills into profile.
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
 		payload->skills[i] = mCharacter->getAdjustedSkill(i);
+	}
+
+	// Copy languages into profile.
+	for (int i = 0; i < Limits::Languages::MAX_ID; i++) {
+		payload->languages[i] = mCharacter->getLanguage(i);
 	}
 
 	// Copy spell book data into profile.
@@ -1506,7 +1514,7 @@ void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const St
 
 	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
-	payload->language = Language::COMMON_TONGUE_LANG;
+	payload->language = Languages::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
 	payload->chan_num = static_cast<uint32>(pChannel);
 	strcpy(payload->message, pMessage.c_str());

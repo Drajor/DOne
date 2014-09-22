@@ -361,7 +361,7 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMe
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
-	payload->language = Language::COMMON_TONGUE_LANG;
+	payload->language = Languages::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
 	payload->chan_num = static_cast<uint32>(pChannel);
 	strcpy(payload->message, pMessage.c_str());

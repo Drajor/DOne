@@ -268,6 +268,7 @@ namespace Utility {
 			"Conjuration",
 			"Defense",
 			"Disarm",
+			"Disarm Traps",
 			"Divination",
 			"Dodge",
 			"Double Attack",
@@ -327,5 +328,35 @@ namespace Utility {
 			"Frenzy"
 		};
 		const String& fromID(const uint32 pSkillID);
+	}
+	namespace Languages {
+		static const String LanguagesStrings[Limits::Languages::MAX_ID] = {
+			"Common Tongue",
+			"Barbarian",
+			"Erudian",
+			"Elvish",
+			"Dark Elvish",
+			"Dwarvish",
+			"Troll",
+			"Ogre",
+			"Gnomish",
+			"Halfling",
+			"Thieves Cant",
+			"Old Erudian",
+			"Elder Elvish",
+			"Froglok",
+			"Goblin",
+			"Gnoll",
+			"Combine Tongue",
+			"Elder Teir'Dal",
+			"Lizardman",
+			"Orcish",
+			"Faerie",
+			"Dragon",
+			"Elder Dragon",
+			"Dark Speech",
+			"Vah Shir"
+		};
+		const String& fromID(const uint32 pLanguageID);
 	}
 }

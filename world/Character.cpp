@@ -23,6 +23,7 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	setIsNPC(false);
 
 	for (auto& i : mSkills) i = 0;
+	for (auto& i : mLanguages) i = 0;
 }
 
 Character::~Character() {
@@ -100,6 +101,11 @@ bool Character::initialise() {
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
 		setSkill(i, mData->mSkills[i]);
+	}
+
+	// Languages
+	for (int i = 0; i < Limits::Languages::MAX_ID; i++) {
+		setLanguage(i, mData->mLanguages[i]);
 	}
 
 	// Armor Dye
@@ -356,6 +362,10 @@ void Character::_updateForSave() {
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++)
 		mData->mSkills[i] = getSkill(i);
+
+	// Languages
+	for (int i = 0; i < Limits::Languages::MAX_ID; i++)
+		mData->mLanguages[i] = getLanguage(i);
 
 	mData->mGuildID = getGuildID();
 	mData->mGuildRank = getGuildRank();
@@ -637,13 +647,28 @@ const bool Character::setSkill(const uint32 pSkillID, const uint32 pValue) {
 	EXPECTED_BOOL(Limits::Skills::validID(pSkillID));
 
 	mSkills[pSkillID] = pValue;
-
 	return true;
 }
 
 const uint32 Character::getAdjustedSkill(const uint32 pSkillID) const {
 	// TODO: For now defer to base skill level.
 	return getSkill(pSkillID);
+}
+
+const uint32 Character::getLanguage(const uint32 pLanguageID) const {
+	if (!Limits::Languages::validID(pLanguageID)) {
+		Log::error("Language ID out of range: " + std::to_string(pLanguageID));
+		return 0;
+	}
+
+	return mLanguages[pLanguageID];
+}
+
+const bool Character::setLanguage(const uint32 pLanguageID, const uint32 pValue) {
+	EXPECTED_BOOL(Limits::Languages::validID(pLanguageID));
+
+	mLanguages[pLanguageID] = pValue;
+	return true;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

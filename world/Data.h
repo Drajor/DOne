@@ -65,6 +65,7 @@ struct CharacterData {
 		mSpellBar.resize(Limits::SpellBar::MAX_SLOTS);
 
 		for (auto& i : mSkills) i = 0;
+		for (auto& i : mLanguages) i = 0;
 	}
 	String mName = "";
 	uint32 mLevel = 1;
@@ -84,6 +85,7 @@ struct CharacterData {
 	float mHeading = 0.0f;
 
 	uint32 mSkills[Limits::Skills::MAX_ID];
+	uint32 mLanguages[Limits::Languages::MAX_ID];
 
 	GuildID mGuildID = NO_GUILD;
 	GuildRank mGuildRank = GuildRanks::GR_None;

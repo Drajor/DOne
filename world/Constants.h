@@ -171,14 +171,12 @@ enum Skills : uint32 {
 	Intimidation,
 	Berserking,
 	Taunt,
-	Frenzy,
-
-	CommonTongue = 100,
+	Frenzy
 };
 namespace Limits {
 	namespace Skills {
 		static const auto MIN_ID = 0;
-		static const auto MAX_ID = ::Skills::Frenzy;
+		static const auto MAX_ID = ::Skills::Frenzy + 1;
 	}
 }
 
@@ -885,7 +883,7 @@ enum class StringID : uint32 {
 	GENERIC_MISS = 15041,	//%1 missed %2
 };
 
-enum Language : uint32 {
+enum Languages : uint32 {
 	COMMON_TONGUE_LANG = 0,
 	BARBARIAN_LANG = 1,
 	ERUDIAN_LANG = 2,
@@ -910,11 +908,14 @@ enum Language : uint32 {
 	DRAGON_LANG = 21,
 	ELDER_DRAGON_LANG = 22,
 	DARK_SPEECH_LANG = 23,
-	VAH_SHIR_LANG = 24,
-	ALARAN_LANG = 25,
-	HADAL_LANG = 26,
-	UNKNOWN_LANG = 27
+	VAH_SHIR_LANG = 24
 };
+namespace Limits {
+	namespace Languages {
+		static const auto MIN_ID = 0;
+		static const auto MAX_ID = ::Languages::VAH_SHIR_LANG + 1;
+	}
+}
 
 enum Animation : uint8 {
 	ANIM_KICK = 1, // tested

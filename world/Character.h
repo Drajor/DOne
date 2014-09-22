@@ -188,6 +188,9 @@ public:
 	const bool setSkill(const uint32 pSkillID, const uint32 pValue);
 	const uint32 getAdjustedSkill(const uint32 pSkillID) const;
 
+	const uint32 getLanguage(const uint32 pLanguageID) const;
+	const bool setLanguage(const uint32 pLanguageID, const uint32 pValue);
+
 	void notify(const String& pMessage);
 	void _updateForSave();
 private:
@@ -230,6 +233,7 @@ private:
 	Timer mCastingTimer;
 
 	uint32 mSkills[Limits::Skills::MAX_ID];
+	uint32 mLanguages[Limits::Languages::MAX_ID];
 
 	bool mStanding = true;
 	bool mIsZoningOut = false;

@@ -100,6 +100,7 @@ public:
 	void sendEnableSpellBar(const uint32 pSpellID);
 
 	void sendSkillValue(const uint32 pSkillID, const uint32 pValue);
+	void sendLanguageValue(const uint32 pLanguageID, const uint32 pValue) { sendSkillValue(pLanguageID + 100, pValue); }
 
 	//void sendSpellCastOn();
 
