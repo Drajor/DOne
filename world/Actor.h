@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Payload.h"
 #include "Vector3.h"
+#include "../common/timer.h"
 
 namespace FUCK {
 	static inline const float xEQ19toFloat(const int d)
@@ -46,10 +47,30 @@ public:
 	inline virtual const bool isNPC() const { return false; }
 	inline virtual const bool isNPCCorpse() const { return false; }
 	inline const bool isCorpse() const { return (isCharacterCorpse() || isNPCCorpse()); }
-	inline void setTarget(Actor* pActor) { mTarget = pActor; }
+
+	// Target
+	void setTarget(Actor* pActor);
 	inline Actor* getTarget() const { return mTarget; }
 	inline const bool hasTarget() const { return mTarget != nullptr; }
 	inline const bool targetIsCharacter() const { return mTarget ? mTarget->isCharacter() : false; }
+	inline void addTargeter(Actor* pActor) { mTargeters.push_back(pActor); }
+	inline void removeTargeter(Actor* pActor) { mTargeters.remove(pActor); }
+	inline void clearTarget(const bool pRemoveFromTargeter = true) {
+		if (!mTarget) return;
+
+		if (pRemoveFromTargeter)
+			mTarget->removeTargeter(this);
+		mTarget = nullptr;
+	}
+	
+	// Removes this Actor from any other Actors that have this Actor targeted.
+	inline void clearTargeters() {
+		for (auto i : mTargeters) {
+			i->clearTarget(false);
+		}
+		mTargeters.clear();
+	}
+
 	template <typename T>
 	inline static T cast(Actor* pActor) {
 		return static_cast<T>(pActor);
@@ -86,14 +107,28 @@ public:
 	inline const String& getSuffix() const { return mSuffix; }
 	inline void setSuffix(const String& pSuffix) { mSuffix = pSuffix; _setSuffix(pSuffix.c_str()); }
 
+	// Standard Currency
 	inline const int32 getCopper() const { return mCopper; }
 	inline void setCopper(const int32 pCopper) { mCopper = pCopper; }
+	inline void addCopper(const int32 pCopper) { setCopper(getCopper() + pCopper); }
+
 	inline const int32 getSilver() const { return mSilver; }
 	inline void setSilver(const int32 pSilver) { mSilver = pSilver; }
+	inline void addSilver(const int32 pSilver) { setSilver(getSilver() + pSilver); }
+
 	inline const int32 getGold() const { return mGold; }
 	inline void setGold(const int32 pGold) { mGold = pGold; }
+	inline void addGold(const int32 pGold) { setGold(getGold() + pGold); }
+
 	inline const int32 getPlatinum() const { return mPlatinum; }
 	inline void setPlatinum(const int32 pPlatinum) { mPlatinum = pPlatinum; }
+	inline void addPlatinum(const int32 pPlatinum) { setPlatinum(getPlatinum() + pPlatinum); }
+
+	inline const bool hasCurrency() const { return (getPlatinum() + getGold() + getSilver() + getCopper()) > 0; }
+	inline void getCurrency(int32& pPlatinum, int32& pGold, int32& pSilver, int32& pCopper) { pPlatinum = getPlatinum(); pGold = getGold(); pSilver = getSilver(); pCopper = getCopper(); }
+	inline void setCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) { setPlatinum(pPlatinum); setGold(pGold); setSilver(pSilver); setCopper(pCopper); }
+	inline void addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) { addPlatinum(pPlatinum); addGold(pGold); addSilver(pSilver); addCopper(pCopper); }
+	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
 
 	inline void _syncPosition() {
 		// Current
@@ -267,6 +302,11 @@ public:
 	inline Character* getLooter() const { return mLooter; }
 	inline void setLooter(Character* pCharacter) { mLooter = pCharacter; }
 
+	const bool hasItems() const { return false; } // TODO: Items
+
+	inline void destroy() { mDestroy = true; }
+	inline const bool getDestroy() const { return mDestroy; }
+
 protected:
 	Vector3 mPosition;
 	float mHeading = 0.0f;
@@ -274,11 +314,13 @@ protected:
 	float mHeadingDelta = 0.0f;
 	int32 mAnimation = 0;
 
-	Actor* mTarget = nullptr;
 	Character* mLooter = nullptr;
+	Timer mDecayTimer;
 	Payload::SpawnData mSpawnData;
 	Zone* mZone = nullptr;
 private:
+
+	bool mDestroy = false;
 
 	int32 mCopper = 0;
 	int32 mSilver = 0;
@@ -292,6 +334,9 @@ private:
 
 	float mVisibleRange = 30.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
+
+	Actor* mTarget = nullptr; // Current target.
+	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.
 
 	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mSpawnData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }

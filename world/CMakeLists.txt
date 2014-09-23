@@ -33,6 +33,7 @@ SET(world_sources
 	UCSClientConnection.cpp
 	TitleManager.cpp
 	SpellDataStore.cpp
+	SpawnPoint.cpp
 )
 
 SET(world_headers

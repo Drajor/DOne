@@ -50,7 +50,7 @@ public:
 	void update();
 
 	void _updateCharacters();
-
+	void _updateNPCs();
 	void _updateConnections();
 
 
@@ -125,6 +125,9 @@ public:
 
 	void handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID);
 	void handleEndLootRequest(Character* pCharacter);
+
+	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
+	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
 private:
 
 	const bool loadSpawnPoints();
@@ -143,6 +146,7 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
+	
 	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID = 0;
@@ -158,11 +162,16 @@ private:
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
+	void _populate(SpawnPoint* pSpawnPoint);
+	void _addRespawn(SpawnPoint* pSpawnPoint);
+	void _updateSpawnPoints();
+	std::list<SpawnPoint*> mRespawns;
+	std::list<SpawnPoint*> mSpawnPoints;
+
 	Scene* mScene = nullptr;
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
 	std::list<Actor*> mActors;
-	std::list<SpawnPoint*> mSpawnPoints;
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;

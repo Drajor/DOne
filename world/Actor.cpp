@@ -1,6 +1,8 @@
 #include "Actor.h"
+#include "Utility.h"
 
 Actor::Actor() {
+	mDecayTimer.Disable();
 	// Until MS fixes initializers...
 	mSpawnData.mName[0] = '\0';
 	mSpawnData.mLastName[0] = '\0';
@@ -50,4 +52,13 @@ Actor::Actor() {
 	//mSpawnData.mUnknown5[0] = 1;
 	//mSpawnData.mUnknown5[1] = 1;
 	//mSpawnData.mUnknown5[2] = 1;
+}
+
+void Actor::setTarget(Actor* pActor) {
+	EXPECTED(pActor);
+	if (mTarget)
+		clearTarget();
+
+	mTarget = pActor;
+	mTarget->addTargeter(this);		
 }

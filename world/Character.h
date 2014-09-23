@@ -198,6 +198,8 @@ public:
 	inline const bool isLooting() const { return mLootingCorpse != nullptr; }
 	inline void setLootingCorpse(Actor* pCorpse) { mLootingCorpse = pCorpse; }
 	inline Actor* getLootingCorpse() { return mLootingCorpse; }
+
+	Actor* findVisible(const uint32 pSpawnID);
 private:
 
 	const uint32 mAccountID;

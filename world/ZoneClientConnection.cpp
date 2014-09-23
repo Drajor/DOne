@@ -1081,7 +1081,7 @@ void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
 }
 
 void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
@@ -1160,22 +1160,22 @@ void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 }
 
 void ZoneClientConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	// TODO:
 }
 
 void ZoneClientConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	// TODO:
 }
 
 void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(ClientTarget_Struct));
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Target::sizeCheck(pPacket->size));
 
-	auto payload = reinterpret_cast<ClientTarget_Struct*>(pPacket->pBuffer);
-
-	mZone->handleTarget(mCharacter, payload->new_target);
+	auto payload = Target::convert(pPacket->pBuffer);
+	mZone->handleTarget(mCharacter, payload->mSpawnID);
 }
 
 void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
@@ -2363,25 +2363,20 @@ void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
 
 void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	
 	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasTarget());
-
+	EXPECTED(Consider::sizeCheck(pPacket->size));
+	
 	auto payload = Consider::convert(pPacket->pBuffer);
-
-	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID());
+	mZone->handleConsider(mCharacter, payload->mTargetSpawnID);
 }
 
 void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Consider::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->hasTarget());
-	EXPECTED(mCharacter->getTarget()->isCorpse());
 
 	auto payload = Consider::convert(pPacket->pBuffer);
-
-	EXPECTED(payload->mTargetSpawnID == mCharacter->getTarget()->getSpawnID());
+	mZone->handleConsiderCorpse(mCharacter, payload->mTargetSpawnID);
 }
 
 void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
@@ -2625,6 +2620,21 @@ void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, u
 	payload->mGold = pGold;
 	payload->mSilver = pSilver;
 	payload->mCopper = pCopper;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_Consider, Consider::size());
+	auto payload = Consider::convert(outPacket->pBuffer);
+	payload->mSpawnID = mCharacter->getSpawnID();
+	payload->mTargetSpawnID = pSpawnID;
+	payload->mFaction = 5;
+	payload->mTargetLevel = 13;
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);

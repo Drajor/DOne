@@ -12,9 +12,15 @@ public:
 	inline NPC* getNPC() const { return mNPC; }
 	inline void setNPC(NPC* pNPC) { mNPC = pNPC; }
 	inline void setRespawnTime(const uint32 pRespawnTime) { mRespawnTime = pRespawnTime; }
+
+	void start();
+	const bool update();
+
+
 private:
 	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
 	NPC* mNPC = nullptr;
 	Vector3 mPosition;
 	float mHeading = 0.0f;
+	Timer mRespawnTimer;
 };

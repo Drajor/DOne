@@ -201,7 +201,7 @@ namespace Payload {
 
 		// C<->S
 		// Yes the Client sends this for some magical reason.
-		struct Consider : FixedSizedPayload<Consider> {
+		struct Consider : FixedLength_And_ServerToClient<Consider> {
 			uint32 mSpawnID = 0;
 			uint32 mTargetSpawnID = 0;
 			uint32 mFaction = 0;
@@ -272,6 +272,7 @@ namespace Payload {
 			uint32 mSpawnID = 0;
 		};
 
+		// S->C
 		// Based on: moneyOnCorpseStruct
 		struct LootResponse : public FixedLength_And_ServerToClient<LootResponse> {
 			enum Response : uint8 { 
@@ -289,6 +290,12 @@ namespace Payload {
 			uint32 mGold = 0;
 			uint32 mSilver = 0;
 			uint32 mCopper = 0;
+		};
+		
+		// C->S
+		// Based on: ClientTarget_Struct
+		struct Target : public FixedSizedPayload<Target> {
+			uint32 mSpawnID = 0;
 		};
 	}
 

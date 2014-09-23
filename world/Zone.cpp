@@ -88,16 +88,8 @@ const bool Zone::loadSpawnPoints() {
 const bool Zone::populate() {
 	EXPECTED_BOOL(mPopulated == false);
 
-	for (auto i : mSpawnPoints) {
-		NPC* npc = new NPC();
-		npc->setZone(this);
-		npc->initialise();
-		npc->setPosition(i->getPosition());
-		npc->setHeading(i->getHeading());
-
-		i->setNPC(npc);
-		addActor(npc);
-	}
+	for (auto i : mSpawnPoints)
+		_populate(i);
 
 	mPopulated = true;
 	return true;
@@ -158,6 +150,8 @@ void Zone::update() {
 	_updatePreConnections();
 	_updateConnections();
 	_updateCharacters();
+	_updateNPCs();
+	_updateSpawnPoints();
 
 	// Check: LD Characters for removal.
 	for (auto i = mLinkDeadCharacters.begin(); i != mLinkDeadCharacters.end();) {
@@ -298,6 +292,22 @@ void Zone::_updateConnections() {
 void Zone::_updateCharacters() {
 	for (auto i : mCharacters)
 		i->update();
+}
+
+void Zone::_updateNPCs() {
+	for (auto i = mNPCs.begin(); i != mNPCs.end();) {
+		NPC* npc = *i;
+		if (npc->update()) {
+			i++;
+			continue;
+		}
+
+		i = mNPCs.erase(i);
+		
+		npc->onDestroy();
+		removeActor(npc);
+		delete npc;
+	}
 }
 
 void Zone::shutdown()
@@ -660,7 +670,7 @@ void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
 
 	// Character is clearing their target.
 	if (pSpawnID == NO_TARGET) {
-		pCharacter->setTarget(nullptr);
+		pCharacter->clearTarget();
 		return;
 	}
 
@@ -715,12 +725,20 @@ void Zone::addActor(Actor* pActor) {
 
 	mScene->add(pActor);
 	mActors.push_back(pActor);
+
+	if (pActor->isNPC()) {
+		mNPCs.push_back(Actor::cast<NPC*>(pActor));
+	}
 }
 
 void Zone::removeActor(Actor* pActor) {
 	EXPECTED(pActor);
 	mScene->remove(pActor);
 	mActors.remove(pActor);
+
+	//if (pActor->isNPC()) {
+	//	mNPCs.remove(Actor::cast<NPC*>(pActor));
+	//}
 }
 
 void Zone::handleSurnameChange(Actor* pActor) {
@@ -868,6 +886,24 @@ void Zone::handleDeath(Actor* pActor) {
 	sendToVisible(pActor, outPacket);
 	safe_delete(outPacket);
 
+	// Check: Empty corpse.
+	if (!pActor->hasCurrency() && !pActor->hasItems()) {
+		pActor->destroy();
+		return;
+	}
+
+	if (pActor->isNPC()) {
+		NPC* npc = pActor->cast<NPC*>(pActor);
+		// Check: Associated with a SpawnPoint.
+		SpawnPoint* spawnPoint = npc->getSpawnPoint();
+		if (spawnPoint) {
+			spawnPoint->setNPC(nullptr);
+			npc->setSpawnPoint(nullptr);
+			// Add SpawnPoint to the respawn list.
+			_addRespawn(spawnPoint);
+		}
+	}
+
 	pActor->onDeath();
 
 	//Death_Struct* d = (Death_Struct*)app->pBuffer;
@@ -880,48 +916,70 @@ void Zone::handleDeath(Actor* pActor) {
 	//app->priority = 6;
 }
 
-void Zone::handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID) {
+void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnID) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isLooting() == false);
+	EXPECTED(pLooter);
+	EXPECTED(pLooter->isLooting() == false);
 
 	// Check: Actor exists.
 	Actor* actor = findActor(pCorpseSpawnID);
 	if (!actor) {
-		pCharacter->notify("Corpse could not be found.");
-		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+		pLooter->notify("Corpse could not be found.");
+		pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
 		return;
 	}
 
 	// Check: Actor is a corpse.
 	if (!actor->isCorpse()) {
-		pCharacter->notify("You can not loot that.");
-		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+		pLooter->notify("You can not loot that.");
+		pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
 		return;
 	}
 
 	// Handle: Looting an NPC corpse.
 	if (actor->isNPCCorpse()) {
 		// Check: Is pCharacter close enough to loot.
-		if (pCharacter->squareDistanceTo(actor) > 625) { // TODO: Magic.
-			pCharacter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
+		if (pLooter->squareDistanceTo(actor) > 625) { // TODO: Magic.
+			pLooter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
 			return;
 		}
 		// Check: Is pCharacter allowed to loot this corpse?
 		if (false) {
-			pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+			pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
 			return;
 		}
 		// Check: Is someone already looting this corpse?
 		if (actor->hasLooter()) {
-			pCharacter->getConnection()->sendLootResponse(LootResponse::ALREADY);
+			pLooter->getConnection()->sendLootResponse(LootResponse::ALREADY);
 			return;
 		}
 
-		pCharacter->setLootingCorpse(actor);
-		actor->setLooter(pCharacter);
+		pLooter->setLootingCorpse(actor);
+		actor->setLooter(pLooter);
 
-		pCharacter->getConnection()->sendLootResponse(LootResponse::LOOT, 10, 9, 8, 7);
+		int32 platinum = 0;
+		int32 gold = 0;
+		int32 silver = 0;
+		int32 copper = 0;
+		bool currencyLooted = false;
+
+		// Check: Does the corpse have currency on it?
+		if (actor->hasCurrency()) {
+			currencyLooted = true;
+
+			// Remove currency from corpse.
+			actor->getCurrency(platinum, gold, silver, copper);
+			actor->removeCurrency();
+
+			// Add currency to looter.
+			pLooter->addCurrency(platinum, gold, silver, copper);
+		}
+
+		pLooter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
+
+		if (currencyLooted) {
+			// TODO: Currency save.
+		}
 
 		return;
 	}
@@ -943,4 +1001,68 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 	corpse->setLooter(nullptr);
 	pCharacter->setLootingCorpse(nullptr);
 	pCharacter->getConnection()->sendLootComplete();
+
+	// Check: Empty corpse
+	if (!corpse->hasCurrency() && !corpse->hasItems()) {
+		corpse->destroy();
+	}
+}
+
+void Zone::_addRespawn(SpawnPoint* pSpawnPoint) {
+	EXPECTED(pSpawnPoint);
+	EXPECTED(pSpawnPoint->getNPC() == nullptr);
+
+	pSpawnPoint->start();
+	mRespawns.push_back(pSpawnPoint);
+}
+
+void Zone::_updateSpawnPoints() {
+	for (auto i = mRespawns.begin(); i != mRespawns.end();) {
+		SpawnPoint* spawnPoint = *i;
+		if (spawnPoint->update()) {
+			i++;
+			continue;
+		}
+		i = mRespawns.erase(i);
+		_populate(spawnPoint);
+	}
+}
+
+void Zone::_populate(SpawnPoint* pSpawnPoint) {
+	EXPECTED(pSpawnPoint);
+	EXPECTED(pSpawnPoint->getNPC() == nullptr);
+
+	NPC* npc = new NPC();
+	npc->setZone(this);
+	npc->initialise();
+	npc->setPosition(pSpawnPoint->getPosition());
+	npc->setHeading(pSpawnPoint->getHeading());
+
+	pSpawnPoint->setNPC(npc);
+	npc->setSpawnPoint(pSpawnPoint);
+
+	addActor(npc);
+}
+
+void Zone::handleConsider(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+
+	if (pSpawnID == pCharacter->getSpawnID()){
+		// TODO: Client sends self consider, need to double check how this should be handled.
+		return;
+	}
+	
+	Actor* actor = pCharacter->findVisible(pSpawnID);
+	EXPECTED(actor);
+
+	pCharacter->getConnection()->sendConsiderResponse(pSpawnID);
+}
+
+void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+
+	Actor* actor = pCharacter->findVisible(pSpawnID);
+	EXPECTED(actor);
+
+	pCharacter->getConnection()->sendSimpleMessage(MessageType::Aqua, StringID::CORPSE_DECAY1, "1", "1");
 }

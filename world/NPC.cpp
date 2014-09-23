@@ -1,4 +1,5 @@
 #include "NPC.h"
+#include "Character.h"
 #include "Zone.h"
 #include "Utility.h"
 
@@ -8,6 +9,8 @@ NPC::NPC() {
 	setBodyType(BT_Humanoid);
 	setActorType(AT_NPC);
 	setIsNPC(true);
+
+	setCurrency(4, 5, 6, 7);
 }
 
 const bool NPC::initialise() {
@@ -19,7 +22,6 @@ const bool NPC::initialise() {
 	setName(baseName+std::to_string(getSpawnID()));
 	setRaceID(6);
 	setClass(ClassIDs::Cleric);
-	//setIsGM(true);
 
 	return true;
 }
@@ -27,7 +29,34 @@ const bool NPC::initialise() {
 const bool NPC::onDeath() {
 	setActorType(AT_NPC_CORPSE);
 	setName(getName() + "'s corpse");
-
+	mDecayTimer.Start(5000);
 	return true;
+}
+
+const bool NPC::update() {
+	// Check: Is NPC flagged for destruction?
+	if (getDestroy()) return false;
+
+	// Check: Is NPC dead?
+	if (isCorpse()) {
+		// Corpse is about to decay, clean up if someone is looting.
+		if (mDecayTimer.Check()) {
+			return false;
+		}
+		return true;
+	}
+	return true;
+}
+
+void NPC::onDestroy() {
+	// Remove target references.
+	clearTargeters();
+
+	// Remove looting reference.
+	Character* looter = getLooter();
+	if (looter) {
+		looter->setLootingCorpse(nullptr);
+		setLooter(nullptr);
+	}
 }
 

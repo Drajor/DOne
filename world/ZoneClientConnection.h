@@ -105,6 +105,8 @@ public:
 	void sendLootComplete();
 	void sendLootResponse(uint8 pResponse, uint32 pPlatinum = 0, uint32 pGold = 0, uint32 pSilver = 0, uint32 pCopper = 0);
 
+	void sendConsiderResponse(const uint32 pSpawnID);
+
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);

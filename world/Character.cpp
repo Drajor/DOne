@@ -5,10 +5,9 @@
 #include "Zone.h"
 #include "Utility.h"
 #include "LogSystem.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/extprofile.h"
 #include "ZoneClientConnection.h"
 #include "Limits.h"
+#include "NPC.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -669,6 +668,21 @@ const bool Character::setLanguage(const uint32 pLanguageID, const uint32 pValue)
 
 	mLanguages[pLanguageID] = pValue;
 	return true;
+}
+
+Actor* Character::findVisible(const uint32 pSpawnID) {
+	// Search NPCs currently visible to this character.
+	for (auto i : mVisibleNPCs) {
+		if (i->getSpawnID() == pSpawnID)
+			return i;
+	}
+	// Search Characters currently visible to this character.
+	for (auto i : getVisibleTo()) {
+		if (i->getSpawnID() == pSpawnID)
+			return i;
+	}
+
+	return nullptr;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
