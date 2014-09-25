@@ -111,7 +111,7 @@ void ZoneClientConnection::dropConnection() {
 }
 
 bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK_BOOL(pPacket);
+	EXPECTED_BOOL(pPacket);
 
 	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
 
@@ -718,7 +718,7 @@ void ZoneClientConnection::_sendWeather() {
 }
 
 void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
 	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestSpawn;
@@ -742,7 +742,7 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 }
 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 
 	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
 	mForceSendPositionTimer.Start(4000);
@@ -826,8 +826,8 @@ void ZoneClientConnection::_sendWorldObjectsSent() {
 void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(PlayerPositionUpdateClient_Struct);
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
 
 	auto payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
 
@@ -848,8 +848,8 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(SpawnAppearance_Struct);
 	
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
 
 	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(pPacket->pBuffer);
 	const uint16 actionType = payload->type;
@@ -971,7 +971,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 }
 
 void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 
 	mCharacter->startCamp();
 }
@@ -980,9 +980,9 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct); // NOTE: This packet size increases with message size.
 	static const auto MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size <= MAXIMUM_SIZE);
-	PACKET_SIZE_CHECK(pPacket->size >= EXPECTED_SIZE);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size <= MAXIMUM_SIZE);
+	EXPECTED(pPacket->size >= EXPECTED_SIZE);
 
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
 
@@ -1200,8 +1200,8 @@ void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(uint32);
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
 	if (tgb == 0 || tgb == 1) {
@@ -1292,8 +1292,8 @@ void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Emote_Struct);
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	static const unsigned int MAX_EMOTE_SIZE = 1024;
 	auto payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
@@ -1304,8 +1304,8 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Animation_Struct);
 	
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
 	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value, false);
@@ -1372,8 +1372,8 @@ void ZoneClientConnection::sendStats() {
 void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Who_All_Struct);
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<Who_All_Struct*>(pPacket->pBuffer);
 	if (payload->type != 0 && payload->type != 3) return;
@@ -1567,8 +1567,8 @@ void ZoneClientConnection::sendGuildMessage(const String& pSenderName, const Str
 
 // NOTE: This occurs when the player presses 'Invite' on the group window.
 void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupInvite_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GroupInvite_Struct));
 
 	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
 
@@ -1595,8 +1595,8 @@ void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
 }
 
 void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupGeneric_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
 
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 	
@@ -1612,8 +1612,8 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 }
 
 void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupCancel_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GroupCancel_Struct));
 
 	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
 	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
@@ -1725,8 +1725,8 @@ void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames)
 }
 
 void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupGeneric_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
 	
 	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
 
@@ -1764,8 +1764,8 @@ void ZoneClientConnection::sendGroupDisband() {
 }
 
 void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GroupMakeLeader_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GroupMakeLeader_Struct));
 	EXPECTED(mCharacter->hasGroup());
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
@@ -1819,8 +1819,8 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 
 	//static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ZoneChange_Struct);
 
-	//ARG_PTR_CHECK(pPacket);
-	//PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	//EXPECTED(pPacket);
+	//EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	//auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	//auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
@@ -1838,9 +1838,9 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild() == false);
-	PACKET_SIZE_CHECK(pPacket->size == Limits::Guild::MAX_NAME_LENGTH);
+	EXPECTED(pPacket->size == Limits::Guild::MAX_NAME_LENGTH);
 	
 	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Guild::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Guild::nameLength(guildName));
@@ -1849,7 +1849,7 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 }
 
 void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Check: Permission.
 
@@ -1882,11 +1882,11 @@ void ZoneClientConnection::_sendGuildNames() {
 }
 
 void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Check: Permission.
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
+	EXPECTED(pPacket->size == sizeof(GuildCommand_Struct));
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
 
@@ -1907,10 +1907,10 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 }
 
 void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildCommand_Struct));
+	EXPECTED(pPacket->size == sizeof(GuildCommand_Struct));
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
 
@@ -1946,11 +1946,11 @@ void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID
 }
 
 void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	if (mCharacter->hasGuild()) { return; } // NOTE: UF sends OP_GuildInvite and OP_GuildInviteAccept(response=2,guildid=0) when using /guildinvite .. not sure why.
 	EXPECTED(mCharacter->hasPendingGuildInvite()); // Check: This Character has actually been invited to *A* Guild
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildInviteAccept_Struct));
+	EXPECTED(pPacket->size == sizeof(GuildInviteAccept_Struct));
 
 	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);
 	
@@ -1981,11 +1981,11 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 }
 
 void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Only leader or officers can set the MOTD.
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildMOTD_Struct));
+	EXPECTED(pPacket->size == sizeof(GuildMOTD_Struct));
 
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
 
@@ -2027,7 +2027,7 @@ void ZoneClientConnection::sendGuildMOTDReply(const String& pMOTD, const String&
 }
 
 void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 
 	GuildManager::getInstance().handleGetMOTD(mCharacter);
@@ -2112,10 +2112,10 @@ void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 }
 
 void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Only a Guild leader can perform this operation.
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(Payload::Guild::GuildUpdate));
+	EXPECTED(pPacket->size == sizeof(Payload::Guild::GuildUpdate));
 
 	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(pPacket->pBuffer);
 	if (payload->mAction == GUILD_URL) {
@@ -2133,10 +2133,10 @@ void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket
 }
 
 void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	// TODO: Put an upper-limit check on packet size.
-	PACKET_SIZE_CHECK(pPacket->size >= sizeof(Payload::Guild::PublicNote));
+	EXPECTED(pPacket->size >= sizeof(Payload::Guild::PublicNote));
 
 	auto payload = reinterpret_cast<Payload::Guild::PublicNote*>(pPacket->pBuffer);
 
@@ -2153,8 +2153,8 @@ void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* 
 }
 
 void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == sizeof(GuildStatus_Struct));
+	EXPECTED(pPacket);
+	EXPECTED(pPacket->size == sizeof(GuildStatus_Struct));
 
 	auto payload = reinterpret_cast<GuildStatus_Struct*>(pPacket->pBuffer);
 
@@ -2169,9 +2169,9 @@ void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPac
 
 void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	PACKET_SIZE_CHECK(Demote::sizeCheck(pPacket->size));
+	EXPECTED(Demote::sizeCheck(pPacket->size));
 
 	auto payload = Demote::convert(pPacket->pBuffer);
 
@@ -2194,9 +2194,9 @@ void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket
 
 void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	ARG_PTR_CHECK(pPacket);
+	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	PACKET_SIZE_CHECK(BankerAltStatus::sizeCheck(pPacket->size));
+	EXPECTED(BankerAltStatus::sizeCheck(pPacket->size));
 
 	auto payload = BankerAltStatus::convert(pPacket->pBuffer);
 

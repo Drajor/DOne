@@ -638,14 +638,14 @@ void Zone::notifyGuildsChanged() {
 }
 
 void Zone::notifyCharacterGuildChange(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildID, pCharacter->getGuildID(), true);
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildRank, pCharacter->getGuildRank(), true);
 }
 
 void Zone::_onLeaveZone(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	// Handle: Character leaving zone while looting.
 	// (UNTESTED)
@@ -669,7 +669,7 @@ void Zone::_onLeaveZone(Character* pCharacter) {
 }
 
 void Zone::_onCamp(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	if (pCharacter->hasGuild())
 		GuildManager::getInstance().onCamp(pCharacter);
@@ -682,7 +682,7 @@ void Zone::_onCamp(Character* pCharacter) {
 }
 
 void Zone::_onLinkdead(Character* pCharacter) {
-	ARG_PTR_CHECK(pCharacter);
+	EXPECTED(pCharacter);
 
 	pCharacter->setLinkDead();
 
