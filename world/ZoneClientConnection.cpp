@@ -794,6 +794,13 @@ void ZoneClientConnection::_sendZonePoints() {
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+
+	// Check payload size calculation.
+	if (dynamicStructure.getBytesWritten() != packetSize) {
+		StringStream ss;
+		ss << "[Zone Client Connection] Wrong amount of data written in _sendZonePoints. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
+		Log::error(ss.str());
+	}
 }
 
 void ZoneClientConnection::_sendAAStats() {
