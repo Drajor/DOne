@@ -10,16 +10,16 @@
 #include "../common/eq_packet_structs.h"
 
 void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
-	EXPECTED(pLeader);
-	EXPECTED(pMember);
+	ARG_PTR_CHECK(pLeader);
+	ARG_PTR_CHECK(pMember);
 	EXPECTED(!(pLeader->hasGroup() || pMember->hasGroup())); // Both Characters must not have groups.
 
 	mGroups.push_back(new Group(pLeader, pMember));
 }
 
 void GroupManager::joinGroup(Group* pGroup, Character* pCharacter) {
-	EXPECTED(pGroup);
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pGroup);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup() == false);
 
 	// UNTESTED!
@@ -31,7 +31,7 @@ void GroupManager::joinGroup(Group* pGroup, Character* pCharacter) {
 }
 
 void GroupManager::_disbandGroup(Group* pGroup) {
-	EXPECTED(pGroup);
+	ARG_PTR_CHECK(pGroup);
 	EXPECTED(pGroup->mMembers.size() == 1); // Only disband groups with one member left.
 
 	Character* lastMember = *pGroup->mMembers.begin();
@@ -45,14 +45,14 @@ void GroupManager::_disbandGroup(Group* pGroup) {
 }
 
 void GroupManager::handleMessage(Character* pCharacter, const String pMessage) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->getGroup());
 
 	_sendMessage(pCharacter->getGroup(), pCharacter->getName(), pMessage);
 }
 
 void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessage) {
-	EXPECTED(pGroup);
+	ARG_PTR_CHECK(pGroup);
 
 	for (auto i : pGroup->mMembers) {
 		// Check: Where a group member is zoning, queue the message.
@@ -65,8 +65,8 @@ void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessa
 }
 
 void GroupManager::_sendZoneMessage(Group* pGroup, Zone* pZone, String pSenderName, String pMessage, Character* pExcludeCharacter) {
-	EXPECTED(pGroup);
-	EXPECTED(pZone);
+	ARG_PTR_CHECK(pGroup);
+	ARG_PTR_CHECK(pZone);
 
 	// NOTE: Zoning members will have a null zone pointer.
 	for (auto i : pGroup->mMembers) {
@@ -76,7 +76,7 @@ void GroupManager::_sendZoneMessage(Group* pGroup, Zone* pZone, String pSenderNa
 }
 
 void GroupManager::handleMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup());
 	EXPECTED(_isLeader(pCharacter)); // Check: Initiator is group leader.
 
@@ -92,7 +92,7 @@ void GroupManager::handleMakeLeader(Character* pCharacter, const String& pLeader
 }
 
 void GroupManager::_postMemberRemoval(Group* pGroup) {
-	EXPECTED(pGroup);
+	ARG_PTR_CHECK(pGroup);
 
 	// Check: Group needs disbanding.
 	if (pGroup->needsDisbanding()) {
@@ -108,7 +108,7 @@ void GroupManager::_postMemberRemoval(Group* pGroup) {
 }
 
 void GroupManager::handleInviteSent(Character* pCharacter, String pInviteName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 
 	// Try to find the Character being invited.
 	auto character = ZoneManager::getInstance().findCharacter(pInviteName);
@@ -128,7 +128,7 @@ void GroupManager::handleInviteSent(Character* pCharacter, String pInviteName) {
 }
 
 void GroupManager::handleAcceptInvite(Character* pCharacter, String pInviterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 
 	// Try to find the Character who invited.
 	auto character = ZoneManager::getInstance().findCharacter(pInviterName);
@@ -145,7 +145,7 @@ void GroupManager::handleAcceptInvite(Character* pCharacter, String pInviterName
 }
 
 void GroupManager::handleDeclineInvite(Character* pCharacter, String pInviterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	
 	// Try to find the Character who invited.
 	auto character = ZoneManager::getInstance().findCharacter(pInviterName);
@@ -157,7 +157,7 @@ void GroupManager::handleDeclineInvite(Character* pCharacter, String pInviterNam
 }
 
 void GroupManager::handleDisband(Character* pCharacter, String pRemoveName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup());
 
 	Group* group = pCharacter->getGroup();
@@ -198,12 +198,12 @@ void GroupManager::handleDisband(Character* pCharacter, String pRemoveName) {
 }
 
 bool GroupManager::_isLeader(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
+	ARG_PTR_CHECK_BOOL(pCharacter);
 	return pCharacter->getGroup()->getLeader() == pCharacter;
 }
 
 void GroupManager::onEnterZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup());
 	EXPECTED(pCharacter->getZone()); // Check: Sanity
 
@@ -216,7 +216,7 @@ void GroupManager::onEnterZone(Character* pCharacter) {
 }
 
 void GroupManager::onLeaveZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGroup());
 	EXPECTED(pCharacter->getZone()); // Check: Sanity
 
@@ -225,7 +225,7 @@ void GroupManager::onLeaveZone(Character* pCharacter) {
 }
 
 void GroupManager::onCamp(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->getGroup());
 
 	Group* group = pCharacter->getGroup();
@@ -236,14 +236,14 @@ void GroupManager::onCamp(Character* pCharacter) {
 }
 
 void GroupManager::onDeath(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->getGroup());
 
 	// TODO: X Died.
 }
 
 void GroupManager::onLinkdead(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->getGroup());
 
 	Group* group = pCharacter->getGroup();
@@ -255,8 +255,8 @@ void GroupManager::onLinkdead(Character* pCharacter) {
 }
 
 Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
-	EXPECTED(pLeader);
-	EXPECTED(pMember);
+	ARG_PTR_CHECK(pLeader);
+	ARG_PTR_CHECK(pMember);
 	// NOTE: Error Conditions are ignored here as CTOR is private.
 	
 	add(pLeader);
@@ -274,7 +274,7 @@ Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
 }
 
 void Group::add(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED((pCharacter->hasGroup() == false)); // Check: Character does not have a group.
 	EXPECTED((mMembers.size() < Limits::Group::MAX_MEMBERS)); // Check: Group is not already full.
 
@@ -283,7 +283,7 @@ void Group::add(Character* pCharacter) {
 }
 
 void Group::remove(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->getGroup() == this); // Check: Pointer matching (sanity).
 	EXPECTED(isMember(pCharacter)); // Check: Character is already a member of this group.
 
@@ -309,7 +309,7 @@ void Group::sendGroupLeaderChange() {
 }
 
 bool Group::isMember(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
+	ARG_PTR_CHECK_BOOL(pCharacter);
 
 	for (auto i : mMembers) {
 		if (i == pCharacter) return true;

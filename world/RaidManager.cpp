@@ -4,22 +4,22 @@
 #include "Utility.h"
 
 void RaidManager::onEnterZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasRaid());
 }
 
 void RaidManager::onLeaveZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasRaid());
 }
 
 
 void RaidManager::onCamp(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasRaid());
 }
 
 void RaidManager::onLinkdead(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasRaid());
 }

@@ -151,7 +151,7 @@ bool LoginServerConnection::connect() {
 
 void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
 	using namespace Payload::LoginServer;
-	EXPECTED(ConnectRequest::sizeCheck(pPacket->size));
+	PACKET_SIZE_CHECK(ConnectRequest::sizeCheck(pPacket->size));
 
 	auto payload = ConnectRequest::convert(pPacket->pBuffer);
 
@@ -172,7 +172,7 @@ void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) 
 	//using namespace Payload::LoginServer;
 	auto expectedSize = sizeof(Payload::LoginServer::ClientAuthentication);
 	auto actualSize = pPacket->size;
-	EXPECTED(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket->size));
+	PACKET_SIZE_CHECK(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket->size));
 
 	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket->pBuffer);
 

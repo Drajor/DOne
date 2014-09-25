@@ -91,7 +91,7 @@ bool GuildManager::initialise() {
 }
 
 void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild() == false);
 
 	// Check: Guild name already exists.
@@ -132,7 +132,7 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 }
 
 void GuildManager::handleDelete(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(pCharacter->getGuildRank() == GuildRanks::Leader);
 
@@ -152,7 +152,7 @@ void GuildManager::handleDelete(Character* pCharacter) {
 }
 
 void GuildManager::handleRemove(Character* pCharacter, const String& pRemoveCharacterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
 
@@ -209,7 +209,7 @@ void GuildManager::handleRemove(Character* pCharacter, const String& pRemoveChar
 }
 
 void GuildManager::handleInviteSent(Character* pCharacter, const String& pInviteCharacterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
 
@@ -239,7 +239,7 @@ void GuildManager::handleInviteSent(Character* pCharacter, const String& pInvite
 }
 
 void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInviterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild() == false); // Check: Sanity.
 	EXPECTED(pInviterName == pCharacter->getPendingGuildInviteName());
 	Guild* guild = _findByID(pCharacter->getPendingGuildInviteID());
@@ -275,7 +275,7 @@ void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInvi
 }
 
 void GuildManager::handleInviteDecline(Character* pCharacter, const String& pInviterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pInviterName == pCharacter->getPendingGuildInviteName());
 	pCharacter->clearPendingGuildInvite();
 
@@ -421,7 +421,7 @@ Guild* GuildManager::_findByID(const GuildID pID) {
 }
 
 void GuildManager::onEnterZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
@@ -444,14 +444,14 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 }
 
 void GuildManager::onLeaveZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	// TODO: Do I need to zero member zone id / instance id?
 }
 
 void GuildManager::onCamp(Character* pCharacter){
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	// Update member.
@@ -470,7 +470,7 @@ void GuildManager::onCamp(Character* pCharacter){
 }
 
 void GuildManager::onLinkdead(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	// Update member.
@@ -489,7 +489,7 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 }
 
 void GuildManager::onLevelChange(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	// Update member details.
@@ -514,14 +514,14 @@ void GuildManager::onLevelChange(Character* pCharacter) {
 
 
 void GuildManager::handleMessage(Character* pCharacter, const String& pMessage) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	_sendMessage(pCharacter->getGuild(), pCharacter->getName(), pMessage);
 }
 
 void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude) {
-	EXPECTED(pGuild);
+	ARG_PTR_CHECK(pGuild);
 
 	for (auto i : pGuild->mOnlineMembers) {
 		if (i == pExclude) continue;;
@@ -536,7 +536,7 @@ void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const 
 }
 
 void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(Limits::Guild::MOTDLength(pMOTD));
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can set the MOTD.
@@ -551,14 +551,14 @@ void GuildManager::handleSetMOTD(Character* pCharacter, const String& pMOTD) {
 }
 
 void GuildManager::handleGetMOTD(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	_sendMOTDReply(pCharacter);
 }
 
 void GuildManager::_sendMOTD(const Guild* pGuild) {
-	EXPECTED(pGuild);
+	ARG_PTR_CHECK(pGuild);
 
 	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(Payload::Guild::MOTD));
 	auto payload = reinterpret_cast<Payload::Guild::MOTD*>(outPacket->pBuffer);
@@ -608,7 +608,7 @@ void GuildManager::_sendChannel(Guild* pGuild) {
 }
 
 void GuildManager::_sendMOTDReply(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	Guild* guild = pCharacter->getGuild();
@@ -616,7 +616,7 @@ void GuildManager::_sendMOTDReply(Character* pCharacter) {
 }
 
 void GuildManager::_sendGuildInformation(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
 	ZoneClientConnection* connection = pCharacter->getConnection();
@@ -632,7 +632,7 @@ void GuildManager::_sendGuildInformation(Character* pCharacter) {
 }
 
 void GuildManager::_sendMembers(Guild* pGuild) {
-	EXPECTED(pGuild);
+	ARG_PTR_CHECK(pGuild);
 
 	for (auto i : pGuild->mOnlineMembers) {
 		if (i->isZoning()) { continue; }
@@ -642,7 +642,7 @@ void GuildManager::_sendMembers(Guild* pGuild) {
 
 void GuildManager::_sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName) {
 	using namespace Payload::Guild;
-	EXPECTED(pGuild);
+	ARG_PTR_CHECK(pGuild);
 	EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
 
 	auto outPacket = new EQApplicationPacket(OP_GuildManageRemove, Remove::size());
@@ -661,8 +661,8 @@ void GuildManager::_sendMemberRemoved(const Guild* pGuild, const String& pRemove
 
 
 void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember) {
-	EXPECTED(pGuild);
-	EXPECTED(pMember);
+	ARG_PTR_CHECK(pGuild);
+	ARG_PTR_CHECK(pMember);
 	EXPECTED(pMember->mGuild == pGuild);
 
 	auto outPacket = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(Payload::Guild::MemberUpdate));
@@ -683,8 +683,8 @@ void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember*
 }
 
 void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember) {
-	EXPECTED(pGuild);
-	EXPECTED(pMember);
+	ARG_PTR_CHECK(pGuild);
+	ARG_PTR_CHECK(pMember);
 	EXPECTED(pMember->mGuild == pGuild);
 
 	auto outPacket = new EQApplicationPacket(OP_GuildMemberLevelUpdate, sizeof(Payload::Guild::LevelUpdate));
@@ -703,7 +703,7 @@ void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember
 }
 
 bool GuildManager::isLeader(Character* pCharacter){
-	EXPECTED_BOOL(pCharacter);
+	ARG_PTR_CHECK_BOOL(pCharacter);
 	EXPECTED_BOOL(pCharacter->hasGuild());
 
 	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
@@ -713,7 +713,7 @@ bool GuildManager::isLeader(Character* pCharacter){
 }
 
 bool GuildManager::isOfficer(Character* pCharacter){
-	EXPECTED_BOOL(pCharacter);
+	ARG_PTR_CHECK_BOOL(pCharacter);
 	EXPECTED_BOOL(pCharacter->hasGuild());
 
 	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
@@ -723,7 +723,7 @@ bool GuildManager::isOfficer(Character* pCharacter){
 }
 
 void GuildManager::handleSetURL(Character* pCharacter, const String& pURL) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter)); // Only leader can change the url.
 	EXPECTED(Limits::Guild::urlLength(pURL));
@@ -737,7 +737,7 @@ void GuildManager::handleSetURL(Character* pCharacter, const String& pURL) {
 }
 
 void GuildManager::handleSetChannel(Character* pCharacter, const String& pChannel) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter)); // Only leader can change the channel.
 	EXPECTED(Limits::Guild::channelLength(pChannel));
@@ -751,7 +751,7 @@ void GuildManager::handleSetChannel(Character* pCharacter, const String& pChanne
 }
 
 void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pNote) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(Limits::Character::nameLength(pCharacterName));
 	EXPECTED(Limits::Guild::publicNoteLength(pNote));
@@ -771,7 +771,7 @@ void GuildManager::handleSetPublicNote(Character* pCharacter, const String& pCha
 }
 
 void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCharacterName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(Limits::Character::nameLength(pCharacterName));
 
 	ZoneClientConnection* connection = pCharacter->getConnection();
@@ -808,7 +808,7 @@ void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCha
 }
 
 void GuildManager::handlePromote(Character* pCharacter, const String& pPromoteName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter)); // Only the guild leader can promote others.
 	EXPECTED(Limits::Character::nameLength(pPromoteName));
@@ -828,7 +828,7 @@ void GuildManager::handlePromote(Character* pCharacter, const String& pPromoteNa
 }
 
 void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
 	EXPECTED(Limits::Character::nameLength(pDemoteName));
@@ -855,7 +855,7 @@ void GuildManager::handleDemote(Character* pCharacter, const String& pDemoteName
 }
 
 void GuildManager::handleSetBanker(Character* pCharacter, const String& pOtherName, const bool pBanker) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(isLeader(pCharacter));
 	EXPECTED(Limits::Character::nameLength(pOtherName));
@@ -873,7 +873,7 @@ void GuildManager::handleSetBanker(Character* pCharacter, const String& pOtherNa
 }
 
 void GuildManager::handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt) {
-	EXPECTED(pCharacter);
+	ARG_PTR_CHECK(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 	EXPECTED(Limits::Character::nameLength(pAltName));
 
