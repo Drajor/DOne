@@ -265,14 +265,15 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		return true;
 	}
 	
+	bool valid = true;
+
+	// Check: Name Length.
 	String characterName = Utility::safeString((char*)pPacket->pBuffer, Limits::Character::MAX_INPUT_LENGTH);
+	valid = Limits::Character::nameInputLength(characterName);
+
 	// TODO: Consider why race and class are sent here?
 	uchar race = pPacket->pBuffer[64];
 	uchar clas = pPacket->pBuffer[68];
-
-	bool valid = true;
-
-	valid = Limits::Character::nameInputLength(characterName);
 
 	// Check case of first character (must be uppercase)
 	if (characterName[0] < 'A' || characterName[0] > 'Z') {

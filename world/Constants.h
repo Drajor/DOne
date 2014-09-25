@@ -60,8 +60,8 @@ namespace Limits {
 	namespace Character {
 		static const auto MIN_NAME_LENGTH = 4;
 		static const auto MAX_NAME_LENGTH = 64;
-		static const auto MIN_INPUT_LENGTH = 4; // @ Character Create
-		static const auto MAX_INPUT_LENGTH = 15; // @ Character Create
+		static const auto MIN_INPUT_LENGTH = 5; // @ Character Create (4 characters + 1 terminator)
+		static const auto MAX_INPUT_LENGTH = 16; // @ Character Create (15 characters + 1 terminator)
 		static const auto MAX_TITLE_LENGTH = 32;
 		static const auto MAX_SUFFIX_LENGTH = 32;
 		static const auto MAX_LAST_NAME_LENGTH = 32; // MAX for payload.
