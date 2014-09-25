@@ -7,6 +7,7 @@
 #include "GuildManager.h"
 #include "RaidManager.h"
 #include "Character.h"
+#include "NPC.h"
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
@@ -22,7 +23,7 @@
 #include "Scene.h"
 #include "SpawnPoint.h"
 
-Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID) :
+Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
@@ -30,7 +31,8 @@ Zone::Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceI
 }
 
 Zone::~Zone() {
-	safe_delete(mStreamFactory);
+	if (mStreamFactory) mStreamFactory->Close();
+	// NOTE: mStreamFactory is intentionally not deleted here.
 	safe_delete(mStreamIdentifier);
 	safe_delete(mScene);
 
@@ -73,9 +75,14 @@ const bool Zone::loadSpawnPoints() {
 	// Create Zone spawn points.
 	for (auto i : spawnPointData) {
 		auto spawnPoint = new SpawnPoint();
+		mSpawnPoints.push_back(spawnPoint);
+
 		spawnPoint->setPosition(i->mPosition);
 		spawnPoint->setHeading(i->mHeading);
-		mSpawnPoints.push_back(spawnPoint);
+		spawnPoint->setRespawnTime(i->mRespawnTime);
+		spawnPoint->setType(i->mType);
+		spawnPoint->setNPCType(i->mNPCType);
+		spawnPoint->setSpawnGroup(i->mSpawnGroupID);
 	}
 
 	// Free data memory.
@@ -111,36 +118,36 @@ const bool Zone::depopulate() {
 	return true;
 }
 
-void Zone::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName) {
-	mAuthenticatedCharacters.insert(std::make_pair(pCharacterName, pAuthentication));
-}
-
-void Zone::removeAuthentication(String pCharacterName) {
-	mAuthenticatedCharacters.erase(pCharacterName);
-}
-
-bool Zone::checkAuthentication(String pCharacterName) {
-	for (auto i : mAuthenticatedCharacters) {
-		if (i.first == pCharacterName) {
-			Log::info("[Zone] Authentication Passed");
-			return true;
-		}
-	}
-
-	Log::error("[Zone] checkAuthentication is returning false. This is unexpected.");
-	return false;
-}
-
-bool Zone::getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication) {
-	for (auto i : mAuthenticatedCharacters) {
-		if (i.first == pCharacterName) {
-			pAuthentication = i.second;
-			return true;
-		}
-	}
-
-	return false;
-}
+//void Zone::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName) {
+//	mAuthenticatedCharacters.insert(std::make_pair(pCharacterName, pAuthentication));
+//}
+//
+//void Zone::removeAuthentication(String pCharacterName) {
+//	mAuthenticatedCharacters.erase(pCharacterName);
+//}
+//
+//bool Zone::checkAuthentication(String pCharacterName) {
+//	for (auto i : mAuthenticatedCharacters) {
+//		if (i.first == pCharacterName) {
+//			Log::info("[Zone] Authentication Passed");
+//			return true;
+//		}
+//	}
+//
+//	Log::error("[Zone] checkAuthentication is returning false. This is unexpected.");
+//	return false;
+//}
+//
+//bool Zone::getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication) {
+//	for (auto i : mAuthenticatedCharacters) {
+//		if (i.first == pCharacterName) {
+//			pAuthentication = i.second;
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
 
 void Zone::update() {
@@ -449,8 +456,8 @@ void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMe
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
-	ZoneManager::getInstance().notifyCharacterChatTell(pCharacter, pTargetName, pMessage);
+void Zone::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
+	ZoneManager::getInstance().handleTell(pCharacter, pTargetName, pMessage);
 }
 
 bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage) {
@@ -568,10 +575,20 @@ Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZonin
 	return ZoneManager::getInstance().findCharacter(pCharacterName, pIncludeZoning, this);
 }
 
-void Zone::notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
-	// TODO: Are we expecting this character to zone out?
+void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID) {
+	EXPECTED(pCharacter);
 
-	ZoneManager::getInstance().registerZoneTransfer(pCharacter, pZoneID, pInstanceID);
+	// Check: Are we expecting a zone change?
+	if (pCharacter->checkZoneChange(pZoneID, pInstanceID)) {
+		//pCharacter->clearZoneChange();
+		pCharacter->setZoneAuthentication(pZoneID, pInstanceID);
+		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 1);
+	}
+	// TODO: Check Zone Points. (Unsolicited)
+	// Deny zone change.
+	else {
+		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 0);
+	}
 }
 
 void Zone::notifyGuildsChanged() {
@@ -1065,4 +1082,9 @@ void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
 	EXPECTED(actor);
 
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::Aqua, StringID::CORPSE_DECAY1, "1", "1");
+}
+
+const bool Zone::checkAuthentication(Character* pCharacter) {
+	EXPECTED_BOOL(pCharacter);
+	return pCharacter->checkZoneAuthentication(mID, mInstanceID);
 }

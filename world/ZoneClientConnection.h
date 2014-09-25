@@ -78,8 +78,8 @@ public:
 	void sendGroupDisband();
 	void sendGroupLeave(const String& pLeavingCharacterName);
 
-	void sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID);
-	void sendZoneChange(uint32 pZoneID, uint16 pInstanceID);
+	void sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID);
+	void sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const int32 pSuccess);
 
 	void sendGuildRank();
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);

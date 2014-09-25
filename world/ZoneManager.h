@@ -25,27 +25,29 @@ private:
 	void operator=(ZoneManager const&); // Do not implement.
 public:
 	bool initialise();
-	const bool isZoneAvailable(const ZoneID pZoneID, const InstanceID pInstanceID);
+	void update();
+
+	const bool isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID);
 
 	ZoneSearchResult getAllZones();
+	
+	// Returns the port used by Zone (ID=pZoneID, Instance=pInstanceID) or 0 if the Zone was not found.
+	const uint16 getZonePort(const uint16 pZoneID, const uint16 pInstanceID);
 
-	const bool addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
-	
-	void registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
-	
-	void addZoningCharacter(Character* pCharacter);
-	const bool removeZoningCharacter(const String& pCharacterName);
-	Character* getZoningCharacter(const String& pCharacterName);
+	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 
-	
-	void update();
-	uint16 getZonePort(ZoneID pZoneID, uint32 pInstanceID = 0);
-	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
+
+	// Character Zoning.
+	void addZoningCharacter(Character* pCharacter);
+	const bool removeZoningCharacter(const String& pCharacterName);
+	const bool hasZoningCharacter(const uint32 pAccountID);
+	Character* getZoningCharacter(const String& pCharacterName);
+	String getZoningCharacterName(const uint32 pAccountID);
 private:
-	Zone* _search(const ZoneID pZoneID, const uint32 pInstanceID);
-	const bool _makeZone(Zone* pZone, const ZoneID pZoneID, const uint32 pInstanceID = 0);
+	Zone* _search(const uint16 pZoneID, const uint16 pInstanceID);
+	const bool _makeZone(const uint16 pZoneID, const uint16 pInstanceID);
 	const uint32 _getNextZonePort();
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;

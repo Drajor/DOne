@@ -2,8 +2,12 @@
 
 std::size_t stringLength(const String& pString) { return pString.length() + 1; }
 
-bool Limits::Character::nameLength(const String& pCharacterName) {
+const bool Limits::Character::nameLength(const String& pCharacterName) {
 	return stringLength(pCharacterName) >= Limits::Character::MIN_NAME_LENGTH && stringLength(pCharacterName) <= Limits::Character::MAX_NAME_LENGTH;
+}
+
+const bool Limits::Character::nameInputLength(const String& pCharacterName) {
+	return stringLength(pCharacterName) >= Limits::Character::MIN_INPUT_LENGTH && stringLength(pCharacterName) <= Limits::Character::MAX_INPUT_LENGTH;
 }
 
 bool Limits::Character::surnameLengthPayload(const String& pSurname) {

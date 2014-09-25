@@ -18,9 +18,13 @@ struct CharacterData;
 struct SpellData;
 class SpellBook;
 
-
 class Character : public Actor {
 	friend ZoneClientConnection;
+public:
+	struct ZoneChange {
+		uint16 mZoneID = 0;
+		uint16 mInstanceID = 0;
+	};
 public:
 	Character(const uint32 pAccountID, CharacterData* pCharacterData);
 	~Character();
@@ -32,6 +36,13 @@ public:
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
 
+	// Zone Authentication
+	uint16 mAuthenticatedZoneID = 0;
+	uint16 mAuthicatedInstanceID = 0;
+	inline const uint16 getAuthenticatedZoneID() const { return mAuthenticatedZoneID; }
+	inline const uint16 getAuthenticatedInstanceID() const { return mAuthicatedInstanceID; }
+	inline void setZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) { mAuthenticatedZoneID = pZoneID; mAuthicatedInstanceID = pInstanceID; }
+	inline const bool checkZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) const { return mAuthenticatedZoneID == pZoneID && mAuthicatedInstanceID == pInstanceID; }
 
 	ClientAuthentication getAuthentication() { return mAuthentication; }
 
@@ -200,7 +211,13 @@ public:
 	inline Actor* getLootingCorpse() { return mLootingCorpse; }
 
 	Actor* findVisible(const uint32 pSpawnID);
+
+	void setZoneChange(const uint16 pZoneID, const uint16 pInstanceID);
+	const bool checkZoneChange(const uint16 pZoneID, const uint16 pInstanceID) const;
+	void clearZoneChange();
+	inline const ZoneChange& getZoneChange() const { return mZoneChange; }
 private:
+	ZoneChange mZoneChange;
 
 	const uint32 mAccountID;
 	bool mInitialised = false;

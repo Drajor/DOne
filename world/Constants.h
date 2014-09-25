@@ -60,6 +60,8 @@ namespace Limits {
 	namespace Character {
 		static const auto MIN_NAME_LENGTH = 4;
 		static const auto MAX_NAME_LENGTH = 64;
+		static const auto MIN_INPUT_LENGTH = 4; // @ Character Create
+		static const auto MAX_INPUT_LENGTH = 15; // @ Character Create
 		static const auto MAX_TITLE_LENGTH = 32;
 		static const auto MAX_SUFFIX_LENGTH = 32;
 		static const auto MAX_LAST_NAME_LENGTH = 32; // MAX for payload.
@@ -95,6 +97,12 @@ namespace Limits {
 }
 
 static const String SYS_NAME = "[System]";
+
+enum SpawnPointType : uint32 {
+	TRASH = 0,
+	SPECIFIC = 1,
+	SPAWN_GROUP = 2
+};
 
 enum Skills : uint32 {
 	OneHandBlunt = 0,
@@ -656,6 +664,9 @@ enum class StringID : uint32 {
 	CORPSE_DECAY1 = 495,		//This corpse will decay in %1 minute(s) %2 seconds.
 	DISC_LEVEL_ERROR = 503,		//You must be a level %1 ... to use this discipline.
 	DISCIPLINE_CANUSEIN = 504,		//You can use a new discipline in %1 minutes %2 seconds.
+	BEGIN_RAIN_BLOOD = 540, // It begins to rain blood.
+	BEGIN_RAIN = 541, // It begins to rain.
+	BEGIN_SNOW = 542, // It begins to snow.
 	PVP_ON = 552,		//You are now player kill and follow the ways of Discord.
 	GENERIC_STRINGID_SAY = 554,		//%1 says '%T2'
 	CANNOT_WAKE = 555,		//%1 tells you, 'I am unable to wake %2, master.'

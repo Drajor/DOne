@@ -26,6 +26,7 @@ namespace Utility {
 		int32 now();
 	}
 	void print(String pMessage);
+	String getRandomName();
 
 	inline const bool isCaster(ClassID pClassID) {
 		switch (pClassID) {

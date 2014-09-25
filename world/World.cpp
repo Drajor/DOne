@@ -183,9 +183,9 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	return AccountManager::getInstance().deleteCharacter(pAccountID, pCharacterName);
 }
 
-const bool World::addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
-	return ZoneManager::getInstance().addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
-}
+//const bool World::addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
+//	return ZoneManager::getInstance().addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
+//}
 
 ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
 	for (auto i : mAuthenticatedClients) {
@@ -205,25 +205,25 @@ bool World::ensureAccountExists(const uint32 pAccountID, const String& pAccountN
 	return true;
 }
 
-bool World::getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer) {
-	for (auto i : mZoneTransfers) {
-		if (i.mCharacterName == pCharacterName) {
-			pZoneTransfer = i;
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void World::removeZoneTransfer(const String& pCharacterName) {
-	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
-		if (i->mCharacterName == pCharacterName) {
-			mZoneTransfers.erase(i);
-			return;
-		}
-	}
-}
+//const bool World::getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer) {
+//	for (auto i : mZoneTransfers) {
+//		if (i.mCharacterName == pCharacterName) {
+//			pZoneTransfer = i;
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
+//
+//void World::removeZoneTransfer(const String& pCharacterName) {
+//	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
+//		if (i->mCharacterName == pCharacterName) {
+//			mZoneTransfers.erase(i);
+//			return;
+//		}
+//	}
+//}
 
 const bool World::handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning) {
 	EXPECTED_BOOL(pConnection);
@@ -237,11 +237,32 @@ const bool World::handleEnterWorld(WorldClientConnection* pConnection, const Str
 bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCharacterName) {
 	EXPECTED_BOOL(pConnection);
 
-	ZoneTransfer zoneTransfer;
-	EXPECTED_BOOL(getCharacterZoneTransfer(pCharacterName, zoneTransfer));
-	removeZoneTransfer(pCharacterName);
-	//addZoneAuthentication()
-	// Add Zone Authentication.
+	//ZoneTransfer zoneTransfer;
+	//EXPECTED_BOOL(getCharacterZoneTransfer(pCharacterName, zoneTransfer));
+	//removeZoneTransfer(pCharacterName);
+
+	//const uint16 zoneID = zoneTransfer.mToZoneID;
+	//const uint16 instanceID = zoneTransfer.mToInstanceID;
+
+	Character* character = ZoneManager::getInstance().getZoningCharacter(pCharacterName);
+	EXPECTED_BOOL(character);
+	EXPECTED_BOOL(character->getName() == pCharacterName);
+
+	auto zoneChange = character->getZoneChange();
+	const uint16 zoneID = zoneChange.mZoneID;
+	const uint16 instanceID = zoneChange.mInstanceID;
+
+	// Check: Zone Authentication.
+	EXPECTED_BOOL(character->checkZoneAuthentication(zoneID, instanceID));
+
+	// Check: Destination Zone is available to Character.
+	if (!ZoneManager::getInstance().isZoneAvailable(zoneID, instanceID)) {
+		return false;
+	}
+
+	// Send the client off to the Zone.
+	pConnection->_sendChatServer(pCharacterName);
+	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(zoneID, instanceID));
 
 	return true;
 }
@@ -257,8 +278,8 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	}
 
 	// Character Destination.
-	const ZoneID zoneID = characterData->mZoneID;
-	const InstanceID instanceID = characterData->mInstanceID;
+	const uint16 zoneID = characterData->mZoneID;
+	const uint16 instanceID = characterData->mInstanceID;
 
 	// Check: Destination Zone is available to pCharacter.
 	if (!ZoneManager::getInstance().isZoneAvailable(zoneID, instanceID)) {
@@ -269,13 +290,10 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	// Create Character
 	Character* character = new Character(pConnection->getAccountID(), characterData);
 
-	// Register ZoneTransfer
-	ZoneManager::getInstance().registerZoneTransfer(character, zoneID, instanceID);
-	if (!addZoneAuthentication(*findAuthentication(pConnection->getAccountID()), pCharacterName, zoneID, instanceID)){
-		
-		return false;
-	}
+	// Register Zone Change
+	//ZoneManager::getInstance().registerZoneChange(character, zoneID, instanceID);
 	ZoneManager::getInstance().addZoningCharacter(character);
+	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
 	pConnection->_sendChatServer(pCharacterName);;
@@ -283,3 +301,20 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 
 	return true;
 }
+
+//const bool World::hasZoningCharacter(const uint32 pAccountID) {
+//	for (auto i : mZoneTransfers) {
+//		if (i.mAccountID == pAccountID)
+//			return true;
+//	}
+//	return false;
+//}
+//
+//String World::getZoningCharacterName(const uint32 pAccountID) {
+//	for (auto i : mZoneTransfers) {
+//		if (i.mAccountID == pAccountID)
+//			return i.mCharacterName;
+//	}
+//
+//	return "";
+//}

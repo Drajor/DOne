@@ -15,13 +15,14 @@ class WorldClientConnection;
 
 struct CharacterData;
 
-struct ZoneTransfer {
-	String mCharacterName = "";
-	ZoneID mFromZoneID = 0;
-	InstanceID mFromInstanceID = 0;
-	ZoneID mToZoneID = 0;
-	InstanceID mToInstanceID = 0;
-};
+//struct ZoneTransfer {
+//	uint32 mAccountID = 0;
+//	String mCharacterName = "";
+//	ZoneID mFromZoneID = 0;
+//	InstanceID mFromInstanceID = 0;
+//	ZoneID mToZoneID = 0;
+//	InstanceID mToInstanceID = 0;
+//};
 
 class World : public Singleton<World> {
 private:
@@ -37,7 +38,7 @@ public:
 	void addAuthentication(ClientAuthentication& pAuthentication);
 	void removeAuthentication(ClientAuthentication& pAuthentication);
 	bool checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey);
-	const bool addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
+	//const bool addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID = 0);
 	bool authenticationExists(uint32 pLoginServerID);
 	bool ensureAccountExists(const uint32 pAccountID, const String& pAccountName);
 
@@ -56,9 +57,12 @@ public:
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
 	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
 	
-	bool getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer);
-	void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
-	void removeZoneTransfer(const String& pCharacterName);
+	//// Zone Transfer.
+	//const bool getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer);
+	//inline void addCharacterZoneTransfer(ZoneTransfer pZoneChangeData) { mZoneTransfers.push_back(pZoneChangeData); }
+	//void removeZoneTransfer(const String& pCharacterName);
+	//const bool hasZoningCharacter(const uint32 pAccountID);
+	//String getZoningCharacterName(const uint32 pAccountID);
 
 	const bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
 private:
@@ -66,7 +70,7 @@ private:
 	ClientAuthentication* findAuthentication(uint32 pLoginServerAccountID);
 	std::list<ClientAuthentication*> mAuthenticatedClients; // These are Clients the Login Server has told us about but have not yet fully connected to the World.
 	std::map<uint32, String> mReservedCharacterNames;
-	std::list<ZoneTransfer> mZoneTransfers;
+	//std::list<ZoneTransfer> mZoneTransfers;
 	void _handleIncomingClientConnections();
 
 	bool mInitialised = false;

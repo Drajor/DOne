@@ -685,6 +685,23 @@ Actor* Character::findVisible(const uint32 pSpawnID) {
 	return nullptr;
 }
 
+void Character::setZoneChange(const uint16 pZoneID, const uint16 pInstanceID) {
+	EXPECTED(mZoneChange.mZoneID == 0);
+	EXPECTED(mZoneChange.mInstanceID == 0);
+
+	mZoneChange.mZoneID = pZoneID;
+	mZoneChange.mInstanceID = pInstanceID;
+}
+
+const bool Character::checkZoneChange(const uint16 pZoneID, const uint16 pInstanceID) const {
+	return mZoneChange.mZoneID == pZoneID && mZoneChange.mInstanceID == pInstanceID;
+}
+
+void Character::clearZoneChange() {
+	mZoneChange.mZoneID = 0;
+	mZoneChange.mInstanceID = 0;
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);

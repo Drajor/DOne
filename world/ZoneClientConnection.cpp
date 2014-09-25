@@ -437,27 +437,17 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	EXPECTED(Limits::Character::nameLength(characterName));
 	Log::info("Got ZoneEntry from " + characterName);
 
-	// Check that this Zone is expecting this client.
-	if (!mZone->checkAuthentication(characterName)) {
-		Log::error("[Zone Client Connection] Client not expected in Zone, dropping connection.");
-		dropConnection();
-		return;
-	}
-	// Retrieve Authentication.
-	ClientAuthentication authentication;
-	if (!mZone->getAuthentication(characterName, authentication)) {
-		Log::error("[Zone Client Connection] Client authentication not found, dropping connection.");
-		dropConnection();
-		return;
-	}
-
-	mZone->removeAuthentication(characterName); // Character has arrived so we can stop expecting them.
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
 	// Retrieve Character
 	mCharacter = ZoneManager::getInstance().getZoningCharacter(characterName);
 	EXPECTED(mCharacter);
 	EXPECTED(ZoneManager::getInstance().removeZoningCharacter(mCharacter->getName()));
+
+	// Check: Character authenticated for this Zone.
+	EXPECTED(mZone->checkAuthentication(mCharacter));
+	// Clear ZoneChange
+	mCharacter->clearZoneChange();
 
 	// If character is not initialised yet they are loading from the Character Selection Screen.
 	if (mCharacter->isInitialised() == false) {
@@ -773,8 +763,12 @@ void ZoneClientConnection::_sendObjects() {
 
 void ZoneClientConnection::_sendZonePoints() {
 	EXPECTED(mConnected);
-	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SendZonepoints, 0);
-	//mStreamInterface->QueuePacket(outPacket);
+
+	const std::list<ZonePoint*>& zonePoints = mZone->getZonePoints();
+	if (zonePoints.size() == 0)
+		return;
+
+	// TODO:
 }
 
 void ZoneClientConnection::_sendAAStats() {
@@ -998,7 +992,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		break;
 	case ChannelID::CH_TELL:
 		if (senderName.length() > 0 && targetName.length() > 0) {
-			mZone->notifyCharacterChatTell(mCharacter, targetName, message);
+			mZone->handleTell(mCharacter, targetName, message);
 		}
 		break;
 	case ChannelID::CH_SAY:
@@ -1485,6 +1479,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 			}
 		}
 		dynamicStructure.write<uint32>(rankStringID); // rankstring
+		//dynamicStructure.write<uint32>(1509); // rankstring
 
 		dynamicStructure.writeString(FakeGuild); // guild
 		//dynamicStructure.write<uint32>(0); // guild
@@ -1759,48 +1754,62 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 	GroupManager::getInstance().handleMakeLeader(mCharacter, newLeader);
 }
 
-void ZoneClientConnection::sendRequestZoneChange(uint32 pZoneID, uint16 pInstanceID) {
-	auto outPacket = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
-	auto payload = reinterpret_cast<RequestClientZoneChange_Struct*>(outPacket->pBuffer);
+void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
 
-	payload->zone_id = pZoneID;
-	payload->instance_id = pInstanceID;
-	payload->type = 0x01; // Copied.
+	auto outPacket = new EQApplicationPacket(OP_RequestClientZoneChange, RequestZoneChange::size());
+	auto payload = RequestZoneChange::convert(outPacket->pBuffer);
+	payload->mZoneID = pZoneID;
+	payload->mInstanceID = pInstanceID;
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendZoneChange(uint32 pZoneID, uint16 pInstanceID) {
-	auto outPacket = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
-	auto payload = reinterpret_cast<ZoneChange_Struct*>(outPacket->pBuffer);
-	strcpy(payload->char_name, mCharacter->getName().c_str());
-	payload->zoneID = pZoneID;
-	payload->instanceID = pInstanceID;
-	payload->success = 1;
-	outPacket->priority = 6;
-	mStreamInterface->FastQueuePacket(&outPacket);
+void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const int32 pSuccess) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_ZoneChange, ZoneChange::size());
+	auto payload = ZoneChange::convert(outPacket->pBuffer);
+	strcpy(payload->mCharacterName, mCharacter->getName().c_str());
+	payload->mZoneID = pZoneID;
+	payload->mInstanceID = pInstanceID;
+	payload->mSuccess = pSuccess;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ZoneChange_Struct);
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(ZoneChange::sizeCheck(pPacket->size));
 
-	ARG_PTR_CHECK(pPacket);
-	PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	auto payload = ZoneChange::convert(pPacket->pBuffer);
+	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID);
 
-	auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
-	auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
-	xx->fromid = mCharacter->getSpawnID();
-	xx->action = groupActUpdate;
-	mStreamInterface->FastQueuePacket(&x);
+	//EXPECTED(mCharacter->checkZoneChange(payload->mZoneID, payload->mInstanceID));
 
-	auto a = new EQApplicationPacket(OP_PreLogoutReply);
-	mStreamInterface->FastQueuePacket(&a);
+	//static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ZoneChange_Struct);
 
-	auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
-	sendZoneChange(payload->zoneID, payload->instanceID);
+	//ARG_PTR_CHECK(pPacket);
+	//PACKET_SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
-	mZone->notifyCharacterZoneChange(mCharacter, payload->zoneID, payload->instanceID);
+	//auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
+	//auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
+	//xx->fromid = mCharacter->getSpawnID();
+	//xx->action = groupActUpdate;
+	//mStreamInterface->FastQueuePacket(&x);
+
+	//auto a = new EQApplicationPacket(OP_PreLogoutReply);
+	//mStreamInterface->FastQueuePacket(&a);
+
+	//auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
+	//sendZoneChange(payload->zoneID, payload->instanceID);
+
+	//mZone->handleZoneChange(mCharacter, payload->zoneID, payload->instanceID);
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {

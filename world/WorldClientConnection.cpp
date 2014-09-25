@@ -1,35 +1,13 @@
 #include "WorldClientConnection.h"
 #include "GuildManager.h"
+#include "ZoneManager.h"
 
-#include "../common/debug.h"
 #include "../common/EQPacket.h"
 #include "../common/EQStreamIntf.h"
-#include "../common/misc.h"
-#include "../common/rulesys.h"
-#include "../common/emu_opcodes.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
-#include "../common/EQStreamIntf.h"
-#include "../common/Item.h"
-#include "../common/races.h"
-#include "../common/classes.h"
-#include "../common/languages.h"
-#include "../common/skills.h"
-#include "../common/extprofile.h"
-#include "../common/StringUtil.h"
-#include "../common/clientversions.h"
-#include "../common/MiscFunctions.h"
 
 #include <iostream>
 #include <iomanip>
 
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <zlib.h>
-#include <limits.h>
-
-#include "../common/servertalk.h"
 #include "World.h"
 #include "Utility.h"
 #include "Limits.h"
@@ -40,23 +18,12 @@
 #include "Payload.h"
 #include "Settings.h"
 
-#ifdef _WINDOWS
-	#include <windows.h>
-	#include <winsock.h>
-#else
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <unistd.h>
-#endif
 
 WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface) :
 	mStreamInterface(pStreamInterface)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
-
-	char_name[0] = 0;
 
 	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
 }
@@ -67,89 +34,169 @@ WorldClientConnection::~WorldClientConnection() {
 	mStreamInterface->ReleaseFromUse();
 }
 
+bool WorldClientConnection::update() {
+	// Check our connection.
+	if (mConnectionDropped || !mStreamInterface->CheckState(ESTABLISHED)) {
+		Utility::print("WorldClientConnection Lost.");
+		return false;
+	}
+
+	bool ret = true;
+
+	// Handle any incoming packets.
+	EQApplicationPacket* packet = 0;
+	while (ret && (packet = (EQApplicationPacket *)mStreamInterface->PopPacket())) {
+		ret = _handlePacket(packet);
+		delete packet;
+	}
+
+	return ret;
+}
+
+bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+	EXPECTED_BOOL(pPacket);
+
+	// Check if unidentified and sending something other than OP_SendLoginInfo
+	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
+	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
+		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
+		return false;
+	}
+
+	EmuOpcode opcode = pPacket->GetOpcode();
+	switch (opcode) {
+	case OP_AckPacket:
+	case OP_World_Client_CRC1:
+	case OP_World_Client_CRC2:
+		return true;
+	case OP_SendLoginInfo:
+		// NOTE: Sent when Client initially connects (Moving from Server Selection to Character Selection).
+		// NOTE: Sent when Client is moving from one zone to another.
+		return _handleSendLoginInfoPacket(pPacket);
+	case OP_ApproveName:
+		// NOTE: This occurs when the user clicks the 'Create Character' button.
+		return _handleNameApprovalPacket(pPacket);
+	case OP_RandomNameGenerator:
+		// NOTE: This occurs when the user clicks the 'Get Name' button.
+		return _handleGenerateRandomNamePacket(pPacket);
+	case OP_CharacterCreateRequest:
+		// NOTE: This occurs when the user clicks the 'New a New Character' button.
+		return _handleCharacterCreateRequestPacket(pPacket);
+	case OP_CharacterCreate:
+		// NOTE: This occurs when the client receives OP_ApproveName.
+		return _handleCharacterCreatePacket(pPacket);
+	case OP_EnterWorld:
+		return _handleEnterWorldPacket(pPacket);
+	case OP_DeleteCharacter:
+		// NOTE: This occurs when the user clicks the 'Delete Character' button.
+		return _handleDeleteCharacterPacket(pPacket);
+	case OP_WorldComplete:
+		// NOTE: This occurs after OP_EnterWorld is replied to.
+		mStreamInterface->Close();
+		return true;
+	case OP_LoginUnknown1:
+	case OP_LoginUnknown2:
+	case OP_CrashDump:
+	case OP_WearChange:
+	case OP_LoginComplete:
+	case OP_ApproveWorld:
+	case OP_WorldClientReady:
+		return true;
+	default:
+		// Ignore.
+		//Log::error("[World Client Connection] Got unexpected packet, ignoring.");
+		return true;
+	}
+	return true;
+}
+
 void WorldClientConnection::_sendLogServer() {
-	auto outPacket = new EQApplicationPacket(OP_LogServer, sizeof(LogServer_Struct));
-	auto payload = reinterpret_cast<LogServer_Struct*>(outPacket->pBuffer);
+	using namespace Payload::World;
+	auto outPacket = new EQApplicationPacket(OP_LogServer, LogServer::size());
+	auto payload = LogServer::convert(outPacket->pBuffer);
 
-	strcpy(payload->worldshortname, Settings::getServerShortName().c_str());	
-	payload->enablemail = 1;
-	payload->enablevoicemacros = 1;
-	payload->enable_pvp = 0;
-	payload->enable_petition_wnd = 1;
-	payload->enable_FV = 0;
+	strcpy(payload->mWorldShortName, Settings::getServerShortName().c_str());	
+	payload->mEnableEmail = 0;
+	payload->mEnabledVoiceMacros = 0;
+	payload->mPVPEnabled = 0;
+	payload->mEnablePetitionWindow = 1;
+	payload->mFVEnabled = 0;
 
-	_queuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendEnterWorld(String pCharacterName) {
 	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
 	strcpy(reinterpret_cast<char*>(outPacket->pBuffer), pCharacterName.c_str());
-	_queuePacket(outPacket);
+	
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendExpansionInfo() {
-	auto outPacket = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
-	auto payload = reinterpret_cast<ExpansionInfo_Struct*>(outPacket->pBuffer);
-	payload->Expansions = (RuleI(World, ExpansionSettings));
-	_queuePacket(outPacket);
+	using namespace Payload::World;
+	
+	auto outPacket = new EQApplicationPacket(OP_ExpansionInfo, ExpansionInfo::size());
+	auto payload = ExpansionInfo::convert(outPacket->pBuffer);
+	payload->mExpansions = 16383; // TODO: Magic.
+	
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendCharacterSelectInfo() {
-	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
-	auto payload = reinterpret_cast<CharacterSelect_Struct*>(outPacket->pBuffer);
+	using namespace Payload::World;
+	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
+	auto payload = CharacterSelect::convert(outPacket->pBuffer);
 	AccountData* accountData = AccountManager::getInstance().getAccount(mAccountID);
 	EXPECTED(accountData);
 
-	//for (auto i = 0; i < MAX_CHARACTERS_CHARSELECT; i++) {
 	int charSlot = 0;
 	for (auto i : accountData->mCharacterData) {
-		strcpy(payload->name[charSlot], i->mName.c_str());
-		payload->race[charSlot] = i->mRace;
-		payload->class_[charSlot] = i->mClass;
-		payload->zone[charSlot] = i->mZoneID;
-		payload->level[charSlot] = i->mLevel;
+		strcpy(payload->mNames[charSlot], i->mName.c_str());
+		payload->mRaces[charSlot] = i->mRace;
+		payload->mClasses[charSlot] = i->mClass;
+		payload->mZoneIDs[charSlot] = i->mZoneID;
+		payload->mLevels[charSlot] = i->mLevel;
 
-		payload->face[charSlot] = i->mFaceStyle;
-		payload->gender[charSlot] = i->mGender;
-		payload->beard[charSlot] = i->mBeardStyle;
-		payload->beardcolor[charSlot] = i->mBeardColour;
-		payload->hairstyle[charSlot] = i->mHairStyle;
-		payload->haircolor[charSlot] = i->mHairColour;
-		payload->drakkin_heritage[charSlot] = i->mDrakkinHeritage;
-		payload->drakkin_tattoo[charSlot] = i->mDrakkinTattoo;
-		payload->drakkin_details[charSlot] = i->mDrakkinDetails;
-		payload->deity[charSlot] = i->mDeity;
-		payload->drakkin_tattoo[charSlot] = i->mDrakkinTattoo;
+		payload->mFaceStyles[charSlot] = i->mFaceStyle;
+		payload->mGenders[charSlot] = i->mGender;
+		payload->mBeardStyles[charSlot] = i->mBeardStyle;
+		payload->mBeardColours[charSlot] = i->mBeardColour;
+		payload->mHairStyles[charSlot] = i->mHairStyle;
+		payload->mHairColours[charSlot] = i->mHairColour;
+		payload->mDrakkinHeritages[charSlot] = i->mDrakkinHeritage;
+		payload->mDrakkinTattoos[charSlot] = i->mDrakkinTattoo;
+		payload->mDrakkinDetails[charSlot] = i->mDrakkinDetails;
+		payload->mDeities[charSlot] = i->mDeity;
+		payload->mDrakkinTattoos[charSlot] = i->mDrakkinTattoo;
 		payload->eyecolor1[charSlot] = i->mEyeColourLeft;
 		payload->eyecolor2[charSlot] = i->mEyeColourRight;
 
-
-		payload->tutorial[charSlot] = 0;
-		payload->gohome[charSlot] = 0;
+		payload->mTutorialAvailable[charSlot] = 0;
+		payload->mGoHomeAvailable[charSlot] = 0;
 
 		// Equipment
-		payload->primary[charSlot] = i->mPrimary;
-		payload->secondary[charSlot] = i->mSecondary;
+		payload->mPrimaryItems[charSlot] = i->mPrimary;
+		payload->mSecondaryItems[charSlot] = i->mSecondary;
 
 		for (auto j = 0; j < Limits::Account::MAX_EQUIPMENT_SLOTS; j++) {
-			payload->cs_colors[charSlot][j].color = i->mEquipment[j].mColour;
-			payload->equip[charSlot][j] = i->mEquipment[j].mMaterial;
+			payload->mEquipmentColours[charSlot][j].mColour = i->mEquipment[j].mColour;
+			payload->mEquipment[charSlot][j] = i->mEquipment[j].mMaterial;
 		}
 
 		charSlot++;
 	}
 
-	_queuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendPostEnterWorld() {
 	auto outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outPacket->size = 0;
-	_queuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
@@ -171,13 +218,17 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	EXPECTED_BOOL(World::getInstance().checkAuthentication(this, accountID, accountKey));
 
 	mZoning = (payload->mZoning == 1);
-	// TODO: Ensure we are expecting a zoning client.
 
 	// Going to: Another Zone
 	if (mZoning) {
+		// Resolve the name of the Character zoning based on Account ID.
+		EXPECTED_BOOL(ZoneManager::getInstance().hasZoningCharacter(accountID));
+		String characterName = ZoneManager::getInstance().getZoningCharacterName(accountID);
+		EXPECTED_BOOL(characterName.length() > 0);
+
 		_sendLogServer();
 		_sendApproveWorld();
-		_sendEnterWorld("Playerzero");
+		_sendEnterWorld(characterName);
 		_sendPostEnterWorld();
 	}
 	// Going to: Character Selection Screen.
@@ -202,35 +253,33 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 }
 
 bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
+	EXPECTED_BOOL(pPacket);
+
 	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
 	// So we check here and just reject the name if the account is at max.
 	// It would be better if I could figure out how the client limits it and duplicate that.
 	if (AccountManager::getInstance().getNumCharacters(mAccountID) >= Limits::Account::MAX_NUM_CHARACTERS) {
 		auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 		outPacket->pBuffer[0] = 0;
-		_queuePacket(outPacket);
+		mStreamInterface->QueuePacket(outPacket);
 		return true;
 	}
 	
-	snprintf(char_name, 64, "%s", (char*)pPacket->pBuffer);
+	String characterName = Utility::safeString((char*)pPacket->pBuffer, Limits::Character::MAX_INPUT_LENGTH);
 	// TODO: Consider why race and class are sent here?
 	uchar race = pPacket->pBuffer[64];
 	uchar clas = pPacket->pBuffer[68];
 
-	auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 	bool valid = true;
-	String characterName = char_name;
-	const int nameLength = characterName.length();
-	// Check length (4 >= x <= 15) 
-	if (nameLength < 4 || nameLength > 15) {
-		valid = false;
-	}
+
+	valid = Limits::Character::nameInputLength(characterName);
+
 	// Check case of first character (must be uppercase)
-	else if (characterName[0] < 'A' || characterName[0] > 'Z') {
+	if (characterName[0] < 'A' || characterName[0] > 'Z') {
 		valid = false;
 	}
 	// Check each character is alpha.
-	for (int i = 0; i < nameLength; i++) {
+	for (auto i = 0; i < characterName.length(); i++) {
 		if (!isalpha(characterName[i])) {
 			valid = false;
 			break;
@@ -251,93 +300,23 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		mReservedCharacterName = characterName;
 	}
 
+	auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 	outPacket->pBuffer[0] = valid? 1 : 0;
-	_queuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
-
-	if(!valid) {
-		memset(char_name, 0, sizeof(char_name));
-	}
 
 	return true;
 }
 
 bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket) {
-	// creates up to a 10 char name
-	char vowels[18]="aeiouyaeiouaeioe";
-	char cons[48]="bcdfghjklmnpqrstvwxzybcdgklmnprstvwbcdgkpstrkd";
-	char rndname[17]="\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-	char paircons[33]="ngrkndstshthphsktrdrbrgrfrclcr";
-	int rndnum = MakeRandomInt(0, 75),n=1;
-	bool dlc=false;
-	bool vwl=false;
-	bool dbl=false;
-	if (rndnum>63)
-	{	// rndnum is 0 - 75 where 64-75 is cons pair, 17-63 is cons, 0-16 is vowel
-		rndnum=(rndnum-61)*2;	// name can't start with "ng" "nd" or "rk"
-		rndname[0]=paircons[rndnum];
-		rndname[1]=paircons[rndnum+1];
-		n=2;
-	}
-	else if (rndnum>16)
-	{
-		rndnum-=17;
-		rndname[0]=cons[rndnum];
-	}
-	else
-	{
-		rndname[0]=vowels[rndnum];
-		vwl=true;
-	}
-	int namlen=MakeRandomInt(5, 10);
-	for (int i=n;i<namlen;i++)
-	{
-		dlc=false;
-		if (vwl)	//last char was a vowel
-		{			// so pick a cons or cons pair
-			rndnum=MakeRandomInt(0, 62);
-			if (rndnum>46)
-			{	// pick a cons pair
-				if (i>namlen-3)	// last 2 chars in name?
-				{	// name can only end in cons pair "rk" "st" "sh" "th" "ph" "sk" "nd" or "ng"
-					rndnum=MakeRandomInt(0, 7)*2;
-				}
-				else
-				{	// pick any from the set
-					rndnum=(rndnum-47)*2;
-				}
-				rndname[i]=paircons[rndnum];
-				rndname[i+1]=paircons[rndnum+1];
-				dlc=true;	// flag keeps second letter from being doubled below
-				i+=1;
-			}
-			else
-			{	// select a single cons
-				rndname[i]=cons[rndnum];
-			}
-		}
-		else
-		{		// select a vowel
-			rndname[i]=vowels[MakeRandomInt(0, 16)];
-		}
-		vwl=!vwl;
-		if (!dbl && !dlc)
-		{	// one chance at double letters in name
-			if (!MakeRandomInt(0, i+9))	// chances decrease towards end of name
-			{
-				rndname[i+1]=rndname[i];
-				dbl=true;
-				i+=1;
-			}
-		}
-	}
+	using namespace Payload::World;
+	EXPECTED_BOOL(pPacket);
 
-	rndname[0]=toupper(rndname[0]);
-	NameGeneration_Struct* payload = reinterpret_cast<NameGeneration_Struct*>(pPacket->pBuffer);
-	memset(payload->name,0,64);
-	strcpy(payload->name,rndname);
+	String name = Utility::getRandomName();
+	auto payload = NameGeneration::convert(pPacket->pBuffer);
+	strcpy(payload->mName, name.c_str());
 
-	_queuePacket(pPacket);
+	mStreamInterface->QueuePacket(pPacket);
 	return true;
 }
 
@@ -377,7 +356,6 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	raceClassAllocations.push_back(r);
 	std::list<RaceClassCombos> raceClassCombos;
 
-	//int allocationIndex = 0;
 	for (auto i : PlayableRaces) {
 		for (auto j : PlayableClasses) {
 			raceClassCombos.push_back({ 0, i, j, PlayerDeityIDs::Agnostic, 0, ZoneIDs::NorthQeynos });
@@ -412,7 +390,7 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 		ptr += sizeof(RaceClassCombos);
 	}
 
-	_queuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 	return true;
 }
@@ -420,7 +398,7 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
-	PACKET_SIZE_CHECK_BOOL(CreateCharacter::sizeCheck(pPacket->size));
+	EXPECTED_BOOL(CreateCharacter::sizeCheck(pPacket->size));
 
 	auto payload = CreateCharacter::convert(pPacket->pBuffer);
 
@@ -457,7 +435,9 @@ bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* p
 			return true;
 		}
 		// Zoning
-		// TODO: Not sure how to handle this yet, beyond dropping the connection.
+		else {
+			// TODO:
+		}
 		return true;
 	}
 
@@ -471,8 +451,8 @@ void WorldClientConnection::_sendChatServer(const String& pCharacterName) {
 	String data = ss.str();
 	auto outPacket = new EQApplicationPacket(OP_SetChatServer, reinterpret_cast<const unsigned char*>(data.c_str()), data.length()+1);
 	auto outPacket2 = new EQApplicationPacket(OP_SetChatServer2, reinterpret_cast<const unsigned char*>(data.c_str()), data.length() + 1);
-	_queuePacket(outPacket);
-	_queuePacket(outPacket2);
+	mStreamInterface->QueuePacket(outPacket);
+	mStreamInterface->QueuePacket(outPacket2);
 	safe_delete(outPacket);
 	safe_delete(outPacket2);
 }
@@ -482,7 +462,6 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
 
-	//auto payload = DeleteCharacter::convert(pPacket->pBuffer);
 	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Character::MAX_NAME_LENGTH);
 
 	if (World::getInstance().deleteCharacter(mAccountID, characterName)) {
@@ -496,111 +475,28 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	return false;
 }
 
-bool WorldClientConnection::_handleZoneChangePacket(const EQApplicationPacket* pPacket) {
-	// HoT sends this to world while zoning and wants it echoed back.
-	if(ClientVersionBit & BIT_RoFAndLater)
-	{
-		_queuePacket(pPacket);
-	}
-	return true;
-}
-
-bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	EXPECTED_BOOL(pPacket);
-
-	// Check if unidentified and sending something other than OP_SendLoginInfo
-	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
-	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
-		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
-		return false;
-	}
-
-	EmuOpcode opcode = pPacket->GetOpcode();
-	switch(opcode) {
-		case OP_AckPacket:
-		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2:
-			return true;
-		case OP_SendLoginInfo:
-			// NOTE: Sent when Client initially connects (Moving from Server Selection to Character Selection).
-			// NOTE: Sent when Client is moving from one zone to another.
-			return _handleSendLoginInfoPacket(pPacket);
-		case OP_ApproveName:
-			return _handleNameApprovalPacket(pPacket);
-		case OP_RandomNameGenerator:
-			return _handleGenerateRandomNamePacket(pPacket);
-		case OP_CharacterCreateRequest:
-			// SoF+ Sends this when the user clicks 'Create a New Character' at the Character Select Screen.
-			return _handleCharacterCreateRequestPacket(pPacket);
-		case OP_CharacterCreate:
-			return _handleCharacterCreatePacket(pPacket);
-		case OP_EnterWorld:
-			return _handleEnterWorldPacket(pPacket);
-		case OP_DeleteCharacter:
-			return _handleDeleteCharacterPacket(pPacket);
-		case OP_WorldComplete:
-			mStreamInterface->Close();
-			return true;
-		case OP_ZoneChange:
-			// HoT sends this to world while zoning and wants it echoed back.
-			return _handleZoneChangePacket(pPacket);
-		case OP_LoginUnknown1:
-		case OP_LoginUnknown2:
-		case OP_CrashDump:
-		case OP_WearChange:
-		case OP_LoginComplete:
-		case OP_ApproveWorld:
-		case OP_WorldClientReady:
-			return true;
-		default:
-			// Ignore.
-			//Log::error("[World Client Connection] Got unexpected packet, ignoring.");
-			return true;
-	}
-	return true;
-}
-
-bool WorldClientConnection::update() {
-	// Check our connection.
-	if (mConnectionDropped || !mStreamInterface->CheckState(ESTABLISHED)) {
-		Utility::print("WorldClientConnection Lost.");
-		return false;
-	}
-
-	bool ret = true;
-
-	// Handle any incoming packets.
-	EQApplicationPacket* packet = 0;
-	while(ret && (packet = (EQApplicationPacket *)mStreamInterface->PopPacket())) {
-		ret = _handlePacket(packet);
-		delete packet;
-	}
-
-	return ret;
-}
-
 void WorldClientConnection::_sendZoneServerInfo(const uint16 pPort) {
-	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
-	auto payload = reinterpret_cast<ZoneServerInfo_Struct*>(outPacket->pBuffer);
-	payload->port = pPort;
-	strcpy(payload->ip, "127.0.0.1");
-	_queuePacket(outPacket);
+	using namespace Payload::World;
+	
+	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, ZoneServerInfo::size());
+	auto payload = ZoneServerInfo::convert(outPacket->pBuffer);
+	payload->mPort = pPort;
+	strcpy(payload->mIP, "127.0.0.1");
+	
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
 
 void WorldClientConnection::_sendZoneUnavailable() {
-	// NOTE: In UF it doesnt matter what 'zone name' is sent back.
-	auto outPacket = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
-	auto payload = reinterpret_cast<ZoneUnavail_Struct*>(outPacket->pBuffer);
-	strcpy(payload->zonename, "NONE");
-	_queuePacket(outPacket);
-	safe_delete(outPacket);
-}
+	using namespace Payload::World;
 
-void WorldClientConnection::_queuePacket(const EQApplicationPacket* pPacket, bool ack_req) {
-	ack_req = true;	// It's broke right now, dont delete this line till fix it. =P
-	mStreamInterface->QueuePacket(pPacket, ack_req);
+	auto outPacket = new EQApplicationPacket(OP_ZoneUnavail, ZoneUnavailable::size());
+	auto payload = ZoneUnavailable::convert(outPacket->pBuffer);
+	strcpy(payload->mZoneName, "NONE"); // NOTE: Zone name appears to have no effect.
+	
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void WorldClientConnection::_sendGuildList() {
@@ -613,63 +509,49 @@ void WorldClientConnection::_sendGuildList() {
 	safe_delete(outPacket);
 }
 
-// @merth: I have no idea what this struct is for, so it's hardcoded for now
 void WorldClientConnection::_sendApproveWorld() {
-	// Send OPCode: OP_ApproveWorld, size: 544
-	 auto outPacket = new EQApplicationPacket(OP_ApproveWorld, sizeof(ApproveWorld_Struct));
-	 auto payload = reinterpret_cast<ApproveWorld_Struct*>(outPacket->pBuffer);
+	using namespace Payload::World; 
+
+	auto outPacket = new EQApplicationPacket(OP_ApproveWorld, ApproveWorld::size());
+	auto payload = ApproveWorld::convert(outPacket->pBuffer);
 	uchar foo[] = {
-//0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x95,0x5E,0x30,0xA5,0xCA,0xD4,0xEA,0xF5,
-//0xCB,0x14,0xFC,0xF7,0x78,0xE2,0x73,0x15,0x90,0x17,0xCE,0x7A,0xEB,0xEC,0x3C,0x34,
-//0x5C,0x6D,0x10,0x05,0xFC,0xEA,0xED,0x19,0xC5,0x0D,0x7A,0x82,0x17,0xCC,0xCC,0x71,
-//0x56,0x38,0xDF,0x78,0x8D,0xE6,0x44,0xD3,0x6F,0xDB,0xE3,0xCF,0x21,0x30,0x75,0x2F,
-//0xCD,0xDC,0xE9,0xB4,0xA4,0x4E,0x58,0xDE,0xEE,0x54,0xDD,0x87,0xDA,0xE9,0xC6,0xC8,
-//0x02,0xDD,0xC4,0xFD,0x94,0x36,0x32,0xAD,0x1B,0x39,0x0F,0x00,0x00,0x00,0x00,0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x37, 0x87, 0x13, 0xbe, 0xc8, 0xa7, 0x77, 0xcb,
+		0x27, 0xed, 0xe1, 0xe6, 0x5d, 0x1c, 0xaa, 0xd3, 0x3c, 0x26, 0x3b, 0x6d, 0x8c, 0xdb, 0x36, 0x8d,
+		0x91, 0x72, 0xf5, 0xbb, 0xe0, 0x5c, 0x50, 0x6f, 0x09, 0x6d, 0xc9, 0x1e, 0xe7, 0x2e, 0xf4, 0x38,
+		0x1b, 0x5e, 0xa8, 0xc2, 0xfe, 0xb4, 0x18, 0x4a, 0xf7, 0x72, 0x85, 0x13, 0xf5, 0x63, 0x6c, 0x16,
+		0x69, 0xf4, 0xe0, 0x17, 0xff, 0x87, 0x11, 0xf3, 0x2b, 0xb7, 0x73, 0x04, 0x37, 0xca, 0xd5, 0x77,
+		0xf8, 0x03, 0x20, 0x0a, 0x56, 0x8b, 0xfb, 0x35, 0xff, 0x59, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x15, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0xC3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+	};
 
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x37,0x87,0x13,0xbe,0xc8,0xa7,0x77,0xcb,
-0x27,0xed,0xe1,0xe6,0x5d,0x1c,0xaa,0xd3,0x3c,0x26,0x3b,0x6d,0x8c,0xdb,0x36,0x8d,
-0x91,0x72,0xf5,0xbb,0xe0,0x5c,0x50,0x6f,0x09,0x6d,0xc9,0x1e,0xe7,0x2e,0xf4,0x38,
-0x1b,0x5e,0xa8,0xc2,0xfe,0xb4,0x18,0x4a,0xf7,0x72,0x85,0x13,0xf5,0x63,0x6c,0x16,
-0x69,0xf4,0xe0,0x17,0xff,0x87,0x11,0xf3,0x2b,0xb7,0x73,0x04,0x37,0xca,0xd5,0x77,
-0xf8,0x03,0x20,0x0a,0x56,0x8b,0xfb,0x35,0xff,0x59,0x00,0x00,0x00,0x00,0x00,0x00,
-
-//0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1f,0x42,0x69,0x2a,0x87,0xdd,0x04,0x3d,
-//0x7f,0xb1,0xb3,0xbb,0xde,0xd5,0x5f,0xfc,0x1f,0xb3,0x25,0x94,0x16,0xd5,0xf3,0x97,
-//0x43,0xdf,0xb9,0x69,0x68,0xdf,0x2b,0x64,0x98,0xf5,0x44,0xbe,0x38,0x65,0xef,0xff,
-//0x36,0x89,0x90,0xcf,0x26,0xbb,0x9f,0x76,0xd5,0xaf,0x6d,0xf2,0x08,0xbe,0xce,0xd8,
-//0x3e,0x4b,0x53,0x8a,0xf3,0x44,0x7c,0x19,0x49,0x5d,0x97,0x99,0xd8,0x8b,0xee,0x10,
-//0x1a,0x7d,0xb7,0x8b,0x49,0x9b,0x40,0x8c,0xea,0x49,0x09,0x00,0x00,0x00,0x00,0x00,
-//
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x15,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x53,0xC3,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00
-};
-	memcpy(payload->unknown544, foo, sizeof(foo));
-	_queuePacket(outPacket);
+	memcpy(payload->mUnknown0, foo, sizeof(foo));
+	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }

@@ -722,6 +722,10 @@ namespace SpawnPointDataXML {
 		SCA Y = "y";
 		SCA Z = "z";
 		SCA Heading = "heading";
+		SCA Respawn = "respawn";
+		SCA Type = "type";
+		SCA NPCType = "npc_type";
+		SCA SpawnGroup = "spawn_group";
 	}
 #undef SCA
 }
@@ -743,10 +747,27 @@ bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<Spawn
 	while (spawnPointElement) {
 		SpawnPointData* sp = new SpawnPointData();
 		pSpawnPoints.push_back(sp);
+		// Required Attributes.
 		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::X, sp->mPosition.x));
 		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Y, sp->mPosition.y));
 		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Z, sp->mPosition.z));
 		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Heading, sp->mHeading));
+		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Type, sp->mType));
+		// TODO: Respawn Time.
+
+		switch (sp->mType) {
+		case SpawnPointType::TRASH:
+			break;
+		case SpawnPointType::SPECIFIC:
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::NPCType, sp->mNPCType));
+			break;
+		case SpawnPointType::SPAWN_GROUP:
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SpawnGroup, sp->mSpawnGroupID));
+			break;
+		default:
+			Log::error("Unknown SpawnPointType");
+			return false;
+		}
 
 		spawnPointElement = spawnPointElement->NextSiblingElement(Tag::SpawnPoint);
 	}

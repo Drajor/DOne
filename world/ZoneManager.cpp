@@ -21,7 +21,7 @@ void ZoneManager::update() {
 	}
 }
 
-uint16 ZoneManager::getZonePort(ZoneID pZoneID, uint32 pInstanceID) {
+const uint16 ZoneManager::getZonePort(const uint16 pZoneID, const uint16 pInstanceID) {
 	// Search existing zones
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
@@ -45,12 +45,12 @@ bool ZoneManager::initialise() {
 }
 
 
-const bool ZoneManager::isZoneAvailable(const ZoneID pZoneID, const InstanceID pInstanceID) {
+const bool ZoneManager::isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID) {
 	Zone* zone = _search(pZoneID, pInstanceID);
 	if (zone)
 		return true;
 
-	return _makeZone(zone, pZoneID, pInstanceID);
+	return _makeZone(pZoneID, pInstanceID);
 }
 
 
@@ -61,19 +61,7 @@ const uint32 ZoneManager::_getNextZonePort() {
 	// TODO: Error check this ;)
 }
 
-const bool ZoneManager::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
-	bool zoneFound = false;
-	for (auto i : mZones) {
-		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
-			i->addAuthentication(pAuthentication, pCharacterName);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-const bool ZoneManager::_makeZone(Zone* pZone, const ZoneID pZoneID, const uint32 pInstanceID) {
+const bool ZoneManager::_makeZone(const uint16 pZoneID, const uint16 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
 	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
@@ -86,7 +74,6 @@ const bool ZoneManager::_makeZone(Zone* pZone, const ZoneID pZoneID, const uint3
 		return false;
 	}
 	
-	pZone = zone;
 	mZones.push_back(zone);
 	return true;
 }
@@ -99,7 +86,7 @@ void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
 	pCharacter->getConnection()->sendWhoResults(matches);
 }
 
-void ZoneManager::notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
+void ZoneManager::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
 	// Search Zones
 	for (auto i : mZones) {
 		if (i->trySendTell(pCharacter->getName(), pTargetName, pMessage)) {
@@ -165,27 +152,23 @@ const bool ZoneManager::removeZoningCharacter(const String& pCharacterName) {
 	return false;
 }
 
-void ZoneManager::registerZoneTransfer(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID) {
-	ARG_PTR_CHECK(pCharacter);
-
-	ZoneTransfer zoneTransfer;
-	zoneTransfer.mCharacterName = pCharacter->getName();
-	zoneTransfer.mToZoneID = pZoneID;
-	zoneTransfer.mToInstanceID = pInstanceID;
-
-	Zone* zone = pCharacter->getZone();
-	// Character is moving from one zone to another.
-	if (zone) {
-		zoneTransfer.mFromZoneID = pCharacter->getZone()->getID();
-		zoneTransfer.mFromInstanceID = pCharacter->getZone()->getInstanceID();
+const bool ZoneManager::hasZoningCharacter(const uint32 pAccountID) {
+	for (auto i : mZoningCharacters) {
+		if (i->getAccountID() == pAccountID) {
+			return true;
+		}
 	}
-	// Character is moving from Character Select to a zone.
-	else {
-		zoneTransfer.mFromZoneID = 0;
-		zoneTransfer.mFromInstanceID = 0;
+	return false;
+}
+
+String ZoneManager::getZoningCharacterName(const uint32 pAccountID) {
+	for (auto i : mZoningCharacters) {
+		if (i->getAccountID() == pAccountID) {
+			return i->getName();
+		}
 	}
 
-	World::getInstance().addCharacterZoneTransfer(zoneTransfer);
+	return "";
 }
 
 Character* ZoneManager::getZoningCharacter(const String& pCharacterName) {
@@ -211,7 +194,7 @@ ZoneSearchResult ZoneManager::getAllZones() {
 	return result;
 }
 
-Zone* ZoneManager::_search(const ZoneID pZoneID, const uint32 pInstanceID) {
+Zone* ZoneManager::_search(const uint16 pZoneID, const uint16 pInstanceID) {
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID)
 			return i;

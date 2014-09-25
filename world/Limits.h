@@ -16,7 +16,8 @@ namespace Limits {
 		bool accountNameLength(const String& pAccountName);
 	}
 	namespace Character {
-		bool nameLength(const String& pCharacterName);
+		const bool nameLength(const String& pCharacterName);
+		const bool nameInputLength(const String& pCharacterName);
 		bool surnameLengthPayload(const String& pSurname);
 		bool surnameLengthClient(const String& pSurname);
 		bool classID(const ClassID pClassID);

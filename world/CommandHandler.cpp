@@ -60,6 +60,7 @@ public:
 			return false;
 		}
 
+		pCharacter->setZoneChange(zoneID, instanceID);
 		pCharacter->getConnection()->sendRequestZoneChange(zoneID, instanceID);
 		return true;
 	}
@@ -326,6 +327,8 @@ public:
 			invalidParameters(pCharacter, pParameters);
 			return false;
 		}
+
+		return false;
 	}
 };
 
@@ -470,6 +473,7 @@ public:
 		}
 
 		// TODO:
+		return true;
 	}
 };
 
@@ -729,7 +733,10 @@ public:
 
 		if (target->isNPC()) {
 			pCharacter->getZone()->handleDeath(target);
+			return true;
 		}
+
+		return false;
 	}
 };
 
@@ -970,6 +977,27 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	else if (pCommandName == "com") {
 		pCharacter->getConnection()->sendLootComplete();
 	}
+
+	//else if (pCommandName == "weather") {
+	//	uint32 unk = 0;
+	//	uint32 type = 0;
+	//	uint32 intensity = 0;
+	//	Utility::stoSafe(unk, pParameters[0]);
+	//	Utility::stoSafe(type, pParameters[1]);
+	//	Utility::stoSafe(intensity, pParameters[2]);
+
+	//	auto outPacket = new EQApplicationPacket(OP_Weather, Payload::Zone::Weather::size());
+	//	auto payload = Payload::Zone::Weather::convert(outPacket->pBuffer);
+
+	//	payload->mUnknown0 = unk;
+	//	payload->mType = type;
+	//	payload->mIntensity = intensity;
+
+	//	pCharacter->getConnection()->sendPacket(outPacket);
+	//	safe_delete(outPacket);
+
+	//	//pCharacter->getConnection()->sendSkillValue(skillID, skillValue);
+	//}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

@@ -297,6 +297,40 @@ namespace Payload {
 		struct Target : public FixedSizedPayload<Target> {
 			uint32 mSpawnID = 0;
 		};
+
+		// S->C
+		// Based on: RequestClientZoneChange_Struct
+		struct RequestZoneChange : public FixedLength_And_ServerToClient<RequestZoneChange> {
+			uint16 mZoneID = 0;
+			uint16 mInstanceID = 0;
+			float mY = 0.0f;
+			float mX = 0.0f;
+			float mZ = 0.0f;
+			float mHeading = 0.0f;
+			uint32 mType = 0; // NOTE: I tried various values for mType and found they did nothing I noticed.
+		};
+
+		// C<->S
+		// Based on: ZoneChange_Struct
+		struct ZoneChange : public FixedLength_And_ServerToClient<ZoneChange> {
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+			uint16 mZoneID = 0;
+			uint16 mInstanceID = 0;
+			float mY = 0.0f;
+			float mX = 0.0f;
+			float mZ = 0.0f;
+			uint32 mReason = 0;
+			int32 mSuccess = 0; // =0 client->server, =1 server->client, -X=specific error
+		};
+
+		// S->C
+		// Based on: Weather_Struct
+		struct Weather : public FixedLength_And_ServerToClient<Weather> {
+			enum Type : uint32 { NORMAL = 0, SNOW = 2, RAIN = 3 };
+			uint32 mUnknown0 = 0;
+			uint32 mType = NORMAL;
+			uint32 mIntensity = 0;
+		};
 	}
 
 	namespace World {
@@ -347,6 +381,98 @@ namespace Payload {
 			uint32 mDrakkinHeritage = 0;
 			uint32 mDrakkinTattoo = 0;
 			uint32 mDrakkinDetails = 0;
+		};
+
+		// S->C
+		// Based on: LogServer_Struct
+		struct LogServer : public FixedLength_And_ServerToClient<LogServer> {
+			uint32 mUknown0 = 0;
+			uint8 mPVPEnabled = 0;
+			uint8 mUnknown1 = 0;
+			uint8 mUnknown2 = 0;
+			uint8 mUnknown3 = 0;
+			uint8 mFVEnabled = 0;
+			uint8 mUnknown4 = 0;
+			uint8 mUnknown5 = 0;
+			uint8 mUnknown6 = 0;
+			uint32 mUnknown7 = 0;
+			uint32 mUnknown8 = 0;
+			uint8 mUnknown9 = 0;
+			char mWorldShortName[32];
+			uint8 mUnknown10[32];
+			char mUnknown11[16];
+			char mUnknown12[16];
+			uint8 mUnknown13[48];
+			uint32 mUnknown14;
+			char mUnknown15[80];
+			uint8 mEnablePetitionWindow = 0;
+			uint8 mEnabledVoiceMacros = 0;
+			uint8 mEnableEmail = 0;
+			uint8 mEnableTutorial = 0;
+		};
+
+		// S->C
+		// Based on: ExpansionInfo_Struct
+		struct ExpansionInfo : public FixedLength_And_ServerToClient<ExpansionInfo> {
+			uint32 mExpansions = 0;
+		};
+
+		// S->C
+		// Based on: CharacterSelect_Struct
+		struct CharacterSelect : public FixedLength_And_ServerToClient<CharacterSelect> {
+			uint32 mRaces[18];
+			Colour mEquipmentColours[18][9];
+			uint8 mBeardColours[18];
+			uint8 mHairStyles[18];
+			uint32 mEquipment[18][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
+			uint32 mSecondaryItems[18];
+			uint32 mDrakkinHeritages[18];
+			uint32 mDrakkinTattoos[18];
+			uint32 mDrakkinDetails[18];
+			uint32 mDeities[18];
+			uint8 mGoHomeAvailable[18];
+			uint8 mTutorialAvailable[18];
+			uint8 mBeardStyles[18];
+			uint8	unknown902[18];			// 10x ff
+			uint32 mPrimaryItems[18]; // ID File
+			uint8 mHairColours[18];
+			uint8	unknown0962[2];			// 2x 00
+			uint32 mZoneIDs[18];
+			uint8 mClasses[18];
+			uint8 mFaceStyles[18];
+			char mNames[18][64];
+			uint8 mGenders[18];
+			uint8	eyecolor1[18];			// Characters Eye Color
+			uint8	eyecolor2[18];			// Characters Eye 2 Color
+			uint8 mLevels[18];
+		};
+
+		// S->C
+		// Based on: NameGeneration_Struct
+		struct NameGeneration : public FixedLength_And_ServerToClient<NameGeneration> {
+			uint32 mRace = 0;
+			uint32 mGender = 0;
+			char mName[64];
+		};
+
+		// S->C
+		// Based on: ZoneServerInfo_Struct
+		struct ZoneServerInfo : public FixedLength_And_ServerToClient<ZoneServerInfo> {
+			char mIP[128];
+			uint16 mPort = 0;
+		};
+
+		// S->C
+		// Based on: ZoneUnavail_Struct
+		struct ZoneUnavailable : public FixedLength_And_ServerToClient<ZoneUnavailable> {
+			char mZoneName[16];
+			int16 mUnknown0[4];
+		};
+
+		// S->C
+		// Based on: ApproveWorld_Struct
+		struct ApproveWorld : public FixedLength_And_ServerToClient<ApproveWorld> {
+			uint8 mUnknown0[544];
 		};
 	}
 

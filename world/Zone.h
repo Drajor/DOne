@@ -22,13 +22,17 @@ class Actor;
 class NPC;
 class Scene;
 class SpawnPoint;
+struct ZonePoint;
 
 class Zone {
 public:
-	Zone(const uint32 pPort, const ZoneID pZoneID, const InstanceID pInstanceID = 0);
+	Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID);
 	~Zone();
 
 	const bool initialise();
+	void shutdown();
+	void update();
+	const bool checkAuthentication(Character* pCharacter);
 
 	inline const String& getLongName() const { return mLongName; }
 	inline const String& getShortName() const { return mShortName; }
@@ -37,28 +41,9 @@ public:
 	inline const float getMinimumZ() const { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
 	inline const uint8 getZoneType() const { return 255; } // Unknown.
 	inline const uint32 getNumCharacters() const { return mCharacters.size(); }
-	inline const ZoneID getID() const { return mID; }
-	inline const InstanceID getInstanceID() const { return mInstanceID; }
+	inline const uint16 getID() const { return mID; }
+	inline const uint16 getInstanceID() const { return mInstanceID; }
 	inline const uint16 getPort() const { return mPort; }
-
-	void addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName);
-	void removeAuthentication(String pCharacterName);
-	bool checkAuthentication(String pCharacterName);
-	bool getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication);
-
-	void shutdown();
-	void update();
-
-	void _updateCharacters();
-	void _updateNPCs();
-	void _updateConnections();
-
-
-	
-
-	void _updatePreConnections();
-
-
 
 	Character* findCharacter(const String pCharacterName);
 	Actor* findActor(const SpawnID pSpawnID);
@@ -81,7 +66,7 @@ public:
 	void notifyCharacterChatOOC(Character* pCharacter, const String pMessage);
 	void notifyCharacterEmote(Character* pCharacter, const String pMessage);
 	void notifyCharacterChatAuction(Character* pCharacter, const String pMessage);
-	void notifyCharacterChatTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
+	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
@@ -96,7 +81,7 @@ public:
 	void notifyGuildsChanged();
 	void notifyCharacterGuildChange(Character* pCharacter);
 
-	void notifyCharacterZoneChange(Character* pCharacter, ZoneID pZoneID, uint16 pInstanceID);
+	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
@@ -128,12 +113,19 @@ public:
 
 	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
+
+	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 private:
 
 	const bool loadSpawnPoints();
 
 	// Performs a global Character search.
 	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
+
+	void _updateCharacters();
+	void _updateNPCs();
+	void _updateConnections();
+	void _updatePreConnections();
 
 	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage);
@@ -146,15 +138,13 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
-	
-	std::map<String, ClientAuthentication> mAuthenticatedCharacters;
 
 	uint32 mLongNameStringID = 0;
 	String mLongName = "";
 	String mShortName = "";
 	uint16 mNextSpawnID = 1;
-	const ZoneID mID;
-	const InstanceID mInstanceID;
+	const uint16 mID;
+	const uint16 mInstanceID;
 	const uint32 mPort;
 
 	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
@@ -175,6 +165,8 @@ private:
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;
+
+	std::list<ZonePoint*> mZonePoints;
 
 	struct LinkDeadCharacter {
 		Timer* mTimer;
