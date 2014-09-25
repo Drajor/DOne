@@ -51,9 +51,9 @@ const bool Zone::initialise() {
 
 	mScene = new Scene(this);
 
-	EXPECTED_BOOL(ZoneData::getInstance().getLongNameStringID(mID, mLongNameStringID));
-	EXPECTED_BOOL(ZoneData::getInstance().getLongName(mID, mLongName));
-	EXPECTED_BOOL(ZoneData::getInstance().getShortName(mID, mShortName));
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongNameStringID(mID, mLongNameStringID));
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getShortName(mID, mShortName));
 
 	EXPECTED_BOOL(loadSpawnPoints());
 	EXPECTED_BOOL(populate());
@@ -63,17 +63,12 @@ const bool Zone::initialise() {
 }
 
 const bool Zone::loadSpawnPoints() {
-	std::list<SpawnPointData*> spawnPointData;
-	if (!DataStore::getInstance().loadSpawnPointData(mShortName, spawnPointData)) {
-		// NOTE: If loadSpawnPointData fails we need to free any memory allocated.
-		for (auto i : spawnPointData)
-			delete i;
-
-		return false;
-	}
+	std::list<SpawnPointData*>* spawnPointData = nullptr;
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), &spawnPointData));
+	EXPECTED_BOOL(spawnPointData);
 
 	// Create Zone spawn points.
-	for (auto i : spawnPointData) {
+	for (auto i : *spawnPointData) {
 		auto spawnPoint = new SpawnPoint();
 		mSpawnPoints.push_back(spawnPoint);
 
@@ -84,10 +79,6 @@ const bool Zone::loadSpawnPoints() {
 		spawnPoint->setNPCType(i->mNPCType);
 		spawnPoint->setSpawnGroup(i->mSpawnGroupID);
 	}
-
-	// Free data memory.
-	for (auto i : spawnPointData)
-		delete i;
 
 	return true;
 }

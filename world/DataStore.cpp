@@ -710,71 +710,6 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	return true;
 }
 
-namespace SpawnPointDataXML {
-#define SCA static const auto
-	namespace Tag {
-		SCA SpawnPoints = "spawn_points";
-		SCA SpawnPoint = "spawn_point";
-	}
-	namespace Attribute {
-		// Tag::SpawnPoint
-		SCA X = "x";
-		SCA Y = "y";
-		SCA Z = "z";
-		SCA Heading = "heading";
-		SCA Respawn = "respawn";
-		SCA Type = "type";
-		SCA NPCType = "npc_type";
-		SCA SpawnGroup = "spawn_group";
-	}
-#undef SCA
-}
-
-bool DataStore::loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints) {
-	Profile p("DataStore::loadSpawnPointData");
-	using namespace SpawnPointDataXML;
-
-	EXPECTED_BOOL(pSpawnPoints.empty());
-
-	TiXmlDocument document(String("./data/zones/" + pZoneShortName + "/spawn_points.xml").c_str());
-	EXPECTED_BOOL(document.LoadFile());
-
-	// Tag::SpawnPoints
-	auto spawnPointsElement = document.FirstChildElement(Tag::SpawnPoints);
-	EXPECTED_BOOL(spawnPointsElement);
-
-	auto spawnPointElement = spawnPointsElement->FirstChildElement(Tag::SpawnPoint);
-	while (spawnPointElement) {
-		SpawnPointData* sp = new SpawnPointData();
-		pSpawnPoints.push_back(sp);
-		// Required Attributes.
-		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::X, sp->mPosition.x));
-		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Y, sp->mPosition.y));
-		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Z, sp->mPosition.z));
-		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Heading, sp->mHeading));
-		EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::Type, sp->mType));
-		// TODO: Respawn Time.
-
-		switch (sp->mType) {
-		case SpawnPointType::TRASH:
-			break;
-		case SpawnPointType::SPECIFIC:
-			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::NPCType, sp->mNPCType));
-			break;
-		case SpawnPointType::SPAWN_GROUP:
-			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SpawnGroup, sp->mSpawnGroupID));
-			break;
-		default:
-			Log::error("Unknown SpawnPointType");
-			return false;
-		}
-
-		spawnPointElement = spawnPointElement->NextSiblingElement(Tag::SpawnPoint);
-	}
-
-	return true;
-}
-
 namespace SettingsDataXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/settings.xml";
@@ -978,5 +913,107 @@ const bool DataStore::loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded
 		pNumSpellsLoaded++;
 	}
 
+	return true;
+}
+
+namespace ZoneDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/zones.xml";
+	namespace Tag {
+		SCA Zones = "zones";
+		SCA Zone = "zone";
+		SCA ZonePoints = "zone_points";
+		SCA ZonePoint = "zone_point";
+		SCA SpawnPoints = "spawn_points";
+		SCA SpawnPoint = "spawn_point";
+	}
+	namespace Attribute {
+		// Tag::Zone
+		SCA ID = "id";
+		SCA ShortName = "short_name";
+		SCA LongName = "long_name";
+		SCA SafeX = "safe_x";
+		SCA SafeY = "safe_y";
+		SCA SafeZ = "safe_z";
+		// Tag::ZonePoint
+		// Tag::SpawnPoint
+		SCA SPType = "type";
+		SCA SPX = "x";
+		SCA SPY = "y";
+		SCA SPZ = "z";
+		SCA SPHeading = "heading";
+		SCA SPRespawn = "respawn";
+		SCA SPNPCType = "npc_type";
+		SCA SPSpawnGroup = "spawn_group";
+	}
+#undef SCA
+}
+const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
+	using namespace ZoneDataXML;
+	EXPECTED_BOOL(pZoneData.empty());
+	Profile p("DataStore::loadZoneData");
+
+	TiXmlDocument document(ZoneDataXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto zonesElement = document.FirstChildElement(Tag::Zones);
+	EXPECTED_BOOL(zonesElement);
+	auto zoneElement = zonesElement->FirstChildElement(Tag::Zone);
+
+	while (zoneElement) {
+		ZoneData* zoneData = new ZoneData();
+		pZoneData.push_back(zoneData);
+
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ID, zoneData->mID));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ShortName, zoneData->mShortName));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::LongName, zoneData->mLongName));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeX, zoneData->mSafeX));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafeY));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafeZ));
+
+		// Read ZonePoints.
+		auto zonePointsElement = zoneElement->FirstChildElement(Tag::ZonePoints);
+		EXPECTED_BOOL(zonePointsElement);
+		auto zonePointElement = zonePointsElement->FirstChildElement(Tag::ZonePoint);
+		while (zonePointElement) {
+
+			zonePointElement = zonePointElement->NextSiblingElement(Tag::ZonePoint);
+		}
+
+		// Read SpawnPoints
+		auto spawnPointsElement = zoneElement->FirstChildElement(Tag::SpawnPoints);
+		EXPECTED_BOOL(spawnPointsElement);
+		auto spawnPointElement = spawnPointsElement->FirstChildElement(Tag::SpawnPoint);
+		while (spawnPointElement) {
+			auto sp = new SpawnPointData();
+			zoneData->mSpawnPoints.push_back(sp);
+
+			// Required Attributes.
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPX, sp->mPosition.x));
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPY, sp->mPosition.y));
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPZ, sp->mPosition.z));
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPHeading, sp->mHeading));
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPType, sp->mType));
+
+			// TODO: Respawn Time.
+			switch (sp->mType) {
+			case SpawnPointType::TRASH:
+				break;
+			case SpawnPointType::SPECIFIC:
+				EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPNPCType, sp->mNPCType));
+				break;
+			case SpawnPointType::SPAWN_GROUP:
+				EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPSpawnGroup, sp->mSpawnGroupID));
+				break;
+			default:
+				Log::error("Unknown SpawnPointType");
+				return false;
+			}
+
+			spawnPointElement = spawnPointElement->NextSiblingElement(Tag::SpawnPoint);
+		}
+
+		zoneElement = zoneElement->NextSiblingElement(Tag::Zone);
+	}
 	return true;
 }

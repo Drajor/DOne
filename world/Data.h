@@ -142,19 +142,6 @@ struct CharacterData {
 	std::vector<uint32> mSpellBar;
 };
 
-struct SpawnGroupData {
-	uint32 mID = 0;
-};
-
-struct SpawnPointData {
-	Vector3 mPosition;
-	float mHeading = 0.0f;
-	uint32 mType = SpawnPointType::TRASH;
-	uint32 mNPCType = 0;
-	uint32 mSpawnGroupID = 0;
-	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
-};
-
 struct NPCAppearanceData {
 	uint32 mID = 0;
 	uint32 mParentID = 0;
@@ -213,4 +200,40 @@ struct SpellData {
 	uint8 mBerserkerLevel = 255;
 	uint8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
 
+};
+
+struct SpawnGroupData {
+	uint32 mID = 0;
+};
+
+struct SpawnPointData {
+	Vector3 mPosition;
+	float mHeading = 0.0f;
+	uint32 mType = SpawnPointType::TRASH;
+	uint32 mNPCType = 0;
+	uint32 mSpawnGroupID = 0;
+	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
+};
+
+struct ZonePointData {
+	uint16 mID = 0;
+	Vector3 mPosition;
+	float mHeading = 0.0f;
+
+	uint16 mDestinationZoneID = 0;
+	uint16 mDestinationInstanceID = 0;
+	Vector3 mDestinationPosition;
+	float mDestinationHeading = 0.0f;
+};
+
+struct ZoneData {
+	ZoneID mID = 0;
+	uint32 mLongNameStringID = 0;
+	String mLongName = "";
+	String mShortName = "";
+	float mSafeX = 0.0f;
+	float mSafeY = 0.0f;
+	float mSafeZ = 0.0f;
+	std::list<SpawnPointData*> mSpawnPoints;
+	std::list<ZonePointData*> mZonePoints;
 };

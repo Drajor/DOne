@@ -30,8 +30,8 @@ public:
 	const bool saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData);
 	const bool deleteCharacter(const String& pCharacterName);
 
-	// Spawn Points
-	bool loadSpawnPointData(const String& pZoneShortName, std::list<SpawnPointData*>& pSpawnPoints);
+	// Zone Data
+	const bool loadZoneData(std::list<ZoneData*>& pZoneData);
 
 	// NPC
 	bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);

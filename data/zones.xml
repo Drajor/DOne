@@ -1,0 +1,3098 @@
+<zones>
+	<zone id="1" short_name="qeynos" long_name="South Qeynos" safe_x="0" safe_y="10" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+			<spawn_point type="0" x="-119" y="120" z="3.75" heading="195" />
+			<spawn_point type="0" x="-83" y="74" z="3.75" heading="99" />
+			<spawn_point type="0" x="-402" y="406" z="3.75" heading="64" />
+			<spawn_point type="0" x="62" y="12" z="-16.129999" heading="56.5" />
+			<spawn_point type="0" x="-314" y="190" z="3.75" heading="64.5" />
+			<spawn_point type="0" x="-117" y="41" z="3.75" heading="62.5" />
+			<spawn_point type="0" x="-430" y="-177" z="6.13" heading="251" />
+			<spawn_point type="0" x="-136" y="552" z="3.75" heading="129.5" />
+			<spawn_point type="0" x="-540" y="-258" z="3.75" heading="26.5" />
+			<spawn_point type="0" x="-511" y="-256" z="3.75" heading="246" />
+			<spawn_point type="0" x="-666" y="300" z="4.75" heading="254" />
+			<spawn_point type="0" x="-680" y="315" z="3.75" heading="64" />
+			<spawn_point type="0" x="-671" y="327" z="3.75" heading="67" />
+			<spawn_point type="0" x="-581" y="298" z="3.75" heading="234" />
+			<spawn_point type="0" x="-578" y="308" z="3.75" heading="210" />
+			<spawn_point type="0" x="-579" y="320" z="3.75" heading="171" />
+			<spawn_point type="0" x="-586" y="323" z="3.75" heading="144" />
+			<spawn_point type="0" x="-595" y="324" z="3.75" heading="109" />
+			<spawn_point type="0" x="-637" y="300" z="2.75" heading="128" />
+			<spawn_point type="0" x="-634" y="326" z="2.75" heading="226" />
+			<spawn_point type="0" x="-560" y="300" z="3.75" heading="254" />
+			<spawn_point type="0" x="-553" y="315" z="3.75" heading="243.5" />
+			<spawn_point type="0" x="-625" y="330" z="3.75" heading="99" />
+			<spawn_point type="0" x="-609" y="311" z="3.75" heading="88" />
+			<spawn_point type="0" x="-431" y="-285" z="3.38" heading="236.5" />
+			<spawn_point type="0" x="-194" y="-15" z="1" heading="60.25" />
+			<spawn_point type="0" x="6.13" y="-105.379997" z="-1.8" heading="128.25" />
+			<spawn_point type="0" x="-299.5" y="538.5" z="0.3" heading="123" />
+			<spawn_point type="0" x="-413.880005" y="454.130005" z="0.3" heading="1.75" />
+			<spawn_point type="0" x="-335" y="497.25" z="1.3" heading="240.5" />
+			<spawn_point type="0" x="-244.5" y="497.630005" z="1.25" heading="63.375" />
+			<spawn_point type="0" x="-174.380005" y="332.880005" z="1.3" heading="133" />
+			<spawn_point type="0" x="60" y="-329.130005" z="-17.6" heading="137.25" />
+			<spawn_point type="0" x="-130.630005" y="-223.630005" z="2.3" heading="129.25" />
+			<spawn_point type="0" x="-480" y="-63.880001" z="29.299999" heading="127" />
+			<spawn_point type="0" x="-538.880005" y="53.630001" z="1.3" heading="128.75" />
+			<spawn_point type="0" x="-643" y="288.5" z="0.3" heading="129.25" />
+			<spawn_point type="0" x="-429" y="231.630005" z="1.3" heading="1.5" />
+			<spawn_point type="0" x="-354.25" y="146.5" z="1.3" heading="131.25" />
+			<spawn_point type="0" x="-59.380001" y="-288.880005" z="13.25" heading="53.125" />
+			<spawn_point type="0" x="-93.5" y="-355.630005" z="4.9" heading="168.5" />
+			<spawn_point type="0" x="-384.25" y="48.25" z="-26.6" heading="16.25" />
+			<spawn_point type="0" x="-566.5" y="349" z="1.3" heading="130.75" />
+			<spawn_point type="0" x="-313" y="-250" z="1.25" heading="136.375" />
+			<spawn_point type="0" x="-509.880005" y="-98.379997" z="1.3" heading="134" />
+			<spawn_point type="0" x="-445" y="161" z="3.75" heading="77" />
+			<spawn_point type="0" x="-605" y="285" z="3.75" heading="51.5" />
+			<spawn_point type="0" x="-455" y="-145" z="4.75" heading="111.5" />
+			<spawn_point type="0" x="-81" y="541" z="17.75" heading="123" />
+			<spawn_point type="0" x="-40" y="163" z="1.75" heading="190" />
+			<spawn_point type="0" x="-397" y="290" z="3.38" heading="195" />
+			<spawn_point type="0" x="-470" y="287" z="3.38" heading="64" />
+			<spawn_point type="0" x="-496" y="298" z="3.75" heading="62.5" />
+			<spawn_point type="0" x="-159" y="555" z="3.75" heading="94" />
+			<spawn_point type="0" x="-133" y="513" z="3.75" heading="251" />
+			<spawn_point type="0" x="-620" y="326" z="3.75" heading="99" />
+			<spawn_point type="0" x="-623" y="288" z="3.75" heading="21" />
+			<spawn_point type="0" x="-517" y="-259" z="3.75" heading="3" />
+			<spawn_point type="0" x="-483" y="-239" z="3.75" heading="69.5" />
+			<spawn_point type="0" x="-260.880005" y="-308.880005" z="2.5" heading="214.5" />
+			<spawn_point type="0" x="-552.880005" y="-188.880005" z="3.75" heading="24.625" />
+			<spawn_point type="0" x="-494.880005" y="-281.880005" z="3.75" heading="33.5" />
+			<spawn_point type="0" x="-477" y="-246" z="3.75" heading="33.625" />
+			<spawn_point type="0" x="-441" y="-150" z="6.75" heading="130.5" />
+			<spawn_point type="0" x="-286" y="288" z="20.129999" heading="123.5" />
+			<spawn_point type="0" x="-147" y="517" z="3.375" heading="44" />
+			<spawn_point type="0" x="-122.879997" y="553.880005" z="3.75" heading="108.5" />
+			<spawn_point type="0" x="-158" y="524" z="3.75" heading="60.5" />
+			<spawn_point type="0" x="-550" y="303" z="3.75" heading="230.5" />
+			<spawn_point type="0" x="-569" y="303" z="3.75" heading="35" />
+			<spawn_point type="0" x="-632" y="282" z="2.75" heading="194.875" />
+			<spawn_point type="0" x="-633" y="329" z="2.75" heading="140.875" />
+			<spawn_point type="0" x="-670" y="314" z="3.75" heading="66.5" />
+			<spawn_point type="0" x="-615" y="361" z="3.75" heading="95.5" />
+			<spawn_point type="0" x="-684" y="286" z="2.75" heading="248" />
+			<spawn_point type="0" x="-615" y="287" z="3.75" heading="17" />
+			<spawn_point type="0" x="-664" y="320" z="4.75" heading="129" />
+			<spawn_point type="0" x="-592" y="319" z="3.75" heading="131" />
+			<spawn_point type="0" x="-645" y="330" z="2.75" heading="35" />
+			<spawn_point type="0" x="-625" y="301" z="3.75" heading="30" />
+			<spawn_point type="0" x="-587" y="81" z="31.75" heading="110" />
+			<spawn_point type="0" x="-466" y="-31" z="-24.129999" heading="47" />
+			<spawn_point type="0" x="-278" y="-169" z="3.75" heading="46" />
+			<spawn_point type="0" x="-10" y="-237.880005" z="3.75" heading="63" />
+			<spawn_point type="0" x="-544" y="-176" z="3.75" heading="134" />
+			<spawn_point type="0" x="-512" y="37" z="31.75" heading="65" />
+			<spawn_point type="0" x="-346" y="406" z="2.75" heading="143.5" />
+			<spawn_point type="0" x="-524.880005" y="-213.880005" z="2.8" heading="0" />
+			<spawn_point type="0" x="-259" y="-301" z="3.75" heading="211.5" />
+			<spawn_point type="0" x="-268" y="-316" z="3.75" heading="212" />
+			<spawn_point type="0" x="-179" y="267" z="3.75" heading="128.5" />
+			<spawn_point type="0" x="-276" y="-305" z="3.75" heading="71.5" />
+			<spawn_point type="0" x="-230" y="-263" z="3.75" heading="127.5" />
+			<spawn_point type="0" x="-428" y="-201" z="3.75" heading="82" />
+			<spawn_point type="0" x="-259" y="414" z="3.75" heading="169" />
+			<spawn_point type="0" x="-268" y="-38" z="3.75" heading="243.5" />
+			<spawn_point type="0" x="-395" y="149" z="3.75" heading="187.5" />
+			<spawn_point type="0" x="-515" y="363" z="3.75" heading="100.5" />
+			<spawn_point type="0" x="-317" y="464.880005" z="3.38" heading="141" />
+			<spawn_point type="0" x="-488" y="312" z="3.75" heading="217.5" />
+			<spawn_point type="0" x="-111" y="363" z="3.75" heading="178" />
+			<spawn_point type="0" x="-118" y="365" z="3.13" heading="121.5" />
+			<spawn_point type="0" x="-86" y="42" z="4.38" heading="223" />
+			<spawn_point type="0" x="-448" y="312" z="4.38" heading="2.5" />
+			<spawn_point type="0" x="-445" y="304" z="4.38" heading="121.5" />
+			<spawn_point type="0" x="-507" y="65" z="4.75" heading="83" />
+			<spawn_point type="0" x="38" y="-345" z="-13.25" heading="29.5" />
+			<spawn_point type="0" x="-145" y="-247" z="4.75" heading="35.75" />
+			<spawn_point type="0" x="-145" y="-200" z="4.75" heading="64" />
+			<spawn_point type="0" x="-64" y="-38" z="3.75" heading="128" />
+			<spawn_point type="0" x="-203" y="297" z="3.75" heading="34" />
+			<spawn_point type="0" x="-260" y="-26" z="3.75" heading="176" />
+			<spawn_point type="0" x="-262" y="-31" z="3.75" heading="194" />
+			<spawn_point type="0" x="-352.880005" y="281.880005" z="3.75" heading="102" />
+			<spawn_point type="0" x="-265" y="427" z="3.75" heading="88.5" />
+			<spawn_point type="0" x="-243" y="440" z="3.75" heading="72" />
+			<spawn_point type="0" x="-261" y="-244" z="3.75" heading="190" />
+			<spawn_point type="0" x="-269" y="-292" z="3.75" heading="80.5" />
+			<spawn_point type="0" x="-40" y="15" z="3.75" heading="193" />
+			<spawn_point type="0" x="-507" y="330" z="3.75" heading="72" />
+			<spawn_point type="0" x="-129" y="231" z="3.75" heading="25.5" />
+			<spawn_point type="0" x="-69" y="259" z="3.75" heading="114" />
+			<spawn_point type="0" x="-170" y="256" z="3.75" heading="1" />
+			<spawn_point type="0" x="-191" y="254" z="3.75" heading="254" />
+			<spawn_point type="0" x="-439" y="319" z="3.75" heading="230.375" />
+			<spawn_point type="0" x="-439" y="339" z="3.75" heading="191" />
+			<spawn_point type="0" x="-80" y="399" z="3.75" heading="234.5" />
+			<spawn_point type="0" x="-255" y="-165" z="3.75" heading="41" />
+			<spawn_point type="0" x="-266" y="-192" z="3.75" heading="11" />
+			<spawn_point type="0" x="-45" y="537" z="17.75" heading="105" />
+			<spawn_point type="0" x="-87" y="536" z="3.75" heading="86" />
+			<spawn_point type="0" x="-33" y="526" z="3.75" heading="156" />
+			<spawn_point type="0" x="-276" y="-32" z="3.75" heading="50" />
+			<spawn_point type="0" x="-310" y="487" z="3.75" heading="242" />
+			<spawn_point type="0" x="-263" y="543" z="3.75" heading="145" />
+			<spawn_point type="0" x="-555" y="304" z="3.75" heading="255" />
+			<spawn_point type="0" x="-327" y="173" z="3.75" heading="108.5" />
+			<spawn_point type="0" x="-269" y="-24" z="3.75" heading="131" />
+			<spawn_point type="0" x="-102" y="35.880001" z="3.8" heading="209" />
+			<spawn_point type="0" x="-664" y="308" z="4.75" heading="1" />
+			<spawn_point type="0" x="-146" y="557" z="3.75" heading="125" />
+			<spawn_point type="0" x="-141" y="509" z="4.1" heading="4.5" />
+			<spawn_point type="0" x="-525" y="-258" z="3.75" heading="255" />
+			<spawn_point type="0" x="-449" y="-192" z="6.13" heading="252" />
+			<spawn_point type="0" x="-520" y="-150" z="6.75" heading="63" />
+			<spawn_point type="0" x="-550" y="35" z="3.75" heading="22.5" />
+			<spawn_point type="0" x="-511" y="75" z="31.75" heading="86" />
+			<spawn_point type="0" x="-124" y="527" z="3.75" heading="64" />
+			<spawn_point type="0" x="-123" y="519" z="3.75" heading="63" />
+			<spawn_point type="0" x="-36" y="-10" z="3.75" heading="226" />
+			<spawn_point type="0" x="-495.880005" y="382" z="3.75" heading="140.5" />
+			<spawn_point type="0" x="222" y="5" z="1.88" heading="0" />
+			<spawn_point type="0" x="-439" y="7" z="31.75" heading="128" />
+			<spawn_point type="0" x="-442" y="78" z="-24.129999" heading="102.5" />
+			<spawn_point type="0" x="-86.879997" y="368.880005" z="3.38" heading="75.5" />
+			<spawn_point type="0" x="-203.130005" y="96.379997" z="2.75" heading="70" />
+			<spawn_point type="0" x="-173" y="197" z="2.75" heading="212" />
+			<spawn_point type="0" x="-148" y="177" z="2.75" heading="108.5" />
+			<spawn_point type="0" x="-83.879997" y="-323.880005" z="5.25" heading="29" />
+			<spawn_point type="0" x="-567" y="318" z="3.75" heading="1.5" />
+			<spawn_point type="0" x="-408" y="232" z="3.75" heading="160.5" />
+			<spawn_point type="0" x="-313" y="-318" z="4" heading="0" />
+			<spawn_point type="0" x="-28" y="-307" z="6" heading="20" />
+			<spawn_point type="0" x="-19" y="77" z="6" heading="76" />
+			<spawn_point type="0" x="-52" y="553" z="4" heading="0" />
+			<spawn_point type="0" x="-32" y="-251" z="6" heading="0" />
+			<spawn_point type="0" x="-653" y="126" z="6" heading="0" />
+			<spawn_point type="0" x="-18" y="76" z="4" heading="0" />
+			<spawn_point type="0" x="-66" y="183" z="3" heading="0" />
+			<spawn_point type="0" x="120" y="-173" z="3.75" heading="63" />
+			<spawn_point type="0" x="-491" y="-282" z="3.75" heading="32" />
+			<spawn_point type="0" x="-277" y="-231" z="4.3" heading="65" />
+			<spawn_point type="0" x="500" y="-549" z="-80" heading="0" />
+			<spawn_point type="0" x="277" y="21" z="-20" heading="254" />
+			<spawn_point type="0" x="-48" y="20" z="17" heading="127" />
+			<spawn_point type="0" x="62" y="-177" z="-25.299999" heading="126" />
+			<spawn_point type="0" x="62" y="-177" z="3.7" heading="184" />
+			<spawn_point type="0" x="61" y="-151" z="-23" heading="152" />
+			<spawn_point type="0" x="103" y="70" z="-36.700001" heading="156" />
+			<spawn_point type="0" x="-331" y="246" z="6.7" heading="190" />
+			<spawn_point type="0" x="97" y="396" z="-49.299999" heading="60" />
+			<spawn_point type="0" x="-142" y="546" z="3.75" heading="152" />
+			<spawn_point type="0" x="175.010254" y="21.969755" z="2.290499" heading="127.75" />
+			<spawn_point type="0" x="-551" y="310" z="2.289498" heading="251" />
+			<spawn_point type="0" x="-179" y="155" z="4.625" heading="156.5" />
+			<spawn_point type="0" x="-314" y="190" z="3.75" heading="64.5" />
+			<spawn_point type="0" x="-277" y="-231" z="4.3" heading="65" />
+			<spawn_point type="0" x="-66" y="183" z="3" heading="0" />
+			<spawn_point type="0" x="-117" y="41" z="3.75" heading="62.5" />
+			<spawn_point type="0" x="-83" y="74" z="3.75" heading="99" />
+			<spawn_point type="0" x="-32" y="-251" z="6" heading="0" />
+			<spawn_point type="0" x="-402" y="406" z="3.75" heading="64" />
+			<spawn_point type="0" x="-18" y="76" z="4" heading="0" />
+			<spawn_point type="0" x="-653" y="126" z="6" heading="127.5" />
+			<spawn_point type="0" x="-19" y="77" z="6" heading="76" />
+			<spawn_point type="0" x="-52" y="553" z="4" heading="0" />
+			<spawn_point type="0" x="-94" y="314" z="3.75" heading="19" />
+			<spawn_point type="0" x="-337" y="244" z="4" heading="193" />
+		</spawn_points>
+	</zone>
+	<zone id="2" short_name="qeynos2" long_name="North Qeynos" safe_x="-74" safe_y="428" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="3" short_name="qrg" long_name="The Surefall Glade" safe_x="0" safe_y="0" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="4" short_name="qeytoqrg" long_name="The Qeynos Hills" safe_x="83" safe_y="508" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="5" short_name="highpass" long_name="Highpass Hold" safe_x="-104" safe_y="-14" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="6" short_name="highkeep" long_name="High Keep" safe_x="88" safe_y="-16" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="8" short_name="freportn" long_name="North Freeport" safe_x="211" safe_y="-296" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="9" short_name="freportw" long_name="West Freeport" safe_x="181" safe_y="335" safe_z="-24">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="10" short_name="freporte" long_name="East Freeport" safe_x="-648" safe_y="-1097" safe_z="-52.2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="11" short_name="runnyeye" long_name="The Liberated Citadel of Runnyeye" safe_x="201" safe_y="90" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="12" short_name="qey2hh1" long_name="The Western Plains of Karana" safe_x="-531" safe_y="15" safe_z="-3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="13" short_name="northkarana" long_name="The Northern Plains of Karana" safe_x="-382" safe_y="-284" safe_z="-8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="14" short_name="southkarana" long_name="The Southern Plains of Karana" safe_x="1294" safe_y="2348" safe_z="-6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="15" short_name="eastkarana" long_name="Eastern Plains of Karana" safe_x="865" safe_y="15" safe_z="-33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="16" short_name="beholder" long_name="Gorge of King Xorbb" safe_x="-21.44" safe_y="-512.23" safe_z="45.13">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="17" short_name="blackburrow" long_name="Blackburrow" safe_x="39" safe_y="-159" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="18" short_name="paw" long_name="The Lair of the Splitpaw" safe_x="63" safe_y="-122" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="19" short_name="rivervale" long_name="Rivervale" safe_x="0" safe_y="0" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="20" short_name="kithicor" long_name="Kithicor Forest" safe_x="3828" safe_y="1889" safe_z="459">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="21" short_name="commons" long_name="West Commonlands" safe_x="-1334.24" safe_y="209.57" safe_z="-51.47">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="22" short_name="ecommons" long_name="East Commonlands" safe_x="-1485" safe_y="9.2" safe_z="-51">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="23" short_name="erudnint" long_name="The Erudin Palace" safe_x="808" safe_y="712" safe_z="21">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="24" short_name="erudnext" long_name="Erudin" safe_x="-338" safe_y="75" safe_z="20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="25" short_name="nektulos" long_name="The Nektulos Forest" safe_x="235" safe_y="-911" safe_z="24">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="25" short_name="nektulos" long_name="The Nektulos Forest" safe_x="-259" safe_y="-1201" safe_z="-5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="26" short_name="cshome" long_name="Sunset Home" safe_x="0" safe_y="100" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="27" short_name="lavastorm" long_name="The Lavastorm Mountains" safe_x="-25" safe_y="182" safe_z="-74">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="28" short_name="nektropos" long_name="Nektropos" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="29" short_name="halas" long_name="Halas" safe_x="0" safe_y="0" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="30" short_name="everfrost" long_name="Everfrost Peaks" safe_x="629" safe_y="3139" safe_z="-60">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="31" short_name="soldunga" long_name="Solusek's Eye" safe_x="-486" safe_y="-476" safe_z="73">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="32" short_name="soldungb" long_name="Nagafen's Lair" safe_x="-263" safe_y="-424" safe_z="-108">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="33" short_name="misty" long_name="Misty Thicket" safe_x="0" safe_y="0" safe_z="2.43">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="34" short_name="nro" long_name="Northern Desert of Ro" safe_x="299.12" safe_y="3537.9" safe_z="-24.5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="35" short_name="sro" long_name="Southern Desert of Ro" safe_x="286" safe_y="1265" safe_z="79">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="36" short_name="befallen" long_name="Befallen" safe_x="35" safe_y="-82" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="37" short_name="oasis" long_name="Oasis of Marr" safe_x="903.98" safe_y="490.03" safe_z="6.4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="38" short_name="tox" long_name="Toxxulia Forest" safe_x="203" safe_y="2295" safe_z="-45">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="39" short_name="hole" long_name="The Hole" safe_x="-1050" safe_y="640" safe_z="-80">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="40" short_name="neriaka" long_name="Neriak - Foreign Quarter" safe_x="157" safe_y="-3" safe_z="31">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="41" short_name="neriakb" long_name="Neriak - Commons" safe_x="-500" safe_y="3" safe_z="-10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="42" short_name="neriakc" long_name="Neriak - 3rd Gate" safe_x="-969" safe_y="892" safe_z="-52">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="43" short_name="neriakd" long_name="Neriak Palace" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="44" short_name="najena" long_name="Najena" safe_x="858" safe_y="-76" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="45" short_name="qcat" long_name="The Qeynos Aqueduct System" safe_x="80" safe_y="860" safe_z="-38">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="46" short_name="innothule" long_name="Innothule Swamp" safe_x="-588" safe_y="-2192" safe_z="-25">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="47" short_name="feerrott" long_name="The Feerrott" safe_x="905" safe_y="1051" safe_z="25">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="48" short_name="cazicthule" long_name="Accursed Temple of CazicThule" safe_x="-74" safe_y="71" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="49" short_name="oggok" long_name="Oggok" safe_x="-99" safe_y="-345" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="50" short_name="rathemtn" long_name="The Rathe Mountains" safe_x="1831" safe_y="3825" safe_z="28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="51" short_name="lakerathe" long_name="Lake Rathetear" safe_x="1213" safe_y="4183" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="52" short_name="grobb" long_name="Grobb" safe_x="0" safe_y="-100" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="53" short_name="aviak" long_name="Aviak Village" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="54" short_name="gfaydark" long_name="The Greater Faydark" safe_x="10" safe_y="-20" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="55" short_name="akanon" long_name="Ak'Anon" safe_x="-35" safe_y="47" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="56" short_name="steamfont" long_name="Steamfont Mountains" safe_x="-272.86" safe_y="159.86" safe_z="-21.4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="57" short_name="lfaydark" long_name="The Lesser Faydark" safe_x="-1770" safe_y="-108" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="58" short_name="crushbone" long_name="Crushbone" safe_x="158" safe_y="-644" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="59" short_name="mistmoore" long_name="The Castle of Mistmoore" safe_x="120" safe_y="-330" safe_z="-178">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="60" short_name="kaladima" long_name="South Kaladim" safe_x="-2" safe_y="-18" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="61" short_name="felwithea" long_name="Northern Felwithe" safe_x="94" safe_y="-25" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="62" short_name="felwitheb" long_name="Southern Felwithe" safe_x="-790" safe_y="320" safe_z="-10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="63" short_name="unrest" long_name="The Estate of Unrest" safe_x="52" safe_y="-38" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="64" short_name="kedge" long_name="Kedge Keep" safe_x="14" safe_y="100" safe_z="302">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="65" short_name="guktop" long_name="The City of Guk" safe_x="7" safe_y="-36" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="66" short_name="gukbottom" long_name="The Ruins of Old Guk" safe_x="-217" safe_y="1197" safe_z="-78">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="67" short_name="kaladimb" long_name="North Kaladim" safe_x="-267" safe_y="414" safe_z="3.75">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="68" short_name="butcher" long_name="Butcherblock Mountains" safe_x="-700" safe_y="2550" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="69" short_name="oot" long_name="Ocean of Tears" safe_x="-9200" safe_y="390" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="70" short_name="cauldron" long_name="Dagnor's Cauldron" safe_x="320" safe_y="2815" safe_z="473">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="71" short_name="airplane" long_name="The Plane of Sky" safe_x="614" safe_y="1415" safe_z="-650">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="72" short_name="fearplane" long_name="The Plane of Fear" safe_x="1282" safe_y="-1139" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="73" short_name="permafrost" long_name="The Permafrost Caverns" safe_x="61" safe_y="-121" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="74" short_name="kerraridge" long_name="Kerra Isle" safe_x="-859.97" safe_y="474.96" safe_z="23.75">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="75" short_name="paineel" long_name="Paineel" safe_x="200" safe_y="800" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="76" short_name="hateplane" long_name="Plane of Hate" safe_x="-353.08" safe_y="-374.8" safe_z="3.75">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="77" short_name="arena" long_name="The Arena" safe_x="146" safe_y="-1009" safe_z="51">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="78" short_name="fieldofbone" long_name="The Field of Bone" safe_x="1617" safe_y="-1684" safe_z="-50">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="79" short_name="warslikswood" long_name="The Warsliks Woods" safe_x="-468" safe_y="-1429" safe_z="198">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="80" short_name="soltemple" long_name="The Temple of Solusek Ro" safe_x="36" safe_y="262" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="81" short_name="droga" long_name="The Temple of Droga" safe_x="290" safe_y="1375" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="82" short_name="cabwest" long_name="Cabilis West" safe_x="767" safe_y="-783" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="83" short_name="swampofnohope" long_name="The Swamp of No Hope" safe_x="2945" safe_y="2761" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="84" short_name="firiona" long_name="Firiona Vie" safe_x="1440" safe_y="-2392" safe_z="1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="85" short_name="lakeofillomen" long_name="Lake of Ill Omen" safe_x="-5383" safe_y="5747" safe_z="70">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="86" short_name="dreadlands" long_name="The Dreadlands" safe_x="9565" safe_y="2806" safe_z="1050">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="87" short_name="burningwood" long_name="The Burning Wood" safe_x="-821" safe_y="-4942" safe_z="204">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="88" short_name="kaesora" long_name="Kaesora" safe_x="40" safe_y="370" safe_z="102">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="89" short_name="sebilis" long_name="The Ruins of Sebilis" safe_x="0" safe_y="250" safe_z="44">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="90" short_name="citymist" long_name="The City of Mist" safe_x="-734" safe_y="28" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="91" short_name="skyfire" long_name="The Skyfire Mountains" safe_x="-4286" safe_y="-1140" safe_z="38">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="92" short_name="frontiermtns" long_name="Frontier Mountains" safe_x="-4262" safe_y="-633" safe_z="116">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="93" short_name="overthere" long_name="The Overthere" safe_x="1450" safe_y="-3500" safe_z="309">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="94" short_name="emeraldjungle" long_name="The Emerald Jungle" safe_x="4648" safe_y="-1223" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="95" short_name="trakanon" long_name="Trakanon's Teeth" safe_x="1486" safe_y="3868" safe_z="-336">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="96" short_name="timorous" long_name="Timorous Deep" safe_x="2194" safe_y="-5392" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="97" short_name="kurn" long_name="Kurn's Tower" safe_x="0" safe_y="0" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="98" short_name="erudsxing" long_name="Erud's Crossing" safe_x="795" safe_y="-1767" safe_z="11">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="100" short_name="stonebrunt" long_name="The Stonebrunt Mountains" safe_x="-1643" safe_y="-3428" safe_z="-7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="101" short_name="warrens" long_name="The Warrens" safe_x="-930" safe_y="748" safe_z="-37">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="102" short_name="karnor" long_name="Karnor's Castle" safe_x="302" safe_y="18" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="103" short_name="chardok" long_name="Chardok" safe_x="859" safe_y="119" safe_z="106">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="104" short_name="dalnir" long_name="The Crypt of Dalnir" safe_x="0" safe_y="0" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="105" short_name="charasis" long_name="The Howling Stones" safe_x="0" safe_y="0" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="106" short_name="cabeast" long_name="Cabilis East" safe_x="-417" safe_y="1362" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="107" short_name="nurga" long_name="The Mines of Nurga" safe_x="-1762" safe_y="-2200" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="108" short_name="veeshan" long_name="Veeshan's Peak" safe_x="1783" safe_y="-5" safe_z="15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="109" short_name="veksar" long_name="Veksar" safe_x="1" safe_y="-486" safe_z="-27">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="110" short_name="iceclad" long_name="The Iceclad Ocean" safe_x="340" safe_y="5330" safe_z="-17">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="111" short_name="frozenshadow" long_name="The Tower of Frozen Shadow" safe_x="200" safe_y="120" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="112" short_name="velketor" long_name="Velketor's Labyrinth" safe_x="-65" safe_y="581" safe_z="-152">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="113" short_name="kael" long_name="Kael Drakkel" safe_x="-633" safe_y="-47" safe_z="128">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="114" short_name="skyshrine" long_name="Skyshrine" safe_x="-730" safe_y="-210" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="115" short_name="thurgadina" long_name="The City of Thurgadin" safe_x="0" safe_y="-1222" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="116" short_name="eastwastes" long_name="Eastern Wastes" safe_x="-4296" safe_y="-5049" safe_z="147">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="117" short_name="cobaltscar" long_name="Cobaltscar" safe_x="895" safe_y="-939" safe_z="318">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="118" short_name="greatdivide" long_name="The Great Divide" safe_x="-965" safe_y="-7720" safe_z="-557">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="119" short_name="wakening" long_name="The Wakening Land" safe_x="-5000" safe_y="-673" safe_z="-195">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="120" short_name="westwastes" long_name="The Western Wastes" safe_x="-3499" safe_y="-4099" safe_z="-18">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="121" short_name="crystal" long_name="The Crystal Caverns" safe_x="303" safe_y="487" safe_z="-74">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="123" short_name="necropolis" long_name="Dragon Necropolis" safe_x="2000" safe_y="-100" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="124" short_name="templeveeshan" long_name="The Temple of Veeshan" safe_x="-499" safe_y="-2086" safe_z="-36">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="125" short_name="sirens" long_name="Siren's Grotto" safe_x="-33" safe_y="196" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="126" short_name="mischiefplane" long_name="The Plane of Mischief" safe_x="-395" safe_y="-1410" safe_z="115">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="127" short_name="growthplane" long_name="The Plane of Growth" safe_x="3016" safe_y="-2522" safe_z="-19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="128" short_name="sleeper" long_name="The Sleeper's Tomb" safe_x="0" safe_y="0" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="129" short_name="thurgadinb" long_name="Icewell Keep" safe_x="0" safe_y="250" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="130" short_name="erudsxing2" long_name="Marauders Mire" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="150" short_name="shadowhaven" long_name="Shadow Haven" safe_x="190" safe_y="-982" safe_z="-28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="151" short_name="bazaar" long_name="The Bazaar" safe_x="-71" safe_y="-250" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="151" short_name="bazaar" long_name="The Bazaar" safe_x="140" safe_y="-821" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="152" short_name="nexus" long_name="Nexus" safe_x="0" safe_y="0" safe_z="-28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="153" short_name="echo" long_name="The Echo Caverns" safe_x="-800" safe_y="840" safe_z="-25">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="154" short_name="acrylia" long_name="The Acrylia Caverns" safe_x="-665" safe_y="20" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="155" short_name="sharvahl" long_name="The City of Shar Vahl" safe_x="85" safe_y="-1135" safe_z="-188">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="156" short_name="paludal" long_name="The Paludal Caverns" safe_x="-241" safe_y="-3721" safe_z="195">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="157" short_name="fungusgrove" long_name="The Fungus Grove" safe_x="-1005" safe_y="-2140" safe_z="-308">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="158" short_name="vexthal" long_name="Vex Thal" safe_x="-1655" safe_y="257" safe_z="-35">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="159" short_name="sseru" long_name="Sanctus Seru" safe_x="-232" safe_y="1166" safe_z="59">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="160" short_name="katta" long_name="Katta Castellum" safe_x="-545" safe_y="645" safe_z="1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="161" short_name="netherbian" long_name="Netherbian Lair" safe_x="14" safe_y="1787" safe_z="-62">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="162" short_name="ssratemple" long_name="Ssraeshza Temple" safe_x="0" safe_y="0" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="163" short_name="griegsend" long_name="Grieg's End" safe_x="3461" safe_y="-19" safe_z="-5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="164" short_name="thedeep" long_name="The Deep" safe_x="-700" safe_y="-398" safe_z="-60">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="165" short_name="shadeweaver" long_name="Shadeweaver's Thicket" safe_x="-3570" safe_y="-2122" safe_z="-93">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="166" short_name="hollowshade" long_name="Hollowshade Moor" safe_x="2420" safe_y="1241" safe_z="40">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="167" short_name="grimling" long_name="Grimling Forest" safe_x="-1020" safe_y="-950" safe_z="22">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="168" short_name="mseru" long_name="Marus Seru" safe_x="-1668" safe_y="540" safe_z="-6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="169" short_name="letalis" long_name="Mons Letalis" safe_x="-623" safe_y="-1249" safe_z="-29">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="170" short_name="twilight" long_name="The Twilight Sea" safe_x="-1858" safe_y="-420" safe_z="-10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="171" short_name="thegrey" long_name="The Grey" safe_x="349" safe_y="-1994" safe_z="-26">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="172" short_name="tenebrous" long_name="The Tenebrous Mountains" safe_x="1810" safe_y="51" safe_z="-36">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="173" short_name="maiden" long_name="The Maiden's Eye" safe_x="1905" safe_y="940" safe_z="-150">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="174" short_name="dawnshroud" long_name="The Dawnshroud Peaks" safe_x="2085" safe_y="0" safe_z="89">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="175" short_name="scarlet" long_name="The Scarlet Desert" safe_x="-1678" safe_y="-1054" safe_z="-98">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="176" short_name="umbral" long_name="The Umbral Plains" safe_x="1900" safe_y="-474" safe_z="23">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="179" short_name="akheva" long_name="The Akheva Ruins" safe_x="60" safe_y="-1395" safe_z="22">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="180" short_name="arena2" long_name="The Arena Two" safe_x="460.9" safe_y="-41.4" safe_z="24.6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="181" short_name="jaggedpine" long_name="The Jaggedpine Forest" safe_x="1800" safe_y="1319" safe_z="-13">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="182" short_name="nedaria" long_name="Nedaria's Landing" safe_x="-1737" safe_y="-181" safe_z="256">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="183" short_name="tutorial" long_name="EverQuest Tutorial" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="184" short_name="load" long_name="Loading Zone" safe_x="-316" safe_y="5" safe_z="8.2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="185" short_name="load2" long_name="New Loading Zone" safe_x="-260" safe_y="-4" safe_z="-724">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="186" short_name="hateplaneb" long_name="The Plane of Hate" safe_x="-393" safe_y="656" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="187" short_name="shadowrest" long_name="Shadowrest" safe_x="-27.3" safe_y="-245.6" safe_z="8.1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="188" short_name="tutoriala" long_name="The Mines of Gloomingdeep" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="189" short_name="tutorialb" long_name="The Mines of Gloomingdeep" safe_x="18" safe_y="-147" safe_z="20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="190" short_name="clz" long_name="Loading" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="200" short_name="codecay" long_name="The Crypt of Decay" safe_x="-170" safe_y="-65" safe_z="-93">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="201" short_name="pojustice" long_name="The Plane of Justice" safe_x="58" safe_y="-61" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="202" short_name="poknowledge" long_name="The Plane of Knowledge" safe_x="-285" safe_y="-148" safe_z="-159">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="203" short_name="potranquility" long_name="The Plane of Tranquility" safe_x="-1507" safe_y="701" safe_z="-878">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="204" short_name="ponightmare" long_name="The Plane of Nightmares" safe_x="1668" safe_y="282" safe_z="212">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="205" short_name="podisease" long_name="The Plane of Disease" safe_x="-1750" safe_y="-1245" safe_z="-56">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="206" short_name="poinnovation" long_name="The Plane of Innovation" safe_x="263" safe_y="516" safe_z="-53">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="207" short_name="potorment" long_name="Torment, the Plane of Pain" safe_x="-341" safe_y="1706" safe_z="-491">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="208" short_name="povalor" long_name="The Plane of Valor" safe_x="190" safe_y="-1668" safe_z="65">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="209" short_name="bothunder" long_name="Bastion of Thunder" safe_x="178" safe_y="207" safe_z="-1620">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="210" short_name="postorms" long_name="The Plane of Storms" safe_x="-1795" safe_y="-2059" safe_z="-471">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="211" short_name="hohonora" long_name="The Halls of Honor" safe_x="-2678" safe_y="-323" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="212" short_name="solrotower" long_name="The Tower of Solusek Ro" safe_x="-1" safe_y="-2915" safe_z="-766">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="213" short_name="powar" long_name="Plane of War" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="214" short_name="potactics" long_name="Drunder, the Fortress of Zek" safe_x="-210" safe_y="10" safe_z="-35">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="215" short_name="poair" long_name="The Plane of Air" safe_x="532" safe_y="884" safe_z="-90">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="216" short_name="powater" long_name="The Plane of Water" safe_x="-165" safe_y="-1250" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="217" short_name="pofire" long_name="The Plane of Fire" safe_x="-1387" safe_y="1210" safe_z="-182">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="218" short_name="poeartha" long_name="The Plane of Earth" safe_x="-1150" safe_y="200" safe_z="71">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="219" short_name="potimea" long_name="The Plane of Time" safe_x="-37" safe_y="-110" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="220" short_name="hohonorb" long_name="The Temple of Marr" safe_x="975" safe_y="2" safe_z="396">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="221" short_name="nightmareb" long_name="The Lair of Terris Thule" safe_x="1608" safe_y="30" safe_z="-327">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="222" short_name="poearthb" long_name="The Plane of Earth" safe_x="-762" safe_y="328" safe_z="-56">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="223" short_name="potimeb" long_name="The Plane of Time" safe_x="851" safe_y="-141" safe_z="396">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="224" short_name="gunthak" long_name="The Gulf of Gunthak" safe_x="-938" safe_y="1461" safe_z="15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="225" short_name="dulak" long_name="Dulak's Harbor" safe_x="438" safe_y="548" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="226" short_name="torgiran" long_name="The Torgiran Mines" safe_x="-620" safe_y="-323" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="227" short_name="nadox" long_name="The Crypt of Nadox" safe_x="-1340" safe_y="-70" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="228" short_name="hatesfury" long_name="Hate's Fury" safe_x="-924" safe_y="107" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="229" short_name="guka" long_name="Deepest Guk: Cauldron of Lost Souls" safe_x="101" safe_y="-841" safe_z="1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="230" short_name="ruja" long_name="The Rujarkian Hills: Bloodied Quarries" safe_x="805" safe_y="-123" safe_z="-95">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="231" short_name="taka" long_name="Takish-Hiz: Sunken Library" safe_x="-77" safe_y="493" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="232" short_name="mira" long_name="Miragul's Menagerie: Silent Gallery" safe_x="649" safe_y="564" safe_z="-89">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="233" short_name="mmca" long_name="Mistmoore's Catacombs: Forlorn Caverns" safe_x="-594" safe_y="-365" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="234" short_name="gukb" long_name="The Drowning Crypt" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="235" short_name="rujb" long_name="The Rujarkian Hills: Halls of War" safe_x="367" safe_y="-776" safe_z="-12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="236" short_name="takb" long_name="Takish-Hiz: Shifting Tower" safe_x="380" safe_y="-544" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="237" short_name="mirb" long_name="Miragul's Menagerie: Frozen Nightmare" safe_x="607" safe_y="1504" safe_z="28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="238" short_name="mmcb" long_name="Mistmoore's Catacombs: Dreary Grotto" safe_x="-522" safe_y="-22" safe_z="23">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="239" short_name="gukc" long_name="Deepest Guk: Ancient Aqueducts" safe_x="-804" safe_y="-372" safe_z="96">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="240" short_name="rujc" long_name="The Rujarkian Hills: Wind Bridges" safe_x="-1315" safe_y="-515" safe_z="-12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="241" short_name="takc" long_name="Takish-Hiz: Fading Temple" safe_x="251" safe_y="33" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="242" short_name="mirc" long_name="The Spider Den" safe_x="-769" safe_y="763" safe_z="-186">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="243" short_name="mmcc" long_name="Mistmoore's Catacombs: Struggles within the Progeny" safe_x="-424" safe_y="-108" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="244" short_name="gukd" long_name="The Mushroom Grove" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="245" short_name="rujd" long_name="The Rujarkian Hills: Prison Break" safe_x="-322" safe_y="1254" safe_z="-96">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="246" short_name="takd" long_name="Takish-Hiz: Royal Observatory" safe_x="-282" safe_y="133" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="247" short_name="mird" long_name="Miragul's Menagerie: Hushed Banquet" safe_x="228" safe_y="-457" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="248" short_name="mmcd" long_name="Mistmoore's Catacombs: Chambers of Eternal Affliction" safe_x="-144" safe_y="-647" safe_z="1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="249" short_name="guke" long_name="Deepest Guk: The Curse Reborn" safe_x="680" safe_y="-1031" safe_z="59">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="250" short_name="ruje" long_name="The Rujarkian Hills: Drudge Hollows" safe_x="500" safe_y="-1876" safe_z="-222">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="251" short_name="take" long_name="Takish-Hiz: River of Recollection" safe_x="375" safe_y="-406" safe_z="19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="252" short_name="mire" long_name="The Frosted Halls" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="253" short_name="mmce" long_name="Mistmoore's Catacombs: Sepulcher of the Damned" safe_x="-605" safe_y="372" safe_z="1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="254" short_name="gukf" long_name="Deepest Guk: Chapel of the Witnesses" safe_x="-714" safe_y="550" safe_z="32">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="255" short_name="rujf" long_name="The Rujarkian Hills: Fortified Lair of the Taskmasters" safe_x="-290" safe_y="-571" safe_z="-460">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="256" short_name="takf" long_name="Takish-Hiz: Sandfall Corridors" safe_x="69" safe_y="1" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="257" short_name="mirf" long_name="The Forgotten Wastes" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="258" short_name="mmcf" long_name="Mistmoore's Catacombs: Scion Lair of Fury" safe_x="-184" safe_y="399" safe_z="-12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="259" short_name="gukg" long_name="The Root Garden" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="260" short_name="rujg" long_name="The Rujarkian Hills: Hidden Vale of Deceit" safe_x="238" safe_y="-1163" safe_z="130">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="261" short_name="takg" long_name="Takish-Hiz: Balancing Chamber" safe_x="-214" safe_y="234" safe_z="22">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="262" short_name="mirg" long_name="Miragul's Menagerie: Heart of the Menagerie" safe_x="434" safe_y="-15" safe_z="56">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="263" short_name="mmcg" long_name="Mistmoore's Catacombs: Cesspits of Putrescence" safe_x="427" safe_y="413" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="264" short_name="gukh" long_name="Deepest Guk: Accursed Sanctuary" safe_x="834" safe_y="-667" safe_z="-92">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="265" short_name="rujh" long_name="The Rujarkian Hills: Blazing Forge " safe_x="656" safe_y="-1250" safe_z="-15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="266" short_name="takh" long_name="Takish-Hiz: Sweeping Tides" safe_x="-147" safe_y="392" safe_z="-1">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="267" short_name="mirh" long_name="The Morbid Laboratory" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="268" short_name="mmch" long_name="Mistmoore's Catacombs: Aisles of Blood" safe_x="-367" safe_y="-323" safe_z="17">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="269" short_name="ruji" long_name="The Rujarkian Hills: Arena of Chance" safe_x="833" safe_y="-1871" safe_z="-222">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="270" short_name="taki" long_name="Takish-Hiz: Antiquated Palace" safe_x="617" safe_y="119" safe_z="-3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="271" short_name="miri" long_name="The Theater of Imprisoned Horror" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="272" short_name="mmci" long_name="Mistmoore's Catacombs: Halls of Sanguinary Rites" safe_x="589" safe_y="-275" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="273" short_name="rujj" long_name="The Rujarkian Hills: Barracks of War" safe_x="750" safe_y="-134" safe_z="26">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="274" short_name="takj" long_name="Takish-Hiz: Prismatic Corridors" safe_x="-143" safe_y="625" safe_z="-21">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="275" short_name="mirj" long_name="Miragul's Menagerie: Grand Library" safe_x="1153" safe_y="-901" safe_z="28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="276" short_name="mmcj" long_name="Mistmoore's Catacombs: Infernal Sanctuary" safe_x="258" safe_y="548" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="277" short_name="chardokb" long_name="Chardok: The Halls of Betrayal" safe_x="-190" safe_y="290" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="278" short_name="soldungc" long_name="The Caverns of Exile" safe_x="307" safe_y="-307" safe_z="-14">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="279" short_name="abysmal" long_name="The Abysmal Sea" safe_x="0" safe_y="-199" safe_z="140">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="280" short_name="natimbi" long_name="Natimbi, the Broken Shores" safe_x="-1557" safe_y="-853" safe_z="239">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="281" short_name="qinimi" long_name="Qinimi, Court of Nihilia" safe_x="-1053" safe_y="438" safe_z="-16">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="282" short_name="riwwi" long_name="Riwwi, Coliseum of Games" safe_x="454" safe_y="-650" safe_z="35">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="283" short_name="barindu" long_name="Barindu, Hanging Gardens" safe_x="590" safe_y="-1457" safe_z="-123">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="284" short_name="ferubi" long_name="Ferubi, Forgotten Temple of Taelosia" safe_x="1485" safe_y="596" safe_z="111.8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="285" short_name="snpool" long_name="Sewers of Nihilia, Pool of Sludg" safe_x="137" safe_y="-5" safe_z="-19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="286" short_name="snlair" long_name="Sewers of Nihilia, Lair of Trapp" safe_x="234" safe_y="-70" safe_z="-14">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="287" short_name="snplant" long_name="Sewers of Nihilia, Purifying Pla" safe_x="150" safe_y="127" safe_z="-7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="288" short_name="sncrematory" long_name="Sewers of Nihilia, Emanating Cre" safe_x="31" safe_y="175" safe_z="-17">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="289" short_name="tipt" long_name="Tipt, Treacherous Crags" safe_x="-448" safe_y="-2374" safe_z="12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="290" short_name="vxed" long_name="Vxed, the Crumbling Caverns" safe_x="-427" safe_y="-3552" safe_z="14">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="291" short_name="yxtta" long_name="Yxtta, Pulpit of Exiles " safe_x="1235" safe_y="1300" safe_z="-348">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="292" short_name="uqua" long_name="Uqua, the Ocean God Chantry" safe_x="-17" safe_y="-7" safe_z="-26">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="293" short_name="kodtaz" long_name="Kod'Taz, Broken Trial Grounds" safe_x="-1475" safe_y="1548" safe_z="-302.12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="294" short_name="ikkinz" long_name="Ikkinz, Chambers of Transcendence" safe_x="-157" safe_y="23" safe_z="-2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="295" short_name="qvic" long_name="Qvic, Prayer Grounds of Calling" safe_x="-2515" safe_y="767" safe_z="-647">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="296" short_name="inktuta" long_name="Inktu'Ta, the Unmasked Chapel" safe_x="0" safe_y="65" safe_z="-2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="297" short_name="txevu" long_name="Txevu, Lair of the Elite" safe_x="-332" safe_y="-1" safe_z="-420">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="298" short_name="tacvi" long_name="Tacvi, The Broken Temple" safe_x="4" safe_y="9" safe_z="-8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="299" short_name="qvicb" long_name="Qvic, the Hidden Vault" safe_x="0" safe_y="0" safe_z="-6.25">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="300" short_name="wallofslaughter" long_name="Wall of Slaughter" safe_x="-1461" safe_y="-2263" safe_z="-69">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="301" short_name="bloodfields" long_name="The Bloodfields" safe_x="-1763" safe_y="2140" safe_z="-928">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="302" short_name="draniksscar" long_name="Dranik's Scar" safe_x="-1519" safe_y="-1468" safe_z="260">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="303" short_name="causeway" long_name="Nobles' Causeway" safe_x="-1674" safe_y="-239" safe_z="317">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="304" short_name="chambersa" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="305" short_name="chambersb" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="306" short_name="chambersc" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="307" short_name="chambersd" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="308" short_name="chamberse" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="309" short_name="chambersf" long_name="Muramite Proving Grounds" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="316" short_name="provinggrounds" long_name="Muramite Provinggrounds" safe_x="-124" safe_y="-5676" safe_z="-306">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="317" short_name="anguish" long_name="Anguish, the Fallen Palace" safe_x="-9" safe_y="-2466" safe_z="-79">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="318" short_name="dranikhollowsa" long_name="Dranik's Hollows" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="319" short_name="dranikhollowsb" long_name="Dranik's Hollows" safe_x="0" safe_y="-447" safe_z="-36">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="320" short_name="dranikhollowsc" long_name="Dranik's Hollows" safe_x="5" safe_y="-51" safe_z="-41">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="328" short_name="dranikcatacombsa" long_name="Catacombs of Dranik" safe_x="0" safe_y="0" safe_z="-8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="329" short_name="dranikcatacombsb" long_name="Catacombs of Dranik" safe_x="222.17" safe_y="665.96" safe_z="-13.21">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="330" short_name="dranikcatacombsc" long_name="Catacombs of Dranik" safe_x="-20" safe_y="-218" safe_z="-1.78">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="331" short_name="draniksewersa" long_name="Sewers of Dranik" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="332" short_name="draniksewersb" long_name="Sewers of Dranik" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="333" short_name="draniksewersc" long_name="Sewers of Dranik" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="334" short_name="riftseekers" long_name="Riftseekers' Sanctum" safe_x="-1" safe_y="297" safe_z="-208">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="335" short_name="harbingers" long_name="Harbinger's Spire" safe_x="122" safe_y="-98" safe_z="10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="336" short_name="dranik" long_name="The Ruined City of Dranik" safe_x="-1112" safe_y="-1953" safe_z="-369">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="337" short_name="broodlands" long_name="The Broodlands" safe_x="-1613" safe_y="-1016" safe_z="99">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="338" short_name="stillmoona" long_name="Stillmoon Temple" safe_x="-9" safe_y="-78" safe_z="-30">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="339" short_name="stillmoonb" long_name="The Ascent" safe_x="169" safe_y="1027" safe_z="44">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="340" short_name="thundercrest" long_name="Thundercrest Isles" safe_x="1641" safe_y="-646" safe_z="114">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="341" short_name="delvea" long_name="Lavaspinner's Lair" safe_x="-246" safe_y="-1578" safe_z="68">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="342" short_name="delveb" long_name="Tirranun's Delve" safe_x="-138" safe_y="-355" safe_z="17">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="343" short_name="thenest" long_name="The Nest" safe_x="-234" safe_y="-55" safe_z="-85">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="344" short_name="guildlobby" long_name="Guild Lobby" safe_x="19" safe_y="-55" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="345" short_name="guildhall" long_name="Guild Hall" safe_x="0" safe_y="1" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="346" short_name="barter" long_name="The Barter Hall" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="347" short_name="illsalin" long_name="Ruins of Illsalin" safe_x="308" safe_y="-182" safe_z="-32">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="348" short_name="illsalina" long_name="Illsalin Marketplace" safe_x="8" safe_y="0" safe_z="-20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="349" short_name="illsalinb" long_name="Temple of Korlach" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="350" short_name="illsalinc" long_name="The Nargil Pits" safe_x="0" safe_y="0" safe_z="-15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="351" short_name="dreadspire" long_name="Dreadspire Keep" safe_x="1358" safe_y="-1030" safe_z="-572">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="354" short_name="drachnidhive" long_name="The Hive" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="355" short_name="drachnidhivea" long_name="The Hatchery" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="356" short_name="drachnidhiveb" long_name="The Cocoons" safe_x="21.25" safe_y="1248.2" safe_z="150.27">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="357" short_name="drachnidhivec" long_name="Queen Sendaii`s Lair" safe_x="-55.72" safe_y="-70.27" safe_z="-755">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="358" short_name="westkorlach" long_name="Stoneroot Falls" safe_x="-2229" safe_y="395" safe_z="895">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="359" short_name="westkorlacha" long_name="Prince's Manor" safe_x="-1549" safe_y="577" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="360" short_name="westkorlachb" long_name="Caverns of the Lost" safe_x="0" safe_y="4" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="361" short_name="westkorlachc" long_name="Lair of the Korlach" safe_x="-57" safe_y="197" safe_z="43">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="362" short_name="eastkorlach" long_name="The Undershore" safe_x="-950" safe_y="-1130" safe_z="184">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="363" short_name="eastkorlacha" long_name="Snarlstone Dens" safe_x="16" safe_y="3" safe_z="-12">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="364" short_name="shadowspine" long_name="Shadow Spine" safe_x="2" safe_y="408" safe_z="72">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="365" short_name="corathus" long_name="Corathus Creep" safe_x="16" safe_y="-337" safe_z="-46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="366" short_name="corathusa" long_name="Sporali Caverns" safe_x="-49.3" safe_y="49.84" safe_z="-10.76">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="367" short_name="corathusb" long_name="The Corathus Mines" safe_x="2" safe_y="90" safe_z="-15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="368" short_name="nektulosa" long_name="Shadowed Grove" safe_x="-11" safe_y="134" safe_z="-13">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="369" short_name="arcstone" long_name="Arcstone, Isle of Spirits" safe_x="1630" safe_y="-279" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="370" short_name="relic" long_name="Relic, the Artifact City" safe_x="861" safe_y="618" safe_z="-265">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="371" short_name="skylance" long_name="Skylance" safe_x="0" safe_y="-95" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="372" short_name="devastation" long_name="The Devastation" safe_x="1390" safe_y="216" safe_z="53">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="373" short_name="devastationa" long_name="The Seething Wall" safe_x="-141" safe_y="1059" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="374" short_name="rage" long_name="Sverag, Stronghold of Rage" safe_x="0" safe_y="1065" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="375" short_name="ragea" long_name="Razorthorn, Tower of Sullon Zek" safe_x="354" safe_y="63" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="376" short_name="takishruins" long_name="Ruins of Takish-Hiz" safe_x="-983" safe_y="269" safe_z="62">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="377" short_name="takishruinsa" long_name="The Root of Ro" safe_x="18" safe_y="-138" safe_z="-29">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="378" short_name="elddar" long_name="The Elddar Forest" safe_x="606" safe_y="296" safe_z="-36">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="379" short_name="elddara" long_name="Tunare's Shrine" safe_x="0" safe_y="0" safe_z="-6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="380" short_name="theater" long_name="Theater of Blood" safe_x="2933" safe_y="719" safe_z="376">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="381" short_name="theatera" long_name="Deathknell, Tower of Dissonance" safe_x="0" safe_y="-108" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="382" short_name="freeporteast" long_name="East Freeport" safe_x="-725" safe_y="-425" safe_z="7">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="383" short_name="freeportwest" long_name="West Freeport" safe_x="-67" safe_y="0" safe_z="-82">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="384" short_name="freeportsewers" long_name="Freeport Sewers" safe_x="-1298" safe_y="111" safe_z="-80">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="385" short_name="freeportacademy" long_name="Academy of Arcane Sciences" safe_x="-141" safe_y="-336" safe_z="49">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="386" short_name="freeporttemple" long_name="Temple of Marr" safe_x="0" safe_y="0" safe_z="10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="387" short_name="freeportmilitia" long_name="Freeport Militia House: My Precious" safe_x="7" safe_y="-243" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="388" short_name="freeportarena" long_name="Arena" safe_x="-6.75" safe_y="-42.5" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="389" short_name="freeportcityhall" long_name="City Hall" safe_x="-46.98" safe_y="-31.21" safe_z="-9.92">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="390" short_name="freeporttheater" long_name="Theater of the Tranquil" safe_x="0" safe_y="-6" safe_z="-28">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="391" short_name="freeporthall" long_name="Hall of Truth: Bounty" safe_x="-432" safe_y="569" safe_z="-100">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="392" short_name="northro" long_name="North Desert of Ro" safe_x="-1262" safe_y="8590" safe_z="40">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="393" short_name="southro" long_name="South Desert of Ro" safe_x="-581" safe_y="-520" safe_z="126">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="394" short_name="crescent" long_name="Crescent Reach" safe_x="-8" safe_y="11" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="395" short_name="moors" long_name="Blightfire Moors" safe_x="3263" safe_y="-626" safe_z="-20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="396" short_name="stonehive" long_name="Stone Hive" safe_x="-1331" safe_y="-521" safe_z="26">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="397" short_name="mesa" long_name="Goru`kar Mesa" safe_x="-85" safe_y="-2050" safe_z="19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="398" short_name="roost" long_name="Blackfeather Roost" safe_x="-1592" safe_y="2125" safe_z="-308">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="399" short_name="steppes" long_name="The Steppes" safe_x="-896" safe_y="-2360" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="400" short_name="icefall" long_name="Icefall Glacier" safe_x="765" safe_y="-1871" safe_z="-46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="401" short_name="valdeholm" long_name="Valdeholm" safe_x="119" safe_y="-3215" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="402" short_name="frostcrypt" long_name="Frostcrypt, Throne of the Shade King" safe_x="0" safe_y="-40" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="403" short_name="sunderock" long_name="Sunderock Springs" safe_x="-393" safe_y="-3454" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="404" short_name="vergalid" long_name="Vergalid Mines" safe_x="14" safe_y="0" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="405" short_name="direwind" long_name="Direwind Cliffs" safe_x="-329" safe_y="-1845" safe_z="10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="406" short_name="ashengate" long_name="Ashengate, Reliquary of the Scale" safe_x="0" safe_y="-375" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="407" short_name="highpasshold" long_name="Highpass Hold" safe_x="-219" safe_y="-148" safe_z="-24">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="408" short_name="commonlands" long_name="The Commonlands" safe_x="-3492" safe_y="180" safe_z="15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="409" short_name="oceanoftears" long_name="The Ocean of Tears" safe_x="-7925" safe_y="1610" safe_z="-292">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="410" short_name="kithforest" long_name="Kithicor Forest" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="411" short_name="befallenb" long_name="Befallen" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="412" short_name="highpasskeep" long_name="HighKeep" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="413" short_name="innothuleb" long_name="The Innothule Swamp" safe_x="-1029" safe_y="-1778" safe_z="19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="414" short_name="toxxulia" long_name="Toxxulia Forest" safe_x="-718" safe_y="2102" safe_z="26">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="415" short_name="mistythicket" long_name="The Misty Thicket" safe_x="662" safe_y="-7" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="416" short_name="kattacastrum" long_name="Katta Castrum" safe_x="-2" safe_y="-425" safe_z="-20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="417" short_name="thalassius" long_name="Thalassius, the Coral Keep" safe_x="37" safe_y="-86" safe_z="23">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="418" short_name="atiiki" long_name="Jewel of Atiiki" safe_x="-916" safe_y="-1089" safe_z="-39">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="419" short_name="zhisza" long_name="Zhisza, the Shissar Sanctuary" safe_x="6" safe_y="-856" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="420" short_name="silyssar" long_name="Silyssar, New Chelsith" safe_x="167" safe_y="-50" safe_z="-66">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="421" short_name="solteris" long_name="Solteris, the Throne of Ro" safe_x="0" safe_y="0" safe_z="-20">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="422" short_name="barren" long_name="Barren Coast" safe_x="1203" safe_y="698" safe_z="54">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="423" short_name="buriedsea" long_name="The Buried Sea" safe_x="3130" safe_y="-1721" safe_z="308">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="424" short_name="jardelshook" long_name="Jardel's Hook" safe_x="4677" safe_y="-784" safe_z="373">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="425" short_name="monkeyrock" long_name="Monkey Rock" safe_x="-4084" safe_y="-3067" safe_z="307">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="426" short_name="suncrest" long_name="Suncrest Isle" safe_x="-2241" safe_y="-650" safe_z="316">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="427" short_name="deadbone" long_name="Deadbone Reef" safe_x="-3817" safe_y="4044" safe_z="314">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="428" short_name="blacksail" long_name="Blacksail Folly" safe_x="-165" safe_y="5410" safe_z="307">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="429" short_name="maidensgrave" long_name="Maiden's Grave" safe_x="4455" safe_y="2042" safe_z="307">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="430" short_name="redfeather" long_name="Redfeather Isle" safe_x="2531" safe_y="-3638" safe_z="312">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="431" short_name="shipmvp" long_name="The Open Sea" safe_x="0" safe_y="68" safe_z="47">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="432" short_name="shipmvu" long_name="The Open Sea" safe_x="-118" safe_y="-193" safe_z="29">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="433" short_name="shippvu" long_name="The Open Sea" safe_x="-116" safe_y="-97" safe_z="46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="434" short_name="shipuvu" long_name="The Open Sea" safe_x="-116" safe_y="-97" safe_z="46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="435" short_name="shipmvm" long_name="The Open Sea" safe_x="-69" safe_y="-47" safe_z="44">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="436" short_name="mechanotus" long_name="Fortress Mechanotus" safe_x="-1700" safe_y="350" safe_z="404">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="437" short_name="mansion" long_name="Meldrath's Majestic Mansion" safe_x="0" safe_y="-73" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="438" short_name="steamfactory" long_name="The Steam Factory" safe_x="-870" safe_y="66" safe_z="121">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="439" short_name="shipworkshop" long_name="S.H.I.P. Workshop" safe_x="530" safe_y="457" safe_z="10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="440" short_name="gyrospireb" long_name="Gyrospire Beza" safe_x="-9" safe_y="-843" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="441" short_name="gyrospirez" long_name="Gyrospire Zeka" safe_x="-9" safe_y="-843" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="442" short_name="dragonscale" long_name="Dragonscale Hills" safe_x="-1954" safe_y="3916" safe_z="19">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="443" short_name="lopingplains" long_name="Loping Plains" safe_x="-3698" safe_y="-1289" safe_z="722">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="444" short_name="hillsofshade" long_name="Hills of Shade" safe_x="-216" safe_y="-1950" safe_z="-50">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="445" short_name="bloodmoon" long_name="Bloodmoon Keep" safe_x="-4" safe_y="34" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="446" short_name="crystallos" long_name="Crystallos, Lair of the Awakened" safe_x="-65" safe_y="-200" safe_z="-75">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="447" short_name="guardian" long_name="The Mechamatic Guardian" safe_x="-115" safe_y="60" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="448" short_name="steamfontmts" long_name="The Steamfont Mountains" safe_x="-170" safe_y="-42" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="449" short_name="cryptofshade" long_name="Crypt of Shade" safe_x="985" safe_y="-445" safe_z="-39">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="451" short_name="dragonscaleb" long_name="Deepscar's Den" safe_x="58" safe_y="20" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="452" short_name="oldfieldofbone" long_name="Field of Scale" safe_x="1692" safe_y="1194" safe_z="-49">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="453" short_name="oldkaesoraa" long_name="Kaesora Library" safe_x="33.67" safe_y="-20.86" safe_z="3.37">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="454" short_name="oldkaesorab" long_name="Kaesora Hatchery" safe_x="-64" safe_y="-30" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="455" short_name="oldkurn" long_name="Kurn's Tower" safe_x="20" safe_y="-265" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="456" short_name="oldkithicor" long_name="Bloody Kithicor" safe_x="-255" safe_y="1189" safe_z="10">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="457" short_name="oldcommons" long_name="Old Commonlands" safe_x="-3492" safe_y="180" safe_z="15">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="458" short_name="oldhighpass" long_name="Highpass Hold" safe_x="0" safe_y="0" safe_z="-5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="459" short_name="thevoida" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="460" short_name="thevoidb" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="461" short_name="thevoidc" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="462" short_name="thevoidd" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="463" short_name="thevoide" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="464" short_name="thevoidf" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="465" short_name="thevoidg" long_name="The Void" safe_x="-79" safe_y="-158" safe_z="33">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="466" short_name="oceangreenhills" long_name="Oceangreen Hills" safe_x="-1140" safe_y="4542" safe_z="73">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="467" short_name="oceangreenvillage" long_name="Oceangreen Village" safe_x="83" safe_y="-72" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="468" short_name="oldblackburrow" long_name="BlackBurrow" safe_x="7" safe_y="-377" safe_z="46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="469" short_name="bertoxtemple" long_name="Temple of Bertoxxulous" safe_x="2" safe_y="-2" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="470" short_name="discord" long_name="Korafax, Home of the Riders" safe_x="28" safe_y="-20" safe_z="-16">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="471" short_name="discordtower" long_name="Citadel of the Worldslayer" safe_x="0" safe_y="-48" safe_z="-48">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="472" short_name="oldbloodfield" long_name="Old Bloodfields" safe_x="-2097" safe_y="2051" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="473" short_name="precipiceofwar" long_name="The Precipice of War" safe_x="985" safe_y="-1110" safe_z="285">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="474" short_name="olddranik" long_name="City of Dranik" safe_x="-1799" safe_y="986" safe_z="-184">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="475" short_name="toskirakk" long_name="Toskirakk" safe_x="-402.5" safe_y="309.17" safe_z="20.18">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="476" short_name="korascian" long_name="Korascian Warrens" safe_x="24" safe_y="-77" safe_z="25">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="477" short_name="rathechamber" long_name="Rathe Council Chamber" safe_x="-19" safe_y="-10" safe_z="-22">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="480" short_name="brellsrest" long_name="Brell's Rest" safe_x="116" safe_y="-700" safe_z="53">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="481" short_name="fungalforest" long_name="Fungal Forest" safe_x="2704" safe_y="233" safe_z="342">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="482" short_name="underquarry" long_name="The Underquarry" safe_x="46" safe_y="-190" safe_z="-196">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="483" short_name="coolingchamber" long_name="The Cooling Chamber" safe_x="-35" safe_y="-130" safe_z="59">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="484" short_name="shiningcity" long_name="Kernagir, the Shining City" safe_x="-19" safe_y="-22" safe_z="-42">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="485" short_name="arthicrex" long_name="Arthicrex" safe_x="517" safe_y="-1662" safe_z="200">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="486" short_name="foundation" long_name="The Foundation" safe_x="1168.49" safe_y="-1023.98" safe_z="-209">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="487" short_name="lichencreep" long_name="Lichen Creep" safe_x="94" safe_y="-1270" safe_z="-5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="488" short_name="pellucid" long_name="Pellucid Grotto" safe_x="-779" safe_y="-424" safe_z="-53">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="489" short_name="stonesnake" long_name="Volska's Husk" safe_x="50" safe_y="24" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="490" short_name="brellstemple" long_name="Brell's Temple" safe_x="1" safe_y="43" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="491" short_name="convorteum" long_name="The Convorteum" safe_x="28" safe_y="-24" safe_z="-42">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="492" short_name="brellsarena" long_name="Brell's Arena" safe_x="3" safe_y="-304" safe_z="-4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="493" short_name="weddingchapel" long_name="Wedding Chapel" safe_x="-87" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="494" short_name="weddingchapeldark" long_name="Wedding Chapel" safe_x="-87" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="495" short_name="dragoncrypt" long_name="Lair of the Risen" safe_x="0" safe_y="0" safe_z="3.37">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="700" short_name="feerrott2" long_name="The Feerrott" safe_x="952.95" safe_y="1022.59" safe_z="40.83">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="701" short_name="thulehouse1" long_name="House of Thule" safe_x="0" safe_y="-332" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="702" short_name="thulehouse2" long_name="House of Thule, Upper Floors" safe_x="-91" safe_y="338" safe_z="64">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="703" short_name="housegarden" long_name="The Grounds" safe_x="102.16" safe_y="-0.87" safe_z="-28.89">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="704" short_name="thulelibrary" long_name="The Library" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="705" short_name="well" long_name="The Well" safe_x="0" safe_y="0" safe_z="52">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="706" short_name="fallen" long_name="Erudin Burning" safe_x="59" safe_y="-15" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="707" short_name="morellcastle" long_name="Morell's Castle" safe_x="-30" safe_y="-219" safe_z="-36">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="708" short_name="somnium" long_name="Sanctum Somnium" safe_x="-2" safe_y="195" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="709" short_name="alkabormare" long_name="Al'Kabor's Nightmare" safe_x="1104" safe_y="-86" safe_z="-14">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="710" short_name="miragulmare" long_name="Miragul's Nightmare" safe_x="-102" safe_y="36" safe_z="-108">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="711" short_name="thuledream" long_name="Fear Itself" safe_x="1282" safe_y="-1139" safe_z="5">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="712" short_name="neighborhood" long_name="Sunrise Hills" safe_x="2035" safe_y="-2940" safe_z="6">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="724" short_name="argath" long_name="Argath, Bastion of Illdaera" safe_x="-217" safe_y="-9" safe_z="14">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="725" short_name="arelis" long_name="Valley of Lunanyn" safe_x="-1964" safe_y="3512" safe_z="135">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="726" short_name="sarithcity" long_name="Sarith, City of Tides" safe_x="-490" safe_y="916" safe_z="-2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="727" short_name="rubak" long_name="Rubak Oseka, Temple of the Sea" safe_x="-61.83" safe_y="-1.71" safe_z="525">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="728" short_name="beastdomain" long_name="Beasts' Domain" safe_x="4761" safe_y="-4859" safe_z="200">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="729" short_name="resplendent" long_name="The Resplendent Temple" safe_x="-33" safe_y="81" safe_z="9">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="730" short_name="pillarsalra" long_name="Pillars of Alra" safe_x="423" safe_y="-1762" safe_z="46">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="731" short_name="windsong" long_name="Windsong Sanctuary" safe_x="-600" safe_y="-505" safe_z="-23">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="732" short_name="cityofbronze" long_name="Erillion, City of Bronze" safe_x="1415" safe_y="-1" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="733" short_name="sepulcher" long_name="Sepulcher of Order" safe_x="1" safe_y="-262" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="734" short_name="eastsepulcher" long_name="Sepulcher East" safe_x="-753.24" safe_y="-140.6" safe_z="2.94">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="735" short_name="westsepulcher" long_name="Sepulcher West" safe_x="745" safe_y="-206" safe_z="8">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="752" short_name="shardslanding" long_name="Shard's Landing" safe_x="-495" safe_y="-1965" safe_z="4">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="753" short_name="xorbb" long_name="Valley of King Xorbb" safe_x="-803" safe_y="-1740" safe_z="132">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="754" short_name="kaelshard" long_name="Kael Drakkel: The King's Madness" safe_x="-633" safe_y="-47" safe_z="128">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="755" short_name="eastwastesshard" long_name="East Wastes: Zeixshi-Kar's Awakening" safe_x="-4222" safe_y="-8892" safe_z="146">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="756" short_name="crystalshard" long_name="The Crystal Caverns: Fragment of Fear" safe_x="303" safe_y="487" safe_z="-74">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="757" short_name="breedinggrounds" long_name="The Breeding Grounds" safe_x="0" safe_y="0" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="758" short_name="eviltree" long_name="Evantil, the Vile Oak" safe_x="1441" safe_y="-205" safe_z="86">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="759" short_name="grelleth" long_name="Grelleth's Palace, the Chateau of Filth" safe_x="0" safe_y="24" safe_z="3">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="760" short_name="chapterhouse" long_name="Chapterhouse of the Fallen" safe_x="-119" safe_y="-197" safe_z="2">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="996" short_name="arttest" long_name="Art Testing Domain" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="998" short_name="fhalls" long_name="The Forgotten Halls" safe_x="-74" safe_y="-843" safe_z="-11">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+	<zone id="999" short_name="apprentice" long_name="Designer Apprentice" safe_x="0" safe_y="0" safe_z="0">
+		<zone_points>
+		</zone_points>
+		<spawn_points>
+		</spawn_points>
+	</zone>
+</zones>

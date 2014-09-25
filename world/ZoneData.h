@@ -12,45 +12,31 @@ struct ZoneDataSearchEntry {
 }; // NOTE: No initializer due to PoD rules.
 typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
-struct ZonePoint {
-	ZoneID mID = 0;
-	Vector3 mPosition;
-	float mHeading;
-
-	Vector3 mDestinationPosition;
-	float mDestinationHeading = 0.0f;
-
-	ZoneID mDestinationZoneID = 0;
-	InstanceID mDestinationInstanceID = 0;
-};
-
-class ZoneData : public Singleton<ZoneData> {
+struct ZoneData;
+struct SpawnPointData;
+struct ZonePointData;
+class ZoneDataManager : public Singleton<ZoneDataManager> {
 private:
-	friend class Singleton<ZoneData>;
-	ZoneData() {};
-	~ZoneData();
-	ZoneData(ZoneData const&); // Do not implement.
-	void operator=(ZoneData const&); // Do not implement.
+	friend class Singleton<ZoneDataManager>;
+	ZoneDataManager() {};
+	~ZoneDataManager();
+	ZoneDataManager(ZoneDataManager const&); // Do not implement.
+	void operator=(ZoneDataManager const&); // Do not implement.
 public:
 
-	bool initialise();
-	const bool getLongName(const ZoneID pZoneID, String& pLongName);
-	const bool getShortName(const ZoneID pZoneID, String& pShortName);
-	const bool getLongNameStringID(const ZoneID pZoneID, uint32& pStringID);
+	const bool initialise();
+	const bool getLongName(const uint16 pZoneID, String& pLongName);
+	const bool getShortName(const uint16 pZoneID, String& pShortName);
+	const bool getLongNameStringID(const uint16 pZoneID, uint32& pStringID);
+
+	const bool getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints);
+	const bool getZonePoints(const uint16 pZoneID, std::list<ZonePointData*> pZonePoints);
 
 	ZoneDataSearchResults searchByName(String pSearchText);
 
 private:
-	struct ZoneInformation {
-		ZoneID mID = 0;
-		uint32 mLongNameStringID = 0;
-		String mLongName = "";
-		String mShortName = "";
-		float mSafeX = 0.0f;
-		float mSafeY = 0.0f;
-		float mSafeZ = 0.0f;
-		std::list<ZonePoint*> mZonePoints;
-	};
-	std::list<ZoneInformation*> mZoneInformation;
-	ZoneInformation* _find(const ZoneID pZoneID) const;
+
+	bool mInitialised = false;
+	ZoneData* _find(const uint16 pZoneID) const;
+	std::list<ZoneData*> mZoneData;
 };

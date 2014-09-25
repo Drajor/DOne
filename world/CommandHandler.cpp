@@ -295,7 +295,7 @@ public:
 			return false;
 		}
 
-		ZoneDataSearchResults results = ZoneData::getInstance().searchByName(pParameters[0]);
+		ZoneDataSearchResults results = ZoneDataManager::getInstance().searchByName(pParameters[0]);
 		pCharacter->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
 		for (auto i : results){
 			pCharacter->message(MessageType::Yellow, "[Zone " + std::to_string(i.mID) + "] " + i.mShortName + " | " + i.mLongName );

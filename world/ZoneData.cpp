@@ -1,4 +1,5 @@
 #include "ZoneData.h"
+#include "DataStore.h"
 #include "Utility.h"
 #include "LogSystem.h"
 /*
@@ -231,43 +232,23 @@
 4050 Hatesfury
 */
 
-#include "../common/tinyxml/tinyxml.h"
-
-ZoneData::~ZoneData(){
-	mZoneInformation.remove_if(Utility::containerEntryDelete<ZoneInformation*>);
+ZoneDataManager::~ZoneDataManager(){
+	
 }
 
-bool ZoneData::initialise() {
+const bool ZoneDataManager::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
+
 	Log::status("[Zone Data] Initialising.");
-
-	TiXmlDocument document;
-	bool loaded = document.LoadFile("zone_data.xml");
-	if (!loaded) {
-		Log::error("[Zone Data] Failed to load data.");
-		return false;
-	}
-
-	TiXmlElement* element = document.FirstChildElement("zone_data")->FirstChildElement("zone");
-	while (element) {
-		ZoneInformation* zoneInformation = new ZoneInformation();
-		zoneInformation->mShortName = element->Attribute("short_name");
-		zoneInformation->mLongName = element->Attribute("long_name");
-		Utility::stou32Safe(zoneInformation->mID, String(element->Attribute("id")));
-		Utility::stofSafe(zoneInformation->mSafeX, String(element->Attribute("safe_x")));
-		Utility::stofSafe(zoneInformation->mSafeY, String(element->Attribute("safe_y")));
-		Utility::stofSafe(zoneInformation->mSafeZ, String(element->Attribute("safe_z")));
-		
-		mZoneInformation.push_back(zoneInformation);
-		element = element->NextSiblingElement();
-	}
-
-	StringStream ss; ss << "[Zone Data] Loaded data for " << mZoneInformation.size() << " Zones.";
-	Log::info(ss.str());
+	EXPECTED_BOOL(DataStore::getInstance().loadZoneData(mZoneData));
+	Log::info("[Zone Data] Loaded data for " + std::to_string(mZoneData.size()) + " Zones.");
+	
+	mInitialised = true;
 	return true;
 }
 
-ZoneData::ZoneInformation* ZoneData::_find(const ZoneID pZoneID) const {
-	for (auto i : mZoneInformation) {
+ZoneData* ZoneDataManager::_find(const uint16 pZoneID) const {
+	for (auto i : mZoneData) {
 		if (pZoneID == i->mID)
 			return i;
 	}
@@ -275,34 +256,45 @@ ZoneData::ZoneInformation* ZoneData::_find(const ZoneID pZoneID) const {
 	return nullptr;
 }
 
-const bool ZoneData::getLongName(const ZoneID pZoneID, String& pLongName) {
-	ZoneInformation* zoneInformation = _find(pZoneID);
-	EXPECTED_BOOL(zoneInformation);
-	pLongName = zoneInformation->mLongName;
+const bool ZoneDataManager::getLongName(const uint16 pZoneID, String& pLongName) {
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	pLongName = zoneData->mLongName;
 	return true;
 }
 
-const bool ZoneData::getShortName(const ZoneID pZoneID, String& pShortName){
-	ZoneInformation* zoneInformation = _find(pZoneID);
-	EXPECTED_BOOL(zoneInformation);
-	pShortName = zoneInformation->mShortName;
+const bool ZoneDataManager::getShortName(const uint16 pZoneID, String& pShortName){
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	pShortName = zoneData->mShortName;
 	return true;
 }
 
-const bool ZoneData::getLongNameStringID(const ZoneID pZoneID, uint32& pStringID) {
-	ZoneInformation* zoneInformation = _find(pZoneID);
-	EXPECTED_BOOL(zoneInformation);
-	pStringID = zoneInformation->mLongNameStringID;
+const bool ZoneDataManager::getLongNameStringID(const uint16 pZoneID, uint32& pStringID) {
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	pStringID = zoneData->mLongNameStringID;
 	return true;
 }
 
-ZoneDataSearchResults ZoneData::searchByName(String pSearchText) {
+ZoneDataSearchResults ZoneDataManager::searchByName(String pSearchText) {
 	ZoneDataSearchResults results;
-	for (auto i : mZoneInformation) {
+	for (auto i : mZoneData) {
 		if (i->mShortName.find(pSearchText) != String::npos || i->mLongName.find(pSearchText) != String::npos) {
 			results.push_back({i->mID, i->mShortName, i->mLongName});
 		}
 	}
 
 	return results;
+}
+
+const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints) {
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	*pSpawnPoints = &zoneData->mSpawnPoints;
+	return true;
+}
+
+const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<ZonePointData*> pZonePoints) {
+	return true;
 }
