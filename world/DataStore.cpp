@@ -936,6 +936,16 @@ namespace ZoneDataXML {
 		SCA SafeY = "safe_y";
 		SCA SafeZ = "safe_z";
 		// Tag::ZonePoint
+		SCA ZPID = "id";
+		SCA ZPX = "x";
+		SCA ZPY = "y";
+		SCA ZPZ = "z";
+		SCA ZPDestZoneID = "dest_zone";
+		SCA ZPDestInstanceID = "dest_instance";
+		SCA ZPDestX = "dest_x";
+		SCA ZPDestY = "dest_y";
+		SCA ZPDestZ = "dest_z";
+		SCA ZPDestHeading = "dest_heading";
 		// Tag::SpawnPoint
 		SCA SPType = "type";
 		SCA SPX = "x";
@@ -976,6 +986,20 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		EXPECTED_BOOL(zonePointsElement);
 		auto zonePointElement = zonePointsElement->FirstChildElement(Tag::ZonePoint);
 		while (zonePointElement) {
+			auto zp = new ZonePointData();
+			zoneData->mZonePoints.push_back(zp);
+
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPID, zp->mID));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPX, zp->mPosition.x));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPY, zp->mPosition.y));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPZ, zp->mPosition.z));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestZoneID, zp->mDestinationZoneID));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestInstanceID, zp->mDestinationInstanceID));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestX, zp->mDestinationPosition.x));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestY, zp->mDestinationPosition.y));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestZ, zp->mDestinationPosition.z));
+			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestHeading, zp->mDestinationHeading));
+
 
 			zonePointElement = zonePointElement->NextSiblingElement(Tag::ZonePoint);
 		}

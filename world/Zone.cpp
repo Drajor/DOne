@@ -55,10 +55,32 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getShortName(mID, mShortName));
 
+	EXPECTED_BOOL(loadZonePoints());
 	EXPECTED_BOOL(loadSpawnPoints());
 	EXPECTED_BOOL(populate());
 
 	mInitialised = true;
+	return true;
+}
+
+const bool Zone::loadZonePoints() {
+	std::list<ZonePointData*>* zonePointData = nullptr;
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getZonePoints(getID(), &zonePointData));
+	EXPECTED_BOOL(zonePointData);
+
+	// Create ZonePoints.
+	for (auto i : *zonePointData) {
+		auto zonePoint = new ZonePoint();
+		mZonePoints.push_back(zonePoint);
+
+		zonePoint->mID = i->mID;
+		zonePoint->mPosition = i->mPosition;
+		zonePoint->mDestinationPosition = i->mDestinationPosition;
+		zonePoint->mDestinationHeading = i->mDestinationHeading;
+		zonePoint->mDestinationZoneID = i->mDestinationZoneID;
+		zonePoint->mDestinationInstanceID = i->mDestinationInstanceID;
+	}
+
 	return true;
 }
 
@@ -67,7 +89,7 @@ const bool Zone::loadSpawnPoints() {
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), &spawnPointData));
 	EXPECTED_BOOL(spawnPointData);
 
-	// Create Zone spawn points.
+	// Create SpawnPoints.
 	for (auto i : *spawnPointData) {
 		auto spawnPoint = new SpawnPoint();
 		mSpawnPoints.push_back(spawnPoint);
@@ -571,15 +593,36 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 
 	// Check: Are we expecting a zone change?
 	if (pCharacter->checkZoneChange(pZoneID, pInstanceID)) {
-		//pCharacter->clearZoneChange();
 		pCharacter->setZoneAuthentication(pZoneID, pInstanceID);
 		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 1);
+
+		// TODO: Position/Heading for destination?!
+
+		return;
 	}
-	// TODO: Check Zone Points. (Unsolicited)
-	// Deny zone change.
 	else {
-		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 0);
+		auto zp = _getClosestZonePoint(pCharacter->getPosition());
+		EXPECTED(zp);
+		EXPECTED(zp->mDestinationZoneID == pZoneID);
+		EXPECTED(zp->mDestinationInstanceID == pInstanceID);
+
+		float distance = zp->mPosition.distance(pCharacter->getPosition());
+		Log::info("[Zone] Character is " + std::to_string(distance) + " units from ZonePoint: " + std::to_string(zp->mID));
+
+		//if (distance <= 20.0f) {
+		if (true) {
+
+			pCharacter->setZoneChange(pZoneID, pInstanceID);
+			pCharacter->setZoneAuthentication(pZoneID, pInstanceID);
+			pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 1);
+			pCharacter->setPosition(zp->mDestinationPosition);
+			pCharacter->setHeading(zp->mDestinationHeading);
+			return;
+		}
 	}
+	
+	// Deny zone change.
+	pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 0);
 }
 
 void Zone::notifyGuildsChanged() {
@@ -1078,4 +1121,19 @@ void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
 const bool Zone::checkAuthentication(Character* pCharacter) {
 	EXPECTED_BOOL(pCharacter);
 	return pCharacter->checkZoneAuthentication(mID, mInstanceID);
+}
+
+ZonePoint* Zone::_getClosestZonePoint(const Vector3& pPosition) {
+	ZonePoint* result = nullptr;
+	float closestDistance = 9999999.0f;
+
+	for (auto i : mZonePoints) {
+		float d = pPosition.squareDistance(i->mPosition);
+		if (d < closestDistance) {
+			closestDistance = d;
+			result = i;
+		}
+	}
+
+	return result;
 }

@@ -30,7 +30,7 @@ public:
 	const bool getLongNameStringID(const uint16 pZoneID, uint32& pStringID);
 
 	const bool getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints);
-	const bool getZonePoints(const uint16 pZoneID, std::list<ZonePointData*> pZonePoints);
+	const bool getZonePoints(const uint16 pZoneID, std::list<ZonePointData*>** pZonePoints);
 
 	ZoneDataSearchResults searchByName(String pSearchText);
 

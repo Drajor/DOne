@@ -295,6 +295,9 @@ const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<Spawn
 	return true;
 }
 
-const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<ZonePointData*> pZonePoints) {
+const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<ZonePointData*>** pZonePoints) {
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	*pZonePoints = &zoneData->mZonePoints;
 	return true;
 }

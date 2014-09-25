@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
+#include "Vector3.h"
 
 class EQStreamFactory;
 class EQStreamIdentifier;
@@ -23,6 +24,17 @@ class NPC;
 class Scene;
 class SpawnPoint;
 struct ZonePoint;
+
+struct ZonePoint {
+	uint16 mID = 0;
+	Vector3 mPosition;
+
+	Vector3 mDestinationPosition;
+	float mDestinationHeading = 0.0f;
+
+	uint16 mDestinationZoneID = 0;
+	uint16 mDestinationInstanceID = 0;
+};
 
 class Zone {
 public:
@@ -117,7 +129,9 @@ public:
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 private:
 
+	const bool loadZonePoints();
 	const bool loadSpawnPoints();
+	
 
 	// Performs a global Character search.
 	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
@@ -152,6 +166,9 @@ private:
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
+	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
+	std::list<ZonePoint*> mZonePoints;
+
 	void _populate(SpawnPoint* pSpawnPoint);
 	void _addRespawn(SpawnPoint* pSpawnPoint);
 	void _updateSpawnPoints();
@@ -165,8 +182,6 @@ private:
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections;
-
-	std::list<ZonePoint*> mZonePoints;
 
 	struct LinkDeadCharacter {
 		Timer* mTimer;

@@ -25,7 +25,7 @@ int main(int argc, char** argv)  {
 
 	EXPECTED_MAIN(DataStore::loadSettings());
 	EXPECTED_MAIN(AccountManager::getInstance().initialise());
-	EXPECTED_MAIN(ZoneData::getInstance().initialise());
+	EXPECTED_MAIN(ZoneDataManager::getInstance().initialise());
 	EXPECTED_MAIN(GuildManager::getInstance().initialise());
 	EXPECTED_MAIN(ZoneManager::getInstance().initialise());
 	EXPECTED_MAIN(DataStore::getInstance().initialise());

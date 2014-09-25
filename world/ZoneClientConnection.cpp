@@ -765,10 +765,35 @@ void ZoneClientConnection::_sendZonePoints() {
 	EXPECTED(mConnected);
 
 	const std::list<ZonePoint*>& zonePoints = mZone->getZonePoints();
-	if (zonePoints.size() == 0)
+	const std::size_t numZonePoints = zonePoints.size();
+	if (numZonePoints == 0)
 		return;
 
-	// TODO:
+	uint32 packetSize = 0;
+	packetSize += sizeof(uint32); // id
+	packetSize += sizeof(uint16); // zone id
+	packetSize += sizeof(uint16); // instance id
+	packetSize += sizeof(float) * 4; // position / heading.
+	packetSize *= numZonePoints;
+	packetSize += sizeof(uint32); // count.
+	
+
+	auto outPacket = new EQApplicationPacket(OP_SendZonepoints, packetSize);
+	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+	
+	dynamicStructure.write<uint32>(numZonePoints); // Count.
+	for (auto i : zonePoints) {
+		dynamicStructure.write<uint32>(i->mID);
+		dynamicStructure.write<float>(i->mDestinationPosition.x);
+		dynamicStructure.write<float>(i->mDestinationPosition.y);
+		dynamicStructure.write<float>(i->mDestinationPosition.z);
+		dynamicStructure.write<float>(i->mDestinationHeading);
+		dynamicStructure.write<uint16>(i->mDestinationZoneID);
+		dynamicStructure.write<uint16>(i->mDestinationInstanceID);
+	}
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendAAStats() {
