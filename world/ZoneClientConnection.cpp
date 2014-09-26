@@ -704,6 +704,8 @@ void ZoneClientConnection::_sendInventory() {
 
 	uint32 size = 0;
 	auto data = inventory->getData(size);
+	EXPECTED(data);
+	EXPECTED(size >= 4); // 4 bytes = empty inventory.
 
 	auto outPacket = new EQApplicationPacket(OP_CharInventory, data, size);
 	mStreamInterface->QueuePacket(outPacket);

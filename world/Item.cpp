@@ -61,45 +61,80 @@ const uint32 Item::_getDataSize() const {
 }
 
 const bool Item::copyData(Utility::DynamicStructure& pStructure) {
-	// Write our own data
-	pStructure.write<ItemData::P0>(mItemData->mP0);
+	// Update ItemData with anything specific from this Item
+	_onCopy();
+
+	// Chunk Zero.
+	std::size_t chunk0 = (unsigned int)&(mItemData->mItemName) - (unsigned int)&(mItemData->mStackSize);
+	pStructure.writeChunk((void*)&(mItemData->mStackSize), chunk0);
+
+	// Variable.
 	pStructure.writeString(String(mItemData->mItemName));
-	//pStructure.writeString(String("Test Item"));
 	pStructure.writeString(String(mItemData->mLore));
 	pStructure.writeString(String(mItemData->mIDFile));
-	//pStructure.writeString(String("IT63"));
-	pStructure.write<ItemData::P1>(mItemData->mP1);
+
+	// Chunk One.
+	std::size_t chunk1 = (unsigned int)&(mItemData->mCharmFile) - (unsigned int)&(mItemData->mID);
+	pStructure.writeChunk((void*)&(mItemData->mID), chunk1);
+
+	// Variable.
 	pStructure.writeString(String(mItemData->mCharmFile));
-	pStructure.write<ItemData::P2>(mItemData->mP2);
+	
+	// Chunk Two.
+	std::size_t chunk2 = (unsigned int)&(mItemData->mFileName) - (unsigned int)&(mItemData->augtype);
+	pStructure.writeChunk((void*)&(mItemData->augtype), chunk2);
+	
+	// Variable.
 	pStructure.writeString(String(mItemData->mFileName));
-	pStructure.write<ItemData::P3>(mItemData->mP3);
-	pStructure.write<ItemData::ClickEffectStruct>(mItemData->mClickEffectStruct);
+
+	// Chunk Three.
+	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffectStruct) - (unsigned int)&(mItemData->loregroup);
+	pStructure.writeChunk((void*)&(mItemData->augtype), chunk3);
+	
+	// Click Effect.
+	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffectStruct);
 	pStructure.writeString(String(mItemData->mClickName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mClickUnknown);
+	
+	// Proc Effect.
 	pStructure.write<ItemData::ProcEffectStruct>(mItemData->mProcEffectStruct);
 	pStructure.writeString(String(mItemData->mProcName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mProcUnknown);
 
-	pStructure.write<ItemData::WornEffectStruct>(mItemData->mWornEffectStruct);
+	// Worn Effect.
+	pStructure.write<ItemData::Effect>(mItemData->mWornEffectStruct);
 	pStructure.writeString(String(mItemData->mWornName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mWornUnknown);
 
-	pStructure.write<ItemData::WornEffectStruct>(mItemData->mFocusEffect);
+	// Focus Effect.
+	pStructure.write<ItemData::Effect>(mItemData->mFocusEffect);
 	pStructure.writeString(String(mItemData->mFocusName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mWornUnknown);
 
-	pStructure.write<ItemData::WornEffectStruct>(mItemData->mScrollEffect);
+	// Scroll Effect.
+	pStructure.write<ItemData::Effect>(mItemData->mScrollEffect);
 	pStructure.writeString(String(mItemData->mScrollName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mScrollUnknown);
 
-	pStructure.write<ItemData::WornEffectStruct>(mItemData->mBardEffect);
+	// Bard Effect.
+	pStructure.write<ItemData::Effect>(mItemData->mBardEffect);
 	pStructure.writeString(String(mItemData->mBardName));
-	pStructure.write<int32>(0); // UNK
+	pStructure.write<int32>(mItemData->mBardUnknown);
 
-	pStructure.write<ItemData::ItemQuaternaryBodyStruct>(mItemData->mItemQuaternaryBodyStruct);
+	// Chunk Four.
+	std::size_t chunk4 = (unsigned int)&(mItemData->subitem_count) - (unsigned int)&(mItemData->scriptfileid);
+	pStructure.writeChunk((void*)&(mItemData->subitem_count), chunk4);
+
+	// Child Items.
+	pStructure.write<uint32>(getSubItems());
+
 	// Write augments
+	for (auto i : mAugments)
+		if (i) EXPECTED_BOOL(i->copyData(pStructure));		
 
 	// Write contents
+	for (auto i : mContents)
+		if (i) EXPECTED_BOOL(i->copyData(pStructure));
 
 	return true;
 }
@@ -113,4 +148,8 @@ uint32 Item::getSubItems() const {
 		if(i) count++;
 
 	return count;
+}
+
+void Item::_onCopy() {
+	mItemData->mSlot = mSlot;
 }

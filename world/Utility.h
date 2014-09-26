@@ -110,6 +110,17 @@ namespace Utility {
 			}
 		}
 
+		void writeChunk(void* pFrom, std::size_t pSize) {
+			if (mWritten + pSize <= mSize) {
+				memcpy(mPointer, pFrom, pSize);
+				mPointer += pSize;
+				mWritten += pSize;
+			}
+			else {
+				Log::error("[Dynamic Structure] Attempt to write to invalid memory.");
+			}
+		}
+
 		void writeString(String pData) {
 			if (mWritten + pData.length() + 1 <= mSize) {
 				strcpy(mPointer, pData.c_str());

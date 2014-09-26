@@ -8,17 +8,19 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	for (auto& i : mItems) i = nullptr;
 
 	auto itemData = new ItemData();
-	itemData->mP1.mID = 2;
-	itemData->mP0.mInstanceID = 2;
-	itemData->mP0.mSlot = 23;
-	itemData->mP1.ItemType = 17;
-	itemData->mP1.mClasses = 65535;
-	itemData->mP1.mIcon = 639;
+	itemData->mID = 2;
+	itemData->mInstanceID = 2;
+	itemData->mSlot = 23;
+	itemData->ItemType = 17;
+	itemData->mClasses = 65535;
+	itemData->mIcon = 639;
 	strcpy(itemData->mItemName, String("Test Item").c_str());
 	strcpy(itemData->mIDFile, String("IT63").c_str());
 
 	auto item = new Item(itemData);
 	put(item, 23);
+
+	//for (auto i = )
 	
 }
 
@@ -73,6 +75,10 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 }
 
 const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
+	EXPECTED_BOOL(pItem);
+	// EXPECTED_BOOL(Limits::Inventory::slotValid(pSlot));
+	EXPECTED_BOOL(mItems[pSlot] == nullptr);
+	pItem->setSlot(pSlot);
 	mItems[pSlot] = pItem;
 	return true;
 }
