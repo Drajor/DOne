@@ -8,6 +8,7 @@
 #include "ZoneClientConnection.h"
 #include "Limits.h"
 #include "NPC.h"
+#include "Inventory.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -23,6 +24,8 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 
 	for (auto& i : mSkills) i = 0;
 	for (auto& i : mLanguages) i = 0;
+
+	mInventory = new Inventoryy(this);
 }
 
 Character::~Character() {

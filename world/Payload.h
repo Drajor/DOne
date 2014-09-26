@@ -331,6 +331,14 @@ namespace Payload {
 			uint32 mType = NORMAL;
 			uint32 mIntensity = 0;
 		};
+
+		// C->S
+		// Based on: MoveItem_Struct
+		struct MoveItem : public FixedLength_And_ServerToClient<MoveItem> {
+			uint32 mFromSlot = 0;
+			uint32 mToSlot = 0;
+			uint32 mStackSize = 0;
+		};
 	}
 
 	namespace World {

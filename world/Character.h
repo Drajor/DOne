@@ -17,6 +17,7 @@ class ZoneClientConnection;
 struct CharacterData;
 struct SpellData;
 class SpellBook;
+class Inventoryy;
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -47,6 +48,8 @@ public:
 	ClientAuthentication getAuthentication() { return mAuthentication; }
 
 	bool initialise();
+
+	inline Inventoryy* getInventory() const { return mInventory; }
 	
 	bool onZoneIn();
 	bool onZoneOut();
@@ -329,4 +332,7 @@ private:
 	};
 	SpellBar* mSpellBar = nullptr;
 	const std::vector<uint32> getSpellBarData() const;
+
+	// Inventory
+	Inventoryy* mInventory = nullptr;
 };

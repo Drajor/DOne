@@ -34,6 +34,8 @@ SET(world_sources
 	TitleManager.cpp
 	SpellDataStore.cpp
 	SpawnPoint.cpp
+	Item.cpp
+	Inventory.cpp
 )
 
 SET(world_headers
@@ -70,6 +72,9 @@ SET(world_headers
 	Singleton.h
 	TitleManager.h
 	SpellDataStore.h
+	ItemData.h
+	Item.h
+	Inventory.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

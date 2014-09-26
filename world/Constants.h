@@ -98,6 +98,24 @@ namespace Limits {
 
 static const String SYS_NAME = "[System]";
 
+enum Slots : uint32 {
+	CURSOR = 31,
+	LT_INV = 23,
+};
+
+/*
+__________
+| 23 | 27 |
+-----------
+| 24 | 28 |
+-----------
+| 25 | 29 |
+-----------
+| 26 | 30 |
+-----------
+
+*/
+
 enum SpawnPointType : uint32 {
 	TRASH = 0,
 	SPECIFIC = 1,

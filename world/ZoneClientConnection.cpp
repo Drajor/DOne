@@ -7,6 +7,7 @@
 #include "ZoneManager.h"
 #include "ZoneData.h"
 #include "Character.h"
+#include "Inventory.h"
 #include "LogSystem.h"
 #include "DataStore.h"
 #include "CommandHandler.h"
@@ -14,7 +15,6 @@
 #include "../common/emu_opcodes.h"
 #include "../common/EQPacket.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/extprofile.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Payload.h"
@@ -415,6 +415,11 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_EndLootRequest:
 		_handleEndLootRequest(pPacket);
+	case OP_LootItem:
+		_handleLootItem(pPacket);
+		break;
+	case OP_MoveItem:
+		_handleMoveItem(pPacket);
 		break;
 	default:
 		StringStream ss;
@@ -694,8 +699,15 @@ void ZoneClientConnection::_sendTributeUpdate() {
 void ZoneClientConnection::_sendInventory() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_CharInventory, 0);
+	auto inventory = mCharacter->getInventory();
+	EXPECTED(inventory);
+
+	uint32 size = 0;
+	auto data = inventory->getData(size);
+
+	auto outPacket = new EQApplicationPacket(OP_CharInventory, data, size);
 	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendWeather() {
@@ -776,31 +788,24 @@ void ZoneClientConnection::_sendZonePoints() {
 	packetSize += sizeof(float) * 4; // position / heading.
 	packetSize *= numZonePoints;
 	packetSize += sizeof(uint32); // count.
-	
 
 	auto outPacket = new EQApplicationPacket(OP_SendZonepoints, packetSize);
-	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
+	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
 	
-	dynamicStructure.write<uint32>(numZonePoints); // Count.
+	ds.write<uint32>(numZonePoints); // Count.
 	for (auto i : zonePoints) {
-		dynamicStructure.write<uint32>(i->mID);
-		dynamicStructure.write<float>(i->mDestinationPosition.x);
-		dynamicStructure.write<float>(i->mDestinationPosition.y);
-		dynamicStructure.write<float>(i->mDestinationPosition.z);
-		dynamicStructure.write<float>(i->mDestinationHeading);
-		dynamicStructure.write<uint16>(i->mDestinationZoneID);
-		dynamicStructure.write<uint16>(i->mDestinationInstanceID);
+		ds.write<uint32>(i->mID);
+		ds.write<float>(i->mDestinationPosition.x);
+		ds.write<float>(i->mDestinationPosition.y);
+		ds.write<float>(i->mDestinationPosition.z);
+		ds.write<float>(i->mDestinationHeading);
+		ds.write<uint16>(i->mDestinationZoneID);
+		ds.write<uint16>(i->mDestinationInstanceID);
 	}
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
-
-	// Check payload size calculation.
-	if (dynamicStructure.getBytesWritten() != packetSize) {
-		StringStream ss;
-		ss << "[Zone Client Connection] Wrong amount of data written in _sendZonePoints. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
-		Log::error(ss.str());
-	}
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::_sendAAStats() {
@@ -1010,13 +1015,13 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		GroupManager::getInstance().handleMessage(mCharacter, message);
 		break;
 	case ChannelID::CH_SHOUT:
-		mZone->notifyCharacterChatShout(mCharacter, message);
+		mZone->handleShout(mCharacter, message);
 		break;
 	case ChannelID::CH_AUCTION:
-		mZone->notifyCharacterChatAuction(mCharacter, message);
+		mZone->handleAuction(mCharacter, message);
 		break;
 	case ChannelID::CH_OOC:
-		mZone->notifyCharacterChatOOC(mCharacter, message);
+		mZone->handleOOC(mCharacter, message);
 		break;
 	case ChannelID::CH_GMSAY:
 	case ChannelID::CH_BROADCAST:
@@ -1033,7 +1038,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 			mCommandHandler->command(mCharacter, message);
 			break;
 		}
-		mZone->notifyCharacterChatSay(mCharacter, message);
+		mZone->handleSay(mCharacter, message);
 		break;
 	case ChannelID::CH_RAID:
 		break;
@@ -1041,7 +1046,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		break;
 		// /emote dances around wildly!
 	case ChannelID::CH_EMOTE:
-		mZone->notifyCharacterEmote(mCharacter, message);
+		mZone->handleEmote(mCharacter, message);
 		break;
 	default:
 		StringStream ss;
@@ -1253,29 +1258,24 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	payload->type = static_cast<uint32>(pType);
 	payload->string_id = static_cast<uint32>(pStringID);
 
-	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
-	dynamicStructure.movePointer(sizeof(FormattedMessage_Struct));
+	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	ds.movePointer(sizeof(FormattedMessage_Struct));
 
-	if (pParameter0.length() != 0) dynamicStructure.writeString(pParameter0);
-	if (pParameter1.length() != 0) dynamicStructure.writeString(pParameter1);
-	if (pParameter2.length() != 0) dynamicStructure.writeString(pParameter2);
-	if (pParameter3.length() != 0) dynamicStructure.writeString(pParameter3);
-	if (pParameter4.length() != 0) dynamicStructure.writeString(pParameter4);
-	if (pParameter5.length() != 0) dynamicStructure.writeString(pParameter5);
-	if (pParameter6.length() != 0) dynamicStructure.writeString(pParameter6);
-	if (pParameter7.length() != 0) dynamicStructure.writeString(pParameter7);
-	if (pParameter8.length() != 0) dynamicStructure.writeString(pParameter8);
-	if (pParameter9.length() != 0) dynamicStructure.writeString(pParameter9);
+	if (pParameter0.length() != 0) ds.writeString(pParameter0);
+	if (pParameter1.length() != 0) ds.writeString(pParameter1);
+	if (pParameter2.length() != 0) ds.writeString(pParameter2);
+	if (pParameter3.length() != 0) ds.writeString(pParameter3);
+	if (pParameter4.length() != 0) ds.writeString(pParameter4);
+	if (pParameter5.length() != 0) ds.writeString(pParameter5);
+	if (pParameter6.length() != 0) ds.writeString(pParameter6);
+	if (pParameter7.length() != 0) ds.writeString(pParameter7);
+	if (pParameter8.length() != 0) ds.writeString(pParameter8);
+	if (pParameter9.length() != 0) ds.writeString(pParameter9);
+
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
-
-	// Check payload size calculation.
-	if (dynamicStructure.getBytesWritten() != packetSize) {
-		StringStream ss;
-		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
-		Log::error(ss.str());
-	}
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendHPUpdate() {
@@ -1305,7 +1305,7 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 	static const unsigned int MAX_EMOTE_SIZE = 1024;
 	auto payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
 	String message = Utility::safeString(payload->message, MAX_EMOTE_SIZE);
-	mZone->notifyCharacterEmote(mCharacter, message);
+	mZone->handleEmote(mCharacter, message);
 }
 
 void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
@@ -1440,10 +1440,10 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	ss << "Size WhoAllPlayer= " << sizeof(WhoAllPlayer);
 	Log::error(ss.str());
 
-	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
-	dynamicStructure.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
+	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	ds.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
 
-	ss << "Written 1: " << dynamicStructure.getBytesWritten();
+	ss << "Written 1: " << ds.getBytesWritten();
 	Log::error(ss.str());
 
 	enum RankMessageID {
@@ -1493,11 +1493,11 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 			if (receiverIsGM)
 				formatString = FS_GM_ANONYMOUS;
 		}
-		dynamicStructure.write<uint32>(formatString); // formatstring
+		ds.write<uint32>(formatString); // formatstring
 
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // pidstring (Not sure what this does).
+		ds.write<uint32>(0xFFFFFFFF); // pidstring (Not sure what this does).
 
-		dynamicStructure.writeString(i->getName()); // name
+		ds.writeString(i->getName()); // name
 		
 		// Determine Rank String ID.
 		uint32 rankStringID = 0xFFFFFFFF;
@@ -1510,36 +1510,30 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 				rankStringID = RM_GM;
 			}
 		}
-		dynamicStructure.write<uint32>(rankStringID); // rankstring
+		ds.write<uint32>(rankStringID); // rankstring
 		//dynamicStructure.write<uint32>(1509); // rankstring
 
-		dynamicStructure.writeString(FakeGuild); // guild
+		ds.writeString(FakeGuild); // guild
 		//dynamicStructure.write<uint32>(0); // guild
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[0]
-		dynamicStructure.write<uint32>(0xFFFFFFFF); // unknown80[1]
+		ds.write<uint32>(0xFFFFFFFF); // unknown80[0]
+		ds.write<uint32>(0xFFFFFFFF); // unknown80[1]
 		//dynamicStructure.write<uint32>(0xFFFFFFFF); // zonestring
-		dynamicStructure.write<uint32>(i->getZone()->getLongNameStringID()); // zonestring // This is StringID 
-		dynamicStructure.write<uint32>(4); // zone (Not sure what this does).
-		dynamicStructure.write<uint32>(i->getClass()); // class_
-		dynamicStructure.write<uint32>(i->getLevel()); // level
-		dynamicStructure.write<uint32>(i->getRaceID()); // race
-		dynamicStructure.writeString(FakeAccount); // account
+		ds.write<uint32>(i->getZone()->getLongNameStringID()); // zonestring // This is StringID 
+		ds.write<uint32>(4); // zone (Not sure what this does).
+		ds.write<uint32>(i->getClass()); // class_
+		ds.write<uint32>(i->getLevel()); // level
+		ds.write<uint32>(i->getRaceID()); // race
+		ds.writeString(FakeAccount); // account
 		//dynamicStructure.write<uint32>(0); // account
-		dynamicStructure.write<uint32>(0); // unknown100
+		ds.write<uint32>(0); // unknown100
 		//ss << "Written 4: " << dynamicStructure.getBytesWritten();
 		//Log::error(ss.str());
 		//ss.str("");
 	}
 
-	// Check payload size calculation.
-	if (dynamicStructure.getBytesWritten() != packetSize) {
-		StringStream ss;
-		ss << "[Zone Client Connection] Wrong amount of data written in sendWhoResults. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
-		Log::error(ss.str());
-	}
-
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage) {
@@ -1638,30 +1632,24 @@ void ZoneClientConnection::sendGroupCreate() {
 	int packetSize = 31 + mCharacter->getName().length() + 1; // Magic number due to no packet structure.
 	auto outPacket = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
 
-	Utility::DynamicStructure dynamicStructure(outPacket->pBuffer, packetSize);
-	dynamicStructure.write<uint32>(0); // 4
-	dynamicStructure.write<uint32>(1); // 8
-	dynamicStructure.write<uint8>(0); // 9
-	dynamicStructure.write<uint32>(0); // 13
-	dynamicStructure.writeString(mCharacter->getName()); // dynamic
-	dynamicStructure.write<uint8>(0); // 14
-	dynamicStructure.write<uint8>(0); // 15
-	dynamicStructure.write<uint8>(0); // 16
-	dynamicStructure.write<uint32>(mCharacter->getLevel()); // 20
-	dynamicStructure.write<uint8>(0); // 21
-	dynamicStructure.write<uint32>(0); // 25
-	dynamicStructure.write<uint32>(0); // 29
-	dynamicStructure.write<uint16>(0); // 31
+	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	ds.write<uint32>(0); // 4
+	ds.write<uint32>(1); // 8
+	ds.write<uint8>(0); // 9
+	ds.write<uint32>(0); // 13
+	ds.writeString(mCharacter->getName()); // dynamic
+	ds.write<uint8>(0); // 14
+	ds.write<uint8>(0); // 15
+	ds.write<uint8>(0); // 16
+	ds.write<uint32>(mCharacter->getLevel()); // 20
+	ds.write<uint8>(0); // 21
+	ds.write<uint32>(0); // 25
+	ds.write<uint32>(0); // 29
+	ds.write<uint16>(0); // 31
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
-
-	// Check payload size calculation.
-	if (dynamicStructure.getBytesWritten() != packetSize) {
-		StringStream ss;
-		ss << "[Zone Client Connection] Wrong amount of data written in sendGroupCreate. Expected " << packetSize << " Got " << dynamicStructure.getBytesWritten();
-		Log::error(ss.str());
-	}
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
@@ -2088,10 +2076,10 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 	for (auto i : pGuildMembers) {
 		ds.writeString(i->mPublicNote);
 	}
-	EXPECTED(ds.check());
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendGuildURL(const String& pURL) {
@@ -2538,9 +2526,9 @@ void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPack
 		ds.writeString(i->mSuffix);
 	}
 
-	EXPECTED(ds.check());
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess) {
@@ -2638,9 +2626,6 @@ void ZoneClientConnection::_handleEndLootRequest(const EQApplicationPacket* pPac
 	EXPECTED(mCharacter->isLooting());
 
 	mZone->handleEndLootRequest(mCharacter);
-	//// TODO: Do we need to go back through Zone?
-	//mCharacter->setLooting(false);
-	//sendLootComplete();
 }
 
 void ZoneClientConnection::sendLootComplete() {
@@ -2679,6 +2664,22 @@ void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID) {
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+	EXPECTED(mCharacter->isLooting());
+
+	// TODO:
+}
+
+void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MoveItem::sizeCheck(pPacket->size));
+
+	auto payload = MoveItem::convert(pPacket->pBuffer);
+	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
 }
 
 //

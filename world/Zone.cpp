@@ -405,27 +405,27 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 	safe_delete(outPacket);
 }
 
-void Zone::notifyCharacterChatSay(Character* pCharacter, const String pMessage) {
+void Zone::handleSay(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_SAY, pMessage);
 }
 
-void Zone::notifyCharacterChatShout(Character* pCharacter, const String pMessage) {
+void Zone::handleShout(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_SHOUT, pMessage);
 }
 
-void Zone::notifyCharacterChatAuction(Character* pCharacter, const String pMessage) {
+void Zone::handleAuction(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_AUCTION, pMessage);
 
 	// TODO: Server Auction
 }
 
-void Zone::notifyCharacterChatOOC(Character* pCharacter, const String pMessage) {
+void Zone::handleOOC(Character* pCharacter, const String pMessage) {
 	_sendChat(pCharacter, ChannelID::CH_OOC, pMessage);
 	
 	// TODO: Server OOC
 }
 
-void Zone::notifyCharacterEmote(Character* pCharacter, const String pMessage) {
+void Zone::handleEmote(Character* pCharacter, const String pMessage) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Emote, 4 + pMessage.length() + pCharacter->getName().length() + 2);
 	Emote_Struct* payload = reinterpret_cast<Emote_Struct*>(outPacket->pBuffer);

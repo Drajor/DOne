@@ -139,9 +139,9 @@ namespace Utility {
 			mPointer += pBytes;
 			mWritten += pBytes; // I need to think about this more.
 		}
-		std::size_t getSize() { return mSize; }
-		std::size_t getBytesWritten() { return mWritten; }
-		bool check() { return mWritten == mSize; }
+		const std::size_t getSize() const { return mSize; }
+		const std::size_t getBytesWritten() const { return mWritten; }
+		const bool check() const { return mWritten == mSize; }
 	private:
 		std::size_t mSize; // maximum number of bytes to be written.
 		std::size_t mWritten; // number of bytes written.

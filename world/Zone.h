@@ -73,11 +73,11 @@ public:
 	void handleSitting(Character* pCharacter);
 	void handleCrouching(Character* pCharacter);
 
-	void notifyCharacterChatSay(Character* pCharacter, const String pMessage);
-	void notifyCharacterChatShout(Character* pCharacter, const String pMessage);
-	void notifyCharacterChatOOC(Character* pCharacter, const String pMessage);
-	void notifyCharacterEmote(Character* pCharacter, const String pMessage);
-	void notifyCharacterChatAuction(Character* pCharacter, const String pMessage);
+	void handleSay(Character* pCharacter, const String pMessage);
+	void handleShout(Character* pCharacter, const String pMessage);
+	void handleOOC(Character* pCharacter, const String pMessage);
+	void handleEmote(Character* pCharacter, const String pMessage);
+	void handleAuction(Character* pCharacter, const String pMessage);
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);

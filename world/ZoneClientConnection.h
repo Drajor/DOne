@@ -199,6 +199,8 @@ private:
 
 	void _handleBeginLootRequest(const EQApplicationPacket* pPacket);
 	void _handleEndLootRequest(const EQApplicationPacket* pPacket);
+	void _handleLootItem(const EQApplicationPacket* pPacket);
+	void _handleMoveItem(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

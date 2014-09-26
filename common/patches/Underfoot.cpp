@@ -1458,85 +1458,6 @@ ENCODE(OP_ItemPacket) {
 	dest->FastQueuePacket(&in, ack_req);
 }
 
-ENCODE(OP_CharInventory) {
-	//consume the packet
-	EQApplicationPacket *in = *p;
-
-	*p = nullptr;
-
-	if(in->size == 0) {
-
-		in->size = 4;
-
-		in->pBuffer = new uchar[in->size];
-
-		*((uint32 *) in->pBuffer) = 0;
-
-		dest->FastQueuePacket(&in, ack_req);
-
-		return;
-	}
-
-	//store away the emu struct
-	unsigned char *__emu_buffer = in->pBuffer;
-
-	int ItemCount = in->size / sizeof(InternalSerializedItem_Struct);
-
-	if(ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
-
-		_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d",
-				   opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
-
-		delete in;
-
-		return;
-	}
-
-	InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *) in->pBuffer;
-
-	in->pBuffer = new uchar[4];
-
-	*(uint32 *)in->pBuffer = ItemCount;
-
-	in->size = 4;
-
-	for(int r = 0; r < ItemCount; r++, eq++) {
-
-		uint32 Length = 0;
-
-		char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0);
-
-		if(Serialized) {
-
-			uchar *OldBuffer = in->pBuffer;
-
-			in->pBuffer = new uchar[in->size + Length];
-
-			memcpy(in->pBuffer, OldBuffer, in->size);
-
-			safe_delete_array(OldBuffer);
-
-			memcpy(in->pBuffer + in->size, Serialized, Length);
-
-			in->size += Length;
-
-			safe_delete_array(Serialized);
-
-		}
-		else {
-			_log(NET__ERROR, "Serialization failed on item slot %d during OP_CharInventory.  Item skipped.",eq->slot_id);
-		}
-	}
-
-	delete[] __emu_buffer;
-
-	//_log(NET__ERROR, "Sending inventory to client");
-
-	//_hex(NET__ERROR, in->pBuffer, in->size);
-
-	dest->FastQueuePacket(&in, ack_req);
-}
-
 ENCODE(OP_GuildMemberList) {
 	//consume the packet
 	EQApplicationPacket *in = *p;
@@ -1919,28 +1840,28 @@ ENCODE(OP_ApplyPoison) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_DeleteItem) {
-	ENCODE_LENGTH_EXACT(DeleteItem_Struct);
-	SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+//ENCODE(OP_DeleteItem) {
+//	ENCODE_LENGTH_EXACT(DeleteItem_Struct);
+//	SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+//
+//	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
+//	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
+//	OUT(number_in_stack);
+//
+//	FINISH_ENCODE();
+//}
 
-	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
-	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
-	OUT(number_in_stack);
-
-	FINISH_ENCODE();
-}
-
-ENCODE(OP_DeleteCharge) {  ENCODE_FORWARD(OP_MoveItem); }
-ENCODE(OP_MoveItem) {
-	ENCODE_LENGTH_EXACT(MoveItem_Struct);
-	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
-	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
-	OUT(number_in_stack);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_DeleteCharge) {  ENCODE_FORWARD(OP_MoveItem); }
+//ENCODE(OP_MoveItem) {
+//	ENCODE_LENGTH_EXACT(MoveItem_Struct);
+//	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+//
+//	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
+//	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
+//	OUT(number_in_stack);
+//
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_ItemVerifyReply) {
 	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
@@ -2957,31 +2878,31 @@ DECODE(OP_CastSpell) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_DeleteItem)
-{
-	DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
-	SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+//DECODE(OP_DeleteItem)
+//{
+//	DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
+//	SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
+//
+//	emu->from_slot = UnderfootToTitaniumSlot(eq->from_slot);
+//	emu->to_slot = UnderfootToTitaniumSlot(eq->to_slot);
+//	IN(number_in_stack);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
-	emu->from_slot = UnderfootToTitaniumSlot(eq->from_slot);
-	emu->to_slot = UnderfootToTitaniumSlot(eq->to_slot);
-	IN(number_in_stack);
-
-	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_MoveItem)
-{
-	DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
-	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-	_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
-
-	emu->from_slot = UnderfootToTitaniumSlot(eq->from_slot);
-	emu->to_slot = UnderfootToTitaniumSlot(eq->to_slot);
-	IN(number_in_stack);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_MoveItem)
+//{
+//	DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+//	SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+//
+//	_log(NET__ERROR, "Moved item from %u to %u", eq->from_slot, eq->to_slot);
+//
+//	emu->from_slot = UnderfootToTitaniumSlot(eq->from_slot);
+//	emu->to_slot = UnderfootToTitaniumSlot(eq->to_slot);
+//	IN(number_in_stack);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_ItemLinkClick) {
 	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
