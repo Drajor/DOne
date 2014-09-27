@@ -7,6 +7,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <queue>
 
 typedef uint8_t byte;
 typedef uint8_t uint8;
@@ -98,10 +99,25 @@ namespace Limits {
 
 static const String SYS_NAME = "[System]";
 
-enum Slots : uint32 {
-	CURSOR = 31,
-	LT_INV = 23,
-};
+namespace SlotID {
+	enum : uint32 {
+		MAIN_0 = 23,
+		MAIN_1 = 24,
+		MAIN_2 = 25,
+		MAIN_3 = 26,
+		MAIN_4 = 27,
+		MAIN_5 = 28,
+		MAIN_6 = 29,
+		MAIN_7 = 30,
+		CURSOR = 31,
+
+		SLOT_DELETE = 4294967295
+	};
+	static const uint32 MAIN_MAX = MAIN_7 + 1;
+	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
+	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
+	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
+}
 
 /*
 __________

@@ -2682,6 +2682,9 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 
 	auto payload = MoveItem::convert(pPacket->pBuffer);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
+	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)){
+		sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
+	}
 }
 
 //
