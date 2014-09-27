@@ -14,7 +14,17 @@ private:
 	void operator=(ItemGenerator const&); // Do not implement.
 public:
 	static Item* makeRandom(const uint8 pLevel);
+
+	enum ContainerRarity : uint8 { COMMON, MAGIC, RARE, ARTIFACT };
+	static Item* makeRandomContainer(const ContainerRarity pRarity);
 private:
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();
+
+	static const String _getContainerName();
+	static const uint8 _getContainerSlots(const ContainerRarity pRarity);
+	static const uint32 _getContainerIcon(const ContainerRarity pRarity);
+	
+	uint32 mNextItemID = 10000;
+	const uint32 getNextItemID();
 };

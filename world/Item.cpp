@@ -1,5 +1,6 @@
 #include "Item.h"
 #include "ItemData.h"
+#include <iostream>
 
 Item::Item(ItemData* pItemData) : mItemData(pItemData) {
 	for (auto& i : mAugments) i = nullptr;
@@ -88,8 +89,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.writeString(String(mItemData->mFileName));
 
 	// Chunk Three.
-	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffectStruct) - (unsigned int)&(mItemData->loregroup);
-	pStructure.writeChunk((void*)&(mItemData->augtype), chunk3);
+	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffectStruct) - (unsigned int)&(mItemData->mLoreGroup);
+	pStructure.writeChunk((void*)&(mItemData->mLoreGroup), chunk3);
 	
 	// Click Effect.
 	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffectStruct);
@@ -123,7 +124,7 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 	// Chunk Four.
 	std::size_t chunk4 = (unsigned int)&(mItemData->subitem_count) - (unsigned int)&(mItemData->scriptfileid);
-	pStructure.writeChunk((void*)&(mItemData->subitem_count), chunk4);
+	pStructure.writeChunk((void*)&(mItemData->scriptfileid), chunk4);
 
 	// Child Items.
 	pStructure.write<uint32>(getSubItems());

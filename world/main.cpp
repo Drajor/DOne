@@ -14,6 +14,7 @@
 #include "SpellDataStore.h"
 #include "LogSystem.h"
 #include "UCS.h"
+#include "Random.h"
 
 TimeoutManager timeout_manager;
 
@@ -22,6 +23,8 @@ int main(int argc, char** argv)  {
 	
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
+
+	Random::initialise();
 
 	EXPECTED_MAIN(DataStore::loadSettings());
 	EXPECTED_MAIN(AccountManager::getInstance().initialise());

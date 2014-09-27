@@ -3,24 +3,30 @@
 #include "ItemData.h"
 #include "Character.h"
 #include "Utility.h"
+#include "ItemGenerator.h"
 
 Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	for (auto& i : mItems) i = nullptr;
 
-	auto itemData = new ItemData();
-	itemData->mID = 2;
-	itemData->mInstanceID = 2;
-	itemData->mSlot = 23;
-	itemData->ItemType = 17;
-	itemData->mClasses = 65535;
-	itemData->mIcon = 639;
-	strcpy(itemData->mItemName, String("Test Item").c_str());
-	strcpy(itemData->mIDFile, String("IT63").c_str());
+	//auto itemData = new ItemData();
+	//itemData->mID = 2;
+	//itemData->mInstanceID = 2;
+	//itemData->mSlot = 23;
+	//itemData->mItemType = 17;
+	//itemData->mClasses = 65535;
+	//itemData->mIcon = 639;
+	//strcpy(itemData->mItemName, String("Test Item").c_str());
+	//strcpy(itemData->mIDFile, String("IT63").c_str());
 
-	auto item = new Item(itemData);
-	put(item, 23);
+	//auto item = new Item(itemData);
+	//put(item, 23);
 
 	//for (auto i = )
+
+	put(ItemGenerator::makeRandomContainer(ItemGenerator::COMMON), 23);
+	put(ItemGenerator::makeRandomContainer(ItemGenerator::MAGIC), 24);
+	put(ItemGenerator::makeRandomContainer(ItemGenerator::RARE), 25);
+	put(ItemGenerator::makeRandomContainer(ItemGenerator::ARTIFACT), 26);
 	
 }
 

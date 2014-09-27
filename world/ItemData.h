@@ -3,6 +3,12 @@
 #include "Constants.h"
 #pragma pack(1)
 
+/*
+
+Infusible
+Placeable
+
+*/
 
 struct ItemData {
 	ItemData() {
@@ -17,6 +23,8 @@ struct ItemData {
 		memset(mFocusName, 0, sizeof(mFocusName));
 		memset(mScrollName, 0, sizeof(mScrollName));
 		memset(mBardName, 0, sizeof(mBardName));
+
+		strcpy(mIDFile, "IT63");
 	}
 
 	// BEGIN chunk0
@@ -38,7 +46,7 @@ struct ItemData {
 	uint8 mUnknown7 = 0;
 	uint8 mUnknown8 = 0; //0 - Add Evolving Item struct if this isn't set to 0?
 	uint8 mUnknown9 = 0;
-	uint8 mItemClass = 0;
+	uint8 mItemClass = ItemClass::COMMON;
 	// END chunk0
 
 	char mItemName[64];
@@ -48,17 +56,17 @@ struct ItemData {
 	// BEGIN chunk1
 	uint32 mID = 0;
 	uint8 mWeight = 0;
-	uint8 mNoRent = 0;
-	uint8 mNoDrop = 0;
-	uint8 mAttuneable = 0;
+	uint8 mTemporary = 1; // 0 = ON, 1 = OFF
+	uint8 mNoDrop = 1; // 0 = ON, 1 = OFF
+	uint8 mAttunable = 0; // 0 = OFF, 1 = ON
 	uint8 mSize = 0;
 	uint32 mSlots = 0;
 	uint32 mPrice = 0;
 	uint32 mIcon = 0;
 	uint8 mUnknown10 = 0;
 	uint8 mUnknown11 = 0;
-	uint32 mBenefitFlag = 0;
-	uint8 mTradeSkills = 0;
+	uint32 mBenefitFlag = 0; // UNSURE
+	uint8 mTradeSkills = 1; // 0 = ON, 1 = OFF
 	int8 mColdResist = 0;
 	int8 mDieaseResist = 0;
 	int8 mPoisonResist = 0;
@@ -79,8 +87,8 @@ struct ItemData {
 	int32 mHealthRegen = 0;
 	int32 mManaRegen = 0;
 	int32 mEnduranceRegen = 0;
-	uint32 mClasses = 0;
-	uint32 mRaces = 0;
+	uint32 mClasses = 65535;
+	uint32 mRaces = 65535; //131071
 	uint32 mDeity = 0;
 	int32 mSkillModifierValue = 0;
 	uint32 mUnknown12 = 0;
@@ -89,7 +97,7 @@ struct ItemData {
 	uint32 mBaneDamageBodyType = 0;
 	uint32 mBaneDamageRaceAmount = 0;
 	int32 mBaneDamageAmount = 0;
-	uint8 mMagic = 0;
+	uint8 mMagic = 1; // 0 = NOT MAGIC, 1 = MAGIC
 	int32 CastTime_ = 0;
 	uint32 mReqLevel = 0;
 	uint32 mRecLevel = 0;
@@ -103,7 +111,7 @@ struct ItemData {
 	uint8 Range = 0;
 	uint32 Damage = 0;
 	uint32 Color = 0;
-	uint8 ItemType = 0;
+	uint8 mItemType = 0;
 	uint32 Material = 0;
 	uint32 unknown13 = 0;
 	uint32 EliteMaterial = 0;
@@ -131,8 +139,8 @@ struct ItemData {
 	uint32 augtype = 0;
 	uint32 augrestrict = 0;
 	struct AugmentationSlot {
-		uint32 type = 0;
-		uint8 visible = 0;
+		uint32 mType = 0;
+		uint8 mVisible = 1;
 		uint8 unknown = 0;
 	};
 	AugmentationSlot augslots[5];
@@ -143,10 +151,10 @@ struct ItemData {
 	uint32 ldonsellbackrate = 0;
 	uint32 ldonsold = 0;
 
-	uint8 bagtype = 0;
-	uint8 bagslots = 0;
-	uint8 bagsize = 0;
-	uint8 wreduction = 0;
+	uint8 mContainerType = ContainerType::NONE;
+	uint8 mContainerSlots = 0;
+	uint8 mContainerSize = ContainerSize::TINY;
+	uint8 mContainerWR = 0; // Weight Reduction: 0% - 100%
 
 	uint8 book = 0;
 	uint8 booktype = 0;
@@ -155,9 +163,9 @@ struct ItemData {
 	char mFileName[33];
 
 	// BEGIN chunk3
-	int32 loregroup = 0;
-	uint8 artifact = 0;
-	uint8 summonedflag = 0;
+	int32 mLoreGroup = 0; // -1 = Lore, 0 = Not Lore, >= 1 Specific Lore Group ID.
+	uint8 mArtifact = 1; // 0 = OFF, 1 = ON
+	uint8 mSummoned = 0; // 0 = OFF, 1 = ON
 	uint32 favor = 0;
 	uint8 fvnodrop = 0;
 	int32 dotshield = 0;
@@ -168,14 +176,14 @@ struct ItemData {
 	uint32 augdistil = 0;
 	int32 mUnknown14 = 0;
 	uint32 mUnknown15 = 0;
-	uint8 no_pet = 0;
+	uint8 mNoPet = 0; // 0 = OFF, 1 = ON
 	uint8 mUnknown16 = 0;
 
 	uint8 potion_belt_enabled = 0;
 	uint32 potion_belt_slots = 0;
 
 	uint32 stacksize = 0;
-	uint8 no_transfer = 0;
+	uint8 mNoTransfer = 0; // 0 = OFF, 1 = ON
 	uint16 expendablearrow = 0;
 
 	uint32 mUnknown17 = 0;
@@ -241,33 +249,38 @@ struct ItemData {
 	char mScrollName[65];
 	int32 mScrollUnknown = 0;
 
+
+	// http://everquest.allakhazam.com/db/item.html?item=87185
+	// http://lucy.allakhazam.com/itemraw.html?id=110788
+	// This item appears to use the bard effect.
 	Effect mBardEffect;
 	char mBardName[65];
 	int32 mBardUnknown = 0;
 
 	// BEGIN chunk4
 	uint32 scriptfileid = 0;
-	uint8 quest_item = 0;
-	uint32 unknown24 = 0; //0xffffffff - Power Source Capacity?
-	uint32 Purity = 0;
+	uint8 mQuest = 0; // 0 = OFF, 1 = ON
+	///////////////////////////////
+	uint32 mPower = 0; // 1 = Power 0%.. Needs more investigation.
+	uint32 Purity = 0; // 1 = Purity: 100, 10 = Purity: 100 and Infusible.
 	uint32 BackstabDmg = 0;
 	uint32 DSMitigation = 0;
-	int32 HeroicStr = 0;
-	int32 HeroicInt = 0;
-	int32 HeroicWis = 0;
-	int32 HeroicAgi = 0;
-	int32 HeroicDex = 0;
-	int32 HeroicSta = 0;
-	int32 HeroicCha = 0;
-	int32 HeroicMR = 0;
-	int32 HeroicFR = 0;
-	int32 HeroicCR = 0;
-	int32 HeroicDR = 0;
-	int32 HeroicPR = 0;
-	int32 HeroicSVCorrup = 0;
-	int32 HealAmt = 0;
-	int32 SpellDmg = 0;
-	int32 clairvoyance = 0;
+	int32 mHeroicStrength = 0;
+	int32 mHeroicIntelligence = 0;
+	int32 mHeroicWisdom = 0;
+	int32 mHeroicAgility = 0;
+	int32 mHeroicDexterity = 0;
+	int32 mHeroicStamina = 0;
+	int32 mHeroicCharisma = 0;
+	int32 mHeroicMagicResist = 0;
+	int32 mHeroicFireResist = 0;
+	int32 mHeroicColdResist = 0;
+	int32 mHeroicDiseaseResist = 0;
+	int32 mHeroicPoisonResist = 0;
+	int32 mHeroicSVCorruption = 0;
+	int32 mHealAmount = 0;
+	int32 mSpellDamage = 0;
+	int32 mClairvoyance = 0;
 	uint8 unknown25 = 0;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string = 0; // Some String, but being evolution related is just a guess
 	uint8 unknown26 = 0;

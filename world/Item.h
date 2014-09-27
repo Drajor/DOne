@@ -8,6 +8,7 @@ class DynamicStructure;
 class Item {
 public:
 	Item(ItemData* pItemData);
+	inline void setName(const String& pName) { mName = pName; strcpy(mItemData->mItemName, pName.c_str()); }
 	inline const String& getName() const { return mName; }
 	inline const uint32 getSlot() const { return mSlot; }
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
@@ -28,9 +29,9 @@ public:
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
-	inline const uint8 isNoRent() const { return mItemData->mNoRent; }
+	inline const uint8 isTemporary() const { return mItemData->mTemporary; }
 	inline const uint8 isNoDrop() const { return mItemData->mNoDrop; }
-	inline const uint8 isAttuneable() const { return mItemData->mAttuneable; }
+	inline const uint8 isAttunable() const { return mItemData->mAttunable; }
 	inline const uint8 getSize() const { return mItemData->mSize; }
 	inline const uint32 getSlots() const { return mItemData->mSlots; }
 	inline const uint32 getPrice() const { return mItemData->mPrice; }
@@ -71,6 +72,13 @@ public:
 	inline const uint32 getReqLevel() const { return mItemData->mReqLevel; }
 	inline const uint32 getRecLevel() const { return mItemData->mRecLevel; }
 
+	inline const uint8 getContainerType() const { return mItemData->mContainerType; }
+	inline const uint8 getContainerSlots() const { return mItemData->mContainerSlots; }
+	inline const uint8 getContainerSize() const { return mItemData->mContainerSize; }
+	inline const uint8 getContainerWR() const { return mItemData->mContainerWR; }
+
+	inline const uint8 getItemType() const { return mItemData->mItemType; }
+
 	inline void setStackSize(const uint32 pValue) { mItemData->mStackSize = pValue; }
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
 	inline void setMerchantSlot(const uint32 pValue) { mItemData->mMerchantSlot = pValue; }
@@ -81,9 +89,9 @@ public:
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
-	inline void setIsNoRent(const bool pValue) { mItemData->mNoRent = pValue ? 1 : 0; }
+	inline void setIsTemporary(const bool pValue) { mItemData->mTemporary = pValue ? 1 : 0; }
 	inline void setIsNoDrop(const bool pValue) { mItemData->mNoDrop = pValue ? 1 : 0; }
-	inline void setIsAttuneable(const bool pValue) { mItemData->mAttuneable = pValue ? 1 : 0; }
+	inline void setIsAttunable(const bool pValue) { mItemData->mAttunable = pValue ? 1 : 0; }
 	inline void setSize(const uint8 pValue) { mItemData->mSize = pValue; }
 	inline void setSlots(const uint32 pValue) { mItemData->mSlots = pValue; }
 	inline void setPrice(const uint32 pValue) { mItemData->mPrice = pValue; }
@@ -123,6 +131,13 @@ public:
 
 	inline void setReqLevel(const uint32 pValue) { mItemData->mReqLevel = pValue; }
 	inline void setRecLevel(const uint32 pValue) { mItemData->mRecLevel = pValue; }
+
+	inline void setContainerType(const uint8 pValue) { mItemData->mContainerType = pValue; }
+	inline void setContainerSlots(const uint8 pValue) { mItemData->mContainerSlots = pValue; }
+	inline void setContainerSize(const uint8 pValue) { mItemData->mContainerSize = pValue; }
+	inline void setContainerWR(const uint8 pValue) { mItemData->mContainerWR = pValue; }
+
+	inline void setItemType(const uint8 pValue) { mItemData->mItemType = pValue; }
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();

@@ -116,6 +116,37 @@ __________
 
 */
 
+namespace ItemClass {
+	enum : uint8 {
+		COMMON = 0,
+		CONTAINER = 1,
+		BOOK = 2
+	};
+}
+
+namespace ItemType {
+	enum : uint8 {
+		MISC = 11
+	};
+}
+
+namespace ContainerSize {
+	enum : uint8 {
+		TINY = 0,
+		SMALL = 1,
+		MEDIUM = 2,
+		LARGE = 3,
+		GIANT = 4
+	};
+}
+
+namespace ContainerType {
+	enum : uint8 {
+		NONE = 0,
+		NORMAL = 1
+	};
+}
+
 enum SpawnPointType : uint32 {
 	TRASH = 0,
 	SPECIFIC = 1,
