@@ -66,8 +66,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	_onCopy();
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mItemName) - (unsigned int)&(mItemData->mStackSize);
-	pStructure.writeChunk((void*)&(mItemData->mStackSize), chunk0);
+	std::size_t chunk0 = (unsigned int)&(mItemData->mItemName) - (unsigned int)&(mItemData->mStacks);
+	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
 
 	// Variable.
 	pStructure.writeString(String(mItemData->mItemName));

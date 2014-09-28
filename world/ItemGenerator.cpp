@@ -4,8 +4,12 @@
 #include "Random.h"
 
 Item* ItemGenerator::_makeBaseItem() {
-	ItemData* data = new ItemData();
-	return new Item(data);
+	auto data = new ItemData();
+	auto item = new Item(data);
+	item->setID(getInstance().getNextID());
+	item->setSerial(getInstance().getNextSerial());
+
+	return item;
 }
 
 Item* ItemGenerator::makeRandom(const uint8 pLevel) {
@@ -19,10 +23,28 @@ Item* ItemGenerator::_makeRandom(const uint8 pLevel) {
 	return item;
 }
 
+Item* ItemGenerator::makeRandomFood() {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Food");
+	item->setIcon(537);
+	item->setMaxStacks(20);
+	item->setStacks(20);
+	item->setCharges(0);
+	item->setCastTime(30);
+	item->setIsMagic(false);
+	item->setWeight(10);
+	item->setSize(ItemSize::SMALL);
+	item->setIsTradeskillsItem(false);
+	item->setItemClass(ItemClass::COMMON);
+	item->setItemType(ItemType::FOOD);
+
+	return item;
+}
+
 Item* ItemGenerator::makeRandomContainer(const ContainerRarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
-	item->setID(ItemGenerator::getInstance().getNextItemID());
 	item->setName(_getContainerName());
 	item->setContainerType(ContainerType::NORMAL);
 	item->setContainerSize(ContainerSize::GIANT);
@@ -109,7 +131,12 @@ const String ItemGenerator::_getContainerName() {
 	return "Some Big Bag";
 }
 
-const uint32 ItemGenerator::getNextItemID() {
-	mNextItemID++;
-	return mNextItemID;
+const uint32 ItemGenerator::getNextID() {
+	mNextID++;
+	return mNextID;
+}
+
+const uint32 ItemGenerator::getNextSerial() {
+	mNextSerial++;
+	return mNextSerial;
 }

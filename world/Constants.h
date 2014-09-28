@@ -142,11 +142,23 @@ namespace ItemClass {
 
 namespace ItemType {
 	enum : uint8 {
-		MISC = 11
+		MISC = 11,
+		FOOD = 14,
+		DRINK = 15,
 	};
 }
 
 namespace ContainerSize {
+	enum : uint8 {
+		TINY = 0,
+		SMALL = 1,
+		MEDIUM = 2,
+		LARGE = 3,
+		GIANT = 4
+	};
+}
+
+namespace ItemSize {
 	enum : uint8 {
 		TINY = 0,
 		SMALL = 1,

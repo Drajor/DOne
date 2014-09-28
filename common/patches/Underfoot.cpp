@@ -1863,16 +1863,16 @@ ENCODE(OP_ApplyPoison) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_ItemVerifyReply) {
-	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
-	SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
-
-	eq->slot = TitaniumToUnderfootSlot(emu->slot);
-	OUT(spell);
-	OUT(target);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ItemVerifyReply) {
+//	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
+//	SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
+//
+//	eq->slot = TitaniumToUnderfootSlot(emu->slot);
+//	OUT(spell);
+//	OUT(target);
+//
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Trader) {
 
@@ -2838,26 +2838,26 @@ DECODE(OP_ApplyPoison) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ItemVerifyRequest) {
-	DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
-	SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
+//DECODE(OP_ItemVerifyRequest) {
+//	DECODE_LENGTH_EXACT(structs::ItemVerifyRequest_Struct);
+//	SETUP_DIRECT_DECODE(ItemVerifyRequest_Struct, structs::ItemVerifyRequest_Struct);
+//
+//	emu->slot = UnderfootToTitaniumSlot(eq->slot);
+//	IN(target);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
-	emu->slot = UnderfootToTitaniumSlot(eq->slot);
-	IN(target);
-
-	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_Consume) {
-	DECODE_LENGTH_EXACT(structs::Consume_Struct);
-	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
-
-	emu->slot = UnderfootToTitaniumSlot(eq->slot);
-	IN(auto_consumed);
-	IN(type);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_Consume) {
+//	DECODE_LENGTH_EXACT(structs::Consume_Struct);
+//	SETUP_DIRECT_DECODE(Consume_Struct, structs::Consume_Struct);
+//
+//	emu->slot = UnderfootToTitaniumSlot(eq->slot);
+//	IN(auto_consumed);
+//	IN(type);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_CastSpell) {
 	DECODE_LENGTH_EXACT(structs::CastSpell_Struct);

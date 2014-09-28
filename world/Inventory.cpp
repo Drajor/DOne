@@ -27,6 +27,11 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	put(ItemGenerator::makeRandomContainer(ItemGenerator::MAGIC), 24);
 	put(ItemGenerator::makeRandomContainer(ItemGenerator::RARE), 25);
 	put(ItemGenerator::makeRandomContainer(ItemGenerator::ARTIFACT), 26);
+
+	put(ItemGenerator::makeRandomFood(), 27);
+	put(ItemGenerator::makeRandomFood(), 28);
+	put(ItemGenerator::makeRandomFood(), 29);
+	put(ItemGenerator::makeRandomFood(), 30);
 	
 }
 

@@ -19,7 +19,7 @@ public:
 	const bool copyData(Utility::DynamicStructure& pStructure);
 	uint32 getSubItems() const;
 
-	inline const uint32 getStackSize() const { return mItemData->mStackSize; }
+	inline const uint32 getStackSize() const { return mItemData->mStacks; }
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
 	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
@@ -68,6 +68,7 @@ public:
 	inline const uint32 getBaneDamageRaceAmount() const { return mItemData->mBaneDamageRaceAmount; }
 	inline const int32 getBaneDamageAmount() const { return mItemData->mBaneDamageAmount; }
 	inline const uint8 isMagic() const { return mItemData->mMagic; }
+	inline const int32 getCastTime() const { return mItemData->mCastTime; }
 
 	inline const uint32 getReqLevel() const { return mItemData->mReqLevel; }
 	inline const uint32 getRecLevel() const { return mItemData->mRecLevel; }
@@ -79,10 +80,10 @@ public:
 
 	inline const uint8 getItemType() const { return mItemData->mItemType; }
 
-	inline void setStackSize(const uint32 pValue) { mItemData->mStackSize = pValue; }
+	inline void setStacks(const uint32 pValue) { mItemData->mStacks = pValue; }
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
 	inline void setMerchantSlot(const uint32 pValue) { mItemData->mMerchantSlot = pValue; }
-	inline void setInstanceID(const uint32 pValue) { mItemData->mInstanceID = pValue; }
+	inline void setSerial(const uint32 pValue) { mItemData->mInstanceID = pValue; }
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
 	inline void setAttuned(const uint32 pValue) { mItemData->mAttuned = pValue; }
@@ -128,6 +129,7 @@ public:
 	inline void setBaneDamageRaceAmount(const uint32 pValue) { mItemData->mBaneDamageRaceAmount = pValue; }
 	inline void setBaneDamageAmount(const int32 pValue) { mItemData->mBaneDamageAmount = pValue; }
 	inline void setIsMagic(const bool pValue) { mItemData->mMagic = pValue ? 1 : 0; }
+	inline void setCastTime(const int32 pValue) { mItemData->mCastTime = pValue; }
 
 	inline void setReqLevel(const uint32 pValue) { mItemData->mReqLevel = pValue; }
 	inline void setRecLevel(const uint32 pValue) { mItemData->mRecLevel = pValue; }
@@ -138,6 +140,8 @@ public:
 	inline void setContainerWR(const uint8 pValue) { mItemData->mContainerWR = pValue; }
 
 	inline void setItemType(const uint8 pValue) { mItemData->mItemType = pValue; }
+
+	inline void setMaxStacks(const uint32 pValue) { mItemData->mMaxStacks = pValue; }
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();

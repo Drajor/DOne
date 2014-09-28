@@ -339,6 +339,40 @@ namespace Payload {
 			uint32 mToSlot = 0;
 			uint32 mStackSize = 0;
 		};
+
+		// C->S
+		// Based on: Consume_Struct
+		struct Consume : public FixedLength_And_ServerToClient<Consume> {
+			enum ConsumeType : uint8 { FOOD = 1, DRINK = 2 };
+			enum ConsumeAction : uint32{ AUTO = 0xFFFFFF, MANUAL = 0 };
+			uint32 mSlot = 0;
+			uint32 mConsumeAction = AUTO; // ConsumeAction
+			uint8 c_unknown1[4];
+			uint8 mType = 0; // ConsumeType
+			uint8 unknown13[3];
+		};
+
+		// S->C
+		// Based on: Stamina_Struct
+		struct Stamina : public FixedLength_And_ServerToClient<Stamina> {
+			uint32 mHunger = 0;
+			uint32 mThirst = 0;
+		};
+
+		// C->S
+		// Based on: ItemVerifyRequest_Struct
+		struct ItemRightClick : public FixedLength_And_ServerToClient<ItemRightClick> {
+			int32 mSlot = 0;
+			uint32 mTargetSpawnID = 0;
+		};
+
+		// S->C
+		// Based on: ItemVerifyReply_Struct
+		struct ItemRightClickResponse : public FixedLength_And_ServerToClient<ItemRightClickResponse> {
+			int32 mSlot = 0;
+			uint32 mSpellID = 0;
+			uint32 mTargetSpawnID = 0;
+		};
 	}
 
 	namespace World {

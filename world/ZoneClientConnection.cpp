@@ -221,9 +221,6 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_Jump:
 		// Ignore.
 		break;
-	case OP_PotionBelt:
-		// Ignore.
-		break;
 	case OP_BazaarSearch:
 		// Ignore.
 		break;
@@ -420,6 +417,17 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_MoveItem:
 		_handleMoveItem(pPacket);
+		break;
+	case OP_Consume:
+		_handleConsume(pPacket);
+		break;
+	case OP_ItemVerifyRequest:
+		// NOTE: UF Requires a reply or the UI will lock up.
+		// NOTE: This occurs when the player right clicks on any Item.
+		_handleItemRightClick(pPacket);
+		break;
+	case OP_PotionBelt:
+		_handlePotionBelt(pPacket);
 		break;
 	default:
 		StringStream ss;
@@ -622,8 +630,8 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->expansions = ;
 	//payload->toxicity;			//from drinking potions, seems to increase by 3 each time you drink
 	//payload->unknown5496[16];	//
-	//payload->hunger_level;
-	//payload->thirst_level;
+	payload->hunger_level = 0;
+	payload->thirst_level = 0;
 	//payload->ability_up;
 	payload->zone_id = mZone->getID();
 	payload->zoneInstance = mZone->getInstanceID();
@@ -2685,6 +2693,57 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)){
 		sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
 	}
+}
+
+void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Consume::sizeCheck(pPacket->size));
+
+	auto payload = Consume::convert(pPacket->pBuffer);
+	
+	sendStamina(6000, 6000);
+}
+
+void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_Stamina, Stamina::size());
+	auto payload = Stamina::convert(outPacket->pBuffer);
+	payload->mHunger = pHunger;
+	payload->mThirst = pThirst;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handlePotionBelt(const EQApplicationPacket* pPacket) {
+}
+
+void ZoneClientConnection::_handleItemRightClick(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(ItemRightClick::sizeCheck(pPacket->size));
+
+	auto payload = ItemRightClick::convert(pPacket->pBuffer);
+
+	sendItemRightClickResponse(payload->mSlot, payload->mTargetSpawnID);
+}
+
+void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_ItemVerifyReply, ItemRightClickResponse::size());
+	auto payload = ItemRightClickResponse::convert(outPacket->pBuffer);
+
+	payload->mSlot = pSlot;
+	payload->mTargetSpawnID = pTargetSpawnID;
+	payload->mSpellID = 0;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 //

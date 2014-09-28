@@ -17,6 +17,7 @@ public:
 
 	enum ContainerRarity : uint8 { COMMON, MAGIC, RARE, ARTIFACT };
 	static Item* makeRandomContainer(const ContainerRarity pRarity);
+	static Item* makeRandomFood();
 private:
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();
@@ -25,6 +26,8 @@ private:
 	static const uint8 _getContainerSlots(const ContainerRarity pRarity);
 	static const uint32 _getContainerIcon(const ContainerRarity pRarity);
 	
-	uint32 mNextItemID = 10000;
-	const uint32 getNextItemID();
+	uint32 mNextID = 10000;
+	const uint32 getNextID();
+	uint32 mNextSerial = 1;
+	const uint32 getNextSerial();
 };

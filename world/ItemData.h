@@ -28,7 +28,7 @@ struct ItemData {
 	}
 
 	// BEGIN chunk0
-	uint32 mStackSize = 0;
+	uint32 mStacks = 1;
 	uint32 mUnknown0 = 0;
 	uint32 mSlot = 0; // NOT USED.
 	uint32 mMerchantPrice = 0; // Maybe vendor price?
@@ -63,8 +63,8 @@ struct ItemData {
 	uint32 mSlots = 0;
 	uint32 mPrice = 0;
 	uint32 mIcon = 0;
-	uint8 mUnknown10 = 0;
-	uint8 mUnknown11 = 0;
+	uint8 mUnknown10 = 1; // 1 copied
+	uint8 mUnknown11 = 1; // 1 copied
 	uint32 mBenefitFlag = 0; // UNSURE
 	uint8 mTradeSkills = 1; // 0 = ON, 1 = OFF
 	int8 mColdResist = 0;
@@ -98,7 +98,7 @@ struct ItemData {
 	uint32 mBaneDamageRaceAmount = 0;
 	int32 mBaneDamageAmount = 0;
 	uint8 mMagic = 1; // 0 = NOT MAGIC, 1 = MAGIC
-	int32 CastTime_ = 0;
+	int32 mCastTime = 0;
 	uint32 mReqLevel = 0;
 	uint32 mRecLevel = 0;
 	uint32 RecSkill = 0;
@@ -110,12 +110,12 @@ struct ItemData {
 	uint8 ElemDmgAmt = 0;
 	uint8 Range = 0;
 	uint32 Damage = 0;
-	uint32 Color = 0;
+	uint32 Color = 4278190080;
 	uint8 mItemType = 0;
 	uint32 Material = 0;
 	uint32 unknown13 = 0;
 	uint32 EliteMaterial = 0;
-	float SellRate = 0.0f;
+	float SellRate = 1.0f;
 	int32 CombatEffects = 0;
 	int32 Shielding = 0;
 	int32 StunResist = 0;
@@ -164,7 +164,7 @@ struct ItemData {
 
 	// BEGIN chunk3
 	int32 mLoreGroup = 0; // -1 = Lore, 0 = Not Lore, >= 1 Specific Lore Group ID.
-	uint8 mArtifact = 1; // 0 = OFF, 1 = ON
+	uint8 mArtifact = 0; // 0 = OFF, 1 = ON
 	uint8 mSummoned = 0; // 0 = OFF, 1 = ON
 	uint32 favor = 0;
 	uint8 fvnodrop = 0;
@@ -182,7 +182,7 @@ struct ItemData {
 	uint8 potion_belt_enabled = 0;
 	uint32 potion_belt_slots = 0;
 
-	uint32 stacksize = 0;
+	uint32 mMaxStacks = 1; // This is the MAX stack size.
 	uint8 mNoTransfer = 0; // 0 = OFF, 1 = ON
 	uint16 expendablearrow = 0;
 
@@ -196,7 +196,8 @@ struct ItemData {
 	// END chunk3
 
 	struct ClickEffect {
-		int32 effect = 0;
+		//int32 effect = 0;
+		int32 mEffectID = -1;
 		uint8 level2 = 0;
 		uint32 type = 0;
 		uint8 level = 0;
@@ -208,11 +209,10 @@ struct ItemData {
 	};
 	ClickEffect mClickEffectStruct;
 	char mClickName[65];
-	int32 mClickUnknown = 0;
+	int32 mClickUnknown = -1;
 
-	struct ProcEffectStruct
-	{
-		uint32 effect = 0;
+	struct ProcEffectStruct {
+		int32 mEffectID = -1;
 		uint8 level2 = 0;
 		uint32 type = 0;
 		uint8 level = 0;
@@ -224,10 +224,11 @@ struct ItemData {
 	};
 	ProcEffectStruct mProcEffectStruct;
 	char mProcName[65];
-	int32 mProcUnknown = 0;
+	int32 mProcUnknown = -1;
 
 	struct Effect {
-		uint32 effect = 0;
+		//uint32 effect = 0;
+		int32 mEffectID = -1;
 		uint8 level2 = 0;
 		uint32 type = 0;
 		uint8 level = 0;
@@ -239,15 +240,15 @@ struct ItemData {
 	};
 	Effect mWornEffectStruct;
 	char mWornName[65];
-	int32 mWornUnknown = 0;
+	int32 mWornUnknown = -1;
 
 	Effect mFocusEffect;
 	char mFocusName[65];
-	int32 mFocusUnknown = 0;
+	int32 mFocusUnknown = -1;
 
 	Effect mScrollEffect;
 	char mScrollName[65];
-	int32 mScrollUnknown = 0;
+	int32 mScrollUnknown = -1;
 
 
 	// http://everquest.allakhazam.com/db/item.html?item=87185
@@ -255,7 +256,7 @@ struct ItemData {
 	// This item appears to use the bard effect.
 	Effect mBardEffect;
 	char mBardName[65];
-	int32 mBardUnknown = 0;
+	int32 mBardUnknown = -1;
 
 	// BEGIN chunk4
 	uint32 scriptfileid = 0;

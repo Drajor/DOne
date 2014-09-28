@@ -106,6 +106,9 @@ public:
 	void sendLootResponse(uint8 pResponse, uint32 pPlatinum = 0, uint32 pGold = 0, uint32 pSilver = 0, uint32 pCopper = 0);
 
 	void sendConsiderResponse(const uint32 pSpawnID);
+	void sendStamina(const uint32 pFood, const uint32 pDrink);
+
+	void sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID);
 
 	//void sendSpellCastOn();
 
@@ -201,6 +204,9 @@ private:
 	void _handleEndLootRequest(const EQApplicationPacket* pPacket);
 	void _handleLootItem(const EQApplicationPacket* pPacket);
 	void _handleMoveItem(const EQApplicationPacket* pPacket);
+	void _handleConsume(const EQApplicationPacket* pPacket);
+	void _handlePotionBelt(const EQApplicationPacket* pPacket);
+	void _handleItemRightClick(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
