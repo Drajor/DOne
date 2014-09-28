@@ -23,15 +23,25 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 
 	//for (auto i = )
 
-	put(ItemGenerator::makeRandomContainer(ItemGenerator::COMMON), 23);
-	put(ItemGenerator::makeRandomContainer(ItemGenerator::MAGIC), 24);
-	put(ItemGenerator::makeRandomContainer(ItemGenerator::RARE), 25);
-	put(ItemGenerator::makeRandomContainer(ItemGenerator::ARTIFACT), 26);
+	//put(ItemGenerator::makeRandomContainer(ItemGenerator::COMMON), 23);
+	//put(ItemGenerator::makeRandomContainer(ItemGenerator::MAGIC), 24);
+	//put(ItemGenerator::makeRandomContainer(ItemGenerator::RARE), 25);
+	//put(ItemGenerator::makeRandomContainer(ItemGenerator::ARTIFACT), 26);
 
-	put(ItemGenerator::makeRandomFood(), 27);
-	put(ItemGenerator::makeRandomFood(), 28);
-	put(ItemGenerator::makeRandomFood(), 29);
-	put(ItemGenerator::makeRandomFood(), 30);
+	//put(ItemGenerator::makeRandomFood(), 27);
+	//put(ItemGenerator::makeRandomFood(), 28);
+	//put(ItemGenerator::makeRandomFood(), 29);
+	//put(ItemGenerator::makeRandomFood(), 30;
+
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 23);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 24);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 25);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 26);
+
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 28);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 29);
+	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 30);
 	
 }
 
@@ -203,4 +213,9 @@ const bool Inventoryy::pushCursor(Item* pItem) {
 
 void Inventoryy::_set(Item* pItem, const uint32 pSlot) {
 	mItems[pSlot] = pItem;
+}
+
+const bool Inventoryy::consume(uint32 pSlot) {
+	// NOTE: UF will only consume from the Main Inventory
+	return true;
 }

@@ -82,8 +82,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.writeString(String(mItemData->mCharmFile));
 	
 	// Chunk Two.
-	std::size_t chunk2 = (unsigned int)&(mItemData->mFileName) - (unsigned int)&(mItemData->augtype);
-	pStructure.writeChunk((void*)&(mItemData->augtype), chunk2);
+	std::size_t chunk2 = (unsigned int)&(mItemData->mFileName) - (unsigned int)&(mItemData->mAugType);
+	pStructure.writeChunk((void*)&(mItemData->mAugType), chunk2);
 	
 	// Variable.
 	pStructure.writeString(String(mItemData->mFileName));
@@ -153,4 +153,5 @@ uint32 Item::getSubItems() const {
 
 void Item::_onCopy() {
 	mItemData->mSlot = mSlot;
+	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
 }

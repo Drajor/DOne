@@ -46,7 +46,7 @@ struct ItemData {
 	uint8 mUnknown7 = 0;
 	uint8 mUnknown8 = 0; //0 - Add Evolving Item struct if this isn't set to 0?
 	uint8 mUnknown9 = 0;
-	uint8 mItemClass = ItemClass::COMMON;
+	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
 
 	char mItemName[64];
@@ -101,30 +101,30 @@ struct ItemData {
 	int32 mCastTime = 0;
 	uint32 mReqLevel = 0;
 	uint32 mRecLevel = 0;
-	uint32 RecSkill = 0;
-	uint32 BardType = 0;
-	int32 BardValue = 0;
-	uint8 Light = 0;
-	uint8 Delay = 0;
-	uint8 ElemDmgType = 0;
-	uint8 ElemDmgAmt = 0;
-	uint8 Range = 0;
-	uint32 Damage = 0;
-	uint32 Color = 4278190080;
+	uint32 mRecSkill = 0;
+	uint32 mBardType = 0;
+	int32 mBardValue = 0;
+	uint8 mLight = 0;
+	uint8 mDelay = 0;
+	uint8 mElementalDamageType = 0;
+	uint8 mElementalDamageAmount = 0;
+	uint8 mRange = 0;
+	uint32 mDamage = 0;
+	uint32 mColour = 4278190080;
 	uint8 mItemType = 0;
-	uint32 Material = 0;
-	uint32 unknown13 = 0;
-	uint32 EliteMaterial = 0;
-	float SellRate = 1.0f;
-	int32 CombatEffects = 0;
-	int32 Shielding = 0;
-	int32 StunResist = 0;
-	int32 StrikeThrough = 0;
-	int32 ExtraDmgSkill = 0;
-	int32 ExtraDmgAmt = 0;
-	int32 SpellShield = 0;
-	int32 Avoidance = 0;
-	int32 Accuracy = 0;
+	uint32 mMaterial = 0;
+	uint32 mUnknown13 = 0;
+	uint32 mEliteMaterial = 0;
+	float mSellRate = 1.0f;
+	int32 mCombatEffects = 0;
+	int32 mShielding = 0;
+	int32 mStunResist = 0;
+	int32 mStrikeThrough = 0;
+	int32 mExtraDamageSkill = 0;
+	int32 mExtraDamageAmount = 0;
+	int32 mSpellShield = 0;
+	int32 mAvoidance = 0;
+	int32 mAccuracy = 0;
 	uint32 CharmFileID = 0;
 	struct FactionModifier {
 		uint32 mFactionID = 0;
@@ -136,8 +136,8 @@ struct ItemData {
 	char mCharmFile[32];
 
 	// BEGIN chunk2
-	uint32 augtype = 0;
-	uint32 augrestrict = 0;
+	uint32 mAugType = 0;
+	uint32 mAugRestrict = 0;
 	struct AugmentationSlot {
 		uint32 mType = 0;
 		uint8 mVisible = 1;
@@ -145,15 +145,15 @@ struct ItemData {
 	};
 	AugmentationSlot augslots[5];
 
-	uint32 ldonpoint_type = 0;
-	uint32 ldontheme = 0;
-	uint32 ldonprice = 0;
-	uint32 ldonsellbackrate = 0;
-	uint32 ldonsold = 0;
+	uint32 mLDONPointType = 0;
+	uint32 mLDONTheme = 0;
+	uint32 mLDONPrice = 0;
+	uint32 mLDONSellBackPrice = 0;
+	uint32 mLDONSold = 0;
 
 	uint8 mContainerType = ContainerType::NONE;
 	uint8 mContainerSlots = 0;
-	uint8 mContainerSize = ContainerSize::TINY;
+	uint8 mContainerSize = ContainerSize::Tiny;
 	uint8 mContainerWR = 0; // Weight Reduction: 0% - 100%
 
 	uint8 book = 0;

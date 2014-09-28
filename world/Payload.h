@@ -343,8 +343,8 @@ namespace Payload {
 		// C->S
 		// Based on: Consume_Struct
 		struct Consume : public FixedLength_And_ServerToClient<Consume> {
+			enum ConsumeAction : uint32{ AUTO = 0xFFFFFF, MANUAL = 999 };
 			enum ConsumeType : uint8 { FOOD = 1, DRINK = 2 };
-			enum ConsumeAction : uint32{ AUTO = 0xFFFFFF, MANUAL = 0 };
 			uint32 mSlot = 0;
 			uint32 mConsumeAction = AUTO; // ConsumeAction
 			uint8 c_unknown1[4];
@@ -372,6 +372,11 @@ namespace Payload {
 			int32 mSlot = 0;
 			uint32 mSpellID = 0;
 			uint32 mTargetSpawnID = 0;
+		};
+
+		// C->S
+		struct OpenContainer : public FixedLength_And_ServerToClient<OpenContainer> {
+			uint32 mSlot = 0;
 		};
 	}
 

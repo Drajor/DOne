@@ -34,38 +34,57 @@ Item* ItemGenerator::makeRandomFood() {
 	item->setCastTime(30);
 	item->setIsMagic(false);
 	item->setWeight(10);
-	item->setSize(ItemSize::SMALL);
+	item->setSize(ItemSize::Small);
 	item->setIsTradeskillsItem(false);
-	item->setItemClass(ItemClass::COMMON);
-	item->setItemType(ItemType::FOOD);
+	item->setItemClass(ItemClass::Common);
+	item->setItemType(ItemType::Food);
 
 	return item;
 }
 
-Item* ItemGenerator::makeRandomContainer(const ContainerRarity pRarity) {
+Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("One Hand Blunt");
+	item->setIcon(578);
+	item->setIDFile("IT7");
+	item->setItemType(ItemType::OneHandBlunt);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Waist);
+
+	return item;
+}
+
+Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
+	return nullptr;
+}
+
+Item* ItemGenerator::makeRandomContainer(const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
 	item->setName(_getContainerName());
 	item->setContainerType(ContainerType::NORMAL);
-	item->setContainerSize(ContainerSize::GIANT);
+	item->setContainerSize(ContainerSize::Giant);
 	item->setContainerWR(100);
 	item->setContainerSlots(_getContainerSlots(pRarity));
 	item->setIcon(_getContainerIcon(pRarity));
-	item->setItemClass(ItemClass::CONTAINER);
-	item->setItemType(ItemType::MISC);
+	item->setItemClass(ItemClass::Container);
+	item->setItemType(ItemType::Miscellaneous);
 
 	return item;
 }
 
-const uint8 ItemGenerator::_getContainerSlots(const ContainerRarity pRarity) {
+const uint8 ItemGenerator::_getContainerSlots(const Rarity pRarity) {
 	switch (pRarity) {
-	case COMMON:
+	case Common:
 		return 4;
-	case MAGIC:
+	case Magic:
 		return 6;
-	case RARE:
+	case Rare:
 		return 8;
-	case ARTIFACT:
+	case Artifact:
 		return 10;
 	default:
 		Log::error("Unknown ContainerRarity in makeRandomContainer");
@@ -73,7 +92,7 @@ const uint8 ItemGenerator::_getContainerSlots(const ContainerRarity pRarity) {
 	}
 }
 
-const uint32 ItemGenerator::_getContainerIcon(const ContainerRarity pRarity) {
+const uint32 ItemGenerator::_getContainerIcon(const Rarity pRarity) {
 	//std::discrete_distribution<uint32> icons = {
 	std::vector<uint32> icons = {
 		539,

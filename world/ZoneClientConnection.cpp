@@ -423,11 +423,15 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_ItemVerifyRequest:
 		// NOTE: UF Requires a reply or the UI will lock up.
-		// NOTE: This occurs when the player right clicks on any Item.
+		// NOTE: This occurs when the player right clicks on any Item (except containers).
 		_handleItemRightClick(pPacket);
 		break;
 	case OP_PotionBelt:
 		_handlePotionBelt(pPacket);
+		break;
+	case OP_OpenContainer:
+		// This occurs when the player opens a container.
+		_handleOpenContainer(pPacket);
 		break;
 	default:
 		StringStream ss;
@@ -2691,7 +2695,7 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 	auto payload = MoveItem::convert(pPacket->pBuffer);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
 	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)){
-		sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
+		inventoryError();
 	}
 }
 
@@ -2701,8 +2705,13 @@ void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
 	EXPECTED(Consume::sizeCheck(pPacket->size));
 
 	auto payload = Consume::convert(pPacket->pBuffer);
+
+	Log::info("Consume from slot: " + std::to_string(payload->mSlot));
+	if (!mCharacter->getInventory()->consume(payload->mSlot)) {
+		inventoryError();
+	}
 	
-	sendStamina(6000, 6000);
+	sendStamina(0, 0);
 }
 
 void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
@@ -2744,6 +2753,19 @@ void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const u
 
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::inventoryError(){
+	sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
+}
+
+void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(OpenContainer::sizeCheck(pPacket->size));
+
+	auto payload = OpenContainer::convert(pPacket->pBuffer);
+	Log::info("Open Container: " + std::to_string(payload->mSlot));
 }
 
 //

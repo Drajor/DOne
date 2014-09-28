@@ -99,6 +99,8 @@ namespace Limits {
 
 static const String SYS_NAME = "[System]";
 
+enum Rarity : uint8 { Common, Magic, Rare, Artifact };
+
 namespace SlotID {
 	enum : uint32 {
 		MAIN_0 = 23,
@@ -111,9 +113,22 @@ namespace SlotID {
 		MAIN_7 = 30,
 		CURSOR = 31,
 
+		MAIN_0_0 = 262, // Slot 23 with 10 slot container.
+		MAIN_1_0 = 272,
+
+		BANK_START = 2000,
+		BANK_END = 2023,
+
+		SHARED_BANK_START = 2500,
+		SHARED_BANK_END = 2501,
+
 		SLOT_DELETE = 4294967295
 	};
-	static const uint32 MAIN_MAX = MAIN_7 + 1;
+	static const uint32 WORN_SLOTS = 0;
+	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
+	static const uint32 BANK_SLOTS = (BANK_END - BANK_START) + 1;
+	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_END - SHARED_BANK_START) + 1;
+
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
 	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
@@ -130,44 +145,129 @@ __________
 | 26 | 30 |
 -----------
 
+_____________
+| 262 | 263 |
+-------------
+| 264 | 265 |
+-------------
+| 266 | 267 |
+-------------
+| 268 | 269 |
+-------------
+| 270 | 271 |
+-------------
+
+== Bank ==
+_______________  _______________  _______________
+| 2000 | 2004 |  | 2008 | 2012 |  | 2016 | 2020 |
+---------------  ---------------  ---------------
+| 2001 | 2005 |  | 2009 | 2013 |  | 2017 | 2021 |
+---------------  ---------------  ---------------
+| 2002 | 2006 |  | 2010 | 2014 |  | 2018 | 2022 |
+---------------  ---------------  ---------------
+| 2003 | 2007 |  | 2011 | 2015 |  | 2019 | 2023 |
+---------------  ---------------  ---------------
+
+== Shared Bank ==
+_______________
+| 2500 | 2501 |
+---------------
+
+23 Worn Slots.
+5 Augmentation Slots per item.
+
+23*5 = 115
+262 - 31 = 231
+231 - 115 
+----
+
+8 Primary
+8*10 = 80 (8 Slot, 10 Bags)
+8*10*5 = 400
+
+Item* mItems[2551]; ~20kb of pointers.
 */
+
+namespace EquipSlots {
+	enum : uint32 {
+		Charm = 1, // 1
+		LeftEar = 2 << 0, // 2
+		Head = 2 << 1, // 4
+		Face = 2 << 2, // 8
+		RightEar = 2 << 3, // 16
+		Neck = 2 << 4, // 32
+		Shoulders = 2 << 5, // 64
+		Arms = 2 << 6, // 128
+		Back = 2 << 7, // 256
+		LeftWrist = 2 << 8, // 512
+		RightWrist = 2 << 9, // 1024
+		Range = 2 << 10, // 2048
+		Hands = 2 << 11, // 4096
+		Primary = 2 << 12, // 8192
+		Secondary = 2 << 13, // 16384
+		LeftFingers = 2 << 14, // 32768
+		RightFingers = 2 << 15, // 65536
+		Chest = 2 << 16, // 131072
+		Legs = 2 << 17, // 262144
+		Feet = 2 << 18, // 524288
+		Waist = 2 << 19, // 1048576
+		PowerSource = 2 << 20, // 2097152
+		Ammo = 2 << 21, // 4194304
+
+		Ears = RightEar + LeftEar,
+		Wrists = LeftWrist + RightWrist,
+		Fingers = LeftFingers + RightFingers
+	};
+}
 
 namespace ItemClass {
 	enum : uint8 {
-		COMMON = 0,
-		CONTAINER = 1,
-		BOOK = 2
+		Common = 0,
+		Container = 1,
+		Book = 2
 	};
 }
 
 namespace ItemType {
 	enum : uint8 {
-		MISC = 11,
-		FOOD = 14,
-		DRINK = 15,
+		OneHandSlash = 0,
+		TwoHandSlash = 1,
+		OneHandPierce = 2,
+		OneHandBlunt = 3,
+		TwoHandBlunt = 4,
+		Bow = 5,
+		// 6 unk
+		LargeThrowing = 7,
+		Shield = 8,
+		Scroll = 9,
+		Armor = 10,
+		Miscellaneous = 11,
+		Food = 14,
+		Drink = 15,
 	};
 }
 
 namespace ContainerSize {
 	enum : uint8 {
-		TINY = 0,
-		SMALL = 1,
-		MEDIUM = 2,
-		LARGE = 3,
-		GIANT = 4
+		Tiny = 0,
+		Small = 1,
+		Medium = 2,
+		Large = 3,
+		Giant = 4
 	};
 }
 
 namespace ItemSize {
 	enum : uint8 {
-		TINY = 0,
-		SMALL = 1,
-		MEDIUM = 2,
-		LARGE = 3,
-		GIANT = 4
+		Tiny = 0,
+		Small = 1,
+		Medium = 2,
+		Large = 3,
+		Giant = 4
 	};
 }
 
+// ContainterType will need some work.
 namespace ContainerType {
 	enum : uint8 {
 		NONE = 0,

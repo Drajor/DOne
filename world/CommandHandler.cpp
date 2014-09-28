@@ -974,9 +974,6 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->getConnection()->sendPacket(outapp);
 		safe_delete(outapp);
 	}
-	else if (pCommandName == "com") {
-		pCharacter->getConnection()->sendLootComplete();
-	}
 
 	//else if (pCommandName == "weather") {
 	//	uint32 unk = 0;
