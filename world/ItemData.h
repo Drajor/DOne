@@ -12,7 +12,7 @@ Placeable
 
 struct ItemData {
 	ItemData() {
-		memset(mItemName, 0, sizeof(mItemName));
+		memset(mName, 0, sizeof(mName));
 		memset(mLore, 0, sizeof(mLore));
 		memset(mIDFile, 0, sizeof(mIDFile));
 		memset(mCharmFile, 0, sizeof(mCharmFile));
@@ -49,7 +49,7 @@ struct ItemData {
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
 
-	char mItemName[64];
+	char mName[64];
 	char mLore[80];
 	char mIDFile[30];
 
@@ -66,7 +66,7 @@ struct ItemData {
 	uint8 mUnknown10 = 1; // 1 copied
 	uint8 mUnknown11 = 1; // 1 copied
 	uint32 mBenefitFlag = 0; // UNSURE
-	uint8 mTradeSkills = 1; // 0 = ON, 1 = OFF
+	uint8 mTradeSkills = 0; // 0 = OFF, 1 = ON
 	int8 mColdResist = 0;
 	int8 mDieaseResist = 0;
 	int8 mPoisonResist = 0;
@@ -88,11 +88,11 @@ struct ItemData {
 	int32 mManaRegen = 0;
 	int32 mEnduranceRegen = 0;
 	uint32 mClasses = 65535;
-	uint32 mRaces = 65535; //131071
+	uint32 mRaces = 65535;
 	uint32 mDeity = 0;
-	int32 mSkillModifierValue = 0;
+	int32 mSkillModAmount = 0;
 	uint32 mUnknown12 = 0;
-	uint32 mSkillModifierType = 0;
+	uint32 mSkillMod = 0;
 	uint32 mBaneDamageRace = 0;
 	uint32 mBaneDamageBodyType = 0;
 	uint32 mBaneDamageRaceAmount = 0;
@@ -120,8 +120,8 @@ struct ItemData {
 	int32 mShielding = 0;
 	int32 mStunResist = 0;
 	int32 mStrikeThrough = 0;
-	int32 mExtraDamageSkill = 0;
-	int32 mExtraDamageAmount = 0;
+	int32 mSkillDamageMod = 0; // Bash, Backstab, Dragon Punch, Eagle Strike, Flying Kick, Kick, Round Kick, Tiger Claw, Frenzy.
+	int32 mSkillDamageModAmount = 0;
 	int32 mSpellShield = 0;
 	int32 mAvoidance = 0;
 	int32 mAccuracy = 0;
@@ -156,8 +156,8 @@ struct ItemData {
 	uint8 mContainerSize = ContainerSize::Tiny;
 	uint8 mContainerWR = 0; // Weight Reduction: 0% - 100%
 
-	uint8 book = 0;
-	uint8 booktype = 0;
+	uint8 mBook = 0;
+	uint8 mBookType = 0;
 	// END chunk2
 
 	char mFileName[33];
@@ -166,13 +166,13 @@ struct ItemData {
 	int32 mLoreGroup = 0; // -1 = Lore, 0 = Not Lore, >= 1 Specific Lore Group ID.
 	uint8 mArtifact = 0; // 0 = OFF, 1 = ON
 	uint8 mSummoned = 0; // 0 = OFF, 1 = ON
-	uint32 favor = 0;
-	uint8 fvnodrop = 0;
-	int32 dotshield = 0;
-	int32 atk = 0;
-	int32 haste = 0;
-	int32 damage_shield = 0;
-	uint32 guildfavor = 0;
+	uint32 mFavor = 0;
+	uint8 mFVNoDrop = 0;
+	int32 mDoTShield = 0;
+	int32 mAttack = 0;
+	int32 mHaste = 0;
+	int32 mDamageShield = 0;
+	uint32 mGuildFavor = 0;
 	uint32 augdistil = 0;
 	int32 mUnknown14 = 0;
 	uint32 mUnknown15 = 0;
@@ -190,13 +190,12 @@ struct ItemData {
 	uint32 mUnknown18 = 0;
 	uint32 mUnknown19 = 0;
 	uint32 mUnknown20 = 0;
-	uint8 unknown21 = 0;
-	uint8 unknown22 = 0;
-	uint8 unknown23 = 0;
+	uint8 mUnknown21 = 0;
+	uint8 mUnknown22 = 0;
+	uint8 mUnknown23 = 0;
 	// END chunk3
 
 	struct ClickEffect {
-		//int32 effect = 0;
 		int32 mEffectID = -1;
 		uint8 level2 = 0;
 		uint32 type = 0;
@@ -207,7 +206,7 @@ struct ItemData {
 		int32 recast_type = 0;
 		uint32 clickunk5 = 0;
 	};
-	ClickEffect mClickEffectStruct;
+	ClickEffect mClickEffect;
 	char mClickName[65];
 	int32 mClickUnknown = -1;
 
@@ -222,12 +221,11 @@ struct ItemData {
 		uint32 unknown4 = 0;
 		uint32 procrate = 0;
 	};
-	ProcEffectStruct mProcEffectStruct;
+	ProcEffectStruct mProcEffect;
 	char mProcName[65];
 	int32 mProcUnknown = -1;
 
 	struct Effect {
-		//uint32 effect = 0;
 		int32 mEffectID = -1;
 		uint8 level2 = 0;
 		uint32 type = 0;
@@ -238,7 +236,7 @@ struct ItemData {
 		uint32 unknown4 = 0;
 		uint32 unknown5 = 0;
 	};
-	Effect mWornEffectStruct;
+	Effect mWornEffect;
 	char mWornName[65];
 	int32 mWornUnknown = -1;
 
@@ -259,13 +257,13 @@ struct ItemData {
 	int32 mBardUnknown = -1;
 
 	// BEGIN chunk4
-	uint32 scriptfileid = 0;
+	uint32 mScriptFileID = 0;
 	uint8 mQuest = 0; // 0 = OFF, 1 = ON
 	///////////////////////////////
 	uint32 mPower = 0; // 1 = Power 0%.. Needs more investigation.
 	uint32 Purity = 0; // 1 = Purity: 100, 10 = Purity: 100 and Infusible.
-	uint32 BackstabDmg = 0;
-	uint32 DSMitigation = 0;
+	uint32 mBackstabDamage = 0;
+	uint32 mDamageShieldMitigation = 0;
 	int32 mHeroicStrength = 0;
 	int32 mHeroicIntelligence = 0;
 	int32 mHeroicWisdom = 0;

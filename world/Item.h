@@ -8,9 +8,31 @@ class DynamicStructure;
 class Item {
 public:
 	Item(ItemData* pItemData);
-	inline void setName(const String& pName) { mName = pName; strcpy(mItemData->mItemName, pName.c_str()); }
-	inline const String& getName() const { return mName; }
+	
+	inline const String getName() const { return String(mItemData->mName); }
+	inline const String getLore() const { return String(mItemData->mLore); }
+	inline const String getIDFile() const { return String(mItemData->mIDFile); }
+	inline const String getCharmFile() const { return String(mItemData->mCharmFile); }
+	inline const String getFileName() const { return String(mItemData->mFileName); }
+	inline const String getClickName() const { return String(mItemData->mClickName); }
+	inline const String getProcName() const { return String(mItemData->mProcName); }
+	inline const String getWornName() const { return String(mItemData->mWornName); }
+	inline const String getFocusName() const { return String(mItemData->mFocusName); }
+	inline const String getScrollName() const { return String(mItemData->mScrollName); }
+	inline const String getBardName() const { return String(mItemData->mBardName); }
+
+	inline void setName(const String& pValue) { memset(mItemData->mName, 0, sizeof(mItemData->mName)); strcpy(mItemData->mName, pValue.c_str()); }
+	inline void setLore(const String& pValue) { memset(mItemData->mLore, 0, sizeof(mItemData->mLore)); strcpy(mItemData->mLore, pValue.c_str()); }
 	inline void setIDFile(const String& pValue) { memset(mItemData->mIDFile, 0, sizeof(mItemData->mIDFile)); strcpy(mItemData->mIDFile, pValue.c_str()); }
+	inline void setCharmFile(const String& pValue) { memset(mItemData->mCharmFile, 0, sizeof(mItemData->mCharmFile)); strcpy(mItemData->mCharmFile, pValue.c_str()); }
+	inline void setFileName(const String& pValue) { memset(mItemData->mFileName, 0, sizeof(mItemData->mFileName)); strcpy(mItemData->mFileName, pValue.c_str()); }
+	inline void setClickName(const String& pValue) { memset(mItemData->mClickName, 0, sizeof(mItemData->mClickName)); strcpy(mItemData->mClickName, pValue.c_str()); }
+	inline void setProcName(const String& pValue) { memset(mItemData->mProcName, 0, sizeof(mItemData->mProcName)); strcpy(mItemData->mProcName, pValue.c_str()); }
+	inline void setWornName(const String& pValue) { memset(mItemData->mWornName, 0, sizeof(mItemData->mWornName)); strcpy(mItemData->mWornName, pValue.c_str()); }
+	inline void setFocusName(const String& pValue) { memset(mItemData->mFocusName, 0, sizeof(mItemData->mFocusName)); strcpy(mItemData->mFocusName, pValue.c_str()); }
+	inline void setScrollName(const String& pValue) { memset(mItemData->mScrollName, 0, sizeof(mItemData->mScrollName)); strcpy(mItemData->mScrollName, pValue.c_str()); }
+	inline void setBardName(const String& pValue) { memset(mItemData->mBardName, 0, sizeof(mItemData->mBardName)); strcpy(mItemData->mBardName, pValue.c_str()); }
+	
 	inline const uint32 getSlot() const { return mSlot; }
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
 	Item* getAugment(const uint8 pSlot) const;
@@ -40,30 +62,50 @@ public:
 	inline const uint32 getBenefitFlag() const { return mItemData->mBenefitFlag; }
 	inline const uint8 isTradeskillsItem() const { return mItemData->mTradeSkills; }
 	inline const int8 getColdResist() const { return mItemData->mColdResist; }
+	inline const int32 _getColdResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getColdResist(); return getColdResist() + count; }
 	inline const int8 getDiseaseResist() const { return mItemData->mDieaseResist; }
+	inline const int32 _getDiseaseResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDiseaseResist(); return getDiseaseResist() + count; }
 	inline const int8 getPoisonResist() const { return mItemData->mPoisonResist; }
+	inline const int32 _getPoisonResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getPoisonResist(); return getPoisonResist() + count; }
 	inline const int8 getMagicResist() const { return mItemData->mMagicResist; }
+	inline const int32 _getMagicResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getMagicResist(); return getMagicResist() + count; }
 	inline const int8 getFireResist() const { return mItemData->mFireResist; }
+	inline const int32 _getFireResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getFireResist(); return getFireResist() + count; }
 	inline const int8 getSVCorruption() const { return mItemData->mSVCorruption; }
+	inline const int32 _getSVCorruption() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSVCorruption(); return getSVCorruption() + count; }
 	inline const int8 getStrength() const { return mItemData->mStrength; }
+	inline const int32 _getStrength() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStrength(); return getStrength() + count; }
 	inline const int8 getStamina() const { return mItemData->mStamina; }
+	inline const int32 _getStamina() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStamina(); return getStamina() + count; }
 	inline const int8 getAgility() const { return mItemData->mAgility; }
+	inline const int32 _getAgility() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAgility(); return getAgility() + count; }
 	inline const int8 getDexterity() const { return mItemData->mDexterity; }
+	inline const int32 _getDexterity() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDexterity(); return getDexterity() + count; }
 	inline const int8 getCharisma() const { return mItemData->mCharisma; }
+	inline const int32 _getCharisma() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCharisma(); return getCharisma() + count; }
 	inline const int8 getIntelligence() const { return mItemData->mIntelligence; }
+	inline const int32 _getIntelligence() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getIntelligence(); return getIntelligence() + count; }
 	inline const uint8 getWisdom() const { return mItemData->mWisdom; }
+	inline const int32 _getWisdom() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getWisdom(); return getWisdom() + count; }
 	inline const int32 getHealth() const { return mItemData->mHealth; }
+	inline const int32 _getHealth() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealth(); return getHealth() + count; }
 	inline const int32 getMana() const { return mItemData->mMana; }
+	inline const int32 _getMana() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getMana(); return getMana() + count; }
 	inline const uint32 getEndurance() const { return mItemData->mEndurance; }
+	inline const int32 _getEndurance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEndurance(); return getEndurance() + count; }
 	inline const int32 getArmorClass() const { return mItemData->mArmorClass; }
+	inline const int32 _getArmorClass() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getArmorClass(); return getArmorClass() + count; }
 	inline const int32 getHealthRegen() const { return mItemData->mHealthRegen; }
+	inline const int32 _getHealthRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealthRegen(); return getHealthRegen() + count; }
 	inline const int32 getManaRegen() const { return mItemData->mManaRegen; }
+	inline const int32 _getManaRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getManaRegen(); return getManaRegen() + count; }
 	inline const int32 getEnduranceRegen() const { return mItemData->mEnduranceRegen; }
+	inline const int32 _getEnduranceRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEnduranceRegen(); return getEnduranceRegen() + count; }
 	inline const uint32 getClasses() const { return mItemData->mClasses; }
 	inline const uint32 getRaces() const { return mItemData->mRaces; }
 	inline const uint32 getDeity() const { return mItemData->mDeity; }
-	inline const int32 getSkillModifierValue() const { return mItemData->mSkillModifierValue; }
-	inline const uint32 getSkillModifierType() const { return mItemData->mSkillModifierType; }
+	inline const int32 getSkillModAmount() const { return mItemData->mSkillModAmount; }
+	inline const uint32 getSkillMod() const { return mItemData->mSkillMod; }
 	inline const uint32 getBaneDamageRace() const { return mItemData->mBaneDamageRace; }
 	inline const uint32 getBaneDamageBodyType() const { return mItemData->mBaneDamageBodyType; }
 	inline const uint32 getBaneDamageRaceAmount() const { return mItemData->mBaneDamageRaceAmount; }
@@ -81,20 +123,28 @@ public:
 	inline const uint8 getElementalDamageAmount() const { return mItemData->mElementalDamageAmount; }
 	inline const uint8 getRange() const { return mItemData->mRange; }
 	inline const uint32 getDamage() const { return mItemData->mDamage; }
+	inline const int32 _getDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDamage(); return getDamage() + count; }
 	inline const uint32 getColour() const { return mItemData->mColour; }
 	inline const uint8 getItemType() const { return mItemData->mItemType; }
 	inline const uint32 getMaterial() const { return mItemData->mMaterial; }
 	inline const uint32 getEliteMaterial() const { return mItemData->mEliteMaterial; }
 	inline const float getSellRate() const { return mItemData->mSellRate; }
 	inline const int32 getCombatEffects() const { return mItemData->mCombatEffects; }
+	inline const int32 _getCombatEffects() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCombatEffects(); return getCombatEffects() + count; }
 	inline const int32 getShielding() const { return mItemData->mShielding; }
+	inline const int32 _getShielding() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getShielding(); return getShielding() + count; }
 	inline const int32 getStunResist() const { return mItemData->mStunResist; }
+	inline const int32 _getStunResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStunResist(); return getStunResist() + count; }
 	inline const int32 getStrikeThrough() const { return mItemData->mStrikeThrough; }
-	inline const int32 getExtraDamageSkill() const { return mItemData->mExtraDamageSkill; }
-	inline const int32 getExtraDamageAmount() const { return mItemData->mExtraDamageAmount; }
+	inline const int32 _getStrikeThrough() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStrikeThrough(); return getStrikeThrough() + count; }
+	inline const int32 getSkillDamageMod() const { return mItemData->mSkillDamageMod; }
+	inline const int32 getSkillDamageModAmount() const { return mItemData->mSkillDamageModAmount; }
 	inline const int32 getSpellShield() const { return mItemData->mSpellShield; }
+	inline const int32 _getSpellShield() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSpellShield(); return getSpellShield() + count; }
 	inline const int32 getAvoidance() const { return mItemData->mAvoidance; }
+	inline const int32 _getAvoidance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAvoidance(); return getAvoidance() + count; }
 	inline const int32 getAccuracy() const { return mItemData->mAccuracy; }
+	inline const int32 _getAccuracy() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAccuracy(); return getAccuracy() + count; }
 	// Faction Modifiers
 	inline const uint32 getAugType() const { return mItemData->mAugType; }
 	inline const uint32 getAugRestrict() const { return mItemData->mAugRestrict; }
@@ -108,6 +158,65 @@ public:
 	inline const uint8 getContainerSlots() const { return mItemData->mContainerSlots; }
 	inline const uint8 getContainerSize() const { return mItemData->mContainerSize; }
 	inline const uint8 getContainerWR() const { return mItemData->mContainerWR; }
+
+	inline const uint8 getBook() const { return mItemData->mBook; }
+	inline const uint8 getBookType() const { return mItemData->mBookType; }
+	inline const int32 getLoreGroup() const { return mItemData->mLoreGroup; }
+	inline const uint8 getIsArtifact() const { return mItemData->mArtifact; }
+	inline const uint8 getIsSummoned() const { return mItemData->mSummoned; }
+	inline const uint32 getFavor() const { return mItemData->mFavor; }
+	inline const uint8 getFVNoDrop() const { return mItemData->mFVNoDrop; }
+	inline const int32 getDoTShield() const { return mItemData->mDoTShield; }
+	inline const int32 getAttack() const { return mItemData->mAttack; }
+	inline const int32 getHaste() const { return mItemData->mHaste; }
+	inline const int32 getDamageShield() const { return mItemData->mDamageShield; }
+	inline const uint32 getGuildFavor() const { return mItemData->mGuildFavor; }
+	// TODO: augdistil
+	inline const uint8 getIsNoPet() const { return mItemData->mNoPet; }
+	// TODO: potion belt
+	inline const uint32 getMaxStacks() const { return mItemData->mMaxStacks; }
+	inline const uint8 getIsNoTransfer() const { return mItemData->mNoTransfer; }
+	// TODO: expendablearrow
+	// TODO: Effects
+	inline const uint32 getScriptFileID() const { return mItemData->mScriptFileID; }
+	inline const uint8 getIsQuest() const { return mItemData->mQuest; }
+	// TODO: Power
+	// TODO: Purity
+	inline const uint32 getBackstabDamage() const { return mItemData->mBackstabDamage; }
+	inline const uint32 getDamageShieldMitigation() const { return mItemData->mDamageShieldMitigation; }
+	inline const int32 getHeroicStrength() const { return mItemData->mHeroicStrength; }
+	inline const int32 _getHeroicStrength() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicStrength(); return getHeroicStrength() + count; }
+	inline const int32 getHeroicIntelligence() const { return mItemData->mHeroicIntelligence; }
+	inline const int32 _getHeroicIntelligence() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicIntelligence(); return getHeroicIntelligence() + count; }
+	inline const int32 getHeroicWisdom() const { return mItemData->mHeroicWisdom; }
+	inline const int32 _getHeroicWisdom() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicWisdom(); return getHeroicWisdom() + count; }
+	inline const int32 getHeroicAgility() const { return mItemData->mHeroicAgility; }
+	inline const int32 _getHeroicAgility() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicAgility(); return getHeroicAgility() + count; }
+	inline const int32 getHeroicDexterity() const { return mItemData->mHeroicDexterity; }
+	inline const int32 _getHeroicDexterity() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicDexterity(); return getHeroicDexterity() + count; }
+	inline const int32 getHeroicStamina() const { return mItemData->mHeroicStamina; }
+	inline const int32 _getHeroicStamina() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicStamina(); return getHeroicStamina() + count; }
+	inline const int32 getHeroicCharisma() const { return mItemData->mHeroicCharisma; }
+	inline const int32 _getHeroicCharisma() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicCharisma(); return getHeroicCharisma() + count; }
+	inline const int32 getHeroicMagicResist() const { return mItemData->mHeroicMagicResist; }
+	inline const int32 _getHeroicMagicResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicMagicResist(); return getHeroicMagicResist() + count; }
+	inline const int32 getHeroicFireResist() const { return mItemData->mHeroicFireResist; }
+	inline const int32 _getHeroicFireResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicFireResist(); return getHeroicFireResist() + count; }
+	inline const int32 getHeroicColdResist() const { return mItemData->mHeroicColdResist; }
+	inline const int32 _getHeroicColdResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicColdResist(); return getHeroicColdResist() + count; }
+	inline const int32 getHeroicDiseaseResist() const { return mItemData->mHeroicDiseaseResist; }
+	inline const int32 _getHeroicDiseaseResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicDiseaseResist(); return getHeroicDiseaseResist() + count; }
+	inline const int32 getHeroicPoisonResist() const { return mItemData->mHeroicPoisonResist; }
+	inline const int32 _getHeroicPoisonResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicPoisonResist(); return getHeroicPoisonResist() + count; }
+	inline const int32 getHeroicSVCorruption() const { return mItemData->mHeroicSVCorruption; }
+	inline const int32 _getHeroicSVCorruption() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicSVCorruption(); return getHeroicSVCorruption() + count; }
+	inline const int32 getHealAmount() const { return mItemData->mHealAmount; }
+	inline const int32 _getHealAmount() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealAmount(); return getHealAmount() + count; }
+	inline const int32 getSpellDamage() const { return mItemData->mSpellDamage; }
+	inline const int32 _getSpellDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSpellDamage(); return getSpellDamage() + count; }
+	inline const int32 getClairvoyance() const { return mItemData->mClairvoyance; }
+	inline const int32 _getClairvoyance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getClairvoyance(); return getClairvoyance() + count; }
+
 
 	inline void setStacks(const uint32 pValue) { mItemData->mStacks = pValue; }
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
@@ -151,8 +260,8 @@ public:
 	inline void setClasses(const uint32 pValue) { mItemData->mClasses = pValue; }
 	inline void setRaces(const uint32 pValue) { mItemData->mRaces = pValue; }
 	inline void setDeity(const uint32 pValue) { mItemData->mDeity = pValue; }
-	inline void setSkillModifierValue(const int32 pValue) { mItemData->mSkillModifierValue = pValue; }
-	inline void setSkillModifierType(const uint32 pType) { mItemData->mSkillModifierType = pType; }
+	inline void setSkillModAmount(const int32 pValue) { mItemData->mSkillModAmount = pValue; }
+	inline void setSkillMod(const uint32 pType) { mItemData->mSkillMod = pType; }
 	inline void setBaneDamageRace(const uint32 pValue) { mItemData->mBaneDamageRace = pValue; }
 	inline void setBaneDamageBodyType(const uint32 pValue) { mItemData->mBaneDamageBodyType = pValue; }
 	inline void setBaneDamageRaceAmount(const uint32 pValue) { mItemData->mBaneDamageRaceAmount = pValue; }
@@ -179,8 +288,8 @@ public:
 	inline void setShielding(const int32 pValue) { mItemData->mShielding = pValue; }
 	inline void setStunResist(const int32 pValue) { mItemData->mStunResist = pValue; }
 	inline void setStrikeThrough(const int32 pValue) { mItemData->mStrikeThrough = pValue; }
-	inline void setExtraDamageSkill(const int32 pValue) { mItemData->mExtraDamageSkill = pValue; }
-	inline void setExtraDamageAmount(const int32 pValue) { mItemData->mExtraDamageAmount = pValue; }
+	inline void setSkillDamageMod(const int32 pValue) { mItemData->mSkillDamageMod = pValue; }
+	inline void setSkillDamageModAmount(const int32 pValue) { mItemData->mSkillDamageModAmount = pValue; }
 	inline void setSpellShield(const int32 pValue) { mItemData->mSpellShield = pValue; }
 	inline void setAvoidance(const int32 pValue) { mItemData->mAvoidance = pValue; }
 	inline void setAccuracy(const int32 pValue) { mItemData->mAccuracy = pValue; }
@@ -198,12 +307,34 @@ public:
 	inline void setContainerSize(const uint8 pValue) { mItemData->mContainerSize = pValue; }
 	inline void setContainerWR(const uint8 pValue) { mItemData->mContainerWR = pValue; }
 
+	inline void setBook(const uint8 pValue) { mItemData->mBook = pValue; }
+	inline void setBookType(const uint8 pValue) { mItemData->mBookType = pValue; }
+
+	inline void setLoreGroup(const int32 pValue) { mItemData->mLoreGroup = pValue; }
+	inline void setIsArtifact(const uint8 pValue) { mItemData->mArtifact = pValue; }
+	inline void setIsSummoned(const uint8 pValue) { mItemData->mSummoned = pValue; }
+	inline void setFavor(const uint32 pValue) { mItemData->mFavor = pValue; }
+	inline void setFVNoDrop(const uint8 pValue) { mItemData->mFVNoDrop = pValue; }
+	inline void setDoTShield(const int32 pValue) { mItemData->mDoTShield = pValue; }
+	inline void setAttack(const int32 pValue) { mItemData->mAttack = pValue; }
+	inline void setHaste(const int32 pValue) { mItemData->mHaste = pValue; }
+	inline void setDamageShield(const int32 pValue) { mItemData->mDamageShield = pValue; }
+	inline void setGuildFavor(const uint32 pValue) { mItemData->mGuildFavor = pValue; }
+	// TODO: augdistil
+	inline void setIsNoPet(const uint8 pValue) { mItemData->mNoPet = pValue; }
+	// TODO: potion belt
 	inline void setMaxStacks(const uint32 pValue) { mItemData->mMaxStacks = pValue; }
+	inline void setIsNoTransfer(const uint8 pValue) { mItemData->mNoTransfer = pValue; }
+	// TODO: expendablearrow
+	// TODO: Effects
+	inline void setScriptFileID(const uint32 pValue) { mItemData->mScriptFileID = pValue; }
+	inline void setIsQuest(const uint8 pValue) { mItemData->mQuest = pValue; }
+	// TODO: Power
+	// TODO: Purity
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();
 
-	String mName;
 	Item* mAugments[5];
 	Item* mContents[10];
 	ItemData* mItemData = nullptr;

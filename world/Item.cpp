@@ -33,7 +33,7 @@ const uint32 Item::_getDataSize() const {
 	uint32 result = sizeof(ItemData);
 
 	// Remove the maximum size of variable sized attributes.
-	result -= sizeof(mItemData->mItemName);
+	result -= sizeof(mItemData->mName);
 	result -= sizeof(mItemData->mLore);
 	result -= sizeof(mItemData->mIDFile);
 	result -= sizeof(mItemData->mCharmFile);
@@ -46,7 +46,7 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mBardName);
 
 	// Add the real size
-	result += strlen(mItemData->mItemName) + 1;
+	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
 	result += strlen(mItemData->mCharmFile) + 1;
@@ -66,11 +66,11 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	_onCopy();
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mItemName) - (unsigned int)&(mItemData->mStacks);
+	std::size_t chunk0 = (unsigned int)&(mItemData->mName) - (unsigned int)&(mItemData->mStacks);
 	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
 
 	// Variable.
-	pStructure.writeString(String(mItemData->mItemName));
+	pStructure.writeString(String(mItemData->mName));
 	pStructure.writeString(String(mItemData->mLore));
 	pStructure.writeString(String(mItemData->mIDFile));
 
@@ -89,21 +89,21 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.writeString(String(mItemData->mFileName));
 
 	// Chunk Three.
-	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffectStruct) - (unsigned int)&(mItemData->mLoreGroup);
+	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffect) - (unsigned int)&(mItemData->mLoreGroup);
 	pStructure.writeChunk((void*)&(mItemData->mLoreGroup), chunk3);
 	
 	// Click Effect.
-	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffectStruct);
+	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffect);
 	pStructure.writeString(String(mItemData->mClickName));
 	pStructure.write<int32>(mItemData->mClickUnknown);
 	
 	// Proc Effect.
-	pStructure.write<ItemData::ProcEffectStruct>(mItemData->mProcEffectStruct);
+	pStructure.write<ItemData::ProcEffectStruct>(mItemData->mProcEffect);
 	pStructure.writeString(String(mItemData->mProcName));
 	pStructure.write<int32>(mItemData->mProcUnknown);
 
 	// Worn Effect.
-	pStructure.write<ItemData::Effect>(mItemData->mWornEffectStruct);
+	pStructure.write<ItemData::Effect>(mItemData->mWornEffect);
 	pStructure.writeString(String(mItemData->mWornName));
 	pStructure.write<int32>(mItemData->mWornUnknown);
 
@@ -123,8 +123,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.write<int32>(mItemData->mBardUnknown);
 
 	// Chunk Four.
-	std::size_t chunk4 = (unsigned int)&(mItemData->subitem_count) - (unsigned int)&(mItemData->scriptfileid);
-	pStructure.writeChunk((void*)&(mItemData->scriptfileid), chunk4);
+	std::size_t chunk4 = (unsigned int)&(mItemData->subitem_count) - (unsigned int)&(mItemData->mScriptFileID);
+	pStructure.writeChunk((void*)&(mItemData->mScriptFileID), chunk4);
 
 	// Child Items.
 	pStructure.write<uint32>(getSubItems());

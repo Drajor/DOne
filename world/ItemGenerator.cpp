@@ -58,7 +58,18 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 }
 
 Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
-	return nullptr;
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Shield");
+	item->setIcon(676);
+	item->setIDFile("IT221");
+	item->setItemType(ItemType::Shield);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Secondary);
+	item->setSkillMod(1);
+	item->setSkillModAmount(1);
+
+	return item;
 }
 
 Item* ItemGenerator::makeRandomContainer(const Rarity pRarity) {
