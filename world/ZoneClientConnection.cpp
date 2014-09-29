@@ -2738,7 +2738,7 @@ void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirs
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_Stamina, Stamina::size());
+	auto outPacket = Stamina::create();
 	auto payload = Stamina::convert(outPacket->pBuffer);
 	payload->mHunger = pHunger;
 	payload->mThirst = pThirst;
@@ -2814,7 +2814,8 @@ void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_TradeRequest, TradeRequest::size());
+	//auto outPacket = new EQApplicationPacket(OP_TradeRequest, TradeRequest::size());
+	auto outPacket = TradeRequest::make(OP_TradeRequest);
 	auto payload = TradeRequest::convert(outPacket->pBuffer);
 	payload->mToSpawnID = mCharacter->getSpawnID();
 	payload->mFromSpawnID = pFromSpawnID;

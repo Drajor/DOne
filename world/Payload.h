@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "../common/EQPacket.h"
 
 enum GuildUpdateAction : uint32 {
 	GUILD_URL = 0,
@@ -26,9 +27,19 @@ struct Colour
 namespace Payload {
 
 	template <typename T>
-	struct FixedSizedPayload {
+	struct Fixed {
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
+		inline static const std::size_t size() { return sizeof(T); }
+		inline static EQApplicationPacket* make(EmuOpcode pOpCode) { return new EQApplicationPacket(pOpCode, size()); }
+	};
+
+	template <typename T, EmuOpcode OpCode>
+	struct FixedT {
+		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
+		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
+		inline static const std::size_t size() { return sizeof(T); }
+		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, size()); }
 	};
 
 	template <typename T>
@@ -36,28 +47,16 @@ namespace Payload {
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 	};
 
-	template <typename T>
-	class ServerToClient {
-	public: inline static const std::size_t size() { return sizeof(T); }
-	};
-
-	template <typename T>
-	struct FixedLength_And_ServerToClient {
-		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
-		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
-		inline static const std::size_t size() { return sizeof(T); }
-	};
-
 	namespace Zone {
 
-		struct ZoneEntry : public FixedSizedPayload<ZoneEntry> {
+		struct ZoneEntry : public Fixed<ZoneEntry> {
 			uint32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
 
 		// C->S
 		// Based on: SetTitle_Struct
-		struct SetTitle : public FixedSizedPayload<SetTitle> {
+		struct SetTitle : public Fixed<SetTitle> {
 			enum : uint32 { SET_PREFIX = 0, SET_SUFFIX = 1 };
 			uint32 mOption = SET_PREFIX;
 			uint32 mTitleID = 0;
@@ -65,7 +64,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: SetTitleReply_Struct
-		struct TitleUpdate : public FixedLength_And_ServerToClient<TitleUpdate> {
+		struct TitleUpdate : public Fixed<TitleUpdate> {
 			enum : uint32 { UPDATE_PREFIX = 0, UPDATE_SUFFIX = 1 };
 			uint32 mOption = UPDATE_PREFIX;
 			char mTitle[32];
@@ -73,7 +72,7 @@ namespace Payload {
 		};
 
 		// C->S
-		struct FaceChange : public FixedSizedPayload<FaceChange> {
+		struct FaceChange : public Fixed<FaceChange> {
 			uint8 mHairColour = 0;
 			uint8 mBeardColour = 0;
 			uint8 mLeftEyeColour = 0;
@@ -87,7 +86,7 @@ namespace Payload {
 		};
 
 		// S->C
-		struct WearChange : public FixedSizedPayload<WearChange>, public ServerToClient<WearChange> {
+		struct WearChange : public Fixed<WearChange> {
 			uint16 mSpawnID = 0;
 			uint32 mMaterialID = 0;
 			uint32 mUnused0 = 0;
@@ -99,14 +98,14 @@ namespace Payload {
 		};
 		
 		// C->S
-		struct AutoAttack : public FixedSizedPayload<AutoAttack> {
+		struct AutoAttack : public Fixed<AutoAttack> {
 			bool mAttacking = false;
 			char mUnknown[3];
 		};
 
 		// C<->S
 		// Based on: MemorizeSpell_Struct
-		struct MemoriseSpell : public FixedLength_And_ServerToClient<MemoriseSpell> {
+		struct MemoriseSpell : public Fixed<MemoriseSpell> {
 			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
 			uint32 mSlot = 0;
 			uint32 mSpellID = 0;
@@ -115,7 +114,7 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct DeleteSpell : public FixedLength_And_ServerToClient<DeleteSpell> {
+		struct DeleteSpell : public Fixed<DeleteSpell> {
 			int16 mSpellBookSlot = 0;
 			uint8 mUnknown0[2];
 			uint8 mSuccess = 0;
@@ -123,19 +122,19 @@ namespace Payload {
 		};
 
 		// C->S
-		struct LoadSpellSet : public FixedSizedPayload<LoadSpellSet> {
+		struct LoadSpellSet : public Fixed<LoadSpellSet> {
 			uint32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
 			uint32 mUnknown0 = 0;
 		};
 
 		// C->S
-		struct SwapSpell : public FixedSizedPayload<SwapSpell> {
+		struct SwapSpell : public Fixed<SwapSpell> {
 			uint32 mFrom = 0;
 			uint32 mTo = 0;
 		};
 
 		// C->S
-		struct CastSpell : public FixedSizedPayload<CastSpell> {
+		struct CastSpell : public Fixed<CastSpell> {
 			uint32 mSlot = 0;
 			uint32 mSpellID = 0;
 			uint32 mInventorySlot = 0; // slot for clicky item, 0xFFFF = normal cast
@@ -145,7 +144,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: BeginCast_Struct
-		struct BeginCast : public FixedLength_And_ServerToClient<BeginCast> {
+		struct BeginCast : public Fixed<BeginCast> {
 			uint16 mSpawnID = 0; // Caster
 			uint16 mSpellID = 0;
 			uint32 mCastTime = 0; // MS
@@ -153,7 +152,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: InterruptCast_Struct
-		struct InterruptCast : public FixedLength_And_ServerToClient<InterruptCast> {
+		struct InterruptCast : public Fixed<InterruptCast> {
 			uint32 mSpawnID = 0;
 			uint32 mMessageID = 0;
 			char mMessage[0];
@@ -161,7 +160,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: ManaChange_Struct
-		struct ManaChange : public FixedLength_And_ServerToClient<ManaChange> {
+		struct ManaChange : public Fixed<ManaChange> {
 			uint32 mMana = 0;
 			uint32 mEndurance = 0;
 			uint32 mSpellID = 0;
@@ -170,7 +169,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: Action_Struct
-		struct Action : public FixedLength_And_ServerToClient<Action> {
+		struct Action : public Fixed<Action> {
 			uint16 mTargetSpawnID = 0;
 			uint16 mSourceSpawnID = 0;
 			uint16 mCasterLevel = 1;
@@ -188,20 +187,20 @@ namespace Payload {
 
 		// C->S
 		// Based on: CombatAbility_Struct
-		struct CombatAbility : public FixedSizedPayload<CombatAbility> {
+		struct CombatAbility : public Fixed<CombatAbility> {
 			uint32 mTargetID = 0;
 			uint32 mAttack = 0;
 			uint32 mSkill = 0;
 		};
 
 		// C->S
-		struct Taunt : FixedSizedPayload<Taunt> {
+		struct Taunt : Fixed<Taunt> {
 			uint32 mSpawnID = 0;
 		};
 
 		// C<->S
 		// Yes the Client sends this for some magical reason.
-		struct Consider : FixedLength_And_ServerToClient<Consider> {
+		struct Consider : Fixed<Consider> {
 			uint32 mSpawnID = 0;
 			uint32 mTargetSpawnID = 0;
 			uint32 mFaction = 0;
@@ -213,7 +212,7 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct Surname : public FixedLength_And_ServerToClient<Surname> {
+		struct Surname : public Fixed<Surname> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint32 mApproved = 0;
 			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
@@ -221,7 +220,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: GMLastName_Struct
-		struct SurnameUpdate : public FixedLength_And_ServerToClient<SurnameUpdate> {
+		struct SurnameUpdate : public Fixed<SurnameUpdate> {
 			char mCharaterName[Limits::Character::MAX_NAME_LENGTH];
 			char mGMName[Limits::Character::MAX_NAME_LENGTH];
 			char mLastName[Limits::Character::MAX_NAME_LENGTH];
@@ -229,7 +228,7 @@ namespace Payload {
 		};
 
 		// Based on: SpawnAppearance_Struct
-		struct SpawnAppearance : public FixedLength_And_ServerToClient<SpawnAppearance> {
+		struct SpawnAppearance : public Fixed<SpawnAppearance> {
 			uint16 mSpawnID = 0;
 			uint16 mType = 0;
 			uint32 mParameter = 0;
@@ -237,7 +236,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: Animation_Struct
-		struct Animation : public FixedLength_And_ServerToClient<Animation> {
+		struct Animation : public Fixed<Animation> {
 			uint16 mSpawnID = 0;
 			uint8 mAction = 0;
 			uint8 mValue = 0;
@@ -245,14 +244,14 @@ namespace Payload {
 
 		// S->C
 		// Based on: SkillUpdate_Struct
-		struct SkillUpdate : public FixedLength_And_ServerToClient<SkillUpdate> {
+		struct SkillUpdate : public Fixed<SkillUpdate> {
 			uint32 mID = 0;
 			uint32 mValue = 0;
 		};
 
 		// S->C
 		// Based on: Death_Struct
-		struct Death : public FixedLength_And_ServerToClient<Death> {
+		struct Death : public Fixed<Death> {
 			uint32 mSpawnID = 0;
 			uint32 mKillerSpawnID = 0;
 			uint32 mCorpseID = 0; // ??
@@ -264,17 +263,17 @@ namespace Payload {
 		};
 
 		// C->S
-		struct LootBeginRequest : public FixedSizedPayload<LootBeginRequest> {
+		struct LootBeginRequest : public Fixed<LootBeginRequest> {
 			uint32 mSpawnID = 0;
 		};
 		// C->S
-		struct LootEndRequest : public FixedSizedPayload<LootEndRequest> {
+		struct LootEndRequest : public Fixed<LootEndRequest> {
 			uint32 mSpawnID = 0;
 		};
 
 		// S->C
 		// Based on: moneyOnCorpseStruct
-		struct LootResponse : public FixedLength_And_ServerToClient<LootResponse> {
+		struct LootResponse : public Fixed<LootResponse> {
 			enum Response : uint8 { 
 				ALREADY = 0,
 				LOOT = 1,
@@ -294,13 +293,13 @@ namespace Payload {
 		
 		// C->S
 		// Based on: ClientTarget_Struct
-		struct Target : public FixedSizedPayload<Target> {
+		struct Target : public Fixed<Target> {
 			uint32 mSpawnID = 0;
 		};
 
 		// S->C
 		// Based on: RequestClientZoneChange_Struct
-		struct RequestZoneChange : public FixedLength_And_ServerToClient<RequestZoneChange> {
+		struct RequestZoneChange : public Fixed<RequestZoneChange> {
 			uint16 mZoneID = 0;
 			uint16 mInstanceID = 0;
 			float mY = 0.0f;
@@ -312,7 +311,7 @@ namespace Payload {
 
 		// C<->S
 		// Based on: ZoneChange_Struct
-		struct ZoneChange : public FixedLength_And_ServerToClient<ZoneChange> {
+		struct ZoneChange : public Fixed<ZoneChange> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint16 mZoneID = 0;
 			uint16 mInstanceID = 0;
@@ -325,7 +324,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: Weather_Struct
-		struct Weather : public FixedLength_And_ServerToClient<Weather> {
+		struct Weather : public Fixed<Weather> {
 			enum Type : uint32 { NORMAL = 0, SNOW = 2, RAIN = 3 };
 			uint32 mUnknown0 = 0;
 			uint32 mType = NORMAL;
@@ -334,7 +333,7 @@ namespace Payload {
 
 		// C->S
 		// Based on: MoveItem_Struct
-		struct MoveItem : public FixedLength_And_ServerToClient<MoveItem> {
+		struct MoveItem : public Fixed<MoveItem> {
 			uint32 mFromSlot = 0;
 			uint32 mToSlot = 0;
 			uint32 mStackSize = 0;
@@ -342,7 +341,7 @@ namespace Payload {
 
 		// C->S
 		// Based on: Consume_Struct
-		struct Consume : public FixedLength_And_ServerToClient<Consume> {
+		struct Consume : public Fixed<Consume> {
 			enum ConsumeAction : uint32{ AUTO = 0xFFFFFF, MANUAL = 999 };
 			enum ConsumeType : uint8 { FOOD = 1, DRINK = 2 };
 			uint32 mSlot = 0;
@@ -354,53 +353,53 @@ namespace Payload {
 
 		// S->C
 		// Based on: Stamina_Struct
-		struct Stamina : public FixedLength_And_ServerToClient<Stamina> {
+		struct Stamina : public FixedT<Stamina, OP_Stamina> {
 			uint32 mHunger = 0;
 			uint32 mThirst = 0;
 		};
 
 		// C->S
 		// Based on: ItemVerifyRequest_Struct
-		struct ItemRightClick : public FixedLength_And_ServerToClient<ItemRightClick> {
+		struct ItemRightClick : public Fixed<ItemRightClick> {
 			int32 mSlot = 0;
 			uint32 mTargetSpawnID = 0;
 		};
 
 		// S->C
 		// Based on: ItemVerifyReply_Struct
-		struct ItemRightClickResponse : public FixedLength_And_ServerToClient<ItemRightClickResponse> {
+		struct ItemRightClickResponse : public Fixed<ItemRightClickResponse> {
 			int32 mSlot = 0;
 			uint32 mSpellID = 0;
 			uint32 mTargetSpawnID = 0;
 		};
 
 		// C->S
-		struct OpenContainer : public FixedLength_And_ServerToClient<OpenContainer> {
+		struct OpenContainer : public Fixed<OpenContainer> {
 			uint32 mSlot = 0;
 		};
 
 		// C->S
 		// Based on: TradeRequest_Struct
-		struct TradeRequest : public FixedLength_And_ServerToClient<TradeRequest> {
+		struct TradeRequest : public Fixed<TradeRequest> {
 			uint32 mToSpawnID = 0;
 			uint32 mFromSpawnID = 0;
 		};
 
 		// C->S
 		// Based on: CancelTrade_Struct
-		struct TradeCancel : public FixedLength_And_ServerToClient<TradeCancel> {
+		struct TradeCancel : public Fixed<TradeCancel> {
 			uint32 mFromSpawnID = 0;
 			uint32 mAction = 0;
 		};
 
 		// C->S
-		struct TradeAccept : public FixedLength_And_ServerToClient<TradeAccept> {
+		struct TradeAccept : public Fixed<TradeAccept> {
 			uint32 mFromSpawnID = 0;
 			uint32 mUnknown0 = 0;
 		};
 
 		// C<->S
-		struct TradeBusy : public FixedLength_And_ServerToClient<TradeBusy> {
+		struct TradeBusy : public Fixed<TradeBusy> {
 			uint32 mToSpawnID = 0;
 			uint32 mFromSpawnID = 0;
 			uint8 mType = 0;
@@ -410,7 +409,7 @@ namespace Payload {
 		};
 
 		// C->S
-		struct ServerFilter : public FixedLength_And_ServerToClient<ServerFilter> {
+		struct ServerFilter : public Fixed<ServerFilter> {
 			Filters mFilters;
 		};
 	}
@@ -418,7 +417,7 @@ namespace Payload {
 	namespace World {
 
 		// C->S
-		struct LoginInformation : public FixedSizedPayload<LoginInformation> {
+		struct LoginInformation : public Fixed<LoginInformation> {
 			char mInformation[64]; // Account ID and Account Key
 			uint8 mUnknown0[124];
 			uint8 mZoning;
@@ -426,7 +425,7 @@ namespace Payload {
 		};
 
 		// C->S
-		struct EnterWorld : public FixedSizedPayload<EnterWorld> {
+		struct EnterWorld : public Fixed<EnterWorld> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint32 mTutorial = 0;
 			uint32 mReturnHome = 0;
@@ -440,7 +439,7 @@ namespace Payload {
 			}
 		};
 
-		struct CreateCharacter : public FixedSizedPayload<CreateCharacter> {
+		struct CreateCharacter : public Fixed<CreateCharacter> {
 			uint32 mClass = 0;
 			uint32 mHairColour = 0;
 			uint32 mBeardColour = 0;
@@ -467,7 +466,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: LogServer_Struct
-		struct LogServer : public FixedLength_And_ServerToClient<LogServer> {
+		struct LogServer : public Fixed<LogServer> {
 			uint32 mUknown0 = 0;
 			uint8 mPVPEnabled = 0;
 			uint8 mUnknown1 = 0;
@@ -495,13 +494,13 @@ namespace Payload {
 
 		// S->C
 		// Based on: ExpansionInfo_Struct
-		struct ExpansionInfo : public FixedLength_And_ServerToClient<ExpansionInfo> {
+		struct ExpansionInfo : public Fixed<ExpansionInfo> {
 			uint32 mExpansions = 0;
 		};
 
 		// S->C
 		// Based on: CharacterSelect_Struct
-		struct CharacterSelect : public FixedLength_And_ServerToClient<CharacterSelect> {
+		struct CharacterSelect : public Fixed<CharacterSelect> {
 			uint32 mRaces[18];
 			Colour mEquipmentColours[18][9];
 			uint8 mBeardColours[18];
@@ -531,7 +530,7 @@ namespace Payload {
 
 		// S->C
 		// Based on: NameGeneration_Struct
-		struct NameGeneration : public FixedLength_And_ServerToClient<NameGeneration> {
+		struct NameGeneration : public Fixed<NameGeneration> {
 			uint32 mRace = 0;
 			uint32 mGender = 0;
 			char mName[64];
@@ -539,35 +538,35 @@ namespace Payload {
 
 		// S->C
 		// Based on: ZoneServerInfo_Struct
-		struct ZoneServerInfo : public FixedLength_And_ServerToClient<ZoneServerInfo> {
+		struct ZoneServerInfo : public Fixed<ZoneServerInfo> {
 			char mIP[128];
 			uint16 mPort = 0;
 		};
 
 		// S->C
 		// Based on: ZoneUnavail_Struct
-		struct ZoneUnavailable : public FixedLength_And_ServerToClient<ZoneUnavailable> {
+		struct ZoneUnavailable : public Fixed<ZoneUnavailable> {
 			char mZoneName[16];
 			int16 mUnknown0[4];
 		};
 
 		// S->C
 		// Based on: ApproveWorld_Struct
-		struct ApproveWorld : public FixedLength_And_ServerToClient<ApproveWorld> {
+		struct ApproveWorld : public Fixed<ApproveWorld> {
 			uint8 mUnknown0[544];
 		};
 	}
 
 	namespace LoginServer {
 
-		struct ConnectRequest : public FixedSizedPayload<ConnectRequest> {
+		struct ConnectRequest : public Fixed<ConnectRequest> {
 			uint32 mAccountID = 0;
 			uint32 mWorldID = 0;
 			uint32 mFromID = 0;
 			uint32 mToID = 0;
 		};
 
-		struct ConnectResponse : public FixedSizedPayload<ConnectResponse> {
+		struct ConnectResponse : public Fixed<ConnectResponse> {
 			uint32 mAccountID = 0;
 			uint32 mWorldID = 0;
 			ResponseID mResponse = ResponseID::ALLOWED;
@@ -575,7 +574,7 @@ namespace Payload {
 			uint32 mToID = 0;
 		};
 
-		struct ClientAuthentication : public FixedSizedPayload<ClientAuthentication> {
+		struct ClientAuthentication : public Fixed<ClientAuthentication> {
 			uint32 mAccountID = 0;
 			char mAccountName[Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH];
 			char mKey[Limits::LoginServer::MAX_KEY_LENGTH];
@@ -588,18 +587,18 @@ namespace Payload {
 
 	namespace Guild {
 
-		struct MakeLeader : public FixedSizedPayload<MakeLeader> {
+		struct MakeLeader : public Fixed<MakeLeader> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			char mLeaderName[Limits::Character::MAX_NAME_LENGTH];
 		};
 
-		struct Demote : public FixedSizedPayload<Demote> {
+		struct Demote : public Fixed<Demote> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
 		};
 
 		// Used for changing both banker and alt status of a guild member.
-		struct BankerAltStatus : public FixedSizedPayload<BankerAltStatus> {
+		struct BankerAltStatus : public Fixed<BankerAltStatus> {
 			uint32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
 			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
@@ -607,7 +606,7 @@ namespace Payload {
 		};
 
 		// S->C
-		struct Remove : public FixedSizedPayload<Remove>, public ServerToClient<Remove> {
+		struct Remove : public Fixed<Remove> {
 			GuildID mGuildID;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
