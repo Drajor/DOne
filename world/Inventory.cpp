@@ -219,3 +219,71 @@ const bool Inventoryy::consume(uint32 pSlot) {
 	// NOTE: UF will only consume from the Main Inventory
 	return true;
 }
+
+void Inventoryy::_calculateAdd(Item* pItem) {
+	EXPECTED(pItem);
+
+	mStrength += pItem->_getStrength();
+	mStamina += pItem->_getStamina();
+	mIntelligence += pItem->_getIntelligence();
+	mWisdom += pItem->_getWisdom();
+	mAgility += pItem->_getAgility();
+	mDexterity += pItem->_getDexterity();
+	mCharisma += pItem->_getCharisma();
+
+	mHeroicStrength += pItem->_getHeroicStrength();
+	mHeroicStamina += pItem->_getHeroicStamina();
+	mHeroicIntelligence += pItem->_getHeroicIntelligence();
+	mHeroicWisdom += pItem->_getHeroicWisdom();
+	mHeroicAgility += pItem->_getHeroicAgility();
+	mHeroicDexterity += pItem->_getHeroicDexterity();
+	mHeroicCharisma += pItem->_getHeroicCharisma();
+
+	mMagicResist += pItem->_getMagicResist();
+	mFireResist += pItem->_getFireResist();
+	mColdResist += pItem->_getColdResist();
+	mDiseaseResist += pItem->_getDiseaseResist();
+	mPoisonResist += pItem->_getPoisonResist();
+	mCorruptionResist += pItem->getCorruptionResist();
+
+	mHeroicMagicResist += pItem->_getHeroicMagicResist();
+	mHeroicFireResist += pItem->_getHeroicFireResist();
+	mHeroicColdResist += pItem->_getHeroicColdResist();
+	mHeroicDiseaseResist += pItem->_getHeroicDiseaseResist();
+	mHeroicPoisonResist += pItem->_getHeroicPoisonResist();
+	mHeroicCorruptionResist += pItem->_getHeroicCorruptionResist();
+}
+
+void Inventoryy::_calculateRemove(Item* pItem) {
+	EXPECTED(pItem);
+
+	mStrength -= pItem->_getStrength();
+	mStamina -= pItem->_getStamina();
+	mIntelligence -= pItem->_getIntelligence();
+	mWisdom -= pItem->_getWisdom();
+	mAgility -= pItem->_getAgility();
+	mDexterity -= pItem->_getDexterity();
+	mCharisma -= pItem->_getCharisma();
+
+	mHeroicStrength -= pItem->_getHeroicStrength();
+	mHeroicStamina -= pItem->_getHeroicStamina();
+	mHeroicIntelligence -= pItem->_getHeroicIntelligence();
+	mHeroicWisdom -= pItem->_getHeroicWisdom();
+	mHeroicAgility -= pItem->_getHeroicAgility();
+	mHeroicDexterity -= pItem->_getHeroicDexterity();
+	mHeroicCharisma -= pItem->_getHeroicCharisma();
+
+	mMagicResist -= pItem->_getMagicResist();
+	mFireResist -= pItem->_getFireResist();
+	mColdResist -= pItem->_getColdResist();
+	mDiseaseResist -= pItem->_getDiseaseResist();
+	mPoisonResist -= pItem->_getPoisonResist();
+	mCorruptionResist -= pItem->getCorruptionResist();
+
+	mHeroicMagicResist -= pItem->_getHeroicMagicResist();
+	mHeroicFireResist -= pItem->_getHeroicFireResist();
+	mHeroicColdResist -= pItem->_getHeroicColdResist();
+	mHeroicDiseaseResist -= pItem->_getHeroicDiseaseResist();
+	mHeroicPoisonResist -= pItem->_getHeroicPoisonResist();
+	mHeroicCorruptionResist -= pItem->_getHeroicCorruptionResist();
+}

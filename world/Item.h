@@ -42,7 +42,7 @@ public:
 	const bool copyData(Utility::DynamicStructure& pStructure);
 	uint32 getSubItems() const;
 
-	inline const uint32 getStackSize() const { return mItemData->mStacks; }
+	inline const uint32 getStacks() const { return mItemData->mStacks; }
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
 	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
@@ -71,8 +71,8 @@ public:
 	inline const int32 _getMagicResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getMagicResist(); return getMagicResist() + count; }
 	inline const int8 getFireResist() const { return mItemData->mFireResist; }
 	inline const int32 _getFireResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getFireResist(); return getFireResist() + count; }
-	inline const int8 getSVCorruption() const { return mItemData->mSVCorruption; }
-	inline const int32 _getSVCorruption() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSVCorruption(); return getSVCorruption() + count; }
+	inline const int8 getCorruptionResist() const { return mItemData->mCorruptionResist; }
+	inline const int32 _getCorruptionResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCorruptionResist(); return getCorruptionResist() + count; }
 	inline const int8 getStrength() const { return mItemData->mStrength; }
 	inline const int32 _getStrength() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStrength(); return getStrength() + count; }
 	inline const int8 getStamina() const { return mItemData->mStamina; }
@@ -208,8 +208,8 @@ public:
 	inline const int32 _getHeroicDiseaseResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicDiseaseResist(); return getHeroicDiseaseResist() + count; }
 	inline const int32 getHeroicPoisonResist() const { return mItemData->mHeroicPoisonResist; }
 	inline const int32 _getHeroicPoisonResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicPoisonResist(); return getHeroicPoisonResist() + count; }
-	inline const int32 getHeroicSVCorruption() const { return mItemData->mHeroicSVCorruption; }
-	inline const int32 _getHeroicSVCorruption() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicSVCorruption(); return getHeroicSVCorruption() + count; }
+	inline const int32 getHeroicCorruptionResist() const { return mItemData->mHeroicSVCorruption; }
+	inline const int32 _getHeroicCorruptionResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicCorruptionResist(); return getHeroicCorruptionResist() + count; }
 	inline const int32 getHealAmount() const { return mItemData->mHealAmount; }
 	inline const int32 _getHealAmount() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealAmount(); return getHealAmount() + count; }
 	inline const int32 getSpellDamage() const { return mItemData->mSpellDamage; }
@@ -242,7 +242,7 @@ public:
 	inline void setPoisonResist(const int8 pValue) { mItemData->mPoisonResist = pValue; }
 	inline void setMagicResist(const int8 pValue) { mItemData->mMagicResist = pValue; }
 	inline void setFireResist(const int8 pValue) { mItemData->mFireResist = pValue; }
-	inline void setSVCorruption(const int8 pValue) { mItemData->mSVCorruption = pValue; }
+	inline void setSVCorruption(const int8 pValue) { mItemData->mCorruptionResist = pValue; }
 	inline void setStrength(const int8 pValue) { mItemData->mStrength = pValue; }
 	inline void setStamina(const int8 pValue) { mItemData->mStamina = pValue; }
 	inline void setAgility(const int8 pValue) { mItemData->mAgility = pValue; }

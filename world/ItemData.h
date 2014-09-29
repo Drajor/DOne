@@ -72,7 +72,7 @@ struct ItemData {
 	int8 mPoisonResist = 0;
 	int8 mMagicResist = 0;
 	int8 mFireResist = 0;
-	int8 mSVCorruption = 0;
+	int8 mCorruptionResist = 0;
 	int8 mStrength = 0;
 	int8 mStamina = 0;
 	int8 mAgility = 0;
