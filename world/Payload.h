@@ -40,6 +40,7 @@ namespace Payload {
 		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
 		inline static const std::size_t size() { return sizeof(T); }
 		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, size()); }
+		inline static EQApplicationPacket* create(T pPayload) { return new EQApplicationPacket(OpCode, (unsigned char*)&pPayload, size()); }
 	};
 
 	template <typename T>

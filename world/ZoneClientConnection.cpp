@@ -2738,11 +2738,11 @@ void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirs
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = Stamina::create();
-	auto payload = Stamina::convert(outPacket->pBuffer);
-	payload->mHunger = pHunger;
-	payload->mThirst = pThirst;
+	Stamina payload;
+	payload.mHunger = pHunger;
+	payload.mThirst = pThirst;
 
+	auto outPacket = Stamina::create(payload);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
