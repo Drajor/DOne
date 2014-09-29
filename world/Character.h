@@ -219,6 +219,7 @@ public:
 	const bool checkZoneChange(const uint16 pZoneID, const uint16 pInstanceID) const;
 	void clearZoneChange();
 	inline const ZoneChange& getZoneChange() const { return mZoneChange; }
+	inline void setFilters(Filters pFilters) { mFilters = pFilters; }
 private:
 	ZoneChange mZoneChange;
 
@@ -228,6 +229,8 @@ private:
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
 	Actor* mLootingCorpse = nullptr;
+
+	Filters mFilters;
 
 	uint32 mExperience = 0;
 	void _checkForLevelIncrease();
@@ -260,8 +263,8 @@ private:
 	uint16 mCastingSlot = 0; // The Spell Bar slot ID used to cast a spell
 	Timer mCastingTimer;
 
-	uint32 mSkills[Limits::Skills::MAX_ID];
-	uint32 mLanguages[Limits::Languages::MAX_ID];
+	std::array<uint32, Limits::Skills::MAX_ID> mSkills;
+	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 
 	bool mStanding = true;
 	bool mIsZoningOut = false;
@@ -319,10 +322,9 @@ private:
 	// Spell Bar
 	class SpellBar {
 	public:
-		SpellBar() {
+		SpellBar() { 
 			mSpellIDs.resize(Limits::SpellBar::MAX_SLOTS);
-			for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
-				mSpellIDs[i] = 0;
+			for (auto& i : mSpellIDs) i = 0;
 		}
 		const std::vector<uint32>& getData() const { return mSpellIDs; }
 		void setSpell(const uint16 pSlot, const uint32 pSpellID);
@@ -332,7 +334,6 @@ private:
 	};
 	SpellBar* mSpellBar = nullptr;
 	const std::vector<uint32> getSpellBarData() const;
-
 	// Inventory
 	Inventoryy* mInventory = nullptr;
 };

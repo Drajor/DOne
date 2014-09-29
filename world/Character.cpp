@@ -22,8 +22,9 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	setActorType(AT_PLAYER);
 	setIsNPC(false);
 
-	for (auto& i : mSkills) i = 0;
-	for (auto& i : mLanguages) i = 0;
+	mFilters.fill(0);
+	mSkills.fill(0);
+	mLanguages.fill(0);
 
 	mInventory = new Inventoryy(this);
 }

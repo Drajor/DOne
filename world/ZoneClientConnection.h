@@ -109,6 +109,7 @@ public:
 	void sendStamina(const uint32 pFood, const uint32 pDrink);
 
 	void sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID);
+	void sendTradeRequest(const uint32 pFromSpawnID);
 
 	//void sendSpellCastOn();
 
@@ -210,6 +211,15 @@ private:
 	void _handleConsume(const EQApplicationPacket* pPacket);
 	void _handlePotionBelt(const EQApplicationPacket* pPacket);
 	void _handleItemRightClick(const EQApplicationPacket* pPacket);
+	void _handleOpenContainer(const EQApplicationPacket* pPacket);
+	
+	void _handleTradeRequest(const EQApplicationPacket* pPacket);
+	void _handleTradeRequestAck(const EQApplicationPacket* pPacket);
+	void _handleCancelTrade(const EQApplicationPacket* pPacket);
+	void _handleAcceptTrade(const EQApplicationPacket* pPacket);
+	void _handleTradeBusy(const EQApplicationPacket* pPacket);
+
+	void _handleSetServerFiler(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
@@ -223,7 +233,6 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void _handleOpenContainer(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;

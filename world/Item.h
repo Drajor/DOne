@@ -42,6 +42,9 @@ public:
 	const bool copyData(Utility::DynamicStructure& pStructure);
 	uint32 getSubItems() const;
 
+	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
+	Item* findFirst(const uint8 pItemType);
+
 	inline const uint32 getStacks() const { return mItemData->mStacks; }
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }

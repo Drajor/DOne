@@ -974,6 +974,11 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->getConnection()->sendPacket(outapp);
 		safe_delete(outapp);
 	}
+	else if (pCommandName == "trade") {
+		uint32 fromSpawnID = 0;
+		Utility::stoSafe(fromSpawnID, pParameters[0]);
+		pCharacter->getConnection()->sendTradeRequest(fromSpawnID);
+	}
 
 	//else if (pCommandName == "weather") {
 	//	uint32 unk = 0;

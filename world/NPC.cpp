@@ -21,8 +21,8 @@ const bool NPC::initialise() {
 	String baseName = "Bob";
 	setName(baseName+std::to_string(getSpawnID()));
 	setRaceID(6);
-	//setClass(ClassIDs::Cleric);
-	setClass(40);
+	setClass(ClassIDs::Cleric);
+	//setClass(40);
 
 	return true;
 }

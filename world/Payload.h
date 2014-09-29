@@ -378,6 +378,41 @@ namespace Payload {
 		struct OpenContainer : public FixedLength_And_ServerToClient<OpenContainer> {
 			uint32 mSlot = 0;
 		};
+
+		// C->S
+		// Based on: TradeRequest_Struct
+		struct TradeRequest : public FixedLength_And_ServerToClient<TradeRequest> {
+			uint32 mToSpawnID = 0;
+			uint32 mFromSpawnID = 0;
+		};
+
+		// C->S
+		// Based on: CancelTrade_Struct
+		struct TradeCancel : public FixedLength_And_ServerToClient<TradeCancel> {
+			uint32 mFromSpawnID = 0;
+			uint32 mAction = 0;
+		};
+
+		// C->S
+		struct TradeAccept : public FixedLength_And_ServerToClient<TradeAccept> {
+			uint32 mFromSpawnID = 0;
+			uint32 mUnknown0 = 0;
+		};
+
+		// C<->S
+		struct TradeBusy : public FixedLength_And_ServerToClient<TradeBusy> {
+			uint32 mToSpawnID = 0;
+			uint32 mFromSpawnID = 0;
+			uint8 mType = 0;
+			uint8 mUnknown0 = 0;
+			uint8 mUnknown1 = 0;
+			uint8 mUnknown2 = 0;
+		};
+
+		// C->S
+		struct ServerFilter : public FixedLength_And_ServerToClient<ServerFilter> {
+			Filters mFilters;
+		};
 	}
 
 	namespace World {

@@ -1814,13 +1814,13 @@ ENCODE(OP_Buff) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_CancelTrade) {
-	ENCODE_LENGTH_EXACT(CancelTrade_Struct);
-	SETUP_DIRECT_ENCODE(CancelTrade_Struct, structs::CancelTrade_Struct);
-	OUT(fromid);
-	OUT(action);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_CancelTrade) {
+//	ENCODE_LENGTH_EXACT(CancelTrade_Struct);
+//	SETUP_DIRECT_ENCODE(CancelTrade_Struct, structs::CancelTrade_Struct);
+//	OUT(fromid);
+//	OUT(action);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_ShopPlayerSell) {
 	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
@@ -2920,15 +2920,15 @@ DECODE(OP_ItemLinkClick) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_SetServerFilter) {
-	DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
-	SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
-	int r;
-	for(r = 0; r < 29; r++) {
-		IN(filters[r]);
-	}
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_SetServerFilter) {
+//	DECODE_LENGTH_EXACT(structs::SetServerFilter_Struct);
+//	SETUP_DIRECT_DECODE(SetServerFilter_Struct, structs::SetServerFilter_Struct);
+//	int r;
+//	for(r = 0; r < 29; r++) {
+//		IN(filters[r]);
+//	}
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 DECODE(OP_Consider) {

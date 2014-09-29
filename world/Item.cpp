@@ -155,3 +155,12 @@ void Item::_onCopy() {
 	mItemData->mSlot = mSlot;
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
 }
+
+Item* Item::findFirst(const uint8 pItemType) {
+	for (auto i : mContents) {
+		if (i && i->getItemType() == pItemType)
+			return i;
+	}
+
+	return nullptr;
+}

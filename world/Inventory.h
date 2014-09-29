@@ -49,6 +49,14 @@ public:
 	inline const int32 getHeroicPoisonResist() const { return mHeroicPoisonResist; }
 	inline const int32 getHeroicCorruptionResist() const { return mHeroicCorruptionResist; }
 
+	inline const int32 getHealth() const { return mHealth; }
+	inline const int32 getMana() const { return mMana; }
+	inline const int32 getEndurance() const { return mEndurance; }
+
+	inline const int32 getHealthRegen() const { return mHealthRegen; }
+	inline const int32 getManaRegen() const { return mManaRegen; }
+	inline const int32 getEnduranceRegen() const { return mEnduranceRegen; }
+
 private:
 	Item* _popCursor();
 	void _set(Item* pItem, const uint32 pSlot);
@@ -58,6 +66,11 @@ private:
 	std::queue<Item*> mCursor; // Slot 31
 	Item* mBank[SlotID::BANK_SLOTS]; // Slots 2000 - 2023
 	Item* mSharedBank[SlotID::SHARED_BANK_SLOTS]; // Slots 2500 - 2501
+
+	void updateConsumables();
+	Item* findFirst(const uint8 pItemType);
+	Item* mAutoFood = nullptr;
+	Item* mAutoDrink = nullptr;
 
 	int32 mStrength = 0;
 	int32 mStamina = 0;
@@ -88,4 +101,12 @@ private:
 	int32 mHeroicDiseaseResist = 0;
 	int32 mHeroicPoisonResist = 0;
 	int32 mHeroicCorruptionResist = 0;
+
+	int32 mHealth = 0;
+	int32 mMana = 0;
+	int32 mEndurance = 0;
+
+	int32 mHealthRegen = 0;
+	int32 mManaRegen = 0;
+	int32 mEnduranceRegen = 0;
 };

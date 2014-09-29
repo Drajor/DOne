@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <map>
 #include <queue>
+#include <array>
 
 typedef uint8_t byte;
 typedef uint8_t uint8;
@@ -94,8 +95,10 @@ namespace Limits {
 	namespace Group {
 		static const auto MAX_MEMBERS = 6;
 	}
-	
+	static const auto MAX_FILTERS = 34;
 }
+
+typedef std::array<uint32, Limits::MAX_FILTERS> Filters;
 
 static const String SYS_NAME = "[System]";
 

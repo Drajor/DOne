@@ -129,7 +129,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleRequestClientSpawn(pPacket);
 		break;
 	case OP_SetServerFilter:
-		Utility::print("[UNHANDLED OP_SetServerFilter]");
+		_handleSetServerFiler(pPacket);
 		break;
 	case OP_SendAATable:
 		_handleSendAATable(pPacket);
@@ -430,8 +430,24 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handlePotionBelt(pPacket);
 		break;
 	case OP_OpenContainer:
-		// This occurs when the player opens a container.
+		// NOTE: This occurs when the player opens a container.
 		_handleOpenContainer(pPacket);
+		break;
+	case OP_TradeRequest:
+		// NOTE: This occurs when a player left clicks on an NPC with an Item on the cursor.
+		_handleTradeRequest(pPacket);
+		break;
+	case OP_TradeRequestAck:
+		_handleTradeRequestAck(pPacket);
+		break;
+	case OP_CancelTrade:
+		_handleCancelTrade(pPacket);
+		break;
+	case OP_TradeAcceptClick:
+		_handleAcceptTrade(pPacket);
+		break;
+	case OP_TradeBusy:
+		_handleTradeBusy(pPacket);
 		break;
 	default:
 		StringStream ss;
@@ -697,7 +713,9 @@ void ZoneClientConnection::_sendZoneSpawns() {
 	EXPECTED(mConnected);
 
 	auto outPacket = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
-	mStreamInterface->FastQueuePacket(&outPacket);
+	
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendTributeUpdate() {
@@ -705,7 +723,9 @@ void ZoneClientConnection::_sendTributeUpdate() {
 
 	auto outPacket = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
 	auto payload = (TributeInfo_Struct *)outPacket->pBuffer;
+	
 	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
 }
 
 void ZoneClientConnection::_sendInventory() {
@@ -2766,6 +2786,76 @@ void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPack
 
 	auto payload = OpenContainer::convert(pPacket->pBuffer);
 	Log::info("Open Container: " + std::to_string(payload->mSlot));
+}
+
+void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(TradeRequest::sizeCheck(pPacket->size));
+
+	auto payload = TradeRequest::convert(pPacket->pBuffer);
+
+	EXPECTED(payload->mFromSpawnID == mCharacter->getSpawnID());
+
+	// OP_TradeRequestAck
+
+	// TODO: Check who the Player is trying to trade with.
+}
+
+void ZoneClientConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(TradeRequest::sizeCheck(pPacket->size));
+
+	auto payload = TradeRequest::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto outPacket = new EQApplicationPacket(OP_TradeRequest, TradeRequest::size());
+	auto payload = TradeRequest::convert(outPacket->pBuffer);
+	payload->mToSpawnID = mCharacter->getSpawnID();
+	payload->mFromSpawnID = pFromSpawnID;
+
+	mStreamInterface->QueuePacket(outPacket);
+	safe_delete(outPacket);
+}
+
+void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(TradeCancel::sizeCheck(pPacket->size));
+
+	auto payload = TradeCancel::convert(pPacket->pBuffer);
+
+}
+
+void ZoneClientConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(TradeAccept::sizeCheck(pPacket->size));
+
+	auto payload = TradeAccept::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(TradeBusy::sizeCheck(pPacket->size));
+
+	auto payload = TradeBusy::convert(pPacket->pBuffer);
+}
+
+void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(ServerFilter::sizeCheck(pPacket->size));
+
+	auto payload = ServerFilter::convert(pPacket->pBuffer);
+
+	mCharacter->setFilters(payload->mFilters);
 }
 
 //

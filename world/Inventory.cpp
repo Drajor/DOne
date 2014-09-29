@@ -252,6 +252,14 @@ void Inventoryy::_calculateAdd(Item* pItem) {
 	mHeroicDiseaseResist += pItem->_getHeroicDiseaseResist();
 	mHeroicPoisonResist += pItem->_getHeroicPoisonResist();
 	mHeroicCorruptionResist += pItem->_getHeroicCorruptionResist();
+
+	mHealth += pItem->_getHealth();
+	mMana += pItem->_getMana();
+	mEndurance += pItem->_getEndurance();
+
+	mHealthRegen += pItem->_getHealthRegen();
+	mManaRegen += pItem->_getManaRegen();
+	mEnduranceRegen += pItem->_getEnduranceRegen();
 }
 
 void Inventoryy::_calculateRemove(Item* pItem) {
@@ -286,4 +294,77 @@ void Inventoryy::_calculateRemove(Item* pItem) {
 	mHeroicDiseaseResist -= pItem->_getHeroicDiseaseResist();
 	mHeroicPoisonResist -= pItem->_getHeroicPoisonResist();
 	mHeroicCorruptionResist -= pItem->_getHeroicCorruptionResist();
+
+	mHealth -= pItem->_getHealth();
+	mMana -= pItem->_getMana();
+	mEndurance -= pItem->_getEndurance();
+
+	mHealthRegen -= pItem->_getHealthRegen();
+	mManaRegen -= pItem->_getManaRegen();
+	mEnduranceRegen -= pItem->_getEnduranceRegen();
+}
+
+void Inventoryy::updateConsumables() {
+	Item* food = findFirst(ItemType::Food);
+	
+	// There was already food.
+	if (mAutoFood) {
+		// Now there is no food.
+		if (!food) {
+			_calculateRemove(mAutoFood);
+			mAutoFood = nullptr;
+		}
+		// There is new food.
+		else if (mAutoFood != food) {
+			_calculateRemove(mAutoFood);
+			mAutoFood = food;
+			_calculateAdd(mAutoFood);
+		}
+	}
+	// There was no food, now there is.
+	else if(food) {
+		mAutoFood = food;
+		_calculateAdd(mAutoFood);
+	}
+
+	Item* drink = findFirst(ItemType::Drink);
+	
+	// There was already drink.
+	if (mAutoDrink) {
+		// Now there is no drink.
+		if (!drink) {
+			_calculateRemove(mAutoDrink);
+			mAutoDrink = nullptr;
+		}
+		// There is new drink.
+		else if (mAutoDrink != drink) {
+			_calculateRemove(mAutoDrink);
+			mAutoDrink = drink;
+			_calculateAdd(mAutoDrink);
+		}
+	}
+	// There was no drink, now there is.
+	else if (drink) {
+		mAutoDrink = drink;
+		_calculateAdd(mAutoDrink);
+	}
+}
+
+Item* Inventoryy::findFirst(const uint8 pItemType) {
+	// Search Main Inventory slots first.
+	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		if (mItems[i] && mItems[i]->getItemType() == pItemType)
+			return mItems[i];
+	}
+
+	// Search: Slots inside each primary slot.
+	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		if (mItems[i] && mItems[i]->isContainer()) {
+			Item* item = mItems[i]->findFirst(pItemType);
+			if (item) {
+				return item;
+			}
+		}
+	}
+	return nullptr;
 }
