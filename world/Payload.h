@@ -36,8 +36,8 @@ namespace Payload {
 
 	template <typename T, EmuOpcode OpCode>
 	struct FixedT {
-		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
-		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
+		inline static T* convert(const EQApplicationPacket* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
+		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == sizeof(T); }
 		inline static const std::size_t size() { return sizeof(T); }
 		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, size()); }
 		inline static EQApplicationPacket* create(T pPayload) { return new EQApplicationPacket(OpCode, (unsigned char*)&pPayload, size()); }
@@ -311,8 +311,7 @@ namespace Payload {
 		};
 
 		// C<->S
-		// Based on: ZoneChange_Struct
-		struct ZoneChange : public Fixed<ZoneChange> {
+		struct ZoneChange : public FixedT<ZoneChange, OP_ZoneChange> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint16 mZoneID = 0;
 			uint16 mInstanceID = 0;
@@ -367,8 +366,7 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: ItemVerifyReply_Struct
-		struct ItemRightClickResponse : public Fixed<ItemRightClickResponse> {
+		struct ItemRightClickResponse : public FixedT<ItemRightClickResponse, OP_ItemVerifyReply> {
 			int32 mSlot = 0;
 			uint32 mSpellID = 0;
 			uint32 mTargetSpawnID = 0;
@@ -379,16 +377,14 @@ namespace Payload {
 			uint32 mSlot = 0;
 		};
 
-		// C->S
-		// Based on: TradeRequest_Struct
-		struct TradeRequest : public Fixed<TradeRequest> {
+		// C<->S
+		struct TradeRequest : public FixedT<TradeRequest, OP_TradeRequest> {
 			uint32 mToSpawnID = 0;
 			uint32 mFromSpawnID = 0;
 		};
 
 		// C->S
-		// Based on: CancelTrade_Struct
-		struct TradeCancel : public Fixed<TradeCancel> {
+		struct TradeCancel : public FixedT<TradeCancel, OP_CancelTrade> {
 			uint32 mFromSpawnID = 0;
 			uint32 mAction = 0;
 		};

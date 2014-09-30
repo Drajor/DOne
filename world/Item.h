@@ -35,6 +35,11 @@ public:
 	
 	inline const uint32 getSlot() const { return mSlot; }
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
+	inline const uint32 getStacks() const { return mStacks; }
+	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
+	inline const bool isAttuned() { return mAttuned; }
+	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
+
 	Item* getAugment(const uint8 pSlot) const;
 	Item* getContents(const uint8 pSlot) const;
 
@@ -45,13 +50,12 @@ public:
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
 	Item* findFirst(const uint8 pItemType);
 
-	inline const uint32 getStacks() const { return mItemData->mStacks; }
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
 	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
 	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
-	inline const uint32 getAttuned() const { return mItemData->mAttuned; }
+	inline const uint32 getPower() const { return mItemData->mPower; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
@@ -114,6 +118,8 @@ public:
 	inline const uint32 getBaneDamageRaceAmount() const { return mItemData->mBaneDamageRaceAmount; }
 	inline const int32 getBaneDamageAmount() const { return mItemData->mBaneDamageAmount; }
 	inline const uint8 isMagic() const { return mItemData->mMagic; }
+	inline const uint32 getFoodSize() const { return mItemData->mFoodSize; }
+	inline const uint32 getDrinkSize() const { return mItemData->mDrinkSize; }
 	inline const int32 getCastTime() const { return mItemData->mCastTime; }
 	inline const uint32 getReqLevel() const { return mItemData->mReqLevel; }
 	inline const uint32 getRecLevel() const { return mItemData->mRecLevel; }
@@ -183,6 +189,7 @@ public:
 	// TODO: Effects
 	inline const uint32 getScriptFileID() const { return mItemData->mScriptFileID; }
 	inline const uint8 getIsQuest() const { return mItemData->mQuest; }
+	inline const uint32 getMaxPower() const { return mItemData->mMaxPower; }
 	// TODO: Power
 	// TODO: Purity
 	inline const uint32 getBackstabDamage() const { return mItemData->mBackstabDamage; }
@@ -221,13 +228,12 @@ public:
 	inline const int32 _getClairvoyance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getClairvoyance(); return getClairvoyance() + count; }
 
 
-	inline void setStacks(const uint32 pValue) { mItemData->mStacks = pValue; }
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
 	inline void setMerchantSlot(const uint32 pValue) { mItemData->mMerchantSlot = pValue; }
 	inline void setSerial(const uint32 pValue) { mItemData->mInstanceID = pValue; }
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
-	inline void setAttuned(const uint32 pValue) { mItemData->mAttuned = pValue; }
+	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
@@ -270,6 +276,8 @@ public:
 	inline void setBaneDamageRaceAmount(const uint32 pValue) { mItemData->mBaneDamageRaceAmount = pValue; }
 	inline void setBaneDamageAmount(const int32 pValue) { mItemData->mBaneDamageAmount = pValue; }
 	inline void setIsMagic(const bool pValue) { mItemData->mMagic = pValue ? 1 : 0; }
+	inline void setFoodSize(const uint32 pValue) { mItemData->mFoodSize = pValue; }
+	inline void setDrinkSize(const uint32 pValue) { mItemData->mDrinkSize = pValue; }
 	inline void setCastTime(const int32 pValue) { mItemData->mCastTime = pValue; }
 	inline void setReqLevel(const uint32 pValue) { mItemData->mReqLevel = pValue; }
 	inline void setRecLevel(const uint32 pValue) { mItemData->mRecLevel = pValue; }
@@ -332,8 +340,27 @@ public:
 	// TODO: Effects
 	inline void setScriptFileID(const uint32 pValue) { mItemData->mScriptFileID = pValue; }
 	inline void setIsQuest(const uint8 pValue) { mItemData->mQuest = pValue; }
+	inline void setMaxPower(const uint32 pValue) { mItemData->mQuest = pValue; }
 	// TODO: Power
 	// TODO: Purity
+	inline void setBackstabDamage(const uint32 pValue) { mItemData->mBackstabDamage = pValue; }
+	inline void setDamageShieldMitigation(const uint32 pValue) { mItemData->mDamageShieldMitigation = pValue; }
+	inline void setHeroicStrength(const int32 pValue) { mItemData->mHeroicStrength = pValue; }
+	inline void setHeroicIntelligence(const int32 pValue) { mItemData->mHeroicIntelligence = pValue; }
+	inline void setHeroicWisdom(const int32 pValue) { mItemData->mHeroicWisdom = pValue; }
+	inline void setHeroicAgility(const int32 pValue) { mItemData->mHeroicAgility = pValue; }
+	inline void setHeroicDexterity(const int32 pValue) { mItemData->mHeroicDexterity = pValue; }
+	inline void setHeroicStamina(const int32 pValue) { mItemData->mHeroicStamina = pValue; }
+	inline void setHeroicCharisma(const int32 pValue) { mItemData->mHeroicCharisma = pValue; }
+	inline void setHeroicMagicResist(const int32 pValue) { mItemData->mHeroicMagicResist = pValue; }
+	inline void setHeroicFireResist(const int32 pValue) { mItemData->mHeroicFireResist = pValue; }
+	inline void setHeroicColdResist(const int32 pValue) { mItemData->mHeroicColdResist = pValue; }
+	inline void setHeroicDiseaseResist(const int32 pValue) { mItemData->mHeroicDiseaseResist = pValue; }
+	inline void setHeroicPoisonResist(const int32 pValue) { mItemData->mHeroicPoisonResist = pValue; }
+	inline void setHeroicCorruptionResist(const int32 pValue) { mItemData->mHeroicSVCorruption = pValue; }
+	inline void setHealAmount(const int32 pValue) { mItemData->mHealAmount = pValue; }
+	inline void setSpellDamage(const int32 pValue) { mItemData->mSpellDamage = pValue; }
+	inline void setClairvoyance(const int32 pValue) { mItemData->mClairvoyance = pValue; }
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();
@@ -344,4 +371,6 @@ private:
 
 	// ItemData Overrides
 	uint32 mSlot = 0;
+	uint32 mStacks = 1;
+	bool mAttuned = false;
 };

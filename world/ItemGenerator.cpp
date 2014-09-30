@@ -23,21 +23,33 @@ Item* ItemGenerator::_makeRandom(const uint8 pLevel) {
 	return item;
 }
 
-Item* ItemGenerator::makeRandomFood() {
+Item* ItemGenerator::makeFood() {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
 	item->setName("Food");
 	item->setIcon(537);
 	item->setMaxStacks(20);
 	item->setStacks(20);
-	item->setCharges(0);
-	item->setCastTime(30);
-	item->setIsMagic(false);
-	item->setWeight(10);
+	item->setFoodSize(1);
 	item->setSize(ItemSize::Small);
-	item->setIsTradeskillsItem(false);
 	item->setItemClass(ItemClass::Common);
 	item->setItemType(ItemType::Food);
+	item->setStrength(15);
+
+	return item;
+}
+
+Item* ItemGenerator::makeDrink() {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Drink");
+	item->setIcon(856);
+	item->setMaxStacks(20);
+	item->setStacks(20);
+	item->setDrinkSize(1);
+	item->setSize(ItemSize::Small);
+	item->setItemClass(ItemClass::Common);
+	item->setItemType(ItemType::Drink);
 
 	return item;
 }
@@ -68,6 +80,9 @@ Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
 	item->setSlots(EquipSlots::Secondary);
 	item->setSkillMod(1);
 	item->setSkillModAmount(1);
+	//item->setClickName("Test");
+	item->setMaxPower(100);
+	item->setPower(Random::make<uint32>(0, 100));
 
 	return item;
 }

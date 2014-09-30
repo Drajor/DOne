@@ -28,9 +28,9 @@ struct ItemData {
 	}
 
 	// BEGIN chunk0
-	uint32 mStacks = 1;
+	uint32 mStacks = 1; // Specified by Item.
 	uint32 mUnknown0 = 0;
-	uint32 mSlot = 0; // NOT USED.
+	uint32 mSlot = 0; // Specified by Item.
 	uint32 mMerchantPrice = 0; // Maybe vendor price?
 	uint32 mMerchantSlot = 1; //1 if not a merchant item
 	uint32 mUnknown1 = 0;
@@ -38,14 +38,14 @@ struct ItemData {
 	uint32 mUnknown2 = 0;
 	uint32 mLastCastTime = 0;	// Unix Time from PP of last cast for this recast type if recast delay > 0
 	uint32 mCharges = 0; //Total Charges an item has (-1 for unlimited)
-	uint32 mAttuned = 0; // 1 if the item is no drop (attuned items)
-	uint32 mUnknown3 = 0;
+	uint32 mAttuned = 0;
+	uint32 mPower = 0;
 	uint32 mUnknown4 = 0;
 	uint32 mUnknown5 = 0;
-	uint32 mUnknown6 = 0;
+	uint32 mUnknown6 = 0; // A non-zero value here causes UF to crash
 	uint8 mUnknown7 = 0;
-	uint8 mUnknown8 = 0; //0 - Add Evolving Item struct if this isn't set to 0?
-	uint8 mUnknown9 = 0;
+	uint8 mUnknown8 = 0; //0 - Add Evolving Item struct if this isn't set to 0? //(Non-zero messes with things).
+	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
 
@@ -98,7 +98,11 @@ struct ItemData {
 	uint32 mBaneDamageRaceAmount = 0;
 	int32 mBaneDamageAmount = 0;
 	uint8 mMagic = 1; // 0 = NOT MAGIC, 1 = MAGIC
-	int32 mCastTime = 0;
+	union {
+		uint32 mFoodSize;
+		uint32 mDrinkSize;
+		int32 mCastTime = 0;
+	};
 	uint32 mReqLevel = 0;
 	uint32 mRecLevel = 0;
 	uint32 mRecSkill = 0;
@@ -258,12 +262,12 @@ struct ItemData {
 
 	// BEGIN chunk4
 	uint32 mScriptFileID = 0;
-	uint8 mQuest = 0; // 0 = OFF, 1 = ON
+	uint8 mQuest = 0; // 1 = ON
 	///////////////////////////////
-	uint32 mPower = 0; // 1 = Power 0%.. Needs more investigation.
+	uint32 mMaxPower = 100;
 	uint32 Purity = 0; // 1 = Purity: 100, 10 = Purity: 100 and Infusible.
 	uint32 mBackstabDamage = 0;
-	uint32 mDamageShieldMitigation = 0;
+	uint32 mDamageShieldMitigation = 10;
 	int32 mHeroicStrength = 0;
 	int32 mHeroicIntelligence = 0;
 	int32 mHeroicWisdom = 0;

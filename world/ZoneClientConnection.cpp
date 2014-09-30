@@ -1825,13 +1825,13 @@ void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pIn
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneChange, ZoneChange::size());
-	auto payload = ZoneChange::convert(outPacket->pBuffer);
-	strcpy(payload->mCharacterName, mCharacter->getName().c_str());
-	payload->mZoneID = pZoneID;
-	payload->mInstanceID = pInstanceID;
-	payload->mSuccess = pSuccess;
+	ZoneChange payload;
+	strcpy(payload.mCharacterName, mCharacter->getName().c_str());
+	payload.mZoneID = pZoneID;
+	payload.mInstanceID = pInstanceID;
+	payload.mSuccess = pSuccess;
 
+	auto outPacket = ZoneChange::create(payload);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -1839,31 +1839,10 @@ void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pIn
 void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(ZoneChange::sizeCheck(pPacket->size));
+	EXPECTED(ZoneChange::sizeCheck(pPacket));
 
-	auto payload = ZoneChange::convert(pPacket->pBuffer);
+	auto payload = ZoneChange::convert(pPacket);
 	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID);
-
-	//EXPECTED(mCharacter->checkZoneChange(payload->mZoneID, payload->mInstanceID));
-
-	//static const auto EXPECTED_PAYLOAD_SIZE = sizeof(ZoneChange_Struct);
-
-	//EXPECTED(pPacket);
-	//EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
-
-	//auto x = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
-	//auto xx = reinterpret_cast<CancelTrade_Struct*>(x->pBuffer);
-	//xx->fromid = mCharacter->getSpawnID();
-	//xx->action = groupActUpdate;
-	//mStreamInterface->FastQueuePacket(&x);
-
-	//auto a = new EQApplicationPacket(OP_PreLogoutReply);
-	//mStreamInterface->FastQueuePacket(&a);
-
-	//auto payload = reinterpret_cast<ZoneChange_Struct*>(pPacket->pBuffer);
-	//sendZoneChange(payload->zoneID, payload->instanceID);
-
-	//mZone->handleZoneChange(mCharacter, payload->zoneID, payload->instanceID);
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
@@ -2764,13 +2743,12 @@ void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const u
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ItemVerifyReply, ItemRightClickResponse::size());
-	auto payload = ItemRightClickResponse::convert(outPacket->pBuffer);
-
-	payload->mSlot = pSlot;
-	payload->mTargetSpawnID = pTargetSpawnID;
-	payload->mSpellID = 0;
-
+	ItemRightClickResponse payload;
+	payload.mSlot = pSlot;
+	payload.mTargetSpawnID = pTargetSpawnID;
+	payload.mSpellID = 0;
+	
+	auto outPacket = ItemRightClickResponse::create(payload);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -2791,9 +2769,9 @@ void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPack
 void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(TradeRequest::sizeCheck(pPacket->size));
+	EXPECTED(TradeRequest::sizeCheck(pPacket));
 
-	auto payload = TradeRequest::convert(pPacket->pBuffer);
+	auto payload = TradeRequest::convert(pPacket);
 
 	EXPECTED(payload->mFromSpawnID == mCharacter->getSpawnID());
 
@@ -2805,21 +2783,20 @@ void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacke
 void ZoneClientConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(TradeRequest::sizeCheck(pPacket->size));
+	EXPECTED(TradeRequest::sizeCheck(pPacket));
 
-	auto payload = TradeRequest::convert(pPacket->pBuffer);
+	auto payload = TradeRequest::convert(pPacket);
 }
 
 void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	//auto outPacket = new EQApplicationPacket(OP_TradeRequest, TradeRequest::size());
-	auto outPacket = TradeRequest::make(OP_TradeRequest);
-	auto payload = TradeRequest::convert(outPacket->pBuffer);
-	payload->mToSpawnID = mCharacter->getSpawnID();
-	payload->mFromSpawnID = pFromSpawnID;
+	TradeRequest payload;
+	payload.mToSpawnID = mCharacter->getSpawnID();
+	payload.mFromSpawnID = pFromSpawnID;
 
+	auto outPacket = TradeRequest::create();
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -2827,9 +2804,9 @@ void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(TradeCancel::sizeCheck(pPacket->size));
+	EXPECTED(TradeCancel::sizeCheck(pPacket));
 
-	auto payload = TradeCancel::convert(pPacket->pBuffer);
+	auto payload = TradeCancel::convert(pPacket);
 
 }
 

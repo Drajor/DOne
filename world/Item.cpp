@@ -153,6 +153,8 @@ uint32 Item::getSubItems() const {
 
 void Item::_onCopy() {
 	mItemData->mSlot = mSlot;
+	mItemData->mStacks = mStacks;
+	mItemData->mAttuned = mAttuned ? 1 : 0;
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
 }
 
