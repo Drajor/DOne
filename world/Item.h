@@ -190,6 +190,7 @@ public:
 	inline const uint32 getScriptFileID() const { return mItemData->mScriptFileID; }
 	inline const uint8 getIsQuest() const { return mItemData->mQuest; }
 	inline const uint32 getMaxPower() const { return mItemData->mMaxPower; }
+	inline const uint32 getPurity() const { return mItemData->mPurity; }
 	// TODO: Power
 	// TODO: Purity
 	inline const uint32 getBackstabDamage() const { return mItemData->mBackstabDamage; }
@@ -340,7 +341,8 @@ public:
 	// TODO: Effects
 	inline void setScriptFileID(const uint32 pValue) { mItemData->mScriptFileID = pValue; }
 	inline void setIsQuest(const uint8 pValue) { mItemData->mQuest = pValue; }
-	inline void setMaxPower(const uint32 pValue) { mItemData->mQuest = pValue; }
+	inline void setMaxPower(const uint32 pValue) { mItemData->mMaxPower = pValue; }
+	inline void setPurity(const uint32 pValue) { mItemData->mPurity = pValue; }
 	// TODO: Power
 	// TODO: Purity
 	inline void setBackstabDamage(const uint32 pValue) { mItemData->mBackstabDamage = pValue; }

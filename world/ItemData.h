@@ -264,8 +264,8 @@ struct ItemData {
 	uint32 mScriptFileID = 0;
 	uint8 mQuest = 0; // 1 = ON
 	///////////////////////////////
-	uint32 mMaxPower = 100;
-	uint32 Purity = 0; // 1 = Purity: 100, 10 = Purity: 100 and Infusible.
+	uint32 mMaxPower = 0;
+	uint32 mPurity = 0;
 	uint32 mBackstabDamage = 0;
 	uint32 mDamageShieldMitigation = 10;
 	int32 mHeroicStrength = 0;

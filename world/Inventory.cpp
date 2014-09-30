@@ -40,15 +40,15 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makeFood(), 29);
 	//put(ItemGenerator::makeFood(), 30);
 
-	put(ItemGenerator::makeShield(0, Rarity::Common), 23);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 24);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 25);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 26);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 24);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 25);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 26);
 
-	put(ItemGenerator::makeShield(0, Rarity::Common), 27);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 28);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 29);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 30);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 27);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 28);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 29);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 30);
 
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 28);

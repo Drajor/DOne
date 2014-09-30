@@ -54,6 +54,23 @@ Item* ItemGenerator::makeDrink() {
 	return item;
 }
 
+Item* ItemGenerator::makePowerSource(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("PowerSource");
+	item->setCharmFile("PS-Air");
+	item->setIcon(2095);
+	item->setIDFile("IT7");
+	item->setItemType(ItemType::Miscellaneous);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::PowerSource);
+	item->setMaxPower(100);
+	item->setPower(Random::make<uint32>(0, 100));
+
+	return item;
+}
+
+
 Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
@@ -81,8 +98,8 @@ Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
 	item->setSkillMod(1);
 	item->setSkillModAmount(1);
 	//item->setClickName("Test");
-	item->setMaxPower(100);
-	item->setPower(Random::make<uint32>(0, 100));
+	//item->setMaxPower(100);
+	//item->setPower(Random::make<uint32>(0, 100));
 
 	return item;
 }

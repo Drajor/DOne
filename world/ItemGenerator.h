@@ -17,6 +17,7 @@ public:
 	static Item* makeRandomContainer(const Rarity pRarity);
 	static Item* makeFood();
 	static Item* makeDrink();
+	static Item* makePowerSource(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeShield(const uint8 pLevel, const Rarity pRarity);
 private:
