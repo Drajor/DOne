@@ -3,10 +3,7 @@
 #include "Constants.h"
 #include "Data.h"
 
-class DataProvider;
-struct CharacterSelect_Struct;
-struct PlayerProfile_Struct;
-struct ExtendedProfile_Struct;
+struct ItemData;
 
 class DataStore {
 public:
@@ -39,10 +36,13 @@ public:
 	// Spells
 	const bool loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded);
 	
+	// Items
+	const bool loadItems(ItemData* pItemData, uint32& pNumItemsLoaded);
 private:
 
 	DataStore() {};
 	~DataStore() {};
 	DataStore(DataStore const&);
 	void operator=(DataStore const&);
+	
 };

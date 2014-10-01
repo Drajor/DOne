@@ -36,6 +36,8 @@ SET(world_sources
 	SpawnPoint.cpp
 	Item.cpp
 	Inventory.cpp
+	ItemGenerator.cpp
+	StaticItemData.cpp
 )
 
 SET(world_headers
@@ -75,6 +77,8 @@ SET(world_headers
 	ItemData.h
 	Item.h
 	Inventory.h
+	ItemGenerator.h
+	StaticItemData.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

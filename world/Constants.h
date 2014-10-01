@@ -75,6 +75,9 @@ namespace Limits {
 	namespace Spells {
 		static const auto MAX_SPELL_ID = 50000;
 	}
+	namespace StaticItems {
+		static const auto MAX_ITEM_ID = 10000;
+	}
 	namespace SpellBook {
 		static const auto MAX_SLOTS = 480;
 	}

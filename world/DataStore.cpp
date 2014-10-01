@@ -3,6 +3,7 @@
 #include "Limits.h"
 #include "Profile.h"
 #include "Settings.h"
+#include "ItemData.h"
 
 #include "../common/tinyxml/tinyxml.h"
 
@@ -913,6 +914,129 @@ const bool DataStore::loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded
 		pNumSpellsLoaded++;
 	}
 
+	return true;
+}
+
+namespace ItemDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/items.xml";
+	namespace Tag {
+		SCA Items = "items";
+		SCA Item = "item";
+	}
+	namespace Attribute {
+		// Tag::Item
+		SCA ID = "id";
+		SCA Name = "name";
+		SCA Lore = "lore";
+		SCA IDFile = "id_file";
+		SCA ItemClass = "item_class";
+		SCA Weight = "weight";
+		SCA Temporary = "temporary";
+		SCA NoDrop = "no_drop";
+		SCA Attunable = "attunable";
+		SCA Size = "size";
+		SCA Slots = "slots";
+		SCA Price = "price";
+		SCA Icon = "icon";
+		SCA Tradeskills = "tradeskills";
+		SCA ColdResist = "cold_resist";
+		SCA DiseaseResist = "disease_resist";
+		SCA PoisonResist = "poison_resist";
+		SCA MagicResist = "magic_resist";
+		SCA FireResist = "fire_resist";
+		SCA CorruptionResist = "corruption_resist";
+		SCA Strength = "strength";
+		SCA Stamina = "stamina";
+		SCA Agility = "agility";
+		SCA Dexterity = "dexterity";
+		SCA Charisma = "charisma";
+		SCA Intelligence = "intelligence";
+		SCA Wisdom = "wisdom";
+		SCA Health = "health";
+		SCA Mana = "mana";
+		SCA Endurance = "endurance";
+		SCA ArmorClass = "armor_class";
+		SCA HealthRegen = "health_regen";
+		SCA ManaRegen = "mana_regen";
+		SCA EnduranceRegen = "endurance_regen";
+		SCA Classes = "classes";
+		SCA Races = "races";
+		SCA Deity = "deity";
+		SCA SkillModAmount = "skill_mod_amount";
+		SCA SkillMod = "skill_mod";
+		SCA BaneRace = "bane_race";
+		SCA BaneBodyType = "bane_body_type";
+		SCA BaneRaceAmount = "bane_race_amount";
+		SCA BaneBodyTypeAmount = "bane_body_type_amount";
+		SCA Magic = "magic";
+		SCA CastTime = "cast_time"; // Used for Food/Drink as well.
+		SCA ReqLevel = "req_level";
+		SCA RecLevel = "rec_level";
+		SCA RecSkill = "rec_skill";
+		SCA BardType = "bard_type";
+		SCA BardValue = "bard_value";
+		SCA Light = "light";
+		SCA Delay = "delay";
+		SCA ElementalDamageType = "elemental_damage_type";
+		SCA ElementalDamageAmount = "elemental_damage_amount";
+		SCA Range = "range";
+		SCA Damage = "damage";
+		SCA Colour = "colour";
+		SCA ItemType = "item_type";
+		SCA Material = "material";
+		SCA EliteMaterial = "elite_material";
+		SCA SellRate = "sell_rate";
+		SCA CombatEffects = "combat_effects";
+		SCA Shielding = "shielding";
+		SCA StunResist = "stun_resist";
+		SCA StrikeThrough = "strike_through";
+		SCA SkillDamageMod = "skill_damage_mod";
+		SCA SkillDamageAmount = "skill_damage_amount";
+		SCA SpellShield = "spell_shield";
+		SCA Avoidance = "avoidance";
+		SCA Accuracy = "accuracy";
+		SCA CharmFileID = "charm_file_id";
+		SCA FactionMod0ID = "faction_mod_0_id";
+		SCA FactionMod0Amount = "faction_mod_0_amount";
+		SCA FactionMod1ID = "faction_mod_1_id";
+		SCA FactionMod1Amount = "faction_mod_1_amount";
+		SCA FactionMod2ID = "faction_mod_2_id";
+		SCA FactionMod2Amount = "faction_mod_2_amount";
+		SCA FactionMod3ID = "faction_mod_3_id";
+		SCA FactionMod3Amount = "faction_mod_3_amount";
+		SCA CharmFile = "charm_file";
+		SCA AugmentType = "augment_type";
+		SCA AugmentRestrict = "augment_restrict";
+
+
+
+		SCA HeroicColdResist = "heroic_cold_resist";
+		SCA HeroicDiseaseResist = "heroic_disease_resist";
+		SCA HeroicPoisonResist = "heroic_poison_resist";
+		SCA HeroicMagicResist = "heroic_magic_resist";
+		SCA HeroicFireResist = "heroic_fire_resist";
+		SCA HeroicCorruptionResist = "heroic_corruption_resist";
+
+		SCA HeroicStrength = "heroic_strength";
+		SCA HeroicStamina = "heroic_stamina";
+		SCA HeroicAgility = "heroic_agility";
+		SCA HeroicDexterity = "heroic_dexterity";
+		SCA HeroicCharisma = "heroic_charisma";
+		SCA HeroicIntelligence = "heroic_intelligence";
+		SCA HeroicWisdom = "heroic_wisdom";
+	}
+#undef SCA
+}
+
+const bool DataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
+	using namespace ItemDataXML;
+	EXPECTED_BOOL(pItemData);
+	Profile p("DataStore::loadItems");
+
+	pNumItemsLoaded = 0;
+	TiXmlDocument document(ItemDataXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
 	return true;
 }
 

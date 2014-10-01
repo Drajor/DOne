@@ -45,6 +45,9 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mScrollName);
 	result -= sizeof(mItemData->mBardName);
 
+	if (getIsEvolvingItem() == 0)
+		result -= sizeof(ItemData::EvolvingItem);
+
 	// Add the real size
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
@@ -66,8 +69,12 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	_onCopy();
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mName) - (unsigned int)&(mItemData->mStacks);
+	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
 	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
+
+	// Optional (Evolving Item)
+	if (getIsEvolvingItem() == 1)
+		pStructure.write<ItemData::EvolvingItem>(mItemData->mEvolvingItem);
 
 	// Variable.
 	pStructure.writeString(String(mItemData->mName));

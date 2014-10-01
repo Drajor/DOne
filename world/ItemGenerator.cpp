@@ -81,7 +81,15 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setDelay(Random::make<uint32>(25, 45));
 	item->setDamage(Random::make<uint32>(5, 15));
 	item->setIsMagic(true);
-	item->setSlots(EquipSlots::Waist);
+	item->setSlots(EquipSlots::Primary);
+	item->setIsEvolvingItem(1);
+
+	//item->setBaneDamageRace(1);
+	//item->setBaneDamageRaceAmount(100);
+	//item->setBaneBodyType(BodyType::BT_Animal);
+	//item->setBaneBodyTypeAmount(100);
+	//item->setElementalDamageAmount(100);
+	//item->setElementalDamasetype(2);
 
 	return item;
 }

@@ -9,7 +9,7 @@ const bool SpellDataStore::initialise() {
 	Profile p("SpellDataStore::initialise");
 	Log::status("[Spell Data Store] Initialising.");
 
-	// Allocate block of memory spells
+	// Allocate block of memory for spells.
 	mSpellData = new SpellData[Limits::Spells::MAX_SPELL_ID];
 
 	// DataStore to load and populate.

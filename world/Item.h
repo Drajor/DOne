@@ -56,6 +56,7 @@ public:
 	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
 	inline const uint32 getPower() const { return mItemData->mPower; }
+	inline const uint32 getIsEvolvingItem() const { return mItemData->mIsEvolvingItem; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
@@ -113,10 +114,10 @@ public:
 	inline const uint32 getDeity() const { return mItemData->mDeity; }
 	inline const int32 getSkillModAmount() const { return mItemData->mSkillModAmount; }
 	inline const uint32 getSkillMod() const { return mItemData->mSkillMod; }
-	inline const uint32 getBaneDamageRace() const { return mItemData->mBaneDamageRace; }
-	inline const uint32 getBaneDamageBodyType() const { return mItemData->mBaneDamageBodyType; }
-	inline const uint32 getBaneDamageRaceAmount() const { return mItemData->mBaneDamageRaceAmount; }
-	inline const int32 getBaneDamageAmount() const { return mItemData->mBaneDamageAmount; }
+	inline const uint32 getBaneRace() const { return mItemData->mBaneDamageRace; }
+	inline const uint32 getBaneBodyType() const { return mItemData->mBaneDamageBodyType; }
+	inline const uint32 getBaneRaceAmount() const { return mItemData->mBaneDamageRaceAmount; }
+	inline const int32 getBaneBodyTypeAmount() const { return mItemData->mBaneDamageBodyTypeAmount; }
 	inline const uint8 isMagic() const { return mItemData->mMagic; }
 	inline const uint32 getFoodSize() const { return mItemData->mFoodSize; }
 	inline const uint32 getDrinkSize() const { return mItemData->mDrinkSize; }
@@ -235,6 +236,7 @@ public:
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
 	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }
+	inline void setIsEvolvingItem(const uint32 pValue) { mItemData->mIsEvolvingItem = pValue; }
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
@@ -272,10 +274,10 @@ public:
 	inline void setDeity(const uint32 pValue) { mItemData->mDeity = pValue; }
 	inline void setSkillModAmount(const int32 pValue) { mItemData->mSkillModAmount = pValue; }
 	inline void setSkillMod(const uint32 pType) { mItemData->mSkillMod = pType; }
-	inline void setBaneDamageRace(const uint32 pValue) { mItemData->mBaneDamageRace = pValue; }
-	inline void setBaneDamageBodyType(const uint32 pValue) { mItemData->mBaneDamageBodyType = pValue; }
-	inline void setBaneDamageRaceAmount(const uint32 pValue) { mItemData->mBaneDamageRaceAmount = pValue; }
-	inline void setBaneDamageAmount(const int32 pValue) { mItemData->mBaneDamageAmount = pValue; }
+	inline void setBaneRace(const uint32 pValue) { mItemData->mBaneDamageRace = pValue; }
+	inline void setBaneBodyType(const uint32 pValue) { mItemData->mBaneDamageBodyType = pValue; }
+	inline void setBaneRaceAmount(const uint32 pValue) { mItemData->mBaneDamageRaceAmount = pValue; }
+	inline void setBaneBodyTypeAmount(const int32 pValue) { mItemData->mBaneDamageBodyTypeAmount = pValue; }
 	inline void setIsMagic(const bool pValue) { mItemData->mMagic = pValue ? 1 : 0; }
 	inline void setFoodSize(const uint32 pValue) { mItemData->mFoodSize = pValue; }
 	inline void setDrinkSize(const uint32 pValue) { mItemData->mDrinkSize = pValue; }

@@ -12,6 +12,7 @@
 #include "TitleManager.h"
 #include "DataStore.h"
 #include "SpellDataStore.h"
+#include "StaticItemData.h"
 #include "LogSystem.h"
 #include "UCS.h"
 #include "Random.h"
@@ -36,6 +37,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(UCS::getInstance().initialise());
 	EXPECTED_MAIN(TitleManager::getInstance().initialise());
 	EXPECTED_MAIN(SpellDataStore::getInstance().initialise());
+	EXPECTED_MAIN(StaticItemData::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

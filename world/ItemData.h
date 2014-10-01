@@ -42,11 +42,42 @@ struct ItemData {
 	uint32 mPower = 0;
 	uint32 mUnknown4 = 0;
 	uint32 mUnknown5 = 0;
-	uint32 mUnknown6 = 0; // A non-zero value here causes UF to crash
-	uint8 mUnknown7 = 0;
-	uint8 mUnknown8 = 0; //0 - Add Evolving Item struct if this isn't set to 0? //(Non-zero messes with things).
+	uint32 mIsEvolvingItem = 0;
+	uint8 mUnknown7 = 0; // Same as below ><
+	uint8 mUnknown8 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
+	struct EvolvingItem {
+		EvolvingItem() {
+			memset(evobytes, 0, sizeof(evobytes));
+			evobytes[0] = 1; // Possible Current Level
+			evobytes[1] = 1;
+			evobytes[2] = 1;
+			evobytes[3] = 1;
+			evobytes[4] = 1;
+			evobytes[5] = 1;
+			evobytes[6] = 1;
+			evobytes[7] = 1;
+			evobytes[8] = 1;
+			evobytes[9] = 1; // Activated (1=Yes)
+			evobytes[10] = 1; // Max Level
+			evobytes[11] = 1; // Max Level
+			evobytes[12] = 1; // Max Level
+			evobytes[13] = 0; // A 1 here adds to the Max Level and adds an item link Final Result..
+			evobytes[14] = 1;
+			evobytes[15] = 1;
+			evobytes[16] = 1;
+			evobytes[17] = 1;
+			evobytes[18] = 0; // String?
+			evobytes[19] = 0; // 1 here breaks the icon.
+			evobytes[20] = 0; // 1 here breaks the icon.
+			evobytes[21] = 0; // 1 here icon = pearl necklace.
+			evobytes[22] = 0; // 1 here icon = pearl necklace.
+			evobytes[23] = 1; // 1 here Item becomes copied, no drop.
+		}
+		uint8 evobytes[25];
+	};
+	EvolvingItem mEvolvingItem;
 	// END chunk0
 
 	char mName[64];
@@ -96,7 +127,7 @@ struct ItemData {
 	uint32 mBaneDamageRace = 0;
 	uint32 mBaneDamageBodyType = 0;
 	uint32 mBaneDamageRaceAmount = 0;
-	int32 mBaneDamageAmount = 0;
+	int32 mBaneDamageBodyTypeAmount = 0;
 	uint8 mMagic = 1; // 0 = NOT MAGIC, 1 = MAGIC
 	union {
 		uint32 mFoodSize;
