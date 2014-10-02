@@ -20,6 +20,9 @@ public:
 	static Item* makePowerSource(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeShield(const uint8 pLevel, const Rarity pRarity);
+
+	static Item* makeHead(const uint8 pLevel, const Rarity pRarity);
+	//static Item* makeChest();
 private:
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();

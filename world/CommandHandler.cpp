@@ -979,6 +979,28 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		Utility::stoSafe(fromSpawnID, pParameters[0]);
 		pCharacter->getConnection()->sendTradeRequest(fromSpawnID);
 	}
+	else if (pCommandName == "linky") {
+		std::stringstream ss;
+		ss << "\x12";
+		ss << std::setw(1) << std::hex << 0; // Unknown ?
+		ss << std::setw(5) << std::hex << std::setfill('0') << 10001; // Item ID
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Augment 0
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Augment 1
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Augment 2
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Augment 3
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Augment 4
+		ss << std::setw(1) << std::hex << std::setfill('0') << 1; // Evolving
+		ss << std::setw(4) << std::hex << std::setfill('0') << 0; // Lore Group
+		ss << std::setw(1) << std::hex << std::setfill('0') << 1; // Evolve Level
+		ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Unknown ?
+		ss << std::setw(8) << std::hex << std::setfill('0') << 0; // Hash
+		ss << "Hello World";
+		ss << "\x12";
+
+		pCharacter->getConnection()->sendMessage(MessageType::White, ss.str());
+
+
+	}
 
 	//else if (pCommandName == "weather") {
 	//	uint32 unk = 0;

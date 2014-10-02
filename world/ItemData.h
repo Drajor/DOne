@@ -4,9 +4,9 @@
 #pragma pack(1)
 
 /*
-
-Infusible
-Placeable
+ Possible Missing
+- Placeable
+- Power Drain (Amount the item drains from the power source per second).
 
 */
 
@@ -25,6 +25,41 @@ struct ItemData {
 		memset(mBardName, 0, sizeof(mBardName));
 
 		strcpy(mIDFile, "IT63");
+
+		//// chunk0
+		//mUnknown0 = 100; // uint32
+		//mUnknown1 = 100; // uint32
+		//mUnknown2 = 100; // uint32
+		//mUnknown4 = 100; // uint32
+		//mUnknown5 = 100; // uint32
+		////mUnknown7 = 0; // uint8
+		////mUnknown8 = 0; // uint8
+
+		//// chunk1
+		//mUnknown10 = 100; // uint8
+		//mUnknown11 = 100; // uin8
+		//mUnknown12 = 100; // uint32
+		//mUnknown13 = 100; // uint32
+
+		//// chunk3
+		//mUnknown14 = 100; // int32
+		//mUnknown15 = 100; // uint32
+		//mUnknown16 = 100; // uint8
+		//mUnknown17 = 100; // uint32
+		//mUnknown18 = 100; // uint32
+		//mUnknown19 = 100; // uint32
+		//mUnknown20 = 100; // uint32
+		//mUnknown21 = 100; // uint8
+		//mUnknown22 = 100; // uint8
+		//mUnknown23 = 100; // uint8
+
+		//// chunk4
+		//unknown25 = 100; // uint8
+		//evolve_string = 100; // uint32
+		//unknown26 = 100; // uint8
+		//unknown27 = 100; // uint32
+		//unknown28 = 100; // uint32
+		//unknown29 = 100; // uint32
 	}
 
 	// BEGIN chunk0
@@ -43,41 +78,45 @@ struct ItemData {
 	uint32 mUnknown4 = 0;
 	uint32 mUnknown5 = 0;
 	uint32 mIsEvolvingItem = 0;
+	struct EvolvingItem {
+		/*
+		6145 Your %1 has evolved!
+		6146 Evolving: Level %1/%2 %3%% %4
+		6147 Your %1 can not evolve until you reach level %2.
+		*/
+		EvolvingItem() {
+			memset(bytes0, 0, sizeof(bytes0));
+			memset(evobytes, 0, sizeof(evobytes));
+			memset(end, 0, sizeof(end));
+			memset(mString, 0, sizeof(mString));
+			mCurrentLevel = 2;
+			mMaxLevel = 10;
+
+			//strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164DShield\\x12").c_str());
+			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D").c_str());
+			//strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%s\\x12").c_str());
+			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D%s").c_str());
+
+			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D%1").c_str());
+			strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%1\\x12").c_str());
+
+			//end[0] = 0; // 1 = icon broken.
+			//end[1] = 0; // 1 = icon broken.
+		}
+		uint8 mUnknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
+		int32 mCurrentLevel = 0;
+		char bytes0[8]; // Possible Race/BodyType experience constraints
+		uint8 mActive = 1; // 1 = ON
+		int32 mMaxLevel = 0;
+		uint8 evobytes[4];
+		char mString[100];
+		uint8 end[2];
+	};
+	EvolvingItem mEvolvingItem;
 	uint8 mUnknown7 = 0; // Same as below ><
 	uint8 mUnknown8 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
-	struct EvolvingItem {
-		EvolvingItem() {
-			memset(evobytes, 0, sizeof(evobytes));
-			evobytes[0] = 1; // Possible Current Level
-			evobytes[1] = 1;
-			evobytes[2] = 1;
-			evobytes[3] = 1;
-			evobytes[4] = 1;
-			evobytes[5] = 1;
-			evobytes[6] = 1;
-			evobytes[7] = 1;
-			evobytes[8] = 1;
-			evobytes[9] = 1; // Activated (1=Yes)
-			evobytes[10] = 1; // Max Level
-			evobytes[11] = 1; // Max Level
-			evobytes[12] = 1; // Max Level
-			evobytes[13] = 0; // A 1 here adds to the Max Level and adds an item link Final Result..
-			evobytes[14] = 1;
-			evobytes[15] = 1;
-			evobytes[16] = 1;
-			evobytes[17] = 1;
-			evobytes[18] = 0; // String?
-			evobytes[19] = 0; // 1 here breaks the icon.
-			evobytes[20] = 0; // 1 here breaks the icon.
-			evobytes[21] = 0; // 1 here icon = pearl necklace.
-			evobytes[22] = 0; // 1 here icon = pearl necklace.
-			evobytes[23] = 1; // 1 here Item becomes copied, no drop.
-		}
-		uint8 evobytes[25];
-	};
-	EvolvingItem mEvolvingItem;
 	// END chunk0
 
 	char mName[64];

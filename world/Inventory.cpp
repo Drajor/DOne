@@ -50,8 +50,10 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 29);
 	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 30);
 
-	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 23);
+	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 23);
+	put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
 	put(ItemGenerator::makeShield(0, Rarity::Common), 24);
+	put(ItemGenerator::makeHead(0, Rarity::Common), 25);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 24);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 25);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 36);
@@ -103,7 +105,9 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 
 	// Shared Bank Items.
 
-	if (ds.check() == false) Log::info("badcheck");
+	if (ds.check() == false) {
+		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	}
 
 	return data;
 }

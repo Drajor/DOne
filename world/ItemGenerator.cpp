@@ -65,7 +65,8 @@ Item* ItemGenerator::makePowerSource(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::PowerSource);
 	item->setMaxPower(100);
-	item->setPower(Random::make<uint32>(0, 100));
+	//item->setPower(Random::make<uint32>(0, 100));
+	item->setPower(100);
 
 	return item;
 }
@@ -83,6 +84,8 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Primary);
 	item->setIsEvolvingItem(1);
+	item->setWeight(200);
+	item->setLore("This is a one hand blunt weapon.");
 
 	//item->setBaneDamageRace(1);
 	//item->setBaneDamageRaceAmount(100);
@@ -105,9 +108,29 @@ Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
 	item->setSlots(EquipSlots::Secondary);
 	item->setSkillMod(1);
 	item->setSkillModAmount(1);
+	item->setPurity(100);
+	item->setStrength(30);
 	//item->setClickName("Test");
 	//item->setMaxPower(100);
 	//item->setPower(Random::make<uint32>(0, 100));
+
+	return item;
+}
+
+Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Head Item");
+	item->setIcon(746);
+	item->setIDFile("IT63");
+	item->setMaterial(3);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Head);
+	//item->setSkillMod(1);
+	//item->setSkillModAmount(1);
+	item->setPurity(100);
+	item->setStrength(30);
 
 	return item;
 }

@@ -45,10 +45,13 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mScrollName);
 	result -= sizeof(mItemData->mBardName);
 
-	if (getIsEvolvingItem() == 0)
+	if (isEvolvingItem())
+		result -= sizeof(mItemData->mEvolvingItem.mString);
+	else
 		result -= sizeof(ItemData::EvolvingItem);
+		
 
-	// Add the real size
+	// Add variable strings
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
@@ -61,6 +64,10 @@ const uint32 Item::_getDataSize() const {
 	result += strlen(mItemData->mScrollName) + 1;
 	result += strlen(mItemData->mBardName) + 1;
 
+	// Add variable string for EvolvingItem (ItemLink?)
+	if (isEvolvingItem())
+		result += strlen(mItemData->mEvolvingItem.mString) + 1;
+
 	return result;
 }
 
@@ -72,9 +79,43 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
 	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
 
-	// Optional (Evolving Item)
-	if (getIsEvolvingItem() == 1)
-		pStructure.write<ItemData::EvolvingItem>(mItemData->mEvolvingItem);
+	//// Optional (Evolving Item)
+	if (isEvolvingItem() == 1) {
+		//uint8 mUnknown0 = 0;
+		pStructure.write<uint8>(mItemData->mEvolvingItem.mUnknown0);
+		//int32 mCurrentLevel = 0;
+		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
+		//char bytes0[8]; // Possible Race/BodyType experience constraints
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.bytes0), sizeof(mItemData->mEvolvingItem.bytes0));
+		//uint8 mActive = 0; // 1 = ON
+		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
+		//int32 mMaxLevel = 0;
+		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
+		//uint8 evobytes[4];
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.evobytes), sizeof(mItemData->mEvolvingItem.evobytes));
+		//char mString[100];
+		pStructure.writeString(String(mItemData->mEvolvingItem.mString));
+		//uint8 end[2];
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.end), sizeof(mItemData->mEvolvingItem.end));
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[0]);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[1]);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[2]);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[3]);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[4]);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.end[5]);
+	}
+		//pStructure.write<ItemData::EvolvingItem>(mItemData->mEvolvingItem);
+
+	/*
+		uint8 mUnknown7 = 0; // Same as below ><
+		uint8 mUnknown8 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
+		uint8 mCopied = 0; // 0 = OFF, 1 = ON
+		uint8 mItemClass = ItemClass::Common;
+	*/
+	pStructure.write<uint8>(mItemData->mUnknown7);
+	pStructure.write<uint8>(mItemData->mUnknown8);
+	pStructure.write<uint8>(mItemData->mCopied);
+	pStructure.write<uint8>(mItemData->mItemClass);
 
 	// Variable.
 	pStructure.writeString(String(mItemData->mName));

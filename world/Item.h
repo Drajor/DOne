@@ -56,7 +56,7 @@ public:
 	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
 	inline const uint32 getPower() const { return mItemData->mPower; }
-	inline const uint32 getIsEvolvingItem() const { return mItemData->mIsEvolvingItem; }
+	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem == 1; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }

@@ -449,6 +449,13 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_TradeBusy:
 		_handleTradeBusy(pPacket);
 		break;
+	case OP_ItemLinkClick:
+		// Note: This occurs when a player clicks on an Item Link.
+		_handleItemLinkClick(pPacket);
+		break;
+	case OP_ItemViewUnknown:
+		_handleItemView(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -2834,6 +2841,16 @@ void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPac
 	auto payload = ServerFilter::convert(pPacket->pBuffer);
 
 	mCharacter->setFilters(payload->mFilters);
+}
+
+void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+	Log::error("Got OP_ItemLinkClick");
+}
+
+void ZoneClientConnection::_handleItemView(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+	Log::info("Got OP_ItemViewUnknown. Size=" + std::to_string(pPacket->size));
 }
 
 //

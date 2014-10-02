@@ -221,6 +221,8 @@ private:
 
 	void _handleSetServerFiler(const EQApplicationPacket* pPacket);
 
+	void _handleItemLinkClick(const EQApplicationPacket* pPacket);
+
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
 	Timer mForceSendPositionTimer;
@@ -233,6 +235,7 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
+		void _handleItemView(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;
