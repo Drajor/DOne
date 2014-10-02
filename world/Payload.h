@@ -48,6 +48,20 @@ namespace Payload {
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 	};
 
+	enum ItemPacketType
+	{
+		ItemPacketViewLink = 0x00,
+		ItemPacketTradeView = 0x65,
+		ItemPacketLoot = 0x66,
+		ItemPacketTrade = 0x67,
+		ItemPacketCharInventory = 0x69,
+		ItemPacketSummonItem = 0x6A,
+		ItemPacketTributeItem = 0x6C,
+		ItemPacketMerchant = 0x64,
+		ItemPacketWorldContainer = 0x6B,
+		ItemPacketCharmUpdate = 0x6E
+	};
+
 	namespace Zone {
 
 		struct ZoneEntry : public Fixed<ZoneEntry> {

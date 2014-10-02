@@ -1,5 +1,6 @@
 #include "Item.h"
 #include "ItemData.h"
+#include "Payload.h"
 #include <iostream>
 
 Item::Item(ItemData* pItemData) : mItemData(pItemData) {
@@ -26,7 +27,10 @@ const uint32 Item::getDataSize() const {
 	for (auto i : mContents)
 		if(i) result += i->getDataSize();
 
-	return _getDataSize() + result;
+	//return _getDataSize() + result;
+	uint32 s = _getDataSize() + result;
+	Log::info("Item: " + getName() + " Size: " + std::to_string(s));
+	return s;
 }
 
 const uint32 Item::_getDataSize() const {
@@ -186,6 +190,27 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 		if (i) EXPECTED_BOOL(i->copyData(pStructure));
 
 	return true;
+}
+
+const unsigned char* Item::copyData(uint32& pSize) {
+	unsigned char * data = nullptr;
+	//uint32 numItems = 1;
+	pSize += getDataSize();
+	//numItems += getSubItems();
+
+	pSize += sizeof(uint32); // Item Count
+	data = new unsigned char[pSize];
+
+	Utility::DynamicStructure ds(data, pSize);
+	ds.write<uint32>(Payload::ItemPacketSummonItem);
+
+	copyData(ds);
+
+	if (ds.check() == false) {
+		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	}
+
+	return data;
 }
 
 uint32 Item::getSubItems() const {

@@ -54,6 +54,7 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
 	put(ItemGenerator::makeShield(0, Rarity::Common), 24);
 	put(ItemGenerator::makeHead(0, Rarity::Common), 25);
+	put(ItemGenerator::makeRandomContainer(Rarity::Common), 26);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 24);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 25);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 36);
@@ -148,6 +149,14 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 }
 
 const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize) {
+
+	// NOTE: The client sends this when an item is summoned to their cursor.
+	if (pFromSlot == pToSlot) {
+		// Debug logging until I understand any other circumstances this can occur in.
+		Log::info("MoveItem: From: " + std::to_string(pFromSlot) + " To: " + std::to_string(pToSlot) + " Stack: " + std::to_string(pStackSize));
+		return true;
+	}
+
 	// Moving To: Free Memory
 	if (SlotID::isDelete(pToSlot)) {
 		Log::info("[Inventory] DELETE");

@@ -13,6 +13,9 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "Limits.h"
+#include "ItemGenerator.h"
+#include "Item.h"
+#include "Inventory.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -42,7 +45,7 @@ std::vector<String> split(const String &s, char delim) {
 class ZoneCommand : public Command {
 public:
 	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #zone <Zone ID> <Zone Instance ID>";
+		mHelpMessages.push_back("Usage: #zone <Zone ID> <Zone Instance ID>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -70,7 +73,7 @@ public:
 class WarpCommand : public Command {
 public:
 	WarpCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #warp <X> <Y> <Z>";
+		mHelpMessages.push_back("Usage: #warp <X> <Y> <Z>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -107,7 +110,7 @@ public:
 class GMCommand : public Command {
 public:
 	GMCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #gm on / #gm off";
+		mHelpMessages.push_back("Usage: #gm on / #gm off");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -128,7 +131,7 @@ public:
 class ZoneListCommand : public Command {
 public:
 	ZoneListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #zonelist";
+		mHelpMessages.push_back("Usage: #zonelist");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -146,7 +149,7 @@ public:
 class AddExperienceCommand : public Command {
 public:
 	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #addexp <number>";
+		mHelpMessages.push_back("Usage: #addexp <number>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -172,7 +175,7 @@ public:
 class RemoveExperienceCommand : public Command {
 public:
 	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #remexp <number>";
+		mHelpMessages.push_back("Usage: #remexp <number>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -198,7 +201,7 @@ public:
 class LocationCommand : public Command {
 public:
 	LocationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #loc";
+		mHelpMessages.push_back("Usage: #loc");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -214,7 +217,7 @@ public:
 class LevelCommand : public Command {
 public:
 	LevelCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #level <number>";
+		mHelpMessages.push_back("Usage: #level <number>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -240,7 +243,7 @@ public:
 class StatsCommand : public Command {
 public:
 	StatsCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage Example: #setstat str 10";
+		mHelpMessages.push_back("Usage Example: #setstat str 10");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -285,7 +288,7 @@ public:
 class ZoneSearchCommand : public Command {
 public:
 	ZoneSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #zs <text>";
+		mHelpMessages.push_back("Usage: #zs <text>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -309,7 +312,7 @@ public:
 class GuildSearchCommand : public Command {
 public:
 	GuildSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #guildsearch <optional text>";
+		mHelpMessages.push_back("Usage: #guildsearch <optional text>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -336,7 +339,7 @@ public:
 class GuildInformationCommand : public Command {
 public:
 	GuildInformationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #ginfo";
+		mHelpMessages.push_back("Usage: #ginfo");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -357,7 +360,7 @@ public:
 class GuildPromoteCommand : public Command {
 public:
 	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #guildpromote <name>";
+		mHelpMessages.push_back("Usage: #guildpromote <name>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -381,7 +384,7 @@ public:
 class GuildDemoteCommand : public Command {
 public:
 	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #guilddemote <name>";
+		mHelpMessages.push_back("Usage: #guilddemote <name>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -403,7 +406,7 @@ public:
 class WearChangeCommand : public Command {
 public:
 	WearChangeCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #wc <slot> <material> <colour>";
+		mHelpMessages.push_back("Usage: #wc <slot> <material> <colour>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -429,7 +432,7 @@ public:
 class SurnameCommand : public Command {
 public:
 	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #surname <name>";
+		mHelpMessages.push_back("Usage: #surname <name>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -462,7 +465,7 @@ public:
 class FindSpellCommand : public Command {
 public:
 	FindSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #findspell <name>";
+		mHelpMessages.push_back("Usage: #findspell <name>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -480,7 +483,7 @@ public:
 class SetSkillCommand : public Command {
 public:
 	SetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #setskill <id> <value>";
+		mHelpMessages.push_back("Usage: #setskill <id> <value>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -515,7 +518,7 @@ public:
 class GetSkillCommand : public Command {
 public:
 	GetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #getskill <id>";
+		mHelpMessages.push_back("Usage: #getskill <id>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -552,7 +555,7 @@ public:
 class SkillListCommand : public Command {
 public:
 	SkillListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #skills";
+		mHelpMessages.push_back("Usage: #skills");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -565,7 +568,7 @@ public:
 class SetLanguageCommand : public Command {
 public:
 	SetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #setlanguage <id> <value>";
+		mHelpMessages.push_back("Usage: #setlanguage <id> <value>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -600,7 +603,7 @@ public:
 class GetLanguageCommand : public Command {
 public:
 	GetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #getlanguage <id>";
+		mHelpMessages.push_back("Usage: #getlanguage <id>");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -636,7 +639,7 @@ public:
 class LanguageListCommand : public Command {
 public:
 	LanguageListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #languages";
+		mHelpMessages.push_back("Usage: #languages");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -649,7 +652,7 @@ public:
 class DepopulateCommand : public Command {
 public:
 	DepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #depop";
+		mHelpMessages.push_back("Usage: #depop");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -662,7 +665,7 @@ public:
 class PopulateCommand : public Command {
 public:
 	PopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #pop";
+		mHelpMessages.push_back("Usage: #pop");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -675,7 +678,7 @@ public:
 class RepopulateCommand : public Command {
 public:
 	RepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #repop";
+		mHelpMessages.push_back("Usage: #repop");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -691,7 +694,7 @@ public:
 class WorldLockCommand : public Command {
 public:
 	WorldLockCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #lock 1/0";
+		mHelpMessages.push_back("Usage: #lock 1/0");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -719,7 +722,7 @@ public:
 class KillCommand : public Command {
 public:
 	KillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessage = "Usage: #kill";
+		mHelpMessages.push_back("Usage: #kill");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -737,6 +740,73 @@ public:
 		}
 
 		return false;
+	}
+};
+
+/*****************************************************************************************************************************/
+class SummonRandomItemCommand : public Command {
+public:
+	SummonRandomItemCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+		mHelpMessages.push_back("Description: Summons a quantity of random items.");
+		mHelpMessages.push_back("Usage: #sri <type> <level> <rarity> <qty=1>");
+		mHelpMessages.push_back("Types: Container=\"cont\" ");
+	};
+
+	const bool send(Character* pCharacter, Item* pItem) {
+		EXPECTED_BOOL(pCharacter);
+		EXPECTED_BOOL(pItem);
+
+		uint32 payloadSize = 0;
+		const unsigned char* data = pItem->copyData(payloadSize);
+
+		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+		pCharacter->getConnection()->sendPacket(outPacket);
+		safe_delete(outPacket);
+
+		return true;
+	}
+
+	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Check: Parameter #
+		if (pParameters.size() < 3) {
+			invalidParameters(pCharacter, pParameters);
+			return false;
+		}
+
+		// Convert 'Level'
+		uint8 level = 0;
+		if (!Utility::stoSafe(level, pParameters[1])) {
+			conversionError(pCharacter, pParameters[1]);
+			return false;
+		}
+
+		// Convert 'Rarity'
+		uint8 rarityIndex = 0;
+		if (!Utility::stoSafe(rarityIndex, pParameters[2])) {
+			conversionError(pCharacter, pParameters[2]);
+			return false;
+		}
+		if (!RarityRangeCheck(rarityIndex)) {
+			// TODO:
+			return false;
+		}
+		Rarity rarity = RarityArray[rarityIndex];
+
+		// Random Container.
+		if (pParameters[0] == "cont") {
+			Item* item = ItemGenerator::makeRandomContainer(rarity);
+			pCharacter->getInventory()->pushCursor(item);
+
+			return send(pCharacter, item);
+		}
+
+		// Random Shield
+		if (pParameters[0] == "shield") {
+			Item* item = ItemGenerator::makeShield(level, rarity);
+			pCharacter->getInventory()->pushCursor(item);
+
+			return send(pCharacter, item);
+		}
 	}
 };
 
@@ -796,6 +866,8 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new RepopulateCommand(100, { "repop" }));
 
 	mCommands.push_back(new KillCommand(100, { "kill" }));
+
+	mCommands.push_back(new SummonRandomItemCommand(100, { "sri" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1051,10 +1123,11 @@ void Command::conversionError(Character* pCharacter, String& pParameter) {
 }
 
 void Command::helpMessage(Character* pCharacter) {
-	if (mHelpMessage.empty()){
+	if (mHelpMessages.size() == 0){
 		pCharacter->getConnection()->sendMessage(MessageType::Yellow, "This command has no help message.");
 		return;
 	}
 
-	pCharacter->getConnection()->sendMessage(MessageType::Yellow, mHelpMessage);
+	for (auto i : mHelpMessages)
+		pCharacter->getConnection()->sendMessage(MessageType::Yellow, i);
 }

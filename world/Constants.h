@@ -106,7 +106,9 @@ typedef std::array<uint32, Limits::MAX_FILTERS> Filters;
 
 static const String SYS_NAME = "[System]";
 
-enum Rarity : uint8 { Common, Magic, Rare, Artifact };
+enum Rarity : uint8 { Common, Magic, Rare, Artifact, RarityMax };
+static const std::array<Rarity, RarityMax> RarityArray = { Rarity::Common, Rarity::Magic, Rarity::Rare, Rarity::Artifact };
+static bool RarityRangeCheck(const uint8 pRarity) { return pRarity < Artifact; }
 
 namespace SlotID {
 	enum : uint32 {

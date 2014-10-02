@@ -22,7 +22,7 @@ protected:
 	
 	std::list<String> mAliases;
 	uint8 mMinimumStatus;
-	String mHelpMessage;
+	std::list<String> mHelpMessages;
 };
 
 class CommandHandler {

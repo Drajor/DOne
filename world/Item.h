@@ -44,6 +44,7 @@ public:
 	Item* getContents(const uint8 pSlot) const;
 
 	const uint32 getDataSize() const;
+	const unsigned char* copyData(uint32& pSize);
 	const bool copyData(Utility::DynamicStructure& pStructure);
 	uint32 getSubItems() const;
 

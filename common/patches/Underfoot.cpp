@@ -1429,34 +1429,34 @@ ENCODE(OP_MercenaryDataUpdate) {
 	delete in;
 }
 
-ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
-ENCODE(OP_ItemPacket) {
-	//consume the packet
-	EQApplicationPacket *in = *p;
-	*p = nullptr;
-
-	unsigned char *__emu_buffer = in->pBuffer;
-	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
-	InternalSerializedItem_Struct *int_struct=(InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
-
-	uint32 length;
-	char *serialized=SerializeItem((ItemInst *)int_struct->inst,int_struct->slot_id,&length,0);
-
-	if (!serialized) {
-		_log(NET__STRUCTS, "Serialization failed on item slot %d.",int_struct->slot_id);
-		delete in;
-		return;
-	}
-	in->size = length+4;
-	in->pBuffer = new unsigned char[in->size];
-	ItemPacket_Struct *new_item_pkt=(ItemPacket_Struct *)in->pBuffer;
-	new_item_pkt->PacketType=old_item_pkt->PacketType;
-	memcpy(new_item_pkt->SerializedItem,serialized,length);
-
-	delete[] __emu_buffer;
-	safe_delete_array(serialized);
-	dest->FastQueuePacket(&in, ack_req);
-}
+//ENCODE(OP_ItemLinkResponse) {  ENCODE_FORWARD(OP_ItemPacket); }
+//ENCODE(OP_ItemPacket) {
+//	//consume the packet
+//	EQApplicationPacket *in = *p;
+//	*p = nullptr;
+//
+//	unsigned char *__emu_buffer = in->pBuffer;
+//	ItemPacket_Struct *old_item_pkt=(ItemPacket_Struct *)__emu_buffer;
+//	InternalSerializedItem_Struct *int_struct=(InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
+//
+//	uint32 length;
+//	char *serialized=SerializeItem((ItemInst *)int_struct->inst,int_struct->slot_id,&length,0);
+//
+//	if (!serialized) {
+//		_log(NET__STRUCTS, "Serialization failed on item slot %d.",int_struct->slot_id);
+//		delete in;
+//		return;
+//	}
+//	in->size = length+4;
+//	in->pBuffer = new unsigned char[in->size];
+//	ItemPacket_Struct *new_item_pkt=(ItemPacket_Struct *)in->pBuffer;
+//	new_item_pkt->PacketType=old_item_pkt->PacketType;
+//	memcpy(new_item_pkt->SerializedItem,serialized,length);
+//
+//	delete[] __emu_buffer;
+//	safe_delete_array(serialized);
+//	dest->FastQueuePacket(&in, ack_req);
+//}
 
 ENCODE(OP_GuildMemberList) {
 	//consume the packet
