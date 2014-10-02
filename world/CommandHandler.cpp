@@ -752,9 +752,9 @@ public:
 		mHelpMessages.push_back("Types: Container=\"cont\" ");
 	};
 
-	const bool send(Character* pCharacter, Item* pItem) {
-		EXPECTED_BOOL(pCharacter);
-		EXPECTED_BOOL(pItem);
+	void send(Character* pCharacter, Item* pItem) {
+		EXPECTED(pCharacter);
+		EXPECTED(pItem);
 
 		uint32 payloadSize = 0;
 		const unsigned char* data = pItem->copyData(payloadSize);
@@ -762,8 +762,6 @@ public:
 		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 		pCharacter->getConnection()->sendPacket(outPacket);
 		safe_delete(outPacket);
-
-		return true;
 	}
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
@@ -792,20 +790,34 @@ public:
 		}
 		Rarity rarity = RarityArray[rarityIndex];
 
+		// Convert 'Quantity'
+		uint8 quantity = 1;
+		if (pParameters.size() == 4) {
+			if (!Utility::stoSafe(quantity, pParameters[3])) {
+				conversionError(pCharacter, pParameters[3]);
+				return false;
+			}
+		}
+
 		// Random Container.
 		if (pParameters[0] == "cont") {
-			Item* item = ItemGenerator::makeRandomContainer(rarity);
-			pCharacter->getInventory()->pushCursor(item);
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeRandomContainer(rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
 
-			return send(pCharacter, item);
+			return true;
 		}
 
 		// Random Shield
 		if (pParameters[0] == "shield") {
-			Item* item = ItemGenerator::makeShield(level, rarity);
-			pCharacter->getInventory()->pushCursor(item);
-
-			return send(pCharacter, item);
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeShield(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+			return true;
 		}
 	}
 };
