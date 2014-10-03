@@ -749,7 +749,7 @@ public:
 	SummonRandomItemCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
 		mHelpMessages.push_back("Description: Summons a quantity of random items.");
 		mHelpMessages.push_back("Usage: #sri <type> <level> <rarity> <qty=1>");
-		mHelpMessages.push_back("Types: Container=\"cont\" ");
+		mHelpMessages.push_back("Types: cont, head, chest, arms, wrists, legs, hands, feet ");
 	};
 
 	void send(Character* pCharacter, Item* pItem) {
@@ -798,6 +798,83 @@ public:
 				return false;
 			}
 		}
+		
+		// Random Head.
+		if (pParameters[0] == "head") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeHead(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Chest.
+		if (pParameters[0] == "chest") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeChest(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Arms.
+		if (pParameters[0] == "arms") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeArms(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Arms.
+		if (pParameters[0] == "wrists") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeWrists(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Legs.
+		if (pParameters[0] == "legs") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeLegs(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Arms.
+		if (pParameters[0] == "hands") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeHands(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
+
+		// Random Feet.
+		if (pParameters[0] == "feet") {
+			for (auto i = 0; i < quantity; i++) {
+				Item* item = ItemGenerator::makeFeet(level, rarity);
+				pCharacter->getInventory()->pushCursor(item);
+				send(pCharacter, item);
+			}
+
+			return true;
+		}
 
 		// Random Container.
 		if (pParameters[0] == "cont") {
@@ -819,6 +896,8 @@ public:
 			}
 			return true;
 		}
+
+		return false;
 	}
 };
 

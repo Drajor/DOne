@@ -25,58 +25,23 @@ struct ItemData {
 		memset(mBardName, 0, sizeof(mBardName));
 
 		strcpy(mIDFile, "IT63");
-
-		//// chunk0
-		//mUnknown0 = 100; // uint32
-		//mUnknown1 = 100; // uint32
-		//mUnknown2 = 100; // uint32
-		//mUnknown4 = 100; // uint32
-		//mUnknown5 = 100; // uint32
-		////mUnknown7 = 0; // uint8
-		////mUnknown8 = 0; // uint8
-
-		//// chunk1
-		//mUnknown10 = 100; // uint8
-		//mUnknown11 = 100; // uin8
-		//mUnknown12 = 100; // uint32
-		//mUnknown13 = 100; // uint32
-
-		//// chunk3
-		//mUnknown14 = 100; // int32
-		//mUnknown15 = 100; // uint32
-		//mUnknown16 = 100; // uint8
-		//mUnknown17 = 100; // uint32
-		//mUnknown18 = 100; // uint32
-		//mUnknown19 = 100; // uint32
-		//mUnknown20 = 100; // uint32
-		//mUnknown21 = 100; // uint8
-		//mUnknown22 = 100; // uint8
-		//mUnknown23 = 100; // uint8
-
-		//// chunk4
-		//unknown25 = 100; // uint8
-		//evolve_string = 100; // uint32
-		//unknown26 = 100; // uint8
-		//unknown27 = 100; // uint32
-		//unknown28 = 100; // uint32
-		//unknown29 = 100; // uint32
 	}
 
 	// BEGIN chunk0
 	uint32 mStacks = 1; // Specified by Item.
-	uint32 mUnknown0 = 0;
+	uint32 __Unknown0 = 0;
 	uint32 mSlot = 0; // Specified by Item.
 	uint32 mMerchantPrice = 0; // Maybe vendor price?
 	uint32 mMerchantSlot = 1; //1 if not a merchant item
-	uint32 mUnknown1 = 0;
+	uint32 __Unknown1 = 0;
 	uint32 mInstanceID = 0; //unique instance id if not merchant item, else is merchant slot // what.the.fuck.
-	uint32 mUnknown2 = 0;
+	uint32 __Unknown2 = 0;
 	uint32 mLastCastTime = 0;	// Unix Time from PP of last cast for this recast type if recast delay > 0
 	uint32 mCharges = 0; //Total Charges an item has (-1 for unlimited)
 	uint32 mAttuned = 0;
 	uint32 mPower = 0;
-	uint32 mUnknown4 = 0;
-	uint32 mUnknown5 = 0;
+	uint32 __Unknown3 = 0;
+	uint32 __Unknown4 = 0;
 	uint32 mIsEvolvingItem = 0;
 	struct EvolvingItem {
 		/*
@@ -113,8 +78,8 @@ struct ItemData {
 		uint8 end[2];
 	};
 	EvolvingItem mEvolvingItem;
-	uint8 mUnknown7 = 0; // Same as below ><
-	uint8 mUnknown8 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
+	uint8 __Unknown5 = 0; // Same as below ><
+	uint8 __Unknown6 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
@@ -133,9 +98,9 @@ struct ItemData {
 	uint32 mSlots = 0;
 	uint32 mPrice = 0;
 	uint32 mIcon = 0;
-	uint8 mUnknown10 = 1; // 1 copied
-	uint8 mUnknown11 = 1; // 1 copied
-	uint32 mBenefitFlag = 0; // UNSURE
+	uint8 __Unknown7 = 1; // 1 copied
+	uint8 __Unknown8 = 1; // 1 copied
+	uint32 mBenefitFlag = 0;
 	uint8 mTradeSkills = 0; // 0 = OFF, 1 = ON
 	int8 mColdResist = 0;
 	int8 mDieaseResist = 0;
@@ -161,7 +126,7 @@ struct ItemData {
 	uint32 mRaces = 65535;
 	uint32 mDeity = 0;
 	int32 mSkillModAmount = 0;
-	uint32 mUnknown12 = 0;
+	uint32 __Unknown9 = 0;
 	uint32 mSkillMod = 0;
 	uint32 mBaneDamageRace = 0;
 	uint32 mBaneDamageBodyType = 0;
@@ -187,7 +152,7 @@ struct ItemData {
 	uint32 mColour = 4278190080;
 	uint8 mItemType = 0;
 	uint32 mMaterial = 0;
-	uint32 mUnknown13 = 0;
+	uint32 __Unknown10 = 0;
 	uint32 mEliteMaterial = 0;
 	float mSellRate = 1.0f;
 	int32 mCombatEffects = 0;
@@ -248,10 +213,10 @@ struct ItemData {
 	int32 mDamageShield = 0;
 	uint32 mGuildFavor = 0;
 	uint32 augdistil = 0;
-	int32 mUnknown14 = 0;
-	uint32 mUnknown15 = 0;
+	int32 __Unknown11 = 0;
+	uint32 __Unknown12 = 0;
 	uint8 mNoPet = 0; // 0 = OFF, 1 = ON
-	uint8 mUnknown16 = 0;
+	uint8 __Unknown13 = 0;
 
 	uint8 potion_belt_enabled = 0;
 	uint32 potion_belt_slots = 0;
@@ -260,13 +225,13 @@ struct ItemData {
 	uint8 mNoTransfer = 0; // 0 = OFF, 1 = ON
 	uint16 expendablearrow = 0;
 
-	uint32 mUnknown17 = 0;
-	uint32 mUnknown18 = 0;
-	uint32 mUnknown19 = 0;
-	uint32 mUnknown20 = 0;
-	uint8 mUnknown21 = 0;
-	uint8 mUnknown22 = 0;
-	uint8 mUnknown23 = 0;
+	uint32 __Unknown14 = 0;
+	uint32 __Unknown15 = 0;
+	uint32 __Unknown16 = 0;
+	uint32 __Unknown17 = 0;
+	uint8 __Unknown18 = 0;
+	uint8 __Unknown19 = 0;
+	uint8 __Unknown20 = 0;
 	// END chunk3
 
 	struct ClickEffect {
@@ -289,7 +254,7 @@ struct ItemData {
 		uint8 level2 = 0;
 		uint32 type = 0;
 		uint8 level = 0;
-		uint32 unknown1 = 0; // poison?
+		uint32 unknown1 = 0;
 		uint32 unknown2 = 0;
 		uint32 unknown3 = 0;
 		uint32 unknown4 = 0;
@@ -322,10 +287,6 @@ struct ItemData {
 	char mScrollName[65];
 	int32 mScrollUnknown = -1;
 
-
-	// http://everquest.allakhazam.com/db/item.html?item=87185
-	// http://lucy.allakhazam.com/itemraw.html?id=110788
-	// This item appears to use the bard effect.
 	Effect mBardEffect;
 	char mBardName[65];
 	int32 mBardUnknown = -1;
@@ -333,7 +294,6 @@ struct ItemData {
 	// BEGIN chunk4
 	uint32 mScriptFileID = 0;
 	uint8 mQuest = 0; // 1 = ON
-	///////////////////////////////
 	uint32 mMaxPower = 0;
 	uint32 mPurity = 0;
 	uint32 mBackstabDamage = 0;
@@ -354,14 +314,16 @@ struct ItemData {
 	int32 mHealAmount = 0;
 	int32 mSpellDamage = 0;
 	int32 mClairvoyance = 0;
-	uint8 unknown25 = 0;	//Power Source Capacity or evolve filename?
-	uint32 evolve_string = 0; // Some String, but being evolution related is just a guess
-	uint8 unknown26 = 0;
-	uint32 unknown27 = 0;	// Bard Stuff?
-	uint32 unknown28 = 0;
-	uint32 unknown29 = 0;
+	uint8 __Unknown21 = 0;
+	uint32 __Unknown22 = 0;
+	uint8 __Unknown23 = 0;
+	uint16 __Unknown24 = 0;
+	uint8 __Unknown25 = 0;
+	uint8 mHeirloom = 0;
+	uint32 __Unknown26 = 0;
+	uint32 __Unknown27 = 0;
 	// END chunk4
-	uint32 subitem_count = 0; // NOT USED.
+	uint32 mNumSubItems = 0; // NOT USED.
 };
 
 #pragma pack()

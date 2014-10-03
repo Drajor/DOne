@@ -253,6 +253,14 @@ namespace ItemType {
 		Miscellaneous = 11,
 		Food = 14,
 		Drink = 15,
+
+		TwoHandPierce = 35,
+	};
+}
+
+namespace ItemMaterial {
+	enum : uint32 {
+		Plate = 3
 	};
 }
 

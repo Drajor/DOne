@@ -229,6 +229,7 @@ public:
 	inline const int32 _getSpellDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSpellDamage(); return getSpellDamage() + count; }
 	inline const int32 getClairvoyance() const { return mItemData->mClairvoyance; }
 	inline const int32 _getClairvoyance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getClairvoyance(); return getClairvoyance() + count; }
+	inline const bool getIsHeirloom() const { return mItemData->mHeirloom == 1; }
 
 
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
@@ -366,6 +367,7 @@ public:
 	inline void setHealAmount(const int32 pValue) { mItemData->mHealAmount = pValue; }
 	inline void setSpellDamage(const int32 pValue) { mItemData->mSpellDamage = pValue; }
 	inline void setClairvoyance(const int32 pValue) { mItemData->mClairvoyance = pValue; }
+	inline void setIsHeirloom(const bool pValue) { mItemData->mHeirloom = pValue ? 1 : 0; }
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();

@@ -67,32 +67,7 @@ Item* ItemGenerator::makePowerSource(const uint8 pLevel, const Rarity pRarity) {
 	item->setMaxPower(100);
 	//item->setPower(Random::make<uint32>(0, 100));
 	item->setPower(100);
-
-	return item;
-}
-
-
-Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
-
-	item->setName("One Hand Blunt");
-	item->setIcon(578);
-	item->setIDFile("IT7");
-	item->setItemType(ItemType::OneHandBlunt);
-	item->setDelay(Random::make<uint32>(25, 45));
-	item->setDamage(Random::make<uint32>(5, 15));
-	item->setIsMagic(true);
-	item->setSlots(EquipSlots::Primary);
-	item->setIsEvolvingItem(1);
-	item->setWeight(200);
-	item->setLore("This is a one hand blunt weapon.");
-
-	//item->setBaneDamageRace(1);
-	//item->setBaneDamageRaceAmount(100);
-	//item->setBaneBodyType(BodyType::BT_Animal);
-	//item->setBaneBodyTypeAmount(100);
-	//item->setElementalDamageAmount(100);
-	//item->setElementalDamasetype(2);
+	item->setIsHeirloom(true);
 
 	return item;
 }
@@ -113,24 +88,6 @@ Item* ItemGenerator::makeShield(const uint8 pLevel, const Rarity pRarity) {
 	//item->setClickName("Test");
 	//item->setMaxPower(100);
 	//item->setPower(Random::make<uint32>(0, 100));
-
-	return item;
-}
-
-Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
-
-	item->setName("Head Item");
-	item->setIcon(746);
-	item->setIDFile("IT63");
-	item->setMaterial(3);
-	item->setItemType(ItemType::Armor);
-	item->setIsMagic(true);
-	item->setSlots(EquipSlots::Head);
-	//item->setSkillMod(1);
-	//item->setSkillModAmount(1);
-	item->setPurity(100);
-	item->setStrength(30);
 
 	return item;
 }
@@ -232,4 +189,208 @@ const uint32 ItemGenerator::getNextID() {
 const uint32 ItemGenerator::getNextSerial() {
 	mNextSerial++;
 	return mNextSerial;
+}
+
+Item* ItemGenerator::makeOneHandSlash(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("One Hand Slash");
+	item->setIcon(580);
+	item->setIDFile("IT10653");
+	item->setItemType(ItemType::OneHandSlash);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary + EquipSlots::Secondary);
+
+	return item;
+}
+
+Item* ItemGenerator::makeTwoHandSlash(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Two Hand Slash");
+	item->setIcon(519);
+	item->setIDFile("IT10648");
+	item->setItemType(ItemType::TwoHandSlash);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary);
+
+	return item;
+}
+
+Item* ItemGenerator::makeOneHandPierce(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("One Hand Pierce");
+	item->setIcon(592);
+	item->setIDFile("IT10650");
+	item->setItemType(ItemType::OneHandPierce);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary + EquipSlots::Secondary);
+
+	return item;
+}
+
+Item* ItemGenerator::makeTwoHandPierce(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Two Hand Pierce");
+	item->setIcon(776);
+	item->setIDFile("IT172");
+	item->setItemType(ItemType::TwoHandPierce);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary);
+
+	return item;
+}
+
+Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("One Hand Blunt");
+	item->setIcon(578);
+	item->setIDFile("IT7");
+	item->setItemType(ItemType::OneHandBlunt);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary + EquipSlots::Secondary);
+
+	return item;
+}
+
+
+Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Two Hand Blunt");
+	item->setIcon(741);
+	item->setIDFile("IT10608");
+	item->setItemType(ItemType::TwoHandSlash);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Primary);
+
+	return item;
+}
+
+Item* ItemGenerator::makeBow(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Bow");
+	item->setIcon(597);
+	item->setIDFile("IT10614");
+	item->setItemType(ItemType::Bow);
+	item->setDelay(Random::make<uint32>(25, 45));
+	item->setDamage(Random::make<uint32>(5, 15));
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Range);
+
+	return item;
+}
+
+Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Head Item");
+	item->setIcon(746);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Head);
+
+	return item;
+}
+
+Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Chest Item");
+	item->setIcon(624);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Chest);
+
+	return item;
+}
+
+Item* ItemGenerator::makeArms(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Arms Item");
+	item->setIcon(622);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Arms);
+
+	return item;
+}
+
+Item* ItemGenerator::makeWrists(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Bracers Item");
+	item->setIcon(516);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Wrists);
+
+	return item;
+}
+
+Item* ItemGenerator::makeLegs(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Legs Item");
+	item->setIcon(540);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Legs);
+
+	return item;
+}
+
+Item* ItemGenerator::makeHands(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Hands Item");
+	item->setIcon(531);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Hands);
+
+	return item;
+}
+
+Item* ItemGenerator::makeFeet(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Feet Item");
+	item->setIcon(524);
+	item->setIDFile("IT63");
+	item->setMaterial(ItemMaterial::Plate);
+	item->setItemType(ItemType::Armor);
+	item->setIsMagic(true);
+	item->setSlots(EquipSlots::Feet);
+
+	return item;
 }

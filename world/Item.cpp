@@ -116,8 +116,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 		uint8 mCopied = 0; // 0 = OFF, 1 = ON
 		uint8 mItemClass = ItemClass::Common;
 	*/
-	pStructure.write<uint8>(mItemData->mUnknown7);
-	pStructure.write<uint8>(mItemData->mUnknown8);
+	pStructure.write<uint8>(mItemData->__Unknown5);
+	pStructure.write<uint8>(mItemData->__Unknown6);
 	pStructure.write<uint8>(mItemData->mCopied);
 	pStructure.write<uint8>(mItemData->mItemClass);
 
@@ -175,7 +175,7 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.write<int32>(mItemData->mBardUnknown);
 
 	// Chunk Four.
-	std::size_t chunk4 = (unsigned int)&(mItemData->subitem_count) - (unsigned int)&(mItemData->mScriptFileID);
+	std::size_t chunk4 = (unsigned int)&(mItemData->mNumSubItems) - (unsigned int)&(mItemData->mScriptFileID);
 	pStructure.writeChunk((void*)&(mItemData->mScriptFileID), chunk4);
 
 	// Child Items.
