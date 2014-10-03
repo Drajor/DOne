@@ -43,6 +43,7 @@ struct ItemData {
 	uint32 __Unknown3 = 0;
 	uint32 __Unknown4 = 0;
 	uint32 mIsEvolvingItem = 0;
+	//uint8 mIsEvolvingItem = 0;
 	struct EvolvingItem {
 		/*
 		6145 Your %1 has evolved!
@@ -56,30 +57,27 @@ struct ItemData {
 			memset(mString, 0, sizeof(mString));
 			mCurrentLevel = 2;
 			mMaxLevel = 10;
-
-			//strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164DShield\\x12").c_str());
-			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D").c_str());
-			//strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%s\\x12").c_str());
-			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D%s").c_str());
-
-			//strcpy(mString, String("0027120000000000000000000000000000000000008D84164D%1").c_str());
 			strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%1\\x12").c_str());
-
-			//end[0] = 0; // 1 = icon broken.
-			//end[1] = 0; // 1 = icon broken.
 		}
+		//uint8 a = 0;
+		//uint8 b = 0;
+		//uint8 c = 1;
 		uint8 mUnknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
-		int32 mCurrentLevel = 0;
+		int32 mCurrentLevel = 1;
 		char bytes0[8]; // Possible Race/BodyType experience constraints
-		uint8 mActive = 1; // 1 = ON
-		int32 mMaxLevel = 0;
+		uint8 mActive = 0; // 1 = ON
+		int32 mMaxLevel = 3;
 		uint8 evobytes[4];
 		char mString[100];
 		uint8 end[2];
 	};
 	EvolvingItem mEvolvingItem;
-	uint8 __Unknown5 = 0; // Same as below ><
-	uint8 __Unknown6 = 0; //0 - Possibly Evolving Item related. When 1, an evolving item is fine, however the icon of non evolving items is messed up.
+	
+	//uint8 a = 0;
+	//uint8 b = 0;
+	//uint8 c = 0;
+	uint8 __Unknown5 = 0;
+	uint8 __Unknown6 = 0;
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0

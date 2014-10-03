@@ -307,6 +307,7 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setItemType(ItemType::Armor);
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Head);
+	item->setIsEvolvingItem(1);
 
 	return item;
 }

@@ -86,6 +86,9 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	//// Optional (Evolving Item)
 	if (isEvolvingItem() == 1) {
 		//uint8 mUnknown0 = 0;
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.a);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.b);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.c);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mUnknown0);
 		//int32 mCurrentLevel = 0;
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
@@ -116,6 +119,10 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 		uint8 mCopied = 0; // 0 = OFF, 1 = ON
 		uint8 mItemClass = ItemClass::Common;
 	*/
+
+	//pStructure.write<uint8>(mItemData->a);
+	//pStructure.write<uint8>(mItemData->b);
+	//pStructure.write<uint8>(mItemData->c);
 	pStructure.write<uint8>(mItemData->__Unknown5);
 	pStructure.write<uint8>(mItemData->__Unknown6);
 	pStructure.write<uint8>(mItemData->mCopied);
