@@ -43,39 +43,29 @@ struct ItemData {
 	uint32 __Unknown3 = 0;
 	uint32 __Unknown4 = 0;
 	uint32 mIsEvolvingItem = 0;
-	//uint8 mIsEvolvingItem = 0;
 	struct EvolvingItem {
-		/*
-		6145 Your %1 has evolved!
-		6146 Evolving: Level %1/%2 %3%% %4
-		6147 Your %1 can not evolve until you reach level %2.
-		*/
 		EvolvingItem() {
 			memset(bytes0, 0, sizeof(bytes0));
-			memset(evobytes, 0, sizeof(evobytes));
+			//memset(bytes1, 0, sizeof(bytes1));
+			//memset(evobytes, 0, sizeof(evobytes));
 			memset(end, 0, sizeof(end));
 			memset(mString, 0, sizeof(mString));
-			mCurrentLevel = 2;
-			mMaxLevel = 10;
+			mCurrentLevel = 0;
+			mMaxLevel = 3;
 			strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%1\\x12").c_str());
 		}
-		//uint8 a = 0;
-		//uint8 b = 0;
-		//uint8 c = 1;
 		uint8 mUnknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
-		int32 mCurrentLevel = 1;
-		char bytes0[8]; // Possible Race/BodyType experience constraints
+		int32 mCurrentLevel = 0;
+		char bytes0[4];
+		float mProgress = 0.0f;
 		uint8 mActive = 0; // 1 = ON
-		int32 mMaxLevel = 3;
-		uint8 evobytes[4];
+		int32 mMaxLevel = 0;
+		float x = 25.0f;
 		char mString[100];
 		uint8 end[2];
 	};
 	EvolvingItem mEvolvingItem;
-	
-	//uint8 a = 0;
-	//uint8 b = 0;
-	//uint8 c = 0;
+
 	uint8 __Unknown5 = 0;
 	uint8 __Unknown6 = 0;
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON

@@ -51,10 +51,14 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 30);
 
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 23);
-	put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
-	put(ItemGenerator::makeShield(0, Rarity::Common), 24);
-	put(ItemGenerator::makeHead(0, Rarity::Common), 25);
-	put(ItemGenerator::makeRandomContainer(Rarity::Common), 26);
+	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
+	//put(ItemGenerator::makeShield(0, Rarity::Common), 24);
+	put(ItemGenerator::makeHead(0, Rarity::Common, 4.7), 26);
+	//put(ItemGenerator::makeHead(0, Rarity::Common, 5.0), 27);
+	//put(ItemGenerator::makeHead(0, Rarity::Common, 6.0), 28);
+	//put(ItemGenerator::makeHead(0, Rarity::Common, 7.0), 29);
+	//put(ItemGenerator::makeHead(0, Rarity::Common, 8.0), 30);
+	//put(ItemGenerator::makeRandomContainer(Rarity::Common), 26);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 24);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 25);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 36);

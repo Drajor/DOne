@@ -51,13 +51,17 @@ public:
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
 	Item* findFirst(const uint8 pItemType);
 
+	// Evolving Items.
+	inline const float getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
+	inline void setEvolvingProgress(const float pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
+
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
 	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
 	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
 	inline const uint32 getPower() const { return mItemData->mPower; }
-	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem == 1; }
+	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem > 0; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
@@ -243,7 +247,7 @@ public:
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
 	inline void setIsTemporary(const bool pValue) { mItemData->mTemporary = pValue ? 1 : 0; }
-	inline void setIsNoDrop(const bool pValue) { mItemData->mNoDrop = pValue ? 1 : 0; }
+	inline void setIsNoDrop(const bool pValue) { mItemData->mNoDrop = pValue ? 0 : 1; }
 	inline void setIsAttunable(const bool pValue) { mItemData->mAttunable = pValue ? 1 : 0; }
 	inline void setSize(const uint8 pValue) { mItemData->mSize = pValue; }
 	inline void setSlots(const uint32 pValue) { mItemData->mSlots = pValue; }
@@ -371,7 +375,7 @@ public:
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();
-
+	
 	Item* mAugments[5];
 	Item* mContents[10];
 	ItemData* mItemData = nullptr;
