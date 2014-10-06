@@ -45,24 +45,22 @@ struct ItemData {
 	uint32 mIsEvolvingItem = 0;
 	struct EvolvingItem {
 		EvolvingItem() {
-			memset(bytes0, 0, sizeof(bytes0));
-			//memset(bytes1, 0, sizeof(bytes1));
-			//memset(evobytes, 0, sizeof(evobytes));
-			memset(end, 0, sizeof(end));
+			memset(__Unknown1, 0, sizeof(__Unknown1));
+			memset(__Unknown2, 0, sizeof(__Unknown2));
+			memset(__Unknown3, 0, sizeof(__Unknown3));
 			memset(mString, 0, sizeof(mString));
 			mCurrentLevel = 0;
 			mMaxLevel = 3;
-			strcpy(mString, String("\\x120027120000000000000000000000000000000000008D84164D%1\\x12").c_str());
 		}
-		uint8 mUnknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
+		uint8 __Unknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
 		int32 mCurrentLevel = 0;
-		char bytes0[4];
+		uint8 __Unknown1[4];
 		float mProgress = 0.0f;
 		uint8 mActive = 0; // 1 = ON
 		int32 mMaxLevel = 0;
-		float x = 25.0f;
+		uint8 __Unknown2[4];
 		char mString[100];
-		uint8 end[2];
+		uint8 __Unknown3[2];
 	};
 	EvolvingItem mEvolvingItem;
 

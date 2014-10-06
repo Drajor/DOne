@@ -297,7 +297,7 @@ Item* ItemGenerator::makeBow(const uint8 pLevel, const Rarity pRarity) {
 	return item;
 }
 
-Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity, const float pProgress) {
+Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
 	item->setName("Head Item");
@@ -307,13 +307,13 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity, const fl
 	item->setItemType(ItemType::Armor);
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Head);
-	item->setIsEvolvingItem(1500);
-	item->setEvolvingProgress(pProgress);
-	item->setLoreGroup(item->getID()); // http://lucy.allakhazam.com/itemraw.html?id=85612 LoreGroup(loreItem) == ItemID
-	item->setWeight(150);
-	item->setIsNoDrop(false);
-	item->setIsAttunable(true);
-	item->setLore("This is a Head Slot item.");
+	//item->setIsEvolvingItem(1500);
+	//item->setEvolvingProgress(pProgress);
+	//item->setLoreGroup(item->getID()); // http://lucy.allakhazam.com/itemraw.html?id=85612 LoreGroup(loreItem) == ItemID
+	//item->setWeight(150);
+	//item->setIsNoDrop(false);
+	//item->setIsAttunable(true);
+	//item->setLore("This is a Head Slot item.");
 
 	return item;
 }

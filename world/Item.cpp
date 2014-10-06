@@ -85,15 +85,15 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
-		pStructure.write<uint8>(mItemData->mEvolvingItem.mUnknown0);
+		pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.bytes0), sizeof(mItemData->mEvolvingItem.bytes0));
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 		pStructure.write<float>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
-		pStructure.write<float>(mItemData->mEvolvingItem.x);
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown2), sizeof(mItemData->mEvolvingItem.__Unknown2));
 		pStructure.writeString(String(mItemData->mEvolvingItem.mString));
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.end), sizeof(mItemData->mEvolvingItem.end));
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown3), sizeof(mItemData->mEvolvingItem.__Unknown3));
 	}
 
 	pStructure.write<uint8>(mItemData->__Unknown5);

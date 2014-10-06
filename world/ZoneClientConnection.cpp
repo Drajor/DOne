@@ -1080,7 +1080,6 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 			break;
 		}
 		mZone->handleSay(mCharacter, message);
-		Log::info(message);
 		break;
 	case ChannelID::CH_RAID:
 		break;

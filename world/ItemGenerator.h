@@ -31,7 +31,7 @@ public:
 	static Item* makeShield(const uint8 pLevel, const Rarity pRarity);
 
 	// Visible Armor
-	static Item* makeHead(const uint8 pLevel, const Rarity pRarity, const float pProgress);
+	static Item* makeHead(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeChest(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeArms(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeWrists(const uint8 pLevel, const Rarity pRarity);

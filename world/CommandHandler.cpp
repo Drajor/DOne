@@ -802,7 +802,7 @@ public:
 		// Random Head.
 		if (pParameters[0] == "head") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeHead(level, rarity, 0);
+				Item* item = ItemGenerator::makeHead(level, rarity);
 				pCharacter->getInventory()->pushCursor(item);
 				send(pCharacter, item);
 			}
