@@ -242,15 +242,14 @@ namespace Payload {
 			uint16 mUnknown0[4];
 		};
 
-		// Based on: SpawnAppearance_Struct
-		struct SpawnAppearance : public Fixed<SpawnAppearance> {
+		// C<->S
+		struct SpawnAppearance : public FixedT<SpawnAppearance, OP_SpawnAppearance> {
 			uint16 mSpawnID = 0;
 			uint16 mType = 0;
 			uint32 mParameter = 0;
 		};
 
 		// S->C
-		// Based on: Animation_Struct
 		struct Animation : public Fixed<Animation> {
 			uint16 mSpawnID = 0;
 			uint8 mAction = 0;

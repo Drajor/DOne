@@ -899,17 +899,16 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 }
 
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(SpawnAppearance_Struct);
-	
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
+	EXPECTED(SpawnAppearance::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(pPacket->pBuffer);
-	const uint16 actionType = payload->type;
-	const uint32 actionParameter = payload->parameter;
+	auto payload = SpawnAppearance::convert(pPacket);
+	const uint16 actionType = payload->mType;
+	const uint32 actionParameter = payload->mParameter;
 
 	// Ignore if spawn id does not match this characters ID.
-	if (payload->spawn_id != mCharacter->getSpawnID()) {
+	if (payload->mSpawnID != mCharacter->getSpawnID()) {
 		// Note: UF client sends spawn ID (0) and action type (51) every few seconds. Not sure why.
 		return;
 	}
@@ -921,26 +920,26 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		case SpawnAppearanceAnimation::Standing:
 			mCharacter->setStanding(true);
 			mZone->handleStanding(mCharacter);
-			mCharacter->setStandingState(Standing);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Standing);
 			break;
 		case SpawnAppearanceAnimation::Freeze:
-			mCharacter->setStandingState(Freeze);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Freeze);
 			break;
 		case SpawnAppearanceAnimation::Looting:
-			mCharacter->setStandingState(Looting);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Looting);
 			break;
 		case SpawnAppearanceAnimation::Sitting:
 			mCharacter->setStanding(false);
 			mZone->handleSitting(mCharacter);
-			mCharacter->setStandingState(Sitting);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Sitting);
 			break;
 		case SpawnAppearanceAnimation::Crouch:
 			// Crouch or Jump triggers this.
 			mZone->handleCrouching(mCharacter);
-			mCharacter->setStandingState(Crouch);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Crouch);
 			break;
 		case SpawnAppearanceAnimation::Death:
-			mCharacter->setStandingState(Death);
+			mCharacter->setStandingState(SpawnAppearanceAnimation::Death);
 			break;
 		default:
 			StringStream ss;

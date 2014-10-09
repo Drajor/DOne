@@ -395,12 +395,12 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
-	auto outPacket = new EQApplicationPacket(OP_SpawnAppearance, SpawnAppearance::size());
-	auto payload = SpawnAppearance::convert(outPacket->pBuffer);
-	payload->mSpawnID = pCharacter->getSpawnID();
-	payload->mType = pType;
-	payload->mParameter = pParameter;
+	SpawnAppearance payload;
+	payload.mSpawnID = pCharacter->getSpawnID();
+	payload.mType = pType;
+	payload.mParameter = pParameter;
 
+	auto outPacket = SpawnAppearance::create(payload);
 	sendToVisible(pCharacter, outPacket, pIncludeSender);
 	safe_delete(outPacket);
 }

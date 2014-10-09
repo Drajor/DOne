@@ -529,14 +529,16 @@ enum SpawnAppearanceType : int16 {
 	EQPlayersAutoUpdate = 45,
 };
 
-enum SpawnAppearanceAnimation : int16 {
-	Standing = 100,
-	Freeze = 102,
-	Looting = 105,
-	Sitting = 110,
-	Crouch = 111,
-	Death = 115
-};
+namespace SpawnAppearanceAnimation {
+	enum : int16 {
+		Standing = 100,
+		Freeze = 102,
+		Looting = 105,
+		Sitting = 110,
+		Crouch = 111,
+		Death = 115
+	};
+}
 
 enum Gender : GenderID {
 	G_MALE,
