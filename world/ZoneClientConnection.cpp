@@ -2894,11 +2894,11 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 	// TODO: Only platinum is allowed in the shared bank.
 
 	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == MoneySlotID::BANK || pSlot == MoneySlotID::SHARED_BANK; };
-	const bool banking = isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
-	// NOTE: a banker is also required for currency conversion.
+	const bool isConversion = payload->mFromType != payload->mToType;
+	const bool bankRequired = isConversion || isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
 
 	// TODO: Banker distance check.
-	if (banking) {
+	if (bankRequired) {
 
 	}
 
@@ -2913,13 +2913,13 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 		addAmount = payload->mAmount;
 		removeAmount = payload->mAmount;
 	}
-	// Moving larger currency to smaller currency
+	// (Conversion) Moving larger currency to smaller currency
 	else if (payload->mFromType > payload->mToType) {
 		uint32 diff = payload->mFromType - payload->mToType;
 		addAmount = payload->mAmount * std::pow(10, diff); // Convert large to small
 		removeAmount = payload->mAmount;
 	}
-	// Moving smaller currency to larger currency
+	// (Conversion) Moving smaller currency to larger currency
 	else {
 		uint32 diff = payload->mToType - payload->mFromType;
 		uint32 denominator = std::pow(10, diff);
@@ -2928,8 +2928,13 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 		removeAmount = payload->mAmount - (payload->mAmount % denominator);
 	}
 
+	const uint64 preTotalCurrency = mCharacter->getTotalCurrency();
+
 	EXPECTED(mCharacter->removeCurrency(payload->mFromSlot, payload->mFromType, removeAmount));
 	EXPECTED(mCharacter->addCurrency(payload->mToSlot, payload->mToType, addAmount));
+
+	EXPECTED(preTotalCurrency == mCharacter->getTotalCurrency()); // Ensure total currency has not changed.
+	EXPECTED(mCharacter->currencyValid()); // Ensure currency is still in a valid state.
 }
 
 void ZoneClientConnection::sendMoneyUpdate() {

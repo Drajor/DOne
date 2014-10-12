@@ -753,6 +753,27 @@ const bool Character::removeEbonCrystals(const uint32 pCrystals) {
 	return true;
 }
 
+const uint64 Character::getTotalCurrency() const {
+	uint64 total = 0;
+	for (auto i = 0; i < MoneySlotID::MAX; i++) {
+		for (auto j = 0; j < MoneyType::MAX; j++) {
+			total += getCurrency(i, j) * std::pow(10, j);
+		}
+	}
+	return total;
+}
+
+const bool Character::currencyValid() const {
+	for (auto i = 0; i < MoneySlotID::MAX; i++) {
+		for (auto j = 0; j < MoneyType::MAX; j++) {
+			if (getCurrency(i, j) < 0)
+				return false;
+		}
+	}
+
+	return true;
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);

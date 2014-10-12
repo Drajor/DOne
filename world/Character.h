@@ -171,7 +171,7 @@ public:
 	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
 	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
 
-	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) { return mCurrency[pSlot][pType]; } // TODO: Guard this.
+	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
 	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
 	inline bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
 		EXPECTED_BOOL(addCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
@@ -182,6 +182,10 @@ public:
 	}
 	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
 	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
+	
+	// Returns the total value of all currency in copper pieces.
+	const uint64 getTotalCurrency() const;
+	const bool currencyValid() const;
 
 	// Radiant Crystals.
 	inline const uint32 getRadiantCrystals() const { return mRadiantCrystals; }
