@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Utility.h"
 #include "../common/EQPacket.h"
 
 enum GuildUpdateAction : uint32 {
@@ -28,8 +29,10 @@ namespace Payload {
 
 	template <typename T>
 	struct Fixed {
+		inline static T* convert(const EQApplicationPacket* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
+		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == size(); }
 		inline static const std::size_t size() { return sizeof(T); }
 		inline static EQApplicationPacket* make(EmuOpcode pOpCode) { return new EQApplicationPacket(pOpCode, size()); }
 	};
@@ -37,7 +40,7 @@ namespace Payload {
 	template <typename T, EmuOpcode OpCode>
 	struct FixedT {
 		inline static T* convert(const EQApplicationPacket* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
-		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == sizeof(T); }
+		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == size(); }
 		inline static const std::size_t size() { return sizeof(T); }
 		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, size()); }
 		inline static EQApplicationPacket* create(T pPayload) { return new EQApplicationPacket(OpCode, (unsigned char*)&pPayload, size()); }
@@ -421,6 +424,55 @@ namespace Payload {
 		// C->S
 		struct ServerFilter : public Fixed<ServerFilter> {
 			Filters mFilters;
+		};
+
+		// C->S
+		struct MoveCoin : public Fixed<MoveCoin> {
+			uint32 mFromSlot = 0;
+			uint32 mToSlot = 0;
+			uint32 mTypeOne = 0;
+			uint32 mTypeTwo = 0;
+			int32 mAmount = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[MoveCoin] ";
+				PRINT_MEMBER(mFromSlot);
+				PRINT_MEMBER(mToSlot);
+				PRINT_MEMBER(mTypeOne);
+				PRINT_MEMBER(mTypeTwo);
+				PRINT_MEMBER(mAmount);
+				return ss.str();
+			}
+		};
+
+		// C<-S
+		struct MoneyUpdate : public FixedT<MoneyUpdate, OP_MoneyUpdate> {
+			int32 mPlatinum = 0;
+			int32 mGold = 0;
+			int32 mSilver = 0;
+			int32 mCopper = 0;
+		};
+
+		// C->S
+		struct CrystalCreate : public Fixed<CrystalCreate>  {
+			enum Type : uint32 { RADIANT = 4, EBON = 5 };
+			uint32 mType = 0;
+			uint32 mAmount = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[CrystalCreate] ";
+				PRINT_MEMBER(mType);
+				PRINT_MEMBER(mAmount);
+				return ss.str();
+			}
+		};
+
+		// S->C
+		struct CrystalUpdate : public FixedT<CrystalUpdate, OP_CrystalCountUpdate> {
+			uint32 mRadiantCrystals = 0;
+			uint32 mEbonCrystals = 0;
+			uint32 mTotalRadiantCrystals = 0;
+			uint32 mTotalEbonCrystals = 0;
 		};
 	}
 

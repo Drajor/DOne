@@ -16,8 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#define DONT_SHARED_OPCODES
-
 #include "../common/debug.h"
 #include "../common/features.h"
 #include "../common/queue.h"
@@ -67,18 +65,8 @@
 #include <signal.h>
 #include <time.h>
 
-#ifdef _CRTDBG_MAP_ALLOC
-	#undef new
-	#define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
-#endif
-
-#ifdef _WINDOWS
-	#include <conio.h>
-	#include <process.h>
-#else
-	#include <pthread.h>
-	#include "../common/unix.h"
-#endif
+#include <conio.h>
+#include <process.h>
 
 volatile bool RunLoops = true;
 extern volatile bool ZoneLoaded;

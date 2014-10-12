@@ -111,12 +111,15 @@ public:
 	void sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID);
 	void sendTradeRequest(const uint32 pFromSpawnID);
 
+	void sendMoneyUpdate();
+	void sendCrystals();
+
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
-
+	void _handleUnknown(const EQApplicationPacket* pPacket);
 	void _sendTimeOfDay();
 
 	void _sendPlayerProfile();
@@ -222,6 +225,10 @@ private:
 	void _handleSetServerFiler(const EQApplicationPacket* pPacket);
 
 	void _handleItemLinkClick(const EQApplicationPacket* pPacket);
+	void _handleItemView(const EQApplicationPacket* pPacket);
+	void _handleMoveCoin(const EQApplicationPacket* pPacket);
+	void _handleCrystalCreate(const EQApplicationPacket* pPacket);
+	void _handleCrystalReclaim(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
@@ -235,7 +242,6 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void _handleItemView(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;

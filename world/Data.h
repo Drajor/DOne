@@ -107,18 +107,19 @@ struct CharacterData {
 	uint32 mDrakkinDetails = 0;
 
 	// Currency
-	uint32 mPlatinumCharacter = 0;
-	uint32 mPlatinumBank = 0;
-	uint32 mPlatinumCursor = 0;
-	uint32 mGoldCharacter = 0;
-	uint32 mGoldBank = 0;
-	uint32 mGoldCursor = 0;
-	uint32 mSilverCharacter = 0;
-	uint32 mSilverBank = 0;
-	uint32 mSilverCursor = 0;
-	uint32 mCopperCharacter = 0;
-	uint32 mCopperBank = 0;
-	uint32 mCopperCursor = 0;
+	int32 mPlatinumCharacter = 0;
+	int32 mPlatinumBank = 0;
+	int32 mPlatinumCursor = 0;
+	int32 mPlatinumSharedBank;
+	int32 mGoldCharacter = 0;
+	int32 mGoldBank = 0;
+	int32 mGoldCursor = 0;
+	int32 mSilverCharacter = 0;
+	int32 mSilverBank = 0;
+	int32 mSilverCursor = 0;
+	int32 mCopperCharacter = 0;
+	int32 mCopperBank = 0;
+	int32 mCopperCursor = 0;
 
 	// Stats
 	uint32 mStrength = 0;

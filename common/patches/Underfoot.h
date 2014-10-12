@@ -9,7 +9,6 @@ namespace Underfoot {
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
-	extern void Reload();
 
 
 

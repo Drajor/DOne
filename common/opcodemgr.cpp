@@ -132,7 +132,7 @@ EmuOpcode OpcodeManager::NameSearch(const char *name) {
 }
 
 RegularOpcodeManager::RegularOpcodeManager()
-: MutableOpcodeManager()
+: OpcodeManager()
 {
 	emu_to_eq = nullptr;
 	eq_to_emu = nullptr;
@@ -161,22 +161,6 @@ bool RegularOpcodeManager::LoadOpcodes(const char *filename, bool report_errors)
 	bool ret = LoadOpcodesFile(filename, &s, report_errors);
 	MOpcodes.unlock();
 	return ret;
-}
-
-bool RegularOpcodeManager::ReloadOpcodes(const char *filename, bool report_errors) {
-	if(!loaded)
-		return(LoadOpcodes(filename));
-
-	NormalMemStrategy s;
-	s.it = this;
-	MOpcodes.lock();
-
-	memset(eq_to_emu, 0, sizeof(uint16)*MAX_EQ_OPCODE);
-
-	bool ret = LoadOpcodesFile(filename, &s, report_errors);
-
-	MOpcodes.unlock();
-	return(ret);
 }
 
 uint16 RegularOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
@@ -225,53 +209,3 @@ void RegularOpcodeManager::NormalMemStrategy::Set(EmuOpcode emu_op, uint16 eq_op
 	it->emu_to_eq[emu_op] = eq_op;
 	it->eq_to_emu[eq_op] = emu_op;
 }
-
-NullOpcodeManager::NullOpcodeManager()
-: MutableOpcodeManager() {
-}
-
-bool NullOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {
-	return(true);
-}
-
-bool NullOpcodeManager::ReloadOpcodes(const char *filename, bool report_errors) {
-	return(true);
-}
-
-uint16 NullOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
-	return(0);
-}
-
-EmuOpcode NullOpcodeManager::EQToEmu(const uint16 eq_op) {
-	return(OP_Unknown);
-}
-
-EmptyOpcodeManager::EmptyOpcodeManager()
-: MutableOpcodeManager() {
-}
-
-bool EmptyOpcodeManager::LoadOpcodes(const char *filename, bool report_errors) {
-	return(true);
-}
-
-bool EmptyOpcodeManager::ReloadOpcodes(const char *filename, bool report_errors) {
-	return(true);
-}
-
-uint16 EmptyOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
-	std::map<EmuOpcode, uint16>::iterator f;
-	f = emu_to_eq.find(emu_op);
-	return(f == emu_to_eq.end()? 0 : f->second);
-}
-
-EmuOpcode EmptyOpcodeManager::EQToEmu(const uint16 eq_op) {
-	std::map<uint16, EmuOpcode>::iterator f;
-	f = eq_to_emu.find(eq_op);
-	return(f == eq_to_emu.end()?OP_Unknown:f->second);
-}
-
-void EmptyOpcodeManager::SetOpcode(EmuOpcode emu_op, uint16 eq_op) {
-	emu_to_eq[emu_op] = eq_op;
-	eq_to_emu[eq_op] = emu_op;
-}
-

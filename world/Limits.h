@@ -15,6 +15,10 @@ namespace Limits {
 	namespace LoginServer {
 		bool accountNameLength(const String& pAccountName);
 	}
+	namespace General {
+		const bool moneySlotIDValid(const uint32 pSlot);
+		const bool moneyTypeValid(const uint32 pType);
+	}
 	namespace Character {
 		const bool nameLength(const String& pCharacterName);
 		const bool nameInputLength(const String& pCharacterName);

@@ -136,3 +136,27 @@ const bool Limits::Skills::validID(const uint32 pSkillID) {
 const bool Limits::Languages::validID(const uint32 pLanguageID) {
 	return pLanguageID < Languages::MAX_ID;
 }
+
+const bool Limits::General::moneySlotIDValid(const uint32 pSlot) {
+	switch (pSlot) {
+	case MoneySlotID::CURSOR:
+	case MoneySlotID::PERSONAL:
+	case MoneySlotID::BANK:
+	case MoneySlotID::SHARED_BANK:
+		return true;
+	default:
+		return false;
+	}
+}
+
+const bool Limits::General::moneyTypeValid(const uint32 pType) {
+	switch (pType) {
+	case MoneyType::COPPER:
+	case MoneyType::SILVER:
+	case MoneyType::GOLD:
+	case MoneyType::PLATINUM:
+		return true;
+	default:
+		return false;
+	}
+}

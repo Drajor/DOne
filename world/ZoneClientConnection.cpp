@@ -116,9 +116,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
 
 	EmuOpcode opcode = pPacket->GetOpcode();
-	if (opcode == 0 || opcode == OP_FloatListThing) return true;
+	if (/*opcode == 0 || */opcode == OP_FloatListThing) return true;
 
 	switch (opcode) {
+	case OP_Unknown:
+		_handleUnknown(pPacket);
+		break;
 	case OP_AckPacket:
 		// Ignore.
 		break;
@@ -456,6 +459,21 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_ItemViewUnknown:
 		_handleItemView(pPacket);
 		break;
+	case OP_MoveCoin:
+		_handleMoveCoin(pPacket);
+		break;
+	case OP_CrystalCreate:
+		// NOTE: This occurs when a player selects Radiant or Ebon Crystals from within the inventory window.
+		_handleCrystalCreate(pPacket);
+		break;
+	case OP_CrystalReclaim:
+		// NOTE: This occurs when a player clicks the 'Reclaim' button in the inventory window.
+		// NOTE: No payload is sent (Size=0)
+		_handleCrystalReclaim(pPacket);
+		break;
+	case OP_EvolvingItem:
+		Log::error("OP_EvolvingItem");
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -597,7 +615,6 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->AGI = mCharacter->getBaseStatistic(Statistic::Agility);
 	payload->WIS = mCharacter->getBaseStatistic(Statistic::Wisdom);
 	payload->face = mCharacter->getFaceStyle();
-	//payload->languages[MAX_PP_LANGUAGE];
 
 	mCharacter->setSkill(Skills::Meditate, 1000);
 	mCharacter->setSkill(Skills::SenseHeading, 1000);
@@ -632,20 +649,28 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->x = mCharacter->getX();
 	payload->z = mCharacter->getZ();
 	payload->heading = mCharacter->getHeading();
-	payload->platinum = mCharacter->getPlatinum();
-	payload->gold = mCharacter->getGold();
-	payload->silver = mCharacter->getSilver();
-	payload->copper = mCharacter->getCopper();
-	//payload->platinum_bank;		// Platinum Pieces in Bank
-	//payload->gold_bank;			// Gold Pieces in Bank
-	//payload->silver_bank;		// Silver Pieces in Bank
-	//payload->copper_bank;		// Copper Pieces in Bank
-	//payload->platinum_cursor;	// Platinum on cursor
-	//payload->gold_cursor;		// Gold on cursor
-	//payload->silver_cursor;		// Silver on cursor
-	//payload->copper_cursor;		// Copper on cursor
-	//payload->platinum_shared;	// Platinum shared between characters
-	//payload->skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
+
+	// Personal Currency.
+	payload->platinum = mCharacter->getPersonalPlatinum();
+	payload->gold = mCharacter->getPersonalGold();
+	payload->silver = mCharacter->getPersonalSilver();
+	payload->copper = mCharacter->getPersonalCopper();
+
+	// Bank Currency.
+	payload->platinum_bank = mCharacter->getBankPlatinum();
+	payload->gold_bank = mCharacter->getBankGold();
+	payload->silver_bank = mCharacter->getBankSilver();
+	payload->copper_bank = mCharacter->getBankCopper();
+
+	// Cursor Currency
+	payload->platinum_cursor = mCharacter->getCursorPlatinum();
+	payload->gold_cursor = mCharacter->getCursorGold();
+	payload->silver_cursor = mCharacter->getCursorSilver();
+	payload->copper_cursor = mCharacter->getCursorCopper();
+
+	// Shared Bank Platinum
+	payload->platinum_shared = mCharacter->getSharedBankPlatinum();
+
 	//payload->pvp2;				//
 	//payload->pvptype;			//
 	//payload->ability_down;		// Guessing
@@ -2802,7 +2827,7 @@ void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	payload.mToSpawnID = mCharacter->getSpawnID();
 	payload.mFromSpawnID = pFromSpawnID;
 
-	auto outPacket = TradeRequest::create();
+	auto outPacket = TradeRequest::create(payload);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -2835,7 +2860,7 @@ void ZoneClientConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) 
 void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(ServerFilter::sizeCheck(pPacket->size));
+	EXPECTED(ServerFilter::sizeCheck(pPacket));
 
 	auto payload = ServerFilter::convert(pPacket->pBuffer);
 
@@ -2850,6 +2875,101 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 void ZoneClientConnection::_handleItemView(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	Log::info("Got OP_ItemViewUnknown. Size=" + std::to_string(pPacket->size));
+}
+
+void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MoveCoin::sizeCheck(pPacket));
+
+	auto payload = MoveCoin::convert(pPacket);
+	Log::info(payload->_debug());
+
+	// Sanitise.
+	EXPECTED(Limits::General::moneySlotIDValid(payload->mFromSlot));
+	EXPECTED(Limits::General::moneySlotIDValid(payload->mToSlot));
+	EXPECTED(Limits::General::moneyTypeValid(payload->mTypeOne));
+	EXPECTED(Limits::General::moneyTypeValid(payload->mTypeTwo));
+	EXPECTED(payload->mAmount >= 1); // There is no natural way for UF to send 0/negative values.
+
+	// TODO: Banker distance check.
+	// TODO: Only platinum is allowed in the shared bank.
+
+	const int32 currencyAtFrom = mCharacter->getCurrency(payload->mFromSlot, payload->mTypeOne);
+	EXPECTED(currencyAtFrom >= payload->mAmount);
+	EXPECTED(mCharacter->removeCurrency(payload->mFromSlot, payload->mTypeOne, payload->mAmount));
+	EXPECTED(mCharacter->addCurrency(payload->mToSlot, payload->mTypeOne, payload->mAmount));
+}
+
+void ZoneClientConnection::sendMoneyUpdate() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	MoneyUpdate payload;
+	payload.mPlatinum = mCharacter->getPersonalPlatinum();
+	payload.mGold = mCharacter->getPersonalGold();
+	payload.mSilver = mCharacter->getPersonalSilver();
+	payload.mCopper = mCharacter->getPersonalCopper();
+
+	auto packet = MoneyUpdate::create();
+	mStreamInterface->QueuePacket(packet);
+	safe_delete(packet);
+}
+
+void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(CrystalCreate::sizeCheck(pPacket));
+
+	auto payload = CrystalCreate::convert(pPacket);
+	Log::info(payload->_debug());
+
+	EXPECTED(payload->mType == CrystalCreate::RADIANT || payload->mType == CrystalCreate::EBON);
+	
+	// Creating Radiant Crystals.
+	if (payload->mType == CrystalCreate::RADIANT) {
+		EXPECTED(payload->mAmount <= mCharacter->getRadiantCrystals());
+		EXPECTED(mCharacter->removeRadiantCrystals(payload->mAmount));
+
+		// TODO: Summon Radiant Crystals.
+	}
+
+	// Creating Ebon Crystals.
+	if (payload->mType == CrystalCreate::EBON) {
+		EXPECTED(payload->mAmount <= mCharacter->getEbonCrystals());
+		EXPECTED(mCharacter->removeEbonCrystals(payload->mAmount));
+
+		// TODO: Summon Ebon Crystals.
+	}
+
+	sendCrystals();
+}
+
+void ZoneClientConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+
+	// TODO: 
+}
+
+void ZoneClientConnection::sendCrystals() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	CrystalUpdate payload;
+	payload.mRadiantCrystals = mCharacter->getRadiantCrystals();
+	payload.mTotalRadiantCrystals = mCharacter->getTotalRadiantCrystals();
+	payload.mEbonCrystals = mCharacter->getEbonCrystals();
+	payload.mTotalEbonCrystals = mCharacter->getTotalEbonCrystals();
+
+	auto packet = CrystalUpdate::create(payload);
+	sendPacket(packet);
+	safe_delete(packet);
+}
+
+void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
+	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
 }
 
 //

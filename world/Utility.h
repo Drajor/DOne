@@ -11,6 +11,8 @@
 #define EXPECTED_PTR(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return nullptr; }
 #define EXPECTED_MAIN(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return 1; }
 
+#define PRINT_MEMBER(pMember) ss << ARG_STR(pMember) << " = " << pMember << " | ";
+
 class Character;
 class Zone;
 namespace Utility {

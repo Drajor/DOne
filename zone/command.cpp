@@ -351,7 +351,7 @@ int command_init(void) {
 		command_add("profilereset","- Reset profiling info",250,command_profilereset) ||
 #endif
 
-		command_add("opcode","- opcode management",250,command_opcode) ||
+		//command_add("opcode","- opcode management",250,command_opcode) ||
 		command_add("logs","[status|normal|error|debug|quest|all] - Subscribe to a log type",250,command_logs) ||
 		command_add("nologs","[status|normal|error|debug|quest|all] - Unsubscribe to a log type",250,command_nologs) ||
 		command_add("ban","[name] - Ban by character name",150,command_ban) ||
@@ -6921,12 +6921,12 @@ void command_profilereset(Client* c, const Seperator *sep) {
 }
 #endif
 
-void command_opcode(Client* c, const Seperator *sep) {
-	if(!strcasecmp( sep->arg[1], "reload" )) {
-		ReloadAllPatches();
-		c->message(0, "Opcodes for all patches have been reloaded");
-	}
-}
+//void command_opcode(Client* c, const Seperator *sep) {
+//	if(!strcasecmp( sep->arg[1], "reload" )) {
+//		ReloadAllPatches();
+//		c->message(0, "Opcodes for all patches have been reloaded");
+//	}
+//}
 
 void command_logsql(Client* c, const Seperator *sep) {
 	if(!strcasecmp( sep->arg[1], "off" )) {

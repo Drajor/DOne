@@ -2,11 +2,11 @@
 #define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, EQStream *dest, bool ack_req)
 #define DECODE(x) void Strategy::Decode_##x(EQApplicationPacket *__packet)
 
-#define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
-#define CopyBlock(to, field, from, field1, field2) \
-	memcpy((void *) &to->field, (const void *) from->field1, StructDist(from, field1, field2));
-#define CopyLen(to, field, from, field1, len) \
-	memcpy((void *) &to->field, (const void *) from->field1, len);
+//#define StructDist(in, f1, f2) (uint32(&in->f2)-uint32(&in->f1))
+//#define CopyBlock(to, field, from, field1, field2) \
+//	memcpy((void *) &to->field, (const void *) from->field1, StructDist(from, field1, field2));
+//#define CopyLen(to, field, from, field1, len) \
+//	memcpy((void *) &to->field, (const void *) from->field1, len);
 
 
 /*
@@ -15,10 +15,10 @@
  *
  */
 //more complex operations and variable length packets
-#define FASTQUEUE(packet) dest->FastQueuePacket(&packet, ack_req);
-#define TAKE(packet_name) \
-	EQApplicationPacket *packet_name = *p; \
-	*p = nullptr;
+//#define FASTQUEUE(packet) dest->FastQueuePacket(&packet, ack_req);
+//#define TAKE(packet_name) \
+//	EQApplicationPacket *packet_name = *p; \
+//	*p = nullptr;
 
 //simple buffer-to-buffer movement for fixed length packets
 //the eq packet is mapped into `eq`, the emu packet into `emu`
@@ -113,11 +113,6 @@
 //a shorter assignment for direct mode
 #undef IN
 #define IN(x) emu->x = eq->x;
-
-//call before any premature returns in an encoder using SETUP_DIRECT_DECODE
-#define FAIL_DIRECT_DECODE() \
-	delete[] __eq_buffer; \
-	p->SetOpcode(OP_Unknown);
 
 //call to finish an encoder using SETUP_DIRECT_DECODE
 #define FINISH_DIRECT_DECODE() \

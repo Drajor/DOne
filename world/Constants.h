@@ -10,6 +10,7 @@
 #include <queue>
 #include <array>
 #include <iomanip>
+#include <safeint.h>
 
 typedef uint8_t byte;
 typedef uint8_t uint8;
@@ -109,6 +110,28 @@ static const String SYS_NAME = "[System]";
 enum Rarity : uint8 { Common, Magic, Rare, Artifact, RarityMax };
 static const std::array<Rarity, RarityMax> RarityArray = { Rarity::Common, Rarity::Magic, Rarity::Rare, Rarity::Artifact };
 static bool RarityRangeCheck(const uint8 pRarity) { return pRarity < Artifact; }
+
+namespace MoneySlotID {
+	enum : uint32 {
+		CURSOR = 0,
+		PERSONAL = 1,
+		BANK = 2,
+		// TRADE
+		SHARED_BANK = 4,
+		MAX = 5,
+		SLOT_DELETE = 0xFFFFFFFF
+	};
+}
+
+namespace MoneyType {
+	enum : int32 {
+		COPPER = 0,
+		SILVER = 1,
+		GOLD = 2,
+		PLATINUM = 3,
+		MAX = 4
+	};
+}
 
 namespace SlotID {
 	enum : uint32 {

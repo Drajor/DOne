@@ -5,6 +5,7 @@
 #include "Settings.h"
 #include "ItemData.h"
 
+#include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
 
 template <typename T>

@@ -17,7 +17,7 @@
 #include "../common/types.h"
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
-#include "../common/patches/patches.h"
+#include "../common/patches/Underfoot.h"
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 #include "Scene.h"
@@ -47,7 +47,7 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(mStreamFactory->Open(mPort));
 
 	mStreamIdentifier = new EQStreamIdentifier;
-	RegisterAllPatches(*mStreamIdentifier);
+	Underfoot::Register(*mStreamIdentifier);
 
 	mScene = new Scene(this);
 
@@ -937,12 +937,7 @@ void Zone::handleDeath(Actor* pActor) {
 	sendToVisible(pActor, outPacket);
 	safe_delete(outPacket);
 
-	// Check: Empty corpse.
-	if (!pActor->hasCurrency() && !pActor->hasItems()) {
-		pActor->destroy();
-		return;
-	}
-
+	// NPC Dead.
 	if (pActor->isNPC()) {
 		NPC* npc = pActor->cast<NPC*>(pActor);
 		// Check: Associated with a SpawnPoint.
@@ -953,6 +948,16 @@ void Zone::handleDeath(Actor* pActor) {
 			// Add SpawnPoint to the respawn list.
 			_addRespawn(spawnPoint);
 		}
+
+		// Check: Empty corpse.
+		if (!npc->hasCurrency() && !npc->hasItems()) {
+			pActor->destroy();
+			return;
+		}
+	}
+	// Character Dead.
+	else {
+
 	}
 
 	pActor->onDeath();
@@ -989,8 +994,9 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 
 	// Handle: Looting an NPC corpse.
 	if (actor->isNPCCorpse()) {
+		NPC* npcCorpse = Actor::cast<NPC*>(actor);
 		// Check: Is pCharacter close enough to loot.
-		if (pLooter->squareDistanceTo(actor) > 625) { // TODO: Magic.
+		if (pLooter->squareDistanceTo(npcCorpse) > 625) { // TODO: Magic.
 			pLooter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
 			return;
 		}
@@ -1005,8 +1011,8 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 			return;
 		}
 
-		pLooter->setLootingCorpse(actor);
-		actor->setLooter(pLooter);
+		pLooter->setLootingCorpse(npcCorpse);
+		npcCorpse->setLooter(pLooter);
 
 		int32 platinum = 0;
 		int32 gold = 0;
@@ -1015,15 +1021,15 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 		bool currencyLooted = false;
 
 		// Check: Does the corpse have currency on it?
-		if (actor->hasCurrency()) {
+		if (npcCorpse->hasCurrency()) {
 			currencyLooted = true;
 
 			// Remove currency from corpse.
-			actor->getCurrency(platinum, gold, silver, copper);
-			actor->removeCurrency();
+			npcCorpse->getCurrency(platinum, gold, silver, copper);
+			npcCorpse->removeCurrency();
 
 			// Add currency to looter.
-			pLooter->addCurrency(platinum, gold, silver, copper);
+			EXPECTED(pLooter->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper));
 		}
 
 		pLooter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
@@ -1053,9 +1059,19 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 	pCharacter->setLootingCorpse(nullptr);
 	pCharacter->getConnection()->sendLootComplete();
 
-	// Check: Empty corpse
-	if (!corpse->hasCurrency() && !corpse->hasItems()) {
-		corpse->destroy();
+	// Finished looting an NPC corpse.
+	if (corpse->isNPCCorpse()) {
+		NPC* npcCorpse = Actor::cast<NPC*>(corpse);
+
+		// Check: Empty corpse
+		if (!npcCorpse->hasCurrency() && !npcCorpse->hasItems()) {
+			npcCorpse->destroy();
+			return;
+		}
+	}
+	// Finished looting a Character corpse.
+	else if (corpse->isCharacterCorpse()) {
+		// TODO:
 	}
 }
 

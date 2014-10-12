@@ -24,9 +24,7 @@
 #include "op_codes.h"
 #include "CRC16.h"
 #include "platform.h"
-#ifndef STATIC_OPCODE
 #include "opcodemgr.h"
-#endif
 #include "packet_dump.h"
 #include "packet_functions.h"
 #include <cstdlib>
@@ -108,12 +106,7 @@ void EQApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-
-#ifdef STATIC_OPCODE
-	buffer += sprintf(buffer, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
-#else
-	buffer += sprintf(buffer, "[OpCode %s Size=%u]\n",OpcodeManager::EmuToName(emu_opcode),size);
-#endif
+	buffer += sprintf(buffer, "[OpCode %s Size=%u]\n", OpcodeManager::EmuToName(emu_opcode), size);
 }
 
 void EQApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
@@ -123,13 +116,8 @@ void EQApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 	fprintf(to, "%s", buff);
 }
 
-void EQApplicationPacket::build_header_dump(char *buffer) const
-{
-#ifdef STATIC_OPCODE
-	sprintf(buffer, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
-#else
-	sprintf(buffer, "[OpCode %s Size=%u]",OpcodeManager::EmuToName(emu_opcode),size);
-#endif
+void EQApplicationPacket::build_header_dump(char *buffer) const {
+	sprintf(buffer, "[OpCode %s Size=%u]", OpcodeManager::EmuToName(emu_opcode), size);
 }
 
 void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
@@ -143,23 +131,14 @@ void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
 
-#ifdef STATIC_OPCODE
-	fprintf(to, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
-#else
-	fprintf(to, "[OpCode %s Size=%lu]\n",OpcodeManager::EmuToName(emu_opcode),(unsigned long)size);
-#endif
+	fprintf(to, "[OpCode %s Size=%lu]\n", OpcodeManager::EmuToName(emu_opcode), (unsigned long)size);
 }
 
 void EQRawApplicationPacket::build_raw_header_dump(char *buffer, uint16 seq) const
 {
 	BasePacket::build_raw_header_dump(buffer, seq);
 	buffer += strlen(buffer);
-
-#ifdef STATIC_OPCODE
-	buffer += sprintf(buffer, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
-#else
-	buffer += sprintf(buffer, "[OpCode %s (0x%04x) Size=%u]\n", OpcodeManager::EmuToName(emu_opcode), opcode,size);
-#endif
+	buffer += sprintf(buffer, "[OpCode %s (0x%04x) Size=%u]\n", OpcodeManager::EmuToName(emu_opcode), opcode, size);
 }
 
 void EQRawApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
@@ -169,13 +148,8 @@ void EQRawApplicationPacket::DumpRawHeader(uint16 seq, FILE *to) const
 	fprintf(to, "%s", buff);
 }
 
-void EQRawApplicationPacket::build_header_dump(char *buffer) const
-{
-#ifdef STATIC_OPCODE
-	sprintf(buffer, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
-#else
-	sprintf(buffer, "[OpCode %s (0x%04x) Size=%u]", OpcodeManager::EmuToName(emu_opcode), opcode,size);
-#endif
+void EQRawApplicationPacket::build_header_dump(char *buffer) const {
+	sprintf(buffer, "[OpCode %s (0x%04x) Size=%u]", OpcodeManager::EmuToName(emu_opcode), opcode, size);
 }
 
 void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
@@ -189,11 +163,7 @@ void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
 
-#ifdef STATIC_OPCODE
-	fprintf(to, "[OpCode 0x%04x (0x%04x) Size=%u]\n", emu_opcode, opcode,size);
-#else
 	fprintf(to, "[OpCode %s (0x%04x) Size=%lu]\n", OpcodeManager::EmuToName(emu_opcode), opcode,(unsigned long)size);
-#endif
 }
 
 uint32 EQProtocolPacket::serialize(unsigned char *dest) const
@@ -232,26 +202,6 @@ uint32 EQApplicationPacket::serialize(uint16 opcode, unsigned char *dest) const
 	return size+OpCodeBytes;
 }
 
-/*EQProtocolPacket::EQProtocolPacket(uint16 op, const unsigned char *buf, uint32 len)
-:	BasePacket(buf, len),
-	opcode(op)
-{
-
-uint32 offset;
-	opcode=ntohs(*(const uint16 *)buf);
-	offset=2;
-
-	if (len-offset) {
-		pBuffer= new unsigned char[len-offset];
-		memcpy(pBuffer,buf+offset,len-offset);
-		size=len-offset;
-	} else {
-		pBuffer=nullptr;
-		size=0;
-	}
-	OpMgr=&RawOpcodeManager;
-}*/
-
 bool EQProtocolPacket::combine(const EQProtocolPacket *rhs)
 {
 bool result=false;
@@ -282,55 +232,6 @@ bool result=false;
 	return result;
 
 }
-
-/*
-this is the code to do app-layer combining, instead of protocol layer.
-this was taken out due to complex interactions with the opcode manager,
-and will require a bit more thinking (likely moving into EQStream) to
-get running again... but might be a good thing some day.
-
-bool EQApplicationPacket::combine(const EQApplicationPacket *rhs)
-{
-uint32 newsize=0, offset=0;
-unsigned char *tmpbuffer=nullptr;
-
-	if (opcode!=OP_AppCombined) {
-		newsize=app_opcode_size+size+(size>254?3:1)+app_opcode_size+rhs->size+(rhs->size>254?3:1);
-		tmpbuffer=new unsigned char [newsize];
-		offset=0;
-		if (size>254) {
-			tmpbuffer[offset++]=0xff;
-			*(uint16 *)(tmpbuffer+offset)=htons(size);
-			offset+=1;
-		} else {
-			tmpbuffer[offset++]=size;
-		}
-		offset+=serialize(tmpbuffer+offset);
-	} else {
-		newsize=size+app_opcode_size+rhs->size+(rhs->size>254?3:1);
-		tmpbuffer=new unsigned char [newsize];
-		memcpy(tmpbuffer,pBuffer,size);
-		offset=size;
-	}
-
-	if (rhs->size>254) {
-		tmpbuffer[offset++]=0xff;
-		*(uint16 *)(tmpbuffer+offset)=htons(rhs->size);
-		offset+=1;
-	} else {
-		tmpbuffer[offset++]=rhs->size;
-	}
-	offset+=rhs->serialize(tmpbuffer+offset);
-
-	size=offset;
-	opcode=OP_AppCombined;
-
-	delete[] pBuffer;
-	pBuffer=tmpbuffer;
-
-	return true;
-}
-*/
 
 bool EQProtocolPacket::ValidateCRC(const unsigned char *buffer, int length, uint32 Key)
 {

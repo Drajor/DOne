@@ -87,8 +87,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	if (isEvolvingItem()) {
 		pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
-		pStructure.write<float>(mItemData->mEvolvingItem.mProgress);
+		//pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
+		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown2), sizeof(mItemData->mEvolvingItem.__Unknown2));

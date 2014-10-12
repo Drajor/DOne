@@ -84,10 +84,26 @@ bool Character::initialise() {
 
 	setExperience(mData->mExperience);
 
-	setPlatinum(mData->mPlatinumCharacter);
-	setGold(mData->mGoldCharacter);
-	setSilver(mData->mSilverCharacter);
-	setCopper(mData->mCopperCharacter);
+	// Personal Currency
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, mData->mPlatinumCharacter);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mGoldCharacter);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mSilverCharacter);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, mData->mCopperCharacter);
+
+	// Cursor Currency
+	setCurrency(MoneySlotID::CURSOR, MoneyType::PLATINUM, mData->mPlatinumCursor);
+	setCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, mData->mGoldCursor);
+	setCurrency(MoneySlotID::CURSOR, MoneyType::SILVER, mData->mSilverCursor);
+	setCurrency(MoneySlotID::CURSOR, MoneyType::COPPER, mData->mCopperCursor);
+
+	// Bank Currency
+	setCurrency(MoneySlotID::BANK, MoneyType::PLATINUM, mData->mPlatinumBank);
+	setCurrency(MoneySlotID::BANK, MoneyType::GOLD, mData->mGoldBank);
+	setCurrency(MoneySlotID::BANK, MoneyType::SILVER, mData->mSilverBank);
+	setCurrency(MoneySlotID::BANK, MoneyType::COPPER, mData->mCopperBank);
+
+	// Shared Bank Currency
+	setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, mData->mPlatinumSharedBank);
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -340,12 +356,26 @@ void Character::_updateForSave() {
 
 	mData->mGender = getGender();
 
-	mData->mPlatinumCharacter = getPlatinum();
-	mData->mGoldCharacter = getGold();
-	mData->mSilverCharacter = getSilver();
-	mData->mCopperCharacter = getCopper();
+	// Personal Currency
+	mData->mPlatinumCharacter = getPersonalPlatinum();
+	mData->mGoldCharacter = getPersonalGold();
+	mData->mSilverCharacter = getPersonalSilver();
+	mData->mCopperCharacter = getPersonalCopper();
 
-	// TODO: Bank / Cursor currency
+	// Cursor Currency
+	mData->mPlatinumCursor = getCursorPlatinum();
+	mData->mGoldCursor = getCursorGold();
+	mData->mSilverCursor = getCursorSilver();
+	mData->mCopperCursor = getCursorCopper();
+
+	// Bank Currency
+	mData->mPlatinumBank = getBankPlatinum();
+	mData->mGoldBank = getBankGold();
+	mData->mSilverBank = getBankSilver();
+	mData->mCopperBank = getBankCopper();
+
+	// Shared Bank Currency
+	mData->mPlatinumSharedBank = getSharedBankPlatinum();
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
@@ -704,6 +734,20 @@ const bool Character::checkZoneChange(const uint16 pZoneID, const uint16 pInstan
 void Character::clearZoneChange() {
 	mZoneChange.mZoneID = 0;
 	mZoneChange.mInstanceID = 0;
+}
+
+const bool Character::removeRadiantCrystals(const uint32 pCrystals) {
+	EXPECTED_BOOL(mRadiantCrystals >= pCrystals);
+	
+	mRadiantCrystals -= pCrystals;
+	return true;
+}
+
+const bool Character::removeEbonCrystals(const uint32 pCrystals) {
+	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
+
+	mEbonCrystals -= pCrystals;
+	return true;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

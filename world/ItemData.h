@@ -45,7 +45,7 @@ struct ItemData {
 	uint32 mIsEvolvingItem = 0;
 	struct EvolvingItem {
 		EvolvingItem() {
-			memset(__Unknown1, 0, sizeof(__Unknown1));
+			//memset(__Unknown1, 0, sizeof(__Unknown1));
 			memset(__Unknown2, 0, sizeof(__Unknown2));
 			memset(__Unknown3, 0, sizeof(__Unknown3));
 			memset(mString, 0, sizeof(mString));
@@ -54,8 +54,8 @@ struct ItemData {
 		}
 		uint8 __Unknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
 		int32 mCurrentLevel = 0;
-		uint8 __Unknown1[4];
-		float mProgress = 0.0f;
+		//uint8 __Unknown1[4];
+		double mProgress = 0.0f;
 		uint8 mActive = 0; // 1 = ON
 		int32 mMaxLevel = 0;
 		uint8 __Unknown2[4];

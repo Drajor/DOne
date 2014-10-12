@@ -9,7 +9,7 @@
 
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
-#include "../common/patches/patches.h"
+#include "../common/patches/Underfoot.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 
@@ -41,7 +41,7 @@ bool World::initialise() {
 	mLog.info("Listening on port " + std::to_string(Limits::World::Port));
 
 	mStreamIdentifier = new EQStreamIdentifier;
-	RegisterAllPatches(*mStreamIdentifier);
+	Underfoot::Register(*mStreamIdentifier);
 
 	EXPECTED_BOOL(ZoneManager::getInstance().initialise());
 

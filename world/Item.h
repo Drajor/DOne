@@ -52,8 +52,8 @@ public:
 	Item* findFirst(const uint8 pItemType);
 
 	// Evolving Items.
-	inline const float getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
-	inline void setEvolvingProgress(const float pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
+	inline const double getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
+	inline void setEvolvingProgress(const double pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
 
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
