@@ -28,6 +28,7 @@ struct AccountData {
 	AccountStatus mStatus = 0;
 	uint32 mSuspendedUntil = 0;
 	uint32 mCreated = 0;
+	int32 mPlatinumSharedBank = 0;
 	struct CharacterData {
 		String mName = "<none>";
 		uint32 mLevel = 0;
@@ -110,7 +111,6 @@ struct CharacterData {
 	int32 mPlatinumCharacter = 0;
 	int32 mPlatinumBank = 0;
 	int32 mPlatinumCursor = 0;
-	int32 mPlatinumSharedBank;
 	int32 mGoldCharacter = 0;
 	int32 mGoldBank = 0;
 	int32 mGoldCursor = 0;
@@ -121,7 +121,7 @@ struct CharacterData {
 	int32 mCopperBank = 0;
 	int32 mCopperCursor = 0;
 
-	// Stats
+	// Base Stats
 	uint32 mStrength = 0;
 	uint32 mStamina = 0;
 	uint32 mCharisma = 0;

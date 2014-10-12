@@ -106,7 +106,7 @@ bool AccountManager::isCharacterNameUnique(const String& pCharacterName)
 	return true;
 }
 
-AccountData* AccountManager::_find(const uint32 pAccountID) {
+AccountData* AccountManager::_find(const uint32 pAccountID) const {
 	for (auto i : mAccounts) {
 		if (i->mAccountID == pAccountID)
 			return i;
@@ -115,7 +115,7 @@ AccountData* AccountManager::_find(const uint32 pAccountID) {
 	return nullptr;
 }
 
-AccountData* AccountManager::_find(const String& pAccountName) {
+AccountData* AccountManager::_find(const String& pAccountName) const {
 	for (auto i : mAccounts) {
 		if (i->mAccountName == pAccountName)
 			return i;
@@ -301,4 +301,24 @@ const uint32 AccountManager::getNumCharacters(const uint32 pAccountID) {
 		return 0;
 	}
 	return account->mCharacterData.size();
+}
+
+const int32 AccountManager::getSharedPlatinum(const uint32 pAccountID) const {
+	auto account = _find(pAccountID);
+	if (!account) {
+		Log::error("Failed to find account with id " + std::to_string(pAccountID));
+		return 0;
+	}
+	return account->mPlatinumSharedBank;
+}
+
+const bool AccountManager::setSharedPlatinum(const uint32 pAccountID, const int32 pPlatinum) {
+	auto account = _find(pAccountID);
+	if (!account) {
+		Log::error("Failed to find account with id " + std::to_string(pAccountID));
+		return false;
+	}
+
+	account->mPlatinumSharedBank = pPlatinum;
+	return true;
 }

@@ -158,6 +158,8 @@ namespace AccountCharacterDataXML {
 		SCA Slot = "slot";
 	}
 	namespace Attribute {
+		// Tag::Account
+		SCA SharedPlatinum = "shared_platinum";
 		// Tag::Character
 		SCA Name = "name";
 		SCA Race = "race";
@@ -195,6 +197,7 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 
 	auto accountElement = document.FirstChildElement(Tag::Account);
 	EXPECTED_BOOL(accountElement);
+	EXPECTED_BOOL(readAttribute(accountElement, Attribute::SharedPlatinum, pAccount->mPlatinumSharedBank));
 	auto charactersElement = accountElement->FirstChildElement(Tag::Characters);
 	EXPECTED_BOOL(charactersElement);
 	auto characterElement = charactersElement->FirstChildElement(Tag::Character);
@@ -258,7 +261,9 @@ bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 
-	auto accountElement = document.LinkEndChild(new TiXmlElement(Tag::Account));
+	auto accountElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Account)));
+	accountElement->SetAttribute(Attribute::SharedPlatinum, pAccount->mPlatinumSharedBank);
+
 	auto charactersElement = accountElement->LinkEndChild(new TiXmlElement(Tag::Characters));
 	
 	// Write 

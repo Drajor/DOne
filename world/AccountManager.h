@@ -43,6 +43,10 @@ public:
 	bool suspend(const String& pAccountName, const uint32 pSuspendUntil);
 	bool removeSuspend(const String& pAccountName);
 	void ensureAccountLoaded(const uint32 pAccountID);
+
+	const int32 getSharedPlatinum(const uint32 pAccountID) const;
+	const bool setSharedPlatinum(const uint32 pAccountID, const int32 pPlatinum);
+
 private:
 	void _clear();
 	bool _save(AccountData* pAccountData);
@@ -51,8 +55,8 @@ private:
 	AccountData* _load(const String& pAccountName);
 	bool _loadAccount(const String& pAccountName);
 
-	AccountData* _find(const uint32 pAccountID);
-	AccountData* _find(const String& pAccountName);
+	AccountData* _find(const uint32 pAccountID) const;
+	AccountData* _find(const String& pAccountName) const;
 	std::list<String> mCharacterNames;
 	std::list<AccountData*> mAccounts;
 };

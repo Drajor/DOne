@@ -9,6 +9,7 @@
 #include "Limits.h"
 #include "NPC.h"
 #include "Inventory.h"
+#include "AccountManager.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -87,7 +88,7 @@ bool Character::initialise() {
 	// Personal Currency
 	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, mData->mPlatinumCharacter);
 	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mGoldCharacter);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mSilverCharacter);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, mData->mSilverCharacter);
 	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, mData->mCopperCharacter);
 
 	// Cursor Currency
@@ -103,7 +104,7 @@ bool Character::initialise() {
 	setCurrency(MoneySlotID::BANK, MoneyType::COPPER, mData->mCopperBank);
 
 	// Shared Bank Currency
-	setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, mData->mPlatinumSharedBank);
+	setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, AccountManager::getInstance().getSharedPlatinum(mAccountID));
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -375,7 +376,7 @@ void Character::_updateForSave() {
 	mData->mCopperBank = getBankCopper();
 
 	// Shared Bank Currency
-	mData->mPlatinumSharedBank = getSharedBankPlatinum();
+	AccountManager::getInstance().setSharedPlatinum(mAccountID, getSharedBankPlatinum());
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
