@@ -127,6 +127,8 @@ public:
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
 
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
+
+	const bool canBank(Character* pCharacter);
 private:
 
 	const bool loadZonePoints();

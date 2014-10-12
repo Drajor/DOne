@@ -2891,15 +2891,20 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 	EXPECTED(Limits::General::moneyTypeValid(payload->mToType));
 	EXPECTED(payload->mAmount > 0); // There is no natural way for UF to send 0/negative values.
 
-	// TODO: Only platinum is allowed in the shared bank.
-
 	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == MoneySlotID::BANK || pSlot == MoneySlotID::SHARED_BANK; };
 	const bool isConversion = payload->mFromType != payload->mToType;
-	const bool bankRequired = isConversion || isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
+	const bool isBankSlot = isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
+	const bool bankRequired = isConversion || isBankSlot;
 
-	// TODO: Banker distance check.
-	if (bankRequired) {
+	// Check: Currency moving into Shared Bank is platinum only.
+	if (payload->mToSlot == MoneySlotID::SHARED_BANK) {
+		EXPECTED(payload->mToType == MoneyType::PLATINUM);
+	}
 
+	// Check: Character is in range of a bank.
+	if (bankRequired && !mZone->canBank(mCharacter)) {
+		// TODO: Cheater.
+		mCharacter->notify("Cheat Detected! Expect to be contacted shortly.");
 	}
 
 	const int32 currencyAtFrom = mCharacter->getCurrency(payload->mFromSlot, payload->mFromType);

@@ -1153,3 +1153,19 @@ ZonePoint* Zone::_getClosestZonePoint(const Vector3& pPosition) {
 
 	return result;
 }
+
+const bool Zone::canBank(Character* pCharacter) {
+	EXPECTED_BOOL(pCharacter);
+	static const float MaxBankingDistance = 5.0f; // TODO! Work out the max distance.
+
+	float closestDistance = 9999999.0f;
+	for (auto i : pCharacter->getVisibleNPCs()) {
+		if (i->isBanker()) {
+			float d = pCharacter->squareDistanceTo(i);
+			if (d < closestDistance)
+				closestDistance = d;
+		}
+	}
+
+	return closestDistance < MaxBankingDistance;
+}

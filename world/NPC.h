@@ -37,6 +37,8 @@ public:
 	inline void setCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) { setPlatinum(pPlatinum); setGold(pGold); setSilver(pSilver); setCopper(pCopper); }
 	inline void addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) { addPlatinum(pPlatinum); addGold(pGold); addSilver(pSilver); addCopper(pCopper); }
 	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
+
+	inline const bool isBanker() const { return getClass() == 40; }
 private:
 	int32 mCopper = 0;
 	int32 mSilver = 0;
