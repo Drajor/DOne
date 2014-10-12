@@ -27,6 +27,8 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	mSkills.fill(0);
 	mLanguages.fill(0);
 
+	memset(mCurrency, 0, sizeof(mCurrency));
+
 	mInventory = new Inventoryy(this);
 }
 

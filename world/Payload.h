@@ -430,16 +430,16 @@ namespace Payload {
 		struct MoveCoin : public Fixed<MoveCoin> {
 			uint32 mFromSlot = 0;
 			uint32 mToSlot = 0;
-			uint32 mTypeOne = 0;
-			uint32 mTypeTwo = 0;
+			uint32 mFromType = 0;
+			uint32 mToType = 0;
 			int32 mAmount = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "[MoveCoin] ";
 				PRINT_MEMBER(mFromSlot);
 				PRINT_MEMBER(mToSlot);
-				PRINT_MEMBER(mTypeOne);
-				PRINT_MEMBER(mTypeTwo);
+				PRINT_MEMBER(mFromType);
+				PRINT_MEMBER(mToType);
 				PRINT_MEMBER(mAmount);
 				return ss.str();
 			}

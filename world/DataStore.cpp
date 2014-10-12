@@ -257,7 +257,7 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 
 bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
 	using namespace AccountCharacterDataXML;
-	Profile p("DataStore::saveAccountCharacterData");
+	//Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
 
@@ -581,7 +581,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 }
 
 const bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData) {
-	Profile p("DataStore::saveCharacter");
+	//Profile p("DataStore::saveCharacter");
 	using namespace CharacterDataXML;
 
 	EXPECTED_BOOL(pCharacterData);

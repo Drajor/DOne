@@ -116,11 +116,21 @@ namespace MoneySlotID {
 		CURSOR = 0,
 		PERSONAL = 1,
 		BANK = 2,
-		// TRADE
+		TRADE = 3,
 		SHARED_BANK = 4,
 		MAX = 5,
 		SLOT_DELETE = 0xFFFFFFFF
 	};
+	static std::map<uint32, String> MoneySlotIDStrings = {
+		{ CURSOR, "Cursor" },
+		{ PERSONAL, "Personal" },
+		{ BANK, "Bank" },
+		{ TRADE, "Trade" },
+		{ SHARED_BANK, "Shared Bank" }
+	};
+	static String toString(const uint32 pSlotID) {
+		return MoneySlotIDStrings[pSlotID];
+	}
 }
 
 namespace MoneyType {
@@ -131,6 +141,15 @@ namespace MoneyType {
 		PLATINUM = 3,
 		MAX = 4
 	};
+	static std::map<int32, String> MoneyTypeStrings{
+		{ COPPER, "Copper" },
+		{ SILVER, "Silver" },
+		{ GOLD, "Gold" },
+		{ PLATINUM, "Platinum" }
+	};
+	static String toString(const int32 pType) {
+		return MoneyTypeStrings[pType];
+	}
 }
 
 namespace SlotID {

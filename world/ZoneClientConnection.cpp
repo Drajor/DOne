@@ -2883,22 +2883,53 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 	EXPECTED(MoveCoin::sizeCheck(pPacket));
 
 	auto payload = MoveCoin::convert(pPacket);
-	Log::info(payload->_debug());
 
 	// Sanitise.
 	EXPECTED(Limits::General::moneySlotIDValid(payload->mFromSlot));
 	EXPECTED(Limits::General::moneySlotIDValid(payload->mToSlot));
-	EXPECTED(Limits::General::moneyTypeValid(payload->mTypeOne));
-	EXPECTED(Limits::General::moneyTypeValid(payload->mTypeTwo));
-	EXPECTED(payload->mAmount >= 1); // There is no natural way for UF to send 0/negative values.
+	EXPECTED(Limits::General::moneyTypeValid(payload->mFromType));
+	EXPECTED(Limits::General::moneyTypeValid(payload->mToType));
+	EXPECTED(payload->mAmount > 0); // There is no natural way for UF to send 0/negative values.
 
-	// TODO: Banker distance check.
 	// TODO: Only platinum is allowed in the shared bank.
 
-	const int32 currencyAtFrom = mCharacter->getCurrency(payload->mFromSlot, payload->mTypeOne);
+	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == MoneySlotID::BANK || pSlot == MoneySlotID::SHARED_BANK; };
+	const bool banking = isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
+	// NOTE: a banker is also required for currency conversion.
+
+	// TODO: Banker distance check.
+	if (banking) {
+
+	}
+
+	const int32 currencyAtFrom = mCharacter->getCurrency(payload->mFromSlot, payload->mFromType);
 	EXPECTED(currencyAtFrom >= payload->mAmount);
-	EXPECTED(mCharacter->removeCurrency(payload->mFromSlot, payload->mTypeOne, payload->mAmount));
-	EXPECTED(mCharacter->addCurrency(payload->mToSlot, payload->mTypeOne, payload->mAmount));
+
+	int32 addAmount = 0;
+	int32 removeAmount = 0;
+
+	// Trivial move (e.g. Gold to Gold)
+	if (payload->mFromType == payload->mToType) {
+		addAmount = payload->mAmount;
+		removeAmount = payload->mAmount;
+	}
+	// Moving larger currency to smaller currency
+	else if (payload->mFromType > payload->mToType) {
+		uint32 diff = payload->mFromType - payload->mToType;
+		addAmount = payload->mAmount * std::pow(10, diff); // Convert large to small
+		removeAmount = payload->mAmount;
+	}
+	// Moving smaller currency to larger currency
+	else {
+		uint32 diff = payload->mToType - payload->mFromType;
+		uint32 denominator = std::pow(10, diff);
+		addAmount = payload->mAmount / denominator; // Convert small to large
+		// NOTE: The remainder of the above division is ignored, the Client will keep it on their cursor.
+		removeAmount = payload->mAmount - (payload->mAmount % denominator);
+	}
+
+	EXPECTED(mCharacter->removeCurrency(payload->mFromSlot, payload->mFromType, removeAmount));
+	EXPECTED(mCharacter->addCurrency(payload->mToSlot, payload->mToType, addAmount));
 }
 
 void ZoneClientConnection::sendMoneyUpdate() {
