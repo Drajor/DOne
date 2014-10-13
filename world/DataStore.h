@@ -31,7 +31,7 @@ public:
 	const bool loadZoneData(std::list<ZoneData*>& pZoneData);
 
 	// NPC
-	bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
+	const bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
 
 	// Spells
 	const bool loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded);

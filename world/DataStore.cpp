@@ -8,8 +8,11 @@
 #include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
 
+static bool AttributeFound = true;
+static bool AttributeNotFound = false;
+
 template <typename T>
-inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true) {
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
@@ -17,6 +20,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
+		pFound = AttributeNotFound;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -25,10 +29,11 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
+	pFound = AttributeFound;
 	return Utility::stoSafe(pAttributeValue, String(attribute));
 }
 
-inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, String& pAttributeValue, bool pRequired = true) {
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, String& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
@@ -36,6 +41,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
+		pFound = AttributeNotFound;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -44,11 +50,12 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
+	pFound = AttributeFound;
 	pAttributeValue = attribute;
 	return true;
 }
 
-inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, bool& pAttributeValue, bool pRequired = true) {
+inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, bool& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
 	if (!pElement) {
 		Log::error("null pElement in readRequiredAttribute");
 		return false;
@@ -56,6 +63,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
+		pFound = AttributeNotFound;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -64,6 +72,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
+	pFound = AttributeFound;
 	pAttributeValue = String(attribute) == "1";
 	return true;
 }
@@ -822,11 +831,13 @@ namespace NPCAppearanceDataXML {
 		SCA DrakkinTattoo = "drakkin_tattoo";
 		SCA DrakkinDetails = "drakkin_details";
 		SCA HelmTexture = "helm_texture";
+		SCA PrimaryMaterial = "primary_material";
+		SCA SecondaryMaterial = "seconday_material";
 	}
 #undef SCA
 }
 
-bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances) {
+const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances) {
 	using namespace NPCAppearanceDataXML;
 	Profile p("DataStore::loadNPCAppearanceData");
 	EXPECTED_BOOL(pAppearances.empty());
@@ -846,22 +857,64 @@ bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearance
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Parent, d->mParentID));
 
 		// Optional.
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Race, d->mRaceID, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Gender, d->mGender, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BodyType, d->mBodyType, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Size, d->mSize, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::FaceStyle, d->mFaceStyle, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairStyle, d->mHairStyle, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardStyle, d->mBeardStyle, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairColour, d->mHairColour, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardColour, d->mBeardColour, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::LeftEyeColour, d->mEyeColourLeft, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinHeritage, d->mDrakkinHeritage, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinTattoo, d->mDrakkinTattoo, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinDetails, d->mDrakkinDetails, false));
-		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HelmTexture, d->mHelmTexture, false));
+		/*
+			When each attribute is read, we record in NPCAppearanceData::mOverrides whether or not this NPCAppearanceData specified a value for it.
+			The data in mOverrides in then used later when resolving inheritance whether to take the parent value, or the child overridden value.
+			I considered using a set of 'default values' and just checked whether a child value differs from that when resolving inheritance however 
+			there this introduces edge case bugs and ambiguity. For this reason, overrides are recorded.
+		*/
+		bool found = false;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Race, d->mRaceID, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::RaceID] = found;
+		
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Gender, d->mGender, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::Gender] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BodyType, d->mBodyType, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::BodyType] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Size, d->mSize, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::Size] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::FaceStyle, d->mFaceStyle, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::FaceStyle] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairStyle, d->mHairStyle, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::HairStyle] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardStyle, d->mBeardStyle, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::BeardStyle] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairColour, d->mHairColour, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::HairColour] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardColour, d->mBeardColour, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::BeardColour] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::LeftEyeColour, d->mEyeColourLeft, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::EyeColourLeft] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::EyeColourRight] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinHeritage, d->mDrakkinHeritage, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::DrakkinHeritage] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinTattoo, d->mDrakkinTattoo, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::DrakkinTattoo] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinDetails, d->mDrakkinDetails, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::DrakkinDetails] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HelmTexture, d->mHelmTexture, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::HelmTexture] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::PrimaryMaterial, d->mPrimaryMaterial, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::PrimaryMaterial] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::SecondaryMaterial, d->mSecondaryMaterial, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::SecondaryMaterial] = found;
 
 		appearanceElement = appearanceElement->NextSiblingElement(Tag::Appearance);
 	}

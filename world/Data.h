@@ -144,6 +144,7 @@ struct CharacterData {
 };
 
 struct NPCAppearanceData {
+	NPCAppearanceData() { mOverrides.set(0); }
 	uint32 mID = 0;
 	uint32 mParentID = 0;
 
@@ -167,6 +168,29 @@ struct NPCAppearanceData {
 
 	uint32 mPrimaryMaterial = 0;
 	uint32 mSecondaryMaterial = 0;
+
+	enum Attributes {
+		RaceID,
+		Gender,
+		BodyType,
+		Size,
+		FaceStyle,
+		HairStyle,
+		HairColour,
+		BeardStyle,
+		BeardColour,
+		EyeColourLeft,
+		EyeColourRight,
+		DrakkinHeritage,
+		DrakkinTattoo,
+		DrakkinDetails,
+		HelmTexture,
+		PrimaryMaterial,
+		SecondaryMaterial,
+		MAX
+	};
+	std::bitset<Attributes::MAX> mOverrides;
+	bool mResolved = false;
 };
 
 struct SpellData {

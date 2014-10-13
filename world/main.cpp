@@ -16,6 +16,7 @@
 #include "LogSystem.h"
 #include "UCS.h"
 #include "Random.h"
+#include "NPCFactory.h"
 
 TimeoutManager timeout_manager;
 
@@ -38,6 +39,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(TitleManager::getInstance().initialise());
 	EXPECTED_MAIN(SpellDataStore::getInstance().initialise());
 	EXPECTED_MAIN(StaticItemData::getInstance().initialise());
+	EXPECTED_MAIN(NPCFactory::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

@@ -11,6 +11,7 @@
 #include <array>
 #include <iomanip>
 #include <safeint.h>
+#include <bitset>
 
 typedef uint8_t byte;
 typedef uint8_t uint8;
