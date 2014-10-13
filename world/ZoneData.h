@@ -28,6 +28,7 @@ public:
 	const bool getLongName(const uint16 pZoneID, String& pLongName);
 	const bool getShortName(const uint16 pZoneID, String& pShortName);
 	const bool getLongNameStringID(const uint16 pZoneID, uint32& pStringID);
+	const bool getSafePoint(const uint16 pZoneID, Vector3& pSafePoint);
 
 	const bool getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints);
 	const bool getZonePoints(const uint16 pZoneID, std::list<ZonePointData*>** pZonePoints);

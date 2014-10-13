@@ -922,6 +922,48 @@ const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppe
 	return true;
 }
 
+namespace NPCTypeDataXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/npc/types.xml";
+	namespace Tag {
+		SCA Types = "types";
+		SCA Type = "type";
+	}
+	namespace Attribute {
+		// Tag::Type
+		SCA ID = "id";
+		SCA AppearanceID = "appearance_id";
+		SCA Name = "name";
+		SCA LastName = "last_name";
+	}
+#undef SCA
+}
+const bool DataStore::loadNPCTypeData(std::list<NPCTypeData*>& pTypes) {
+	using namespace NPCTypeDataXML;
+	Profile p("DataStore::loadNPCTypeData");
+	EXPECTED_BOOL(pTypes.empty());
+	TiXmlDocument document(NPCTypeDataXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto typesElement = document.FirstChildElement(Tag::Types);
+	EXPECTED_BOOL(typesElement);
+	auto typeElement = typesElement->FirstChildElement(Tag::Type);
+
+	while (typeElement) {
+		auto d = new NPCTypeData();
+		pTypes.push_back(d);
+
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::ID, d->mID));
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::AppearanceID, d->mAppearanceID));
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::Name, d->mName));
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::LastName, d->mLastName));
+
+		typeElement = typeElement->NextSiblingElement(Tag::Type);
+	}
+
+	return true;
+}
+
 const bool DataStore::deleteCharacter(const String& pCharacterName) {
 	const String existingFile = "./data/characters/" + pCharacterName + ".xml";
 	const String newFile = "./data/characters/deleted/" + std::to_string(Utility::Time::now()) + "_" + pCharacterName + ".xml";

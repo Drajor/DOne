@@ -242,6 +242,7 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
+		void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;

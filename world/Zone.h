@@ -48,6 +48,7 @@ public:
 
 	inline const String& getLongName() const { return mLongName; }
 	inline const String& getShortName() const { return mShortName; }
+	inline const Vector3& getSafePoint() const { return mSafePoint; }
 	inline const uint32 getLongNameStringID() const { return mLongNameStringID; }
 	inline const float getGravity() const { return 0.4f; }
 	inline const float getMinimumZ() const { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
@@ -96,6 +97,7 @@ public:
 	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
+	inline void moveCharacter(Character* pCharacter, Vector3& pPosition) { moveCharacter(pCharacter, pPosition.x, pPosition.y, pPosition.z); }
 	uint16 getNextSpawnID() { return mNextSpawnID++; }
 
 	bool trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage);
@@ -158,6 +160,7 @@ private:
 	uint32 mLongNameStringID = 0;
 	String mLongName = "";
 	String mShortName = "";
+	Vector3 mSafePoint;
 	uint16 mNextSpawnID = 1;
 	const uint16 mID;
 	const uint16 mInstanceID;

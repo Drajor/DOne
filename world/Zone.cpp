@@ -22,6 +22,7 @@
 #include "LogSystem.h"
 #include "Scene.h"
 #include "SpawnPoint.h"
+#include "NPCFactory.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -54,6 +55,7 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongNameStringID(mID, mLongNameStringID));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getShortName(mID, mShortName));
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getSafePoint(mID, mSafePoint));
 
 	EXPECTED_BOOL(loadZonePoints());
 	EXPECTED_BOOL(loadSpawnPoints());
@@ -121,9 +123,12 @@ const bool Zone::depopulate() {
 	for (auto i : mSpawnPoints) {
 		auto npc = i->getNPC();
 		if (npc) {
+			// Unlink NPC and SpawnPoint
 			i->setNPC(nullptr);
-			removeActor(npc);
-			delete npc;
+			npc->setSpawnPoint(nullptr);
+
+			// Flag for destruction next update.
+			npc->destroy();
 		}
 	}
 
@@ -1099,12 +1104,13 @@ void Zone::_populate(SpawnPoint* pSpawnPoint) {
 	EXPECTED(pSpawnPoint);
 	EXPECTED(pSpawnPoint->getNPC() == nullptr);
 
-	NPC* npc = new NPC();
+	auto npc = NPCFactory::getInstance().create(1);
 	npc->setZone(this);
 	npc->initialise();
 	npc->setPosition(pSpawnPoint->getPosition());
 	npc->setHeading(pSpawnPoint->getHeading());
 
+	// Link NPC / SpawnPoint
 	pSpawnPoint->setNPC(npc);
 	npc->setSpawnPoint(pSpawnPoint);
 

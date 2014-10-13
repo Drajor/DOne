@@ -1077,6 +1077,7 @@ ENCODE(OP_ZoneSpawns) {
 			Bitfields->ispet = emu->is_pet;
 
 			Buffer += sizeof(structs::Spawn_Struct_Bitfields);
+			std::cout << "sizeof Bitfields= " << sizeof(structs::Spawn_Struct_Bitfields) << std::endl;
 
 			uint8 OtherData = 0;
 
@@ -1262,6 +1263,7 @@ ENCODE(OP_ZoneSpawns) {
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary); //IsMercenary
 			Buffer += 28; // Unknown;
 
+			std::cout << "sizeof  outapp->size = " << outapp->size << std::endl;
 			dest->FastQueuePacket(&outapp, ack_req);
 	}
 

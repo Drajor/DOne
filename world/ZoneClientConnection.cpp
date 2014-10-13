@@ -474,6 +474,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_EvolvingItem:
 		Log::error("OP_EvolvingItem");
 		break;
+	case OP_EnvDamage:
+		_handleEnvironmentalDamage(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3011,6 +3014,11 @@ void ZoneClientConnection::sendCrystals() {
 void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
+}
+
+void ZoneClientConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
+{
+	sendHPUpdate();
 }
 
 //

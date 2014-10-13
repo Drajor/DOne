@@ -1,11 +1,18 @@
 #include "NPCFactory.h"
 #include "Utility.h"
 #include "DataStore.h"
+#include "NPC.h"
 
 const bool NPCFactory::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
 
 	EXPECTED_BOOL(DataStore::getInstance().loadNPCAppearanceData(mNPCAppearanceData));
 	EXPECTED_BOOL(calculateAppearanceData());
+
+	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypeData));
+	EXPECTED_BOOL(validateNPCTypeData());
+
+	mInitialised = true;
 	return true;
 }
 
@@ -89,6 +96,54 @@ const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
 
 NPCAppearanceData* NPCFactory::_findAppearance(const uint32 pID) {
 	for (auto i : mNPCAppearanceData) {
+		if (i->mID == pID)
+			return i;
+	}
+	return nullptr;
+}
+
+const bool NPCFactory::validateNPCTypeData() {
+	for (auto i : mNPCTypeData) {
+		EXPECTED_BOOL(_findAppearance(i->mAppearanceID));
+	}
+
+	return true;
+}
+
+NPC* NPCFactory::create(const uint32 pTypeID) {
+	NPCTypeData* type = _findType(pTypeID);
+	EXPECTED_PTR(type);
+	NPCAppearanceData* appearance = _findAppearance(type->mAppearanceID);
+	EXPECTED_PTR(appearance);
+
+	NPC* npc = new NPC();
+	npc->setName(type->mName);
+	npc->setLastName(type->mLastName);
+	
+	npc->setRaceID(appearance->mRaceID);
+	npc->setGender(appearance->mGender);
+	npc->setBodyType(appearance->mBodyType);
+	npc->setSize(appearance->mSize);
+
+	npc->setFaceStyle(appearance->mFaceStyle);
+	npc->setHairStyle(appearance->mHairStyle);
+	npc->setHairColour(appearance->mHairColour);
+	npc->setBeardStyle(appearance->mBeardStyle);
+	npc->setBeardColour(appearance->mBeardColour);
+	npc->setLeftEyeColour(appearance->mEyeColourLeft);
+	npc->setRightEyeColour(appearance->mEyeColourRight);
+	npc->setDrakkinHeritage(appearance->mDrakkinHeritage);
+	npc->setDrakkinTattoo(appearance->mDrakkinTattoo);
+	npc->setDrakkinDetails(appearance->mDrakkinDetails);
+	//npc->helm Helm Texture
+	npc->setMaterial(MaterialSlot::Mat_Primary, appearance->mPrimaryMaterial);
+	npc->setMaterial(MaterialSlot::Mat_Secondary, appearance->mSecondaryMaterial);
+
+	return npc;
+}
+
+NPCTypeData* NPCFactory::_findType(const uint32 pID) {
+	for (auto i : mNPCTypeData) {
 		if (i->mID == pID)
 			return i;
 	}

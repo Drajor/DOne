@@ -255,8 +255,8 @@ public:
 	inline const FlyMode getFlyMode() const { return mSpawnData.mFlyMode; }
 	inline void getFlyMode(const FlyMode pFlyMode) { mSpawnData.mFlyMode = pFlyMode; }
 
-	inline const BodyType getBodyType() const { return mSpawnData.mBodyType; }
-	inline void setBodyType(const BodyType pBodyType) { mSpawnData.mBodyType = pBodyType; }
+	inline const uint8 getBodyType() const { return mSpawnData.mBodyType; }
+	inline void setBodyType(const uint8 pBodyType) { mSpawnData.mBodyType = pBodyType; }
 
 	inline const Colour getColour(const int pSlotID) const {
 		// TODO: Guard this.
@@ -304,7 +304,7 @@ private:
 	String mPrefix = "";
 	String mSuffix = "";
 
-	float mVisibleRange = 30.0f;
+	float mVisibleRange = 3000.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
 
 	Actor* mTarget = nullptr; // Current target.

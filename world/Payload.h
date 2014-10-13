@@ -474,6 +474,11 @@ namespace Payload {
 			uint32 mTotalRadiantCrystals = 0;
 			uint32 mTotalEbonCrystals = 0;
 		};
+
+		// S->C
+		struct Illusion : public FixedT<Illusion, OP_Illusion> {
+
+		};
 	}
 
 	namespace World {
@@ -783,7 +788,7 @@ namespace Payload {
 		uint8 mRightEyeColour = 0;
 		FlyMode mFlyMode = FM_NONE;
 		GenderID mGender = G_FEMALE;
-		BodyType mBodyType = BT_Humanoid;
+		uint8 mBodyType = BT_Humanoid;
 		uint8 mUnknown14[3];
 		union
 		{

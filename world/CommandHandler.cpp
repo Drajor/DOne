@@ -73,36 +73,45 @@ public:
 class WarpCommand : public Command {
 public:
 	WarpCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
-		mHelpMessages.push_back("Usage: #warp <X> <Y> <Z>");
+		mHelpMessages.push_back("Usage: #warp (warps yourself to your target).");
+		mHelpMessages.push_back("Usage: #warp <X> <Y> <Z> (warps your target or yourself to the specified position).");
+		mHelpMessages.push_back("Usage: #warp safe (warps your target or yourself to the zone safe point).");
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		// Warp to target.
 		if (pParameters.empty()) {
 			Actor* target = pCharacter->getTarget();
-			if (!target || !target->isCharacter()) { return false; }
-			Character* characterTarget = static_cast<Character*>(target);
-			pCharacter->message(MessageType::Yellow, "Moving to " + characterTarget->getName() + ".");
-			pCharacter->getZone()->moveCharacter(pCharacter, characterTarget->getX(), characterTarget->getY(), characterTarget->getZ());
+			if (!target) { return false; }
+			Vector3 position = target->getPosition();
+			pCharacter->notify("Warping to target " + position.toString());
+			pCharacter->getZone()->moveCharacter(pCharacter, position);
 			return true;
 		}
-		// Check: Parameter #
-		if (pParameters.size() != 3) {
-			invalidParameters(pCharacter, pParameters);
-			return false;
+		
+		// Warp to position
+		if (pParameters.size() == 3) {
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+			// Check: Parameter conversion.
+			const bool ok = Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2]);
+			if (!ok) { return false; }
+			Vector3 position(x, y, z);
+			pCharacter->notify("Warping to position " + position.toString());
+			pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
+			return true;
 		}
 
-		float x = 0.0f;
-		float y = 0.0f;
-		float z = 0.0f;
-		// Check: Parameter conversion.
-		const bool ok = Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2]);
-		if (!ok) {
-			pCharacter->message(MessageType::Red, "There was a problem with your parameters.");
-			return false;
+		// Warp to safe
+		if (pParameters.size() == 1 && pParameters[0] == "safe") {
+			Vector3 safePoint = pCharacter->getZone()->getSafePoint();
+			pCharacter->notify("Warping to zone safe point " + safePoint.toString());
+			pCharacter->getZone()->moveCharacter(pCharacter, safePoint);
+			return true;
 		}
 
-		pCharacter->getZone()->moveCharacter(pCharacter, x, y, z);
-		return true;
+		return false;
 	}
 };
 

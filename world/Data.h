@@ -193,6 +193,14 @@ struct NPCAppearanceData {
 	bool mResolved = false;
 };
 
+struct NPCTypeData {
+	uint32 mID = 0;
+	uint32 mAppearanceID = 0;
+
+	String mName = "";
+	String mLastName = "";
+};
+
 struct SpellData {
 	bool mInUse = false;
 	uint32 mID = 0;

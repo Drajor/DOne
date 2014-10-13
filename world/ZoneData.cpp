@@ -301,3 +301,13 @@ const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<ZonePo
 	*pZonePoints = &zoneData->mZonePoints;
 	return true;
 }
+
+const bool ZoneDataManager::getSafePoint(const uint16 pZoneID, Vector3& pSafePoint) {
+	ZoneData* zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	pSafePoint.x = zoneData->mSafeX;
+	pSafePoint.y = zoneData->mSafeY;
+	pSafePoint.z = zoneData->mSafeZ;
+
+	return true;
+}
