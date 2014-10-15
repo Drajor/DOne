@@ -918,7 +918,6 @@ namespace Payload {
 		float mWalkSpeed = 0.0f;
 		float mRunSpeed = 0.0f;
 		uint32 mRace = 0;
-		uint8 __Unknown2 = 1; // comment = showname
 		uint8 mPropertyCount = 1; // HC 1
 		uint32 mBodyType = 0;
 		uint8 mCurrentHP = 0;
