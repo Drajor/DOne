@@ -843,7 +843,7 @@ void Zone::handleTitleChanged(Character* pCharacter, TitleOption pOption) {
 
 	if (pOption == TitleOption::TO_Title) {
 		payload->mOption = TitleUpdate::UPDATE_PREFIX;
-		strcpy(payload->mTitle, pCharacter->getPrefix().c_str());
+		strcpy(payload->mTitle, pCharacter->getTitle().c_str());
 
 	}
 	else {

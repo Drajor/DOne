@@ -880,7 +880,7 @@ namespace Payload {
 		ActorFlags mFlags;
 		uint8 mOtherData; // Possible this is just part of bitfields too.
 		float __Unknown0 = -1; // Destructible writes 0, else writes -1 float.
-		uint32 __Unknown1 = 0; // HC as 0
+		float __Unknown1 = 0; // HC as 0
 
 		/*
 		struct Destructible {
@@ -918,8 +918,8 @@ namespace Payload {
 		float mWalkSpeed = 0.0f;
 		float mRunSpeed = 0.0f;
 		uint32 mRace = 0;
-		// Apparently Destructible stuff is added here
-		uint8 __Unknown2 = 1;
+		uint8 __Unknown2 = 1; // comment = showname
+		uint8 mPropertyCount = 1; // HC 1
 		uint32 mBodyType = 0;
 		uint8 mCurrentHP = 0;
 		uint8 mHairColour = 0;

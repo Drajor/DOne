@@ -102,10 +102,16 @@ public:
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
 	inline const String& getLastName() const { return mLastName; }
 	inline void setLastName(const String& pLastName) { mLastName = pLastName; _setLastName(pLastName.c_str()); }
-	inline const String& getPrefix() const { return mPrefix; }
-	inline void setPrefix(const String& pPrefix) { mPrefix = pPrefix; _setPrefix(pPrefix.c_str()); }
+	
+	inline bool hasTitle() const { return mTitle.length() > 0; }
+	inline const String& getTitle() const { return mTitle; }
+	inline void setTitle(const String& pValue) { mTitle = pValue; _setPrefix(pValue.c_str()); }
+	
+	inline const bool hasSuffix() const { return mSuffix.length() > 0; }
 	inline const String& getSuffix() const { return mSuffix; }
-	inline void setSuffix(const String& pSuffix) { mSuffix = pSuffix; _setSuffix(pSuffix.c_str()); }
+	inline void setSuffix(const String& pValue) { mSuffix = pValue; _setSuffix(pValue.c_str()); }
+
+	inline const bool isDestructible() const { return false; }
 
 	inline void _syncPosition() {
 		// Current
@@ -314,11 +320,13 @@ protected:
 	Zone* mZone = nullptr;
 private:
 
+	void _onCopy();
+
 	bool mDestroy = false;
 
 	String mName = "";
 	String mLastName = "";
-	String mPrefix = "";
+	String mTitle = "";
 	String mSuffix = "";
 
 	float mVisibleRange = 3000.0f;

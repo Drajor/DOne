@@ -75,14 +75,20 @@ const uint32 Actor::getDataSize() const {
 	// Add variable strings
 	result += strlen(mActorData.mName) + 1;
 	result += strlen(mActorData.mLastName) + 1;
-	result += strlen(mActorData.mTitle) + 1;
-	result += strlen(mActorData.mSuffix) + 1;
+	
+	if (hasTitle())
+		result += strlen(mActorData.mTitle) + 1;
+
+	if (hasSuffix())
+		result += strlen(mActorData.mSuffix) + 1;
 
 	Log::info("Actor: " + getName() + " Size: " + std::to_string(result));
 	return result;
 }
 
 const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
+	
+	_onCopy();
 
 	pStructure.writeString(String(mActorData.mName));
 
@@ -92,12 +98,17 @@ const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
 
 	pStructure.writeString(String(mActorData.mLastName));
 
+	Log::info("After LastName: " + std::to_string(pStructure.getBytesWritten()));
+
 	// Chunk One.
 	std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.__Unknown7);
 	pStructure.writeChunk((void*)&(mActorData.__Unknown7), chunk1);
 
-	pStructure.writeString(String(mActorData.mTitle));
-	pStructure.writeString(String(mActorData.mSuffix));
+	if (hasTitle())
+		pStructure.writeString(String(mActorData.mTitle));
+
+	if (hasSuffix())
+		pStructure.writeString(String(mActorData.mSuffix));
 
 	pStructure.write<uint32>(mActorData.__Unknown16);
 	pStructure.write<uint32>(mActorData.__Unknown17);
@@ -105,5 +116,20 @@ const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
 
 	pStructure.writeChunk((void*)&(mActorData.mUnknowns), sizeof(mActorData.mUnknowns));
 
+	if (pStructure.check() == false) {
+		Log::error("[Actor] Bad Write: Written: " + std::to_string(pStructure.getBytesWritten()) + " Size: " + std::to_string(pStructure.getSize()));
+	}
+
 	return true;
+}
+
+void Actor::_onCopy() {
+	if (hasTitle())
+		mActorData.mOtherData = mActorData.mOtherData | 0x04;
+
+	if (hasSuffix())
+		mActorData.mOtherData = mActorData.mOtherData | 0x08;
+
+	if (isDestructible())
+		mActorData.mOtherData = mActorData.mOtherData | 0xd1;
 }

@@ -604,7 +604,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	}
 	//payload->aa_array[MAX_PP_AA_ARRAY];
 	//payload->servername[32];
-	strncpy(payload->title, mCharacter->getPrefix().c_str(), Limits::Character::MAX_TITLE_LENGTH);
+	strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
 	strncpy(payload->suffix, mCharacter->getSuffix().c_str(), Limits::Character::MAX_SUFFIX_LENGTH);
 	//payload->guildid2;
 	payload->exp = mCharacter->getExperience();
@@ -2533,7 +2533,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 			prefix = TitleManager::getInstance().getPrefix(payload->mTitleID);
 
 		// Update Character.
-		mCharacter->setPrefix(prefix);
+		mCharacter->setTitle(prefix);
 	}
 
 	// Suffix changing.
