@@ -567,7 +567,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	strncpy(payload->name, mCharacter->getName().c_str(), Limits::Character::MAX_NAME_LENGTH);
 	strncpy(payload->last_name, mCharacter->getLastName().c_str(), Limits::Character::MAX_LAST_NAME_LENGTH);
 	payload->gender = mCharacter->getGender();
-	payload->race = mCharacter->getRaceID();
+	payload->race = mCharacter->getRace();
 	payload->class_ = mCharacter->getClass();
 	payload->level = mCharacter->getLevel();
 	//payload->binds[5];
@@ -598,7 +598,8 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->item_material[_MaterialCount];
 	//payload->item_tint[_MaterialCount];
 	for (int i = 0; i < MAX_MATERIAL_SLOTS; i++) {
-		payload->item_tint[i].color = mCharacter->getColour(i).mColour;
+		//payload->item_tint[i].color = mCharacter->getColour(i).mColour;
+		// TODO!
 		payload->item_material[i] = mCharacter->getMaterial(i);
 	}
 	//payload->aa_array[MAX_PP_AA_ARRAY];
@@ -737,10 +738,14 @@ void ZoneClientConnection::_sendZoneEntry() {
 	EXPECTED(mConnected);
 
 	mCharacter->_syncPosition();
+
+	uint32 size = mCharacter->getDataSize();
+	unsigned char * data = new unsigned char[size];
+	Utility::DynamicStructure ds(data, size);
+	EXPECTED(mCharacter->copyData(ds));
 	
-	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, mCharacter->getActorData(), sizeof(Payload::SpawnData));
+	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	mStreamInterface->QueuePacket(outPacket);
-	outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 
@@ -1590,7 +1595,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		ds.write<uint32>(4); // zone (Not sure what this does).
 		ds.write<uint32>(i->getClass()); // class_
 		ds.write<uint32>(i->getLevel()); // level
-		ds.write<uint32>(i->getRaceID()); // race
+		ds.write<uint32>(i->getRace()); // race
 		ds.writeString(FakeAccount); // account
 		//dynamicStructure.write<uint32>(0); // account
 		ds.write<uint32>(0); // unknown100

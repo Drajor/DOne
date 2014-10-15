@@ -8,7 +8,7 @@ NPC::NPC() {
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
 	setActorType(AT_NPC);
-	setIsNPC(true);
+	//setIsNPC(true);
 
 	setCurrency(4, 5, 6, 7);
 }

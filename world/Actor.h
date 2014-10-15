@@ -84,8 +84,8 @@ public:
 
 	virtual const bool onDeath() = 0;
 
-	inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
-	inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mSpawnData.mSpawnID2); }
+	//inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
+	inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mActorData.mPosition); }
 
 	inline const float getVisibleRange() const { return mVisibleRange; }
 	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
@@ -95,8 +95,8 @@ public:
 	inline void addVisibleTo(Character* pCharacter) { mVisibleTo.push_back(pCharacter); }
 	inline void removeVisibleTo(Character* pCharacter) { mVisibleTo.remove(pCharacter); }
 
-	inline const SpawnID getSpawnID() const { return mSpawnData.mSpawnID; }
-	inline void setSpawnID(const SpawnID pSpawnID) { mSpawnData.mSpawnID = pSpawnID; mSpawnData.mSpawnID2 = pSpawnID; }
+	inline const SpawnID getSpawnID() const { return mActorData.mSpawnID; }
+	inline void setSpawnID(const SpawnID pSpawnID) { mActorData.mSpawnID = pSpawnID; }
 
 	inline const String& getName() const { return mName; }
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
@@ -109,15 +109,15 @@ public:
 
 	inline void _syncPosition() {
 		// Current
-		mSpawnData.x = FUCK::xFloatToEQ19(mPosition.x);
-		mSpawnData.y = FUCK::xFloatToEQ19(mPosition.y);
-		mSpawnData.z = FUCK::xFloatToEQ19(mPosition.z);
-		mSpawnData.heading = FUCK::xFloatToEQ19(mHeading);
+		mActorData.mPosition.x = FUCK::xFloatToEQ19(mPosition.x);
+		mActorData.mPosition.y = FUCK::xFloatToEQ19(mPosition.y);
+		mActorData.mPosition.z = FUCK::xFloatToEQ19(mPosition.z);
+		mActorData.mPosition.heading = FUCK::xFloatToEQ19(mHeading);
 		// Delta
-		mSpawnData.deltaX = FUCK::xNewFloatToEQ13(mPositionDelta.x);
-		mSpawnData.deltaY = FUCK::xNewFloatToEQ13(mPositionDelta.y);
-		mSpawnData.deltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
-		mSpawnData.deltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
+		mActorData.mPosition.deltaX = FUCK::xNewFloatToEQ13(mPositionDelta.x);
+		mActorData.mPosition.deltaY = FUCK::xNewFloatToEQ13(mPositionDelta.y);
+		mActorData.mPosition.deltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
+		mActorData.mPosition.deltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
 	}
 
 	inline const Vector3& getPosition() const { return mPosition; }
@@ -138,141 +138,154 @@ public:
 	inline const int32 getAnimation() const { return mAnimation; }
 	inline void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
 
-	inline const uint8 getStandingState() const { return mSpawnData.mStandState; }
-	inline void setStandingState(const uint8 pStandingState) { mSpawnData.mStandState = pStandingState; }
+	inline const uint8 getStandingState() const { return mActorData.mStandState; }
+	inline void setStandingState(const uint8 pStandingState) { mActorData.mStandState = pStandingState; }
 
 	// Visual
-	inline const uint8 getFaceStyle() const { return mSpawnData.mFaceStyle; }
-	inline const uint8 getLeftEyeColour() const { return mSpawnData.mLeftEyeColour; }
-	inline const uint8 getRightEyeColour() const { return mSpawnData.mRightEyeColour; }
-	inline const uint8 getHairStyle() const { return mSpawnData.mHairStyle; }
-	inline const uint8 getBeardStyle() const { return mSpawnData.mBeardStyle; }
-	inline const uint8 getHairColour() const { return mSpawnData.mHairColour; }
-	inline const uint8 getBeardColour() const { return mSpawnData.mBeardColour; }
-	inline const uint32 getDrakkinHeritage() const { return mSpawnData.mDrakkinHeritage; }
-	inline const uint32 getDrakkinTattoo() const { return mSpawnData.mDrakkinTattoo; }
-	inline const uint32 getDrakkinDetails() const { return mSpawnData.mDrakkinDetails; }
+	inline const uint8 getFaceStyle() const { return mActorData.mFaceStyle; }
+	inline const uint8 getLeftEyeColour() const { return mActorData.mLeftEyeColour; }
+	inline const uint8 getRightEyeColour() const { return mActorData.mRightEyeColour; }
+	inline const uint8 getHairStyle() const { return mActorData.mHairStyle; }
+	inline const uint8 getBeardStyle() const { return mActorData.mBeardStyle; }
+	inline const uint8 getHairColour() const { return mActorData.mHairColour; }
+	inline const uint8 getBeardColour() const { return mActorData.mBeardColour; }
+	inline const uint32 getDrakkinHeritage() const { return mActorData.mDrakkinHeritage; }
+	inline const uint32 getDrakkinTattoo() const { return mActorData.mDrakkinTattoo; }
+	inline const uint32 getDrakkinDetails() const { return mActorData.mDrakkinDetails; }
 
-	inline void setFaceStyle(const uint8 pFaceStyle) { mSpawnData.mFaceStyle = pFaceStyle; }
-	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mSpawnData.mLeftEyeColour = pLeftEyeColour; }
-	inline void setRightEyeColour(const uint8 pRightEyeColour) { mSpawnData.mRightEyeColour = pRightEyeColour; }
-	inline void setHairStyle(const uint8 pHairStyle) { mSpawnData.mHairStyle = pHairStyle; }
-	inline void setBeardStyle(const uint8 pBeardStyle) { mSpawnData.mBeardStyle = pBeardStyle; }
-	inline void setHairColour(const uint8 pHairColour) { mSpawnData.mHairColour = pHairColour; }
-	inline void setBeardColour(const uint8 pBeardColour) { mSpawnData.mBeardColour = pBeardColour; }
-	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mSpawnData.mDrakkinHeritage = pDrakkinHeritage; }
-	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mSpawnData.mDrakkinTattoo = pDrakkinTattoo; }
-	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mSpawnData.mDrakkinDetails = pDrakkinDetails; }
+	inline void setFaceStyle(const uint8 pFaceStyle) { mActorData.mFaceStyle = pFaceStyle; }
+	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mActorData.mLeftEyeColour = pLeftEyeColour; }
+	inline void setRightEyeColour(const uint8 pRightEyeColour) { mActorData.mRightEyeColour = pRightEyeColour; }
+	inline void setHairStyle(const uint8 pHairStyle) { mActorData.mHairStyle = pHairStyle; }
+	inline void setBeardStyle(const uint8 pBeardStyle) { mActorData.mBeardStyle = pBeardStyle; }
+	inline void setHairColour(const uint8 pHairColour) { mActorData.mHairColour = pHairColour; }
+	inline void setBeardColour(const uint8 pBeardColour) { mActorData.mBeardColour = pBeardColour; }
+	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mActorData.mDrakkinHeritage = pDrakkinHeritage; }
+	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
+	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
 
 	// Other
-	inline const bool getIsGM() const { return mSpawnData.mGM == 1; }
-	inline void setIsGM(const bool pIsGM) { mSpawnData.mGM = pIsGM ? GM_ON : GM_OFF; }
+	inline const bool getIsGM() const { return mActorData.mFlags.mIsGM == 1; }
+	inline void setIsGM(const bool pIsGM) { mActorData.mFlags.mIsGM = pIsGM ? GM_ON : GM_OFF; }
 
-	inline const GenderID getGender() const { return mSpawnData.mGender; }
-	inline void setGender(const GenderID pGender) { mSpawnData.mGender = pGender; }
+	//inline const GenderID getGender() const { return mActorData.mGender; }
+	//inline void setGender(const GenderID pGender) { mSpawnData.mGender = pGender; }
+	// TODO!
+	inline const GenderID getGender() const { return 0; }
+	inline void setGender(const GenderID pGender) { };
 	
-	inline const ClassID getClass() const { return mSpawnData.mClass; }
-	inline void setClass(const ClassID pClassID) { mSpawnData.mClass = pClassID; }
+	inline const uint8 getClass() const { return mActorData.mClass; }
+	inline void setClass(const uint8 pClassID) { mActorData.mClass = pClassID; }
 	
-	inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
-	inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
+	//inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
+	//inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
 	
-	inline const AnonType getAnonymous() const { return mSpawnData.mAnonymous; }
-	inline void setAnonymous(const AnonType pAnonType) { mSpawnData.mAnonymous = pAnonType; }
+	//inline const AnonType getAnonymous() const { return mSpawnData.mAnonymous; }
+	//inline void setAnonymous(const AnonType pAnonType) { mSpawnData.mAnonymous = pAnonType; }
+	// TODO!
+	inline const AnonType getAnonymous() const { return AnonType::AT_None; }
+	inline void setAnonymous(const AnonType pAnonType) { };
 	
-	inline const DeityID getDeityID() const { return mSpawnData.mDeity; }
-	inline void setDeityID(const DeityID pDeityID) { mSpawnData.mDeity = pDeityID; }
+	inline const uint32 getDeityID() const { return mActorData.mDeity; }
+	inline void setDeityID(const uint32 pDeityID) { mActorData.mDeity = pDeityID; }
 
-	inline const float getSize() const { return mSpawnData.mSize; }
-	inline void setSize(const float pSize) { mSpawnData.mSize = pSize; }
+	inline const float getSize() const { return mActorData.mSize; }
+	inline void setSize(const float pSize) { mActorData.mSize = pSize; }
 
-	inline const ActorType getActorType() const { return mSpawnData.mActorType; }
-	inline void setActorType(const ActorType pActorType) { mSpawnData.mActorType = pActorType; }
+	inline const uint8 getActorType() const { return mActorData.mActorType; }
+	inline void setActorType(const uint8 pActorType) { mActorData.mActorType = pActorType; }
 
-	inline const bool isInvisible() const { return mSpawnData.mIsInvisible == 1; }
-	inline void setInvisible(const bool pInvisible) { mSpawnData.mIsInvisible = pInvisible ? 1 : 0; }
+	inline const bool isInvisible() const { return mActorData.mFlags.mIsInvisible == 1; }
+	inline void setInvisible(const bool pInvisible) { mActorData.mFlags.mIsInvisible ? 1 : 0; }
 
 	// TODO: Is this a ratio?
-	inline const uint8 getCurrentHP() const { return mSpawnData.mCurrentHP; }
-	inline void setCurrentHP(const uint8 pCurrentHP) { mSpawnData.mCurrentHP = pCurrentHP; }
+	inline const uint8 getCurrentHP() const { return mActorData.mCurrentHP; }
+	inline void setCurrentHP(const uint8 pCurrentHP) { mActorData.mCurrentHP = pCurrentHP; }
 	// max_hp TODO
 
-	inline const bool isFindable() const { return mSpawnData.mIsFindable == 1; }
-	inline void setIsFindable(const bool pFindable) { mSpawnData.mIsFindable = pFindable ? 1 : 0; }
+	//inline const bool isFindable() const { return mSpawnData.mIsFindable == 1; }
+	//inline void setIsFindable(const bool pFindable) { mSpawnData.mIsFindable = pFindable ? 1 : 0; }
 
-	inline const uint8 getStandState() const { return mSpawnData.mStandState; }
-	inline void setStandState(const uint8 pStandState) { mSpawnData.mStandState = pStandState; }
+	inline const uint8 getStandState() const { return mActorData.mStandState; }
+	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
 
-	inline const bool getShowHelm() const { return mSpawnData.mShowHelm == 1; }
-	inline void setShowHelm(const bool pShowHelm) { mSpawnData.mShowHelm = pShowHelm ? 1 : 0; }
+	inline const bool getShowHelm() const { return mActorData.mFlags.mShowHelm == 1; }
+	inline void setShowHelm(const bool pShowHelm) { mActorData.mFlags.mShowHelm = pShowHelm ? 1 : 0; }
 
-	inline const bool getIsNPC() const { return mSpawnData.mIsNPC == 1; }
-	inline void setIsNPC(const bool pIsNPC) { mSpawnData.mIsNPC = pIsNPC ? 1 : 0; }
+	//inline const bool getIsNPC() const { return mSpawnData.mIsNPC == 1; }
+	//inline void setIsNPC(const bool pIsNPC) { mSpawnData.mIsNPC = pIsNPC ? 1 : 0; }
 
-	inline const uint8 getLevel() const { return mSpawnData.mLevel; }
-	inline void setLevel(const uint8 pLevel) { mSpawnData.mLevel = pLevel; }
+	inline const uint8 getLevel() const { return mActorData.mLevel; }
+	inline void setLevel(const uint8 pLevel) { mActorData.mLevel = pLevel; }
 
-	inline const SpawnID getOwnerSpawnID() const { return mSpawnData.mOwnerSpawnID; }
-	inline void setOwnerSpawnID(const SpawnID pSpawnID) { mSpawnData.mOwnerSpawnID = pSpawnID; }
+	inline const uint32 getOwnerSpawnID() const { return mActorData.mOwnerSpawnID; }
+	inline void setOwnerSpawnID(const uint32 pSpawnID) { mActorData.mOwnerSpawnID = pSpawnID; }
 
-	inline const GuildRank getGuildRank() const { return mSpawnData.mGuildRank; }
-	inline void setGuildRank(const GuildRank pGuildRank) { mSpawnData.mGuildRank = pGuildRank; }
+	inline const uint32 getGuildRank() const { return mActorData.mGuildRank; }
+	inline void setGuildRank(const uint32 pGuildRank) { mActorData.mGuildRank = pGuildRank; }
 
 	inline const uint32 getMaterial(const MaterialSlot pSlotID) const {
 		// TODO: Guard this.
-		return mSpawnData.mEquipmentMaterials[pSlotID];
+		//return mSpawnData.mEquipmentMaterials[pSlotID];
+		// TODO!
+		return 0;
 	}
 	inline const uint32 getMaterial(const int pSlotID) const {
 		// TODO: Guard this.
-		return mSpawnData.mEquipmentMaterials[pSlotID];
+		//return mSpawnData.mEquipmentMaterials[pSlotID];
+		// TODO!
+		return 0;
 	}
 	inline void setMaterial(const MaterialSlot pSlotID, const uint32 pMaterial) {
 		// TODO: Guard this.
-		mSpawnData.mEquipmentMaterials[pSlotID] = pMaterial;
+		//mActorData.mEquipment[pSlotID] = pMaterial;
+		// TODO!
 	}
 
-	inline const float getRunSpeed() const { return mSpawnData.mRunSpeed; }
-	inline void setRunSpeed(const float pRunSpeed) { mSpawnData.mRunSpeed = pRunSpeed; }
+	inline const float getRunSpeed() const { return mActorData.mRunSpeed; }
+	inline void setRunSpeed(const float pRunSpeed) { mActorData.mRunSpeed = pRunSpeed; }
 
-	inline const bool isAFK() const { return mSpawnData.mIsAFK == 1; }
-	inline void setIsAFK(const bool pAFK) { mSpawnData.mIsAFK = pAFK ? 1 : 0; }
+	inline const bool isAFK() const { return mActorData.mFlags.mIsAFK == 1; }
+	inline void setIsAFK(const bool pAFK) { mActorData.mFlags.mIsAFK = pAFK ? 1 : 0; }
 
-	inline const GuildID getGuildID() const { return mSpawnData.mGuildID; }
-	inline void setGuildID(const GuildID pGuildID) { mSpawnData.mGuildID = pGuildID; }
+	inline const uint32 getGuildID() const { return mActorData.mGuildID; }
+	inline void setGuildID(const uint32 pGuildID) { mActorData.mGuildID = pGuildID; }
 
-	inline const RaceID getRaceID() const { return mSpawnData.mRace; }
-	inline void setRaceID(const RaceID pRaceID) { mSpawnData.mRace = pRaceID; }
+	inline const uint32 getRace() const { return mActorData.mRace; }
+	inline void setRace(const uint32 pRaceID) { mActorData.mRace = pRaceID; }
 
-	inline const float getWalkSpeed() const { return mSpawnData.mWalkSpeed; }
-	inline void setWalkSpeed(const float pWalkSpeed) { mSpawnData.mWalkSpeed = pWalkSpeed; }
+	inline const float getWalkSpeed() const { return mActorData.mWalkSpeed; }
+	inline void setWalkSpeed(const float pWalkSpeed) { mActorData.mWalkSpeed = pWalkSpeed; }
 
-	inline const bool isPet() const { return mSpawnData.mIsPet == 1; }
-	inline void setIsPet(const bool pIsPet) { mSpawnData.mIsPet = pIsPet ? 1 : 0; }
+	inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }
+	inline void setIsPet(const bool pIsPet) { mActorData.mFlags.mIsPet = pIsPet ? 1 : 0; }
 
-	inline const uint8 getLight() const { return mSpawnData.mLight; }
-	inline void setLight(const uint8 pLight) { mSpawnData.mLight = pLight; }
+	inline const uint8 getLight() const { return mActorData.mLight; }
+	inline void setLight(const uint8 pLight) { mActorData.mLight = pLight; }
 
-	inline const FlyMode getFlyMode() const { return mSpawnData.mFlyMode; }
-	inline void getFlyMode(const FlyMode pFlyMode) { mSpawnData.mFlyMode = pFlyMode; }
+	inline const uint8 getFlyMode() const { return mActorData.mFlyMode; }
+	inline void getFlyMode(const uint8 pFlyMode) { mActorData.mFlyMode = pFlyMode; }
 
-	inline const uint8 getBodyType() const { return mSpawnData.mBodyType; }
-	inline void setBodyType(const uint8 pBodyType) { mSpawnData.mBodyType = pBodyType; }
+	inline const uint32 getBodyType() const { return mActorData.mBodyType; }
+	inline void setBodyType(const uint32 pBodyType) { mActorData.mBodyType = pBodyType; }
 
-	inline const Colour getColour(const int pSlotID) const {
-		// TODO: Guard this.
-		return mSpawnData.mEquipmentColours[pSlotID];
-	}
-	inline void setColour(const int pSlotID, const Colour pColour) {
-		// TODO: Guard this.
-		mSpawnData.mEquipmentColours[pSlotID] = pColour;
-	}
+	//inline const Colour getColour(const int pSlotID) const {
+	//	// TODO: Guard this.
+	//	return mActorData.mColours[pSlotID];
+	//}
+	//inline void setColour(const int pSlotID, const Colour pColour) {
+	//	// TODO: Guard this.
+	//	//mSpawnData.mEquipmentColours[pSlotID] = pColour;
+	//	mActorData.mColours[pSlotID] = pColour.mColour;
+	//}
 	inline void setColour(const int pSlotID, const uint32 pColour) {
 		// TODO: Guard this.
-		mSpawnData.mEquipmentColours[pSlotID].mColour = pColour;
+		//mSpawnData.mEquipmentColours[pSlotID].mColour = pColour;
+		mActorData.mColours[pSlotID] = pColour;
 	}
 
-	inline const bool isLFG() const { return mSpawnData.mIsLFG == 1; }
-	inline void setIsLFG(const bool pIsLFG) { mSpawnData.mIsLFG = pIsLFG ? 1 : 0; }
+	inline const bool isLFG() const { return mActorData.mFlags.mLFG == 1; }
+	inline void setIsLFG(const bool pIsLFG) { mActorData.mFlags.mLFG = pIsLFG ? 1 : 0; }
 
 	// Looting
 	inline const bool hasLooter() const { return mLooter != nullptr; }
@@ -284,6 +297,9 @@ public:
 	inline void destroy() { mDestroy = true; }
 	inline const bool getDestroy() const { return mDestroy; }
 
+	const uint32 getDataSize() const;
+	const bool copyData(Utility::DynamicStructure& pStructure);
+
 protected:
 	Vector3 mPosition;
 	float mHeading = 0.0f;
@@ -293,7 +309,8 @@ protected:
 
 	Character* mLooter = nullptr;
 	Timer mDecayTimer;
-	Payload::SpawnData mSpawnData;
+	//Payload::SpawnData mSpawnData;
+	Payload::ActorData mActorData;
 	Zone* mZone = nullptr;
 private:
 
@@ -310,8 +327,8 @@ private:
 	Actor* mTarget = nullptr; // Current target.
 	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.
 
-	inline void _setName(const char* pName) { strncpy(mSpawnData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
-	inline void _setLastName(const char* pLastName) { strncpy(mSpawnData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
-	inline void _setPrefix(const char* pTitle) { strncpy(mSpawnData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
-	inline void _setSuffix(const char* pSuffix) { strncpy(mSpawnData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
+	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
+	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
+	inline void _setPrefix(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
+	inline void _setSuffix(const char* pSuffix) { strncpy(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 };

@@ -21,7 +21,7 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
 	setActorType(AT_PLAYER);
-	setIsNPC(false);
+	//setIsNPC(false);
 
 	mFilters.fill(0);
 	mSkills.fill(0);
@@ -61,7 +61,7 @@ bool Character::initialise() {
 	setLastName(mData->mLastName);
 	setPrefix(mData->mTitle);
 	setSuffix(mData->mSuffix);
-	setRaceID(mData->mRace);
+	setRace(mData->mRace);
 	setIsGM(mData->mGM);
 	setClass(mData->mClass);
 	setGender(mData->mGender);
@@ -83,7 +83,7 @@ bool Character::initialise() {
 	setDrakkinTattoo(mData->mDrakkinTattoo);
 	setDrakkinDetails(mData->mDrakkinDetails);
 
-	setSize(Character::getDefaultSize(getRaceID()));
+	setSize(Character::getDefaultSize(getRace()));
 
 	setExperience(mData->mExperience);
 
@@ -343,7 +343,7 @@ void Character::_updateForSave() {
 	mData->mLevel = getLevel();
 	mData->mExperience = getExperience();
 
-	mData->mRace = getRaceID();
+	mData->mRace = getRace();
 	mData->mClass = getClass();
 
 	mData->mBeardStyle = getBeardStyle();
@@ -408,7 +408,8 @@ void Character::_updateForSave() {
 
 	// Armor Dye
 	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
-		mData->mDyes[i] = getColour(i).mColour;
+		//mData->mDyes[i] = getColour(i).mColour;
+		//TODO!
 	}
 
 	mData->mAutoConsentGroup = getAutoConsentGroup();

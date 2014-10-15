@@ -120,7 +120,7 @@ NPC* NPCFactory::create(const uint32 pTypeID) {
 	npc->setName(type->mName);
 	npc->setLastName(type->mLastName);
 	
-	npc->setRaceID(appearance->mRaceID);
+	npc->setRace(appearance->mRaceID);
 	npc->setGender(appearance->mGender);
 	npc->setBodyType(appearance->mBodyType);
 	npc->setSize(appearance->mSize);

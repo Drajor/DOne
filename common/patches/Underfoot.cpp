@@ -951,324 +951,324 @@ ENCODE(OP_BazaarSearch)
 	dest->FastQueuePacket(&in, ack_req);
 }
 
-ENCODE(OP_NewSpawn) {  ENCODE_FORWARD(OP_ZoneSpawns); }
-ENCODE(OP_ZoneEntry){  ENCODE_FORWARD(OP_ZoneSpawns); }
-ENCODE(OP_ZoneSpawns) {
-		//consume the packet
-		EQApplicationPacket *in = *p;
-		*p = nullptr;
-
-		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
-		Spawn_Struct *emu = (Spawn_Struct *) __emu_buffer;
-
-		//determine and verify length
-		int entrycount = in->size / sizeof(Spawn_Struct);
-		if(entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
-			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
-			delete in;
-			return;
-		}
-
-
-		//_log(NET__STRUCTS, "Spawn name is [%s]", emu->name);
-
-		emu = (Spawn_Struct *) __emu_buffer;
-
-		//_log(NET__STRUCTS, "Spawn packet size is %i, entries = %i", in->size, entrycount);
-
-		char *Buffer = (char *) in->pBuffer;
-
-
-		int r;
-		int k;
-		for(r = 0; r < entrycount; r++, emu++) {
-
-			int PacketSize = sizeof(structs::Spawn_Struct);
-
-			PacketSize += strlen(emu->name);
-			PacketSize += strlen(emu->lastName);
-
-			if(strlen(emu->title))
-				PacketSize += strlen(emu->title) + 1;
-
-			if(strlen(emu->suffix))
-				PacketSize += strlen(emu->suffix) + 1;
-
-			if(emu->DestructibleObject)
-			{
-				PacketSize = PacketSize - 4;	// No bodytype
-				PacketSize += 53;	// Fixed portion
-				PacketSize += strlen(emu->DestructibleModel) + 1;
-				PacketSize += strlen(emu->DestructibleName2) + 1;
-				PacketSize += strlen(emu->DestructibleString) + 1;
-			}
-
-			bool ShowName = 1;
-			if(emu->bodytype >= 66)
-			{
-				emu->race = 127;
-				emu->bodytype = 11;
-				emu->gender = 0;
-				ShowName = 0;
-			}
-
-			float SpawnSize = emu->size;
-			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
-			{
-				PacketSize -= (sizeof(structs::EquipStruct) * 9);
-
-				if(emu->size == 0)
-				{
-					emu->size = 6;
-					SpawnSize = 6;
-				}
-			}
-
-			if(SpawnSize == 0)
-			{
-				SpawnSize = 3;
-			}
-
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, PacketSize);
-			Buffer = (char *) outapp->pBuffer;
-
-			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-
-			if(emu->DestructibleObject)
-			{
-				VARSTRUCT_ENCODE_TYPE(float, Buffer, 10);	// was int and 0x41200000
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
-			}
-
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
-
-			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
-
-			Bitfields->afk = 0;
-			Bitfields->linkdead = 0;
-			Bitfields->gender = emu->gender;
-
-			Bitfields->invis = emu->invis;
-			Bitfields->sneak = 0;
-			Bitfields->lfg = emu->lfg;
-			Bitfields->gm = emu->gm;
-			Bitfields->anon = emu->anon;
-			Bitfields->showhelm = emu->showhelm;
-			Bitfields->targetable = 1;
-			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
-			Bitfields->statue = 0;
-			Bitfields->trader = 0;
-			Bitfields->buyer = 0;
-
-			Bitfields->showname = ShowName;
-
-			if(emu->DestructibleObject)
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x1d600000);
-				Buffer = Buffer -4;
-			}
-
-			Bitfields->ispet = emu->is_pet;
-
-			Buffer += sizeof(structs::Spawn_Struct_Bitfields);
-			std::cout << "sizeof Bitfields= " << sizeof(structs::Spawn_Struct_Bitfields) << std::endl;
-
-			uint8 OtherData = 0;
-
-			if(strlen(emu->title))
-				OtherData = OtherData | 0x04;
-
-			if(strlen(emu->suffix))
-				OtherData = OtherData | 0x08;
-
-			if(emu->DestructibleObject)
-				OtherData = OtherData | 0xd1;	// Live has 0xe1 for OtherData
-
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
-
-			if(emu->DestructibleObject)
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x00000000);
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(float, Buffer, -1);	// unknown3
-			}
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
-
-			if(emu->DestructibleObject)
-			{
-				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
-				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
-				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleString);
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleAppearance);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk1);
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID1);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID2);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID3);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID4);
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk2);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk3);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk4);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk5);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk6);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk7);
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->DestructibleUnk8);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk9);
-			}
-
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->size);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->face);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->walkspeed);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->runspeed);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->race);
-			/*
-			if(emu->bodytype >=66)
-			{
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// showname
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// showname
-			}*/
-
-
-			if(!emu->DestructibleObject)
-			{
-				// Setting this next field to zero will cause a crash. Looking at ShowEQ, if it is zero, the bodytype field is not
-				// present. Will sort that out later.
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// This is a properties count field
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->bodytype);
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			}
-
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->curHp);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->haircolor);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->beardcolor);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->eyecolor1);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->eyecolor2);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->hairstyle);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->beard);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_heritage);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_tattoo);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_details);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// ShowEQ calls this 'Holding'
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->deity);
-			if(emu->NPC)
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xFFFFFFFF);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x00000000);
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
-			}
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->class_);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// pvp
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->StandState);	// standstate
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->light);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->flymode);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->equip_chest2); // unknown8
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown9
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown10
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // unknown11
-			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown12
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
-
-
-			structs::Spawn_Struct_Position *Position = (structs::Spawn_Struct_Position*)Buffer;
-
-			Position->deltaX = emu->deltaX;
-			Position->deltaHeading = emu->deltaHeading;
-			Position->deltaY = emu->deltaY;
-			Position->y = emu->y;
-			Position->animation = emu->animation;
-			Position->heading = emu->heading;
-			Position->x = emu->x;
-			Position->z = emu->z;
-			Position->deltaZ = emu->deltaZ;
-
-			Buffer += sizeof(structs::Spawn_Struct_Position);
-
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
-			{
-				for(k = 0; k < 9; ++k)
-				{
-					{
-						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
-					}
-				}
-			}
-			else
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary]);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary]);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-			}
-
-
-			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
-			{
-				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
-
-				for(k = 0; k < 9; k++) {
-					Equipment[k].equip0 = emu->equipment[k];
-					Equipment[k].equip1 = 0;
-					Equipment[k].itemId = 0;
-				}
-
-				Buffer += (sizeof(structs::EquipStruct) * 9);
-			}
-			if(strlen(emu->title))
-			{
-				VARSTRUCT_ENCODE_STRING(Buffer, emu->title);
-			}
-
-			if(strlen(emu->suffix))
-			{
-				VARSTRUCT_ENCODE_STRING(Buffer, emu->suffix);
-			}
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary); //IsMercenary
-			Buffer += 28; // Unknown;
-
-			std::cout << "sizeof  outapp->size = " << outapp->size << std::endl;
-			dest->FastQueuePacket(&outapp, ack_req);
-	}
-
-	delete in;
-}
+//ENCODE(OP_NewSpawn) {  ENCODE_FORWARD(OP_ZoneSpawns); }
+//ENCODE(OP_ZoneEntry){  ENCODE_FORWARD(OP_ZoneSpawns); }
+//ENCODE(OP_ZoneSpawns) {
+//		//consume the packet
+//		EQApplicationPacket *in = *p;
+//		*p = nullptr;
+//
+//		//store away the emu struct
+//		unsigned char *__emu_buffer = in->pBuffer;
+//		Spawn_Struct *emu = (Spawn_Struct *) __emu_buffer;
+//
+//		//determine and verify length
+//		int entrycount = in->size / sizeof(Spawn_Struct);
+//		if(entrycount == 0 || (in->size % sizeof(Spawn_Struct)) != 0) {
+//			_log(NET__STRUCTS, "Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(Spawn_Struct));
+//			delete in;
+//			return;
+//		}
+//
+//
+//		//_log(NET__STRUCTS, "Spawn name is [%s]", emu->name);
+//
+//		emu = (Spawn_Struct *) __emu_buffer;
+//
+//		//_log(NET__STRUCTS, "Spawn packet size is %i, entries = %i", in->size, entrycount);
+//
+//		char *Buffer = (char *) in->pBuffer;
+//
+//
+//		int r;
+//		int k;
+//		for(r = 0; r < entrycount; r++, emu++) {
+//
+//			int PacketSize = sizeof(structs::Spawn_Struct);
+//
+//			PacketSize += strlen(emu->name);
+//			PacketSize += strlen(emu->lastName);
+//
+//			if(strlen(emu->title))
+//				PacketSize += strlen(emu->title) + 1;
+//
+//			if(strlen(emu->suffix))
+//				PacketSize += strlen(emu->suffix) + 1;
+//
+//			if(emu->DestructibleObject)
+//			{
+//				PacketSize = PacketSize - 4;	// No bodytype
+//				PacketSize += 53;	// Fixed portion
+//				PacketSize += strlen(emu->DestructibleModel) + 1;
+//				PacketSize += strlen(emu->DestructibleName2) + 1;
+//				PacketSize += strlen(emu->DestructibleString) + 1;
+//			}
+//
+//			bool ShowName = 1;
+//			if(emu->bodytype >= 66)
+//			{
+//				emu->race = 127;
+//				emu->bodytype = 11;
+//				emu->gender = 0;
+//				ShowName = 0;
+//			}
+//
+//			float SpawnSize = emu->size;
+//			if(!((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
+//			{
+//				PacketSize -= (sizeof(structs::EquipStruct) * 9);
+//
+//				if(emu->size == 0)
+//				{
+//					emu->size = 6;
+//					SpawnSize = 6;
+//				}
+//			}
+//
+//			if(SpawnSize == 0)
+//			{
+//				SpawnSize = 3;
+//			}
+//
+//			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, PacketSize);
+//			Buffer = (char *) outapp->pBuffer;
+//
+//			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
+//
+//			if(emu->DestructibleObject)
+//			{
+//				VARSTRUCT_ENCODE_TYPE(float, Buffer, 10);	// was int and 0x41200000
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+//			}
+//
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
+//
+//			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
+//
+//			Bitfields->afk = 0;
+//			Bitfields->linkdead = 0;
+//			Bitfields->gender = emu->gender;
+//
+//			Bitfields->invis = emu->invis;
+//			Bitfields->sneak = 0;
+//			Bitfields->lfg = emu->lfg;
+//			Bitfields->gm = emu->gm;
+//			Bitfields->anon = emu->anon;
+//			Bitfields->showhelm = emu->showhelm;
+//			Bitfields->targetable = 1;
+//			Bitfields->targetable_with_hotkey = (emu->IsMercenary ? 0 : 1);
+//			Bitfields->statue = 0;
+//			Bitfields->trader = 0;
+//			Bitfields->buyer = 0;
+//
+//			Bitfields->showname = ShowName;
+//
+//			if(emu->DestructibleObject)
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x1d600000);
+//				Buffer = Buffer -4;
+//			}
+//
+//			Bitfields->ispet = emu->is_pet;
+//
+//			Buffer += sizeof(structs::Spawn_Struct_Bitfields);
+//			std::cout << "sizeof Bitfields= " << sizeof(structs::Spawn_Struct_Bitfields) << std::endl;
+//
+//			uint8 OtherData = 0;
+//
+//			if(strlen(emu->title))
+//				OtherData = OtherData | 0x04;
+//
+//			if(strlen(emu->suffix))
+//				OtherData = OtherData | 0x08;
+//
+//			if(emu->DestructibleObject)
+//				OtherData = OtherData | 0xd1;	// Live has 0xe1 for OtherData
+//
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
+//
+//			if(emu->DestructibleObject)
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x00000000);
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(float, Buffer, -1);	// unknown3
+//			}
+//			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
+//
+//			if(emu->DestructibleObject)
+//			{
+//				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
+//				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
+//				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleString);
+//
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleAppearance);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk1);
+//
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID1);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID2);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID3);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID4);
+//
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk2);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk3);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk4);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk5);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk6);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk7);
+//				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->DestructibleUnk8);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk9);
+//			}
+//
+//			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->size);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->face);
+//			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->walkspeed);
+//			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->runspeed);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->race);
+//			/*
+//			if(emu->bodytype >=66)
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// showname
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// showname
+//			}*/
+//
+//
+//			if(!emu->DestructibleObject)
+//			{
+//				// Setting this next field to zero will cause a crash. Looking at ShowEQ, if it is zero, the bodytype field is not
+//				// present. Will sort that out later.
+//				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// This is a properties count field
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->bodytype);
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+//			}
+//
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->curHp);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->haircolor);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->beardcolor);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->eyecolor1);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->eyecolor2);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->hairstyle);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->beard);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_heritage);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_tattoo);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_details);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// ShowEQ calls this 'Holding'
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->deity);
+//			if(emu->NPC)
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xFFFFFFFF);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x00000000);
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
+//			}
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->class_);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// pvp
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->StandState);	// standstate
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->light);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->flymode);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->equip_chest2); // unknown8
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown9
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown10
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // unknown11
+//			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown12
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown18
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0xffffffff); // unknown19
+//
+//
+//			structs::Spawn_Struct_Position *Position = (structs::Spawn_Struct_Position*)Buffer;
+//
+//			Position->deltaX = emu->deltaX;
+//			Position->deltaHeading = emu->deltaHeading;
+//			Position->deltaY = emu->deltaY;
+//			Position->y = emu->y;
+//			Position->animation = emu->animation;
+//			Position->heading = emu->heading;
+//			Position->x = emu->x;
+//			Position->z = emu->z;
+//			Position->deltaZ = emu->deltaZ;
+//
+//			Buffer += sizeof(structs::Spawn_Struct_Position);
+//
+//			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu ->race == 130) || (emu->race == 330) || (emu->race == 522))
+//			{
+//				for(k = 0; k < 9; ++k)
+//				{
+//					{
+//						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
+//					}
+//				}
+//			}
+//			else
+//			{
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary]);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary]);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//			}
+//
+//
+//			if((emu->NPC == 0) || (emu->race <=12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
+//			{
+//				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
+//
+//				for(k = 0; k < 9; k++) {
+//					Equipment[k].equip0 = emu->equipment[k];
+//					Equipment[k].equip1 = 0;
+//					Equipment[k].itemId = 0;
+//				}
+//
+//				Buffer += (sizeof(structs::EquipStruct) * 9);
+//			}
+//			if(strlen(emu->title))
+//			{
+//				VARSTRUCT_ENCODE_STRING(Buffer, emu->title);
+//			}
+//
+//			if(strlen(emu->suffix))
+//			{
+//				VARSTRUCT_ENCODE_STRING(Buffer, emu->suffix);
+//			}
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // Unknown;
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary); //IsMercenary
+//			Buffer += 28; // Unknown;
+//
+//			std::cout << "sizeof  outapp->size = " << outapp->size << std::endl;
+//			dest->FastQueuePacket(&outapp, ack_req);
+//	}
+//
+//	delete in;
+//}
 
 ENCODE(OP_MercenaryDataResponse) {
 	//consume the packet
