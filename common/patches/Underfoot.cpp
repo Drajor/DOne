@@ -1721,18 +1721,6 @@ ENCODE(OP_LogServer) {
  	FINISH_ENCODE();
 }
 
-ENCODE(OP_Damage) {
-	ENCODE_LENGTH_EXACT(CombatDamage_Struct);
-	SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
-	OUT(target);
-	OUT(source);
-	OUT(type);
-	OUT(spellid);
-	OUT(damage);
-	eq->sequence = emu->sequence;
-	FINISH_ENCODE();
-}
-
 ENCODE(OP_Consider) {
 	ENCODE_LENGTH_EXACT(Consider_Struct);
 	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
@@ -1818,40 +1806,6 @@ ENCODE(OP_ApplyPoison) {
 	OUT(success);
 	FINISH_ENCODE();
 }
-
-//ENCODE(OP_DeleteItem) {
-//	ENCODE_LENGTH_EXACT(DeleteItem_Struct);
-//	SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
-//
-//	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
-//	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
-//	OUT(number_in_stack);
-//
-//	FINISH_ENCODE();
-//}
-
-//ENCODE(OP_DeleteCharge) {  ENCODE_FORWARD(OP_MoveItem); }
-//ENCODE(OP_MoveItem) {
-//	ENCODE_LENGTH_EXACT(MoveItem_Struct);
-//	SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-//
-//	eq->from_slot = TitaniumToUnderfootSlot(emu->from_slot);
-//	eq->to_slot = TitaniumToUnderfootSlot(emu->to_slot);
-//	OUT(number_in_stack);
-//
-//	FINISH_ENCODE();
-//}
-
-//ENCODE(OP_ItemVerifyReply) {
-//	ENCODE_LENGTH_EXACT(ItemVerifyReply_Struct);
-//	SETUP_DIRECT_ENCODE(ItemVerifyReply_Struct, structs::ItemVerifyReply_Struct);
-//
-//	eq->slot = TitaniumToUnderfootSlot(emu->slot);
-//	OUT(spell);
-//	OUT(target);
-//
-//	FINISH_ENCODE();
-//}
 
 ENCODE(OP_Trader) {
 
@@ -3174,18 +3128,6 @@ DECODE(OP_LoadSpellSet)
 		else
 			emu->spell[i] = eq->spell[i];
 
-	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_Damage) {
-	DECODE_LENGTH_EXACT(structs::CombatDamage_Struct);
-	SETUP_DIRECT_DECODE(CombatDamage_Struct, structs::CombatDamage_Struct);
-	IN(target);
-	IN(source);
-	IN(type);
-	IN(spellid);
-	IN(damage);
-	emu->sequence = eq->sequence;
 	FINISH_DIRECT_DECODE();
 }
 

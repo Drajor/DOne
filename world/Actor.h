@@ -36,7 +36,7 @@ class Character;
 class Zone;
 class Actor {
 public:
-	Actor();;
+	Actor();
 	virtual ~Actor() {};
 
 	void setZone(Zone* pZone) { mZone = pZone; }
@@ -103,9 +103,9 @@ public:
 	inline const String& getLastName() const { return mLastName; }
 	inline void setLastName(const String& pLastName) { mLastName = pLastName; _setLastName(pLastName.c_str()); }
 	
-	inline bool hasTitle() const { return mTitle.length() > 0; }
+	inline const bool hasTitle() const { return mTitle.length() > 0; }
 	inline const String& getTitle() const { return mTitle; }
-	inline void setTitle(const String& pValue) { mTitle = pValue; _setPrefix(pValue.c_str()); }
+	inline void setTitle(const String& pValue) { mTitle = pValue; _setTitle(pValue.c_str()); }
 	
 	inline const bool hasSuffix() const { return mSuffix.length() > 0; }
 	inline const String& getSuffix() const { return mSuffix; }
@@ -170,9 +170,45 @@ public:
 	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
 	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
 
-	// Other
-	inline const bool getIsGM() const { return mActorData.mFlags.mIsGM == 1; }
-	inline void setIsGM(const bool pIsGM) { mActorData.mFlags.mIsGM = pIsGM ? GM_ON : GM_OFF; }
+	// Flags
+	inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }
+	inline void setIsPet(const bool pValue) { mActorData.mFlags.mIsPet = pValue ? 1 : 0; }
+
+	inline const bool isAFK() const { return mActorData.mFlags.mIsAFK == 1; }
+	inline void setIsAFK(const bool pValue) { mActorData.mFlags.mIsAFK = pValue ? 1 : 0; }
+
+	inline const bool isSneaking() const { return mActorData.mFlags.mIsSneaking == 1; }
+	inline void setIsSneaking(const bool pValue) { mActorData.mFlags.mIsSneaking = pValue ? 1 : 0; }
+
+	inline const bool isLFG() const { return mActorData.mFlags.mLFG == 1; }
+	inline void setIsLFG(const bool pValue) { mActorData.mFlags.mLFG = pValue ? 1 : 0; }
+
+	inline const bool isInvisible() { return mActorData.mFlags.mIsInvisible == 1; }
+	inline const bool setIsInvisible(const bool pValue) { mActorData.mFlags.mIsInvisible = pValue ? 1 : 0; }
+
+	inline const bool isGM() const { return mActorData.mFlags.mIsGM == 1; }
+	inline void setIsGM(const bool pIsGM) { mActorData.mFlags.mIsGM = pIsGM ? 1 : 0; }
+
+	// Anonymous
+
+	// Gender
+
+	inline const bool isLD() { return mActorData.mFlags.mIsLD == 1; }
+	inline void setIsLD(const bool pValue) { mActorData.mFlags.mIsLD = pValue ? 1 : 0; }
+
+	inline const bool getShowHelm() const { return mActorData.mFlags.mShowHelm & 1; }
+	inline void setShowHelm(const bool pValue) { mActorData.mFlags.mShowHelm = pValue ? 1 : 0; }
+
+	inline const bool getShowName() const { return mActorData.mFlags.mShowName == 1; }
+	inline void setShowName(const bool pValue) { mActorData.mFlags.mShowName = pValue ? 1 : 0; }
+
+	inline const bool isTrader() const { return mActorData.mFlags.mIsTrader == 1 ; }
+	inline const bool setIsTrader(const bool pValue) { mActorData.mFlags.mIsTrader = pValue ? 1 : 0; }
+
+	inline const bool isBuyer() const { return mActorData.mFlags.mIsBuyer == 1; }
+	inline const bool setIsBuyer(const bool pValue) { mActorData.mFlags.mIsBuyer = pValue ? 1 : 0; }
+	 
+	//inline const bool 
 
 	//inline const GenderID getGender() const { return mActorData.mGender; }
 	//inline void setGender(const GenderID pGender) { mSpawnData.mGender = pGender; }
@@ -201,22 +237,17 @@ public:
 	inline const uint8 getActorType() const { return mActorData.mActorType; }
 	inline void setActorType(const uint8 pActorType) { mActorData.mActorType = pActorType; }
 
-	inline const bool isInvisible() const { return mActorData.mFlags.mIsInvisible == 1; }
-	inline void setInvisible(const bool pInvisible) { mActorData.mFlags.mIsInvisible ? 1 : 0; }
+	//inline const bool isInvisible() const { return mActorData.mFlags.mIsInvisible == 1; }
+	//inline void setInvisible(const bool pInvisible) { mActorData.mFlags.mIsInvisible ? 1 : 0; }
 
-	// TODO: Is this a ratio?
-	inline const uint8 getCurrentHP() const { return mActorData.mCurrentHP; }
-	inline void setCurrentHP(const uint8 pCurrentHP) { mActorData.mCurrentHP = pCurrentHP; }
-	// max_hp TODO
+	inline const uint8 getHPPercent() const { return mActorData.mHPPercent; }
+	inline void setHPPercent(const uint8 pValue) { mActorData.mHPPercent = pValue; }
 
 	//inline const bool isFindable() const { return mSpawnData.mIsFindable == 1; }
 	//inline void setIsFindable(const bool pFindable) { mSpawnData.mIsFindable = pFindable ? 1 : 0; }
 
 	inline const uint8 getStandState() const { return mActorData.mStandState; }
 	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
-
-	inline const bool getShowHelm() const { return mActorData.mFlags.mShowHelm == 1; }
-	inline void setShowHelm(const bool pShowHelm) { mActorData.mFlags.mShowHelm = pShowHelm ? 1 : 0; }
 
 	//inline const bool getIsNPC() const { return mSpawnData.mIsNPC == 1; }
 	//inline void setIsNPC(const bool pIsNPC) { mSpawnData.mIsNPC = pIsNPC ? 1 : 0; }
@@ -251,9 +282,6 @@ public:
 	inline const float getRunSpeed() const { return mActorData.mRunSpeed; }
 	inline void setRunSpeed(const float pRunSpeed) { mActorData.mRunSpeed = pRunSpeed; }
 
-	inline const bool isAFK() const { return mActorData.mFlags.mIsAFK == 1; }
-	inline void setIsAFK(const bool pAFK) { mActorData.mFlags.mIsAFK = pAFK ? 1 : 0; }
-
 	inline const uint32 getGuildID() const { return mActorData.mGuildID; }
 	inline void setGuildID(const uint32 pGuildID) { mActorData.mGuildID = pGuildID; }
 
@@ -263,8 +291,8 @@ public:
 	inline const float getWalkSpeed() const { return mActorData.mWalkSpeed; }
 	inline void setWalkSpeed(const float pWalkSpeed) { mActorData.mWalkSpeed = pWalkSpeed; }
 
-	inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }
-	inline void setIsPet(const bool pIsPet) { mActorData.mFlags.mIsPet = pIsPet ? 1 : 0; }
+	//inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }
+	//inline void setIsPet(const bool pIsPet) { mActorData.mFlags.mIsPet = pIsPet ? 1 : 0; }
 
 	inline const uint8 getLight() const { return mActorData.mLight; }
 	inline void setLight(const uint8 pLight) { mActorData.mLight = pLight; }
@@ -290,9 +318,6 @@ public:
 		mActorData.mColours[pSlotID] = pColour;
 	}
 
-	inline const bool isLFG() const { return mActorData.mFlags.mLFG == 1; }
-	inline void setIsLFG(const bool pIsLFG) { mActorData.mFlags.mLFG = pIsLFG ? 1 : 0; }
-
 	// Looting
 	inline const bool hasLooter() const { return mLooter != nullptr; }
 	inline Character* getLooter() const { return mLooter; }
@@ -315,7 +340,6 @@ protected:
 
 	Character* mLooter = nullptr;
 	Timer mDecayTimer;
-	//Payload::SpawnData mSpawnData;
 	Payload::ActorData mActorData;
 	Zone* mZone = nullptr;
 private:
@@ -337,6 +361,6 @@ private:
 
 	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
-	inline void _setPrefix(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
+	inline void _setTitle(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
 	inline void _setSuffix(const char* pSuffix) { strncpy(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 };

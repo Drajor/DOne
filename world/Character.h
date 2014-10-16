@@ -109,12 +109,12 @@ public:
 	// Damage
 	void damage(uint32 pAmount);
 
-	int32 getCurrentHP() { return mCurrentHP; }
-	int32 getMaximumHP() { return mMaximumHP; }
-	int32 getCurrentMana() { return mCurrentMana; }
-	int32 getMaximumMana() { return mMaximumMana; }
-	int32 getCurrentEndurance() { return mCurrentEndurance; }
-	int32 getMaximumEndurance() { return mMaximumEndurance; }
+	inline const int32 getCurrentHP() const { return mCurrentHP; }
+	inline const int32 getMaximumHP() const { return mMaximumHP; }
+	inline const int32 getCurrentMana() const { return mCurrentMana; }
+	inline const int32 getMaximumMana() const { return mMaximumMana; }
+	inline const int32 getCurrentEndurance() const { return mCurrentEndurance; }
+	inline const int32 getMaximumEndurance() const { return mMaximumEndurance; }
 
 	void doAnimation(uint8 pAnimationID);
 

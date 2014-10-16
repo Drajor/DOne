@@ -479,6 +479,36 @@ namespace Payload {
 		struct Illusion : public FixedT<Illusion, OP_Illusion> {
 
 		};
+
+		// S->C
+		struct HPUpdate : public FixedT<HPUpdate, OP_HPUpdate> {
+			uint32 mCurrentHP = 0;
+			int32 mMaximumHP = 0;
+			int16 mSpawnID = 0;
+		};
+
+		// S->C
+		struct Damage : public FixedT<Damage, OP_Damage> {
+			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
+			static EQApplicationPacket* make(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint16 pSpellID = 0) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTargetSpawnID = pTarget;
+				payload->mSourceSpawnID = pSource;
+				payload->mAmount = pAmount;
+				payload->mType = pType;
+				payload->mSpellID = pSpellID;
+				return packet;
+			}
+			uint16 mTargetSpawnID = 0;
+			uint16 mSourceSpawnID = 0;
+			uint8 mType = 0;
+			uint16 mSpellID = 0;
+			int32 mAmount = 0;
+			float __Unknown0 = 0.0f;
+			uint32 mSequence = 7;
+			uint8 __Unknown1[9];
+		};
 	}
 
 	namespace World {
@@ -716,113 +746,6 @@ namespace Payload {
 		};
 	}
 
-	//struct SpawnData {
-	//	uint8 mUnnknown0 = 0;
-	//	GMStatus mGM = GM_OFF;
-	//	uint8 mUnknown1 = 0;
-	//	AATitle mAATitle = NONE;
-	//	uint8 mUnknown2 = 0;
-	//	AnonType mAnonymous = AT_None;
-	//	uint8 mFaceStyle = 0;
-	//	char mName[Limits::Character::MAX_NAME_LENGTH];
-	//	DeityID mDeity = 0;
-	//	uint16 unknown3 = 0;
-	//	float mSize = 5.0f;
-	//	uint32 mUnknown4 = 0;
-	//	ActorType mActorType = AT_PLAYER;
-	//	uint8 mIsInvisible = 0;
-	//	uint8 mHairColour = 0;
-	//	uint8 mCurrentHP = 100;
-	//	uint8 max_hp = 100;				// (name prolly wrong)takes on the value 100 for players, 100 or 110 for NPCs and 120 for PC corpses...
-	//	uint8 mIsFindable = 0;
-	//	uint8 mUnknown5[3];
-	//	uint16 mSpawnID2 = 0;
-	//	/*0094*/ signed	deltaHeading : 10;	// change in heading
-	//	/*????*/ signed	x : 19;				// x coord
-	//	/*????*/ signed	padding0054 : 3;		// ***Placeholder
-	//	/*0098*/ signed	y : 19;				// y coord
-	//	/*????*/ signed	animation : 10;		// animation
-	//	/*????*/ signed	padding0058 : 3;		// ***Placeholder
-	//	/*0102*/ signed	z : 19;				// z coord
-	//	/*????*/ signed	deltaY : 13;			// change in y
-	//	/*0106*/ signed	deltaX : 13;			// change in x
-	//	/*????*/ unsigned	heading : 12;		// heading
-	//	/*????*/ signed	padding0066 : 7;		// ***Placeholder
-	//	/*0110*/ signed	deltaZ : 13;			// change in z
-	//	/*????*/ signed	padding0070 : 19;		// ***Placeholder
-	//	uint8 mLeftEyeColour = 0;
-	//	uint8 mUnknown6[11];
-	//	uint8 mStandState = 100;	// stand state for SoF+ 0x64 for normal animation
-	//	uint32 mDrakkinHeritage = 0;
-	//	uint32 mDrakkinTattoo = 0;
-	//	uint32 mDrakkinDetails = 0;
-	//	uint8 mShowHelm = 0;
-	//	uint8 mUnknown7[4];
-	//	uint8 mIsNPC = 0;
-	//	uint8 mHairStyle = 0;
-	//	uint8 mBeardStyle = 0;
-	//	uint8 mUnknown8[4];
-	//	uint8 mLevel = 1;
-	//	uint8 mUnknown9[4];
-	//	uint8 mBeardColour = 0;
-	//	char mSuffix[Limits::Character::MAX_SUFFIX_LENGTH];
-	//	SpawnID mOwnerSpawnID = 0;
-	//	GuildRank mGuildRank = GR_None;
-	//	uint8 mUnknown10[3];
-	//	uint32 mEquipmentMaterials[MAX_MATERIAL_SLOTS];
-	//	float mRunSpeed = 1.0f;
-	//	uint8 mIsAFK = 0;
-	//	GuildID mGuildID = NO_GUILD;
-	//	char mTitle[Limits::Character::MAX_TITLE_LENGTH];
-	//	uint8 mUnknown11 = 0;
-	//	uint8 set_to_0xFF[8];	// ***Placeholder (all ff)
-	//	uint8 mHelmTexture = 0;
-	//	RaceID mRace = 0;
-	//	uint32 mUnknown12 = 0;
-	//	char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
-	//	float mWalkSpeed = 0.5f;
-	//	uint8 mUnknown13 = 0;
-	//	uint8 mIsPet = 0;
-	//	uint8 mLight = 0;
-	//	ClassID mClass = Warrior;
-	//	uint8 mRightEyeColour = 0;
-	//	FlyMode mFlyMode = FM_NONE;
-	//	GenderID mGender = G_FEMALE;
-	//	uint8 mBodyType = BT_Humanoid;
-	//	uint8 mUnknown14[3];
-	//	union
-	//	{
-	//		/*0339*/ uint8 equip_chest2 = 0;	// Second place in packet for chest texture (usually 0xFF in live packets)
-	//		// Not sure why there are 2 of them, but it effects chest texture!
-	//		/*0339*/ uint8 mount_color;		// drogmor: 0=white, 1=black, 2=green, 3=red
-	//		// horse: 0=brown, 1=white, 2=black, 3=tan
-	//	};
-	//	uint32 mSpawnID = 0;
-	//	uint8 mUnknown15[3];
-	//	uint8 mIsMercenary = 0;
-	//	Colour mEquipmentColours[MAX_MATERIAL_SLOTS];
-	//	uint8 mIsLFG = 0;
-	//	bool mIsDestructibleObject = false;
-	//	char DestructibleModel[64];	// Model of the Destructible Object - Required - Seen "DEST_TNT_G"
-	//	char DestructibleName2[64];	// Secondary name - Not Required - Seen "a_tent"
-	//	char DestructibleString[64];	// Unknown - Not Required - Seen "ZoneActor_01186"
-	//	uint32 DestructibleAppearance = 0;	// Damage Appearance
-	//	uint32 DestructibleUnk1 = 0;
-	//	uint32 DestructibleID1 = 0;
-	//	uint32 DestructibleID2 = 0;
-	//	uint32 DestructibleID3 = 0;
-	//	uint32 DestructibleID4 = 0;
-	//	uint32 DestructibleUnk2 = 0;
-	//	uint32 DestructibleUnk3 = 0;
-	//	uint32 DestructibleUnk4 = 0;
-	//	uint32 DestructibleUnk5 = 0;
-	//	uint32 DestructibleUnk6 = 0;
-	//	uint32 DestructibleUnk7 = 0;
-	//	uint8 DestructibleUnk8 = 0;
-	//	uint32 DestructibleUnk9 = 0;
-
-	//};
-
 	struct ActorPosition {
 		signed padding0000 : 12; // ***Placeholder
 		signed deltaX : 13;      // change in x
@@ -846,39 +769,55 @@ namespace Payload {
 			memset(mTitle, 0, sizeof(mTitle));
 			memset(mSuffix, 0, sizeof(mSuffix));
 			memset(mUnknowns, 0, sizeof(mUnknowns));
-			//mFlags.set(0);
+			memset(&mFlags, 0, sizeof(mFlags));
+			memset(&mPosition, 0, sizeof(mPosition));
+
+			mFlags.mTargetable = 1;
+			mFlags.mShowName = 1;
 		}
 		char mName[100]; // Variable
 		uint32 mSpawnID = 0;
-		uint8 mLevel = 0;
+		uint8 mLevel = 1;
 		// Destructible Object writes 4 bytes, float = 10.
 		// Else writes 4 bytes, float, SpawnSize - 0.7 comment = eye height?
-		float mViewOffset = 0.0f;
+		float mViewOffset = 20.0f;
 		uint8 mActorType = 0;
 		struct ActorFlags {
 			unsigned mIsPet : 1;		// Could be 'is summoned pet' rather than just is pet.
 			unsigned mIsAFK : 1;		// 0=no, 1=afk
-			unsigned sneak : 1;
+			unsigned mIsSneaking : 1;
 			unsigned mLFG : 1;
-			unsigned padding5 : 1;
-			unsigned mIsInvisible : 1;		// 0 = visible, 1 = invis/sneaking
-			unsigned padding7 : 11;
+			unsigned __Unknown0 : 1; // No observed effects.
+			// Invisible Start
+			unsigned mIsInvisible : 1; // Normal
+			unsigned __Unknown1 : 1; // Undead
+			unsigned __Unknown2 : 1; // Animals
+			unsigned __Unknown3 : 1; // Others? AA invis types?
+			unsigned __Unknown4 : 1;
+			unsigned __Unknown5 : 1;
+			unsigned __Unknown6 : 1;
+			unsigned __Unknown7 : 1;
+			unsigned __Unknown8 : 1;
+			unsigned __Unknown9 : 1;
+			unsigned __Unknown10 : 1;
+			unsigned __Unknown11 : 1;
+			// Invisible End.
 			unsigned mIsGM : 1;
 			unsigned anon : 2;		// 0=normal, 1=anon, 2=roleplay
-			unsigned gender : 2;		// Gender (0=male, 1=female, 2=monster)
-			unsigned linkdead : 1;		// Toggles LD on or off after name
+			unsigned mGender : 2;		// Gender (0=male, 1=female, 2=monster)
+			unsigned mIsLD : 1;
 			unsigned betabuffed : 1;
 			unsigned mShowHelm : 1;
 			unsigned padding26 : 1;
-			unsigned targetable : 1;	// 1 = Targetable 0 = Not Targetable (is_npc?)
+			unsigned mTargetable : 1;
 			unsigned targetable_with_hotkey : 1;	// is_npc?
-			unsigned showname : 1;
-			unsigned statue : 1;
-			unsigned trader : 1;
-			unsigned buyer : 1;
+			unsigned mShowName : 1;
+			unsigned statue : 1; // No observed effect on NPCs. Added <Unknown Guild> below PC name.
+			unsigned mIsTrader : 1; // No observed effect on NPCs. Added "Trader" to PC name.
+			unsigned mIsBuyer : 1; // No observed effect on NPCs. Added "Buyer" to PC name + <Unknown Guild> + removed title.
 		};
 		ActorFlags mFlags;
-		uint8 mOtherData; // Possible this is just part of bitfields too.
+		uint8 mOtherFlags = 0;
 		float __Unknown0 = -1; // Destructible writes 0, else writes -1 float.
 		float __Unknown1 = 0; // HC as 0
 
@@ -920,7 +859,7 @@ namespace Payload {
 		uint32 mRace = 0;
 		uint8 mPropertyCount = 1; // HC 1
 		uint32 mBodyType = 0;
-		uint8 mCurrentHP = 0;
+		uint8 mHPPercent = 100; // Percentage: 0-100
 		uint8 mHairColour = 0;
 		uint8 mBeardColour = 0;
 		uint8 mLeftEyeColour = 0;
@@ -932,7 +871,7 @@ namespace Payload {
 		uint32 mDrakkinDetails = 0;
 		uint8 __Unknown3 = 0;
 		uint32 mDeity = 0;
-		uint32 mGuildID = 0;
+		uint32 mGuildID = NO_GUILD;
 		uint32 mGuildRank = 0;
 		uint8 mClass = 0;
 		uint8 mPVP = 0;

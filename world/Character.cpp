@@ -37,7 +37,7 @@ Character::~Character() {
 
 void Character::update() {
 
-	if (getIsGM()) {
+	if (isGM()) {
 		if (mSuperGMPower.Check()) {
 			mZone->handleLevelIncrease(this);
 		}
@@ -334,7 +334,7 @@ void Character::_updateForSave() {
 	EXPECTED(mData);
 	EXPECTED(mZone);
 
-	mData->mGM = getIsGM();
+	mData->mGM = isGM();
 	mData->mName = getName();
 	mData->mLastName = getLastName();
 	mData->mTitle = getTitle();
@@ -669,6 +669,7 @@ const bool Character::send(EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(mConnection);
 	EXPECTED_BOOL(mIsLinkDead == false);
 	mConnection->sendPacket(pPacket);
+	return true;
 }
 
 const uint32 Character::getSkill(const uint32 pSkillID) const {

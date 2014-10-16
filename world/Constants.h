@@ -341,6 +341,45 @@ enum SpawnPointType : uint32 {
 	SPAWN_GROUP = 2
 };
 
+/*
+DamageType
+- UF defaults to "X punches YOU" for any DamageType other than those listed below.
+*/
+namespace DamageType {
+	enum : uint8 {
+		OneHandBlunt = 0, // "X crushes YOU"
+		OneHandSlashing = 1, // "X slashes YOU"
+		TwoHandBlunt = 2, // "X crushes YOU"
+		TwoHandSlashing = 3, // "X slashes YOU"
+
+		Archery = 7, // "X hits YOU"
+		Backstab = 8, // "X backstabs YOU"
+
+		Bash = 10, // "X bashes YOU"
+
+		DragonPunch = 21, // "X strikes YOU"
+
+		EagleStrike = 23, // "X strikes YOU"
+
+		FlyingKick = 26, // "X kicks YOU"
+
+		HandtoHand = 28, // "X punches YOU"
+
+		Kick = 30, // "X kicks YOU"
+
+		OneHandPiercing = 36, // "X pierces YOU"
+
+		RoundKick = 38, // "X kicks YOU"
+
+		Throwing = 51, // "X hits YOU"
+		TigerClaw = 52, // "X strikes YOU"
+
+		Intimidation = 71, // "X kicks YOU" ... not sure why this skill gives 'kicks'..
+
+		Frenzy = 74, // "X frenzies on YOU"
+	};
+}
+
 enum Skills : uint32 {
 	OneHandBlunt = 0,
 	OneHandSlashing,
@@ -378,7 +417,7 @@ enum Skills : uint32 {
 	Offense,
 	Parry,
 	PickLock,
-	OneHandPiercing,				// Changed in RoF2(05-10-2013)
+	OneHandPiercing,
 	Riposte,
 	RoundKick,
 	SafeFall,

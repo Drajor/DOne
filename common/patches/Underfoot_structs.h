@@ -1395,13 +1395,13 @@ struct PlayerPositionUpdateClient_Struct
 ** Length: 10 Bytes
 ** OpCode: OP_HPUpdate
 */
-struct SpawnHPUpdate_Struct
-{
-/*00*/ uint32	cur_hp;               // Id of spawn to update
-/*04*/ int32	max_hp;                 // Maximum hp of spawn
-/*08*/ int16	spawn_id;                 // Current hp of spawn
-/*10*/
-};
+//struct SpawnHPUpdate_Struct
+//{
+///*00*/ uint32	cur_hp;               // Id of spawn to update
+///*04*/ int32	max_hp;                 // Maximum hp of spawn
+///*08*/ int16	spawn_id;                 // Current hp of spawn
+///*10*/
+//};
 
 /*
 ** SendExpZonein
@@ -1428,12 +1428,12 @@ struct SendExpZonein_Struct
 ** OpCode: OP_SendExpZonein
 */
 //struct SendExpZonein_Struct {};
-
-struct SpawnHPUpdate_Struct2
-{
-/*01*/ int16	spawn_id;
-/*00*/ uint8	hp;
-};
+//
+//struct SpawnHPUpdate_Struct2
+//{
+///*01*/ int16	spawn_id;
+///*00*/ uint8	hp;
+//};
 /*
 ** Stamina
 ** Length: 8 Bytes

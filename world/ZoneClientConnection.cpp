@@ -579,7 +579,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->pvp;
 	//payload->level2;
 	payload->mAnonymous = mCharacter->getAnonymous();
-	payload->gm = mCharacter->getIsGM() ? 1 : 0;
+	payload->gm = mCharacter->isGM() ? 1 : 0;
 	payload->guildrank = mCharacter->getGuildRank();
 	//payload->guildbanker;
 	//payload->intoxication;
@@ -610,7 +610,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->exp = mCharacter->getExperience();
 	payload->points = 0;
 	payload->mana = mCharacter->getCurrentMana();
-	payload->cur_hp = mCharacter->getCurrentHP();
+	payload->cur_hp = mCharacter->getHPPercent();
 	payload->STR = mCharacter->getBaseStatistic(Statistic::Strength);
 	payload->STA = mCharacter->getBaseStatistic(Statistic::Stamina);
 	payload->CHA = mCharacter->getBaseStatistic(Statistic::Charisma);
@@ -1352,16 +1352,17 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 }
 
 void ZoneClientConnection::sendHPUpdate() {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-	auto payload = reinterpret_cast<SpawnHPUpdate_Struct*>(outPacket->pBuffer);
-	payload->spawn_id = mCharacter->getSpawnID();
-	payload->cur_hp = mCharacter->getCurrentHP();
-	payload->max_hp = mCharacter->getMaximumHP();
+	HPUpdate payload;
+	payload.mSpawnID = mCharacter->getSpawnID();
+	payload.mCurrentHP = mCharacter->getCurrentHP();
+	payload.mMaximumHP = mCharacter->getMaximumHP();
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = HPUpdate::create(payload);
+	sendPacket(packet);
+	safe_delete(packet);
 }
 
 void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
@@ -1548,7 +1549,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		FS_ANONYMOUS = 5024,		//% T1[ANONYMOUS] % 2 % 3
 		FS_DEFAULT = 5025		//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
 	};
-	const bool receiverIsGM = mCharacter->getIsGM() == 1 ? true : false;
+	const bool receiverIsGM = mCharacter->isGM() == 1 ? true : false;
 	for (auto i : pMatches) {
 		// NOTE: The write methods below *MUST* stay in order.
 

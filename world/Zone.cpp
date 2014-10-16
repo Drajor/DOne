@@ -393,7 +393,7 @@ void Zone::handleAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharac
 void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Standing); }
 void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Sitting); }
 void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Crouch); }
-void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->getIsGM() ? 1 : 0, true); }
+void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->isGM() ? 1 : 0, true); }
 void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
 
 void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
@@ -762,7 +762,7 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	EXPECTED(pAddActor->copyData(ds));
 
 	//auto outPacket = new EQApplicationPacket(OP_NewSpawn, pAddActor->getActorData(), sizeof(Payload::SpawnData));
-	auto outPacket = new EQApplicationPacket(OP_NewSpawn, data, size);
+	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	pCharacter->getConnection()->sendPacket(outPacket);
 	//outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
