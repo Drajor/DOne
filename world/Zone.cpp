@@ -832,28 +832,22 @@ void Zone::handleSurnameChange(Actor* pActor) {
 	safe_delete(outPacket);
 }
 
-void Zone::handleTitleChanged(Character* pCharacter, TitleOption pOption) {
+void Zone::handleTitleChanged(Character* pCharacter, const uint32 pOption) {
 	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
-	auto outPacket = new EQApplicationPacket(OP_SetTitleReply, TitleUpdate::size());
-	auto payload = TitleUpdate::convert(outPacket->pBuffer);
+	EQApplicationPacket* packet = nullptr;
 
-	payload->mSpawnID = pCharacter->getSpawnID();
-
-	if (pOption == TitleOption::TO_Title) {
-		payload->mOption = TitleUpdate::UPDATE_PREFIX;
-		strcpy(payload->mTitle, pCharacter->getTitle().c_str());
-
-	}
-	else {
-		payload->mOption = TitleUpdate::UPDATE_SUFFIX;
-		strcpy(payload->mTitle, pCharacter->getSuffix().c_str());
-	}
+	// Updating Title.
+	if (pOption == TitleOption::Title)
+		packet = TitleUpdate::construct(TitleUpdate::UPDATE_TITLE, pCharacter->getSpawnID(), pCharacter->getTitle());
+	// Updating Suffix.
+	else
+		packet = TitleUpdate::construct(TitleUpdate::UPDATE_SUFFIX, pCharacter->getSpawnID(), pCharacter->getSuffix());
 
 	// Update Character + those visible to
-	sendToVisible(pCharacter, outPacket, true);
-	safe_delete(outPacket);
+	sendToVisible(pCharacter, packet, true);
+	safe_delete(packet);
 }
 
 void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {

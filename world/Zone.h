@@ -111,7 +111,7 @@ public:
 	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
 
 	void handleSurnameChange(Actor* pActor);
-	void handleTitleChanged(Character* pCharacter, TitleOption pOption);
+	void handleTitleChanged(Character* pCharacter, const uint32 pOption);
 
 	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
 	void handleCastingFinished(Actor* pActor);

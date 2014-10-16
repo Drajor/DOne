@@ -1007,7 +1007,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	else if (pCommandName == "damage" && pParameters.size() == 1) {
 		unsigned int damage = 0;
 		if (Utility::stou32Safe(damage, pParameters[0])) {
-			auto packet = Payload::Zone::Damage::make(pCharacter->getSpawnID(), damage, 1, 0);
+			auto packet = Payload::Zone::Damage::construct(pCharacter->getSpawnID(), damage, 1, 0);
 			pCharacter->getConnection()->sendPacket(packet);
 			safe_delete(packet);
 

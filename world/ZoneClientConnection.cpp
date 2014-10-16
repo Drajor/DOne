@@ -2521,12 +2521,12 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 	
 	auto payload = SetTitle::convert(pPacket->pBuffer);
 
-	EXPECTED(payload->mOption == SetTitle::SET_PREFIX || payload->mOption == SetTitle::SET_SUFFIX);
+	EXPECTED(payload->mOption == SetTitle::SET_TITLE || payload->mOption == SetTitle::SET_SUFFIX);
 
 	// TODO: Check eligibility
 
 	// Prefix changing.
-	if (payload->mOption == SetTitle::SET_PREFIX) {
+	if (payload->mOption == SetTitle::SET_TITLE) {
 		String prefix = "";
 
 		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
@@ -2550,7 +2550,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 	}
 
 	// Update Zone.
-	TitleOption t = payload->mOption == SetTitle::SET_PREFIX ? TitleOption::TO_Title : TitleOption::TO_Suffix;
+	const uint32 t = payload->mOption == SetTitle::SET_TITLE ? TitleOption::Title : TitleOption::Suffix;
 	mZone->handleTitleChanged(mCharacter, t);
 	
 }

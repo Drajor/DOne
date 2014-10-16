@@ -464,10 +464,7 @@ namespace Limits {
 	}
 }
 
-enum class TitleOption {
-	TO_Title,
-	TO_Suffix
-};
+namespace TitleOption { enum : uint32 { Title, Suffix }; };
 
 enum MaterialSlot : uint8 {
 	Mat_Head,

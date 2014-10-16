@@ -42,7 +42,7 @@ namespace Payload {
 		inline static T* convert(const EQApplicationPacket* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
 		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == size(); }
 		inline static const std::size_t size() { return sizeof(T); }
-		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, size()); }
+		inline static EQApplicationPacket* create() { return new EQApplicationPacket(OpCode, reinterpret_cast<const unsigned char*>(new T()), size()); }
 		inline static EQApplicationPacket* create(T pPayload) { return new EQApplicationPacket(OpCode, (unsigned char*)&pPayload, size()); }
 	};
 
@@ -73,19 +73,26 @@ namespace Payload {
 		};
 
 		// C->S
-		// Based on: SetTitle_Struct
 		struct SetTitle : public Fixed<SetTitle> {
-			enum : uint32 { SET_PREFIX = 0, SET_SUFFIX = 1 };
-			uint32 mOption = SET_PREFIX;
+			enum : uint32 { SET_TITLE = 0, SET_SUFFIX = 1 };
+			uint32 mOption = SET_TITLE;
 			uint32 mTitleID = 0;
 		};
 
 		// S->C
-		// Based on: SetTitleReply_Struct
-		struct TitleUpdate : public Fixed<TitleUpdate> {
-			enum : uint32 { UPDATE_PREFIX = 0, UPDATE_SUFFIX = 1 };
-			uint32 mOption = UPDATE_PREFIX;
-			char mTitle[32];
+		struct TitleUpdate : public FixedT<TitleUpdate, OP_SetTitleReply> {
+			static EQApplicationPacket* construct(const uint32 pOption, const uint32 pSpawnID, const String& pText) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mOption = pOption;
+				payload->mSpawnID = pSpawnID;
+				strcpy(payload->mText, pText.c_str());
+
+				return packet;
+			}
+			enum : uint32 { UPDATE_TITLE = 0, UPDATE_SUFFIX = 1 };
+			uint32 mOption = UPDATE_TITLE;
+			char mText[32];
 			uint32 mSpawnID = 0;
 		};
 
@@ -490,7 +497,7 @@ namespace Payload {
 		// S->C
 		struct Damage : public FixedT<Damage, OP_Damage> {
 			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
-			static EQApplicationPacket* make(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint16 pSpellID = 0) {
+			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint16 pSpellID = 0) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mTargetSpawnID = pTarget;
@@ -508,6 +515,23 @@ namespace Payload {
 			float __Unknown0 = 0.0f;
 			uint32 mSequence = 7;
 			uint8 __Unknown1[9];
+		};
+
+		// C->S
+		struct MarkNPC : public FixedT<MarkNPC, OP_MarkNPC> {
+			MarkNPC() { memset(mName, 0, sizeof(mName)); }
+			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pNumber, const String& pName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mNumber = pNumber;
+				strcpy(payload->mName, pName.c_str());
+
+				return packet;
+			}
+			uint32 mSpawnID = 0;
+			uint32 mNumber = 1;
+			char mName[64];
 		};
 	}
 
