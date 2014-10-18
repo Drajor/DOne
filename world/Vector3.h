@@ -4,6 +4,11 @@
 
 struct Vector3 {
 	Vector3(float pX = 0.0f, float pY = 0.0f, float pZ = 0.0f) : x(pX), y(pY), z(pZ) {}
+	Vector3(const Vector3& pVector){
+		x = pVector.x;
+		y = pVector.y;
+		z = pVector.z;
+	}
 	
 	inline Vector3& operator = (const Vector3& pVector) {
 		x = pVector.x;
@@ -28,7 +33,7 @@ struct Vector3 {
 	inline const float squareDistance(const Vector3& pVector) const {
 		return ((x - pVector.x) * (x - pVector.x) + (y - pVector.y) * (y - pVector.y) + (z - pVector.z) * (z - pVector.z));
 	}
-	String toString(uint32 pPrecision = 1) {
+	String toString(uint32 pPrecision = 1) const {
 		StringStream ss;
 		ss.precision(pPrecision);
 		ss << std::fixed << "(" << x << ", " << y << ", " << z << ")";

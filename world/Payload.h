@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "Utility.h"
+#include "Vector3.h"
 #include "../common/EQPacket.h"
 
 enum GuildUpdateAction : uint32 {
@@ -322,8 +323,18 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: RequestClientZoneChange_Struct
-		struct RequestZoneChange : public Fixed<RequestZoneChange> {
+		struct RequestZoneChange : public FixedT<RequestZoneChange, OP_RequestClientZoneChange> {
+			static EQApplicationPacket* construct(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mZoneID = pZoneID;
+				payload->mInstanceID = pInstanceID;
+				payload->mX = pPosition.x;
+				payload->mY = pPosition.y;
+				payload->mZ = pPosition.z;
+
+				return packet;
+			}
 			uint16 mZoneID = 0;
 			uint16 mInstanceID = 0;
 			float mY = 0.0f;
@@ -335,6 +346,20 @@ namespace Payload {
 
 		// C<->S
 		struct ZoneChange : public FixedT<ZoneChange, OP_ZoneChange> {
+			ZoneChange() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
+			static EQApplicationPacket* construct(const String& pCharacterName, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				payload->mZoneID = pZoneID;
+				payload->mInstanceID = pInstanceID;
+				payload->mX = pPosition.x;
+				payload->mY = pPosition.y;
+				payload->mZ = pPosition.z;
+				payload->mSuccess = pSuccess;
+
+				return packet;
+			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint16 mZoneID = 0;
 			uint16 mInstanceID = 0;

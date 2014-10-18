@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Vector3.h"
 
 #include "../common/timer.h"
 
@@ -78,8 +79,8 @@ public:
 	void sendGroupDisband();
 	void sendGroupLeave(const String& pLeavingCharacterName);
 
-	void sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID);
-	void sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const int32 pSuccess);
+	void sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
+	void sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess);
 
 	void sendGuildRank();
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);

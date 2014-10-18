@@ -925,7 +925,7 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	Vector3 newPosition(payload->mX, payload->mY, payload->mZ);
 	float delta = previousPosition.distance(newPosition);
 	
-	Log::info("InPosition = " + newPosition.toString() + " Delta: " + std::to_string(delta));
+	//Log::info("InPosition = " + newPosition.toString() + " Delta: " + std::to_string(delta));
 
 	//if (mCharacter->getX() != payload->mX || mCharacter->getY() != payload->mY || mCharacter->getZ() != payload->mZ || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
 		mCharacter->setPosition(Vector3(payload->mX, payload->mY, payload->mZ));
@@ -1139,28 +1139,15 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 }
 
 void ZoneClientConnection::sendPosition() {
+	using namespace Payload;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	auto payload = reinterpret_cast<PlayerPositionUpdateServer_Struct*>(outPacket->pBuffer);
-	memset(payload, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
-	payload->spawn_id = mCharacter->getSpawnID();
-	payload->x_pos = FloatToEQ19(mCharacter->getX());
-	payload->y_pos = FloatToEQ19(mCharacter->getY());
-	payload->z_pos = FloatToEQ19(mCharacter->getZ());
-	payload->delta_x = NewFloatToEQ13(static_cast<float>(mCharacter->getXDelta()));
-	payload->delta_y = NewFloatToEQ13(static_cast<float>(mCharacter->getYDelta()));
-	payload->delta_z = NewFloatToEQ13(static_cast<float>(mCharacter->getZDelta()));
-	payload->heading = FloatToEQ19(static_cast<float>(mCharacter->getHeading()));
-	payload->animation = 0;
-	payload->delta_heading = NewFloatToEQ13(static_cast<float>(mCharacter->getHeadingDelta()));
-	payload->padding0002 = 0;
-	payload->padding0006 = 7;
-	payload->padding0014 = 0x7f;
-	payload->padding0018 = 0x5df27;
-
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	mCharacter->_syncPosition();
+	auto position = mCharacter->getPositionData();
+	auto packet = ActorPosition::create(position);
+	sendPacket(packet);
+	packet->pBuffer = nullptr;
+	safe_delete(packet);
 }
 
 /*
@@ -1857,32 +1844,24 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 	GroupManager::getInstance().handleMakeLeader(mCharacter, newLeader);
 }
 
-void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID) {
+void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_RequestClientZoneChange, RequestZoneChange::size());
-	auto payload = RequestZoneChange::convert(outPacket->pBuffer);
-	payload->mZoneID = pZoneID;
-	payload->mInstanceID = pInstanceID;
-
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = RequestZoneChange::construct(pZoneID, pInstanceID, pPosition);
+	Log::info("sendRequestZoneChange: " + pPosition.toString());
+	mStreamInterface->QueuePacket(packet);
+	safe_delete(packet);
 }
 
-void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const int32 pSuccess) {
+void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	ZoneChange payload;
-	strcpy(payload.mCharacterName, mCharacter->getName().c_str());
-	payload.mZoneID = pZoneID;
-	payload.mInstanceID = pInstanceID;
-	payload.mSuccess = pSuccess;
-
-	auto outPacket = ZoneChange::create(payload);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = ZoneChange::construct(mCharacter->getName(), pZoneID, pInstanceID, pPosition, pSuccess);
+	Log::info("sendZoneChange: " + pPosition.toString());
+	sendPacket(packet);
+	safe_delete(packet);
 }
 
 void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
@@ -1891,7 +1870,7 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 	EXPECTED(ZoneChange::sizeCheck(pPacket));
 
 	auto payload = ZoneChange::convert(pPacket);
-	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID);
+	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID, Vector3(payload->mX, payload->mY, payload->mZ));
 }
 
 void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {

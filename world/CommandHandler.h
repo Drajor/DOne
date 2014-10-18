@@ -14,15 +14,17 @@ public:
 	virtual ~Command() {};
 	std::list<String>& getAliases() { return mAliases; }
 	uint8 getMinimumStatus() { return mMinimumStatus; }
-	virtual const bool handleCommand(Character* pCharacter, CommandParameters pParameters) = 0;
-	virtual void helpMessage(Character* pCharacter);
+	void setInvoker(Character* pCharacter) { mInvoker = pCharacter; }
+	virtual const bool handleCommand(CommandParameters pParameters) = 0;
+	virtual void helpMessage();
 protected:
-	virtual void invalidParameters(Character* pCharacter, CommandParameters pParameters);
-	virtual void conversionError(Character* pCharacter, String& pParameter);
+	virtual void invalidParameters(CommandParameters pParameters);
+	virtual void conversionError(String& pParameter);
 	
 	std::list<String> mAliases;
 	uint8 mMinimumStatus;
 	std::list<String> mHelpMessages;
+	Character* mInvoker = nullptr;
 };
 
 class CommandHandler {

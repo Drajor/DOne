@@ -360,6 +360,9 @@ void Zone::_handleIncomingConnections() {
 
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->setPosition(Vector3(pX, pY, pZ));
+	handleActorPositionChange(pCharacter);
+
+	// This is not ideal. Need to decide whether handleActorPositionChange should check for Character/have a parameter to send to self.
 	pCharacter->getConnection()->sendPosition();
 }
 
@@ -378,8 +381,6 @@ void Zone::handleActorPositionChange(Actor* pActor) {
 
 	pActor->_syncPosition();
 	// Update any Character visible to pActor.
-	//auto outPacket = new EQApplicationPacket(OP_ClientUpdate, pActor->getPositionData(), 22); // sizeof(PlayerPositionUpdateServer_Struct)
-	//auto packet = Payload::ActorPosition::
 	auto position = pActor->getPositionData();
 	auto packet = Payload::ActorPosition::create(position);
 	for (auto i : pActor->getVisibleTo()) {
@@ -597,15 +598,15 @@ Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZonin
 	return ZoneManager::getInstance().findCharacter(pCharacterName, pIncludeZoning, this);
 }
 
-void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID) {
+void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
 	EXPECTED(pCharacter);
-
+	Log::info("handleZoneChange: " + pPosition.toString());
 	// Check: Are we expecting a zone change?
 	if (pCharacter->checkZoneChange(pZoneID, pInstanceID)) {
 		pCharacter->setZoneAuthentication(pZoneID, pInstanceID);
-		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 1);
+		pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, pPosition, 1);
 
-		// TODO: Position/Heading for destination?!
+		// TODO: Check Position to prevent zone/warp. The position the client sends here should be what we sent them previously.
 
 		return;
 	}
@@ -623,7 +624,7 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 
 			pCharacter->setZoneChange(pZoneID, pInstanceID);
 			pCharacter->setZoneAuthentication(pZoneID, pInstanceID);
-			pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 1);
+			pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, zp->mDestinationPosition, 1);
 			pCharacter->setPosition(zp->mDestinationPosition);
 			pCharacter->setHeading(zp->mDestinationHeading);
 			return;
@@ -631,7 +632,7 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 	}
 	
 	// Deny zone change.
-	pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID, 0);
+	pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID,  pCharacter->getPosition(), 0);
 }
 
 void Zone::notifyGuildsChanged() {

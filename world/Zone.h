@@ -94,7 +94,7 @@ public:
 	void notifyGuildsChanged();
 	void notifyCharacterGuildChange(Character* pCharacter);
 
-	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID);
+	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	inline void moveCharacter(Character* pCharacter, Vector3& pPosition) { moveCharacter(pCharacter, pPosition.x, pPosition.y, pPosition.z); }
