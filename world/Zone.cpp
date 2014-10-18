@@ -372,18 +372,22 @@ void Zone::notifyCharacterZoneIn(Character* pCharacter) {
 }
 
 void Zone::handleActorPositionChange(Actor* pActor) {
+
 	// Update Scene with Actor movement
 	mScene->update(pActor);
 
 	pActor->_syncPosition();
 	// Update any Character visible to pActor.
-	auto outPacket = new EQApplicationPacket(OP_ClientUpdate, pActor->getPositionData(), 22); // sizeof(PlayerPositionUpdateServer_Struct)
+	//auto outPacket = new EQApplicationPacket(OP_ClientUpdate, pActor->getPositionData(), 22); // sizeof(PlayerPositionUpdateServer_Struct)
+	//auto packet = Payload::ActorPosition::
+	auto position = pActor->getPositionData();
+	auto packet = Payload::ActorPosition::create(position);
 	for (auto i : pActor->getVisibleTo()) {
 		if (i->isLinkDead() == false)
-			i->getConnection()->sendPacket(outPacket);
+			i->getConnection()->sendPacket(packet);
 	}
-	outPacket->pBuffer = nullptr;
-	safe_delete(outPacket);
+	packet->pBuffer = nullptr;
+	safe_delete(packet);
 }
 
 

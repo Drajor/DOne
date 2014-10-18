@@ -28,5 +28,10 @@ struct Vector3 {
 	inline const float squareDistance(const Vector3& pVector) const {
 		return ((x - pVector.x) * (x - pVector.x) + (y - pVector.y) * (y - pVector.y) + (z - pVector.z) * (z - pVector.z));
 	}
-	String toString() { return "(" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z) + ")"; }
+	String toString(uint32 pPrecision = 1) {
+		StringStream ss;
+		ss.precision(pPrecision);
+		ss << std::fixed << "(" << x << ", " << y << ", " << z << ")";
+		return ss.str();
+	}
 };

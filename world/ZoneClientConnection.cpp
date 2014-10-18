@@ -157,6 +157,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// Ignore.
 		break;
 	case OP_ClientUpdate:
+		// NOTE: Sent when a Character moves
+		// NOTE: Sent automatically every X seconds by the client.
 		_handleClientUpdate(pPacket);
 		break;
 	case OP_ClientError:
@@ -910,25 +912,29 @@ void ZoneClientConnection::_sendWorldObjectsSent() {
 }
 
 void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(PlayerPositionUpdateClient_Struct);
-
+	using namespace Payload;
 	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE || pPacket->size == EXPECTED_PAYLOAD_SIZE + 1);
+	EXPECTED(PositionUpdate::sizeCheck(pPacket) || pPacket->size == PositionUpdate::size() + 1); // Payload has an extra byte from time to time.
 
-	auto payload = reinterpret_cast<PlayerPositionUpdateClient_Struct*>(pPacket->pBuffer);
+	auto payload = PositionUpdate::convert(pPacket);
+	
+	Vector3 previousPosition = mCharacter->getPosition();
+	Vector3 newPosition(payload->mX, payload->mY, payload->mZ);
+	float delta = previousPosition.distance(newPosition);
+	
+	Log::info("InPosition = " + newPosition.toString() + " Delta: " + std::to_string(delta));
 
-	if (mCharacter->getX() != payload->x_pos || mCharacter->getY() != payload->y_pos || mCharacter->getZ() != payload->z_pos || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
-		//mCharacter->setPosition(payload->x_pos, payload->y_pos, payload->z_pos, EQ19toFloat(payload->heading));
-		mCharacter->setPosition(Vector3(payload->x_pos, payload->y_pos, payload->z_pos));
+	//if (mCharacter->getX() != payload->mX || mCharacter->getY() != payload->mY || mCharacter->getZ() != payload->mZ || FloatToEQ19(mCharacter->getHeading()) != payload->heading || mCharacter->getAnimation() != payload->animation) {
+		mCharacter->setPosition(Vector3(payload->mX, payload->mY, payload->mZ));
 		mCharacter->setHeading(EQ19toFloat(payload->heading));
 		mCharacter->setAnimation(payload->animation);
-		mCharacter->setPositionDelta(Vector3(payload->delta_x, payload->delta_y, payload->delta_z));
+		mCharacter->setPositionDelta(Vector3(payload->mDeltaX, payload->mDeltaY, payload->mDeltaZ));
 		mCharacter->setHeadingDelta(NewEQ13toFloat(payload->delta_heading));
 		mZone->handleActorPositionChange(mCharacter);
 
 		// Restart the force send timer.
 		mForceSendPositionTimer.Start();
-	}
+	//}
 }
 
 void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
@@ -985,7 +991,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		// 0 = Normal, 1 = Anonymous, 2 = Roleplay
 		if (actionParameter >= 0 && actionParameter <= 2) {
 			// Update character and notify zone.
-			mCharacter->setAnonymous(static_cast<AnonType>(actionParameter)); // TODO: Checked cast
+			mCharacter->setAnonymous(actionParameter);
 			mZone->handleAnonymous(mCharacter);
 		}
 		// Anything else is ignored.
@@ -1555,12 +1561,12 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 
 		// Determine Format String ID.
 		uint32 formatString = FS_DEFAULT;
-		if (i->getAnonymous() != AT_None) {
+		if (i->getAnonymous() != AnonType::None) {
 			// Player is /roleplay
-			if (i->getAnonymous() == AT_Roleplay) 
+			if (i->isRoleplaying()) 
 				formatString = FS_ROLEPLAY;
 			// Player is /anonymous
-			if (i->getAnonymous() == AT_Anonymous)
+			if (i->isAnonymous())
 				formatString = FS_ANONYMOUS;
 
 			// Allows GM to see through anonymous.

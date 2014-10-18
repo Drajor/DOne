@@ -149,7 +149,7 @@ struct NPCAppearanceData {
 	uint32 mParentID = 0;
 
 	uint32 mRaceID = 0;
-	uint8 mGender = Gender::G_FEMALE;
+	uint8 mGender = Gender::Female;
 	uint8 mBodyType = BodyType::BT_Humanoid;
 	float mSize = 5.0f;
 

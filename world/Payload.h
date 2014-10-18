@@ -770,20 +770,42 @@ namespace Payload {
 		};
 	}
 
-	struct ActorPosition {
-		signed padding0000 : 12; // ***Placeholder
-		signed deltaX : 13;      // change in x
-		signed padding0005 : 7;  // ***Placeholder
-		signed deltaHeading : 10;// change in heading
-		signed deltaY : 13;      // change in y
-		signed padding0006 : 9;  // ***Placeholder
-		signed y : 19;           // y coord
-		signed animation : 13;   // animation
-		unsigned heading : 12;     // heading
-		signed x : 19;           // x coord
-		signed padding0014 : 1;  // ***Placeholder
-		signed z : 19;           // z coord
-		signed deltaZ : 13;      // change in z
+	// C->S
+	struct PositionUpdate : public Fixed<PositionUpdate> {
+		uint16 mSpawnID = 0;
+		uint16 mSequence = 0;
+		/*0004*/ uint8		unknown0004[4];		// ***Placeholder
+		float mX = 0.0f;
+		float mY = 0.0f;
+		/*0016*/ signed		delta_heading : 10;	// change in heading
+		unsigned	padding0036 : 10;		// animation
+		unsigned	padding0016 : 12;		// ***Placeholder
+		float mDeltaX = 0.0f;
+		float mDeltaY = 0.0f;
+		float mZ = 0.0f;
+		float mDeltaZ = 0.0f;
+		/*0036*/ unsigned	animation : 10;		// ***Placeholder
+		unsigned	heading : 12;			// Directional heading
+		unsigned	padding0037 : 10;		// ***Placeholder
+		/*0040*/
+	};
+
+	// S->C
+	struct ActorPosition : public FixedT<ActorPosition, OP_ClientUpdate> {
+		uint16 mSpawnID = 0;
+		signed padding0000 : 12;
+		signed mDeltaX : 13;
+		signed padding0005 : 7;
+		signed mDeltaHeading : 10;
+		signed mDeltaY : 13;
+		signed padding0006 : 9;
+		signed mY : 19;
+		signed mAnimation : 13;
+		unsigned mHeading : 12;
+		signed mX : 19;
+		signed padding0014 : 1;
+		signed mZ : 19;
+		signed mDeltaZ : 13;      
 	};
 
 	struct ActorData {
@@ -827,8 +849,8 @@ namespace Payload {
 			unsigned __Unknown11 : 1;
 			// Invisible End.
 			unsigned mIsGM : 1;
-			unsigned anon : 2;		// 0=normal, 1=anon, 2=roleplay
-			unsigned mGender : 2;		// Gender (0=male, 1=female, 2=monster)
+			unsigned mAnonymous : 2; // See Constants AnonType
+			unsigned mGender : 2; // See Constants Gender
 			unsigned mIsLD : 1;
 			unsigned betabuffed : 1;
 			unsigned mShowHelm : 1;
@@ -909,7 +931,7 @@ namespace Payload {
 
 		char mLastName[100];
 
-		uint32 __Unknown7 = 0; // aatitle
+		uint32 mAAtitle = 0; // TODO: Figure out how this works.
 		uint8 __Unknown8 = 0;
 		uint32 mOwnerSpawnID = 0; // Pet Owner.
 		uint8 __Unknown9 = 0;
@@ -917,8 +939,8 @@ namespace Payload {
 		uint32 __Unknown11 = 0;
 		uint32 __Unknown12 = 0;
 		uint32 __Unknown13 = 0;
-		uint32 __Unknown14 = 0xffffffff; // Copied HC
-		uint32 __Unknown15 = 0xffffffff; // Copied HC
+		uint32 __Unknown14 = 0xFFFFFFFF; // Copied HC
+		uint16 __Unknown15 = 0xFFFF; // Copied HC
 
 		ActorPosition mPosition;
 

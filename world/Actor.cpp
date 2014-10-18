@@ -51,8 +51,8 @@ const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.writeString(String(mActorData.mLastName));
 
 	// Chunk One.
-	std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.__Unknown7);
-	pStructure.writeChunk((void*)&(mActorData.__Unknown7), chunk1);
+	std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.mAAtitle);
+	pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
 
 	// Write optional title.
 	if (hasTitle())

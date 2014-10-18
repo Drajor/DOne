@@ -84,8 +84,8 @@ public:
 
 	virtual const bool onDeath() = 0;
 
-	//inline const unsigned char* getActorData() { return reinterpret_cast<unsigned char*>(&mSpawnData); }
-	inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mActorData.mPosition); }
+	//inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mActorData.mPosition); }
+	inline const Payload::ActorPosition& getPositionData() { return mActorData.mPosition; }
 
 	inline const float getVisibleRange() const { return mVisibleRange; }
 	inline void setVisibleRange(const float pVisibleRange) { mVisibleRange = pVisibleRange; /* Notify scene? */ }
@@ -95,8 +95,8 @@ public:
 	inline void addVisibleTo(Character* pCharacter) { mVisibleTo.push_back(pCharacter); }
 	inline void removeVisibleTo(Character* pCharacter) { mVisibleTo.remove(pCharacter); }
 
-	inline const SpawnID getSpawnID() const { return mActorData.mSpawnID; }
-	inline void setSpawnID(const SpawnID pSpawnID) { mActorData.mSpawnID = pSpawnID; }
+	inline const uint32 getSpawnID() const { return mActorData.mSpawnID; }
+	inline void setSpawnID(const uint32 pSpawnID) { mActorData.mSpawnID = pSpawnID; mActorData.mPosition.mSpawnID = pSpawnID; }
 
 	inline const String& getName() const { return mName; }
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
@@ -115,15 +115,15 @@ public:
 
 	inline void _syncPosition() {
 		// Current
-		mActorData.mPosition.x = FUCK::xFloatToEQ19(mPosition.x);
-		mActorData.mPosition.y = FUCK::xFloatToEQ19(mPosition.y);
-		mActorData.mPosition.z = FUCK::xFloatToEQ19(mPosition.z);
-		mActorData.mPosition.heading = FUCK::xFloatToEQ19(mHeading);
+		mActorData.mPosition.mX = FUCK::xFloatToEQ19(mPosition.x);
+		mActorData.mPosition.mY = FUCK::xFloatToEQ19(mPosition.y);
+		mActorData.mPosition.mZ = FUCK::xFloatToEQ19(mPosition.z);
+		mActorData.mPosition.mHeading = FUCK::xFloatToEQ19(mHeading);
 		// Delta
-		mActorData.mPosition.deltaX = FUCK::xNewFloatToEQ13(mPositionDelta.x);
-		mActorData.mPosition.deltaY = FUCK::xNewFloatToEQ13(mPositionDelta.y);
-		mActorData.mPosition.deltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
-		mActorData.mPosition.deltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
+		mActorData.mPosition.mDeltaX = FUCK::xNewFloatToEQ13(mPositionDelta.x);
+		mActorData.mPosition.mDeltaY = FUCK::xNewFloatToEQ13(mPositionDelta.y);
+		mActorData.mPosition.mDeltaZ = FUCK::xNewFloatToEQ13(mPositionDelta.z);
+		mActorData.mPosition.mDeltaHeading = FUCK::xNewFloatToEQ13(mHeadingDelta);
 	}
 
 	inline const Vector3& getPosition() const { return mPosition; }
@@ -189,9 +189,50 @@ public:
 	inline const bool isGM() const { return mActorData.mFlags.mIsGM == 1; }
 	inline void setIsGM(const bool pIsGM) { mActorData.mFlags.mIsGM = pIsGM ? 1 : 0; }
 
-	// Anonymous
+	inline const uint8 getAnonymous() const { return mActorData.mFlags.mAnonymous; }
+	inline const bool isAnonymous() const { return getAnonymous() == AnonType::Anonymous; }
+	inline const bool isRoleplaying() const { return getAnonymous() == AnonType::Roleplay; }
 
-	// Gender
+	inline void setAnonymous(const uint8 pAnonType) {
+		mActorData.mFlags.mAnonymous = 0;
+		switch (pAnonType) {
+		case AnonType::None:
+			mActorData.mFlags.mAnonymous = 0;
+			return;
+		case AnonType::Roleplay:
+			mActorData.mFlags.mAnonymous = 1;
+			return;
+		case AnonType::Anonymous:
+			mActorData.mFlags.mAnonymous = 0;
+			return;
+		default:
+			Log::error("[Actor] Invalid anontype value in setAnonymous");
+			break;
+		}
+	};
+
+	inline const uint8 getGender() const { return mActorData.mFlags.mGender; }
+	inline const bool isMale() const { return getGender() == Gender::Male; }
+	inline const bool isFemale() const { return getGender() == Gender::Female; }
+	inline const bool isMonster() const { return getGender() == Gender::Monster; }
+
+	inline void setGender(const uint8 pGender) {
+		mActorData.mFlags.mGender = 0;
+		switch (pGender) {
+		case Gender::Male:
+			mActorData.mFlags.mGender = Gender::Male;
+			return;
+		case Gender::Female:
+			mActorData.mFlags.mGender = Gender::Female;
+			return;
+		case Gender::Monster:
+			mActorData.mFlags.mGender = Gender::Monster;
+			return;
+		default:
+			Log::error("[Actor] Invalid gender value in setGender");
+			break;
+		}
+	};
 
 	inline const bool isLD() { return mActorData.mFlags.mIsLD == 1; }
 	inline void setIsLD(const bool pValue) { mActorData.mFlags.mIsLD = pValue ? 1 : 0; }
@@ -207,26 +248,12 @@ public:
 
 	inline const bool isBuyer() const { return mActorData.mFlags.mIsBuyer == 1; }
 	inline const bool setIsBuyer(const bool pValue) { mActorData.mFlags.mIsBuyer = pValue ? 1 : 0; }
-	 
-	//inline const bool 
-
-	//inline const GenderID getGender() const { return mActorData.mGender; }
-	//inline void setGender(const GenderID pGender) { mSpawnData.mGender = pGender; }
-	// TODO!
-	inline const GenderID getGender() const { return 0; }
-	inline void setGender(const GenderID pGender) { };
 	
 	inline const uint8 getClass() const { return mActorData.mClass; }
 	inline void setClass(const uint8 pClassID) { mActorData.mClass = pClassID; }
 	
 	//inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
 	//inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
-	
-	//inline const AnonType getAnonymous() const { return mSpawnData.mAnonymous; }
-	//inline void setAnonymous(const AnonType pAnonType) { mSpawnData.mAnonymous = pAnonType; }
-	// TODO!
-	inline const AnonType getAnonymous() const { return AnonType::AT_None; }
-	inline void setAnonymous(const AnonType pAnonType) { };
 	
 	inline const uint32 getDeityID() const { return mActorData.mDeity; }
 	inline void setDeityID(const uint32 pDeityID) { mActorData.mDeity = pDeityID; }
@@ -237,20 +264,11 @@ public:
 	inline const uint8 getActorType() const { return mActorData.mActorType; }
 	inline void setActorType(const uint8 pActorType) { mActorData.mActorType = pActorType; }
 
-	//inline const bool isInvisible() const { return mActorData.mFlags.mIsInvisible == 1; }
-	//inline void setInvisible(const bool pInvisible) { mActorData.mFlags.mIsInvisible ? 1 : 0; }
-
 	inline const uint8 getHPPercent() const { return mActorData.mHPPercent; }
 	inline void setHPPercent(const uint8 pValue) { mActorData.mHPPercent = pValue; }
 
-	//inline const bool isFindable() const { return mSpawnData.mIsFindable == 1; }
-	//inline void setIsFindable(const bool pFindable) { mSpawnData.mIsFindable = pFindable ? 1 : 0; }
-
 	inline const uint8 getStandState() const { return mActorData.mStandState; }
 	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
-
-	//inline const bool getIsNPC() const { return mSpawnData.mIsNPC == 1; }
-	//inline void setIsNPC(const bool pIsNPC) { mSpawnData.mIsNPC = pIsNPC ? 1 : 0; }
 
 	inline const uint8 getLevel() const { return mActorData.mLevel; }
 	inline void setLevel(const uint8 pLevel) { mActorData.mLevel = pLevel; }
@@ -288,11 +306,11 @@ public:
 	inline const uint32 getRace() const { return mActorData.mRace; }
 	inline void setRace(const uint32 pRaceID) { mActorData.mRace = pRaceID; }
 
+	inline const bool isPVP() const { return mActorData.mPVP == 1; }
+	inline void setIsPVP(const bool pValue) { mActorData.mPVP = pValue ? 1 : 0; }
+
 	inline const float getWalkSpeed() const { return mActorData.mWalkSpeed; }
 	inline void setWalkSpeed(const float pWalkSpeed) { mActorData.mWalkSpeed = pWalkSpeed; }
-
-	//inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }
-	//inline void setIsPet(const bool pIsPet) { mActorData.mFlags.mIsPet = pIsPet ? 1 : 0; }
 
 	inline const uint8 getLight() const { return mActorData.mLight; }
 	inline void setLight(const uint8 pLight) { mActorData.mLight = pLight; }

@@ -214,8 +214,9 @@ public:
 	};
 
 	const bool handleCommand(Character* pCharacter, CommandParameters pParameters) {
+		Vector3 position = pCharacter->getPosition();
 		StringStream ss;
-		ss << "Your location is " << pCharacter->getX() << ", " << pCharacter->getY() << ", " << pCharacter->getZ();
+		ss << "Your location is " << position.toString() << " Heading: " << pCharacter->getHeading();
 		pCharacter->message(MessageType::White, ss.str());
 
 		return true;

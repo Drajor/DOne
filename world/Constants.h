@@ -503,11 +503,13 @@ enum AATitle : uint8 {
 	CLASS
 };
 
-enum AnonType : uint8 {
-	AT_None = 0,
-	AT_Roleplay = 1,
-	AT_Anonymous = 2
-};
+namespace AnonType {
+	enum : uint8 {
+		None = 0,
+		Roleplay = 1,
+		Anonymous = 2
+	};
+}
 
 enum GuildRanks : GuildRank {
 	Member = 0,
@@ -619,10 +621,13 @@ namespace SpawnAppearanceAnimation {
 	};
 }
 
-enum Gender : GenderID {
-	G_MALE,
-	G_FEMALE
-};
+namespace Gender {
+	enum : GenderID {
+		Male,
+		Female,
+		Monster
+	};
+}
 
 enum BodyType : uint8 {
 	BT_Humanoid = 1,
