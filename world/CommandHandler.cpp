@@ -243,7 +243,7 @@ public:
 			return false;
 		}
 
-		pCharacter->setLevel(static_cast<uint8>(level));
+		pCharacter->setCharacterLevel(static_cast<uint8>(level));
 		return true;
 	}
 };

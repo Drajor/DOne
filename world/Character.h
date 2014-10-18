@@ -126,8 +126,10 @@ public:
 	void removeExperience(uint32 pExperience);
 	inline const uint32 getExperienceForNextLevel() const { return Character::getExperienceForLevel(getLevel() + 1); }
 	
+	void setCharacterLevel(uint8 pLevel);
+
 	static const uint32 getExperienceForLevel(const uint8 pLevel);
-	static inline const uint8 getMaxCharacterLevel() { return 20; }
+	static inline const uint8 getMaxCharacterLevel() { return 60; }
 
 	static float getDefaultSize(uint32 pRace);
 

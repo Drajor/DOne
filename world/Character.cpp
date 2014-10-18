@@ -256,32 +256,32 @@ void Character::_checkForLevelIncrease() {
 	}
 }
 
-//void Character::setLevel(uint8 pLevel) {
-//	// Ensure not going above maximum level.
-//	if (pLevel > Character::getMaxCharacterLevel()){
-//		pLevel = Character::getMaxCharacterLevel();
-//	}
-//	
-//	// Increasing.
-//	if (pLevel > getLevel()) {
-//		setLevel(pLevel);
-//		// Notify user.
-//		mConnection->sendLevelUpdate();
-//		mConnection->sendLevelGain();
-//		// Notify zone.
-//		mZone->notifyCharacterLevelIncrease(this);
-//	}
-//	else if (pLevel < getLevel()) {
-//		mExperience = 0; // to be safe.
-//		setLevel(pLevel);
-//		// Notify user.
-//		mConnection->sendLevelUpdate();
-//		mConnection->sendLevelLost();
-//		// Notify zone.
-//		mZone->notifyCharacterLevelDecrease(this);
-//	}
-//	
-//}
+void Character::setCharacterLevel(uint8 pLevel) {
+	// Ensure not going above maximum level.
+	if (pLevel > Character::getMaxCharacterLevel()){
+		pLevel = Character::getMaxCharacterLevel();
+	}
+	
+	// Increasing.
+	if (pLevel > getLevel()) {
+		setLevel(pLevel);
+		// Notify user.
+		mConnection->sendLevelUpdate();
+		mConnection->sendLevelGain();
+		// Notify zone.
+		mZone->handleLevelIncrease(this);
+	}
+	else if (pLevel < getLevel()) {
+		mExperience = 0; // to be safe.
+		setLevel(pLevel);
+		// Notify user.
+		mConnection->sendLevelUpdate();
+		mConnection->sendLevelLost();
+		// Notify zone.
+		mZone->handleLevelDecrease(this);
+	}
+	
+}
 
 const uint32 Character::getExperienceRatio() const {
 	// Protect against division by zero.
