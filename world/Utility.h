@@ -365,4 +365,38 @@ namespace Utility {
 		};
 		const String& fromID(const uint32 pLanguageID);
 	}
+
+	class PopupHelper {
+	public:
+		enum Colour : int32 {
+			RED,
+			GREEN,
+			BLUE,
+			AQUA,
+			YELLOW,
+			MAX
+		};
+		PopupHelper() {
+			mColours.resize(Colour::MAX);
+			mColours[RED] = "<c \"#FF0000\">";
+			mColours[GREEN] = "<c \"#00FF00\">";
+			mColours[BLUE] = "<c \"#0000FF\">";
+			mColours[AQUA] = "<c \"#00FFFF\">";
+			mColours[YELLOW] = "<c \"#FFFF00\">";
+		}
+		inline String getText() const { return mText; }
+		inline void write(const String pText) { mText += pText; }
+		inline void writeBr(const String pText) { write(pText); breakLine(); }
+		
+		//template <typename T>
+		//inline void write(const string pString, const T pValue) { write(pString + std::to_string(pValue)); }
+		
+		inline void startColour(const Colour pColour) { write(mColours[pColour]); }
+		inline void endColour() { mText += "</c>"; }
+		inline void breakLine() { mText += "<br>"; }
+		inline void clear() { mText.clear(); }
+	private:
+		String mText;
+		std::vector<const String> mColours;
+	};
 }

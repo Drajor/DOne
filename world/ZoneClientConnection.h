@@ -114,6 +114,8 @@ public:
 	void sendMoneyUpdate();
 	void sendCrystals();
 
+	void sendPopup(const String& pTitle, const String& pText);
+
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);
@@ -229,6 +231,8 @@ private:
 	void _handleMoveCoin(const EQApplicationPacket* pPacket);
 	void _handleCrystalCreate(const EQApplicationPacket* pPacket);
 	void _handleCrystalReclaim(const EQApplicationPacket* pPacket);
+	void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
+	void _handlePopupResponse(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
@@ -242,7 +246,6 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;

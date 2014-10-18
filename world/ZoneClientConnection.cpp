@@ -479,6 +479,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_EnvDamage:
 		_handleEnvironmentalDamage(pPacket);
 		break;
+	case OP_PopupResponse:
+		_handlePopupResponse(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3031,6 +3034,19 @@ void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
 {
 	sendHPUpdate();
+}
+
+void ZoneClientConnection::sendPopup(const String& pTitle, const String& pText) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = PopupWindow::construct(pTitle, pText);
+	sendPacket(packet);
+	safe_delete(packet);
+}
+
+void ZoneClientConnection::_handlePopupResponse(const EQApplicationPacket* pPacket) {
+	EXPECTED(pPacket);
 }
 
 //

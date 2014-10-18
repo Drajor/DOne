@@ -1120,6 +1120,22 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 
 		pCharacter->getConnection()->sendSkillValue(skillID, skillValue);
 	}
+	else if (pCommandName == "popup") {
+		Utility::PopupHelper helper;
+
+		helper.startColour(Utility::PopupHelper::RED);
+		helper.writeBr("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=");
+		helper.endColour();
+		helper.startColour(Utility::PopupHelper::GREEN);
+		helper.writeBr("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=");
+		helper.endColour();
+		helper.startColour(Utility::PopupHelper::YELLOW);
+		helper.writeBr("=*=*=*=*=*=*=*=*=*=*=*=*=*=*=");
+		helper.endColour();
+
+
+		pCharacter->getConnection()->sendPopup("TEST", helper.getText());
+	}
 	else if (pCommandName == "corpse") {
 		uint8 response = 0;
 		uint8 unk0 = 0;

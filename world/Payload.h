@@ -533,6 +533,35 @@ namespace Payload {
 			uint32 mNumber = 1;
 			char mName[64];
 		};
+
+		// C->S
+		struct PopupWindow : public FixedT<PopupWindow, OP_OnLevelMessage> {
+			PopupWindow() {
+				memset(mTitle, 0, sizeof(mTitle));
+				memset(mText, 0, sizeof(mText));
+				memset(mLeftButtonName, 0, sizeof(mLeftButtonName));
+				memset(mRightButtonName, 0, sizeof(mRightButtonName));
+			}
+			static EQApplicationPacket* construct(const String& pTitle, const String& pText) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mTitle, pTitle.c_str());
+				strcpy(payload->mText, pText.c_str());
+
+				return packet;
+
+			}
+			char mTitle[128];
+			char mText[4096];
+			char mLeftButtonName[25];
+			char mRightButtonName[25];
+			uint8 mShowButtons = 0;
+			uint8 __Unknown0 = 0;
+			uint32 mDuration = 0;
+			uint32 mLeftButtonResponse = 1;
+			uint32 mRightButtonResponse = 2;
+			uint32 __Unknown1 = 0;
+		};
 	}
 
 	namespace World {

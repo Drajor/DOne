@@ -1616,21 +1616,21 @@ ENCODE(OP_ManaChange) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_OnLevelMessage)
-{
-	ENCODE_LENGTH_EXACT(OnLevelMessage_Struct);
-	SETUP_DIRECT_ENCODE(OnLevelMessage_Struct, structs::OnLevelMessage_Struct);
-	memcpy(eq->Title, emu->Title, sizeof(eq->Title));
-	memcpy(eq->Text, emu->Text, sizeof(eq->Text));
-	OUT(Buttons);
-	OUT(Duration);
-	OUT(PopupID);
-	OUT(NegativeID);
-	// These two field names are used if Buttons == 1.
-	OUT_str(ButtonName0);
-	OUT_str(ButtonName1);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_OnLevelMessage)
+//{
+//	ENCODE_LENGTH_EXACT(OnLevelMessage_Struct);
+//	SETUP_DIRECT_ENCODE(OnLevelMessage_Struct, structs::OnLevelMessage_Struct);
+//	memcpy(eq->Title, emu->Title, sizeof(eq->Title));
+//	memcpy(eq->Text, emu->Text, sizeof(eq->Text));
+//	OUT(Buttons);
+//	OUT(Duration);
+//	OUT(PopupID);
+//	OUT(NegativeID);
+//	// These two field names are used if Buttons == 1.
+//	OUT_str(ButtonName0);
+//	OUT_str(ButtonName1);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Illusion) {
 	ENCODE_LENGTH_EXACT(Illusion_Struct);
