@@ -44,7 +44,7 @@ std::vector<String> split(const String &s, char delim) {
 /*****************************************************************************************************************************/
 class ZoneCommand : public Command {
 public:
-	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #zone <Zone ID> <Zone Instance ID>");
 	};
 
@@ -78,7 +78,7 @@ public:
 /*****************************************************************************************************************************/
 class WarpCommand : public Command {
 public:
-	WarpCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	WarpCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #warp (warps yourself to your target).");
 		mHelpMessages.push_back("Usage: #warp <X> <Y> <Z> (warps your target or yourself to the specified position).");
 		mHelpMessages.push_back("Usage: #warp safe (warps your target or yourself to the zone safe point).");
@@ -139,7 +139,7 @@ public:
 /*****************************************************************************************************************************/
 class GMCommand : public Command {
 public:
-	GMCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GMCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #gm on / #gm off");
 	};
 
@@ -160,7 +160,7 @@ public:
 /*****************************************************************************************************************************/
 class ZoneListCommand : public Command {
 public:
-	ZoneListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneListCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #zonelist");
 	};
 
@@ -178,7 +178,7 @@ public:
 /*****************************************************************************************************************************/
 class AddExperienceCommand : public Command {
 public:
-	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #addexp <number>");
 	};
 
@@ -204,7 +204,7 @@ public:
 /*****************************************************************************************************************************/
 class RemoveExperienceCommand : public Command {
 public:
-	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #remexp <number>");
 	};
 
@@ -230,7 +230,7 @@ public:
 /*****************************************************************************************************************************/
 class LocationCommand : public Command {
 public:
-	LocationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	LocationCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #loc");
 	};
 
@@ -247,7 +247,7 @@ public:
 /*****************************************************************************************************************************/
 class LevelCommand : public Command {
 public:
-	LevelCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	LevelCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #level <number>");
 	};
 
@@ -273,7 +273,7 @@ public:
 /*****************************************************************************************************************************/
 class StatsCommand : public Command {
 public:
-	StatsCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	StatsCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage Example: #setstat str 10");
 	};
 
@@ -318,7 +318,7 @@ public:
 /*****************************************************************************************************************************/
 class ZoneSearchCommand : public Command {
 public:
-	ZoneSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	ZoneSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #zs <text>");
 	};
 
@@ -342,7 +342,7 @@ public:
 /*****************************************************************************************************************************/
 class GuildSearchCommand : public Command {
 public:
-	GuildSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #guildsearch <optional text>");
 	};
 
@@ -369,7 +369,7 @@ public:
 /*****************************************************************************************************************************/
 class GuildInformationCommand : public Command {
 public:
-	GuildInformationCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildInformationCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #ginfo");
 	};
 
@@ -390,7 +390,7 @@ public:
 // Allows for cross zone and offline guild promotion.
 class GuildPromoteCommand : public Command {
 public:
-	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #guildpromote <name>");
 	};
 
@@ -414,7 +414,7 @@ public:
 // Allows for cross zone and offline guild demotion.
 class GuildDemoteCommand : public Command {
 public:
-	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #guilddemote <name>");
 	};
 
@@ -436,7 +436,7 @@ public:
 
 class WearChangeCommand : public Command {
 public:
-	WearChangeCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	WearChangeCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #wc <slot> <material> <colour>");
 	};
 
@@ -462,7 +462,7 @@ public:
 
 class SurnameCommand : public Command {
 public:
-	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #surname <name>");
 	};
 
@@ -495,7 +495,7 @@ public:
 
 class FindSpellCommand : public Command {
 public:
-	FindSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	FindSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #findspell <name>");
 	};
 
@@ -513,7 +513,7 @@ public:
 
 class SetSkillCommand : public Command {
 public:
-	SetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #setskill <id> <value>");
 	};
 
@@ -548,7 +548,7 @@ public:
 
 class GetSkillCommand : public Command {
 public:
-	GetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GetSkillCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #getskill <id>");
 	};
 
@@ -585,7 +585,7 @@ public:
 
 class SkillListCommand : public Command {
 public:
-	SkillListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SkillListCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #skills");
 	};
 
@@ -598,7 +598,7 @@ public:
 
 class SetLanguageCommand : public Command {
 public:
-	SetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #setlanguage <id> <value>");
 	};
 
@@ -633,7 +633,7 @@ public:
 
 class GetLanguageCommand : public Command {
 public:
-	GetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	GetLanguageCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #getlanguage <id>");
 	};
 
@@ -669,7 +669,7 @@ public:
 
 class LanguageListCommand : public Command {
 public:
-	LanguageListCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	LanguageListCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #languages");
 	};
 
@@ -682,7 +682,7 @@ public:
 
 class DepopulateCommand : public Command {
 public:
-	DepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	DepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #depop");
 	};
 
@@ -695,7 +695,7 @@ public:
 
 class PopulateCommand : public Command {
 public:
-	PopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	PopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #pop");
 	};
 
@@ -708,7 +708,7 @@ public:
 
 class RepopulateCommand : public Command {
 public:
-	RepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	RepopulateCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #repop");
 	};
 
@@ -724,7 +724,7 @@ public:
 
 class WorldLockCommand : public Command {
 public:
-	WorldLockCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	WorldLockCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #lock 1/0");
 	};
 
@@ -752,7 +752,7 @@ public:
 
 class KillCommand : public Command {
 public:
-	KillCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	KillCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #kill");
 	};
 
@@ -777,7 +777,7 @@ public:
 /*****************************************************************************************************************************/
 class SummonRandomItemCommand : public Command {
 public:
-	SummonRandomItemCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SummonRandomItemCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Description: Summons a quantity of random items.");
 		mHelpMessages.push_back("Usage: #sri <type> <level> <rarity> <qty=1>");
 		mHelpMessages.push_back("Types: cont, head, chest, arms, wrists, legs, hands, feet ");
@@ -935,7 +935,7 @@ public:
 /*****************************************************************************************************************************/
 class SummonCommand : public Command {
 public:
-	SummonCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	SummonCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #summon <name> or current target.");
 	};
 
@@ -993,7 +993,7 @@ public:
 /*****************************************************************************************************************************/
 class KickCommand : public Command {
 public:
-	KickCommand(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+	KickCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #kick (kicks your target)");
 		mHelpMessages.push_back("Usage: #kick <name> (kicks a specific Character)");
 	};
@@ -1029,7 +1029,7 @@ public:
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
-//	YOURCOMMAND(uint8 pMinimumStatus, std::list<String> pAliases) : Command(pMinimumStatus, pAliases) {
+//	YOURCOMMAND(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 //		mHelpMessages.push_back("Usage: ");
 //	};
 //
@@ -1062,7 +1062,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new StatsCommand(100, { "setstat" }));
 
 	mCommands.push_back(new WearChangeCommand(100, { "wc" }));
-	mCommands.push_back(new LocationCommand(100, { "loc" }));
+	mCommands.push_back(new LocationCommand(100, { "loc" }, false));
 
 	mCommands.push_back(new SurnameCommand(100, { "surname" }));
 
@@ -1108,13 +1108,18 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 			command->helpMessage();
 			return;
 		}
-		
+
+		// Log command if required.
+		if (command->isLogged())
+			_logCommand(pCharacter, pCommandMessage);
+
 		command->handleCommand(elements);
 
 		command->setInvoker(nullptr);
 	}
 	else {
 		// Hack/Test commands can be handled in here.
+		_logCommand(pCharacter, pCommandMessage);
 		_handleCommand(pCharacter, commandName, elements);
 	}
 }
@@ -1353,6 +1358,17 @@ Command* CommandHandler::findCommand(String pCommandName) {
 
 CommandHandler::~CommandHandler() {
 	mCommands.remove_if(Utility::containerEntryDelete<Command*>);
+}
+
+void CommandHandler::_logCommand(Character* pCharacter, String pCommandMessage) {
+	StringStream ss;
+	ss << "[Command] Invoker(" << pCharacter->getName() << ")";
+	if (pCharacter->hasTarget())
+		ss << " Target(" << pCharacter->getTarget()->getName() << ")";
+
+	ss << " Text(" << pCommandMessage << ")";
+
+	Log::info(ss.str());
 }
 
 void Command::invalidParameters(CommandParameters pParameters) {
