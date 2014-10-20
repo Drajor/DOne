@@ -65,6 +65,9 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 			// Send normal damage message - "You punch X for Y points of damage."
 			zone->handleDamage(pAttacker, pDefender, damage, pAttacker->getPrimaryDamageType(), 0);
 
+			// Defender animation.
+			zone->handleAnimation(pDefender, Animation::ANIM_HIT, 10, true);
+
 			// Check: Send HP update if % hp changed.
 			if (preDamagePct != pDefender->getHPPercent()) {
 				zone->handleHPChange(pDefender);

@@ -1018,7 +1018,7 @@ namespace Payload {
 		uint32 mGuildRank = 0;
 		uint8 mClass = 0;
 		uint8 mPVP = 0;
-		uint8 mStandState = 0;
+		uint8 mStandState = 100;
 		uint8 mLight = 0;
 		uint8 mFlyMode = 0;
 		uint8 __Unknown4 = 0; // equip_chest2
@@ -1032,7 +1032,7 @@ namespace Payload {
 		uint8 __Unknown8 = 0;
 		uint32 mOwnerSpawnID = 0; // Pet Owner.
 		uint8 __Unknown9 = 0;
-		uint32 __Unknown10 = 0; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+		uint32 __Unknown10 = 64; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 		uint32 __Unknown11 = 0;
 		uint32 __Unknown12 = 0;
 		uint32 __Unknown13 = 0;

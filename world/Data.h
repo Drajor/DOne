@@ -270,3 +270,53 @@ struct ZoneData {
 	std::list<SpawnPointData*> mSpawnPoints;
 	std::list<ZonePointData*> mZonePoints;
 };
+
+namespace AffixType{
+	enum {
+		Strength,
+		Stamina,
+		Agility,
+		Dexterity,
+		Wisdom,
+		Intelligence,
+		Charisma,
+		AllStats,
+		PoisonResist,
+		MagicResist,
+		DiseaseResist,
+		FireResist,
+		ColdResist,
+		CorruptionResist,
+		AllResist,
+		HeroicStrength,
+		HeroicStamina,
+		HeroicAgility,
+		HeroicDexterity,
+		HeroicWisdom,
+		HeroicIntelligence,
+		HeroicCharisma,
+		AllHeroicStats,
+		HeroicPoisonResist,
+		HeroicMagicResist,
+		HeroicDiseaseResist,
+		HeroicFireResist,
+		HeroicColdResist,
+		HeroicCorruptionResist,
+		AllHeroicResists,
+
+		Health,
+		Mana,
+		Endurance,
+
+		HealthRegen,
+		ManaRegen,
+		EnduranceRegen,
+
+		ArmorClass,
+		Haste,
+	};
+};
+
+struct ItemAffix {
+
+};

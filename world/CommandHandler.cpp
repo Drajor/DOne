@@ -1181,11 +1181,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	}
 	// #anim <number>
 	else if (pCommandName == "anim") {
-		if (pParameters.size() == 1 && pCharacter->hasTarget()) {
-			uint32 animationID = 0;
-			if (Utility::stou32Safe(animationID, pParameters[0])) {
+		if (pParameters.size() == 2 && pCharacter->hasTarget()) {
+			uint32 v0 = 0;
+			uint32 v1 = 0;
+			if (Utility::stou32Safe(v0, pParameters[0]) && Utility::stou32Safe(v1, pParameters[1])) {
 				//pCharacter->doAnimation(animationID);
-				pCharacter->getZone()->handleAnimation(pCharacter->getTarget(), 10, animationID, true);
+				pCharacter->getZone()->handleAnimation(pCharacter->getTarget(), v0, v1, true);
 			}
 		}
 	}
