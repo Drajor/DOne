@@ -1,5 +1,4 @@
 #include "../common/timer.h"
-
 #include "../common/timeoutmgr.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
@@ -17,12 +16,16 @@
 #include "UCS.h"
 #include "Random.h"
 #include "NPCFactory.h"
+#include "Timer.h"
+#include "TimeUtility.h"
+
+uint64 TTimer::mCurrentTime = 0;
 
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
 	//system("pause");
-	
+
 	RegisterExecutablePlatform(ExePlatformWorld);
 	set_exception_handler();
 
@@ -43,11 +46,12 @@ int main(int argc, char** argv)  {
 
 	while(true) {
 		Timer::SetCurrentTime();
+		TTimer::setCurrentTime(Time::nowMilliseconds());
 		World::getInstance().update();
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
-		Sleep(5);
+		Sleep(20);
 	}
 	Log::status("World : Shutting down");
 

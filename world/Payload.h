@@ -261,7 +261,16 @@ namespace Payload {
 		};
 
 		// S->C
-		struct Animation : public Fixed<Animation> {
+		struct Animation : public FixedT<Animation, OP_Animation> {
+			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pAction, const uint8 pValue) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mAction = pAction;
+				payload->mValue = pValue;
+
+				return packet;
+			}
 			uint16 mSpawnID = 0;
 			uint8 mAction = 0;
 			uint8 mValue = 0;
@@ -522,7 +531,7 @@ namespace Payload {
 		// S->C
 		struct Damage : public FixedT<Damage, OP_Damage> {
 			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
-			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint16 pSpellID = 0) {
+			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint32 pSequence, const uint16 pSpellID = 0) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mTargetSpawnID = pTarget;
@@ -530,15 +539,16 @@ namespace Payload {
 				payload->mAmount = pAmount;
 				payload->mType = pType;
 				payload->mSpellID = pSpellID;
+				payload->mSequence = pSequence;
 				return packet;
 			}
 			uint16 mTargetSpawnID = 0;
 			uint16 mSourceSpawnID = 0;
-			uint8 mType = 0;
+			uint8 mType = 0; // See Constants, DamageType
 			uint16 mSpellID = 0;
 			int32 mAmount = 0;
 			float __Unknown0 = 0.0f;
-			uint32 mSequence = 7;
+			uint32 mSequence = 0;
 			uint8 __Unknown1[9];
 		};
 
@@ -873,6 +883,7 @@ namespace Payload {
 			memset(&mPosition, 0, sizeof(mPosition));
 
 			mFlags.mTargetable = 1;
+			mFlags.mTargetableWithHotkey = 1;
 			mFlags.mShowName = 1;
 		}
 		char mName[100]; // Variable
@@ -910,7 +921,7 @@ namespace Payload {
 			unsigned mShowHelm : 1;
 			unsigned padding26 : 1;
 			unsigned mTargetable : 1;
-			unsigned targetable_with_hotkey : 1;	// is_npc?
+			unsigned mTargetableWithHotkey : 1;
 			unsigned mShowName : 1;
 			unsigned statue : 1; // No observed effect on NPCs. Added <Unknown Guild> below PC name.
 			unsigned mIsTrader : 1; // No observed effect on NPCs. Added "Trader" to PC name.
@@ -954,8 +965,8 @@ namespace Payload {
 
 		float mSize = 0.0f;
 		uint8 mFaceStyle = 0;
-		float mWalkSpeed = 0.0f;
-		float mRunSpeed = 0.0f;
+		float mWalkSpeed = 3.0f;
+		float mRunSpeed = 6.0f;
 		uint32 mRace = 0;
 		uint8 mPropertyCount = 1; // HC 1
 		uint32 mBodyType = 0;

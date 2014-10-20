@@ -81,6 +81,8 @@ SET(world_headers
 	ItemGenerator.h
 	StaticItemData.h
 	NPCFactory.h
+	Timer.h
+	TimeUtility.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

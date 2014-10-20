@@ -1025,6 +1025,26 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class InvulnerableCommand : public Command {
+public:
+	InvulnerableCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #invul <on/off>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		bool invulnerable = pParameters[0] == "on";
+		Actor* target = mInvoker->getTarget();
+		target->setInvulnerable(invulnerable);
+		String msg = invulnerable ? "now" : "no longer";
+		mInvoker->notify(target->getName() + " is " + msg + " invulnerable!");
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1086,6 +1106,7 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new SummonCommand(100, { "summon" }));
 	mCommands.push_back(new KickCommand(100, { "kick" }));
+	mCommands.push_back(new InvulnerableCommand(100, { "invul" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1098,23 +1119,37 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 
 	Command* command = findCommand(commandName);
 	if (command) {
-		// Check status and return silently if required.
-		if (command->getMinimumStatus() > pCharacter->getStatus()) { return; }
+		// Check: Invoker has the required status.
+		if (command->getMinimumStatus() >= pCharacter->getStatus()) { return; }
 
 		command->setInvoker(pCharacter);
 
-		// Check if the user wants help
+		// Check: Invoker wants help.
 		if (elements.size() == 1 && elements[0][0] == HELP_TOKEN) {
 			command->helpMessage();
+			command->setInvoker(nullptr);
 			return;
 		}
 
-		// Log command if required.
+		// Check: Parameter range.
+		if (elements.size() < command->getMinimumParameters() || elements.size() > command->getMaximumParameters()) {
+			command->invalidParameters(elements);
+			command->setInvoker(nullptr);
+			return;
+		}
+
+		// Check: Target required.
+		if (command->getRequiresTarget() && !pCharacter->hasTarget()) {
+			pCharacter->notify("Command requires a target!");
+			command->setInvoker(nullptr);
+			return;
+		}
+
+		// Check: Log Command usage if required.
 		if (command->isLogged())
 			_logCommand(pCharacter, pCommandMessage);
 
 		command->handleCommand(elements);
-
 		command->setInvoker(nullptr);
 	}
 	else {
@@ -1131,10 +1166,10 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->healPercentage(100);
 	}
 	// #damage <amount>
-	else if (pCommandName == "damage" && pParameters.size() == 1) {
+	else if (pCommandName == "damage" && pParameters.size() == 1 && pCharacter->hasTarget()) {
 		unsigned int damage = 0;
 		if (Utility::stou32Safe(damage, pParameters[0])) {
-			auto packet = Payload::Zone::Damage::construct(pCharacter->getSpawnID(), damage, 1, 0);
+			auto packet = Payload::Zone::Damage::construct(pCharacter->getTarget()->getSpawnID(), pCharacter->getSpawnID(), damage, 1, 0);
 			pCharacter->getConnection()->sendPacket(packet);
 			safe_delete(packet);
 
@@ -1151,10 +1186,11 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 	}
 	// #anim <number>
 	else if (pCommandName == "anim") {
-		if (pParameters.size() == 1) {
+		if (pParameters.size() == 1 && pCharacter->hasTarget()) {
 			uint32 animationID = 0;
 			if (Utility::stou32Safe(animationID, pParameters[0])) {
-				pCharacter->doAnimation(animationID);
+				//pCharacter->doAnimation(animationID);
+				pCharacter->getZone()->handleAnimation(pCharacter->getTarget(), 10, animationID, true);
 			}
 		}
 	}

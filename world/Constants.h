@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <safeint.h>
 #include <bitset>
+#include <cmath>
 
 typedef uint8_t byte;
 typedef uint8_t uint8;
@@ -1225,8 +1226,8 @@ enum Animation : uint8 {
 	ANIM_TRIP = 14, // tested
 	ANIM_DROWNING = 15, // tested
 	ANIM_DEATHX = 16, // tested
-	ANIM_17 = 17, // Nothing (Tested with Human Female)
-	ANIM_18 = 18, // Nothing (Tested with Human Female)
+	ANIM_17 = 17, // Nothing (Tested with Human Female) // NPC walk !!
+	ANIM_18 = 18, // Nothing (Tested with Human Female) // NPC run !!
 	ANIM_JUMP_HORIZONTAL = 19, // tested
 	ANIM_JUMP_VERTICAL = 20, // tested Was previously ANIM_SWARMATTACK
 	ANIM_FALLING = 21, // tested

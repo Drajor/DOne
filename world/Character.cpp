@@ -10,6 +10,7 @@
 #include "NPC.h"
 #include "Inventory.h"
 #include "AccountManager.h"
+#include "CombatSystem.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -52,6 +53,22 @@ void Character::update() {
 	if (mAutoSave.Check()) {
 		_updateForSave();
 		mZone->requestSave(this);
+	}
+
+	if (mAutoAttacking) {
+		// TODO: Check range.
+		// TODO: Check PvP
+		// TODO: Check stunned.
+
+		// Check: Primary Hand
+		if (mPrimaryAttackTimer.check() && hasTarget()) {
+			// Attacking an NPC.
+			if (getTarget()->isNPC())
+				CombatSystem::primaryMeleeAttack(this, Actor::cast<NPC*>(getTarget()));
+			// Attacking a Character.
+			else if (getTarget()->isCharacter())
+				CombatSystem::primaryMeleeAttack(this, Actor::cast<Character*>(getTarget()));
+		}
 	}
 }
 
@@ -203,7 +220,7 @@ void Character::damage(uint32 pAmount) {
 }
 
 void Character::doAnimation(uint8 pAnimationID) {
-	mZone->notifyCharacterAnimation(this, 10, pAnimationID, true);
+	mZone->handleAnimation(this, 10, pAnimationID, true);
 }
 
 void Character::addExperience(uint32 pExperience) {
@@ -774,6 +791,15 @@ const bool Character::currencyValid() const {
 	}
 
 	return true;
+}
+
+void Character::setAutoAttack(const bool pAttacking) {
+	mAutoAttacking = pAttacking;
+
+	if (mAutoAttacking) {
+		mPrimaryAttackTimer.setStep(2000);
+		mPrimaryAttackTimer.start();
+	}
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

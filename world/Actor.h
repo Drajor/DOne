@@ -4,6 +4,7 @@
 #include "Payload.h"
 #include "Vector3.h"
 #include "../common/timer.h"
+#include "Timer.h"
 
 namespace FUCK {
 	static inline const float xEQ19toFloat(const int d)
@@ -349,6 +350,31 @@ public:
 	const uint32 getDataSize() const;
 	const bool copyData(Utility::DynamicStructure& pStructure);
 
+	inline const uint8 getPrimaryDamageType() const { return mPrimaryDamageType; }
+	inline const uint8 getSecondaryDamageType() const { return mSecondaryDamageType; }
+	inline const uint8 getRangeDamageType() const { return mRangeDamageType; }
+
+	inline void setPrimaryDamageType(const uint8 pValue) { mPrimaryDamageType = pValue; }
+	inline void setSecondaryDamageType(const uint8 pValue) { mSecondaryDamageType = pValue; }
+	inline void setRangeDamageType(const uint8 pValue) { mRangeDamageType = pValue; }
+
+	inline const uint8 getPrimaryAttackAnimation() const { return mPrimaryAttackAnimation; }
+	inline const uint8 getSecondaryAttackAnimation() const { return mSecondaryAttackAnimation; }
+	inline const uint8 getRangeAttackAnimation() const { return mRangeAttackAnimation; }
+
+	inline void setPrimaryAttackAnimation(const uint8 pValue) { mPrimaryAttackAnimation = pValue; }
+	inline void setSecondaryAttackAnimation(const uint8 pValue) { mSecondaryAttackAnimation = pValue; }
+	inline void setRangeAttackAnimation(const uint8 pValue) { mRangeAttackAnimation = pValue; }
+
+	inline const bool isStunImmune() const { return mIsStunImmune; }
+	inline void setStunImmune(const bool pValue) { mIsStunImmune = pValue; }
+
+	inline const bool isStunned() const { return mIsStunned; }
+	inline void setIsStunned(const bool pValue) { mIsStunned = pValue; }
+
+	inline const bool isInvulnerable() const { return mIsInvulnerable; }
+	inline void setInvulnerable(const bool pValue) { mIsInvulnerable = pValue; }
+
 protected:
 	Vector3 mPosition;
 	float mHeading = 0.0f;
@@ -360,6 +386,10 @@ protected:
 	Timer mDecayTimer;
 	Payload::ActorData mActorData;
 	Zone* mZone = nullptr;
+
+	TTimer mPrimaryAttackTimer;
+	TTimer mSecondaryAttackTimer;
+	TTimer mRangeAttackTimer;
 private:
 
 	void _onCopy();
@@ -371,6 +401,18 @@ private:
 	String mTitle = "";
 	String mSuffix = "";
 
+	uint8 mPrimaryDamageType = DamageType::HandtoHand;
+	uint8 mSecondaryDamageType = DamageType::HandtoHand;
+	uint8 mRangeDamageType = DamageType::Archery;
+
+	uint8 mPrimaryAttackAnimation = Animation::ANIM_HAND2HAND;
+	uint8 mSecondaryAttackAnimation = Animation::ANIM_HAND2HAND;
+	uint8 mRangeAttackAnimation = Animation::ANIM_SHOOTBOW;
+	
+	bool mIsInvulnerable = false;
+	bool mIsStunImmune = false;
+	bool mIsStunned = false;
+
 	float mVisibleRange = 3000.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
 
@@ -381,4 +423,6 @@ private:
 	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
 	inline void _setTitle(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
 	inline void _setSuffix(const char* pSuffix) { strncpy(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
+
+	const bool sendsEquipment() const;
 };

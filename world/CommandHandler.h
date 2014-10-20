@@ -18,8 +18,11 @@ public:
 	virtual const bool handleCommand(CommandParameters pParameters) = 0;
 	virtual void helpMessage();
 	inline const bool isLogged() const { return mLogged; }
-protected:
+	inline const uint8 getMinimumParameters() const { return mMinimumParameters; }
+	inline const uint8 getMaximumParameters() const { return mMaximumParameters; }
+	inline const bool getRequiresTarget() const { return mRequiresTarget; }
 	virtual void invalidParameters(CommandParameters pParameters);
+protected:
 	virtual void conversionError(String& pParameter);
 	
 	std::list<String> mAliases;
@@ -27,6 +30,9 @@ protected:
 	std::list<String> mHelpMessages;
 	Character* mInvoker = nullptr;
 	bool mLogged = true;
+	uint8 mMinimumParameters = 0;
+	uint8 mMaximumParameters = UINT8_MAX;
+	bool mRequiresTarget = false;
 };
 
 class CommandHandler {

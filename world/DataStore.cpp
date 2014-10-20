@@ -20,7 +20,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		pFound = AttributeNotFound;
+		pFound = false;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -29,7 +29,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
-	pFound = AttributeFound;
+	pFound = true;
 	return Utility::stoSafe(pAttributeValue, String(attribute));
 }
 
@@ -41,7 +41,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		pFound = AttributeNotFound;
+		pFound = false;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -50,7 +50,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
-	pFound = AttributeFound;
+	pFound = true;
 	pAttributeValue = attribute;
 	return true;
 }
@@ -63,7 +63,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	// Try to read attribute.
 	const char* attribute = pElement->Attribute(pAttributeName.c_str());
 	if (!attribute) {
-		pFound = AttributeNotFound;
+		pFound = false;
 		// Attribute required.
 		if (pRequired) {
 			Log::error("attribute not found in readRequiredAttribute");
@@ -72,7 +72,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		// Attribute not required.
 		return true;
 	}
-	pFound = AttributeFound;
+	pFound = true;
 	pAttributeValue = String(attribute) == "1";
 	return true;
 }

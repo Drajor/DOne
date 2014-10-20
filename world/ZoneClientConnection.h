@@ -234,6 +234,7 @@ private:
 	void _handleCrystalReclaim(const EQApplicationPacket* pPacket);
 	void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
 	void _handlePopupResponse(const EQApplicationPacket* pPacket);
+	void _handleClaimRequest(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

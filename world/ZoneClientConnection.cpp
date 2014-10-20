@@ -482,6 +482,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_PopupResponse:
 		_handlePopupResponse(pPacket);
 		break;
+	case OP_VetClaimRequest:
+		// NOTE: This occurs when a player clicks the 'Refresh' button in the Claim Window.
+		_handleClaimRequest(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -1385,7 +1389,7 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
-	mZone->notifyCharacterAnimation(mCharacter, payload->action, payload->value, false);
+	mZone->handleAnimation(mCharacter, payload->action, payload->value, false);
 }
 
 void ZoneClientConnection::sendExperienceUpdate() {
@@ -2310,16 +2314,10 @@ void ZoneClientConnection::sendWearChange(const uint16 pSpawnID, const uint8 pSl
 void ZoneClientConnection::_handleAutoAttack(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(AutoAttack::sizeCheck(pPacket->size));
+	EXPECTED(AutoAttack::sizeCheck(pPacket));
 
 	auto payload = AutoAttack::convert(pPacket->pBuffer);
-
-	if (payload->mAttacking) {
-		Log::info("Attack ON");
-		return;
-	}
-
-	Log::info("Attack OFF");
+	mCharacter->setAutoAttack(payload->mAttacking);
 }
 
 void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
@@ -3026,6 +3024,11 @@ void ZoneClientConnection::sendPopup(const String& pTitle, const String& pText) 
 
 void ZoneClientConnection::_handlePopupResponse(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
+}
+
+void ZoneClientConnection::_handleClaimRequest(const EQApplicationPacket* pPacket)
+{
+	throw std::logic_error("The method or operation is not implemented.");
 }
 
 //

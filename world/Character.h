@@ -204,6 +204,7 @@ public:
 	inline void addVisibleNPC(NPC* pNPC) { mVisibleNPCs.push_back(pNPC); }
 	inline void removeVisibleNPC(NPC* pNPC) { mVisibleNPCs.remove(pNPC); }
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
+	inline void clearVisibleNPCs() { mVisibleNPCs.clear(); }
 
 	inline const bool isCasting() const { return mIsCasting; }
 	const bool hasSpell(const uint16 pSlot, const uint32 pSpellID) const;
@@ -256,6 +257,8 @@ public:
 	void clearZoneChange();
 	inline const ZoneChange& getZoneChange() const { return mZoneChange; }
 	inline void setFilters(Filters pFilters) { mFilters = pFilters; }
+
+	void setAutoAttack(const bool pAttacking);
 private:
 	ZoneChange mZoneChange;
 
@@ -304,6 +307,7 @@ private:
 	std::array<uint32, Limits::Skills::MAX_ID> mSkills;
 	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 
+	bool mAutoAttacking = false;
 	bool mStanding = true;
 	bool mIsZoningOut = false;
 	bool mCampComplete = false; // Flag indicating whether this character logged out via /camp

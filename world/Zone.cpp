@@ -23,6 +23,7 @@
 #include "Scene.h"
 #include "SpawnPoint.h"
 #include "NPCFactory.h"
+#include "Random.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -495,18 +496,21 @@ bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, con
 	return false;
 }
 
-void Zone::notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender) {
+void Zone::handleAnimation(Actor* pActor, uint8 pAction, uint8 pValue, bool pIncludeSender) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	EXPECTED(pActor);
 
-	auto outPacket = new EQApplicationPacket(OP_Animation, Payload::Zone::Animation::size());
-	auto payload = Payload::Zone::Animation::convert(outPacket->pBuffer);
-	payload->mSpawnID = pCharacter->getSpawnID();
-	payload->mAction = pAction;
-	payload->mValue = pAnimationID;
+	auto packet = Payload::Zone::Animation::construct(pActor->getSpawnID(), pAction, pValue);
+	// Character animation.
+	if (pActor->isCharacter()) {
+		sendToVisible(Actor::cast<Character*>(pActor), packet, pIncludeSender);
+	}
+	// NPC animation.
+	else {
+		sendToVisible(pActor, packet);
+	}
 
-	sendToVisible(pCharacter, outPacket, pIncludeSender);
-	safe_delete(outPacket);
+	safe_delete(packet);
 }
 
 void Zone::handleLevelIncrease(Character* pCharacter) {
@@ -757,7 +761,7 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	EXPECTED(pCharacter);
 	EXPECTED(pAddActor);
 
-	Log::info(pCharacter->getName() + " can now see " + pAddActor->getName());
+	//Log::info(pCharacter->getName() + " can now see " + pAddActor->getName());
 
 	pAddActor->_syncPosition();
 
@@ -766,10 +770,8 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	Utility::DynamicStructure ds(data, size);
 	EXPECTED(pAddActor->copyData(ds));
 
-	//auto outPacket = new EQApplicationPacket(OP_NewSpawn, pAddActor->getActorData(), sizeof(Payload::SpawnData));
 	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	pCharacter->getConnection()->sendPacket(outPacket);
-	//outPacket->pBuffer = nullptr;
 	safe_delete(outPacket);
 }
 
@@ -777,7 +779,7 @@ void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
 	EXPECTED(pCharacter);
 	EXPECTED(pRemoveActor);
 
-	Log::info(pCharacter->getName() + " can no longer see " + pRemoveActor->getName());
+	//Log::info(pCharacter->getName() + " can no longer see " + pRemoveActor->getName());
 
 	// 
 	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
@@ -1180,4 +1182,17 @@ const bool Zone::canBank(Character* pCharacter) {
 	}
 
 	return closestDistance < MaxBankingDistance;
+}
+
+void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID) {
+	using namespace Payload::Zone;
+
+	uint32 sequence = Random::make(0, 20304843);
+	auto packet = Damage::construct(pDefender->getSpawnID(), pAttacker->getSpawnID(), pAmount, pType, sequence, pSpellID);
+	sendToVisible(pDefender, packet);
+	safe_delete(packet);
+}
+
+void Zone::handleCriticalHit(Character* pCharacter, int32 pDamage) {
+	pCharacter->getConnection()->sendSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pCharacter->getName(), std::to_string(pDamage));
 }

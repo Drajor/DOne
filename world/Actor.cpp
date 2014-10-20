@@ -33,7 +33,9 @@ const uint32 Actor::getDataSize() const {
 	if (hasSuffix())
 		result += strlen(mActorData.mSuffix) + 1;
 
-	Log::info("Actor: " + getName() + " Size: " + std::to_string(result));
+	if (!sendsEquipment())
+		result -= sizeof(mActorData.mEquipment);
+
 	return result;
 }
 
@@ -51,8 +53,14 @@ const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
 	pStructure.writeString(String(mActorData.mLastName));
 
 	// Chunk One.
-	std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.mAAtitle);
-	pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
+	if (sendsEquipment()) {
+		std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.mAAtitle);
+		pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
+	}
+	else {
+		std::size_t chunk1 = (unsigned int)&(mActorData.mEquipment) - (unsigned int)&(mActorData.mAAtitle);
+		pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
+	}
 
 	// Write optional title.
 	if (hasTitle())
@@ -84,4 +92,32 @@ void Actor::_onCopy() {
 
 	if (isDestructible())
 		mActorData.mOtherFlags = mActorData.mOtherFlags | 0xd1;
+}
+
+const bool Actor::sendsEquipment() const {
+	if (getActorType() == AT_PLAYER)
+		return true;
+
+	switch (mActorData.mRace) {
+	case PlayableRaceIDs::Human:
+	case PlayableRaceIDs::Barbarian:
+	case PlayableRaceIDs::Erudite:
+	case PlayableRaceIDs::WoodElf:
+	case PlayableRaceIDs::HighElf:
+	case PlayableRaceIDs::DarkElf:
+	case PlayableRaceIDs::HalfElf:
+	case PlayableRaceIDs::Dwarf:
+	case PlayableRaceIDs::Troll:
+	case PlayableRaceIDs::Ogre:
+	case PlayableRaceIDs::Halfling:
+	case PlayableRaceIDs::Gnome:
+	case PlayableRaceIDs::Iksar:
+	case PlayableRaceIDs::Vahshir:
+	case PlayableRaceIDs::Froglok:
+	case PlayableRaceIDs::Drakkin:
+		return true;
+	default:
+		return false;
+	}
+
 }

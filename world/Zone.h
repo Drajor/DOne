@@ -80,7 +80,7 @@ public:
 	void handleEmote(Character* pCharacter, const String pMessage);
 	void handleAuction(Character* pCharacter, const String pMessage);
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
-	void notifyCharacterAnimation(Character* pCharacter, uint8 pAction, uint8 pAnimationID, bool pIncludeSender = false);
+	void handleAnimation(Actor* pCharacter, uint8 pAction, uint8 pValue, bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
@@ -89,6 +89,8 @@ public:
 	void handleFaceChange(Character* pCharacter);
 
 	void handleDeath(Actor* pActor);
+
+	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
 
 	// Guild
 	void notifyGuildsChanged();
@@ -131,6 +133,8 @@ public:
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 
 	const bool canBank(Character* pCharacter);
+
+	void handleCriticalHit(Character* pCharacter, int32 pDamage);
 private:
 
 	const bool loadZonePoints();

@@ -102,6 +102,9 @@ void Scene::onCharacterRemoved(Character* pCharacter) {
 		mZone->handleVisibilityRemove(i, pCharacter);
 		i->removeVisibleTo(pCharacter);
 	}
+
+	// Remove all visible NPCs from Character.
+	pCharacter->clearVisibleNPCs();
 }
 
 void Scene::onNPCAdded(NPC* pNPC) {
