@@ -205,6 +205,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_TargetMouse:
 	case OP_TargetCommand:
+		// NOTE: This is sent when the current target dies.
 		_handleTarget(pPacket);
 		break;
 	case OP_Camp:

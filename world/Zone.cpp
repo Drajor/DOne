@@ -957,17 +957,13 @@ void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
 	}
 }
 
-void Zone::handleDeath(Actor* pActor) {
+void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
-	auto outPacket = new EQApplicationPacket(OP_Death, Death::size());
-	auto payload = Death::convert(outPacket->pBuffer);
-	payload->mSpawnID = pActor->getSpawnID();
-	payload->mKillerSpawnID = 0;
-
-	sendToVisible(pActor, outPacket);
-	safe_delete(outPacket);
+	auto packet = Death::construct(pActor->getSpawnID(), pKiller ? pKiller->getSpawnID() : 0, pDamage, pSkill);
+	sendToVisible(pActor, packet);
+	safe_delete(packet);
 
 	// NPC Dead.
 	if (pActor->isNPC()) {

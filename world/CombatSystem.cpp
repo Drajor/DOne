@@ -16,13 +16,17 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	Zone* zone = pAttacker->getZone();
 	EXPECTED(zone);
 
+	// Check: Defender is already dead. This may have occurred earlier in the update.
+	if (pDefender->isDead()) return;
+
+	// Attacker animation.
+	zone->handleAnimation(pAttacker, 10, pAttacker->getPrimaryAttackAnimation(), true);
+
 	int32 damage = 0;
 	uint32 hitChance = 80;
 
 	// Check: Defender is invulnerable
 	if (pDefender->isInvulnerable()) {
-		// Attacker animation.
-		zone->handleAnimation(pAttacker, 10, pAttacker->getPrimaryAttackAnimation(), true);
 		// Sends then "X tried to hit Y, but Y is INVULNERABLE!"
 		zone->handleDamage(pAttacker, pDefender, Invulnerable, pAttacker->getPrimaryDamageType(), 0);
 		return;
@@ -33,7 +37,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		damage = AttackMiss;
 	}
 	else {
-		damage = Random::make<int32>(2, 14);
+		damage = Random::make<int32>(5, 15);
 	}
 
 	uint32 criticalChance = 50;
@@ -42,25 +46,34 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		damage *= 2;
 	}
 	
-	// Attacker animation.
-	zone->handleAnimation(pAttacker, 10, pAttacker->getPrimaryAttackAnimation(), true);
-	// Defender animation.
-
-	zone->handleDamage(pAttacker, pDefender, damage, pAttacker->getPrimaryDamageType(), 0);
-	// TODO: Determine why defender animation is not working.
-
-	if (criticalHit && hit) {
-		zone->handleCriticalHit(pAttacker, damage);
-	}
-
+	// Attacker successfully hit Defender.
 	if (damage > 0) {
+		// Apply damage.
 		const uint8 preDamagePct = pDefender->getHPPercent();
 		pDefender->damage(damage);
 
-		// Check: Send HP update if % hp changed.
-		if (preDamagePct != pDefender->getHPPercent()) {
-			zone->handleHPChange(pDefender);
+		// Send critical hit message.
+		if (criticalHit && hit)
+			zone->handleCriticalHit(pAttacker, damage);
+
+		// Check: Did that hit kill pDefender?
+		if (pDefender->isDead()) {
+			// Send kill message - "You have slain X!"
+			zone->handleDeath(pDefender, pAttacker, damage, pAttacker->getPrimaryDamageType());
 		}
+		else {
+			// Send normal damage message - "You punch X for Y points of damage."
+			zone->handleDamage(pAttacker, pDefender, damage, pAttacker->getPrimaryDamageType(), 0);
+
+			// Check: Send HP update if % hp changed.
+			if (preDamagePct != pDefender->getHPPercent()) {
+				zone->handleHPChange(pDefender);
+			}
+		}
+	}
+	// Attacker missed Defender
+	else {
+		zone->handleDamage(pAttacker, pDefender, AttackMiss, pAttacker->getPrimaryDamageType(), 0);
 	}
 }
 

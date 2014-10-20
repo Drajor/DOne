@@ -308,7 +308,7 @@ const uint32 Character::getExperienceRatio() const {
 		return 0;
 	}
 
-	return 330.0f * (mExperience / static_cast<float>(next));
+	return static_cast<uint32>(330.0f * (mExperience / static_cast<float>(next)));
 }
 
 const uint32 Character::getExperienceForLevel(const uint8 pLevel) {
@@ -776,7 +776,7 @@ const uint64 Character::getTotalCurrency() const {
 	uint64 total = 0;
 	for (auto i = 0; i < MoneySlotID::MAX; i++) {
 		for (auto j = 0; j < MoneyType::MAX; j++) {
-			total += getCurrency(i, j) * std::pow(10, j);
+			total += getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
 		}
 	}
 	return total;
@@ -797,7 +797,7 @@ void Character::setAutoAttack(const bool pAttacking) {
 	mAutoAttacking = pAttacking;
 
 	if (mAutoAttacking) {
-		mPrimaryAttackTimer.setStep(2000);
+		mPrimaryAttackTimer.setStep(1500);
 		mPrimaryAttackTimer.start();
 	}
 }

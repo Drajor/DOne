@@ -28,6 +28,7 @@ const bool NPC::initialise() {
 }
 
 const bool NPC::onDeath() {
+	setHPPercent(0);
 	setActorType(AT_NPC_CORPSE);
 	setName(getName() + "'s corpse");
 	mDecayTimer.Start(5000);

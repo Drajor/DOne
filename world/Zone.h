@@ -88,7 +88,7 @@ public:
 	void handleTarget(Character* pCharacter, uint16 pSpawnID);
 	void handleFaceChange(Character* pCharacter);
 
-	void handleDeath(Actor* pActor);
+	void handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill);
 
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
 

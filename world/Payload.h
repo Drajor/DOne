@@ -284,8 +284,17 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: Death_Struct
-		struct Death : public Fixed<Death> {
+		struct Death : public FixedT<Death, OP_Death> {
+			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pKillerSpawnID, const uint32 pDamage, const uint32 pSkill) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mKillerSpawnID = pKillerSpawnID;
+				payload->mDamage = pDamage;
+				payload->mSkillID = pSkill;
+
+				return packet;
+			}
 			uint32 mSpawnID = 0;
 			uint32 mKillerSpawnID = 0;
 			uint32 mCorpseID = 0; // ??
@@ -294,6 +303,30 @@ namespace Payload {
 			uint32 mSkillID = 0;
 			uint32 mDamage = 0;
 			uint32 mUnknown0 = 0;
+		};
+
+		// S->C
+		struct Damage : public FixedT<Damage, OP_Damage> {
+			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
+			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint32 pSequence, const uint16 pSpellID = 0) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTargetSpawnID = pTarget;
+				payload->mSourceSpawnID = pSource;
+				payload->mAmount = pAmount;
+				payload->mType = pType;
+				payload->mSpellID = pSpellID;
+				payload->mSequence = pSequence;
+				return packet;
+			}
+			uint16 mTargetSpawnID = 0;
+			uint16 mSourceSpawnID = 0;
+			uint8 mType = 0; // See Constants, DamageType
+			uint16 mSpellID = 0;
+			int32 mAmount = 0;
+			float __Unknown0 = 0.0f;
+			uint32 mSequence = 0;
+			uint8 __Unknown1[9];
 		};
 
 		// C->S
@@ -549,30 +582,6 @@ namespace Payload {
 			}
 			int16 mSpawnID = 0;
 			uint8 mHPPercent = 0;
-		};
-
-		// S->C
-		struct Damage : public FixedT<Damage, OP_Damage> {
-			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
-			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint32 pSequence, const uint16 pSpellID = 0) {
-				auto packet = create();
-				auto payload = convert(packet);
-				payload->mTargetSpawnID = pTarget;
-				payload->mSourceSpawnID = pSource;
-				payload->mAmount = pAmount;
-				payload->mType = pType;
-				payload->mSpellID = pSpellID;
-				payload->mSequence = pSequence;
-				return packet;
-			}
-			uint16 mTargetSpawnID = 0;
-			uint16 mSourceSpawnID = 0;
-			uint8 mType = 0; // See Constants, DamageType
-			uint16 mSpellID = 0;
-			int32 mAmount = 0;
-			float __Unknown0 = 0.0f;
-			uint32 mSequence = 0;
-			uint8 __Unknown1[9];
 		};
 
 		// C->S

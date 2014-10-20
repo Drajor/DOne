@@ -754,19 +754,14 @@ class KillCommand : public Command {
 public:
 	KillCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #kill");
+		mRequiresTarget = true;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
 		Actor* target = mInvoker->getTarget();
 
-		// Check: Has a target.
-		if (!target){
-			mInvoker->notify("You need to target something first.");
-			return true;
-		}
-
 		if (target->isNPC()) {
-			mInvoker->getZone()->handleDeath(target);
+			mInvoker->getZone()->handleDeath(target, mInvoker, 1, 0);
 			return true;
 		}
 

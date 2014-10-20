@@ -378,17 +378,31 @@ public:
 	inline void setInvulnerable(const bool pValue) { mIsInvulnerable = pValue; }
 
 	inline const int32 getCurrentHP() const { return mCurrentHP; }
+	inline void setCurrentHP(const int32 pValue) { mCurrentHP = pValue; }
 	inline const int32 getMaximumHP() const { return mMaximumHP; }
+	inline void setMaximumHP(const int32 pValue) { mMaximumHP = pValue; }
 	inline const int32 getCurrentMana() const { return mCurrentMana; }
+	inline void setCurrentMana(const int32 pValue) { mCurrentMana = pValue; }
 	inline const int32 getMaximumMana() const { return mMaximumMana; }
+	inline void setMaximumMana(const int32 pValue) { mMaximumMana = pValue; }
 	inline const int32 getCurrentEndurance() const { return mCurrentEndurance; }
+	inline void setCurrentEndurance(const int32 pValue) { mCurrentEndurance = pValue; }
 	inline const int32 getMaximumEndurance() const { return mMaximumEndurance; }
+	inline void setMaximumEndurance(const int32 pValue) { mMaximumEndurance = pValue; }
+
+	inline const bool isDead() const { return mIsDead; }
+	inline void setIsDead(const bool pValue) { mIsDead = pValue; }
 
 	void damage(const int32 pAmount);
 
 protected:
+
+	// Returns a number of type T between 0-100 representing current HP percentage.
 	template <typename T = uint8>
-	inline const T _calcHPPercent() const { return static_cast<T>(std::floor((static_cast<float>(mCurrentHP) / static_cast<float>(mMaximumHP)) * 100)); }
+	inline const T _calcHPPercent() const {
+		static_assert(std::is_arithmetic<T>::value, "T must be a number.");
+		return static_cast<T>(std::floor((static_cast<float>(mCurrentHP) / static_cast<float>(mMaximumHP)) * 100));
+	}
 
 	Vector3 mPosition;
 	float mHeading = 0.0f;
@@ -426,6 +440,7 @@ private:
 	bool mIsInvulnerable = false;
 	bool mIsStunImmune = false;
 	bool mIsStunned = false;
+	bool mIsDead = false;
 
 	int32 mCurrentHP = 100;
 	int32 mMaximumHP = 100;
