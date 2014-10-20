@@ -496,11 +496,11 @@ bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, con
 	return false;
 }
 
-void Zone::handleAnimation(Actor* pActor, uint8 pAction, uint8 pValue, bool pIncludeSender) {
+void Zone::handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pSpeed, const bool pIncludeSender) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
-	auto packet = Payload::Zone::Animation::construct(pActor->getSpawnID(), pAction, pValue);
+	auto packet = Payload::Zone::ActorAnimation::construct(pActor->getSpawnID(), pAnimation, pSpeed);
 	// Character animation.
 	if (pActor->isCharacter()) {
 		sendToVisible(Actor::cast<Character*>(pActor), packet, pIncludeSender);

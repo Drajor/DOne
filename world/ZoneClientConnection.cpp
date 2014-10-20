@@ -1384,13 +1384,14 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Animation_Struct);
-	
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(ActorAnimation::sizeCheck(pPacket));
+	
+	auto payload = ActorAnimation::convert(pPacket);
+	EXPECTED(payload->mSpawnID == mCharacter->getSpawnID());
 
-	auto payload = reinterpret_cast<Animation_Struct*>(pPacket->pBuffer);
-	mZone->handleAnimation(mCharacter, payload->action, payload->value, false);
+	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
 }
 
 void ZoneClientConnection::sendExperienceUpdate() {

@@ -261,19 +261,19 @@ namespace Payload {
 		};
 
 		// S->C
-		struct Animation : public FixedT<Animation, OP_Animation> {
-			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pAction, const uint8 pValue) {
+		struct ActorAnimation : public FixedT<ActorAnimation, OP_Animation> {
+			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pAnimation, const uint8 pSpeed = 10) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
-				payload->mAction = pAction;
-				payload->mValue = pValue;
+				payload->mSpeed = pSpeed;
+				payload->mAnimation = pAnimation;
 
 				return packet;
 			}
 			uint16 mSpawnID = 0;
-			uint8 mAction = 0;
-			uint8 mValue = 0;
+			uint8 mSpeed = 0;
+			uint8 mAnimation = 0;
 		};
 
 		// S->C
@@ -1032,7 +1032,7 @@ namespace Payload {
 		uint8 __Unknown8 = 0;
 		uint32 mOwnerSpawnID = 0; // Pet Owner.
 		uint8 __Unknown9 = 0;
-		uint32 __Unknown10 = 64; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+		uint32 __Unknown10 = 0; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 		uint32 __Unknown11 = 0;
 		uint32 __Unknown12 = 0;
 		uint32 __Unknown13 = 0;

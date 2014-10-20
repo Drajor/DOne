@@ -20,7 +20,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	if (pDefender->isDead()) return;
 
 	// Attacker animation.
-	zone->handleAnimation(pAttacker, 10, pAttacker->getPrimaryAttackAnimation(), true);
+	zone->handleAnimation(pAttacker, pAttacker->getPrimaryAttackAnimation(), 10, true);
 
 	int32 damage = 0;
 	uint32 hitChance = 80;
@@ -63,10 +63,8 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		}
 		else {
 			// Send normal damage message - "You punch X for Y points of damage."
+			// This also triggers the 'hit' animation on Defender.
 			zone->handleDamage(pAttacker, pDefender, damage, pAttacker->getPrimaryDamageType(), 0);
-
-			// Defender animation.
-			zone->handleAnimation(pDefender, Animation::ANIM_HIT, 10, true);
 
 			// Check: Send HP update if % hp changed.
 			if (preDamagePct != pDefender->getHPPercent()) {

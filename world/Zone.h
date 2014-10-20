@@ -80,7 +80,7 @@ public:
 	void handleEmote(Character* pCharacter, const String pMessage);
 	void handleAuction(Character* pCharacter, const String pMessage);
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
-	void handleAnimation(Actor* pActor, uint8 pAction, uint8 pValue, bool pIncludeSender = false);
+	void handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pSpeed = 10, const bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
