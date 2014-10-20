@@ -80,12 +80,12 @@ public:
 	void handleEmote(Character* pCharacter, const String pMessage);
 	void handleAuction(Character* pCharacter, const String pMessage);
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
-	void handleAnimation(Actor* pCharacter, uint8 pAction, uint8 pValue, bool pIncludeSender = false);
+	void handleAnimation(Actor* pActor, uint8 pAction, uint8 pValue, bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
-	void handleTarget(Character* pCharacter, SpawnID pSpawnID);
+	void handleTarget(Character* pCharacter, uint16 pSpawnID);
 	void handleFaceChange(Character* pCharacter);
 
 	void handleDeath(Actor* pActor);
@@ -120,6 +120,7 @@ public:
 
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
+	void sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket);
 
 	const bool populate();
 	const bool depopulate();
@@ -135,6 +136,7 @@ public:
 	const bool canBank(Character* pCharacter);
 
 	void handleCriticalHit(Character* pCharacter, int32 pDamage);
+	void handleHPChange(Actor* pActor);
 private:
 
 	const bool loadZonePoints();

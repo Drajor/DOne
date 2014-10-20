@@ -730,7 +730,8 @@ void Zone::_onLinkdead(Character* pCharacter) {
 	handleLinkDead(pCharacter);
 }
 
-void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
+void Zone::handleTarget(Character* pCharacter, uint16 pSpawnID) {
+	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
 	// Character is clearing their target.
@@ -742,6 +743,11 @@ void Zone::handleTarget(Character* pCharacter, SpawnID pSpawnID) {
 	Actor* actor = findActor(pSpawnID);
 	EXPECTED(actor);
 	pCharacter->setTarget(actor);
+
+	// Send HP of new target.
+	auto packet = ActorHPUpdate::construct(actor->getHPPercent(), actor->getHPPercent());
+	pCharacter->getConnection()->sendPacket(packet);
+	safe_delete(packet);
 }
 
 Actor* Zone::findActor(const SpawnID pSpawnID) {
@@ -931,11 +937,24 @@ void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bo
 }
 
 void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
+	EXPECTED(pActor);
 	EXPECTED(pPacket);
 
 	// Update anyone who can see pActor.
 	for (auto i : pActor->getVisibleTo())
 		i->getConnection()->sendPacket(pPacket);
+}
+
+void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
+	EXPECTED(pActor);
+	EXPECTED(pPacket);
+
+	// Update any Character targeting pActor.
+	for (auto i : pActor->getTargeters()) {
+		if (i->isCharacter()) {
+			Actor::cast<Character*>(pActor)->getConnection()->sendPacket(pPacket);
+		}
+	}
 }
 
 void Zone::handleDeath(Actor* pActor) {
@@ -1195,4 +1214,13 @@ void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount,
 
 void Zone::handleCriticalHit(Character* pCharacter, int32 pDamage) {
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pCharacter->getName(), std::to_string(pDamage));
+}
+
+void Zone::handleHPChange(Actor* pActor) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto packet = ActorHPUpdate::construct(pActor->getSpawnID(), pActor->getHPPercent());
+	sendToVisible(pActor, packet);
+	safe_delete(packet);
 }

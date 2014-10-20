@@ -30,7 +30,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 
 	bool hit = Random::make(1, 100) <= hitChance;
 	if (!hit) {
-		damage = 0;
+		damage = AttackMiss;
 	}
 	else {
 		damage = Random::make<int32>(2, 14);
@@ -53,7 +53,15 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		zone->handleCriticalHit(pAttacker, damage);
 	}
 
-	//pDefender->damage(
+	if (damage > 0) {
+		const uint8 preDamagePct = pDefender->getHPPercent();
+		pDefender->damage(damage);
+
+		// Check: Send HP update if % hp changed.
+		if (preDamagePct != pDefender->getHPPercent()) {
+			zone->handleHPChange(pDefender);
+		}
+	}
 }
 
 void CombatSystem::seconaryMeleeAttack(Character* pAttacker, NPC* pDefender)

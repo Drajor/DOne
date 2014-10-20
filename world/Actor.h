@@ -72,6 +72,8 @@ public:
 		mTargeters.clear();
 	}
 
+	inline std::list<Actor*>& getTargeters() { return mTargeters; }
+
 	template <typename T>
 	inline static T cast(Actor* pActor) {
 		return static_cast<T>(pActor);
@@ -375,7 +377,19 @@ public:
 	inline const bool isInvulnerable() const { return mIsInvulnerable; }
 	inline void setInvulnerable(const bool pValue) { mIsInvulnerable = pValue; }
 
+	inline const int32 getCurrentHP() const { return mCurrentHP; }
+	inline const int32 getMaximumHP() const { return mMaximumHP; }
+	inline const int32 getCurrentMana() const { return mCurrentMana; }
+	inline const int32 getMaximumMana() const { return mMaximumMana; }
+	inline const int32 getCurrentEndurance() const { return mCurrentEndurance; }
+	inline const int32 getMaximumEndurance() const { return mMaximumEndurance; }
+
+	void damage(const int32 pAmount);
+
 protected:
+	template <typename T = uint8>
+	inline const T _calcHPPercent() const { return static_cast<T>(std::floor((static_cast<float>(mCurrentHP) / static_cast<float>(mMaximumHP)) * 100)); }
+
 	Vector3 mPosition;
 	float mHeading = 0.0f;
 	Vector3 mPositionDelta;
@@ -412,6 +426,13 @@ private:
 	bool mIsInvulnerable = false;
 	bool mIsStunImmune = false;
 	bool mIsStunned = false;
+
+	int32 mCurrentHP = 100;
+	int32 mMaximumHP = 100;
+	int32 mCurrentMana = 100;
+	int32 mMaximumMana = 100;
+	int32 mCurrentEndurance = 100;
+	int32 mMaximumEndurance = 100;
 
 	float mVisibleRange = 3000.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.

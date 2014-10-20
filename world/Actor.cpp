@@ -121,3 +121,12 @@ const bool Actor::sendsEquipment() const {
 	}
 
 }
+
+void Actor::damage(const int32 pAmount) {
+	mCurrentHP -= pAmount;
+
+	if (mCurrentHP <= 0)
+		setHPPercent(0);
+	else
+		setHPPercent(_calcHPPercent());
+}

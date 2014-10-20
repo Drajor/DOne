@@ -523,9 +523,32 @@ namespace Payload {
 
 		// S->C
 		struct HPUpdate : public FixedT<HPUpdate, OP_HPUpdate> {
-			uint32 mCurrentHP = 0;
+			static EQApplicationPacket* construct(const int16 pSpawnID, const int32 pCurrentHP, const int32 pMaximumHP) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mCurrentHP = pCurrentHP;
+				payload->mMaximumHP = pMaximumHP;
+				payload->mSpawnID = pSpawnID;
+
+				return packet;
+			}
+			int32 mCurrentHP = 0;
 			int32 mMaximumHP = 0;
 			int16 mSpawnID = 0;
+		};
+
+		// S->C
+		struct ActorHPUpdate : public FixedT<ActorHPUpdate, OP_MobHealth> {
+			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pHPPercent) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mHPPercent = pHPPercent;
+
+				return packet;
+			}
+			int16 mSpawnID = 0;
+			uint8 mHPPercent = 0;
 		};
 
 		// S->C

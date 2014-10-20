@@ -106,15 +106,8 @@ public:
 	// Healing
 	void healPercentage(int pPercent);
 
-	// Damage
-	void damage(uint32 pAmount);
-
-	inline const int32 getCurrentHP() const { return mCurrentHP; }
-	inline const int32 getMaximumHP() const { return mMaximumHP; }
-	inline const int32 getCurrentMana() const { return mCurrentMana; }
-	inline const int32 getMaximumMana() const { return mMaximumMana; }
-	inline const int32 getCurrentEndurance() const { return mCurrentEndurance; }
-	inline const int32 getMaximumEndurance() const { return mMaximumEndurance; }
+	//// Damage
+	//void damage(uint32 pAmount);
 
 	void doAnimation(uint8 pAnimationID);
 
@@ -283,13 +276,6 @@ private:
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
 	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
-
-	int32 mCurrentHP = 100;
-	int32 mMaximumHP = 100;
-	int32 mCurrentMana = 100;
-	int32 mMaximumMana = 100;
-	int32 mCurrentEndurance = 100;
-	int32 mMaximumEndurance = 100;
 
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;

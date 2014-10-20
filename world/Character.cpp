@@ -214,10 +214,10 @@ void Character::healPercentage(int pPercent) {
 	mConnection->sendHPUpdate();
 }
 
-void Character::damage(uint32 pAmount) {
-	mCurrentHP -= pAmount;
-	mConnection->sendHPUpdate();
-}
+//void Character::damage(uint32 pAmount) {
+//	mCurrentHP -= pAmount;
+//	mConnection->sendHPUpdate();
+//}
 
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->handleAnimation(this, 10, pAnimationID, true);
