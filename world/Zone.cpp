@@ -25,6 +25,7 @@
 #include "NPCFactory.h"
 #include "Random.h"
 #include "LootAllocator.h"
+#include "Item.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -1068,6 +1069,19 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 
 		if (currencyLooted) {
 			// TODO: Currency save.
+		}
+
+		// Send items.
+		int count = 0;
+		for (auto i : npcCorpse->getLootItems()) {
+			i->setSlot(23 + count);
+			uint32 payloadSize = 0;
+			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot);
+
+			auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+			pLooter->getConnection()->sendPacket(outPacket);
+			safe_delete(outPacket);
+			count++;
 		}
 
 		return;

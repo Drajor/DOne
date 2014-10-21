@@ -50,6 +50,7 @@ enum ResponseID : AccountStatus { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNE
 static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
 
 static const uint32 DEFAULT_RESPAWN_TIME = 5000; // In seconds, 5 minutes.
+static const uint32 DEFAULT_CORPSE_ROT_TIME = 120; // In seconds.
 
 namespace Limits {
 	namespace World {

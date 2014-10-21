@@ -174,7 +174,7 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	return true;
 }
 
-const unsigned char* Item::copyData(uint32& pSize) {
+const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	unsigned char * data = nullptr;
 	//uint32 numItems = 1;
 	pSize += getDataSize();
@@ -184,7 +184,8 @@ const unsigned char* Item::copyData(uint32& pSize) {
 	data = new unsigned char[pSize];
 
 	Utility::DynamicStructure ds(data, pSize);
-	ds.write<uint32>(Payload::ItemPacketSummonItem);
+	//ds.write<uint32>(Payload::ItemPacketSummonItem);
+	ds.write<uint32>(pCopyType);
 
 	copyData(ds);
 

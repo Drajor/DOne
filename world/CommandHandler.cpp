@@ -783,7 +783,7 @@ public:
 		EXPECTED(pItem);
 
 		uint32 payloadSize = 0;
-		const unsigned char* data = pItem->copyData(payloadSize);
+		const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
 
 		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 		mInvoker->getConnection()->sendPacket(outPacket);
