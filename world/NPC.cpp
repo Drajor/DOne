@@ -61,4 +61,3 @@ void NPC::onDestroy() {
 		setLooter(nullptr);
 	}
 }
-

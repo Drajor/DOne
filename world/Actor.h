@@ -54,6 +54,7 @@ public:
 	inline Actor* getTarget() const { return mTarget; }
 	inline const bool hasTarget() const { return mTarget != nullptr; }
 	inline const bool targetIsCharacter() const { return mTarget ? mTarget->isCharacter() : false; }
+	inline const bool targetIsNPC() const { return mTarget ? mTarget->isNPC() : false; }
 	inline void addTargeter(Actor* pActor) { mTargeters.push_back(pActor); }
 	inline void removeTargeter(Actor* pActor) { mTargeters.remove(pActor); }
 	inline void clearTarget(const bool pRemoveFromTargeter = true) {

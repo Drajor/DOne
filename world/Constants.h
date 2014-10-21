@@ -267,6 +267,7 @@ namespace EquipSlots {
 		PowerSource = 2 << 20, // 2097152
 		Ammo = 2 << 21, // 4194304
 
+		PrimarySecondary = Primary + Secondary,
 		Ears = RightEar + LeftEar,
 		Wrists = LeftWrist + RightWrist,
 		Fingers = LeftFingers + RightFingers

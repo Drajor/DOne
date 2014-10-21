@@ -24,6 +24,7 @@
 #include "SpawnPoint.h"
 #include "NPCFactory.h"
 #include "Random.h"
+#include "LootAllocator.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -37,6 +38,7 @@ Zone::~Zone() {
 	// NOTE: mStreamFactory is intentionally not deleted here.
 	safe_delete(mStreamIdentifier);
 	safe_delete(mScene);
+	safe_delete(mLootAllocator);
 
 	mSpawnPoints.remove_if(Utility::containerEntryDelete<SpawnPoint*>);
 }
@@ -52,6 +54,8 @@ const bool Zone::initialise() {
 	Underfoot::Register(*mStreamIdentifier);
 
 	mScene = new Scene(this);
+
+	mLootAllocator = new LootAllocator();
 
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongNameStringID(mID, mLongNameStringID));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
@@ -1136,6 +1140,9 @@ void Zone::_populate(SpawnPoint* pSpawnPoint) {
 	// Link NPC / SpawnPoint
 	pSpawnPoint->setNPC(npc);
 	npc->setSpawnPoint(pSpawnPoint);
+
+	// Allocate Loot
+	mLootAllocator->allocate(npc);
 
 	addActor(npc);
 }

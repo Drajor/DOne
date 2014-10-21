@@ -13,7 +13,7 @@ private:
 	ItemGenerator(ItemGenerator const&); // Do not implement.
 	void operator=(ItemGenerator const&); // Do not implement.
 public:
-	static Item* makeRandom(const uint8 pLevel);
+	static Item* makeRandom(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeRandomContainer(const Rarity pRarity);
 	static Item* makeFood();
 	static Item* makeDrink();
@@ -26,9 +26,12 @@ public:
 	static Item* makeTwoHandPierce(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeHandtoHand(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeBow(const uint8 pLevel, const Rarity pRarity);
 
 	static Item* makeShield(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeCharm(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeRange(const uint8 pLevel, const Rarity pRarity);
 
 	// Visible Armor
 	static Item* makeHead(const uint8 pLevel, const Rarity pRarity);
@@ -39,6 +42,13 @@ public:
 	static Item* makeHands(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeFeet(const uint8 pLevel, const Rarity pRarity);
 
+	static Item* makeEars(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeRing(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeNeck(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeFace(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeShoulder(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeBack(const uint8 pLevel, const Rarity pRarity);
+	static Item* makeWaist(const uint8 pLevel, const Rarity pRarity);
 private:
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();

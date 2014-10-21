@@ -3,6 +3,8 @@
 #include "Actor.h"
 
 class SpawnPoint;
+class Item;
+
 class NPC : public Actor {
 public:
 	NPC();
@@ -39,11 +41,14 @@ public:
 	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
 
 	inline const bool isBanker() const { return getClass() == 40; }
+	void addLootItem(Item* pItem) { mLootItems.push_back(pItem); }
+	std::list<Item*>& getLootItems() { return mLootItems; }
 private:
 	int32 mCopper = 0;
 	int32 mSilver = 0;
 	int32 mGold = 0;
 	int32 mPlatinum = 0;
+	std::list<Item*> mLootItems;
 
 	SpawnPoint* mSpawnPoint = nullptr;
 };

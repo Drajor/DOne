@@ -21,4 +21,11 @@ namespace Random {
 	inline const T make(const T pLow, const T pHigh) {
 		return std::uniform_int_distribution<T>(pLow, pHigh)(mRandom);
 	}
+
+	// Returns a random value between 0 and pHigh
+	template <typename T>
+	inline const T make(const T pHigh) { return make<T>(0, pHigh); }
+
+	template <typename T>
+	inline const bool roll(const T pRequired) { return make<T>(100) <= pRequired; }
 }

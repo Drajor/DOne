@@ -24,6 +24,7 @@ class NPC;
 class Scene;
 class SpawnPoint;
 struct ZonePoint;
+class LootAllocator;
 
 struct ZonePoint {
 	uint16 mID = 0;
@@ -185,6 +186,8 @@ private:
 	void _updateSpawnPoints();
 	std::list<SpawnPoint*> mRespawns;
 	std::list<SpawnPoint*> mSpawnPoints;
+	
+	LootAllocator* mLootAllocator = nullptr;
 
 	Scene* mScene = nullptr;
 	std::list<Character*> mCharacters;

@@ -1040,6 +1040,37 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class InspectCommand : public Command {
+public:
+	InspectCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #inspect");
+		mMinimumParameters = 0;
+		mMaximumParameters = 0;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		if (mInvoker->targetIsNPC()) {
+			NPC* target = Actor::cast<NPC*>(mInvoker->getTarget());
+			mInvoker->notify("== Items ==");
+			for (auto i : target->getLootItems()) {
+				mInvoker->notify(i->getName());
+			}
+
+			mInvoker->notify("== Currency ==");
+			const int32 platinum = target->getPlatinum();
+			const int32 gold = target->getGold();
+			const int32 silver = target->getSilver();
+			const int32 copper = target->getCopper();
+			StringStream ss;
+			ss << "P(" << platinum << ") G(" << gold << ") S" << silver << ") C(" << copper << ")";
+			mInvoker->notify(ss.str());
+		}
+
+		return true;
+	}
+};
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1049,11 +1080,6 @@ public:
 //	};
 //
 //	const bool handleCommand(CommandParameters pParameters) {
-//		// Check: Parameter #
-//		if (pParameters.size() != 1) {
-//			invalidParameters(pParameters);
-//			return false;
-//		}
 //	}
 //};
 
@@ -1102,6 +1128,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new SummonCommand(100, { "summon" }));
 	mCommands.push_back(new KickCommand(100, { "kick" }));
 	mCommands.push_back(new InvulnerableCommand(100, { "invul" }));
+	mCommands.push_back(new InspectCommand(100, { "inspect" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
