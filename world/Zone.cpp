@@ -26,6 +26,7 @@
 #include "Random.h"
 #include "LootAllocator.h"
 #include "Item.h"
+#include "Inventory.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -1072,6 +1073,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 		}
 
 		// Send items.
+		npcCorpse->onLootBegin();
 		int count = 0;
 		for (auto i : npcCorpse->getLootItems()) {
 			i->setSlot(23 + count);
@@ -1120,6 +1122,36 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 		// TODO:
 	}
 }
+
+void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pSlotID) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCorpse);
+	EXPECTED(pCharacter->isLooting());
+	EXPECTED(pCharacter->getLootingCorpse() == pCorpse);
+	EXPECTED(pCorpse->getLooter() == pCharacter);
+	//EXPECTED(Limits::Corpse::slotIsValid(pSlotID)); // TODO!
+
+	// Looting Item from NPC corpse.
+	if (pCorpse->isNPCCorpse()) {
+		NPC* npcCorpse = Actor::cast<NPC*>(pCorpse);
+		Item* item = npcCorpse->getLootItem(pSlotID - 23);
+
+		// Update Character Inventory.
+		pCharacter->getInventory()->pushCursor(item);
+
+		// Update NPC loot items.
+		npcCorpse->removeLootItem(pSlotID - 23);
+
+		uint32 payloadSize = 0;
+		const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketTrade);
+
+		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+		pCharacter->getConnection()->sendPacket(outPacket);
+		safe_delete(outPacket);
+	}
+	
+}
+
 
 void Zone::_addRespawn(SpawnPoint* pSpawnPoint) {
 	EXPECTED(pSpawnPoint);

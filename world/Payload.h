@@ -226,7 +226,15 @@ namespace Payload {
 
 		// C<->S
 		// Yes the Client sends this for some magical reason.
-		struct Consider : Fixed<Consider> {
+		struct Consider : FixedT<Consider, OP_Consider> {
+			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pTargetSpawnID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mTargetSpawnID = pTargetSpawnID;
+
+				return packet;
+			}
 			uint32 mSpawnID = 0;
 			uint32 mTargetSpawnID = 0;
 			uint32 mFaction = 0;
@@ -238,7 +246,16 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct Surname : public Fixed<Surname> {
+		struct Surname : public FixedT<Surname, OP_Surname> {
+			static EQApplicationPacket* construct(const uint32 pApproved, const String& pName, const String& pLastName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mApproved = pApproved;
+				strcpy(payload->mCharacterName, pName.c_str());
+				strcpy(payload->mLastName, pLastName.c_str());
+
+				return packet;
+			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			uint32 mApproved = 0;
 			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
@@ -356,6 +373,28 @@ namespace Payload {
 			uint32 mGold = 0;
 			uint32 mSilver = 0;
 			uint32 mCopper = 0;
+		};
+
+		struct LootItem : Fixed<LootItem> {
+			uint32 mCorpseSpawnID = 0;
+			uint32 mLooterSpawnID = 0;
+			uint32 mSlotID = 0;
+			uint32 mAutoLoot = 0;
+			uint32 mUnknown0 = 0; // Right0, 
+			String _debug() const {
+				StringStream ss;
+				ss << "[LootItem] ";
+				PRINT_MEMBER(mCorpseSpawnID);
+				PRINT_MEMBER(mLooterSpawnID);
+				PRINT_MEMBER(mSlotID);
+				PRINT_MEMBER(mAutoLoot);
+				PRINT_MEMBER(mUnknown0);
+				return ss.str();
+			}
+			/*
+			C->S OP_LootItem
+			S->C OP_LootItem (echo first packet).
+			*/
 		};
 		
 		// C->S

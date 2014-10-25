@@ -345,7 +345,7 @@ public:
 	inline Character* getLooter() const { return mLooter; }
 	inline void setLooter(Character* pCharacter) { mLooter = pCharacter; }
 
-	const bool hasItems() const { return false; } // TODO: Items
+	virtual const bool hasItems() const { return false; } // TODO: Items
 
 	inline void destroy() { mDestroy = true; }
 	inline const bool getDestroy() const { return mDestroy; }

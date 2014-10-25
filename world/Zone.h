@@ -128,6 +128,7 @@ public:
 
 	void handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID);
 	void handleEndLootRequest(Character* pCharacter);
+	void handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pSlotID);
 
 	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);

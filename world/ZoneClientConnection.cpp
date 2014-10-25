@@ -418,6 +418,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_EndLootRequest:
 		_handleEndLootRequest(pPacket);
+		break;
 	case OP_LootItem:
 		_handleLootItem(pPacket);
 		break;
@@ -2434,28 +2435,28 @@ void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(Consider::sizeCheck(pPacket->size));
+	EXPECTED(Consider::sizeCheck(pPacket));
 	
-	auto payload = Consider::convert(pPacket->pBuffer);
+	auto payload = Consider::convert(pPacket);
 	mZone->handleConsider(mCharacter, payload->mTargetSpawnID);
 }
 
 void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(Consider::sizeCheck(pPacket->size));
+	EXPECTED(Consider::sizeCheck(pPacket));
 
-	auto payload = Consider::convert(pPacket->pBuffer);
+	auto payload = Consider::convert(pPacket);
 	mZone->handleConsiderCorpse(mCharacter, payload->mTargetSpawnID);
 }
 
 void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(Surname::sizeCheck(pPacket->size));
+	EXPECTED(Surname::sizeCheck(pPacket));
 	EXPECTED(mCharacter->getLevel() >= Limits::Character::MIN_LEVEL_SURNAME); // Hacker!
 
-	auto payload = Surname::convert(pPacket->pBuffer);
+	auto payload = Surname::convert(pPacket);
 
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(characterName));
@@ -2478,15 +2479,9 @@ void ZoneClientConnection::sendSurnameApproval(const bool pSuccess) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_Surname, Surname::size());
-	auto payload = Surname::convert(outPacket->pBuffer);
-
-	strcpy(payload->mCharacterName, mCharacter->getName().c_str());
-	strcpy(payload->mLastName, mCharacter->getLastName().c_str());
-	payload->mApproved = pSuccess ? 1 : 0;
-
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = Surname::construct(pSuccess ? 1 : 0, mCharacter->getName(), mCharacter->getLastName());
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleGMLastName(const EQApplicationPacket* pPacket) {
@@ -2696,22 +2691,34 @@ void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_Consider, Consider::size());
-	auto payload = Consider::convert(outPacket->pBuffer);
-	payload->mSpawnID = mCharacter->getSpawnID();
-	payload->mTargetSpawnID = pSpawnID;
-	payload->mFaction = 5;
-	payload->mTargetLevel = 13;
+	//auto outPacket = new EQApplicationPacket(OP_Consider, Consider::size());
+	//auto payload = Consider::convert(outPacket->pBuffer);
+	//payload->mSpawnID = mCharacter->getSpawnID();
+	//payload->mTargetSpawnID = pSpawnID;
+	//payload->mFaction = 5;
+	//payload->mTargetLevel = 13;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = Consider::construct(mCharacter->getSpawnID(), pSpawnID);
+	sendPacket(packet);
+	safe_delete(packet);
 }
 
 void ZoneClientConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->isLooting());
+	EXPECTED(LootItem::sizeCheck(pPacket));
+	
+	auto payload = LootItem::convert(pPacket);
+	Log::info(payload->_debug());
 
-	// TODO:
+	EXPECTED(payload->mLooterSpawnID == mCharacter->getSpawnID());
+	EXPECTED(payload->mCorpseSpawnID == mCharacter->getLootingCorpse()->getSpawnID());
+
+	// Send required reply(echo).
+	sendPacket(const_cast<EQApplicationPacket*>(pPacket));
+
+	mZone->handleLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
 }
 
 void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
@@ -3008,6 +3015,8 @@ void ZoneClientConnection::sendCrystals() {
 void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
+	auto raw = static_cast<EQRawApplicationPacket*>(const_cast<EQApplicationPacket*>(pPacket));
+	Log::info("OpCode= " + std::to_string(raw->GetRawOpcode()));
 }
 
 void ZoneClientConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)

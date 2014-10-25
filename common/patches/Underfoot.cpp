@@ -1834,17 +1834,17 @@ ENCODE(OP_TraderBuy) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_LootItem) {
-
-	ENCODE_LENGTH_EXACT(LootingItem_Struct);
-	SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
-	OUT(lootee);
-	OUT(looter);
-	eq->slot_id = emu->slot_id + 1;
-	OUT(auto_loot);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_LootItem) {
+//
+//	ENCODE_LENGTH_EXACT(LootingItem_Struct);
+//	SETUP_DIRECT_ENCODE(LootingItem_Struct, structs::LootingItem_Struct);
+//	OUT(lootee);
+//	OUT(looter);
+//	eq->slot_id = emu->slot_id + 1;
+//	OUT(auto_loot);
+//
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_TributeItem) {
 	ENCODE_LENGTH_EXACT(TributeItem_Struct);
@@ -3035,16 +3035,16 @@ DECODE(OP_TraderBuy)
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_LootItem) {
-	DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
-	SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
-	IN(lootee);
-	IN(looter);
-	emu->slot_id = eq->slot_id - 1;
-	IN(auto_loot);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_LootItem) {
+//	DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
+//	SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
+//	IN(lootee);
+//	IN(looter);
+//	emu->slot_id = eq->slot_id - 1;
+//	IN(auto_loot);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_TributeItem) {
 	DECODE_LENGTH_EXACT(structs::TributeItem_Struct);

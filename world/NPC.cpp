@@ -61,3 +61,9 @@ void NPC::onDestroy() {
 		setLooter(nullptr);
 	}
 }
+
+void NPC::onLootBegin() {
+	// Remove any null items from mLootItems
+	// These occur from previous looting.
+	mLootItems.erase(std::remove(begin(mLootItems), end(mLootItems), nullptr), end(mLootItems));
+}

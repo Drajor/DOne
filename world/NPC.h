@@ -41,14 +41,19 @@ public:
 	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
 
 	inline const bool isBanker() const { return getClass() == 40; }
+
+	void onLootBegin();
 	void addLootItem(Item* pItem) { mLootItems.push_back(pItem); }
-	std::list<Item*>& getLootItems() { return mLootItems; }
+	Item* getLootItem(const uint32 pSlot) { return mLootItems[pSlot]; }
+	std::vector<Item*>& getLootItems() { return mLootItems; }
+	inline const bool hasItems() const { return !mLootItems.empty(); }
+	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
 private:
 	int32 mCopper = 0;
 	int32 mSilver = 0;
 	int32 mGold = 0;
 	int32 mPlatinum = 0;
-	std::list<Item*> mLootItems;
+	std::vector<Item*> mLootItems;
 
 	SpawnPoint* mSpawnPoint = nullptr;
 };
