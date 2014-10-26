@@ -1204,7 +1204,7 @@ void Zone::handleConsider(Character* pCharacter, const uint32 pSpawnID) {
 	Actor* actor = pCharacter->findVisible(pSpawnID);
 	EXPECTED(actor);
 
-	pCharacter->getConnection()->sendConsiderResponse(pSpawnID);
+	pCharacter->getConnection()->sendConsiderResponse(pSpawnID, 1); // TODO: Message
 }
 
 void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {

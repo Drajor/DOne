@@ -225,24 +225,38 @@ namespace Payload {
 		};
 
 		// C<->S
-		// Yes the Client sends this for some magical reason.
 		struct Consider : FixedT<Consider, OP_Consider> {
-			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pTargetSpawnID) {
+			enum Message { Ally = 1, Warmly = 2, Kindly = 3, Amiably = 4, Indifferent = 5, Scowls = 6, Threateningly = 7, Dubiously = 8, Apprehensively = 9  };
+			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pTargetSpawnID, const uint32 pMessage) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
 				payload->mTargetSpawnID = pTargetSpawnID;
+				payload->mMessage = pMessage;
 
 				return packet;
 			}
+			String _debug() const {
+				StringStream ss;
+				ss << "[Consider] ";
+				PRINT_MEMBER(mSpawnID);
+				PRINT_MEMBER(mTargetSpawnID);
+				PRINT_MEMBER(mMessage);
+				PRINT_MEMBER(mTargetLevel);
+				PRINT_MEMBER((int32)mIsPVP);
+				PRINT_MEMBER((int32)mUnknown0);
+				PRINT_MEMBER((int32)mUnknown1);
+				PRINT_MEMBER((int32)mUnknown2);
+				return ss.str();
+			}
 			uint32 mSpawnID = 0;
 			uint32 mTargetSpawnID = 0;
-			uint32 mFaction = 0;
-			uint32 mTargetLevel = 1;
-			int32 cur_hp = 0; // Ignore.
-			int32 max_hp = 0; // Ignore.
-			uint8 mIsPVP; // 0/1
-			uint8 mUnknown0[3];
+			uint32 mMessage = Message::Indifferent;
+			uint32 mTargetLevel = 0;
+			uint8 mIsPVP = 0;
+			uint8 mUnknown0 = 0;
+			uint8 mUnknown1 = 0;
+			uint8 mUnknown2 = 0;
 		};
 
 		// C<->S

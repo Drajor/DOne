@@ -1721,16 +1721,16 @@ ENCODE(OP_LogServer) {
  	FINISH_ENCODE();
 }
 
-ENCODE(OP_Consider) {
-	ENCODE_LENGTH_EXACT(Consider_Struct);
-	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
-	OUT(playerid);
-	OUT(targetid);
-	OUT(faction);
-	OUT(level);
-	OUT(pvpcon);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_Consider) {
+//	ENCODE_LENGTH_EXACT(Consider_Struct);
+//	SETUP_DIRECT_ENCODE(Consider_Struct, structs::Consider_Struct);
+//	OUT(playerid);
+//	OUT(targetid);
+//	OUT(faction);
+//	OUT(level);
+//	OUT(pvpcon);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Action) {
 	ENCODE_LENGTH_EXACT(Action_Struct);
@@ -2806,19 +2806,19 @@ DECODE(OP_ItemLinkClick) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
-DECODE(OP_Consider) {
-	DECODE_LENGTH_EXACT(structs::Consider_Struct);
-	SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
-	IN(playerid);
-	IN(targetid);
-	IN(faction);
-	IN(level);
-	//emu->cur_hp = 1;
-	//emu->max_hp = 2;
-	//emu->pvpcon = 0;
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
+//DECODE(OP_Consider) {
+//	DECODE_LENGTH_EXACT(structs::Consider_Struct);
+//	SETUP_DIRECT_DECODE(Consider_Struct, structs::Consider_Struct);
+//	IN(playerid);
+//	IN(targetid);
+//	IN(faction);
+//	IN(level);
+//	//emu->cur_hp = 1;
+//	//emu->max_hp = 2;
+//	//emu->pvpcon = 0;
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_ShopPlayerBuy)
 {

@@ -1249,15 +1249,15 @@ struct CombatDamage_Struct
 ** Consider Struct
 ** Length: 20 Bytes
 */
-struct Consider_Struct{
-/*000*/ uint32	playerid;               // PlayerID
-/*004*/ uint32	targetid;               // TargetID
-/*008*/ uint32	faction;                // Faction
-/*012*/ uint32	level;					// Level
-/*016*/ uint8	pvpcon;					// Pvp con flag 0/1
-/*017*/ uint8	unknown017[3];			//
-/*020*/
-};
+//struct Consider_Struct{
+///*000*/ uint32	playerid;               // PlayerID
+///*004*/ uint32	targetid;               // TargetID
+///*008*/ uint32	faction;                // Faction
+///*012*/ uint32	level;					// Level
+///*016*/ uint8	pvpcon;					// Pvp con flag 0/1
+///*017*/ uint8	unknown017[3];			//
+///*020*/
+//};
 
 /*
 ** Spawn Death Blow

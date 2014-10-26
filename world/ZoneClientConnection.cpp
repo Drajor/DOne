@@ -2438,6 +2438,7 @@ void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	EXPECTED(Consider::sizeCheck(pPacket));
 	
 	auto payload = Consider::convert(pPacket);
+	Log::info(payload->_debug());
 	mZone->handleConsider(mCharacter, payload->mTargetSpawnID);
 }
 
@@ -2687,18 +2688,11 @@ void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, u
 	safe_delete(outPacket);
 }
 
-void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID) {
+void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID, const uint32 pMessage) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	//auto outPacket = new EQApplicationPacket(OP_Consider, Consider::size());
-	//auto payload = Consider::convert(outPacket->pBuffer);
-	//payload->mSpawnID = mCharacter->getSpawnID();
-	//payload->mTargetSpawnID = pSpawnID;
-	//payload->mFaction = 5;
-	//payload->mTargetLevel = 13;
-
-	auto packet = Consider::construct(mCharacter->getSpawnID(), pSpawnID);
+	auto packet = Consider::construct(mCharacter->getSpawnID(), pSpawnID, pMessage);
 	sendPacket(packet);
 	safe_delete(packet);
 }
