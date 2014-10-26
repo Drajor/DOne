@@ -396,6 +396,7 @@ public:
 
 	void damage(const int32 pAmount);
 
+	const TTimer& getDecayTimer() const { return mDecayTimer; }
 protected:
 
 	// Returns a number of type T between 0-100 representing current HP percentage.
@@ -412,7 +413,7 @@ protected:
 	int32 mAnimation = 0;
 
 	Character* mLooter = nullptr;
-	Timer mDecayTimer;
+	TTimer mDecayTimer;
 	Payload::ActorData mActorData;
 	Zone* mZone = nullptr;
 

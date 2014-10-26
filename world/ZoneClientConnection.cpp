@@ -2448,6 +2448,7 @@ void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPac
 	EXPECTED(Consider::sizeCheck(pPacket));
 
 	auto payload = Consider::convert(pPacket);
+	Log::info(payload->_debug());
 	mZone->handleConsiderCorpse(mCharacter, payload->mTargetSpawnID);
 }
 

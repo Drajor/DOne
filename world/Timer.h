@@ -29,10 +29,13 @@ public:
 	inline const uint64 remaining() { return mNext - mCurrentTime; }
 	// Returns the number of complete seconds remaining.
 	inline const uint64 secondsRemaining() { return static_cast<uint64>(std::floor(remaining() / 1000)); }
+	inline const uint64 secondsRemainingX() { return static_cast<uint64>(secondsRemaining() % 60); }
 	// Returns the number of complete minutes remaining.
 	inline const uint64 minutesRemaining() { return static_cast<uint64>(std::floor(remaining() / 1000 / 60)); }
+	inline const uint64 minutesRemainingX() { return static_cast<uint64>(minutesRemaining() % 60); }
 	// Returns the number of complete hours remaining.
 	inline const uint64 hoursRemaining() { return static_cast<uint64>(std::floor(remaining() / 1000 / 60 / 60)); }
+	inline const uint64 hoursRemainingX() { return static_cast<uint64>(hoursRemaining() % 24); }
 	// Returns the number of complete days remaining.
 	inline const uint64 daysRemaining() { return static_cast<uint64>(std::floor(remaining() / 1000 / 60 / 60 / 24)); }
 private:

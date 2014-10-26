@@ -2,7 +2,6 @@
 #include "Utility.h"
 
 Actor::Actor() {
-	mDecayTimer.Disable();
 }
 
 void Actor::setTarget(Actor* pActor) {

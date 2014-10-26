@@ -31,7 +31,8 @@ const bool NPC::onDeath() {
 	setHPPercent(0);
 	setActorType(AT_NPC_CORPSE);
 	setName(getName() + "'s corpse");
-	mDecayTimer.Start(DEFAULT_CORPSE_ROT_TIME * 1000);
+	mDecayTimer.setStep(DEFAULT_CORPSE_ROT_TIME * 1000);
+	mDecayTimer.start();
 	return true;
 }
 
@@ -42,7 +43,7 @@ const bool NPC::update() {
 	// Check: Is NPC dead?
 	if (isCorpse()) {
 		// Corpse is about to decay, clean up if someone is looting.
-		if (mDecayTimer.Check()) {
+		if (mDecayTimer.check()) {
 			return false;
 		}
 		return true;

@@ -1212,8 +1212,23 @@ void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
 
 	Actor* actor = pCharacter->findVisible(pSpawnID);
 	EXPECTED(actor);
+	EXPECTED(actor->isCorpse());
 
-	pCharacter->getConnection()->sendSimpleMessage(MessageType::Aqua, StringID::CORPSE_DECAY1, "1", "1");
+	if (actor->isNPCCorpse()) {
+		auto decayTimer = actor->getDecayTimer();
+		auto minutes = decayTimer.minutesRemainingX();
+		auto seconds = decayTimer.secondsRemainingX();
+		pCharacter->getConnection()->sendSimpleMessage(MessageType::Aqua, StringID::CORPSE_DECAY1, std::to_string(minutes), std::to_string(seconds));
+	}
+
+	
+	/*
+	491 This corpse's resurrection time will expire in %1 hour(s) %2 minute(s) %3 seconds.
+	492 This corpse's resurrection time will expire in %1 minute(s) %2 seconds.
+	493 This corpse will decay in %1 day(s) %2 hour(s) %3 minute(s) %4 seconds.
+	494 This corpse will decay in %1 hour(s) %2 minute(s) %3 seconds.
+	495 This corpse will decay in %1 minute(s) %2 seconds.
+	*/
 }
 
 const bool Zone::checkAuthentication(Character* pCharacter) {

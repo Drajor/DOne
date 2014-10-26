@@ -37,7 +37,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		damage = AttackMiss;
 	}
 	else {
-		damage = Random::make<int32>(5, 15);
+		damage = Random::make<int32>(50, 70);
 	}
 
 	uint32 criticalChance = 50;
