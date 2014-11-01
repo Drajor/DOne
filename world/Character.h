@@ -51,7 +51,7 @@ public:
 
 	inline Inventoryy* getInventory() const { return mInventory; }
 	
-	bool onZoneIn();
+	bool onEnterZone();
 	bool onZoneOut();
 	const bool onDeath() { return true; };
 	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);

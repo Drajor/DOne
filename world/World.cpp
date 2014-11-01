@@ -84,7 +84,7 @@ void World::_handleIncomingClientConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		mLog.error("TODO: Check Bans.");
-		mLog.info("Incoming Connection");
+		mLog.info("Connection from " + incomingStreamInterface->GetRemoteIP());
 		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface));
 	}
 }

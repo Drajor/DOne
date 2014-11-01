@@ -65,7 +65,7 @@ public:
 	void addActor(Actor* pActor);
 	void removeActor(Actor* pActor);
 
-	void notifyCharacterZoneIn(Character* pCharacter);
+	void onEnterZone(Character* pCharacter);
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
 	void handleAFK(Character* pCharacter);
@@ -86,7 +86,7 @@ public:
 	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
-	void handleTarget(Character* pCharacter, uint16 pSpawnID);
+	void handleTarget(Character* pCharacter, const uint16 pSpawnID);
 	void handleFaceChange(Character* pCharacter);
 
 	void handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill);

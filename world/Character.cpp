@@ -181,7 +181,7 @@ bool Character::initialise() {
 	return true;
 }
 
-bool Character::onZoneIn() {
+bool Character::onEnterZone() {
 	setZoning(false);
 	_processMessageQueue();
 	return true;

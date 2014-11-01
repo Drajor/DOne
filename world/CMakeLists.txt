@@ -41,6 +41,7 @@ SET(world_sources
 	NPCFactory.cpp
 	CombatSystem.cpp
 	LootAllocator.cpp
+	EventDispatcher.cpp
 )
 
 SET(world_headers
@@ -87,6 +88,7 @@ SET(world_headers
 	TimeUtility.h
 	CombatSystem.h
 	LootAllocator.h
+	EventDispatcher.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

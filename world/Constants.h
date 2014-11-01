@@ -1335,3 +1335,21 @@ struct WhoFilter {
 //	/*084*/	uint32	guildid;
 //	/*088*/	uint8	unknown076[64];
 //	/*152*/	uint32	type;		// New for SoF. 0 = /who 3 = /who
+
+enum Event : uint32 {
+	EnterZone,
+	LeaveZone,
+	Camped,
+	ELinkDead,
+
+	Spawn,
+	Despawn,
+
+	Target,
+	Say,
+	Shout,
+	Dead,
+
+	EventMax
+};
+//static uint32 EventMax = Event::EventMax;

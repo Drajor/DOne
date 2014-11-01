@@ -27,6 +27,7 @@
 #include "LootAllocator.h"
 #include "Item.h"
 #include "Inventory.h"
+#include "EventDispatcher.h"
 
 Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
 	mPort(pPort),
@@ -228,10 +229,11 @@ void Zone::_updatePreConnections() {
 					// Add Character to zone.
 					mCharacters.push_back(character);
 					mActors.push_back(character);
+
 					// Tell everyone else.
-					notifyCharacterZoneIn(character);
+					onEnterZone(character);
 					// Let Character do what it needs to.
-					character->onZoneIn();
+					character->onEnterZone();
 				}
 				else {
 					// This should never occur.
@@ -373,12 +375,17 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->getConnection()->sendPosition();
 }
 
-void Zone::notifyCharacterZoneIn(Character* pCharacter) {
+void Zone::onEnterZone(Character* pCharacter) {
 	EXPECTED(pCharacter);
 	EXPECTED(mScene);
 
 	// Add Character to Scene.
 	mScene->add(pCharacter);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::EnterZone, pCharacter);
+
+	Log::info("Character " + pCharacter->getName() + " entered Zone");
 }
 
 void Zone::handleActorPositionChange(Actor* pActor) {
@@ -423,11 +430,23 @@ void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType
 }
 
 void Zone::handleSay(Character* pCharacter, const String pMessage) {
+	EXPECTED(pCharacter);
+
+	// Send to other Characters.
 	_sendChat(pCharacter, ChannelID::CH_SAY, pMessage);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Say, pCharacter);
 }
 
 void Zone::handleShout(Character* pCharacter, const String pMessage) {
+	EXPECTED(pCharacter);
+
+	// Send to other Characters.
 	_sendChat(pCharacter, ChannelID::CH_SHOUT, pMessage);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Shout, pCharacter);
 }
 
 void Zone::handleAuction(Character* pCharacter, const String pMessage) {
@@ -686,6 +705,9 @@ void Zone::_onLeaveZone(Character* pCharacter) {
 
 	if (pCharacter->hasRaid())
 		RaidManager::getInstance().onLeaveZone(pCharacter);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::LeaveZone, pCharacter);
 }
 
 void Zone::_onCamp(Character* pCharacter) {
@@ -699,6 +721,9 @@ void Zone::_onCamp(Character* pCharacter) {
 
 	if (pCharacter->hasRaid())
 		RaidManager::getInstance().onCamp(pCharacter);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Camped, pCharacter);
 }
 
 void Zone::_onLinkdead(Character* pCharacter) {
@@ -734,9 +759,12 @@ void Zone::_onLinkdead(Character* pCharacter) {
 		RaidManager::getInstance().onLinkdead(pCharacter);
 
 	handleLinkDead(pCharacter);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::ELinkDead, pCharacter);
 }
 
-void Zone::handleTarget(Character* pCharacter, uint16 pSpawnID) {
+void Zone::handleTarget(Character* pCharacter, const uint16 pSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
@@ -754,6 +782,9 @@ void Zone::handleTarget(Character* pCharacter, uint16 pSpawnID) {
 	auto packet = ActorHPUpdate::construct(actor->getHPPercent(), actor->getHPPercent());
 	pCharacter->getConnection()->sendPacket(packet);
 	safe_delete(packet);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Target, pCharacter);
 }
 
 Actor* Zone::findActor(const SpawnID pSpawnID) {
@@ -983,6 +1014,9 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 			_addRespawn(spawnPoint);
 		}
 
+		// Dispatch Event.
+		EventDispatcher::getInstance().event(Event::Dead, npc);
+
 		// Check: Empty corpse.
 		if (!npc->hasCurrency() && !npc->hasItems()) {
 			pActor->destroy();
@@ -991,19 +1025,12 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 	}
 	// Character Dead.
 	else {
-
+		Character* character = pActor->cast<Character*>(pActor);
+		// Dispatch Event.
+		EventDispatcher::getInstance().event(Event::Dead, character);
 	}
 
 	pActor->onDeath();
-
-	//Death_Struct* d = (Death_Struct*)app->pBuffer;
-	//d->spawn_id = getID();
-	//d->killer_id = killerMob ? killerMob->getID() : 0;
-	//d->bindzoneid = 0;
-	//d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
-	//d->attack_skill = SkillDamageTypes[attack_skill];
-	//d->damage = damage;
-	//app->priority = 6;
 }
 
 void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnID) {
