@@ -1,11 +1,50 @@
 #include "LogSystem.h"
 #include <windows.h>
 #include <stdio.h>
+#include <fstream>
 
 #define PRINT_LOG
 #ifdef PRINT_LOG
 #include "Utility.h"
 #endif
+
+class LogFile {
+public:
+	const bool open(const String& pFileName) {
+		if (mInitialised) return false;
+
+		try {
+			mLogFile.open(pFileName, std::fstream::out);
+		}
+		catch (...) {
+			return false;
+		}
+		if (!mLogFile.good()) return false;
+
+		return true;
+	}
+	inline void close() { mLogFile.close(); }
+	inline void write(const String& pMessage) {
+		auto t = std::time(nullptr);
+		auto tm = *std::localtime(&t);
+		mLogFile << std::put_time(&tm, "(%d-%m-%Y %H-%M-%S) ") << pMessage << std::endl;
+	}
+private:
+	std::fstream mLogFile;
+	bool mInitialised = false;
+};
+static LogFile logFile;
+
+bool Log::start(const String& pFileName) {
+	if (!logFile.open(pFileName)) return false;
+	
+	logFile.write("Log Started.");	
+	return true;
+}
+void Log::end(){
+	logFile.write("Log Ended.");
+	logFile.close();
+}
 
 enum ConsoleColours : WORD {
 	CC_BLUE = 1,
@@ -35,4 +74,5 @@ void Log::commonlog(String pMessage) {
 #ifdef PRINT_LOG
 	Utility::print(pMessage);
 #endif
+	logFile.write(pMessage);
 }

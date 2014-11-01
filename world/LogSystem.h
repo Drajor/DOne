@@ -3,6 +3,9 @@
 #include "Constants.h"
 
 namespace Log {
+	bool start(const String& pFileName);
+	void end();
+
 	void status(String pMessage);
 	void info(String pMessage);
 	void error(String pMessage);

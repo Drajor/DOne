@@ -177,15 +177,26 @@ void World::reserveCharacterName(const uint32 pWorldAccountID, const String pCha
 }
 
 bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterName) {
-	// Verify that character with pCharacterName belongs to pWorldAccountID.
-	const bool isOwner = AccountManager::getInstance().checkOwnership(pAccountID, pCharacterName);
-	EXPECTED_BOOL(isOwner);
-	return AccountManager::getInstance().deleteCharacter(pAccountID, pCharacterName);
-}
+	mLog.info("Delete Character request from Account(" + std::to_string(pAccountID) + ") Name(" + pCharacterName + ")");
 
-//const bool World::addZoneAuthentication(ClientAuthentication& pAuthentication, String pCharacterName, ZoneID pZoneID, uint32 pInstanceID) {
-//	return ZoneManager::getInstance().addAuthentication(pAuthentication, pCharacterName, pZoneID, pInstanceID);
-//}
+	// Check: Character to Account.
+	const bool isOwner = AccountManager::getInstance().checkOwnership(pAccountID, pCharacterName);
+	if (!isOwner) {
+		mLog.error("Ownership test failed!");
+		return false;
+	}
+	mLog.info("Ownership test passed!");
+
+	// Check: Delete succeeds.
+	const bool isDeleted = AccountManager::getInstance().deleteCharacter(pAccountID, pCharacterName);
+	if (!isDeleted) {
+		mLog.error("Delete Failed!");
+		return false;
+	}
+
+	mLog.info("Delete Success!");
+	return true;
+}
 
 ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
 	for (auto i : mAuthenticatedClients) {
@@ -205,26 +216,6 @@ bool World::ensureAccountExists(const uint32 pAccountID, const String& pAccountN
 	return true;
 }
 
-//const bool World::getCharacterZoneTransfer(const String& pCharacterName, ZoneTransfer& pZoneTransfer) {
-//	for (auto i : mZoneTransfers) {
-//		if (i.mCharacterName == pCharacterName) {
-//			pZoneTransfer = i;
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-//
-//void World::removeZoneTransfer(const String& pCharacterName) {
-//	for (auto i = mZoneTransfers.begin(); i != mZoneTransfers.end(); i++){
-//		if (i->mCharacterName == pCharacterName) {
-//			mZoneTransfers.erase(i);
-//			return;
-//		}
-//	}
-//}
-
 const bool World::handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning) {
 	EXPECTED_BOOL(pConnection);
 
@@ -236,13 +227,6 @@ const bool World::handleEnterWorld(WorldClientConnection* pConnection, const Str
 
 bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCharacterName) {
 	EXPECTED_BOOL(pConnection);
-
-	//ZoneTransfer zoneTransfer;
-	//EXPECTED_BOOL(getCharacterZoneTransfer(pCharacterName, zoneTransfer));
-	//removeZoneTransfer(pCharacterName);
-
-	//const uint16 zoneID = zoneTransfer.mToZoneID;
-	//const uint16 instanceID = zoneTransfer.mToInstanceID;
 
 	Character* character = ZoneManager::getInstance().getZoningCharacter(pCharacterName);
 	EXPECTED_BOOL(character);
@@ -301,20 +285,3 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 
 	return true;
 }
-
-//const bool World::hasZoningCharacter(const uint32 pAccountID) {
-//	for (auto i : mZoneTransfers) {
-//		if (i.mAccountID == pAccountID)
-//			return true;
-//	}
-//	return false;
-//}
-//
-//String World::getZoningCharacterName(const uint32 pAccountID) {
-//	for (auto i : mZoneTransfers) {
-//		if (i.mAccountID == pAccountID)
-//			return i.mCharacterName;
-//	}
-//
-//	return "";
-//}

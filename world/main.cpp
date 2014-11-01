@@ -3,6 +3,7 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 
+#include "LogSystem.h"
 #include "World.h"
 #include "ZoneData.h"
 #include "GuildManager.h"
@@ -24,6 +25,7 @@ uint64 TTimer::mCurrentTime = 0;
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
+	EXPECTED_MAIN(Log::start("logs/" + std::to_string(Time::nowMilliseconds()) + ".log"));
 	//system("pause");
 
 	RegisterExecutablePlatform(ExePlatformWorld);
@@ -55,5 +57,6 @@ int main(int argc, char** argv)  {
 	}
 	Log::status("World : Shutting down");
 
+	Log::end();
 	return 0;
 }
