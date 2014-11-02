@@ -25,6 +25,11 @@ struct ItemData {
 		memset(mBardName, 0, sizeof(mBardName));
 
 		strcpy(mIDFile, "IT63");
+
+		memset(mOrnamentationIDFile, 0, sizeof(mOrnamentationIDFile));
+
+		mOrnamentationIcon = 1000;
+		strcpy(mOrnamentationIDFile, "IT148");
 	}
 
 	// BEGIN chunk0
@@ -46,10 +51,6 @@ struct ItemData {
 	struct EvolvingItem {
 		EvolvingItem() {
 			memset(__Unknown2, 0, sizeof(__Unknown2));
-			memset(mIDFile, 0, sizeof(mIDFile));
-
-			mIcon = 1000;
-			strcpy(mIDFile, "IT148");
 		}
 		uint8 __Unknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
 		int32 mCurrentLevel = 0; // Specified by Item.
@@ -57,17 +58,19 @@ struct ItemData {
 		uint8 mActive = 0; // 1 = ON
 		int32 mMaxLevel = 0;
 		uint8 __Unknown2[4];
-		// Ornamentation
-		char mIDFile[100];
-		uint16 mIcon = 0;
+
 	};
 	EvolvingItem mEvolvingItem;
+
+	// Ornamentation
+	char mOrnamentationIDFile[100];
+	uint16 mOrnamentationIcon = 0;
 
 	// Changing either __Unknown5 or __Unknown6 sets the icon to the pearl necklace.
 	uint8 __Unknown5 = 0; // Matches second last byte in Payload::Zone::ItemLink
 	uint8 __Unknown6 = 0; // Matches last byte in Payload::Zone::ItemLink
 
-	uint8 mCopied = 1; // 0 = OFF, 1 = ON
+	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
 
@@ -169,7 +172,7 @@ struct ItemData {
 		uint8 mVisible = 1;
 		uint8 unknown = 0;
 	};
-	AugmentationSlot augslots[5];
+	AugmentationSlot mAugmentationSlots[5];
 
 	uint32 mLDONPointType = 0;
 	uint32 mLDONTheme = 0;

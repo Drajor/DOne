@@ -55,6 +55,8 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makeShield(0, Rarity::Common), 24);
 	put(ItemGenerator::makeHead(0, Rarity::Common), 26);
 	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
+	put(ItemGenerator::makeChest(0, Rarity::Common), 28);
+	put(ItemGenerator::makeAugmentation(0, Rarity::Common), 29);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 5.0), 27);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 6.0), 28);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 7.0), 29);

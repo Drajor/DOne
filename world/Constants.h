@@ -301,6 +301,59 @@ namespace ItemType {
 		Drink = 15,
 
 		TwoHandPierce = 35,
+
+		Augmentation = 54,
+	};
+}
+
+// dbstr_us.txt
+// 1^16^1 (General: Single Stat)
+// 2^16^2 (General: Multiple Stat)
+// 3^16^3 (General: Spell Effect)
+// 4^16^4 (Weapon: General)
+// 5^16^5 (Weapon: Elem Damage)
+// 6^16^6 (Weapon: Base Damage)
+// 7^16^7 (General: Group)
+// 8^16^8 (General: Raid)
+// 9^16^9 (General: Dragons Points)
+// 10^16^10 (Crafted: Common)
+// 11^16^11 (Crafted: Group)
+namespace AugmentationSlotType {
+	enum : uint32 {
+		SingleStat = 1, // "(General: Single Stat)"
+		MultipleStat = 2, // "(General: Multiple Stat)"
+		SpellEffect = 3, // "(General: Spell Effect)"
+		Weapon = 4, // "(Weapon: General)"
+		ElementalDamage = 5, // "(Weapon: Elem Damage)"
+		BaseDamage = 6, // "(Weapon: Base Damage)"
+		Group = 7, // "(General: Group)"
+		Raid = 8, // "(General: Raid)"
+		Dragons = 9, // "(General: Dragons Points)"
+		CraftedCommon = 10, // "(Crafted: Common)"
+		CraftedGroup = 11, // "(Crafted: Group)"
+	};
+}
+
+namespace AugmentationRestriction {
+	enum : uint32 {
+		None,
+		Armor = 1, // "Armor Only"
+		Weapons = 2, // "Weapons Only"
+		OneHandWeapons = 3, // "1h Weapons Only"
+		TwoHandWeapons = 4, // "2h Weapons Only"
+		OneHandSlash = 5, // "1h Slash Only"
+		OneHandBlunt = 6, // "1h Blunt Only"
+		Piercing = 7, // "Piercing Only"
+		TwoHandSlash = 8, // "2h Slash Only"
+		TwoHandBlunt = 9, // "2h Blunt Only"
+		TwoHandPierce = 10, // "2h Pierce Only"
+		Bow = 11, // "Bows Only"
+		Shield = 12, // "Shields Only"
+		HandtoHand = 13, // "Hand to Hand Only"
+		/*
+		8052 1h Slash, 1h Blunt, or Hand to Hand Only
+		9200 1h Blunt or Hand to Hand Only
+		*/
 	};
 }
 

@@ -43,6 +43,17 @@ Item* ItemGenerator::_makeBaseItem() {
 	return new Item(data);
 }
 
+Item* ItemGenerator::_makeBaseArmorItem() {
+	auto data = ItemDataStore::getInstance().getNew();
+	data->mAugmentationSlots[0].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[1].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[2].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[3].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[4].mType = AugmentationSlotType::MultipleStat;
+
+	return new Item(data);
+}
+
 Item* ItemGenerator::makeRandom(const uint8 pLevel, const Rarity pRarity) {
 	const uint32 itemType = Random::make<uint32>(RandomItemType::Max);
 
@@ -385,7 +396,7 @@ Item* ItemGenerator::makeBow(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 
 	item->setName("Head Item");
 	item->setIcon(746);
@@ -408,7 +419,7 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 
 	item->setSlots(EquipSlots::Chest);
 	item->setIsMagic(true);
@@ -423,7 +434,7 @@ Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeArms(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 
 	item->setSlots(EquipSlots::Arms);
 	item->setIsMagic(true);
@@ -440,7 +451,7 @@ Item* ItemGenerator::makeArms(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeWrists(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 
 	item->setSlots(EquipSlots::Wrists);
 	item->setIsMagic(true);
@@ -455,7 +466,7 @@ Item* ItemGenerator::makeWrists(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeLegs(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 
 	item->setSlots(EquipSlots::Legs);
 	item->setIsMagic(true);
@@ -470,7 +481,7 @@ Item* ItemGenerator::makeLegs(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeHands(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 	
 	item->setSlots(EquipSlots::Hands);
 	item->setIsMagic(true);
@@ -485,7 +496,7 @@ Item* ItemGenerator::makeHands(const uint8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeFeet(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem();
 	
 	item->setSlots(EquipSlots::Feet);
 	item->setIsMagic(true);
@@ -594,6 +605,19 @@ Item* ItemGenerator::makeWaist(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsMagic(true);
 	
 	item->setName("Waist");
+
+	return item;
+}
+
+Item* ItemGenerator::makeAugmentation(const uint8 pLevel, const Rarity pRarity) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName("Augmentation");
+	item->setIcon(2185);
+	item->setAugmentationType(AugmentationSlotType::MultipleStat);
+	item->setAugmentationRestriction(AugmentationRestriction::None);
+	item->setHealth(100);
+	item->setItemType(ItemType::Augmentation);
 
 	return item;
 }

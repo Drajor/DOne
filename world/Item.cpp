@@ -37,6 +37,7 @@ const uint32 Item::_getDataSize() const {
 	uint32 result = sizeof(ItemData);
 
 	// Remove the maximum size of variable sized attributes.
+	result -= sizeof(mItemData->mOrnamentationIDFile);
 	result -= sizeof(mItemData->mName);
 	result -= sizeof(mItemData->mLore);
 	result -= sizeof(mItemData->mIDFile);
@@ -49,13 +50,15 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mScrollName);
 	result -= sizeof(mItemData->mBardName);
 
-	if (isEvolvingItem())
-		result -= sizeof(mItemData->mEvolvingItem.mIDFile);
-	else
+	//if (isEvolvingItem())
+	//	result -= sizeof(mItemData->mEvolvingItem.mOrnamentationIDFile);
+	//else
+	//	result -= sizeof(ItemData::EvolvingItem);
+	if (!isEvolvingItem())
 		result -= sizeof(ItemData::EvolvingItem);
-		
 
 	// Add variable strings
+	result += strlen(mItemData->mOrnamentationIDFile) + 1;
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
@@ -68,9 +71,9 @@ const uint32 Item::_getDataSize() const {
 	result += strlen(mItemData->mScrollName) + 1;
 	result += strlen(mItemData->mBardName) + 1;
 
-	// Add variable string for EvolvingItem (ItemLink?)
-	if (isEvolvingItem())
-		result += strlen(mItemData->mEvolvingItem.mIDFile) + 1;
+	//// Add variable string for EvolvingItem (ItemLink?)
+	//if (isEvolvingItem())
+	//	result += strlen(mItemData->mEvolvingItem.mOrnamentationIDFile) + 1;
 
 	return result;
 }
@@ -87,22 +90,31 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	if (isEvolvingItem()) {
 		pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
-		//pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown2), sizeof(mItemData->mEvolvingItem.__Unknown2));
-		pStructure.writeString(String(mItemData->mEvolvingItem.mIDFile));
-		//pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown3), sizeof(mItemData->mEvolvingItem.__Unknown3));
-		pStructure.write<uint16>(mItemData->mEvolvingItem.mIcon);
-	}
 
-	pStructure.write<uint8>(mItemData->__Unknown5);
-	pStructure.write<uint8>(mItemData->__Unknown6);
-	//pStructure.writeString(String(mItemData->__Unknown6));
-	//pStructure.write<uint8>(mItemData->ex0);
-	pStructure.write<uint8>(mItemData->mCopied);
-	pStructure.write<uint8>(mItemData->mItemClass);
+		// This is where evolving items store ornament data.
+		pStructure.writeString(String(mItemData->mOrnamentationIDFile));
+		pStructure.write<uint16>(mItemData->mOrnamentationIcon);
+
+		pStructure.write<uint8>(mItemData->__Unknown5);
+		pStructure.write<uint8>(mItemData->__Unknown6);
+		pStructure.write<uint8>(mItemData->mCopied);
+		pStructure.write<uint8>(mItemData->mItemClass);
+	}
+	else {
+
+		
+		pStructure.write<uint8>(mItemData->__Unknown5);
+		pStructure.write<uint8>(mItemData->__Unknown6);
+		pStructure.write<uint8>(mItemData->mCopied);
+		pStructure.write<uint8>(mItemData->mItemClass);
+
+		//pStructure.write<uint16>(mItemData->mOrnamentationIcon);
+		//pStructure.writeString(String(mItemData->mOrnamentationIDFile));
+	}
 	
 	// HEADER - END
 
@@ -179,15 +191,12 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	unsigned char * data = nullptr;
-	//uint32 numItems = 1;
 	pSize += getDataSize();
-	//numItems += getSubItems();
 
 	pSize += sizeof(uint32); // Item Count
 	data = new unsigned char[pSize];
 
 	Utility::DynamicStructure ds(data, pSize);
-	//ds.write<uint32>(Payload::ItemPacketSummonItem);
 	ds.write<uint32>(pCopyType);
 
 	copyData(ds);

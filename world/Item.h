@@ -12,6 +12,7 @@ public:
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
 	inline const String getIDFile() const { return String(mItemData->mIDFile); }
+	inline const String getOrnamentationIDFile() const { return String(mItemData->mOrnamentationIDFile); }
 	inline const String getCharmFile() const { return String(mItemData->mCharmFile); }
 	inline const String getFileName() const { return String(mItemData->mFileName); }
 	inline const String getClickName() const { return String(mItemData->mClickName); }
@@ -24,6 +25,7 @@ public:
 	inline void setName(const String& pValue) { memset(mItemData->mName, 0, sizeof(mItemData->mName)); strcpy(mItemData->mName, pValue.c_str()); }
 	inline void setLore(const String& pValue) { memset(mItemData->mLore, 0, sizeof(mItemData->mLore)); strcpy(mItemData->mLore, pValue.c_str()); }
 	inline void setIDFile(const String& pValue) { memset(mItemData->mIDFile, 0, sizeof(mItemData->mIDFile)); strcpy(mItemData->mIDFile, pValue.c_str()); }
+	inline void setOrnamentationIDFile(const String& pValue) { memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile)); strcpy(mItemData->mOrnamentationIDFile, pValue.c_str()); }
 	inline void setCharmFile(const String& pValue) { memset(mItemData->mCharmFile, 0, sizeof(mItemData->mCharmFile)); strcpy(mItemData->mCharmFile, pValue.c_str()); }
 	inline void setFileName(const String& pValue) { memset(mItemData->mFileName, 0, sizeof(mItemData->mFileName)); strcpy(mItemData->mFileName, pValue.c_str()); }
 	inline void setClickName(const String& pValue) { memset(mItemData->mClickName, 0, sizeof(mItemData->mClickName)); strcpy(mItemData->mClickName, pValue.c_str()); }
@@ -51,17 +53,17 @@ public:
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
 	Item* findFirst(const uint8 pItemType);
 
-	// Evolving Items.
+	// Evolving.
 	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
 	inline void setCurrentEvolvingLevel(const int32 pValue) { mCurrentEvolvingLevel = pValue; }
-	//inline const int32 getCurrentEvolvingLevel() const { return mItemData->mEvolvingItem.mCurrentLevel; }
-	//inline void setCurrentEvolvingLevel(const int32 pValue) { mItemData->mEvolvingItem.mCurrentLevel = pValue; }
 	inline const int32 getMaximumEvolvingLevel() const { return mItemData->mEvolvingItem.mMaxLevel; }
 	inline void setMaximumEvolvingLevel(const int32 pValue) { mItemData->mEvolvingItem.mMaxLevel = pValue; }
 	inline const double getEvolvingProgress() const { return mEvolvingProgress; }
 	inline void setEvolvingProgress(const double pProgress) { mEvolvingProgress = pProgress; }
-//	inline const double getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
-//	inline void setEvolvingProgress(const double pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
+
+	// Ornamentation
+	inline const uint16 getOrnamentationIcon() const { return mItemData->mOrnamentationIcon; }
+	inline void setOrnamentationIcon(const uint16 pValue) { mItemData->mOrnamentationIcon = pValue; }
 
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
@@ -322,8 +324,8 @@ public:
 	inline void setAvoidance(const int32 pValue) { mItemData->mAvoidance = pValue; }
 	inline void setAccuracy(const int32 pValue) { mItemData->mAccuracy = pValue; }
 	// Faction Modifiers
-	inline void setAugType(const uint32 pValue) const { mItemData->mAugType = pValue; }
-	inline void setAugRestrict(const uint32 pValue) const { mItemData->mAugRestrict = pValue; }
+	inline void setAugmentationType(const uint32 pValue) const { mItemData->mAugType = pValue; }
+	inline void setAugmentationRestriction(const uint32 pValue) const { mItemData->mAugRestrict = pValue; }
 	// Augmentation Slots
 	inline void setLDONPointType(const uint32 pValue) { mItemData->mLDONPointType = pValue; }
 	inline void setLDONTheme(const uint32 pValue) { mItemData->mLDONTheme = pValue; }

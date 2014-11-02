@@ -49,7 +49,11 @@ public:
 	static Item* makeShoulder(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeBack(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeWaist(const uint8 pLevel, const Rarity pRarity);
+
+	// Augmentations
+	static Item* makeAugmentation(const uint8 pLevel, const Rarity pRarity);
 private:
+	Item* _makeBaseArmorItem();
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();
 
