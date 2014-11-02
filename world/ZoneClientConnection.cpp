@@ -18,6 +18,8 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "Payload.h"
+#include "Item.h"
+#include "ItemDataStore.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -2867,8 +2869,29 @@ void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPac
 }
 
 void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	Log::error("Got OP_ItemLinkClick");
+	EXPECTED(ItemLink::sizeCheck(pPacket));
+
+	auto payload = ItemLink::convert(pPacket);
+
+	// Retrieve ItemData
+	auto itemData = ItemDataStore::getInstance().get(payload->mItemID);
+	EXPECTED(itemData);
+
+	Item* item = new Item(itemData);
+
+	item->setCurrentEvolvingLevel(payload->mCurrentEvolvingLevel);
+
+	// NOTE: This is untested. This is probably to do with ornamentation.
+	if (payload->mIcon != 0) item->setIcon(payload->mIcon);
+
+	//item->setIcon(2876);
+	
+	// TODO: Augments.
+
+	sendItemView(item);
+	delete item;
 }
 
 void ZoneClientConnection::_handleItemView(const EQApplicationPacket* pPacket) {
@@ -3035,6 +3058,17 @@ void ZoneClientConnection::_handlePopupResponse(const EQApplicationPacket* pPack
 void ZoneClientConnection::_handleClaimRequest(const EQApplicationPacket* pPacket)
 {
 	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void ZoneClientConnection::sendItemView(Item* pItem) {
+	EXPECTED(pItem);
+
+	uint32 payloadSize = 0;
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketViewLink);
+
+	auto packet = new EQApplicationPacket(OP_ItemLinkResponse, data, payloadSize);
+	sendPacket(packet);
+	delete packet;
 }
 
 //

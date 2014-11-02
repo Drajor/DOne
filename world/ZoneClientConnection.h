@@ -12,6 +12,7 @@ class Character;
 class DataStore;
 class CommandHandler;
 class Guild;
+class Item;
 struct GuildMember;
 struct NewSpawn_Struct;
 
@@ -116,7 +117,7 @@ public:
 	void sendCrystals();
 
 	void sendPopup(const String& pTitle, const String& pText);
-
+	void sendItemView(Item* pItem);
 	//void sendSpellCastOn();
 
 	void sendPacket(EQApplicationPacket* pPacket);

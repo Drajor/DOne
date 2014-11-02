@@ -57,8 +57,8 @@ private:
 	static const uint8 _getContainerSlots(const Rarity pRarity);
 	static const uint32 _getContainerIcon(const Rarity pRarity);
 	
-	uint32 mNextID = 10000;
-	const uint32 getNextID();
-	uint32 mNextSerial = 1;
-	const uint32 getNextSerial();
+	//uint32 mNextID = 10000;
+	//const uint32 getNextID();
+	//uint32 mNextSerial = 1;
+	//const uint32 getNextSerial();
 };

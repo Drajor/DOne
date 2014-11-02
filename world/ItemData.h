@@ -49,13 +49,11 @@ struct ItemData {
 			memset(__Unknown2, 0, sizeof(__Unknown2));
 			memset(__Unknown3, 0, sizeof(__Unknown3));
 			memset(mString, 0, sizeof(mString));
-			mCurrentLevel = 0;
-			mMaxLevel = 3;
 		}
 		uint8 __Unknown0 = 0; // 1 = broken item name in item link. This number appears in the item link. Non zero adds 2 chars in the item link.
-		int32 mCurrentLevel = 0;
+		int32 mCurrentLevel = 0; // Specified by Item.
 		//uint8 __Unknown1[4];
-		double mProgress = 0.0f;
+		double mProgress = 0.0f; // Specified by Item.
 		uint8 mActive = 0; // 1 = ON
 		int32 mMaxLevel = 0;
 		uint8 __Unknown2[4];
@@ -66,7 +64,7 @@ struct ItemData {
 
 	uint8 __Unknown5 = 0;
 	uint8 __Unknown6 = 0;
-	uint8 mCopied = 0; // 0 = OFF, 1 = ON
+	uint8 mCopied = 1; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
 	// END chunk0
 

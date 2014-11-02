@@ -52,8 +52,16 @@ public:
 	Item* findFirst(const uint8 pItemType);
 
 	// Evolving Items.
-	inline const double getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
-	inline void setEvolvingProgress(const double pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
+	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
+	inline void setCurrentEvolvingLevel(const int32 pValue) { mCurrentEvolvingLevel = pValue; }
+	//inline const int32 getCurrentEvolvingLevel() const { return mItemData->mEvolvingItem.mCurrentLevel; }
+	//inline void setCurrentEvolvingLevel(const int32 pValue) { mItemData->mEvolvingItem.mCurrentLevel = pValue; }
+	inline const int32 getMaximumEvolvingLevel() const { return mItemData->mEvolvingItem.mMaxLevel; }
+	inline void setMaximumEvolvingLevel(const int32 pValue) { mItemData->mEvolvingItem.mMaxLevel = pValue; }
+	inline const double getEvolvingProgress() const { return mEvolvingProgress; }
+	inline void setEvolvingProgress(const double pProgress) { mEvolvingProgress = pProgress; }
+//	inline const double getEvolvingProgress() const { return mItemData->mEvolvingItem.mProgress; }
+//	inline void setEvolvingProgress(const double pProgress) { mItemData->mEvolvingItem.mProgress = pProgress; }
 
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
@@ -384,4 +392,7 @@ private:
 	uint32 mSlot = 0;
 	uint32 mStacks = 1;
 	bool mAttuned = false;
+
+	int32 mCurrentEvolvingLevel = 0;
+	double mEvolvingProgress = 0.0f;
 };

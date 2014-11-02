@@ -2,6 +2,7 @@
 #include "ItemData.h"
 #include "Item.h"
 #include "Random.h"
+#include "ItemDataStore.h"
 
 namespace RandomItemType {
 	enum : uint32 {
@@ -38,12 +39,8 @@ namespace RandomItemType {
 };
 
 Item* ItemGenerator::_makeBaseItem() {
-	auto data = new ItemData();
-	auto item = new Item(data);
-	item->setID(getInstance().getNextID());
-	item->setSerial(getInstance().getNextSerial());
-
-	return item;
+	auto data = ItemDataStore::getInstance().getNew();
+	return new Item(data);
 }
 
 Item* ItemGenerator::makeRandom(const uint8 pLevel, const Rarity pRarity) {
@@ -248,15 +245,15 @@ const String ItemGenerator::_getContainerName() {
 	return "Some Big Bag";
 }
 
-const uint32 ItemGenerator::getNextID() {
-	mNextID++;
-	return mNextID;
-}
-
-const uint32 ItemGenerator::getNextSerial() {
-	mNextSerial++;
-	return mNextSerial;
-}
+//const uint32 ItemGenerator::getNextID() {
+//	mNextID++;
+//	return mNextID;
+//}
+//
+//const uint32 ItemGenerator::getNextSerial() {
+//	mNextSerial++;
+//	return mNextSerial;
+//}
 
 Item* ItemGenerator::makeOneHandSlash(const uint8 pLevel, const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
@@ -391,6 +388,8 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Head);
 	item->setIsEvolvingItem(1500);
+	item->setCurrentEvolvingLevel(3);
+	item->setMaximumEvolvingLevel(4);
 	item->setEvolvingProgress(55.4);
 	item->setLoreGroup(item->getID()); // http://lucy.allakhazam.com/itemraw.html?id=85612 LoreGroup(loreItem) == ItemID
 	item->setWeight(150);

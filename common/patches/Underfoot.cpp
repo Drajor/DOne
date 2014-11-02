@@ -2790,21 +2790,21 @@ DECODE(OP_CastSpell) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ItemLinkClick) {
-	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
-	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
-	MEMSET_IN(ItemViewRequest_Struct);
-
-	IN(item_id);
-	int r;
-	for (r = 0; r < 5; r++) {
-		IN(augments[r]);
-	}
-	IN(link_hash);
-	IN(icon);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ItemLinkClick) {
+//	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);
+//	SETUP_DIRECT_DECODE(ItemViewRequest_Struct, structs::ItemViewRequest_Struct);
+//	MEMSET_IN(ItemViewRequest_Struct);
+//
+//	IN(item_id);
+//	int r;
+//	for (r = 0; r < 5; r++) {
+//		IN(augments[r]);
+//	}
+//	IN(link_hash);
+//	IN(icon);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 //DECODE(OP_Consider) {

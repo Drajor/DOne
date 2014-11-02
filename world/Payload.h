@@ -516,6 +516,26 @@ namespace Payload {
 		};
 
 		// C->S
+		/*
+		2/11/2014 - Live shows current level, max level but does not seem to show current exp
+		*/
+		struct ItemLink : public Fixed<ItemLink> {
+			ItemLink() { 
+				memset(mAugments, 0, sizeof(mAugments));
+				//memset()
+			}
+			uint32 mItemID = 0;
+			uint32 mAugments[5];
+			uint32 mHash = 0;
+			uint32 mUnknown0 = 0;
+			int32 mUnknown1 = 0; // Seen: 1 for evovling, 0 non-evolving.
+			int32 mUnknown2 = 0; // Seen: 5 for evolving, 0 non-evovling.
+			int32 mCurrentEvolvingLevel = 0;
+			uint16 mIcon = 0;
+			char unknown046[2];
+		};
+
+		// C->S
 		struct OpenContainer : public Fixed<OpenContainer> {
 			uint32 mSlot = 0;
 		};

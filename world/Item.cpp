@@ -212,6 +212,11 @@ void Item::_onCopy() {
 	mItemData->mStacks = mStacks;
 	mItemData->mAttuned = mAttuned ? 1 : 0;
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
+
+	if (isEvolvingItem()) {
+		mItemData->mEvolvingItem.mCurrentLevel = mCurrentEvolvingLevel;
+		mItemData->mEvolvingItem.mProgress = mEvolvingProgress;
+	}
 }
 
 Item* Item::findFirst(const uint8 pItemType) {
