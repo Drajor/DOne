@@ -327,6 +327,13 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::PrimarySecondary);
 
+	item->setIsEvolvingItem(1501);
+	item->setCurrentEvolvingLevel(3);
+	item->setMaximumEvolvingLevel(4);
+	item->setEvolvingProgress(55.4);
+	item->setLoreGroup(1501);
+	//item
+
 	return item;
 }
 

@@ -50,7 +50,7 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mBardName);
 
 	if (isEvolvingItem())
-		result -= sizeof(mItemData->mEvolvingItem.mString);
+		result -= sizeof(mItemData->mEvolvingItem.mIDFile);
 	else
 		result -= sizeof(ItemData::EvolvingItem);
 		
@@ -70,7 +70,7 @@ const uint32 Item::_getDataSize() const {
 
 	// Add variable string for EvolvingItem (ItemLink?)
 	if (isEvolvingItem())
-		result += strlen(mItemData->mEvolvingItem.mString) + 1;
+		result += strlen(mItemData->mEvolvingItem.mIDFile) + 1;
 
 	return result;
 }
@@ -92,12 +92,15 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown2), sizeof(mItemData->mEvolvingItem.__Unknown2));
-		pStructure.writeString(String(mItemData->mEvolvingItem.mString));
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown3), sizeof(mItemData->mEvolvingItem.__Unknown3));
+		pStructure.writeString(String(mItemData->mEvolvingItem.mIDFile));
+		//pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown3), sizeof(mItemData->mEvolvingItem.__Unknown3));
+		pStructure.write<uint16>(mItemData->mEvolvingItem.mIcon);
 	}
 
 	pStructure.write<uint8>(mItemData->__Unknown5);
 	pStructure.write<uint8>(mItemData->__Unknown6);
+	//pStructure.writeString(String(mItemData->__Unknown6));
+	//pStructure.write<uint8>(mItemData->ex0);
 	pStructure.write<uint8>(mItemData->mCopied);
 	pStructure.write<uint8>(mItemData->mItemClass);
 	
