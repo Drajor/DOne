@@ -166,7 +166,7 @@ struct ItemData {
 
 	// BEGIN chunk2
 	uint32 mAugType = 0;
-	uint32 mAugRestrict = 0;
+	uint32 mAugmentationRestriction = 0;
 	struct AugmentationSlot {
 		uint32 mType = 0;
 		uint8 mVisible = 1;

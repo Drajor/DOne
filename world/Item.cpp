@@ -8,6 +8,12 @@ Item::Item(ItemData* pItemData) : mItemData(pItemData) {
 	for (auto& i : mContents) i = nullptr;
 }
 
+Item::~Item() {
+	for (auto i : mAugments) {
+		if (i) delete i;
+	}
+}
+
 Item* Item::getAugment(const uint8 pSlot) const {
 	return mAugments[pSlot];
 }

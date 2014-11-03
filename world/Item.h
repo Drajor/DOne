@@ -8,6 +8,7 @@ class DynamicStructure;
 class Item {
 public:
 	Item(ItemData* pItemData);
+	~Item();
 	
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
@@ -52,6 +53,10 @@ public:
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
 	Item* findFirst(const uint8 pItemType);
+
+	// Augmentation
+	// TODO: This needs some error checking.
+	inline void setAugmentation(uint32 pSlot, Item* pAugmentation) { mAugments[pSlot] = pAugmentation; }
 
 	// Evolving.
 	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
@@ -172,7 +177,7 @@ public:
 	inline const int32 _getAccuracy() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAccuracy(); return getAccuracy() + count; }
 	// Faction Modifiers
 	inline const uint32 getAugType() const { return mItemData->mAugType; }
-	inline const uint32 getAugRestrict() const { return mItemData->mAugRestrict; }
+	inline const uint32 getAugRestrict() const { return mItemData->mAugmentationRestriction; }
 	// Augmentation Slots
 	inline const uint32 getLDONPointType() const { return mItemData->mLDONPointType; }
 	inline const uint32 getLDONTheme() const { return mItemData->mLDONTheme; }
@@ -325,7 +330,7 @@ public:
 	inline void setAccuracy(const int32 pValue) { mItemData->mAccuracy = pValue; }
 	// Faction Modifiers
 	inline void setAugmentationType(const uint32 pValue) const { mItemData->mAugType = pValue; }
-	inline void setAugmentationRestriction(const uint32 pValue) const { mItemData->mAugRestrict = pValue; }
+	inline void setAugmentationRestriction(const uint32 pValue) const { mItemData->mAugmentationRestriction = pValue; }
 	// Augmentation Slots
 	inline void setLDONPointType(const uint32 pValue) { mItemData->mLDONPointType = pValue; }
 	inline void setLDONTheme(const uint32 pValue) { mItemData->mLDONTheme = pValue; }

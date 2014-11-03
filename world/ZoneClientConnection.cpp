@@ -2875,20 +2875,26 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 
 	auto payload = ItemLink::convert(pPacket);
 
-	// Retrieve ItemData
+	// Retrieve base ItemData
 	auto itemData = ItemDataStore::getInstance().get(payload->mItemID);
 	EXPECTED(itemData);
 
 	Item* item = new Item(itemData);
 
 	item->setCurrentEvolvingLevel(payload->mCurrentEvolvingLevel);
-
-	// NOTE: This is untested. This is probably to do with ornamentation.
-	if (payload->mIcon != 0) item->setIcon(payload->mIcon);
-
-	//item->setIcon(2876);
+	item->setOrnamentationIcon(payload->mOrnamentationIcon);
 	
-	// TODO: Augments.
+	// NOTE: Untested!
+	// Add required augmentations.
+	for (auto i = 0; i < 5; i++) {
+		if (payload->mAugments[i] != 0) {
+			// Retrieve augmentation ItemData.
+			auto augmentationItemData = ItemDataStore::getInstance().get(payload->mAugments[i]);
+			EXPECTED(augmentationItemData); // NOTE: This will leak.
+
+			item->setAugmentation(i, new Item(augmentationItemData));
+		}
+	}
 
 	sendItemView(item);
 	delete item;
