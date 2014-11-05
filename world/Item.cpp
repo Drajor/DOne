@@ -245,3 +245,87 @@ Item* Item::findFirst(const uint8 pItemType) {
 
 	return nullptr;
 }
+
+const bool Item::insertAugment(Item* pAugment) {
+	EXPECTED_BOOL(pAugment);
+	EXPECTED_BOOL(pAugment->isAugmentation());
+	EXPECTED_BOOL(augmentAllowed(pAugment));
+
+	// Find an empty augmentation slot with the correct type.
+	int slotID = -1;
+	for (int i = 0; i < 5; i++) {
+		// Found a matching slot type.
+		if (mItemData->mAugmentationSlots[i].mType == pAugment->getAugmentationType()) {
+			// Found an empty, matching slot.
+			if (mAugments[i] == nullptr) {
+				slotID = i;
+				break;
+			}
+		}
+	}
+
+	// No valid slot found.
+	if (slotID < 0) return false;
+
+	setAugmentation(slotID, pAugment);
+
+	return true;
+}
+
+const bool Item::augmentAllowed(Item* pAugment) {
+	EXPECTED_BOOL(pAugment);
+	EXPECTED_BOOL(pAugment->isAugmentation());
+
+	// Check: Restrictions.
+	if (pAugment->getAugmentationRestriction()) {
+		switch (pAugment->getAugmentationRestriction()) {
+		case AugmentationRestriction::Armor:
+			if (!isArmor()) return false;
+			break;
+		case AugmentationRestriction::Weapons:
+			if (!isWeapon()) return false;
+			break;
+		case AugmentationRestriction::OneHandWeapons:
+			if (!isOneHandWeapon()) return false;
+			break;
+		case AugmentationRestriction::TwoHandWeapons:
+			if (!isTwoHandWeapon()) return false;
+			break;
+		case AugmentationRestriction::OneHandSlash:
+			if (!isOneHandSlash()) return false;
+			break;
+		case AugmentationRestriction::OneHandBlunt:
+			if (!isOneHandBlunt()) return false;
+			break;
+		case AugmentationRestriction::Piercing:
+			if (!isOneHandPierce()) return false;
+			break;
+		case AugmentationRestriction::TwoHandSlash:
+			if (!isTwoHandSlash()) return false;
+			break;
+		case AugmentationRestriction::TwoHandBlunt:
+			if (!isTwoHandBlunt()) return false;
+			break;
+		case AugmentationRestriction::TwoHandPierce:
+			if (!isTwoHandPierce()) return false;
+			break;
+		case AugmentationRestriction::Bow:
+			if (!isBow()) return false;
+			break;
+		case AugmentationRestriction::Shield:
+			if (!isShield()) return false;
+			break;
+		case AugmentationRestriction::HandtoHand:
+			if (!isHandToHand()) return false;
+			break;
+		default:
+			return false;
+		}
+	}
+
+	// Check: Equipment Slot
+
+
+
+	return true;
+}

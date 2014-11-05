@@ -18,6 +18,7 @@ struct CharacterData;
 struct SpellData;
 class SpellBook;
 class Inventoryy;
+class Item;
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -252,6 +253,9 @@ public:
 	inline void setFilters(Filters pFilters) { mFilters = pFilters; }
 
 	void setAutoAttack(const bool pAttacking);
+
+	// Returns whether this Character can equip PItem in pSlotID
+	const bool canEquip(const Item* pItem, const uint32 pSlotID) const;
 private:
 	ZoneChange mZoneChange;
 

@@ -125,8 +125,8 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 	if (SlotID::isCursor(pSlot))
 		return mCursor.empty() ? nullptr : mCursor.front();
 
-	// Getting: Main Inventory.
-	if (SlotID::isMainInventory(pSlot))
+	// Getting: Main Inventory or Worn.
+	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot))
 		return mItems[pSlot];
 
 	return nullptr;
@@ -143,8 +143,8 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 		return true;
 	}
 
-	// Putting item in Main Inventory.
-	if (SlotID::isMainInventory(pSlot)) {
+	// Putting item in Main Inventory or Worn.
+	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
 		Item* existingItem = getItem(pSlot);
 		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
 		pItem->setSlot(pSlot);
@@ -224,6 +224,38 @@ const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const 
 			// NOTE: _set is required because put prevents Item pointers overriding.
 			_set(nullptr, pToSlot);
 			EXPECTED_BOOL(put(cursorItem, pToSlot));
+
+			return true;
+		}
+
+		return false;
+	}
+
+	// Moving To: Worn Inventory
+	if (SlotID::isWorn(pToSlot)) {
+		// Moving From: Cursor
+		if (SlotID::isCursor(pFromSlot)) {
+			Item* cursorItem = _popCursor();
+			EXPECTED_BOOL(cursorItem); // Failure = desync.
+			EXPECTED_BOOL(SlotID::isCursor(cursorItem->getSlot())); // Failure = bug.
+
+			// Check: Item in pToSlot
+			Item* invItem = getItem(pToSlot);
+			if (invItem) {
+				EXPECTED_BOOL(invItem->getSlot() == pToSlot); // Failure = bug.
+				// Push the Item from pToSlot on to the cursor.
+				EXPECTED_BOOL(pushCursor(invItem));
+
+				// Remove equipped Item
+				_calculateRemove(invItem);
+			}
+
+			// NOTE: _set is required because put prevents Item pointers overriding.
+			_set(nullptr, pToSlot);
+			EXPECTED_BOOL(put(cursorItem, pToSlot));
+
+			// Add equipped Item
+			_calculateAdd(cursorItem);
 
 			return true;
 		}

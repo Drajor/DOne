@@ -259,7 +259,7 @@ public:
 	//inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
 	//inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
 	
-	inline const uint32 getDeityID() const { return mActorData.mDeity; }
+	inline const uint32 getDeity() const { return mActorData.mDeity; }
 	inline void setDeityID(const uint32 pDeityID) { mActorData.mDeity = pDeityID; }
 
 	inline const float getSize() const { return mActorData.mSize; }

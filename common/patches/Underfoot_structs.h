@@ -1531,20 +1531,20 @@ struct ItemProperties_Struct {
 /*008*/
 };
 
-struct DeleteItem_Struct {
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
-};
+//struct DeleteItem_Struct {
+///*0000*/ uint32 from_slot;
+///*0004*/ uint32 to_slot;
+///*0008*/ uint32 number_in_stack;
+///*0012*/
+//};
 
-struct MoveItem_Struct
-{
-/*0000*/ uint32 from_slot;
-/*0004*/ uint32 to_slot;
-/*0008*/ uint32 number_in_stack;
-/*0012*/
-};
+//struct MoveItem_Struct
+//{
+///*0000*/ uint32 from_slot;
+///*0004*/ uint32 to_slot;
+///*0008*/ uint32 number_in_stack;
+///*0012*/
+//};
 
 //
 // from_slot/to_slot
@@ -2206,12 +2206,12 @@ struct Stun_Struct { // 8 bytes total
 /*008*/
 };
 
-struct AugmentItem_Struct {
-/*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
-/*04*/	int32	augment_slot;
-/*08*/
-};
+//struct AugmentItem_Struct {
+///*00*/	int16	container_slot;
+///*02*/	char	unknown02[2];
+///*04*/	int32	augment_slot;
+///*08*/
+//};
 
 // OP_Emote
 struct Emote_Struct {

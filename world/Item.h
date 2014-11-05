@@ -9,6 +9,22 @@ class Item {
 public:
 	Item(ItemData* pItemData);
 	~Item();
+
+	inline const bool isArmor() const { return getItemType() == ItemType::Armor; }
+	inline const bool isShield() const { return getItemType() == ItemType::Shield; }
+	inline const bool isAugmentation() const { return getItemType() == ItemType::Augmentation; }
+	inline const bool isOneHandSlash() const { return getItemType() == ItemType::OneHandSlash; }
+	inline const bool isTwoHandSlash() const { return getItemType() == ItemType::TwoHandSlash; }
+	inline const bool isOneHandBlunt() const { return getItemType() == ItemType::OneHandBlunt; }
+	inline const bool isTwoHandBlunt() const { return getItemType() == ItemType::TwoHandBlunt; }
+	inline const bool isOneHandPierce() const { return getItemType() == ItemType::OneHandPierce; }
+	inline const bool isTwoHandPierce() const { return getItemType() == ItemType::TwoHandPierce; }
+	inline const bool isBow() const { return getItemType() == ItemType::Bow; }
+	inline const bool isHandToHand() const { return getItemType() == ItemType::HandToHand; }
+
+	inline const bool isOneHandWeapon() const { return isOneHandSlash() || isOneHandBlunt() || isOneHandPierce() || isHandToHand();	}
+	inline const bool isTwoHandWeapon() const { return isTwoHandSlash() || isTwoHandBlunt() || isTwoHandPierce(); }
+	inline const bool isWeapon() const { return	isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
 	
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
@@ -57,6 +73,10 @@ public:
 	// Augmentation
 	// TODO: This needs some error checking.
 	inline void setAugmentation(uint32 pSlot, Item* pAugmentation) { mAugments[pSlot] = pAugmentation; }
+	// Inserts an augment into the Item.
+	const bool insertAugment(Item* pAugment);
+	// Returns whether pAugment is allowed to go into this Item.
+	const bool augmentAllowed(Item* pAugment);
 
 	// Evolving.
 	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
@@ -131,7 +151,7 @@ public:
 	inline const int32 _getEnduranceRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEnduranceRegen(); return getEnduranceRegen() + count; }
 	inline const uint32 getClasses() const { return mItemData->mClasses; }
 	inline const uint32 getRaces() const { return mItemData->mRaces; }
-	inline const uint32 getDeity() const { return mItemData->mDeity; }
+	inline const uint32 getDeities() const { return mItemData->mDeities; }
 	inline const int32 getSkillModAmount() const { return mItemData->mSkillModAmount; }
 	inline const uint32 getSkillMod() const { return mItemData->mSkillMod; }
 	inline const uint32 getBaneRace() const { return mItemData->mBaneDamageRace; }
@@ -142,7 +162,7 @@ public:
 	inline const uint32 getFoodSize() const { return mItemData->mFoodSize; }
 	inline const uint32 getDrinkSize() const { return mItemData->mDrinkSize; }
 	inline const int32 getCastTime() const { return mItemData->mCastTime; }
-	inline const uint32 getReqLevel() const { return mItemData->mReqLevel; }
+	inline const uint32 getRequiredLevel() const { return mItemData->mReqLevel; }
 	inline const uint32 getRecLevel() const { return mItemData->mRecLevel; }
 	inline const uint32 getRecSkill() const { return mItemData->mRecSkill; }
 	inline const uint32 getBardType() const { return mItemData->mBardType; }
@@ -176,8 +196,8 @@ public:
 	inline const int32 getAccuracy() const { return mItemData->mAccuracy; }
 	inline const int32 _getAccuracy() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAccuracy(); return getAccuracy() + count; }
 	// Faction Modifiers
-	inline const uint32 getAugType() const { return mItemData->mAugType; }
-	inline const uint32 getAugRestrict() const { return mItemData->mAugmentationRestriction; }
+	inline const uint32 getAugmentationType() const { return mItemData->mAugType; }
+	inline const uint32 getAugmentationRestriction() const { return mItemData->mAugmentationRestriction; }
 	// Augmentation Slots
 	inline const uint32 getLDONPointType() const { return mItemData->mLDONPointType; }
 	inline const uint32 getLDONTheme() const { return mItemData->mLDONTheme; }
@@ -292,7 +312,7 @@ public:
 	inline void setEnduranceRegen(const int32 pValue) { mItemData->mEnduranceRegen = pValue; }
 	inline void setClasses(const uint32 pValue) { mItemData->mClasses = pValue; }
 	inline void setRaces(const uint32 pValue) { mItemData->mRaces = pValue; }
-	inline void setDeity(const uint32 pValue) { mItemData->mDeity = pValue; }
+	inline void setDeities(const uint32 pValue) { mItemData->mDeities = pValue; }
 	inline void setSkillModAmount(const int32 pValue) { mItemData->mSkillModAmount = pValue; }
 	inline void setSkillMod(const uint32 pType) { mItemData->mSkillMod = pType; }
 	inline void setBaneRace(const uint32 pValue) { mItemData->mBaneDamageRace = pValue; }
@@ -390,7 +410,6 @@ public:
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();
-	
 	Item* mAugments[5];
 	Item* mContents[10];
 	ItemData* mItemData = nullptr;
