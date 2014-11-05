@@ -12,9 +12,12 @@ private:
 	ItemDataStore(ItemDataStore const&); // Do not implement.
 	void operator=(ItemDataStore const&); // Do not implement.
 public:
+	const bool initialise();
 	ItemData* getNew();
 	ItemData* get(const uint32 pID);
 private:
+	void _bootstrap();
+	bool mInitialised = false;
 	std::vector<ItemData> mItemData;
 
 	inline ItemData* _getNext();
@@ -22,4 +25,5 @@ private:
 	const uint32 getNextID();
 	uint32 mNextSerial = 1;
 	const uint32 getNextSerial();
+	
 };

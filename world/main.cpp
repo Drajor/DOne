@@ -13,6 +13,7 @@
 #include "DataStore.h"
 #include "SpellDataStore.h"
 #include "StaticItemData.h"
+#include "ItemDataStore.h"
 #include "LogSystem.h"
 #include "UCS.h"
 #include "Random.h"
@@ -44,6 +45,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(TitleManager::getInstance().initialise());
 	EXPECTED_MAIN(SpellDataStore::getInstance().initialise());
 	EXPECTED_MAIN(StaticItemData::getInstance().initialise());
+	EXPECTED_MAIN(ItemDataStore::getInstance().initialise());
 	EXPECTED_MAIN(NPCFactory::getInstance().initialise());
 
 	while(true) {

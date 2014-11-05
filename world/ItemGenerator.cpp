@@ -171,7 +171,7 @@ Item* ItemGenerator::makeRandomContainer(const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
 	item->setName(_getContainerName());
-	item->setContainerType(ContainerType::NORMAL);
+	item->setContainerType(ContainerType::Normal);
 	item->setContainerSize(ContainerSize::Giant);
 	item->setContainerWR(100);
 	item->setContainerSlots(_getContainerSlots(pRarity));
@@ -429,7 +429,8 @@ Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
 	item->setIDFile("IT63");
 	item->setMaterial(ItemMaterial::Plate);
 	item->setItemType(ItemType::Armor);
-
+	item->setRaces(EquipRaces::Human + EquipRaces::DarkElf);
+	item->setDeities(EquipDeities::Agnostic + EquipDeities::RallosZek);
 	return item;
 }
 
@@ -618,6 +619,7 @@ Item* ItemGenerator::makeAugmentation(const uint8 pLevel, const Rarity pRarity) 
 	item->setAugmentationRestriction(AugmentationRestriction::None);
 	item->setHealth(100);
 	item->setItemType(ItemType::Augmentation);
+	item->setSlots(EquipSlots::VisibleArmor);
 
 	return item;
 }

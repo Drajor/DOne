@@ -112,9 +112,9 @@ struct ItemData {
 	int32 mHealthRegen = 0;
 	int32 mManaRegen = 0;
 	int32 mEnduranceRegen = 0;
-	uint32 mClasses = 65535;
-	uint32 mRaces = 65535;
-	uint32 mDeity = 0;
+	uint32 mClasses = EquipClasses::All;
+	uint32 mRaces = EquipRaces::All;
+	uint32 mDeities = EquipDeities::All;
 	int32 mSkillModAmount = 0;
 	uint32 __Unknown9 = 0;
 	uint32 mSkillMod = 0;
@@ -180,7 +180,7 @@ struct ItemData {
 	uint32 mLDONSellBackPrice = 0;
 	uint32 mLDONSold = 0;
 
-	uint8 mContainerType = ContainerType::NONE;
+	uint8 mContainerType = ContainerType::None;
 	uint8 mContainerSlots = 0;
 	uint8 mContainerSize = ContainerSize::Tiny;
 	uint8 mContainerWR = 0; // Weight Reduction: 0% - 100%
@@ -287,7 +287,7 @@ struct ItemData {
 	uint32 mMaxPower = 0;
 	uint32 mPurity = 0;
 	uint32 mBackstabDamage = 0;
-	uint32 mDamageShieldMitigation = 10;
+	uint32 mDamageShieldMitigation = 0;
 	int32 mHeroicStrength = 0;
 	int32 mHeroicIntelligence = 0;
 	int32 mHeroicWisdom = 0;

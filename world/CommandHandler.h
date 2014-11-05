@@ -24,6 +24,9 @@ public:
 	virtual void invalidParameters(CommandParameters pParameters);
 protected:
 	virtual void conversionError(String& pParameter);
+
+	inline void setMinimumParameters(uint8 pValue) { mMinimumParameters = pValue; }
+	inline void setMaximumParameters(uint8 pValue) { mMaximumParameters = pValue; }
 	
 	std::list<String> mAliases;
 	uint8 mMinimumStatus;

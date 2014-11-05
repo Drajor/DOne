@@ -482,6 +482,22 @@ namespace Payload {
 			uint32 mStackSize = 0;
 		};
 
+		// S->C
+		struct DeleteItem : public FixedT<DeleteItem, OP_DeleteItem> {
+			static EQApplicationPacket* construct(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mFromSlot = pFromSlot;
+				payload->mToSlot = pToSlot;
+				payload->mStacks = pStacks;
+
+				return packet;
+			}
+			uint32 mFromSlot = 0;
+			uint32 mToSlot = 0;
+			uint32 mStacks = 0;
+		};
+
 		// C->S
 		// Based on: Consume_Struct
 		struct Consume : public Fixed<Consume> {
@@ -700,6 +716,24 @@ namespace Payload {
 			uint32 mLeftButtonResponse = 1;
 			uint32 mRightButtonResponse = 2;
 			uint32 __Unknown1 = 0;
+		};
+
+		// C->S
+		struct AugmentItem : public Fixed<AugmentItem> {
+			AugmentItem() { memset(mUnknown, 0, sizeof(mUnknown)); }
+			int16 mContainerSlot = 0;
+			char mUnknown[2];
+			int32 mAugmentSlot = 0;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{AugmentItem} ";
+				PRINT_MEMBER(mContainerSlot);
+				PRINT_MEMBER((int)mUnknown[0]);
+				PRINT_MEMBER((int)mUnknown[1]);
+				PRINT_MEMBER(mAugmentSlot);
+				return ss.str();
+			}
 		};
 	}
 

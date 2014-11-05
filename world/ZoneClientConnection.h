@@ -236,6 +236,7 @@ private:
 	void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
 	void _handlePopupResponse(const EQApplicationPacket* pPacket);
 	void _handleClaimRequest(const EQApplicationPacket* pPacket);
+	void _handleAugmentItem(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

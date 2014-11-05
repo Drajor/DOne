@@ -1,8 +1,38 @@
 #include "ItemDataStore.h"
 #include "Utility.h"
+#include "Item.h"
 
 ItemDataStore::ItemDataStore() {
 	mItemData.resize(1000000);
+}
+
+const bool ItemDataStore::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
+
+	_bootstrap();
+
+	return (mInitialised = true);
+}
+
+void ItemDataStore::_bootstrap() {
+
+	// Augmentation Sealer.
+	{
+		auto data = &mItemData[1];
+		data->mID = 1;
+		auto item = new Item(data);
+		
+		item->setName("Augmentation Sealer");
+		item->setIDFile("IT63");
+		item->setIcon(1142);
+		item->setItemClass(ItemClass::Container);
+		item->setContainerType(ContainerType::AugmentationSealer);
+		item->setContainerSlots(2);
+		item->setContainerSize(ContainerSize::Giant);
+
+		delete item;
+	}
+	
 }
 
 ItemData* ItemDataStore::getNew() {

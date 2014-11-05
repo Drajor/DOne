@@ -114,6 +114,64 @@ enum Rarity : uint8 { Common, Magic, Rare, Artifact, RarityMax };
 static const std::array<Rarity, RarityMax> RarityArray = { Rarity::Common, Rarity::Magic, Rarity::Rare, Rarity::Artifact };
 static bool RarityRangeCheck(const uint8 pRarity) { return pRarity < Artifact; }
 
+enum PlayableRaceIDs {
+	Human = 1,
+	Barbarian = 2,
+	Erudite = 3,
+	WoodElf = 4,
+	HighElf = 5,
+	DarkElf = 6,
+	HalfElf = 7,
+	Dwarf = 8,
+	Troll = 9,
+	Ogre = 10,
+	Halfling = 11,
+	Gnome = 12,
+	Iksar = 128,
+	Vahshir = 130,
+	Froglok = 330,
+	Drakkin = 522
+};
+
+enum ClassIDs : ClassID {
+	Warrior = 1,
+	Cleric = 2,
+	Paladin = 3,
+	Ranger = 4,
+	Shadowknight = 5,
+	Druid = 6,
+	Monk = 7,
+	Bard = 8,
+	Rogue = 9,
+	Shaman = 10,
+	Necromancer = 11,
+	Wizard = 12,
+	Magician = 13,
+	Enchanter = 14,
+	Beastlord = 15,
+	Berserker = 16
+};
+
+enum PlayerDeityIDs {
+	Bertoxxulous = 201,
+	BrellSerilis = 202,
+	CazicThule = 203,
+	ErollisiMarr = 204,
+	Bristlebane = 205,
+	Innoruuk = 206,
+	Karana = 207,
+	MithanielMarr = 208,
+	Prexus = 209,
+	Quellious = 210,
+	RallosZek = 211,
+	RodcetNife = 212,
+	SolusekRo = 213,
+	TheTribunal = 214,
+	Tunare = 215,
+	Veeshan = 216,
+	Agnostic = 396
+};
+
 namespace MoneySlotID {
 	enum : uint32 {
 		CURSOR = 0,
@@ -157,6 +215,29 @@ namespace MoneyType {
 
 namespace SlotID {
 	enum : uint32 {
+		CHARM = 0,
+		LEFT_EAR = 1,
+		HEAD = 2,
+		FACE = 3,
+		RIGHT_EAR = 4,
+		NECK = 5,
+		SHOULDERS = 6,
+		ARMS = 7,
+		BACK = 8,
+		LEFT_WRIST = 9,
+		RIGHT_WRIST = 10,
+		RANGE = 11,
+		HANDS = 12,
+		PRIMARY = 13,
+		SECONDARY = 14,
+		LEFT_RING = 15,
+		RIGHT_RING = 16,
+		CHEST = 17,
+		LEGS = 18,
+		FEET = 19,
+		WAIST = 20,
+		POWER_SOURCE = 21,
+		AMMO = 22,
 		MAIN_0 = 23,
 		MAIN_1 = 24,
 		MAIN_2 = 25,
@@ -186,6 +267,7 @@ namespace SlotID {
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
 	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
+	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 }
 
 /*
@@ -242,37 +324,215 @@ _______________
 Item* mItems[2551]; ~20kb of pointers.
 */
 
+namespace EquipClasses {
+	enum : uint32 {
+		None = 0,
+		Warrior = 1,
+		Cleric = 2 << 0,
+		Paladin = 2 << 1,
+		Ranger = 2 << 2,
+		Shadowknight = 2 << 3,
+		Druid = 2 << 4,
+		Monk = 2 << 5,
+		Bard = 2 << 6,
+		Rogue = 2 << 7,
+		Shaman = 2 << 8,
+		Necromancer = 2 << 9,
+		Wizard = 2 << 10,
+		Magician = 2 << 11,
+		Enchanter = 2 << 12,
+		Beastlord = 2 << 13,
+		Berserker = 2 << 14,
+
+		Plate = Warrior + Cleric + Paladin + Shadowknight + Bard,
+		Chain = Ranger + Rogue + Shaman + Berserker,
+		Cloth = Necromancer + Wizard + Magician + Enchanter,
+		Leather = Druid + Monk + Beastlord,
+
+		All = Warrior + Cleric + Paladin + Ranger + Shadowknight + Druid + Monk + Bard + Rogue + Shaman + Necromancer + Wizard + Magician + Enchanter + Beastlord + Berserker,
+	};
+
+	// Converts a Class ID to a Class Bit
+	static const uint32 convert(const uint32 pClassID) {
+		switch (pClassID) {
+		case ClassIDs::Warrior: return Warrior;
+		case ClassIDs::Cleric: return Cleric;
+		case ClassIDs::Paladin: return Paladin;
+		case ClassIDs::Ranger: return Ranger;
+		case ClassIDs::Shadowknight: return Shadowknight;
+		case ClassIDs::Druid: return Druid;
+		case ClassIDs::Monk: return Monk;
+		case ClassIDs::Bard: return Bard;
+		case ClassIDs::Rogue: return Rogue;
+		case ClassIDs::Shaman: return Shaman;
+		case ClassIDs::Necromancer: return Necromancer;
+		case ClassIDs::Wizard: return Wizard;
+		case ClassIDs::Magician: return Magician;
+		case ClassIDs::Enchanter: return Enchanter;
+		case ClassIDs::Beastlord: return Beastlord;
+		case ClassIDs::Berserker: return Berserker;
+		default: return None;
+		}
+	}
+}
+
+namespace EquipRaces {
+	enum : uint32 {
+		None = 0,
+		Human = (1u << 0),
+		Barbarian = (1u << 1),
+		Erudite = (1u << 2),
+		WoodElf = (1u << 3),
+		HighElf = (1u << 4),
+		DarkElf = (1u << 5),
+		HalfElf = (1u << 6),
+		Dwarf = (1u << 7),
+		Troll = (1u << 8),
+		Ogre = (1u << 9),
+		Halfling = (1u << 10),
+		Gnome = (1u << 11),
+		Iksar = (1u << 12),
+		Vahshir = (1u << 13),
+		Froglok = (1u << 14),
+		Drakkin = (1u << 15),
+
+		All = Human + Barbarian + Erudite + WoodElf + HighElf + DarkElf + HalfElf + Dwarf + Troll + Ogre + Halfling + Gnome + Iksar + Vahshir + Froglok + Drakkin,
+	};
+
+	// Converts a Race ID to a Race Bit
+	static const uint32 convert(const uint32 pRaceID) {
+		switch (pRaceID) {
+		case PlayableRaceIDs::Human: return Human;
+		case PlayableRaceIDs::Barbarian: return Barbarian;
+		case PlayableRaceIDs::Erudite: return Erudite;
+		case PlayableRaceIDs::WoodElf: return WoodElf;
+		case PlayableRaceIDs::HighElf: return HighElf;
+		case PlayableRaceIDs::DarkElf: return DarkElf;
+		case PlayableRaceIDs::HalfElf: return HalfElf;
+		case PlayableRaceIDs::Dwarf: return Dwarf;
+		case PlayableRaceIDs::Troll: return Troll;
+		case PlayableRaceIDs::Ogre: return Ogre;
+		case PlayableRaceIDs::Halfling: return Halfling;
+		case PlayableRaceIDs::Gnome: return Gnome;
+		case PlayableRaceIDs::Iksar: return Iksar;
+		case PlayableRaceIDs::Vahshir: return Vahshir;
+		case PlayableRaceIDs::Froglok: return Froglok;
+		case PlayableRaceIDs::Drakkin: return Drakkin;
+		default: return None;
+		}
+	}
+}
+
+namespace EquipDeities {
+	enum : uint32 {
+		All = 0,
+		Agnostic = (1u << 0),
+		Bertoxxulous = (1u << 1),
+		BrellSerilis = (1u << 2),
+		CazicThule = (1u << 3),
+		ErollisiMarr = (1u << 4),
+		Bristlebane = (1u << 5),
+		Innoruuk = (1u << 6),
+		Karana = (1u << 7),
+		MithanielMarr = (1u << 8),
+		Prexus = (1u << 9),
+		Quellious = (1u << 10),
+		RallosZek = (1u << 11),
+		RodcetNife = (1u << 12),
+		SolusekRo = (1u << 13),
+		TheTribunal = (1u << 14),
+		Tunare = (1u << 15),
+		Veeshan = (1u << 16),
+	};
+
+	// Converts a Deity ID to a Deity Bit
+	static const uint32 convert(const uint32 pDeity) {
+		switch (pDeity) {
+		case PlayerDeityIDs::Bertoxxulous: return Bertoxxulous;
+		case PlayerDeityIDs::BrellSerilis: return BrellSerilis;
+		case PlayerDeityIDs::CazicThule: return CazicThule;
+		case PlayerDeityIDs::ErollisiMarr: return ErollisiMarr;
+		case PlayerDeityIDs::Bristlebane: return Bristlebane;
+		case PlayerDeityIDs::Innoruuk: return Innoruuk;
+		case PlayerDeityIDs::Karana: return Karana;
+		case PlayerDeityIDs::MithanielMarr: return MithanielMarr;
+		case PlayerDeityIDs::Prexus: return Prexus;
+		case PlayerDeityIDs::Quellious: return Quellious;
+		case PlayerDeityIDs::RallosZek: return RallosZek;
+		case PlayerDeityIDs::RodcetNife: return RodcetNife;
+		case PlayerDeityIDs::SolusekRo: return SolusekRo;
+		case PlayerDeityIDs::TheTribunal: return TheTribunal;
+		case PlayerDeityIDs::Tunare: return Tunare;
+		case PlayerDeityIDs::Veeshan: return Veeshan;
+		case PlayerDeityIDs::Agnostic: return Agnostic;
+		default: return All;
+		}
+	}
+}
+
 namespace EquipSlots {
 	enum : uint32 {
-		Charm = 1, // 1
-		LeftEar = 2 << 0, // 2
-		Head = 2 << 1, // 4
-		Face = 2 << 2, // 8
-		RightEar = 2 << 3, // 16
-		Neck = 2 << 4, // 32
-		Shoulders = 2 << 5, // 64
-		Arms = 2 << 6, // 128
-		Back = 2 << 7, // 256
-		LeftWrist = 2 << 8, // 512
-		RightWrist = 2 << 9, // 1024
-		Range = 2 << 10, // 2048
-		Hands = 2 << 11, // 4096
-		Primary = 2 << 12, // 8192
-		Secondary = 2 << 13, // 16384
-		LeftFingers = 2 << 14, // 32768
-		RightFingers = 2 << 15, // 65536
-		Chest = 2 << 16, // 131072
-		Legs = 2 << 17, // 262144
-		Feet = 2 << 18, // 524288
-		Waist = 2 << 19, // 1048576
-		PowerSource = 2 << 20, // 2097152
-		Ammo = 2 << 21, // 4194304
+		None = 0,
+		Charm = (1u << 0),
+		LeftEar = (1u << 1),
+		Head = (1u << 2),
+		Face = (1u << 3),
+		RightEar = (1u << 4),
+		Neck = (1u << 5),
+		Shoulders = (1u << 6),
+		Arms = (1u << 7),
+		Back = (1u << 8),
+		LeftWrist = (1u << 9),
+		RightWrist = (1u << 10),
+		Range = (1u << 11),
+		Hands = (1u << 12),
+		Primary = (1u << 13),
+		Secondary = (1u << 14),
+		LeftFingers = (1u << 15),
+		RightFingers = (1u << 16),
+		Chest = (1u << 17),
+		Legs = (1u << 18),
+		Feet = (1u << 19),
+		Waist = (1u << 20),
+		PowerSource = (1u << 21),
+		Ammo = (1u << 22),
 
 		PrimarySecondary = Primary + Secondary,
 		Ears = RightEar + LeftEar,
 		Wrists = LeftWrist + RightWrist,
-		Fingers = LeftFingers + RightFingers
+		Fingers = LeftFingers + RightFingers,
+
+		VisibleArmor = Head + Arms + Wrists + Hands + Chest + Legs + Feet,
 	};
+
+	static const uint32 convert(const uint32 pSlotID) {
+		switch (pSlotID) {
+		case SlotID::CHARM: return Charm;
+		case SlotID::LEFT_EAR: return LeftEar;
+		case SlotID::HEAD: return Head;
+		case SlotID::FACE: return Face;
+		case SlotID::RIGHT_EAR: return RightEar;
+		case SlotID::NECK: return Neck;
+		case SlotID::SHOULDERS: return Shoulders;
+		case SlotID::ARMS: return Arms;
+		case SlotID::BACK: return Back;
+		case SlotID::LEFT_WRIST: return LeftWrist;
+		case SlotID::RIGHT_WRIST: return RightWrist;
+		case SlotID::RANGE: return Range;
+		case SlotID::HANDS: return Hands;
+		case SlotID::PRIMARY: return Primary;
+		case SlotID::SECONDARY: return Secondary;
+		case SlotID::LEFT_RING: return LeftFingers;
+		case SlotID::RIGHT_RING: return RightFingers;
+		case SlotID::CHEST: return Chest;
+		case SlotID::LEGS: return Legs;
+		case SlotID::FEET: return Feet;
+		case SlotID::WAIST: return Waist;
+		case SlotID::POWER_SOURCE: return PowerSource;
+		case SlotID::AMMO: return Ammo;
+		default: return None;
+		}
+	}
 }
 
 namespace ItemClass {
@@ -301,6 +561,7 @@ namespace ItemType {
 		Drink = 15,
 
 		TwoHandPierce = 35,
+		HandToHand = 45,
 
 		Augmentation = 54,
 	};
@@ -386,8 +647,10 @@ namespace ItemSize {
 // ContainterType will need some work.
 namespace ContainerType {
 	enum : uint8 {
-		NONE = 0,
-		NORMAL = 1
+		None = 0,
+		Normal = 1,
+
+		AugmentationSealer = 53,
 	};
 }
 
@@ -572,48 +835,6 @@ enum GuildRanks : GuildRank {
 	Officer = 1,
 	Leader = 2,
 	GR_None = 9
-};
-
-enum PlayableRaceIDs {
-	Human = 1,
-	Barbarian = 2,
-	Erudite = 3,
-	WoodElf = 4,
-	HighElf = 5,
-	DarkElf = 6,
-	HalfElf = 7,
-	Dwarf = 8,
-	Troll = 9,
-	Ogre = 10,
-	Halfling = 11,
-	Gnome = 12,
-	Iksar = 128,
-	Vahshir = 130,
-	Froglok = 330,
-	Drakkin = 522
-};
-
-enum ClassIDs : ClassID {
-	Warrior = 1,
-	Cleric = 2,
-	Paladin = 3,
-	Ranger = 4,
-	Shadowknight = 5,
-	Druid = 6,
-	Monk = 7,
-	Bard = 8,
-	Rogue = 9,
-	Shaman = 10,
-	Necromancer = 11,
-	Wizard = 12,
-	Magician = 13,
-	Enchanter = 14,
-	Beastlord = 15,
-	Berserker = 16
-};
-
-enum PlayerDeityIDs {
-	Agnostic = 396
 };
 
 enum ZoneIDs : ZoneID {

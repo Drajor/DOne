@@ -490,6 +490,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player clicks the 'Refresh' button in the Claim Window.
 		_handleClaimRequest(pPacket);
 		break;
+	case OP_AugmentItem:
+		// NOTE: This occurs when the player presses 'Insert' on the Augmentation Sealer.
+		_handleAugmentItem(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -584,7 +588,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->class_ = mCharacter->getClass();
 	payload->level = mCharacter->getLevel();
 	//payload->binds[5];
-	payload->deity = mCharacter->getDeityID();
+	payload->deity = mCharacter->getDeity();
 	payload->guild_id = mCharacter->getGuildID();
 	//payload->birthday;			// characters bday
 	//payload->lastlogin;			// last login or zone time
@@ -2725,8 +2729,30 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 
 	auto payload = MoveItem::convert(pPacket->pBuffer);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
-	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)){
+
+	Item* equipItem = nullptr;
+
+	// Character is trying to equip an Item.
+	if (SlotID::isWorn(payload->mToSlot)) {
+		equipItem = mCharacter->getInventory()->getItem(payload->mFromSlot);
+		EXPECTED(equipItem);
+
+		// Check: Can Character equip this Item?
+		if (!mCharacter->canEquip(equipItem, payload->mToSlot)) {
+			inventoryError();
+			return;
+		}
+	}
+
+	// Move.
+	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)) {
 		inventoryError();
+		return;
+	}
+
+	// Where an attunable Item is being equipped, attune it!
+	if (equipItem && equipItem->isAttunable()) {
+		equipItem->setIsAttuned(true);
 	}
 }
 
@@ -2787,6 +2813,7 @@ void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const u
 
 void ZoneClientConnection::inventoryError(){
 	sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
+	Log::error("Inventory Error");
 }
 
 void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPacket) {
@@ -3068,6 +3095,7 @@ void ZoneClientConnection::_handleClaimRequest(const EQApplicationPacket* pPacke
 
 void ZoneClientConnection::sendItemView(Item* pItem) {
 	EXPECTED(pItem);
+	EXPECTED(mConnected);
 
 	uint32 payloadSize = 0;
 	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketViewLink);
@@ -3075,6 +3103,48 @@ void ZoneClientConnection::sendItemView(Item* pItem) {
 	auto packet = new EQApplicationPacket(OP_ItemLinkResponse, data, payloadSize);
 	sendPacket(packet);
 	delete packet;
+}
+
+void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(AugmentItem::sizeCheck(pPacket));
+
+	auto payload = AugmentItem::convert(pPacket);
+
+	Log::info(payload->_debug());
+
+	auto container = mCharacter->getInventory()->getItem(payload->mContainerSlot);
+	EXPECTED(container);
+	EXPECTED(container->getContainerType() == ContainerType::AugmentationSealer);
+	EXPECTED(container->getContainerSlots() == 2);
+
+	auto item0 = container->getContents(0);
+	EXPECTED(item0);
+	auto item1 = container->getContents(1);
+	EXPECTED(item1);
+
+	Item* item = nullptr;
+	Item* augment = nullptr;
+
+	// Determine which item is the augment.
+
+	if (item0->getItemType() == ItemType::Augmentation) {
+		augment = item0;
+		item = item1;
+	}
+	else {
+		EXPECTED(item1->getItemType() == ItemType::Augmentation);
+		augment = item1;
+		item = item0;
+	}
+
+	EXPECTED(item->insertAugment(augment));
+
+	// Remove 
+	// Clear the container.
+
+	// Send the augmented item back.
 }
 
 //

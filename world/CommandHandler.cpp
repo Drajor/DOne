@@ -14,6 +14,7 @@
 #include "Constants.h"
 #include "Limits.h"
 #include "ItemGenerator.h"
+#include "ItemDataStore.h"
 #include "Item.h"
 #include "Inventory.h"
 
@@ -770,6 +771,55 @@ public:
 };
 
 /*****************************************************************************************************************************/
+class SummonItemCommand : public Command {
+public:
+	SummonItemCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #si <item id> <qty=1>");
+		setMinimumParameters(1);
+		setMaximumParameters(2);
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		uint32 itemID = 0;
+		if (!Utility::stoSafe(itemID, pParameters[0])) {
+			conversionError(pParameters[0]);
+			return false;
+		}
+
+		// Convert 'Quantity'
+		uint8 quantity = 1;
+		if (pParameters.size() == 2) {
+			if (!Utility::stoSafe(quantity, pParameters[1])) {
+				conversionError(pParameters[1]);
+				return false;
+			}
+		}
+
+		auto data = ItemDataStore::getInstance().get(itemID);
+		EXPECTED_BOOL(data);
+		for (auto i = 0; i < quantity; i++) {
+			auto item = new Item(data);
+			mInvoker->getInventory()->pushCursor(item);
+			send(mInvoker, item);
+		}
+
+		return true;
+	}
+
+	void send(Character* pInvoker, Item* pItem) {
+		EXPECTED(pInvoker);
+		EXPECTED(pItem);
+
+		uint32 payloadSize = 0;
+		const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
+
+		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+		pInvoker->getConnection()->sendPacket(outPacket);
+		safe_delete(outPacket);
+	}
+};
+
+/*****************************************************************************************************************************/
 class SummonRandomItemCommand : public Command {
 public:
 	SummonRandomItemCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
@@ -778,15 +828,15 @@ public:
 		mHelpMessages.push_back("Types: cont, head, chest, arms, wrists, legs, hands, feet ");
 	};
 
-	void send(Character* mInvoker, Item* pItem) {
-		EXPECTED(mInvoker);
+	void send(Character* pInvoker, Item* pItem) {
+		EXPECTED(pInvoker);
 		EXPECTED(pItem);
 
 		uint32 payloadSize = 0;
 		const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
 
 		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-		mInvoker->getConnection()->sendPacket(outPacket);
+		pInvoker->getConnection()->sendPacket(outPacket);
 		safe_delete(outPacket);
 	}
 
@@ -1123,6 +1173,7 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new KillCommand(100, { "kill" }));
 
+	mCommands.push_back(new SummonItemCommand(100, { "si" }));
 	mCommands.push_back(new SummonRandomItemCommand(100, { "sri" }));
 
 	mCommands.push_back(new SummonCommand(100, { "summon" }));
