@@ -329,3 +329,33 @@ const bool Item::augmentAllowed(Item* pAugment) {
 
 	return true;
 }
+
+const bool Item::clearContents(const uint32 pSubIndex) {
+	EXPECTED_BOOL(isContainer());
+	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
+	EXPECTED_BOOL(getContainerSize() > pSubIndex);
+	mContents[pSubIndex] = nullptr;
+
+	return true;
+}
+
+const bool Item::setContents(Item* pItem, const uint32 pSubIndex) {
+	EXPECTED_BOOL(pItem);
+	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
+	EXPECTED_BOOL(mContents[pSubIndex] == nullptr); // Prevent overriding Item pointer. Failure = bug.
+	EXPECTED_BOOL(isContainer());
+	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
+
+	mContents[pSubIndex] = pItem;
+	// Update the slot of the Item being set.
+	pItem->setSlot(SlotID::getChildSlot(getSlot(), pSubIndex));
+
+	return true;
+}
+
+void Item::updateContentsSlots() {
+	for (auto i = 0; i < SlotID::MAX_CONTENTS; i++) {
+		if (mContents[i])
+			mContents[i]->setSlot(SlotID::getChildSlot(getSlot(), i));
+	}
+}

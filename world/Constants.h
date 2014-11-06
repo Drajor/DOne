@@ -248,8 +248,17 @@ namespace SlotID {
 		MAIN_7 = 30,
 		CURSOR = 31,
 
-		MAIN_0_0 = 262, // Slot 23 with 10 slot container.
-		MAIN_1_0 = 272,
+		// Main Inventory Contents
+
+		MAIN_0_0 = 262, // (Parent) Slot 23 with 10 slot container.
+		MAIN_1_0 = 272, // (Parent) Slot 24
+		MAIN_2_0 = 282, // (Parent) Slot 25
+		MAIN_3_0 = 292, // (Parent) Slot 26
+		MAIN_4_0 = 302, // (Parent) Slot 27
+		MAIN_5_0 = 312, // (Parent) Slot 28
+		MAIN_6_0 = 322, // (Parent) Slot 29
+		MAIN_7_0 = 332, // (Parent) Slot 30
+		MAIN_7_9 = 341, // (End of Slot 30 sub-slots)
 
 		BANK_START = 2000,
 		BANK_END = 2023,
@@ -259,6 +268,7 @@ namespace SlotID {
 
 		SLOT_DELETE = 4294967295
 	};
+	static const uint32 MAX_CONTENTS = 10;
 	static const uint32 WORN_SLOTS = 0;
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
 	static const uint32 BANK_SLOTS = (BANK_END - BANK_START) + 1;
@@ -267,7 +277,59 @@ namespace SlotID {
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
 	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
+	static const bool isMainContents(const uint32 pSlot) { return pSlot >= MAIN_0_0 && pSlot <= MAIN_7_9; }
+	static const bool isBankContents(const uint32 pSlot) { return false; }
+	static const bool isSharedBankContents(const uint32 pSlot) { return false; }
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
+
+	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex < MAX_CONTENTS; }
+
+	// Returns the parent SlotID of pSlot
+	static const uint32 getParentSlot(const uint32 pSlot) {
+		// Main Inventory Contents.
+		if (isMainContents(pSlot)) {
+			return MAIN_0 + ((pSlot - MAIN_0_0) / MAX_CONTENTS);
+		}
+		// Bank Contents.
+		if (isBankContents(pSlot)) {
+			return 0; // TODO
+		}
+		// Shared Bank Contents.
+		if (isSharedBankContents(pSlot)) {
+			return 0; // TODO
+		}
+
+		// This is bad.
+		return 0;
+	}
+
+	static const uint32 getChildSlot(const uint32 pSlot, const uint32 pSubIndex) {
+		// Main Inventory Contents.
+		if (isMainInventory(pSlot)) {
+			return MAIN_0_0 + (MAX_CONTENTS * (pSlot - MAIN_0)) + pSubIndex; // Trust me, I'm a pirate.
+		}
+		// Bank Contents.
+		if (isBankContents(pSlot)) {
+			return 0; // TODO
+		}
+		// Shared Bank Contents.
+		if (isSharedBankContents(pSlot)) {
+			return 0; // TODO
+		}
+
+		// This is bad.
+		return 0;
+	}
+
+	static const uint32 getSubIndex(const uint32 pSlot) {
+		// Main Inventory Contents.
+		if (isMainContents(pSlot)) {
+			return (pSlot - MAIN_0_0) % 10;
+		}
+
+		// This is bad.
+		return 0;
+	}
 }
 
 /*

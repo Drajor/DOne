@@ -8,8 +8,13 @@ class Inventoryy { // We get an extra y for now.
 
 public:
 	Inventoryy(Character* pCharacter);
+
+	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
 	const bool put(Item* pItem, const uint32 pSlot);
+
+	// Returns the Item at pSlot or nullptr.
 	Item* getItem(const uint32 pSlot) const;
+
 	const unsigned char* getData(uint32& pSize); // Caller responsible for delete.
 	const bool move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
 	const bool consume(uint32 pSlot);
@@ -58,8 +63,18 @@ public:
 	inline const int32 getEnduranceRegen() const { return mEnduranceRegen; }
 
 private:
+	const bool slotValid(const uint32 pSlot) const;
 	Item* _popCursor();
+
+	// Will push Item at pFromSlot to cursor.
+	const bool _pushCursor(const uint32 pFromSlot);
+	
+	// Will push Item at pFromSlot to the cursor if it exists.
+	void _tryPushCursor(const uint32 pFromSlot);
+
 	void _set(Item* pItem, const uint32 pSlot);
+	const bool _clear(const uint32 pSlot);
+
 	Character* mCharacter = nullptr;
 
 	Item* mItems[SlotID::MAIN_SLOTS]; // Slots 0 - 30
