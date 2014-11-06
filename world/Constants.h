@@ -349,6 +349,9 @@ namespace SlotID {
 
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 
+	static const bool isValidBankIndex(const uint32 pIndex) { return pIndex < BANK_SLOTS; }
+	static const bool isValidSharedBankIndex(const uint32 pIndex) { return pIndex < SHARED_BANK_SLOTS; }
+
 	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex < MAX_CONTENTS; }
 
 	// Returns the parent SlotID of pSlot
@@ -376,12 +379,24 @@ namespace SlotID {
 			return MAIN_0_0 + (MAX_CONTENTS * (pSlot - MAIN_0)) + pSubIndex; // Trust me, I'm a pirate.
 		}
 		// Bank Contents.
-		if (isBankContents(pSlot)) {
+		if (isBank(pSlot)) {
 			return BANK_0_0 + (MAX_CONTENTS * (pSlot - BANK_0)) + pSubIndex;
 		}
 		// Shared Bank Contents.
-		if (isSharedBankContents(pSlot)) {
+		if (isSharedBank(pSlot)) {
 			return SHARED_BANK_0_0 + (MAX_CONTENTS * (pSlot - SHARED_BANK_0)) + pSubIndex;
+		}
+
+		// This is bad.
+		return 0;
+	}
+
+	static const uint32 getIndex(const uint32 pSlot) {
+		if (isBank(pSlot)) {
+			return pSlot - BANK_0;
+		}
+		if (isSharedBank(pSlot)) {
+			return pSlot - SHARED_BANK_0;
 		}
 
 		// This is bad.

@@ -334,9 +334,10 @@ const bool Item::augmentAllowed(Item* pAugment) {
 }
 
 const bool Item::clearContents(const uint32 pSubIndex) {
+	Log::info("SubIndex = " + std::to_string(pSubIndex));
 	EXPECTED_BOOL(isContainer());
 	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
-	EXPECTED_BOOL(getContainerSize() > pSubIndex);
+	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
 	mContents[pSubIndex] = nullptr;
 
 	return true;
@@ -348,6 +349,7 @@ const bool Item::setContents(Item* pItem, const uint32 pSubIndex) {
 	EXPECTED_BOOL(mContents[pSubIndex] == nullptr); // Prevent overriding Item pointer. Failure = bug.
 	EXPECTED_BOOL(isContainer());
 	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
+	EXPECTED_BOOL(getContainerSize() >= pItem->getSize());
 
 	mContents[pSubIndex] = pItem;
 	// Update the slot of the Item being set.

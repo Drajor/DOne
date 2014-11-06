@@ -11,6 +11,7 @@ public:
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
 	const bool put(Item* pItem, const uint32 pSlot);
+	const bool putContainer(Item* pItem, const uint32 pSlot);
 
 	// Returns the Item at pSlot or nullptr.
 	Item* getItem(const uint32 pSlot) const;
@@ -63,17 +64,9 @@ public:
 	inline const int32 getEnduranceRegen() const { return mEnduranceRegen; }
 
 private:
-	const bool slotValid(const uint32 pSlot) const;
 	Item* _popCursor();
-
-	// Will push Item at pFromSlot to cursor.
-	const bool _pushCursor(const uint32 pFromSlot);
-	
-	// Will push Item at pFromSlot to the cursor if it exists.
-	void _tryPushCursor(const uint32 pFromSlot);
-
-	void _set(Item* pItem, const uint32 pSlot);
 	const bool _clear(const uint32 pSlot);
+	const bool _clearContainerSlot(const uint32 pSlot);
 
 	Character* mCharacter = nullptr;
 
@@ -84,6 +77,9 @@ private:
 
 	void updateConsumables();
 	Item* findFirst(const uint8 pItemType);
+	
+	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
+	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 

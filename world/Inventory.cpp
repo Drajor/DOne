@@ -124,12 +124,20 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 
 Item* Inventoryy::getItem(const uint32 pSlot) const {
 	// Getting: Cursor
-	if (SlotID::isCursor(pSlot))
-		return mCursor.empty() ? nullptr : mCursor.front();
+	if (SlotID::isCursor(pSlot)) {
+		Item* item = mCursor.empty() ? nullptr : mCursor.front();
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+		
 
 	// Getting: Main Inventory or Worn.
-	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot))
-		return mItems[pSlot];
+	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
+		Item* item = mItems[pSlot];
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+		
 
 	// Getting: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {
@@ -137,7 +145,49 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 		Item* parentContainer = getItem(parentSlotID);
 		EXPECTED_PTR(parentContainer);
 		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		return parentContainer->getContents(subIndex);
+		Item* item = parentContainer->getContents(subIndex);
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+	
+	// Getting: Bank.
+	if (SlotID::isBank(pSlot)) {
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_PTR(SlotID::isValidBankIndex(index));
+		Item* item = mBank[index];
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+
+	// Getting: Bank Contents.
+	if (SlotID::isBankContents(pSlot)) {
+		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
+		Item* parentContainer = getItem(parentSlotID);
+		EXPECTED_PTR(parentContainer);
+		const uint32 subIndex = SlotID::getSubIndex(pSlot);
+		Item* item = parentContainer->getContents(subIndex);
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+
+	// Getting: Shared Bank.
+	if (SlotID::isSharedBank(pSlot)) {
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_PTR(SlotID::isValidSharedBankIndex(index));
+		Item* item = mSharedBank[index];
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+
+	// Getting: Shared Bank Contents.
+	if (SlotID::isSharedBankContents(pSlot)) {
+		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
+		Item* parentContainer = getItem(parentSlotID);
+		EXPECTED_PTR(parentContainer);
+		const uint32 subIndex = SlotID::getSubIndex(pSlot);
+		Item* item = parentContainer->getContents(subIndex);
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
 	}
 
 	return nullptr;
@@ -163,27 +213,74 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 		return true;
 	}
 
-	// Putting item in Main Contents
-	if (SlotID::isMainContents(pSlot)) {
-		// Determine the parent slot.
-		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-		// Check: Parent is a valid Item.
-		Item* parentContainer = getItem(parentSlotID);
-		EXPECTED_BOOL(parentContainer);
-		// Check: Parent is a valid container.
-		EXPECTED_BOOL(parentContainer->isContainer());
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		// Check: Index is valid for container size.
-		EXPECTED_BOOL(parentContainer->getContainerSlots() > subIndex);
-		// Check: No existing Item where pItem is being put
-		EXPECTED_BOOL(parentContainer->getContents(subIndex) == nullptr);
-		// Finally try and put the Item inside the container.
-		EXPECTED_BOOL(parentContainer->setContents(pItem, subIndex));
+	// Putting: Bank.
+	if (SlotID::isBank(pSlot)) {
+		Item* existingItem = getItem(pSlot);
+		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
+		pItem->setSlot(pSlot);
 
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidBankIndex(index));
+		mBank[index] = pItem;
+		return true;
+	}
+
+	// Putting: Shared Bank.
+	if (SlotID::isSharedBank(pSlot)) {
+		// TODO: Check No Drop / Attuned.
+		Item* existingItem = getItem(pSlot);
+		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
+		pItem->setSlot(pSlot);
+
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidSharedBankIndex(index));
+		mSharedBank[index] = pItem;
+		return true;
+	}
+
+	// Putting: Main Contents.
+	if (SlotID::isMainContents(pSlot)) {
+		EXPECTED_BOOL(putContainer(pItem, pSlot));
+		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
+		return true;
+	}
+
+	// Putting: Bank Contents.
+	if (SlotID::isBankContents(pSlot)) {
+		EXPECTED_BOOL(putContainer(pItem, pSlot));
+		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
+		return true;
+	}
+
+	// Putting: Shared Bank Contents.
+	if (SlotID::isSharedBankContents(pSlot)) {
+		EXPECTED_BOOL(putContainer(pItem, pSlot));
+		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
 		return true;
 	}
 
 	return false;
+}
+
+const bool Inventoryy::putContainer(Item* pItem, const uint32 pSlot) {
+	EXPECTED_BOOL(pItem);
+
+	// Determine the parent slot.
+	const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
+	// Check: Parent is a valid Item.
+	Item* parentContainer = getItem(parentSlotID);
+	EXPECTED_BOOL(parentContainer);
+	// Check: Parent is a valid container.
+	EXPECTED_BOOL(parentContainer->isContainer());
+	const uint32 subIndex = SlotID::getSubIndex(pSlot);
+	// Check: Index is valid for container size.
+	EXPECTED_BOOL(parentContainer->getContainerSlots() > subIndex);
+	// Check: No existing Item where pItem is being put
+	EXPECTED_BOOL(parentContainer->getContents(subIndex) == nullptr);
+	// Finally try and put the Item inside the container.
+	EXPECTED_BOOL(parentContainer->setContents(pItem, subIndex));
+
+	return true;
 }
 
 const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize) {
@@ -195,7 +292,7 @@ const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const 
 		return true;
 	}
 
-	// Moving To: Free Memory
+	// Deleting an Item.
 	if (SlotID::isDelete(pToSlot)) {
 		Log::info("[Inventory] DELETE");
 		// NOTE: As far as I know the only possible slot to delete from is cursor.
@@ -208,154 +305,19 @@ const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const 
 		return true;
 	}
 
-	// Moving To: Cursor
-	if (SlotID::isCursor(pToSlot)) {
-		Item* itemFrom = getItem(pFromSlot);
-		EXPECTED_BOOL(itemFrom); // Failure = desync
-		EXPECTED_BOOL(itemFrom->getSlot() == pFromSlot); // Failure = bug.
-
-		// Check: Cursor is empty.
-		if (isCursorEmpty()) {
-			// Push the Item from pFromSlot on to the cursor.
-			EXPECTED_BOOL(pushCursor(itemFrom));
-			// Free pFromSlot
-			EXPECTED_BOOL(_clear(pFromSlot));
-			return true;
-		}
-
-		// Cursor is not empty.
-		auto cursorItem = _popCursor();
-		EXPECTED_BOOL(cursorItem); // Failure = desync
-		EXPECTED_BOOL(SlotID::isCursor(cursorItem->getSlot())); // Failure = bug.
-
-		// Push the Item from pFromSlot on to the cursor.
-		EXPECTED_BOOL(pushCursor(itemFrom));
-		// Put the Item that was on the cursor into pFromSlot.
-		EXPECTED_BOOL(_clear(pFromSlot));
-		EXPECTED_BOOL(put(cursorItem, pFromSlot));
+	// Picking an Item up.
+	if (SlotID::isCursor(pFromSlot)) {
+		EXPECTED_BOOL(_putDown(pToSlot, pStackSize));
 		return true;
 	}
 
-	// Moving To: Main Inventory
-	if (SlotID::isMainInventory(pToSlot)) {
-		// Moving From: Cursor
-		if (SlotID::isCursor(pFromSlot)) {
-			Item* cursorItem = _popCursor();
-			EXPECTED_BOOL(cursorItem); // Failure = desync.
-			EXPECTED_BOOL(SlotID::isCursor(cursorItem->getSlot())); // Failure = bug.
-
-			// Check: Item in pToSlot
-			Item* invItem = getItem(pToSlot);
-			if (invItem) {
-				EXPECTED_BOOL(invItem->getSlot() == pToSlot); // Failure = bug.
-				// Push the Item from pToSlot on to the cursor.
-				EXPECTED_BOOL(pushCursor(invItem));
-			}
-
-			EXPECTED_BOOL(_clear(pToSlot));
-			EXPECTED_BOOL(put(cursorItem, pToSlot));
-
-			// Check: Container has moved, contents will need to have slot updated.
-			if (cursorItem->isContainer())
-				cursorItem->updateContentsSlots();
-
-			return true;
-		}
-
-		return false;
-	}
-
-	// Moving To: Main Contents
-	if (SlotID::isMainContents(pToSlot)) {
-		// Moving From: Cursor
-		if (SlotID::isCursor(pFromSlot)) {
-			Item* fromItem = _popCursor();
-			EXPECTED_BOOL(fromItem); // Failure = desync.
-			EXPECTED_BOOL(SlotID::isCursor(fromItem->getSlot())); // Failure = bug.
-			EXPECTED_BOOL(fromItem->isContainer() == false); // Prevent moving container into container.
-
-			const uint32 toParentSlot = SlotID::getParentSlot(pToSlot);
-			EXPECTED_BOOL(SlotID::isMainInventory(toParentSlot)); // Failure = bug.
-
-			// Check: Valid container.
-			Item* toParentItem = getItem(toParentSlot);
-			EXPECTED_BOOL(toParentItem);
-			EXPECTED_BOOL(toParentItem->isContainer());
-
-			// Check: Container has enough slots.
-			const uint32 subIndex = SlotID::getSubIndex(pToSlot);
-			EXPECTED_BOOL(toParentItem->getContainerSlots() > subIndex);
-
-			// Ensure the container is the correct size.
-			EXPECTED_BOOL(toParentItem->getContainerSize() >= fromItem->getSize());
-
-			// If there is an existing Item in pToSlot, push it to the cursor.
-			Item* invItem = getItem(pToSlot);
-			if (invItem) {
-				EXPECTED_BOOL(invItem->getSlot() == pToSlot); // Failure = bug.
-				// Push the Item from pToSlot on to the cursor.
-				EXPECTED_BOOL(pushCursor(invItem));
-			}
-
-			// TODO: If the item being pushed to the cursor is a container, what do I do about contents slot IDs?
-
-			// Clear the destination slot.
-			EXPECTED_BOOL(_clear(pToSlot));
-			// Put Item into destination slot.
-			EXPECTED_BOOL(put(fromItem, pToSlot));
-
-			return true;
-		}
-
-		return false;
-	}
-
-	// Moving To: Worn Inventory
-	if (SlotID::isWorn(pToSlot)) {
-		// Moving From: Cursor
-		if (SlotID::isCursor(pFromSlot)) {
-			Item* cursorItem = _popCursor();
-			EXPECTED_BOOL(cursorItem); // Failure = desync.
-			EXPECTED_BOOL(SlotID::isCursor(cursorItem->getSlot())); // Failure = bug.
-
-			// Check: Item in pToSlot
-			Item* invItem = getItem(pToSlot);
-			if (invItem) {
-				EXPECTED_BOOL(invItem->getSlot() == pToSlot); // Failure = bug.
-				// Push the Item from pToSlot on to the cursor.
-				EXPECTED_BOOL(pushCursor(invItem));
-
-				// Remove equipped Item
-				_calculateRemove(invItem);
-			}
-
-			// NOTE: _set is required because put prevents Item pointers overriding.
-			EXPECTED_BOOL(_clear(pToSlot));
-			EXPECTED_BOOL(put(cursorItem, pToSlot));
-
-			// Add equipped Item
-			_calculateAdd(cursorItem);
-
-			return true;
-		}
-
-		return false;
+	// Putting an Item down.
+	if (SlotID::isCursor(pToSlot)) {
+		EXPECTED_BOOL(_pickUp(pFromSlot, pStackSize));
+		return true;
 	}
 
 	return false;
-}
-
-const bool Inventoryy::_pushCursor(const uint32 pFromSlot) {
-	Item* item = getItem(pFromSlot);
-	EXPECTED_BOOL(item);
-	EXPECTED_BOOL(pushCursor(item));
-	return true;
-}
-
-void Inventoryy::_tryPushCursor(const uint32 pFromSlot) {
-	Item* item = getItem(pFromSlot);
-	if (item)
-		pushCursor(item);
 }
 
 Item* Inventoryy::_popCursor() {
@@ -370,23 +332,6 @@ const bool Inventoryy::pushCursor(Item* pItem) {
 	mCursor.push(pItem);
 	pItem->setSlot(SlotID::CURSOR);
 	return true;
-}
-
-void Inventoryy::_set(Item* pItem, const uint32 pSlot) {
-	// Setting Main Inventory or Worn.
-	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
-		mItems[pSlot] = pItem;
-	}
-	// Setting Main Contents.
-	if (SlotID::isMainContents(pSlot)) {
-		// Determine the parent slot.
-		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-		Item* parentContainer = getItem(parentSlotID);
-		if (!parentContainer) return;
-
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		parentContainer->setContents(pItem, pSlot);
-	}
 }
 
 const bool Inventoryy::consume(uint32 pSlot) {
@@ -543,36 +488,103 @@ Item* Inventoryy::findFirst(const uint8 pItemType) {
 	return nullptr;
 }
 
-const bool Inventoryy::slotValid(const uint32 pSlot) const {
-	if (SlotID::isCursor(pSlot)) return true;
-	if (SlotID::isMainInventory(pSlot)) return true;
-	if (SlotID::isWorn(pSlot)) return true;
-	
-	if (SlotID::isMainContents(pSlot)) {
-
-	}
-
-	return false;
-}
-
 const bool Inventoryy::_clear(const uint32 pSlot) {
 	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
 		mItems[pSlot] = nullptr;
 		return true;
 	}
+	// Clearing: Bank slot.
+	if (SlotID::isBank(pSlot)) {
+		uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidBankIndex(index));
+		mBank[index] = nullptr;
+		return true;
+	}
+	// Clearing: Shared Bank slot.
+	if (SlotID::isSharedBank(pSlot)) {
+		uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidSharedBankIndex(index));
+		mSharedBank[index] = nullptr;
+		return true;
+	}
+
+	// Clearing: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {
-		const uint32 parentSlot = SlotID::getParentSlot(pSlot);
-		EXPECTED_BOOL(SlotID::isMainInventory(parentSlot));
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
+		EXPECTED_BOOL(_clearContainerSlot(pSlot));
+		return true;
+	}
 
-		Item* container = getItem(parentSlot);
-		EXPECTED_BOOL(container);
-		EXPECTED_BOOL(container->isContainer());
-		EXPECTED_BOOL(container->getContainerSlots() > subIndex);
-		EXPECTED_BOOL(container->clearContents(subIndex));
+	// Clearing: Bank Contents.
+	if (SlotID::isBankContents(pSlot)) {
+		EXPECTED_BOOL(_clearContainerSlot(pSlot));
+		return true;
+	}
 
+	// Clearing: Shared Bank Contents.
+	if (SlotID::isSharedBankContents(pSlot)) {
+		EXPECTED_BOOL(_clearContainerSlot(pSlot));
 		return true;
 	}
 
 	return false;
+}
+
+const bool Inventoryy::_clearContainerSlot(const uint32 pSlot) {
+	const uint32 parentSlot = SlotID::getParentSlot(pSlot);
+	const uint32 subIndex = SlotID::getSubIndex(pSlot);
+
+	if (SlotID::isMainContents(pSlot)) EXPECTED_BOOL(SlotID::isMainInventory(parentSlot));
+	if (SlotID::isBankContents(pSlot)) EXPECTED_BOOL(SlotID::isBank(parentSlot));
+	if (SlotID::isSharedBankContents(pSlot)) EXPECTED_BOOL(SlotID::isSharedBank(parentSlot));
+
+	EXPECTED_BOOL(SlotID::subIndexValid(subIndex));
+
+	Item* container = getItem(parentSlot);
+	EXPECTED_BOOL(container);
+	EXPECTED_BOOL(container->isContainer());
+	EXPECTED_BOOL(container->getContainerSlots() > subIndex);
+	EXPECTED_BOOL(container->clearContents(subIndex));
+
+	return true;
+}
+
+const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
+	Item* cursorItem = _popCursor();
+	EXPECTED_BOOL(cursorItem); // Failure = desync.
+
+	// Check: Existing Item in pToSlot.
+	Item* existing = getItem(pToSlot);
+	if (existing) {
+		// Pick up the existing Item.
+		EXPECTED_BOOL(_pickUp(pToSlot, existing->getStacks()));
+
+		// TODO: This is where stacks are merged.
+	}
+
+	EXPECTED_BOOL(put(cursorItem, pToSlot));
+
+	// Check: Worn Item being equipped.
+	if (SlotID::isWorn(pToSlot))
+		_calculateAdd(cursorItem);
+
+	// Check: Container being put down.
+	if (cursorItem->isContainer())
+		cursorItem->updateContentsSlots();
+
+	return true;
+}
+
+const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) {
+	Item* pickUp = getItem(pFromSlot);
+	EXPECTED_BOOL(pickUp);
+	EXPECTED_BOOL(pushCursor(pickUp));
+	EXPECTED_BOOL(_clear(pFromSlot));
+
+	// Check: Worn Item being un-equipped.
+	if (SlotID::isWorn(pFromSlot))
+		_calculateRemove(pickUp);
+
+	// TODO: This is where stacks are split.
+
+	return true;
 }
