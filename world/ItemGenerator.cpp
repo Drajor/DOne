@@ -223,7 +223,7 @@ const uint32 ItemGenerator::_getContainerIcon(const Rarity pRarity) {
 		883,
 		892
 	};
-	return icons[Random::make<uint32>(0, icons.size())];
+	return icons[Random::make<uint32>(0, icons.size()-1)];
 	//return Random::make(icons);
 	//return MakeRandomInt(0, icons.size());
 	/*

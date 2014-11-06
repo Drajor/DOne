@@ -7,7 +7,9 @@
 
 Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	for (auto& i : mItems) i = nullptr;
-
+	for (auto& i : mBank) i = nullptr;
+	for (auto& i : mSharedBank) i = nullptr;
+	
 	//auto itemData = new ItemData();
 	//itemData->mID = 2;
 	//itemData->mInstanceID = 2;

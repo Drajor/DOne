@@ -112,7 +112,7 @@ static const String SYS_NAME = "[System]";
 
 enum Rarity : uint8 { Common, Magic, Rare, Artifact, RarityMax };
 static const std::array<Rarity, RarityMax> RarityArray = { Rarity::Common, Rarity::Magic, Rarity::Rare, Rarity::Artifact };
-static bool RarityRangeCheck(const uint8 pRarity) { return pRarity < Artifact; }
+static bool RarityRangeCheck(const uint8 pRarity) { return pRarity <= Artifact; }
 
 enum PlayableRaceIDs {
 	Human = 1,
@@ -248,6 +248,8 @@ namespace SlotID {
 		MAIN_7 = 30,
 		CURSOR = 31,
 
+		MAX_CURSOR_DEPTH = 37, // Underfoot only allows for a maximum of 37 Items on the cursor.
+
 		// Main Inventory Contents
 
 		MAIN_0_0 = 262, // (Parent) Slot 23 with 10 slot container.
@@ -260,26 +262,91 @@ namespace SlotID {
 		MAIN_7_0 = 332, // (Parent) Slot 30
 		MAIN_7_9 = 341, // (End of Slot 30 sub-slots)
 
-		BANK_START = 2000,
-		BANK_END = 2023,
+		// Bank Primary
 
-		SHARED_BANK_START = 2500,
-		SHARED_BANK_END = 2501,
+		BANK_0 = 2000,
+		BANK_1 = 2001,
+		BANK_2 = 2002,
+		BANK_3 = 2003,
+		BANK_4 = 2004,
+		BANK_5 = 2005,
+		BANK_6 = 2006,
+		BANK_7 = 2007,
+		BANK_8 = 2008,
+		BANK_9 = 2009,
+		BANK_10 = 2010,
+		BANK_11 = 2011,
+		BANK_12 = 2012,
+		BANK_13 = 2013,
+		BANK_14 = 2014,
+		BANK_15 = 2015,
+		BANK_16 = 2016,
+		BANK_17 = 2017,
+		BANK_18 = 2018,
+		BANK_19 = 2019,
+		BANK_20 = 2020,
+		BANK_21 = 2021,
+		BANK_22 = 2022,
+		BANK_23 = 2023,
+
+		// Bank Contents
+
+		BANK_0_0 = 2032, // (Parent) Slot 2000
+		BANK_1_0 = 2042, // (Parent) Slot 2001
+		BANK_2_0 = 2052, // (Parent) Slot 2002
+		BANK_3_0 = 2062, // (Parent) Slot 2003
+		BANK_4_0 = 2072, // (Parent) Slot 2004
+		BANK_5_0 = 2082, // (Parent) Slot 2005
+		BANK_6_0 = 2092, // (Parent) Slot 2006
+		BANK_7_0 = 2102, // (Parent) Slot 2007
+		BANK_8_0 = 2112, // (Parent) Slot 2008
+		BANK_9_0 = 2122, // (Parent) Slot 2009
+		BANK_10_0 = 2132, // (Parent) Slot 2010
+		BANK_11_0 = 2142, // (Parent) Slot 2011
+		BANK_12_0 = 2152, // (Parent) Slot 2012
+		BANK_13_0 = 2162, // (Parent) Slot 2013
+		BANK_14_0 = 2172, // (Parent) Slot 2014
+		BANK_15_0 = 2182, // (Parent) Slot 2015
+		BANK_16_0 = 2192, // (Parent) Slot 2016
+		BANK_17_0 = 2202, // (Parent) Slot 2017
+		BANK_18_0 = 2212, // (Parent) Slot 2018
+		BANK_19_0 = 2222, // (Parent) Slot 2019
+		BANK_20_0 = 2232, // (Parent) Slot 2020
+		BANK_21_0 = 2242, // (Parent) Slot 2021
+		BANK_22_0 = 2252, // (Parent) Slot 2022
+		BANK_23_0 = 2262, // (Parent) Slot 2023
+		BANK_23_9 = 2271, // (End of Slot 2023 sub-slots)
+
+		// Shared Bank Primary
+
+		SHARED_BANK_0 = 2500,
+		SHARED_BANK_1 = 2501,
+
+		// Shared Bank Contents
+
+		SHARED_BANK_0_0 = 2532, // (Parent) Slot 2500
+		SHARED_BANK_1_0 = 2542, // (Parent) Slot 2501
+		SHARED_BANK_1_9 = 2551, // (End of Slot 2542 sub-slots)
 
 		SLOT_DELETE = 4294967295
 	};
 	static const uint32 MAX_CONTENTS = 10;
-	static const uint32 WORN_SLOTS = 0;
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
-	static const uint32 BANK_SLOTS = (BANK_END - BANK_START) + 1;
-	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_END - SHARED_BANK_START) + 1;
+	static const uint32 BANK_SLOTS = (BANK_23 - BANK_0) + 1;
+	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
 
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
+
 	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
 	static const bool isMainContents(const uint32 pSlot) { return pSlot >= MAIN_0_0 && pSlot <= MAIN_7_9; }
-	static const bool isBankContents(const uint32 pSlot) { return false; }
-	static const bool isSharedBankContents(const uint32 pSlot) { return false; }
+	
+	static const bool isBank(const uint32 pSlot) { return pSlot >= BANK_0 && pSlot <= BANK_23; }
+	static const bool isBankContents(const uint32 pSlot) { return pSlot >= BANK_0_0 && pSlot <= BANK_23_9; }
+	
+	static const bool isSharedBank(const uint32 pSlot) { return pSlot >= SHARED_BANK_0 && pSlot <= SHARED_BANK_1; }
+	static const bool isSharedBankContents(const uint32 pSlot) { return pSlot >= SHARED_BANK_0_0 && pSlot <= SHARED_BANK_1_9; }
+
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 
 	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex < MAX_CONTENTS; }
@@ -292,11 +359,11 @@ namespace SlotID {
 		}
 		// Bank Contents.
 		if (isBankContents(pSlot)) {
-			return 0; // TODO
+			return BANK_0 + ((pSlot - BANK_0_0) / MAX_CONTENTS);
 		}
 		// Shared Bank Contents.
 		if (isSharedBankContents(pSlot)) {
-			return 0; // TODO
+			return SHARED_BANK_0 + ((pSlot - SHARED_BANK_0_0) / MAX_CONTENTS);
 		}
 
 		// This is bad.
@@ -310,11 +377,11 @@ namespace SlotID {
 		}
 		// Bank Contents.
 		if (isBankContents(pSlot)) {
-			return 0; // TODO
+			return BANK_0_0 + (MAX_CONTENTS * (pSlot - BANK_0)) + pSubIndex;
 		}
 		// Shared Bank Contents.
 		if (isSharedBankContents(pSlot)) {
-			return 0; // TODO
+			return SHARED_BANK_0_0 + (MAX_CONTENTS * (pSlot - SHARED_BANK_0)) + pSubIndex;
 		}
 
 		// This is bad.
@@ -325,6 +392,14 @@ namespace SlotID {
 		// Main Inventory Contents.
 		if (isMainContents(pSlot)) {
 			return (pSlot - MAIN_0_0) % 10;
+		}
+		// Bank Contents.
+		if (isBankContents(pSlot)) {
+			return (pSlot - BANK_0_0) % 10;
+		}
+		// Shared Bank Contents.
+		if (isSharedBankContents(pSlot)) {
+			return (pSlot - SHARED_BANK_0_0) % 10;
 		}
 
 		// This is bad.

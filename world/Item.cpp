@@ -12,6 +12,9 @@ Item::~Item() {
 	for (auto i : mAugments) {
 		if (i) delete i;
 	}
+	for (auto i : mContents) {
+		if (i) delete i;
+	}
 }
 
 Item* Item::getAugment(const uint8 pSlot) const {
