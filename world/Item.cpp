@@ -8,6 +8,10 @@ Item::Item(ItemData* pItemData) : mItemData(pItemData) {
 	for (auto& i : mContents) i = nullptr;
 }
 
+Item* Item::copy() const {
+	return new Item(mItemData);
+}
+
 Item::~Item() {
 	for (auto i : mAugments) {
 		if (i) delete i;
@@ -424,5 +428,13 @@ const bool Item::isTradeable() {
 		if (i && !i->isTradeable()) return false;
 	}
 
+	return true;
+}
+
+const bool Item::removeStacks(const uint32 pStacks) {
+	EXPECTED_BOOL(isStackable());
+	EXPECTED_BOOL(getStacks() > pStacks);
+
+	mStacks -= pStacks;
 	return true;
 }

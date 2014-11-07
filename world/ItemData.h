@@ -202,7 +202,7 @@ struct ItemData {
 	int32 mHaste = 0;
 	int32 mDamageShield = 0;
 	uint32 mGuildFavor = 0;
-	uint32 augdistil = 0;
+	uint32 mAugmentationDistiller = 0; // This number refers to an Item ID.
 	int32 __Unknown11 = 0;
 	uint32 __Unknown12 = 0;
 	uint8 mNoPet = 0; // 0 = OFF, 1 = ON

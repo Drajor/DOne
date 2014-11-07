@@ -21,7 +21,7 @@ void ItemDataStore::_bootstrap() {
 		auto data = &mItemData[1];
 		data->mID = 1;
 		auto item = new Item(data);
-		
+
 		item->setName("Augmentation Sealer");
 		item->setIDFile("IT63");
 		item->setIcon(1142);
@@ -29,6 +29,36 @@ void ItemDataStore::_bootstrap() {
 		item->setContainerType(ContainerType::AugmentationSealer);
 		item->setContainerSlots(2);
 		item->setContainerSize(ContainerSize::Giant);
+
+		delete item;
+	}
+	// Universal Distiller.
+	{
+		auto data = &mItemData[2];
+		data->mID = 2;
+		auto item = new Item(data);
+
+		item->setName("Universal Distiller");
+		item->setIDFile("IT63");
+		item->setIcon(2267);
+		item->setItemType(ItemType::AugmentationDistiller);
+		item->setItemClass(ItemClass::Common);
+		item->setMaxStacks(10000);
+
+		delete item;
+	}
+	// Universal Solvent.
+	{
+		auto data = &mItemData[3];
+		data->mID = 3;
+		auto item = new Item(data);
+
+		item->setName("Universal Solvent");
+		item->setIDFile("IT63");
+		item->setIcon(2268);
+		item->setItemType(ItemType::AugmentationSolvent);
+		item->setItemClass(ItemClass::Common);
+		item->setMaxStacks(10000);
 
 		delete item;
 	}

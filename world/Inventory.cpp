@@ -227,7 +227,8 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 
 	// Putting: Shared Bank.
 	if (SlotID::isSharedBank(pSlot)) {
-		// TODO: Check No Drop / Attuned.
+		// Check: Only tradeable Items can be stored in the Shared bank.
+		EXPECTED_BOOL(pItem->isTradeable());
 		Item* existingItem = getItem(pSlot);
 		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
 		pItem->setSlot(pSlot);
@@ -305,13 +306,14 @@ const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const 
 		return true;
 	}
 
-	// Picking an Item up.
+
+	// Putting an Item down.
 	if (SlotID::isCursor(pFromSlot)) {
 		EXPECTED_BOOL(_putDown(pToSlot, pStackSize));
 		return true;
 	}
 
-	// Putting an Item down.
+	// Picking an Item up.
 	if (SlotID::isCursor(pToSlot)) {
 		EXPECTED_BOOL(_pickUp(pFromSlot, pStackSize));
 		return true;
@@ -583,6 +585,24 @@ const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
 const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) {
 	Item* pickUp = getItem(pFromSlot);
 	EXPECTED_BOOL(pickUp);
+
+	// Splitting the stack.
+	if (pStackSize > 0) {
+		const uint32 preSplitStacks = pickUp->getStacks();
+		EXPECTED_BOOL(pickUp->getStacks() > pStackSize);
+		EXPECTED_BOOL(pickUp->removeStacks(pStackSize));
+
+		Item* split = pickUp->copy();
+		split->setStacks(pStackSize);
+
+		// Check: The total number of stacks remains the same.
+		EXPECTED_BOOL(preSplitStacks == (pickUp->getStacks() + split->getStacks()));
+
+		EXPECTED_BOOL(pushCursor(split));
+		return true;
+	}
+
+	// Regular pick up.
 	EXPECTED_BOOL(pushCursor(pickUp));
 	EXPECTED_BOOL(_clear(pFromSlot));
 	pickUp->clearParent();
@@ -591,8 +611,6 @@ const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) 
 	// Check: Worn Item being un-equipped.
 	if (SlotID::isWorn(pFromSlot))
 		_calculateRemove(pickUp);
-
-	// TODO: This is where stacks are split.
 
 	return true;
 }

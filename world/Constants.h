@@ -716,6 +716,8 @@ namespace ItemType {
 		HandToHand = 45,
 
 		Augmentation = 54,
+		AugmentationSolvent = 55,
+		AugmentationDistiller = 56,
 	};
 }
 

@@ -8,6 +8,7 @@ class DynamicStructure;
 class Item {
 public:
 	Item(ItemData* pItemData);
+	Item* copy() const;
 	~Item();
 
 	const bool isTradeable();
@@ -58,6 +59,7 @@ public:
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
 	inline const uint32 getStacks() const { return mStacks; }
 	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
+	const bool removeStacks(const uint32 pStacks);;
 	inline const bool isAttuned() { return mAttuned; }
 	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
 
@@ -237,9 +239,10 @@ public:
 	inline const int32 getHaste() const { return mItemData->mHaste; }
 	inline const int32 getDamageShield() const { return mItemData->mDamageShield; }
 	inline const uint32 getGuildFavor() const { return mItemData->mGuildFavor; }
-	// TODO: augdistil
+	inline const uint32 getAugmentationDistiller() const { return mItemData->mAugmentationDistiller; }
 	inline const uint8 getIsNoPet() const { return mItemData->mNoPet; }
 	// TODO: potion belt
+	inline const bool isStackable() const { return getMaxStacks() > 1; }
 	inline const uint32 getMaxStacks() const { return mItemData->mMaxStacks; }
 	inline const uint8 getIsNoTransfer() const { return mItemData->mNoTransfer; }
 	// TODO: expendablearrow
@@ -391,7 +394,7 @@ public:
 	inline void setHaste(const int32 pValue) { mItemData->mHaste = pValue; }
 	inline void setDamageShield(const int32 pValue) { mItemData->mDamageShield = pValue; }
 	inline void setGuildFavor(const uint32 pValue) { mItemData->mGuildFavor = pValue; }
-	// TODO: augdistil
+	inline void setAugmentationDistiller(const uint32 pValue) { mItemData->mAugmentationDistiller = pValue; }
 	inline void setIsNoPet(const uint8 pValue) { mItemData->mNoPet = pValue; }
 	// TODO: potion belt
 	inline void setMaxStacks(const uint32 pValue) { mItemData->mMaxStacks = pValue; }

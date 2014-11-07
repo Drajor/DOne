@@ -430,7 +430,7 @@ Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
 	item->setMaterial(ItemMaterial::Plate);
 	item->setItemType(ItemType::Armor);
 	item->setRaces(EquipRaces::Human + EquipRaces::DarkElf);
-	item->setDeities(EquipDeities::Agnostic + EquipDeities::RallosZek);
+	//item->setDeities(EquipDeities::Agnostic + EquipDeities::RallosZek);
 	return item;
 }
 
@@ -620,6 +620,7 @@ Item* ItemGenerator::makeAugmentation(const uint8 pLevel, const Rarity pRarity) 
 	item->setHealth(100);
 	item->setItemType(ItemType::Augmentation);
 	item->setSlots(EquipSlots::VisibleArmor);
+	item->setAugmentationDistiller(2);
 
 	return item;
 }

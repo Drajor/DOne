@@ -3114,43 +3114,53 @@ void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket
 	EXPECTED(container->getContainerType() == ContainerType::AugmentationSealer);
 	EXPECTED(container->getContainerSlots() == 2);
 
-	auto item0 = container->getContents(0);
-	EXPECTED(item0);
-	auto item1 = container->getContents(1);
-	EXPECTED(item1);
+	// Insert
+	if (payload->mAugmentSlot == -1) {
+		auto item0 = container->getContents(0);
+		EXPECTED(item0);
+		auto item1 = container->getContents(1);
+		EXPECTED(item1);
 
-	Item* item = nullptr;
-	Item* augment = nullptr;
+		Item* item = nullptr;
+		Item* augment = nullptr;
 
-	// Determine which item is the augment.
+		// Determine which item is the augment.
 
-	if (item0->getItemType() == ItemType::Augmentation) {
-		augment = item0;
-		item = item1;
+		if (item0->getItemType() == ItemType::Augmentation) {
+			augment = item0;
+			item = item1;
+		}
+		else {
+			EXPECTED(item1->getItemType() == ItemType::Augmentation);
+			augment = item1;
+			item = item0;
+		}
+
+		// (Server) Clear container
+		container->clearContents(0);
+		container->clearContents(1);
+		// (Client) Clear container
+		sendDeleteItem(augment->getSlot());
+		sendDeleteItem(item->getSlot());
+
+		// Send the augmented item back.
+		EXPECTED(item->insertAugment(augment));
+		mCharacter->getInventory()->pushCursor(item);
+
+		uint32 payloadSize = 0;
+		const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketSummonItem);
+
+		auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+		sendPacket(packet);
+		delete packet;
+
+		return;
 	}
-	else {
-		EXPECTED(item1->getItemType() == ItemType::Augmentation);
-		augment = item1;
-		item = item0;
+
+	// Remove.
+	if (payload->mAugmentSlot == 0) {
+
 	}
-
-	// (Server) Clear container
-	container->clearContents(0);
-	container->clearContents(1);
-	// (Client) Clear container
-	sendDeleteItem(augment->getSlot());
-	sendDeleteItem(item->getSlot());
-
-	// Send the augmented item back.
-	EXPECTED(item->insertAugment(augment));
-	mCharacter->getInventory()->pushCursor(item);
-
-	uint32 payloadSize = 0;
-	const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketSummonItem);
-
-	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-	sendPacket(packet);
-	delete packet;
 }
 
 void ZoneClientConnection::sendDeleteItem(const uint32 pSlot) {

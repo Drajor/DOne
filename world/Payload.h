@@ -723,7 +723,7 @@ namespace Payload {
 			AugmentItem() { memset(mUnknown, 0, sizeof(mUnknown)); }
 			int16 mContainerSlot = 0;
 			char mUnknown[2];
-			int32 mAugmentSlot = 0;
+			int32 mAugmentSlot = 0; // -1 = Insert
 
 			String _debug() const {
 				StringStream ss;

@@ -774,9 +774,9 @@ public:
 class SummonItemCommand : public Command {
 public:
 	SummonItemCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #si <item id> <qty=1>");
+		mHelpMessages.push_back("Usage: #si <item id> <qty=1> <stacks=1>");
 		setMinimumParameters(1);
-		setMaximumParameters(2);
+		setMaximumParameters(3);
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
@@ -786,10 +786,19 @@ public:
 			return false;
 		}
 
-		// Convert 'Quantity'
+		// Convert (optional) quantity.
 		uint8 quantity = 1;
-		if (pParameters.size() == 2) {
+		if (pParameters.size() >= 2) {
 			if (!Utility::stoSafe(quantity, pParameters[1])) {
+				conversionError(pParameters[1]);
+				return false;
+			}
+		}
+
+		// Convert (optional) stacks.
+		uint32 stacks = 1;
+		if (pParameters.size() == 3) {
+			if (!Utility::stoSafe(stacks, pParameters[2])) {
 				conversionError(pParameters[1]);
 				return false;
 			}
@@ -799,6 +808,11 @@ public:
 		EXPECTED_BOOL(data);
 		for (auto i = 0; i < quantity; i++) {
 			auto item = new Item(data);
+
+			if (item->isStackable()) {
+				item->setStacks(stacks > item->getMaxStacks() ? item->getMaxStacks() : stacks);
+			}
+
 			mInvoker->getInventory()->pushCursor(item);
 			send(mInvoker, item);
 		}
