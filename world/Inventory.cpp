@@ -579,6 +579,8 @@ const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) 
 	EXPECTED_BOOL(pickUp);
 	EXPECTED_BOOL(pushCursor(pickUp));
 	EXPECTED_BOOL(_clear(pFromSlot));
+	pickUp->clearParent();
+	pickUp->clearSubIndex();
 
 	// Check: Worn Item being un-equipped.
 	if (SlotID::isWorn(pFromSlot))

@@ -3139,12 +3139,32 @@ void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket
 		item = item0;
 	}
 
-	EXPECTED(item->insertAugment(augment));
-
-	// Remove 
-	// Clear the container.
+	// (Server) Clear container
+	container->clearContents(0);
+	container->clearContents(1);
+	// (Client) Clear container
+	sendDeleteItem(augment->getSlot());
+	sendDeleteItem(item->getSlot());
 
 	// Send the augmented item back.
+	EXPECTED(item->insertAugment(augment));
+	mCharacter->getInventory()->pushCursor(item);
+
+	uint32 payloadSize = 0;
+	const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketSummonItem);
+
+	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendDeleteItem(const uint32 pSlot) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = DeleteItem::construct(pSlot);
+	sendPacket(packet);
+	delete packet;
 }
 
 //

@@ -352,7 +352,7 @@ namespace SlotID {
 	static const bool isValidBankIndex(const uint32 pIndex) { return pIndex < BANK_SLOTS; }
 	static const bool isValidSharedBankIndex(const uint32 pIndex) { return pIndex < SHARED_BANK_SLOTS; }
 
-	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex < MAX_CONTENTS; }
+	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex >= 0 && pSubIndex < MAX_CONTENTS; }
 
 	// Returns the parent SlotID of pSlot
 	static const uint32 getParentSlot(const uint32 pSlot) {

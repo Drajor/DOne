@@ -22,10 +22,10 @@ public:
 	inline const bool isBow() const { return getItemType() == ItemType::Bow; }
 	inline const bool isHandToHand() const { return getItemType() == ItemType::HandToHand; }
 
-	inline const bool isOneHandWeapon() const { return isOneHandSlash() || isOneHandBlunt() || isOneHandPierce() || isHandToHand();	}
+	inline const bool isOneHandWeapon() const { return isOneHandSlash() || isOneHandBlunt() || isOneHandPierce() || isHandToHand(); }
 	inline const bool isTwoHandWeapon() const { return isTwoHandSlash() || isTwoHandBlunt() || isTwoHandPierce(); }
 	inline const bool isWeapon() const { return	isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
-	
+
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
 	inline const String getIDFile() const { return String(mItemData->mIDFile); }
@@ -51,13 +51,23 @@ public:
 	inline void setFocusName(const String& pValue) { memset(mItemData->mFocusName, 0, sizeof(mItemData->mFocusName)); strcpy(mItemData->mFocusName, pValue.c_str()); }
 	inline void setScrollName(const String& pValue) { memset(mItemData->mScrollName, 0, sizeof(mItemData->mScrollName)); strcpy(mItemData->mScrollName, pValue.c_str()); }
 	inline void setBardName(const String& pValue) { memset(mItemData->mBardName, 0, sizeof(mItemData->mBardName)); strcpy(mItemData->mBardName, pValue.c_str()); }
-	
+
 	inline const uint32 getSlot() const { return mSlot; }
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
 	inline const uint32 getStacks() const { return mStacks; }
 	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
 	inline const bool isAttuned() { return mAttuned; }
 	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
+
+	inline const uint32 getSubIndex() const { return mSubIndex; };
+	inline const bool hasValidSubIndex() const { return mSubIndex >= 0 && mSubIndex < SlotID::MAX_CONTENTS; }
+	const bool setSubIndex(const uint32 pSubIndex);
+	inline void clearSubIndex() { mSubIndex = -1; }
+
+	inline Item* getParent() const { return mParent; }
+	const bool setParent(Item* pParent);
+	inline void clearParent() { mParent = nullptr; }
+	inline const bool hasParent() const { return getParent() != nullptr; }
 
 	Item* getAugment(const uint8 pSlot) const;
 
@@ -414,6 +424,7 @@ public:
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();
+	Item* mParent = nullptr;
 	Item* mAugments[5];
 	Item* mContents[10];
 	ItemData* mItemData = nullptr;
@@ -422,6 +433,10 @@ private:
 	uint32 mSlot = 0;
 	uint32 mStacks = 1;
 	bool mAttuned = false;
+
+	// When an Item is a sub-Item such as an augment or container contents
+	// mSubIndex will be a value 0-9 that specifies the position it is stored.
+	int32 mSubIndex = -1;
 
 	int32 mCurrentEvolvingLevel = 0;
 	double mEvolvingProgress = 0.0f;

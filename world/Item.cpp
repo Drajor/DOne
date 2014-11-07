@@ -45,6 +45,11 @@ const uint32 Item::getDataSize() const {
 const uint32 Item::_getDataSize() const {
 	uint32 result = sizeof(ItemData);
 
+	if (hasParent()) {
+		// Sub-Items need 4 extra bytes to store sub-index.
+		result += sizeof(uint32);
+	}
+
 	// Remove the maximum size of variable sized attributes.
 	result -= sizeof(mItemData->mOrnamentationIDFile);
 	result -= sizeof(mItemData->mName);
@@ -84,12 +89,24 @@ const uint32 Item::_getDataSize() const {
 	//if (isEvolvingItem())
 	//	result += strlen(mItemData->mEvolvingItem.mOrnamentationIDFile) + 1;
 
+	// Until I can work this out..
+	if (!isEvolvingItem()) {
+		result -= strlen(mItemData->mOrnamentationIDFile) + 1;
+		result -= sizeof(mItemData->mOrnamentationIcon);
+	}
+
 	return result;
 }
 
 const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	// Update ItemData with anything specific from this Item
 	_onCopy();
+
+	// Check: This Item is either an augment or within a bag.
+	if (hasParent()) {
+		EXPECTED_BOOL(hasValidSubIndex());
+		pStructure.write<uint32>(getSubIndex());
+	}
 
 	// Chunk Zero.
 	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
@@ -271,6 +288,9 @@ const bool Item::insertAugment(Item* pAugment) {
 	if (slotID < 0) return false;
 
 	setAugmentation(slotID, pAugment);
+	pAugment->setSlot(getSlot());
+	pAugment->setParent(this);
+	pAugment->setSubIndex(slotID);
 
 	return true;
 }
@@ -334,10 +354,17 @@ const bool Item::augmentAllowed(Item* pAugment) {
 }
 
 const bool Item::clearContents(const uint32 pSubIndex) {
-	Log::info("SubIndex = " + std::to_string(pSubIndex));
 	EXPECTED_BOOL(isContainer());
 	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
 	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
+
+	// Clean up where there is Item in the slot being cleared.
+	Item* existingItem = mContents[pSubIndex];
+	if (existingItem) {
+		existingItem->clearParent();
+		existingItem->clearSubIndex();
+	}
+
 	mContents[pSubIndex] = nullptr;
 
 	return true;
@@ -350,6 +377,8 @@ const bool Item::setContents(Item* pItem, const uint32 pSubIndex) {
 	EXPECTED_BOOL(isContainer());
 	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
 	EXPECTED_BOOL(getContainerSize() >= pItem->getSize());
+	EXPECTED_BOOL(pItem->setParent(this));
+	EXPECTED_BOOL(pItem->setSubIndex(pSubIndex));
 
 	mContents[pSubIndex] = pItem;
 	// Update the slot of the Item being set.
@@ -363,4 +392,22 @@ void Item::updateContentsSlots() {
 		if (mContents[i])
 			mContents[i]->setSlot(SlotID::getChildSlot(getSlot(), i));
 	}
+}
+
+const bool Item::setParent(Item* pParent) {
+	EXPECTED_BOOL(pParent);
+	EXPECTED_BOOL(getParent() == nullptr);
+
+	mParent = pParent;
+
+	return true;
+}
+
+const bool Item::setSubIndex(const uint32 pSubIndex) {
+	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
+	EXPECTED_BOOL(getSubIndex() == -1);
+
+	mSubIndex = pSubIndex;
+
+	return true;
 }

@@ -250,6 +250,7 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
+		void sendDeleteItem(const uint32 pSlot);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;
