@@ -10,6 +10,8 @@ public:
 	Item(ItemData* pItemData);
 	~Item();
 
+	const bool isTradeable();
+
 	inline const bool isArmor() const { return getItemType() == ItemType::Armor; }
 	inline const bool isShield() const { return getItemType() == ItemType::Shield; }
 	inline const bool isAugmentation() const { return getItemType() == ItemType::Augmentation; }

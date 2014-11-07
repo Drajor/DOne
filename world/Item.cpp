@@ -411,3 +411,18 @@ const bool Item::setSubIndex(const uint32 pSubIndex) {
 
 	return true;
 }
+
+const bool Item::isTradeable() {
+	if (isNoDrop()) return false;
+	if (isAttuned()) return false;
+
+	for (auto i : mAugments) {
+		if (i && !i->isTradeable()) return false;
+	}
+
+	for (auto i : mContents) {
+		if (i && !i->isTradeable()) return false;
+	}
+
+	return true;
+}

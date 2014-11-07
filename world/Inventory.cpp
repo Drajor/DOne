@@ -564,8 +564,14 @@ const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
 	EXPECTED_BOOL(put(cursorItem, pToSlot));
 
 	// Check: Worn Item being equipped.
-	if (SlotID::isWorn(pToSlot))
+	if (SlotID::isWorn(pToSlot)) {
+		// Set Item to Attuned where it is Attunable.
+		if (cursorItem->isAttunable())
+			// TODO: Attuned augments in cursorItem.
+			cursorItem->setIsAttuned(true);
+
 		_calculateAdd(cursorItem);
+	}
 
 	// Check: Container being put down.
 	if (cursorItem->isContainer())

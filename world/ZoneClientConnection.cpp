@@ -2749,11 +2749,6 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 		inventoryError();
 		return;
 	}
-
-	// Where an attunable Item is being equipped, attune it!
-	if (equipItem && equipItem->isAttunable()) {
-		equipItem->setIsAttuned(true);
-	}
 }
 
 void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
