@@ -557,10 +557,20 @@ const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
 	// Check: Existing Item in pToSlot.
 	Item* existing = getItem(pToSlot);
 	if (existing) {
+		// Potential stack merge.
+		if (pStackSize > 0) {
+			EXPECTED_BOOL(cursorItem->isStackable());
+			if (cursorItem->getID() == existing->getID()) {
+				// Full merge.
+				if (pStackSize == cursorItem->getStacks()) {
+
+				}
+				// Partial merge.
+			}
+		}
+
 		// Pick up the existing Item.
 		EXPECTED_BOOL(_pickUp(pToSlot, existing->getStacks()));
-
-		// TODO: This is where stacks are merged.
 	}
 
 	EXPECTED_BOOL(put(cursorItem, pToSlot));
@@ -588,6 +598,7 @@ const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) 
 
 	// Splitting the stack.
 	if (pStackSize > 0) {
+		EXPECTED_BOOL(pickUp->isStackable());
 		const uint32 preSplitStacks = pickUp->getStacks();
 		EXPECTED_BOOL(pickUp->getStacks() > pStackSize);
 		EXPECTED_BOOL(pickUp->removeStacks(pStackSize));

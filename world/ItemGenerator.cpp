@@ -338,12 +338,16 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::PrimarySecondary);
 
-	item->setIsEvolvingItem(1501);
-	item->setCurrentEvolvingLevel(3);
-	item->setMaximumEvolvingLevel(4);
-	item->setEvolvingProgress(55.4);
-	item->setLoreGroup(1501);
+	//item->setIsEvolvingItem(1501);
+	//item->setCurrentEvolvingLevel(3);
+	//item->setMaximumEvolvingLevel(4);
+	//item->setEvolvingProgress(55.4);
+	//item->setLoreGroup(1501);
 	//item
+
+	item->setOrnamentationIcon(1346);
+	item->setIDFile("IT10634");
+	Log::error("ID = " + std::to_string(item->getID()));
 
 	return item;
 }
@@ -415,6 +419,9 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsAttunable(true);
 	item->setLore("This is a Head Slot item.");
 
+	item->setOrnamentationIcon(1000);
+	item->setOrnamentationIDFile("IT148");
+
 	return item;
 }
 
@@ -431,6 +438,9 @@ Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
 	item->setItemType(ItemType::Armor);
 	item->setRaces(EquipRaces::Human + EquipRaces::DarkElf);
 	//item->setDeities(EquipDeities::Agnostic + EquipDeities::RallosZek);
+
+	//item->setOrnamentationIcon(1568);
+
 	return item;
 }
 

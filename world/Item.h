@@ -123,6 +123,8 @@ public:
 	inline const uint8 isAttunable() const { return mItemData->mAttunable; }
 	inline const uint8 getSize() const { return mItemData->mSize; }
 	inline const uint32 getSlots() const { return mItemData->mSlots; }
+	// Returns slot restrictions based on this Item and augments.
+	inline const uint32 _getSlots() const { uint32 slots = getSlots(); for (auto i : mAugments) if (i) slots &= i->getSlots(); return slots; }
 	inline const uint32 getPrice() const { return mItemData->mPrice; }
 	inline const uint32 getIcon() const { return mItemData->mIcon; }
 	inline const uint32 getBenefitFlag() const { return mItemData->mBenefitFlag; }
@@ -161,15 +163,43 @@ public:
 	inline const int32 _getEndurance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEndurance(); return getEndurance() + count; }
 	inline const int32 getArmorClass() const { return mItemData->mArmorClass; }
 	inline const int32 _getArmorClass() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getArmorClass(); return getArmorClass() + count; }
+
+	// Returns the health regeneration on this Item.
 	inline const int32 getHealthRegen() const { return mItemData->mHealthRegen; }
-	inline const int32 _getHealthRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealthRegen(); return getHealthRegen() + count; }
+
+	// Returns the total health regeneration on this Item and augments.
+	inline const int32 _getHealthRegen() const { int32 v = getHealthRegen(); for (auto i : mAugments) if (i) v += i->getHealthRegen(); return v; }
+
+	// Returns the mana regeneration on this Item.
 	inline const int32 getManaRegen() const { return mItemData->mManaRegen; }
-	inline const int32 _getManaRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getManaRegen(); return getManaRegen() + count; }
+
+	// Returns the total mana regeneration on this Item and augments.
+	inline const int32 _getManaRegen() const { int32 v = getManaRegen(); for (auto i : mAugments) if (i) v += i->getManaRegen(); return v; }
+	
+	// Returns the endurance regeneration on this Item.
 	inline const int32 getEnduranceRegen() const { return mItemData->mEnduranceRegen; }
-	inline const int32 _getEnduranceRegen() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEnduranceRegen(); return getEnduranceRegen() + count; }
+	
+	// Returns the total endurance regeneration on this Item and augments.
+	inline const int32 _getEnduranceRegen() const { int32 v = getEnduranceRegen(); for (auto i : mAugments) if (i) v += i->getEnduranceRegen(); return v; }
+	
+	// Returns the class restrictions on this Item.
 	inline const uint32 getClasses() const { return mItemData->mClasses; }
+	
+	// Returns the class restrictions on this Item and augments.
+	inline const uint32 _getClasses() const { uint32 v = getClasses(); for (auto i : mAugments) if (i) v &= i->getSlots(); return v; }
+	
+	// Returns the race restrictions on this Item.
 	inline const uint32 getRaces() const { return mItemData->mRaces; }
+	
+	// Returns the race restrictions on this Item and augments.
+	inline const uint32 _getRaces() const { uint32 v = getRaces(); for (auto i : mAugments) if (i) v &= i->getRaces(); return v; }
+	
+	// Returns the deity restrictions on this Item.
 	inline const uint32 getDeities() const { return mItemData->mDeities; }
+	
+	// Returns the deity restrictions on this Item and augments.
+	inline const uint32 _getDeities() const { uint32 v = getDeities(); for (auto i : mAugments) if (i) v &= i->getDeities(); return v; }
+	
 	inline const int32 getSkillModAmount() const { return mItemData->mSkillModAmount; }
 	inline const uint32 getSkillMod() const { return mItemData->mSkillMod; }
 	inline const uint32 getBaneRace() const { return mItemData->mBaneDamageRace; }

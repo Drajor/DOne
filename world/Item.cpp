@@ -9,6 +9,7 @@ Item::Item(ItemData* pItemData) : mItemData(pItemData) {
 }
 
 Item* Item::copy() const {
+	// TODO: Needs a new serial
 	return new Item(mItemData);
 }
 
@@ -68,15 +69,24 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mScrollName);
 	result -= sizeof(mItemData->mBardName);
 
-	//if (isEvolvingItem())
-	//	result -= sizeof(mItemData->mEvolvingItem.mOrnamentationIDFile);
-	//else
-	//	result -= sizeof(ItemData::EvolvingItem);
-	if (!isEvolvingItem())
+	// Evolving Item.
+	if (isEvolvingItem()) {
+		result += strlen(mItemData->mOrnamentationIDFile) + 1;
+	}
+	// Non-Evolving Item.
+	else {
 		result -= sizeof(ItemData::EvolvingItem);
+		result -= sizeof(mItemData->mOrnamentationIcon);
+
+		if (getOrnamentationIcon() > 0) {
+			//result += sizeof(mItemData->mOrnamentationIcon);
+			result += strlen(mItemData->mOrnamentationIDFile) + 1;
+			//result += 1;
+		}
+	}
 
 	// Add variable strings
-	result += strlen(mItemData->mOrnamentationIDFile) + 1;
+	//result += strlen(mItemData->mOrnamentationIDFile) + 1;
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
@@ -88,16 +98,6 @@ const uint32 Item::_getDataSize() const {
 	result += strlen(mItemData->mFocusName) + 1;
 	result += strlen(mItemData->mScrollName) + 1;
 	result += strlen(mItemData->mBardName) + 1;
-
-	//// Add variable string for EvolvingItem (ItemLink?)
-	//if (isEvolvingItem())
-	//	result += strlen(mItemData->mEvolvingItem.mOrnamentationIDFile) + 1;
-
-	// Until I can work this out..
-	if (!isEvolvingItem()) {
-		result -= strlen(mItemData->mOrnamentationIDFile) + 1;
-		result -= sizeof(mItemData->mOrnamentationIcon);
-	}
 
 	return result;
 }
@@ -113,11 +113,12 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	}
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
+	std::size_t chunk0 = (unsigned int)&(mItemData->mIsEvolvingItem) - (unsigned int)&(mItemData->mStacks);
 	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
+		pStructure.write<uint32>(mItemData->mIsEvolvingItem);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
 		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
@@ -135,15 +136,23 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 		pStructure.write<uint8>(mItemData->mItemClass);
 	}
 	else {
-
 		
-		pStructure.write<uint8>(mItemData->__Unknown5);
-		pStructure.write<uint8>(mItemData->__Unknown6);
+		if (getOrnamentationIcon() > 0) {
+			pStructure.write<uint8>(0);
+			pStructure.write<uint8>(0);
+			pStructure.write<uint16>(getOrnamentationIcon());
+			pStructure.writeString(String(mItemData->mOrnamentationIDFile));
+			pStructure.write<uint8>(mItemData->__Unknown6);
+			
+			
+		}
+		else {
+			pStructure.write<uint32>(mItemData->mIsEvolvingItem); // Should be zero.
+			pStructure.write<uint8>(mItemData->__Unknown5);
+			pStructure.write<uint8>(mItemData->__Unknown6);
+		}
 		pStructure.write<uint8>(mItemData->mCopied);
 		pStructure.write<uint8>(mItemData->mItemClass);
-
-		//pStructure.write<uint16>(mItemData->mOrnamentationIcon);
-		//pStructure.writeString(String(mItemData->mOrnamentationIDFile));
 	}
 	
 	// HEADER - END

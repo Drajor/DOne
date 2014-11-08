@@ -538,13 +538,14 @@ namespace Payload {
 		struct ItemLink : public Fixed<ItemLink> {
 			ItemLink() { 
 				memset(mAugments, 0, sizeof(mAugments));
+				memset(unknown046, 0, sizeof(unknown046));
 			}
 			uint32 mItemID = 0;
 			uint32 mAugments[5];
 			uint32 mHash = 0;
 			uint32 mUnknown0 = 0; // Always 4 it appears.
-			int32 mUnknown1 = 0; // Seen: 1 for evovling, 0 non-evolving.
-			int32 mUnknown2 = 0; // Seen: 5 for evolving, 0 non-evovling.
+			int32 mUnknown1 = 0; // Seen: 1 for evolving, 0 non-evolving.
+			int32 mUnknown2 = 0; // Seen: 5 for evolving, 0 non-evolving.
 			int32 mCurrentEvolvingLevel = 0;
 			uint16 mOrnamentationIcon = 0;
 			char unknown046[2];

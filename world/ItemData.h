@@ -27,9 +27,6 @@ struct ItemData {
 		strcpy(mIDFile, "IT63");
 
 		memset(mOrnamentationIDFile, 0, sizeof(mOrnamentationIDFile));
-
-		mOrnamentationIcon = 1000;
-		strcpy(mOrnamentationIDFile, "IT148");
 	}
 
 	// BEGIN chunk0
@@ -68,7 +65,7 @@ struct ItemData {
 
 	// Changing either __Unknown5 or __Unknown6 sets the icon to the pearl necklace.
 	uint8 __Unknown5 = 0; // Matches second last byte in Payload::Zone::ItemLink
-	uint8 __Unknown6 = 0; // Matches last byte in Payload::Zone::ItemLink
+	uint8 __Unknown6 = 0; // Matches last byte in Payload::Zone::ItemLink - Related to Ornamentation Icon.
 
 	uint8 mCopied = 0; // 0 = OFF, 1 = ON
 	uint8 mItemClass = ItemClass::Common;
