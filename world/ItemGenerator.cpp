@@ -365,6 +365,16 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Primary);
 
+	//item->setIsEvolvingItem(1501);
+	item->setIsEvolvingItem(0x00000100);
+	item->setCurrentEvolvingLevel(3);
+	item->setMaximumEvolvingLevel(4);
+	item->setEvolvingProgress(55.4);
+	item->setLoreGroup(1501);
+
+	//item->setOrnamentationIcon(2174);
+	item->setOrnamentationIDFile("IT11107");
+
 	return item;
 }
 
@@ -409,7 +419,8 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setItemType(ItemType::Armor);
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Head);
-	item->setIsEvolvingItem(1500);
+	//item->setIsEvolvingItem(1500);
+	item->setIsEvolvingItem(1);
 	item->setCurrentEvolvingLevel(3);
 	item->setMaximumEvolvingLevel(4);
 	item->setEvolvingProgress(55.4);

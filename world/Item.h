@@ -32,7 +32,7 @@ public:
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
 	inline const String getIDFile() const { return String(mItemData->mIDFile); }
-	inline const String getOrnamentationIDFile() const { return String(mItemData->mOrnamentationIDFile); }
+	inline const String getOrnamentationIDFile() const { return mOrnamentationIDFile; }
 	inline const String getCharmFile() const { return String(mItemData->mCharmFile); }
 	inline const String getFileName() const { return String(mItemData->mFileName); }
 	inline const String getClickName() const { return String(mItemData->mClickName); }
@@ -45,7 +45,8 @@ public:
 	inline void setName(const String& pValue) { memset(mItemData->mName, 0, sizeof(mItemData->mName)); strcpy(mItemData->mName, pValue.c_str()); }
 	inline void setLore(const String& pValue) { memset(mItemData->mLore, 0, sizeof(mItemData->mLore)); strcpy(mItemData->mLore, pValue.c_str()); }
 	inline void setIDFile(const String& pValue) { memset(mItemData->mIDFile, 0, sizeof(mItemData->mIDFile)); strcpy(mItemData->mIDFile, pValue.c_str()); }
-	inline void setOrnamentationIDFile(const String& pValue) { memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile)); strcpy(mItemData->mOrnamentationIDFile, pValue.c_str()); }
+	//inline void setOrnamentationIDFile(const String& pValue) { memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile)); strcpy(mItemData->mOrnamentationIDFile, pValue.c_str()); }
+	inline void setOrnamentationIDFile(const String& pValue) { mOrnamentationIDFile = pValue; }
 	inline void setCharmFile(const String& pValue) { memset(mItemData->mCharmFile, 0, sizeof(mItemData->mCharmFile)); strcpy(mItemData->mCharmFile, pValue.c_str()); }
 	inline void setFileName(const String& pValue) { memset(mItemData->mFileName, 0, sizeof(mItemData->mFileName)); strcpy(mItemData->mFileName, pValue.c_str()); }
 	inline void setClickName(const String& pValue) { memset(mItemData->mClickName, 0, sizeof(mItemData->mClickName)); strcpy(mItemData->mClickName, pValue.c_str()); }
@@ -105,8 +106,8 @@ public:
 	inline void setEvolvingProgress(const double pProgress) { mEvolvingProgress = pProgress; }
 
 	// Ornamentation
-	inline const uint16 getOrnamentationIcon() const { return mItemData->mOrnamentationIcon; }
-	inline void setOrnamentationIcon(const uint16 pValue) { mItemData->mOrnamentationIcon = pValue; }
+	inline const uint16 getOrnamentationIcon() const { return mOrnamentationIcon; }
+	inline void setOrnamentationIcon(const uint16 pValue) { mOrnamentationIcon = pValue; }
 
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
@@ -468,6 +469,8 @@ private:
 	uint32 mSlot = 0;
 	uint32 mStacks = 1;
 	bool mAttuned = false;
+	uint16 mOrnamentationIcon = 0;
+	String mOrnamentationIDFile = "";
 
 	// When an Item is a sub-Item such as an augment or container contents
 	// mSubIndex will be a value 0-9 that specifies the position it is stored.

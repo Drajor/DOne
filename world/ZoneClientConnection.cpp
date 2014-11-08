@@ -2912,8 +2912,9 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 		if (payload->mAugments[i] != 0) {
 			// Retrieve augmentation ItemData.
 			auto augmentationItemData = ItemDataStore::getInstance().get(payload->mAugments[i]);
-			EXPECTED(augmentationItemData); // NOTE: This will leak.
+			EXPECTED(augmentationItemData);
 
+			// NOTE: Memory is freed when item is deleted.
 			item->setAugmentation(i, new Item(augmentationItemData));
 		}
 	}

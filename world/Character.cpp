@@ -811,32 +811,20 @@ const bool Character::canEquip(const Item* pItem, const uint32 pSlotID) const {
 
 	// Check: Race
 	const uint32 raceBit = EquipRaces::convert(getRace());
-	if ((pItem->getRaces() & raceBit) == 0) return false;
+	if ((pItem->_getRaces() & raceBit) == 0) return false;
 
 	// Check: Class
 	const uint32 classBit = EquipClasses::convert(getClass());
-	if ((pItem->getClasses() & classBit) == 0) return false;
+	if ((pItem->_getClasses() & classBit) == 0) return false;
 
 	// Check: Deity
 	// NOTE: Deity is special because a value of 0 means ALL.
 	const uint32 deityBit = EquipDeities::convert(getDeity());
-	if (deityBit && (pItem->getDeities() & deityBit) == 0) return false;
+	if (deityBit && (pItem->_getDeities() & deityBit) == 0) return false;
 
 	// Check: Slot
 	const uint32 slotBit = EquipSlots::convert(pSlotID);
-	if ((pItem->getSlots() & slotBit) == 0) return false;
-
-	// Check: Item augments.
-	if (!pItem->isAugmentation()) {
-		for (auto i = 0; i < 5; i++) {
-			auto augment = pItem->getAugment(i);
-			if (augment) {
-				EXPECTED_BOOL(augment->isAugmentation()); // Prevents a potential infinite loop + normal error checking.
-				if (!canEquip(augment, pSlotID))
-					return false;
-			}
-		}
-	}
+	if ((pItem->_getSlots() & slotBit) == 0) return false;
 
 	return true;
 }

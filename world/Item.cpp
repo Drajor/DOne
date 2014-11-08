@@ -71,22 +71,20 @@ const uint32 Item::_getDataSize() const {
 
 	// Evolving Item.
 	if (isEvolvingItem()) {
-		result += strlen(mItemData->mOrnamentationIDFile) + 1;
+		result += getOrnamentationIDFile().length() + 1;
 	}
 	// Non-Evolving Item.
 	else {
 		result -= sizeof(ItemData::EvolvingItem);
 		result -= sizeof(mItemData->mOrnamentationIcon);
 
-		if (getOrnamentationIcon() > 0) {
-			//result += sizeof(mItemData->mOrnamentationIcon);
-			result += strlen(mItemData->mOrnamentationIDFile) + 1;
-			//result += 1;
-		}
+		//if (getOrnamentationIcon() > 0) {
+		//	result += getOrnamentationIDFile().length() +1;
+		//}
+		result += getOrnamentationIDFile().length() + 1;
 	}
 
 	// Add variable strings
-	//result += strlen(mItemData->mOrnamentationIDFile) + 1;
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
@@ -119,7 +117,8 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
 		pStructure.write<uint32>(mItemData->mIsEvolvingItem);
-		pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
+		//pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
+		pStructure.write<uint8>(1);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
 		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
@@ -132,28 +131,25 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 		pStructure.write<uint8>(mItemData->__Unknown5);
 		pStructure.write<uint8>(mItemData->__Unknown6);
-		pStructure.write<uint8>(mItemData->mCopied);
-		pStructure.write<uint8>(mItemData->mItemClass);
 	}
 	else {
 		
-		if (getOrnamentationIcon() > 0) {
+		if (mItemData->mOrnamentationIcon > 0) {
 			pStructure.write<uint8>(0);
 			pStructure.write<uint8>(0);
-			pStructure.write<uint16>(getOrnamentationIcon());
-			pStructure.writeString(String(mItemData->mOrnamentationIDFile));
-			pStructure.write<uint8>(mItemData->__Unknown6);
-			
-			
+			// This is where non-evolving items store ornament data.
+			pStructure.write<uint16>(mItemData->mOrnamentationIcon);
 		}
 		else {
 			pStructure.write<uint32>(mItemData->mIsEvolvingItem); // Should be zero.
-			pStructure.write<uint8>(mItemData->__Unknown5);
-			pStructure.write<uint8>(mItemData->__Unknown6);
+
 		}
-		pStructure.write<uint8>(mItemData->mCopied);
-		pStructure.write<uint8>(mItemData->mItemClass);
+		pStructure.writeString(String(mItemData->mOrnamentationIDFile));
+		pStructure.write<uint8>(mItemData->__Unknown6);
 	}
+
+	pStructure.write<uint8>(mItemData->mCopied);
+	pStructure.write<uint8>(mItemData->mItemClass);
 	
 	// HEADER - END
 
@@ -262,6 +258,10 @@ void Item::_onCopy() {
 	mItemData->mSlot = mSlot;
 	mItemData->mStacks = mStacks;
 	mItemData->mAttuned = mAttuned ? 1 : 0;
+	mItemData->mOrnamentationIcon = mOrnamentationIcon;
+	memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile));
+	strcpy(mItemData->mOrnamentationIDFile, mOrnamentationIDFile.c_str());
+
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
 
 	if (isEvolvingItem()) {
