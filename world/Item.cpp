@@ -111,14 +111,11 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	}
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mIsEvolvingItem) - (unsigned int)&(mItemData->mStacks);
+	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
 	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
-		pStructure.write<uint32>(mItemData->mIsEvolvingItem);
-		//pStructure.write<uint8>(mItemData->mEvolvingItem.__Unknown0);
-		pStructure.write<uint8>(1);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
 		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
@@ -135,8 +132,6 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 	else {
 		
 		if (mItemData->mOrnamentationIcon > 0) {
-			pStructure.write<uint8>(0);
-			pStructure.write<uint8>(0);
 			// This is where non-evolving items store ornament data.
 			pStructure.write<uint16>(mItemData->mOrnamentationIcon);
 		}

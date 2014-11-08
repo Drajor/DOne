@@ -44,7 +44,7 @@ struct ItemData {
 	uint32 mPower = 0;
 	uint32 __Unknown3 = 0;
 	uint32 __Unknown4 = 0;
-	uint32 mIsEvolvingItem = 0;
+	uint16 mIsEvolvingItem = 0;
 	struct EvolvingItem {
 		EvolvingItem() {
 			memset(__Unknown2, 0, sizeof(__Unknown2));
@@ -57,6 +57,7 @@ struct ItemData {
 		uint8 __Unknown2[4];
 
 	};
+	uint16 unk = 0;
 	EvolvingItem mEvolvingItem;
 
 	// Ornamentation
