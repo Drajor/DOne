@@ -54,7 +54,7 @@ public:
 	inline const bool isTwoHandWeapon() const { return isTwoHandSlash() || isTwoHandBlunt() || isTwoHandPierce(); }
 
 	// Returns whether this Item is a weapon or not.
-	inline const bool isWeapon() const { return	isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
+	inline const bool isWeapon() const { return isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
 
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
@@ -255,13 +255,13 @@ public:
 	inline const uint32 getEndurance() const { return mItemData->mEndurance; }
 
 	// Returns the total endurance on this Item and augments.
-	inline const int32 _getEndurance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEndurance(); return getEndurance() + count; }
+	inline const int32 _getEndurance() const { int32 v = 0; for (auto i : mAugments) if (i) v += i->getEndurance(); return getEndurance() + v; }
 
 	// Returns the armor class on this Item.
 	inline const int32 getArmorClass() const { return mItemData->mArmorClass; }
 
 	// Returns the total armor class on this Item and augments.
-	inline const int32 _getArmorClass() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getArmorClass(); return getArmorClass() + count; }
+	inline const int32 _getArmorClass() const { int32 v = 0; for (auto i : mAugments) if (i) v += i->getArmorClass(); return getArmorClass() + v; }
 
 	// Returns the health regeneration on this Item.
 	inline const int32 getHealthRegen() const { return mItemData->mHealthRegen; }
@@ -319,41 +319,98 @@ public:
 	inline const uint8 getElementalDamageType() const { return mItemData->mElementalDamageType; }
 	inline const uint8 getElementalDamageAmount() const { return mItemData->mElementalDamageAmount; }
 	inline const uint8 getRange() const { return mItemData->mRange; }
+
+	// Returns the damage on this Item.
 	inline const uint32 getDamage() const { return mItemData->mDamage; }
+
+	// Returns the total damage on this Item and augments.
 	inline const int32 _getDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDamage(); return getDamage() + count; }
+
+	// Returns the colour of this Item.
 	inline const uint32 getColour() const { return mItemData->mColour; }
+
+	// Returns the type of Item. See Constants.h ItemType enumeration.
 	inline const uint8 getItemType() const { return mItemData->mItemType; }
+
+	// Returns the material on this Item. See Constants.h ItemMaterial enumeration.
 	inline const uint32 getMaterial() const { return mItemData->mMaterial; }
+	
+	// TODO: Not sure!
 	inline const uint32 getEliteMaterial() const { return mItemData->mEliteMaterial; }
+
+	// TODO:
 	inline const float getSellRate() const { return mItemData->mSellRate; }
+
+	// (MOD2) Returns the combat effects on this Item.
 	inline const int32 getCombatEffects() const { return mItemData->mCombatEffects; }
+
+	// (MOD2) Returns the total combat effects on this Item and augments.
 	inline const int32 _getCombatEffects() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCombatEffects(); return getCombatEffects() + count; }
+
+	// (MOD2) Returns the shielding on this Item.
 	inline const int32 getShielding() const { return mItemData->mShielding; }
+
+	// (MOD2) Returns the total shielding on this Item and augments.
 	inline const int32 _getShielding() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getShielding(); return getShielding() + count; }
+
+	// (MOD2) Returns the stun resist on this Item.
 	inline const int32 getStunResist() const { return mItemData->mStunResist; }
+
+	// (MOD2) Returns the total stun resist on this Item and augments.
 	inline const int32 _getStunResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStunResist(); return getStunResist() + count; }
+
+	// (MOD2) Returns the strike through on this Item.
 	inline const int32 getStrikeThrough() const { return mItemData->mStrikeThrough; }
+
+	// (MOD2) Returns the total strike through on this Item and augments.
 	inline const int32 _getStrikeThrough() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStrikeThrough(); return getStrikeThrough() + count; }
+
+
+	// TODO: I need to see whether augments stack this.
 	inline const int32 getSkillDamageMod() const { return mItemData->mSkillDamageMod; }
 	inline const int32 getSkillDamageModAmount() const { return mItemData->mSkillDamageModAmount; }
+
+	// (MOD2) Returns the spell shield on this Item.
 	inline const int32 getSpellShield() const { return mItemData->mSpellShield; }
+
+	// (MOD2) Returns the total spell shield on this Item and augments.
 	inline const int32 _getSpellShield() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSpellShield(); return getSpellShield() + count; }
+
+	// (MOD2) Returns the avoidance on this Item.
 	inline const int32 getAvoidance() const { return mItemData->mAvoidance; }
+
+	// (MOD2) Returns the total avoidance on this Item and augments.
 	inline const int32 _getAvoidance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAvoidance(); return getAvoidance() + count; }
+
+	// (MOD2) Returns the accuracy on this Item.
 	inline const int32 getAccuracy() const { return mItemData->mAccuracy; }
+
+	// (MOD2) Returns the total accuracy on this Item and augments.
 	inline const int32 _getAccuracy() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAccuracy(); return getAccuracy() + count; }
-	// Faction Modifiers
+	
+	// TODO: Faction Modifiers
+	
 	inline const uint32 getAugmentationType() const { return mItemData->mAugType; }
 	inline const uint32 getAugmentationRestriction() const { return mItemData->mAugmentationRestriction; }
+	
 	// Augmentation Slots
+	
 	inline const uint32 getLDONPointType() const { return mItemData->mLDONPointType; }
 	inline const uint32 getLDONTheme() const { return mItemData->mLDONTheme; }
 	inline const uint32 getLDONPrice() const { return mItemData->mLDONPrice; }
 	inline const uint32 getLDONSellBackPrice() const { return mItemData->mLDONSellBackPrice; }
 	inline const uint32 getLDONSold() const { return mItemData->mLDONSold; }
+
+	// Returns the container type of this Item. See Constants.h ContainerType enumeration.
 	inline const uint8 getContainerType() const { return mItemData->mContainerType; }
+
+	// Returns the number of container slots this Item has. 1-10.
 	inline const uint8 getContainerSlots() const { return mItemData->mContainerSlots; }
+
+	// Returns the container size. See Constants.h ContainerSize enumeration.
 	inline const uint8 getContainerSize() const { return mItemData->mContainerSize; }
+
+	// Returns the container weight reduction. 0-100.
 	inline const uint8 getContainerWR() const { return mItemData->mContainerWR; }
 
 	inline const uint8 getBook() const { return mItemData->mBook; }
@@ -363,8 +420,16 @@ public:
 	inline const uint8 getIsSummoned() const { return mItemData->mSummoned; }
 	inline const uint32 getFavor() const { return mItemData->mFavor; }
 	inline const uint8 getFVNoDrop() const { return mItemData->mFVNoDrop; }
+	
+	// Returns the DoT shield on this Item.
 	inline const int32 getDoTShield() const { return mItemData->mDoTShield; }
+
+	// Returns the total DoT shield on this Item and augments.
+	inline const int32 _getDoTShield() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDoTShield(); return getDoTShield() + count; }
+
+	// TODO: Does attack stack with augs?
 	inline const int32 getAttack() const { return mItemData->mAttack; }
+	
 	inline const int32 getHaste() const { return mItemData->mHaste; }
 	inline const int32 getDamageShield() const { return mItemData->mDamageShield; }
 	inline const uint32 getGuildFavor() const { return mItemData->mGuildFavor; }
@@ -505,26 +570,67 @@ public:
 	inline void setIcon(const uint32 pValue) { mItemData->mIcon = pValue; }
 	inline void setBenefitFlag(const uint32 pValue) { mItemData->mBenefitFlag = pValue; }
 	inline void setIsTradeskillsItem(const bool pValue) { mItemData->mTradeSkills = pValue ? 1 : 0; }
+	
+	// Sets the cold resist on this Item.
 	inline void setColdResist(const int8 pValue) { mItemData->mColdResist = pValue; }
+
+	// Sets the disease resist on this Item.
 	inline void setDiseaseResist(const int8 pValue) { mItemData->mDieaseResist = pValue; }
+
+	// Sets the poison resist on this Item.
 	inline void setPoisonResist(const int8 pValue) { mItemData->mPoisonResist = pValue; }
+
+	// Sets the magic resist on this Item.
 	inline void setMagicResist(const int8 pValue) { mItemData->mMagicResist = pValue; }
+
+	// Sets the fire resist on this Item.
 	inline void setFireResist(const int8 pValue) { mItemData->mFireResist = pValue; }
-	inline void setSVCorruption(const int8 pValue) { mItemData->mCorruptionResist = pValue; }
+
+	// Sets the corruption resist on this Item.
+	inline void setCorruptionResist(const int8 pValue) { mItemData->mCorruptionResist = pValue; }
+
+	// Sets the strength on this Item.
 	inline void setStrength(const int8 pValue) { mItemData->mStrength = pValue; }
+
+	// Sets the stamina on this Item.
 	inline void setStamina(const int8 pValue) { mItemData->mStamina = pValue; }
+	
+	// Sets the agility on this Item.
 	inline void setAgility(const int8 pValue) { mItemData->mAgility = pValue; }
+
+	// Sets the dexterity on this Item.
 	inline void setDexterity(const int8 pValue) { mItemData->mDexterity = pValue; }
+
+	// Sets the charisma on this Item.
 	inline void setCharisma(const int8 pValue) { mItemData->mCharisma = pValue; }
+
+	// Sets the intelligence on this Item.
 	inline void setIntelligence(const int8 pValue) { mItemData->mIntelligence = pValue; }
+
+	// Sets the wisdom on this Item.
 	inline void setWisdom(const int8 pValue) { mItemData->mWisdom = pValue; }
+
+	// Sets the health on this Item.
 	inline void setHealth(const int32 pValue) { mItemData->mHealth = pValue; }
+
+	// Sets the mana on this Item.
 	inline void setMana(const int32 pValue) { mItemData->mMana = pValue; }
+	
+	// Sets the endurance on this Item.
 	inline void setEndurance(const uint32 pValue) { mItemData->mEndurance = pValue; }
+
+	// Sets the armor class on this Item.
 	inline void setArmorClass(const int32 pValue) { mItemData->mArmorClass = pValue; }
+
+	// Sets the health regeneration on this Item.
 	inline void setHealthRegen(const int32 pValue) { mItemData->mHealthRegen = pValue; }
+
+	// Sets the mana regeneration on this Item.
 	inline void setManaRegen(const int32 pValue) { mItemData->mManaRegen = pValue; }
+
+	// Sets the endurance regeneration on this Item.
 	inline void setEnduranceRegen(const int32 pValue) { mItemData->mEnduranceRegen = pValue; }
+
 	inline void setClasses(const uint32 pValue) { mItemData->mClasses = pValue; }
 	inline void setRaces(const uint32 pValue) { mItemData->mRaces = pValue; }
 	inline void setDeities(const uint32 pValue) { mItemData->mDeities = pValue; }
@@ -606,7 +712,7 @@ public:
 	inline void setBackstabDamage(const uint32 pValue) { mItemData->mBackstabDamage = pValue; }
 	inline void setDamageShieldMitigation(const uint32 pValue) { mItemData->mDamageShieldMitigation = pValue; }
 
-	// Sets the heroic strenth on this Item.
+	// Sets the heroic strength on this Item.
 	inline void setHeroicStrength(const int32 pValue) { mItemData->mHeroicStrength = pValue; }
 
 	// Sets the heroic intelligence on this Item.
@@ -645,8 +751,13 @@ public:
 	// Sets the heroic corruption resist on this Item.
 	inline void setHeroicCorruptionResist(const int32 pValue) { mItemData->mHeroicSVCorruption = pValue; }
 
+	// (MOD2) Sets the heal amount on this Item.
 	inline void setHealAmount(const int32 pValue) { mItemData->mHealAmount = pValue; }
+
+	// (MOD2) Sets the spell damage on this Item.
 	inline void setSpellDamage(const int32 pValue) { mItemData->mSpellDamage = pValue; }
+
+	// (MOD2) Sets the clairvoyance on this Item.
 	inline void setClairvoyance(const int32 pValue) { mItemData->mClairvoyance = pValue; }
 
 	// Sets whether this Item is an heirloom or not.

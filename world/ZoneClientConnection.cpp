@@ -494,6 +494,9 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player presses 'Insert' on the Augmentation Sealer.
 		_handleAugmentItem(pPacket);
 		break;
+	case OP_WeaponEquip1:
+		Log::info("OP_WeaponEquip1 size= " + std::to_string(pPacket->size));
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
