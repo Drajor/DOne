@@ -11,28 +11,54 @@ public:
 	Item* copy() const;
 	~Item();
 
+	// Returns whether this Item is tradeable or not.
 	const bool isTradeable();
 
+	// Returns whether this Item is armor or not.
 	inline const bool isArmor() const { return getItemType() == ItemType::Armor; }
+
+	// Returns whether this Item is a shield or not.
 	inline const bool isShield() const { return getItemType() == ItemType::Shield; }
+
+	// Returns whether this Item is an augment or not.
 	inline const bool isAugmentation() const { return getItemType() == ItemType::Augmentation; }
+
+	// Returns whether this Item is one hand slash or not.
 	inline const bool isOneHandSlash() const { return getItemType() == ItemType::OneHandSlash; }
+
+	// Returns whether this Item is two hand slash or not.
 	inline const bool isTwoHandSlash() const { return getItemType() == ItemType::TwoHandSlash; }
+
+	// Returns whether this Item is one hand blunt or not.
 	inline const bool isOneHandBlunt() const { return getItemType() == ItemType::OneHandBlunt; }
+
+	// Returns whether this Item is two hand blunt or not.
 	inline const bool isTwoHandBlunt() const { return getItemType() == ItemType::TwoHandBlunt; }
+
+	// Returns whether this Item is one hand pierce or not.
 	inline const bool isOneHandPierce() const { return getItemType() == ItemType::OneHandPierce; }
+
+	// Returns whether this Item is two hand pierce or not.
 	inline const bool isTwoHandPierce() const { return getItemType() == ItemType::TwoHandPierce; }
+
+	// Returns whether this Item is a bow or not.
 	inline const bool isBow() const { return getItemType() == ItemType::Bow; }
+
+	// Returns whether this Item is hand to hand or not.
 	inline const bool isHandToHand() const { return getItemType() == ItemType::HandToHand; }
 
+	// Returns whether this Item is a one handed weapon or not.
 	inline const bool isOneHandWeapon() const { return isOneHandSlash() || isOneHandBlunt() || isOneHandPierce() || isHandToHand(); }
+	
+	// Returns whether this Item is a two handed weapon or not.
 	inline const bool isTwoHandWeapon() const { return isTwoHandSlash() || isTwoHandBlunt() || isTwoHandPierce(); }
+
+	// Returns whether this Item is a weapon or not.
 	inline const bool isWeapon() const { return	isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
 
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
 	inline const String getIDFile() const { return String(mItemData->mIDFile); }
-	inline const String getOrnamentationIDFile() const { return mOrnamentationIDFile; }
 	inline const String getCharmFile() const { return String(mItemData->mCharmFile); }
 	inline const String getFileName() const { return String(mItemData->mFileName); }
 	inline const String getClickName() const { return String(mItemData->mClickName); }
@@ -45,8 +71,6 @@ public:
 	inline void setName(const String& pValue) { memset(mItemData->mName, 0, sizeof(mItemData->mName)); strcpy(mItemData->mName, pValue.c_str()); }
 	inline void setLore(const String& pValue) { memset(mItemData->mLore, 0, sizeof(mItemData->mLore)); strcpy(mItemData->mLore, pValue.c_str()); }
 	inline void setIDFile(const String& pValue) { memset(mItemData->mIDFile, 0, sizeof(mItemData->mIDFile)); strcpy(mItemData->mIDFile, pValue.c_str()); }
-	//inline void setOrnamentationIDFile(const String& pValue) { memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile)); strcpy(mItemData->mOrnamentationIDFile, pValue.c_str()); }
-	inline void setOrnamentationIDFile(const String& pValue) { mOrnamentationIDFile = pValue; }
 	inline void setCharmFile(const String& pValue) { memset(mItemData->mCharmFile, 0, sizeof(mItemData->mCharmFile)); strcpy(mItemData->mCharmFile, pValue.c_str()); }
 	inline void setFileName(const String& pValue) { memset(mItemData->mFileName, 0, sizeof(mItemData->mFileName)); strcpy(mItemData->mFileName, pValue.c_str()); }
 	inline void setClickName(const String& pValue) { memset(mItemData->mClickName, 0, sizeof(mItemData->mClickName)); strcpy(mItemData->mClickName, pValue.c_str()); }
@@ -108,6 +132,11 @@ public:
 	// Ornamentation
 	inline const uint16 getOrnamentationIcon() const { return mOrnamentationIcon; }
 	inline void setOrnamentationIcon(const uint16 pValue) { mOrnamentationIcon = pValue; }
+	inline const bool hasOrnamentationIcon() const { return getOrnamentationIcon() > 0; }
+
+	inline const String getOrnamentationIDFile() const { return mOrnamentationIDFile; }
+	inline void setOrnamentationIDFile(const String& pValue) { mOrnamentationIDFile = pValue; }
+	inline const bool hasOrnamentationIDFile() const { return getOrnamentationIDFile().length() > 0; }
 
 	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
 	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
@@ -116,6 +145,7 @@ public:
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
 	inline const uint32 getPower() const { return mItemData->mPower; }
 	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem > 0; }
+	inline const uint8 getIsCopied() const { return mItemData->mCopied; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
@@ -130,39 +160,107 @@ public:
 	inline const uint32 getIcon() const { return mItemData->mIcon; }
 	inline const uint32 getBenefitFlag() const { return mItemData->mBenefitFlag; }
 	inline const uint8 isTradeskillsItem() const { return mItemData->mTradeSkills; }
+
+	// Returns the cold resist on this Item.
 	inline const int8 getColdResist() const { return mItemData->mColdResist; }
+
+	// Returns the total cold resist on this Item and augments.
 	inline const int32 _getColdResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getColdResist(); return getColdResist() + count; }
+
+	// Returns the disease resist on this Item.
 	inline const int8 getDiseaseResist() const { return mItemData->mDieaseResist; }
+
+	// Returns the total disease resist on this Item and augments.
 	inline const int32 _getDiseaseResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDiseaseResist(); return getDiseaseResist() + count; }
+
+	// Returns the poison resist on this Item.
 	inline const int8 getPoisonResist() const { return mItemData->mPoisonResist; }
+
+	// Returns the total poison resist on this Item and augments.
 	inline const int32 _getPoisonResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getPoisonResist(); return getPoisonResist() + count; }
+
+	// Returns the magic resist on this Item.
 	inline const int8 getMagicResist() const { return mItemData->mMagicResist; }
+
+	// Returns the total magic resist on this Item and augments.
 	inline const int32 _getMagicResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getMagicResist(); return getMagicResist() + count; }
+
+	// Returns the fire resist on this Item.
 	inline const int8 getFireResist() const { return mItemData->mFireResist; }
+
+	// Returns the total fire resist on this Item and augments.
 	inline const int32 _getFireResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getFireResist(); return getFireResist() + count; }
+
+	// Returns the corruption resist on this Item.
 	inline const int8 getCorruptionResist() const { return mItemData->mCorruptionResist; }
+
+	// Returns total corruption resist on this Item and augments.
 	inline const int32 _getCorruptionResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCorruptionResist(); return getCorruptionResist() + count; }
+
+	// Returns the strength on this Item.
 	inline const int8 getStrength() const { return mItemData->mStrength; }
+
+	// Returns the total strength on this Item and augments.
 	inline const int32 _getStrength() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStrength(); return getStrength() + count; }
+
+	// Returns the stamina on this Item.
 	inline const int8 getStamina() const { return mItemData->mStamina; }
+
+	// Returns the total stamina on this Item and augments.
 	inline const int32 _getStamina() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getStamina(); return getStamina() + count; }
+
+	// Returns the agility on this Item.
 	inline const int8 getAgility() const { return mItemData->mAgility; }
+
+	// Returns the total agility on this Item and augments.
 	inline const int32 _getAgility() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getAgility(); return getAgility() + count; }
+
+	// Returns the dexterity on this Item.
 	inline const int8 getDexterity() const { return mItemData->mDexterity; }
+
+	// Returns the total dexterity on this Item and augments.
 	inline const int32 _getDexterity() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDexterity(); return getDexterity() + count; }
+
+	// Returns the charisma on this Item.
 	inline const int8 getCharisma() const { return mItemData->mCharisma; }
+
+	// Returns the total charisma on this Item and augments.
 	inline const int32 _getCharisma() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getCharisma(); return getCharisma() + count; }
+
+	// Returns the intelligence on this Item.
 	inline const int8 getIntelligence() const { return mItemData->mIntelligence; }
+
+	// Returns the total intelligence on this Item and augments.
 	inline const int32 _getIntelligence() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getIntelligence(); return getIntelligence() + count; }
+
+	// Returns the wisdom on this Item.
 	inline const uint8 getWisdom() const { return mItemData->mWisdom; }
+
+	// Returns the total wisdom on this Item and augments.
 	inline const int32 _getWisdom() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getWisdom(); return getWisdom() + count; }
+
+	// Returns the health on this Item.
 	inline const int32 getHealth() const { return mItemData->mHealth; }
+
+	// Returns the total health on this Item and augments.
 	inline const int32 _getHealth() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealth(); return getHealth() + count; }
+
+	// Returns the mana on this Item.
 	inline const int32 getMana() const { return mItemData->mMana; }
+
+	// Returns the total mana on this Item and augments.
 	inline const int32 _getMana() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getMana(); return getMana() + count; }
+
+	// Returns the endurance on this Item.
 	inline const uint32 getEndurance() const { return mItemData->mEndurance; }
+
+	// Returns the total endurance on this Item and augments.
 	inline const int32 _getEndurance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getEndurance(); return getEndurance() + count; }
+
+	// Returns the armor class on this Item.
 	inline const int32 getArmorClass() const { return mItemData->mArmorClass; }
+
+	// Returns the total armor class on this Item and augments.
 	inline const int32 _getArmorClass() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getArmorClass(); return getArmorClass() + count; }
 
 	// Returns the health regeneration on this Item.
@@ -286,38 +384,104 @@ public:
 	// TODO: Purity
 	inline const uint32 getBackstabDamage() const { return mItemData->mBackstabDamage; }
 	inline const uint32 getDamageShieldMitigation() const { return mItemData->mDamageShieldMitigation; }
+
+	// Returns the heroic strength on this Item.
 	inline const int32 getHeroicStrength() const { return mItemData->mHeroicStrength; }
+
+	// Returns the total heroic strength on this Item and augments.
 	inline const int32 _getHeroicStrength() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicStrength(); return getHeroicStrength() + count; }
+
+	// Returns the heroic intelligence on this Item.
 	inline const int32 getHeroicIntelligence() const { return mItemData->mHeroicIntelligence; }
+
+	// Returns the total heroic intelligence on this Item and augments.
 	inline const int32 _getHeroicIntelligence() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicIntelligence(); return getHeroicIntelligence() + count; }
+
+	// Returns the heroic wisdom on this Item.
 	inline const int32 getHeroicWisdom() const { return mItemData->mHeroicWisdom; }
+
+	// Returns the total heroic wisdom on this Item and augments.
 	inline const int32 _getHeroicWisdom() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicWisdom(); return getHeroicWisdom() + count; }
+
+	// Returns the heroic agility on  this Item.
 	inline const int32 getHeroicAgility() const { return mItemData->mHeroicAgility; }
+
+	// Returns the total heroic agility on this Item.
 	inline const int32 _getHeroicAgility() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicAgility(); return getHeroicAgility() + count; }
+
+	// Returns the heroic dexterity on this Item.
 	inline const int32 getHeroicDexterity() const { return mItemData->mHeroicDexterity; }
+
+	// Returns the total heroic dexterity on this Item and augments.
 	inline const int32 _getHeroicDexterity() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicDexterity(); return getHeroicDexterity() + count; }
+
+	// Returns the heroic stamina on this Item.
 	inline const int32 getHeroicStamina() const { return mItemData->mHeroicStamina; }
+
+	// Returns the total heroic stamina on this Item and augments.
 	inline const int32 _getHeroicStamina() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicStamina(); return getHeroicStamina() + count; }
+
+	// Returns the heroic charisma on this Item.
 	inline const int32 getHeroicCharisma() const { return mItemData->mHeroicCharisma; }
+
+	// Returns the total heroic charisma on this Item and augments.
 	inline const int32 _getHeroicCharisma() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicCharisma(); return getHeroicCharisma() + count; }
+
+	// Returns the heroic magic resist on this Item.
 	inline const int32 getHeroicMagicResist() const { return mItemData->mHeroicMagicResist; }
+	
+	// Returns the total heroic magic resist on this Item and augments.
 	inline const int32 _getHeroicMagicResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicMagicResist(); return getHeroicMagicResist() + count; }
+
+	// Returns the heroic fire resist on this Item.
 	inline const int32 getHeroicFireResist() const { return mItemData->mHeroicFireResist; }
+
+	// Returns the total heroic fire resist on this Item and augments.
 	inline const int32 _getHeroicFireResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicFireResist(); return getHeroicFireResist() + count; }
+
+	// Returns the heroic cold resist on this Item.
 	inline const int32 getHeroicColdResist() const { return mItemData->mHeroicColdResist; }
+
+	// Returns the total heroic cold resist on this Item and augments.
 	inline const int32 _getHeroicColdResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicColdResist(); return getHeroicColdResist() + count; }
+
+	// Returns the heroic disease resist on this Item.
 	inline const int32 getHeroicDiseaseResist() const { return mItemData->mHeroicDiseaseResist; }
+
+	// Returns the total heroic disease resist on this Item and augments.
 	inline const int32 _getHeroicDiseaseResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicDiseaseResist(); return getHeroicDiseaseResist() + count; }
+
+	// Returns the heroic poison resist on this Item.
 	inline const int32 getHeroicPoisonResist() const { return mItemData->mHeroicPoisonResist; }
+
+	// Returns the total heroic poison resist on this Item and augments.
 	inline const int32 _getHeroicPoisonResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicPoisonResist(); return getHeroicPoisonResist() + count; }
+
+	// Returns the heroic corruption resist on this Item.
 	inline const int32 getHeroicCorruptionResist() const { return mItemData->mHeroicSVCorruption; }
+
+	// Returns the total heroic corruption resist on this Item and augments.
 	inline const int32 _getHeroicCorruptionResist() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHeroicCorruptionResist(); return getHeroicCorruptionResist() + count; }
+
+	// (MOD2) Returns the heal amount on this Item.
 	inline const int32 getHealAmount() const { return mItemData->mHealAmount; }
+
+	// (MOD2) Returns the total heal amount on this Item and augments.
 	inline const int32 _getHealAmount() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getHealAmount(); return getHealAmount() + count; }
+
+	// (MOD2) Returns the spell damage on this Item.
 	inline const int32 getSpellDamage() const { return mItemData->mSpellDamage; }
+
+	// (MOD2) Returns the total spell damage on this Item and augments.
 	inline const int32 _getSpellDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getSpellDamage(); return getSpellDamage() + count; }
+
+	// (MOD2) Returns the clairvoyance on this Item.
 	inline const int32 getClairvoyance() const { return mItemData->mClairvoyance; }
+
+	// (MOD2) Returns the total clairvoyance on this Item and augments.
 	inline const int32 _getClairvoyance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getClairvoyance(); return getClairvoyance() + count; }
+
+	// Returns whether or not this Item is an heirloom.
 	inline const bool getIsHeirloom() const { return mItemData->mHeirloom == 1; }
 
 
@@ -328,6 +492,7 @@ public:
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
 	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }
 	inline void setIsEvolvingItem(const bool pValue) { mItemData->mIsEvolvingItem = pValue ? 1 : 0; }
+	inline void setIsCopied(const uint8 pValue) { mItemData->mCopied = pValue; }
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
@@ -440,23 +605,53 @@ public:
 	// TODO: Purity
 	inline void setBackstabDamage(const uint32 pValue) { mItemData->mBackstabDamage = pValue; }
 	inline void setDamageShieldMitigation(const uint32 pValue) { mItemData->mDamageShieldMitigation = pValue; }
+
+	// Sets the heroic strenth on this Item.
 	inline void setHeroicStrength(const int32 pValue) { mItemData->mHeroicStrength = pValue; }
+
+	// Sets the heroic intelligence on this Item.
 	inline void setHeroicIntelligence(const int32 pValue) { mItemData->mHeroicIntelligence = pValue; }
+
+	// Sets the heroic wisdom on this Item.
 	inline void setHeroicWisdom(const int32 pValue) { mItemData->mHeroicWisdom = pValue; }
+
+	// Sets the heroic agility on this Item.
 	inline void setHeroicAgility(const int32 pValue) { mItemData->mHeroicAgility = pValue; }
+
+	// Sets the heroic dexterity on this Item.
 	inline void setHeroicDexterity(const int32 pValue) { mItemData->mHeroicDexterity = pValue; }
+
+	// Sets the heroic stamina on this Item.
 	inline void setHeroicStamina(const int32 pValue) { mItemData->mHeroicStamina = pValue; }
+
+	// Sets the heroic charisma on this Item.
 	inline void setHeroicCharisma(const int32 pValue) { mItemData->mHeroicCharisma = pValue; }
+
+	// Sets the heroic magic resist on this Item.
 	inline void setHeroicMagicResist(const int32 pValue) { mItemData->mHeroicMagicResist = pValue; }
+
+	// Sets the heroic fire resist on this Item.
 	inline void setHeroicFireResist(const int32 pValue) { mItemData->mHeroicFireResist = pValue; }
+
+	// Sets the  heroic cold resist on this Item.
 	inline void setHeroicColdResist(const int32 pValue) { mItemData->mHeroicColdResist = pValue; }
+
+	// Sets the heroic disease resist on this Item.
 	inline void setHeroicDiseaseResist(const int32 pValue) { mItemData->mHeroicDiseaseResist = pValue; }
+
+	// Sets the heroic poison resist on this Item.
 	inline void setHeroicPoisonResist(const int32 pValue) { mItemData->mHeroicPoisonResist = pValue; }
+
+	// Sets the heroic corruption resist on this Item.
 	inline void setHeroicCorruptionResist(const int32 pValue) { mItemData->mHeroicSVCorruption = pValue; }
+
 	inline void setHealAmount(const int32 pValue) { mItemData->mHealAmount = pValue; }
 	inline void setSpellDamage(const int32 pValue) { mItemData->mSpellDamage = pValue; }
 	inline void setClairvoyance(const int32 pValue) { mItemData->mClairvoyance = pValue; }
+
+	// Sets whether this Item is an heirloom or not.
 	inline void setIsHeirloom(const bool pValue) { mItemData->mHeirloom = pValue ? 1 : 0; }
+
 private:
 	const uint32 _getDataSize() const;
 	void _onCopy();

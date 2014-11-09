@@ -337,16 +337,17 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setDamage(Random::make<uint32>(5, 15));
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::PrimarySecondary);
+	//item->setIsCopied(8);
 
-	//item->setIsEvolvingItem(1501);
-	//item->setCurrentEvolvingLevel(3);
-	//item->setMaximumEvolvingLevel(4);
-	//item->setEvolvingProgress(55.4);
-	//item->setLoreGroup(1501);
+	item->setIsEvolvingItem(true);
+	item->setCurrentEvolvingLevel(3);
+	item->setMaximumEvolvingLevel(4);
+	item->setEvolvingProgress(55.4);
+	item->setLoreGroup(1502);
 	//item
 
-	item->setOrnamentationIcon(1346);
-	item->setOrnamentationIDFile("IT10634");
+	//item->setOrnamentationIcon(1346);
+	//item->setOrnamentationIDFile("IT10634");
 	Log::error("ID = " + std::to_string(item->getID()));
 
 	return item;
@@ -359,7 +360,7 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setName("Two Hand Blunt");
 	item->setIcon(741);
 	item->setIDFile("IT10608");
-	item->setItemType(ItemType::TwoHandSlash);
+	item->setItemType(ItemType::TwoHandBlunt);
 	item->setDelay(Random::make<uint32>(25, 45));
 	item->setDamage(Random::make<uint32>(5, 15));
 	item->setIsMagic(true);
@@ -373,7 +374,7 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setLoreGroup(1501);
 
 	//item->setOrnamentationIcon(2174);
-	item->setOrnamentationIDFile("IT11107");
+	//item->setOrnamentationIDFile("IT11107");
 
 	return item;
 }

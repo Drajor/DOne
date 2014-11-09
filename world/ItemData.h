@@ -7,7 +7,6 @@
  Possible Missing
 - Placeable
 - Power Drain (Amount the item drains from the power source per second).
-
 */
 
 struct ItemData {

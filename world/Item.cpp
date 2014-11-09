@@ -400,6 +400,8 @@ const bool Item::setSubIndex(const uint32 pSubIndex) {
 const bool Item::isTradeable() {
 	if (isNoDrop()) return false;
 	if (isAttuned()) return false;
+	if (hasOrnamentationIcon()) return false;
+	if (hasOrnamentationIDFile()) return false;
 
 	for (auto i : mAugments) {
 		if (i && !i->isTradeable()) return false;
