@@ -132,7 +132,7 @@ struct ItemData {
 	int32 mBardValue = 0;
 	uint8 mLight = 0;
 	uint8 mDelay = 0;
-	uint8 mElementalDamageType = 0;
+	uint8 mElementalDamageType = ElementalDamageType::None;
 	uint8 mElementalDamageAmount = 0;
 	uint8 mRange = 0;
 	uint32 mDamage = 0;

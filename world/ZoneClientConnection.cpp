@@ -497,6 +497,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_WeaponEquip1:
 		Log::info("OP_WeaponEquip1 size= " + std::to_string(pPacket->size));
 		break;
+	case OP_WeaponEquip2:
+		Log::info("OP_WeaponEquip2 size= " + std::to_string(pPacket->size));
+		break;
+	case OP_WeaponUnequip2:
+		Log::info("OP_WeaponUnequip2 size= " + std::to_string(pPacket->size));
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;

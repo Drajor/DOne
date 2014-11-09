@@ -798,6 +798,21 @@ namespace ItemSize {
 	};
 }
 
+namespace ElementalDamageType {
+	enum : uint8 {
+		None = 0,
+		Magic = 1,
+		Fire = 2,
+		Cold = 3,
+		Poison = 4,
+		Disease = 5,
+		Chromatic = 6,
+		Prismatic = 7,
+		Phys = 8,
+		Corrupt = 9,
+	};
+}
+
 // ContainterType will need some work.
 namespace ContainerType {
 	enum : uint8 {

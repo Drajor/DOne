@@ -62,6 +62,29 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+
+	// Test - Elemental Damage Augmentations
+	int id = 4;
+	for (auto i = 1; i < 20; i++) {
+		auto data = &mItemData[id];
+		data->mID = id;
+		auto item = new Item(data);
+
+		item->setName("Elemental Damage T(" + std::to_string(i)+")");
+		item->setIDFile("IT63");
+		item->setIcon(2187);
+		item->setItemType(ItemType::Augmentation);
+		item->setItemClass(ItemClass::Common);
+		item->setElementalDamasetype(i);
+		item->setElementalDamageAmount(7);
+
+		item->setAugmentationType(AugmentationSlotType::MultipleStat);
+		item->setAugmentationRestriction(AugmentationRestriction::None);
+		item->setAugmentationDistiller(2);
+
+		delete item;
+		id++;
+	}
 	
 }
 
