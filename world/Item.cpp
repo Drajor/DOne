@@ -55,6 +55,10 @@ const uint32 Item::_getDataSize() const {
 		result += sizeof(uint32);
 	}
 
+	if (!isEvolvingItem()) {
+		result -= sizeof(ItemData::EvolvingItem);
+	}
+
 	// Remove the maximum size of variable sized attributes.
 	result -= sizeof(mItemData->mOrnamentationIDFile);
 	result -= sizeof(mItemData->mName);
@@ -69,22 +73,8 @@ const uint32 Item::_getDataSize() const {
 	result -= sizeof(mItemData->mScrollName);
 	result -= sizeof(mItemData->mBardName);
 
-	// Evolving Item.
-	if (isEvolvingItem()) {
-		result += getOrnamentationIDFile().length() + 1;
-	}
-	// Non-Evolving Item.
-	else {
-		result -= sizeof(ItemData::EvolvingItem);
-		result -= sizeof(mItemData->mOrnamentationIcon);
-
-		//if (getOrnamentationIcon() > 0) {
-		//	result += getOrnamentationIDFile().length() +1;
-		//}
-		result += getOrnamentationIDFile().length() + 1;
-	}
-
 	// Add variable strings
+	result += getOrnamentationIDFile().length() + 1;
 	result += strlen(mItemData->mName) + 1;
 	result += strlen(mItemData->mLore) + 1;
 	result += strlen(mItemData->mIDFile) + 1;
@@ -116,32 +106,19 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown0), sizeof(mItemData->mEvolvingItem.__Unknown0));
 		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
 		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
 		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown2), sizeof(mItemData->mEvolvingItem.__Unknown2));
-
-		// This is where evolving items store ornament data.
-		pStructure.writeString(String(mItemData->mOrnamentationIDFile));
-		pStructure.write<uint16>(mItemData->mOrnamentationIcon);
-
-		pStructure.write<uint8>(mItemData->__Unknown5);
-		pStructure.write<uint8>(mItemData->__Unknown6);
+		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 	}
-	else {
-		
-		if (mItemData->mOrnamentationIcon > 0) {
-			// This is where non-evolving items store ornament data.
-			pStructure.write<uint16>(mItemData->mOrnamentationIcon);
-		}
-		else {
-			pStructure.write<uint32>(mItemData->mIsEvolvingItem); // Should be zero.
 
-		}
-		pStructure.writeString(String(mItemData->mOrnamentationIDFile));
-		pStructure.write<uint8>(mItemData->__Unknown6);
-	}
+	pStructure.writeString(String(mItemData->mOrnamentationIDFile));
+	pStructure.write<uint16>(mItemData->mOrnamentationIcon);
+
+	pStructure.write<uint8>(mItemData->__Unknown5);
+	pStructure.write<uint8>(mItemData->__Unknown6);
 
 	pStructure.write<uint8>(mItemData->mCopied);
 	pStructure.write<uint8>(mItemData->mItemClass);

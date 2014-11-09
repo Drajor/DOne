@@ -346,7 +346,7 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	//item
 
 	item->setOrnamentationIcon(1346);
-	item->setIDFile("IT10634");
+	item->setOrnamentationIDFile("IT10634");
 	Log::error("ID = " + std::to_string(item->getID()));
 
 	return item;
@@ -366,7 +366,7 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setSlots(EquipSlots::Primary);
 
 	//item->setIsEvolvingItem(1501);
-	item->setIsEvolvingItem(0x00000100);
+	item->setIsEvolvingItem(true);
 	item->setCurrentEvolvingLevel(3);
 	item->setMaximumEvolvingLevel(4);
 	item->setEvolvingProgress(55.4);
@@ -420,7 +420,7 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Head);
 	//item->setIsEvolvingItem(1500);
-	item->setIsEvolvingItem(1);
+	item->setIsEvolvingItem(true);
 	item->setCurrentEvolvingLevel(3);
 	item->setMaximumEvolvingLevel(4);
 	item->setEvolvingProgress(55.4);

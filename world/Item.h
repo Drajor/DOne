@@ -327,7 +327,7 @@ public:
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
 	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }
-	inline void setIsEvolvingItem(const uint16 pValue) { mItemData->mIsEvolvingItem = pValue; }
+	inline void setIsEvolvingItem(const bool pValue) { mItemData->mIsEvolvingItem = pValue ? 1 : 0; }
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
