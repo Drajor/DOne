@@ -807,6 +807,7 @@ const bool Character::canEquip(const Item* pItem, const uint32 pSlotID) const {
 	EXPECTED_BOOL(pItem);
 
 	// Check: Required Level
+	// TODO: I need to check what happens to required level on augs.
 	if (pItem->getRequiredLevel() > getLevel()) return false;
 
 	// Check: Race
@@ -826,6 +827,94 @@ const bool Character::canEquip(const Item* pItem, const uint32 pSlotID) const {
 	const uint32 slotBit = EquipSlots::convert(pSlotID);
 	if ((pItem->_getSlots() & slotBit) == 0) return false;
 
+	// TODO: Check dw constraints. 1h in secondary while 2h in primary
+
+	return true;
+}
+
+const bool Character::onWornSlotChange(const uint32 pSlot, Item* pOldItem, Item* pNewItem) {
+	EXPECTED_BOOL(SlotID::isWorn(pSlot));
+	EXPECTED_BOOL(pOldItem || pNewItem);
+
+	// TODO: This where I will add / remove worn effects on Items.
+
+	switch (pSlot) {
+	case SlotID::Primary: {
+		EXPECTED_BOOL(onPrimarySlotChange(pNewItem));
+		break;
+	}
+	case SlotID::Secondary: {
+		EXPECTED_BOOL(onSecondarySlotChange(pNewItem));
+		break;
+	}
+	case SlotID::Range: {
+		EXPECTED_BOOL(onRangeItemChange(pNewItem));
+		break;
+	}
+	default:
+		break;
+	}
+
+	return true;
+}
+
+const bool Character::onPrimarySlotChange(Item* pItem) {
+	_clearPrimary();
+	if (pItem == nullptr) return true; // No Item was equipped.
+	if (pItem->isWeapon() == false) return true; // Non-weapon being equipped.
+
+	// Update primary damage.
+	setPrimaryDamage(pItem->_getDamage());
+	
+	// Update primary elemental damage.
+	setPrimaryFireDamage(pItem->_getElementalDamage(ElementalDamageType::Fire));
+	setPrimaryColdDamage(pItem->_getElementalDamage(ElementalDamageType::Cold));
+	setPrimaryPoisonDamage(pItem->_getElementalDamage(ElementalDamageType::Poison));
+	setPrimaryDiseaseDamage(pItem->_getElementalDamage(ElementalDamageType::Disease));
+	setPrimaryChromaticDamage(pItem->_getElementalDamage(ElementalDamageType::Chromatic));
+	setPrimaryPrismaticDamage(pItem->_getElementalDamage(ElementalDamageType::Prismatic));
+	setPrimaryPhysicalDamage(pItem->_getElementalDamage(ElementalDamageType::Phys));
+	setPrimaryCorruptionDamage(pItem->_getElementalDamage(ElementalDamageType::Corrupt));
+
+	// Update primary animation
+	switch (pItem->getItemType()) {
+	case ItemType::OneHandSlash:
+		setPrimaryAttackAnimation(Animation::ANIM_1HWEAPON);
+		break;
+	case ItemType::TwoHandSlash:
+		setPrimaryAttackAnimation(Animation::ANIM_2HSLASHING);
+		break;
+	case ItemType::OneHandBlunt:
+		setPrimaryAttackAnimation(Animation::ANIM_1HWEAPON);
+		break;
+	case ItemType::TwoHandBlunt:
+		setPrimaryAttackAnimation(Animation::ANIM_2HWEAPON);
+		break;
+	case ItemType::OneHandPierce:
+		setPrimaryAttackAnimation(Animation::ANIM_PIERCING);
+		break;
+	case ItemType::TwoHandPierce:
+		setPrimaryAttackAnimation(Animation::ANIM_2HWEAPON);
+		break;
+	case ItemType::HandToHand:
+		setPrimaryAttackAnimation(Animation::ANIM_HAND2HAND);
+		break;
+	default:
+		Log::error("Got unknown ItemType in onPrimarySlotChange " + std::to_string((int)pItem->getItemType()));
+		setPrimaryAttackAnimation(Animation::ANIM_HAND2HAND);
+		break;
+	}
+
+	return true;
+}
+
+const bool Character::onSecondarySlotChange(Item* pItem)
+{
+	return true;
+}
+
+const bool Character::onRangeItemChange(Item* pItem)
+{
 	return true;
 }
 

@@ -125,7 +125,7 @@ struct ItemData {
 		uint32 mDrinkSize;
 		int32 mCastTime = 0;
 	};
-	uint32 mReqLevel = 0;
+	uint32 mRequiredLevel = 0;
 	uint32 mRecLevel = 0;
 	uint32 mRecSkill = 0;
 	uint32 mBardType = 0;
@@ -133,7 +133,7 @@ struct ItemData {
 	uint8 mLight = 0;
 	uint8 mDelay = 0;
 	uint8 mElementalDamageType = ElementalDamageType::None;
-	uint8 mElementalDamageAmount = 0;
+	uint8 mElementalDamage = 0;
 	uint8 mRange = 0;
 	uint32 mDamage = 0;
 	uint32 mColour = 4278190080;

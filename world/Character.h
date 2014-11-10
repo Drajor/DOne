@@ -256,6 +256,11 @@ public:
 
 	// Returns whether this Character can equip PItem in pSlotID
 	const bool canEquip(const Item* pItem, const uint32 pSlotID) const;
+	const bool onWornSlotChange(const uint32 pSlot, Item* pOldItem, Item* pNewItem);
+	const bool onPrimarySlotChange(Item* pItem);
+	const bool onSecondarySlotChange(Item* pItem);
+	const bool onRangeItemChange(Item* pItem);
+
 private:
 	ZoneChange mZoneChange;
 

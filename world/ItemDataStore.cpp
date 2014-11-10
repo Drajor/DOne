@@ -75,8 +75,9 @@ void ItemDataStore::_bootstrap() {
 		item->setIcon(2187);
 		item->setItemType(ItemType::Augmentation);
 		item->setItemClass(ItemClass::Common);
-		item->setElementalDamasetype(i);
-		item->setElementalDamageAmount(7);
+		item->setElementalDamageType(i);
+		item->setElementalDamage(7);
+		item->setSlots(EquipSlots::PrimarySecondary);
 
 		item->setAugmentationType(AugmentationSlotType::MultipleStat);
 		item->setAugmentationRestriction(AugmentationRestriction::None);

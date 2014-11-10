@@ -309,22 +309,38 @@ public:
 	inline const uint32 getFoodSize() const { return mItemData->mFoodSize; }
 	inline const uint32 getDrinkSize() const { return mItemData->mDrinkSize; }
 	inline const int32 getCastTime() const { return mItemData->mCastTime; }
-	inline const uint32 getRequiredLevel() const { return mItemData->mReqLevel; }
+	inline const uint32 getRequiredLevel() const { return mItemData->mRequiredLevel; }
 	inline const uint32 getRecLevel() const { return mItemData->mRecLevel; }
 	inline const uint32 getRecSkill() const { return mItemData->mRecSkill; }
 	inline const uint32 getBardType() const { return mItemData->mBardType; }
 	inline const int32 getBardValue() const { return mItemData->mBardValue; }
 	inline const uint8 getLight() const { return mItemData->mLight; }
 	inline const uint8 getDelay() const { return mItemData->mDelay; }
+	
+	// Returns the elemental damage type of this Item. See Constants.h ElementalDamageType enumeration.
 	inline const uint8 getElementalDamageType() const { return mItemData->mElementalDamageType; }
-	inline const uint8 getElementalDamageAmount() const { return mItemData->mElementalDamageAmount; }
+	
+	// Returns the elemental damage on this Item.
+	inline const uint8 getElementalDamage() const { return mItemData->mElementalDamage; }
+
+	// Returns the elemental damage of pType on this Item and augments. See Constants.h ElementalDamageType enumeration.
+	inline const uint32 _getElementalDamage(const uint8 pType) {
+		uint32 v = getElementalDamageType() == pType ? getElementalDamage() : 0;
+		for (auto i : mAugments)
+			if (i && i->getElementalDamageType() == pType)
+				v += i->getElementalDamage();
+
+		return v;
+	}
+	
+	// Returns the range on this Item.
 	inline const uint8 getRange() const { return mItemData->mRange; }
 
 	// Returns the damage on this Item.
 	inline const uint32 getDamage() const { return mItemData->mDamage; }
 
 	// Returns the total damage on this Item and augments.
-	inline const int32 _getDamage() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getDamage(); return getDamage() + count; }
+	inline const uint32 _getDamage() const { uint32 v = getDamage(); for (auto i : mAugments) if (i) v += i->getDamage(); return v; }
 
 	// Returns the colour of this Item.
 	inline const uint32 getColour() const { return mItemData->mColour; }
@@ -644,15 +660,15 @@ public:
 	inline void setFoodSize(const uint32 pValue) { mItemData->mFoodSize = pValue; }
 	inline void setDrinkSize(const uint32 pValue) { mItemData->mDrinkSize = pValue; }
 	inline void setCastTime(const int32 pValue) { mItemData->mCastTime = pValue; }
-	inline void setReqLevel(const uint32 pValue) { mItemData->mReqLevel = pValue; }
+	inline void setRequiredLevel(const uint32 pValue) { mItemData->mRequiredLevel = pValue; }
 	inline void setRecLevel(const uint32 pValue) { mItemData->mRecLevel = pValue; }
 	inline void setRecSkill(const uint32 pValue) { mItemData->mRecSkill = pValue; }
 	inline void setBardType(const uint32 pValue) { mItemData->mBardType = pValue; }
 	inline void setBardValue(const int32 pValue) { mItemData->mBardValue = pValue; }
 	inline void setLight(const uint8 pValue) { mItemData->mLight = pValue; }
 	inline void setDelay(const uint8 pValue) { mItemData->mDelay = pValue; }
-	inline void setElementalDamasetype(const uint8 pValue) { mItemData->mElementalDamageType = pValue; }
-	inline void setElementalDamageAmount(const uint8 pValue) { mItemData->mElementalDamageAmount = pValue; }
+	inline void setElementalDamageType(const uint8 pValue) { mItemData->mElementalDamageType = pValue; }
+	inline void setElementalDamage(const uint8 pValue) { mItemData->mElementalDamage = pValue; }
 	inline void setRange(const uint8 pValue) { mItemData->mRange = pValue; }
 	inline void setDamage(const uint32 pValue) { mItemData->mDamage = pValue; }
 	inline void setColour(const uint32 pValue) { mItemData->mColour = pValue; }

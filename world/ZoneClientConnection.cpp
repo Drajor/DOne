@@ -2739,24 +2739,46 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 	auto payload = MoveItem::convert(pPacket->pBuffer);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
 
-	Item* equipItem = nullptr;
+	Item* wornNew = nullptr; // Item that will be equipped after move.
+	Item* wornOld = nullptr; // Item that will be unequipped after move.
 
 	// Character is trying to equip an Item.
 	if (SlotID::isWorn(payload->mToSlot)) {
-		equipItem = mCharacter->getInventory()->getItem(payload->mFromSlot);
-		EXPECTED(equipItem);
+		EXPECTED(SlotID::isCursor(payload->mFromSlot)); // We expect the Item to be coming from the cursor.
+
+		wornNew = mCharacter->getInventory()->getItem(payload->mFromSlot);
+		EXPECTED(wornNew);
 
 		// Check: Can Character equip this Item?
-		if (!mCharacter->canEquip(equipItem, payload->mToSlot)) {
+		if (!mCharacter->canEquip(wornNew, payload->mToSlot)) {
 			inventoryError();
 			return;
 		}
+
+		wornOld = mCharacter->getInventory()->getItem(payload->mToSlot); // Can be null if slot was empty.
+	}
+	// Character is trying to unequip an Item.
+	else if (SlotID::isWorn(payload->mFromSlot)) {
+		EXPECTED(SlotID::isCursor(payload->mToSlot)); // We expect the Item to be going to the cursor.
+
+		wornOld = mCharacter->getInventory()->getItem(payload->mFromSlot);
+		EXPECTED(wornOld);
+
+		wornNew = mCharacter->getInventory()->getItem(payload->mToSlot); // Can be null if no Item on cursor.
 	}
 
 	// Move.
 	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)) {
 		inventoryError();
 		return;
+	}
+
+	// Notify Character that a worn slot has changed.
+	if (SlotID::isWorn(payload->mToSlot)) {
+		EXPECTED(mCharacter->onWornSlotChange(payload->mToSlot, wornOld, wornNew));
+	}
+	else if (SlotID::isWorn(payload->mFromSlot)) {
+		EXPECTED(mCharacter->onWornSlotChange(payload->mFromSlot, wornOld, wornNew));
 	}
 }
 

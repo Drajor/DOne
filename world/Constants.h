@@ -226,10 +226,10 @@ namespace SlotID {
 		BACK = 8,
 		LEFT_WRIST = 9,
 		RIGHT_WRIST = 10,
-		RANGE = 11,
+		Range = 11,
 		HANDS = 12,
-		PRIMARY = 13,
-		SECONDARY = 14,
+		Primary = 13,
+		Secondary = 14,
 		LEFT_RING = 15,
 		RIGHT_RING = 16,
 		CHEST = 17,
@@ -334,6 +334,10 @@ namespace SlotID {
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
 	static const uint32 BANK_SLOTS = (BANK_23 - BANK_0) + 1;
 	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
+
+	static const bool isPrimary(const uint32 pSlot) { return pSlot == Primary; }
+	static const bool isSecondary(const uint32 pSlot) { return pSlot == Secondary; }
+	static const bool isRange(const uint32 pSlot) { return pSlot == Range; }
 
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
@@ -670,10 +674,10 @@ namespace EquipSlots {
 		case SlotID::BACK: return Back;
 		case SlotID::LEFT_WRIST: return LeftWrist;
 		case SlotID::RIGHT_WRIST: return RightWrist;
-		case SlotID::RANGE: return Range;
+		case SlotID::Range: return Range;
 		case SlotID::HANDS: return Hands;
-		case SlotID::PRIMARY: return Primary;
-		case SlotID::SECONDARY: return Secondary;
+		case SlotID::Primary: return Primary;
+		case SlotID::Secondary: return Secondary;
 		case SlotID::LEFT_RING: return LeftFingers;
 		case SlotID::RIGHT_RING: return RightFingers;
 		case SlotID::CHEST: return Chest;

@@ -420,6 +420,31 @@ protected:
 	TTimer mPrimaryAttackTimer;
 	TTimer mSecondaryAttackTimer;
 	TTimer mRangeAttackTimer;
+
+	void _clearPrimary();
+
+	inline const uint32 getPrimaryDamage() const { return mPrimaryDamage; }
+	inline const uint32 getPrimaryMagicDamage() const { return mPrimaryMagicDamage; }
+	inline const uint32 getPrimaryFireDamage() const { return mPriamryFireDamage; }
+	inline const uint32 getPrimaryColdDamage() const { return mPrimaryColdDamage; }
+	inline const uint32 getPrimaryPoisonDamage() const { return mPrimaryPoisonDamage; }
+	inline const uint32 getPrimaryDiseaseDamage() const { return mPrimaryDiseaseDamage; }
+	inline const uint32 getPrimaryChromaticDamage() const { return mPrimaryChromaticDamage; }
+	inline const uint32 getPrimaryPrismaticDamage() const { return mPrimaryPrismaticDamage; }
+	inline const uint32 getPrimaryPhysicalDamage() const { return mPrimaryPhysicalDamage; }
+	inline const uint32 getPrimaryCorruptionDamage() const { return mPrimaryCorruptionDamage; }
+
+	inline void setPrimaryDamage(const uint32 pValue) { mPrimaryDamage = pValue; }
+	inline void setPrimaryMagicDamage(const uint32 pValue) { mPrimaryMagicDamage = pValue; }
+	inline void setPrimaryFireDamage(const uint32 pValue) { mPriamryFireDamage = pValue; }
+	inline void setPrimaryColdDamage(const uint32 pValue) { mPrimaryColdDamage = pValue; }
+	inline void setPrimaryPoisonDamage(const uint32 pValue) { mPrimaryPoisonDamage = pValue; }
+	inline void setPrimaryDiseaseDamage(const uint32 pValue) { mPrimaryDiseaseDamage = pValue; }
+	inline void setPrimaryChromaticDamage(const uint32 pValue) { mPrimaryChromaticDamage = pValue; }
+	inline void setPrimaryPrismaticDamage(const uint32 pValue) { mPrimaryPrismaticDamage = pValue; }
+	inline void setPrimaryPhysicalDamage(const uint32 pValue) { mPrimaryPhysicalDamage = pValue; }
+	inline void setPrimaryCorruptionDamage(const uint32 pValue) { mPrimaryCorruptionDamage = pValue; }
+
 private:
 
 	void _onCopy();
@@ -430,6 +455,19 @@ private:
 	String mLastName = "";
 	String mTitle = "";
 	String mSuffix = "";
+
+	// Primary Damage
+	uint32 mPrimaryDamage = 0;
+	// Primary Elemental Damage
+	uint32 mPrimaryMagicDamage = 0;
+	uint32 mPriamryFireDamage = 0;
+	uint32 mPrimaryColdDamage = 0;
+	uint32 mPrimaryPoisonDamage = 0;
+	uint32 mPrimaryDiseaseDamage = 0;
+	uint32 mPrimaryChromaticDamage = 0;
+	uint32 mPrimaryPrismaticDamage = 0;
+	uint32 mPrimaryPhysicalDamage = 0;
+	uint32 mPrimaryCorruptionDamage = 0;
 
 	uint8 mPrimaryDamageType = DamageType::HandtoHand;
 	uint8 mSecondaryDamageType = DamageType::HandtoHand;

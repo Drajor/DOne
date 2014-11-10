@@ -133,3 +133,15 @@ void Actor::damage(const int32 pAmount) {
 	else
 		setHPPercent(_calcHPPercent());
 }
+
+void Actor::_clearPrimary() {
+	setPrimaryDamage(0);
+	setPrimaryFireDamage(0);
+	setPrimaryColdDamage(0);
+	setPrimaryPoisonDamage(0);
+	setPrimaryDiseaseDamage(0);
+	setPrimaryChromaticDamage(0);
+	setPrimaryPrismaticDamage(0);
+	setPrimaryPhysicalDamage(0);
+	setPrimaryCorruptionDamage(0);
+}

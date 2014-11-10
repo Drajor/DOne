@@ -54,6 +54,7 @@ public:
 	static Item* makeAugmentation(const uint8 pLevel, const Rarity pRarity);
 private:
 	Item* _makeBaseArmorItem();
+	Item* _makeBaseOneHandWeapon();
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();
 

@@ -54,6 +54,17 @@ Item* ItemGenerator::_makeBaseArmorItem() {
 	return new Item(data);
 }
 
+Item* ItemGenerator::_makeBaseOneHandWeapon() {
+	auto data = ItemDataStore::getInstance().getNew();
+	data->mAugmentationSlots[0].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[1].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[2].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[3].mType = AugmentationSlotType::MultipleStat;
+	data->mAugmentationSlots[4].mType = AugmentationSlotType::MultipleStat;
+
+	return new Item(data);
+}
+
 Item* ItemGenerator::makeRandom(const uint8 pLevel, const Rarity pRarity) {
 	const uint32 itemType = Random::make<uint32>(RandomItemType::Max);
 
@@ -93,7 +104,7 @@ Item* ItemGenerator::makeRandom(const uint8 pLevel, const Rarity pRarity) {
 
 Item* ItemGenerator::_makeRandom(const uint8 pLevel) {
 	Item* item = _makeBaseItem();
-	item->setReqLevel(pLevel);
+	item->setRequiredLevel(pLevel);
 
 	return item;
 }
@@ -327,7 +338,7 @@ Item* ItemGenerator::makeTwoHandPierce(const uint8 pLevel, const Rarity pRarity)
 }
 
 Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = ItemGenerator::getInstance()._makeBaseOneHandWeapon();
 
 	item->setName("One Hand Blunt");
 	item->setIcon(578);
@@ -349,7 +360,6 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	//item->setOrnamentationIcon(1346);
 	//item->setOrnamentationIDFile("IT10634");
 	Log::error("ID = " + std::to_string(item->getID()));
-
 	return item;
 }
 
