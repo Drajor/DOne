@@ -450,9 +450,11 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleTradeRequestAck(pPacket);
 		break;
 	case OP_CancelTrade:
+		// NOTE: This occurs when a player presses the 'Cancel' button whilst trading with an NPC.
 		_handleCancelTrade(pPacket);
 		break;
 	case OP_TradeAcceptClick:
+		// NOTE: This occurs when a player presses 'Give' button whilst trading with an NPC.
 		_handleAcceptTrade(pPacket);
 		break;
 	case OP_TradeBusy:
@@ -2732,9 +2734,15 @@ void ZoneClientConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
+	if (!_handleMoveItemImpl(pPacket)) {
+		inventoryError();
+	}
+}
+
+const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(MoveItem::sizeCheck(pPacket->size));
+	EXPECTED_BOOL(pPacket);
+	EXPECTED_BOOL(MoveItem::sizeCheck(pPacket->size));
 
 	auto payload = MoveItem::convert(pPacket->pBuffer);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
@@ -2744,42 +2752,42 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 
 	// Character is trying to equip an Item.
 	if (SlotID::isWorn(payload->mToSlot)) {
-		EXPECTED(SlotID::isCursor(payload->mFromSlot)); // We expect the Item to be coming from the cursor.
+		EXPECTED_BOOL(SlotID::isCursor(payload->mFromSlot)); // We expect the Item to be coming from the cursor.
 
 		wornNew = mCharacter->getInventory()->getItem(payload->mFromSlot);
-		EXPECTED(wornNew);
-
-		// Check: Can Character equip this Item?
-		if (!mCharacter->canEquip(wornNew, payload->mToSlot)) {
-			inventoryError();
-			return;
-		}
+		EXPECTED_BOOL(wornNew);
+		EXPECTED_BOOL(mCharacter->canEquip(wornNew, payload->mToSlot));
 
 		wornOld = mCharacter->getInventory()->getItem(payload->mToSlot); // Can be null if slot was empty.
 	}
 	// Character is trying to unequip an Item.
 	else if (SlotID::isWorn(payload->mFromSlot)) {
-		EXPECTED(SlotID::isCursor(payload->mToSlot)); // We expect the Item to be going to the cursor.
+		EXPECTED_BOOL(SlotID::isCursor(payload->mToSlot)); // We expect the Item to be going to the cursor.
 
 		wornOld = mCharacter->getInventory()->getItem(payload->mFromSlot);
-		EXPECTED(wornOld);
+		EXPECTED_BOOL(wornOld);
 
 		wornNew = mCharacter->getInventory()->getItem(payload->mToSlot); // Can be null if no Item on cursor.
 	}
 
-	// Move.
-	if (!mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize)) {
-		inventoryError();
-		return;
+	// Character is trying to put an Item into a trade slot.
+	if (SlotID::isTrade(payload->mToSlot)) {
+		EXPECTED_BOOL(SlotID::isCursor(payload->mFromSlot)); // We expect the Item to be coming from the cursor.
+		EXPECTED_BOOL(mCharacter->isTrading());
 	}
+
+	// Move.
+	EXPECTED_BOOL(mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize));
 
 	// Notify Character that a worn slot has changed.
 	if (SlotID::isWorn(payload->mToSlot)) {
-		EXPECTED(mCharacter->onWornSlotChange(payload->mToSlot, wornOld, wornNew));
+		EXPECTED_BOOL(mCharacter->onWornSlotChange(payload->mToSlot, wornOld, wornNew));
 	}
 	else if (SlotID::isWorn(payload->mFromSlot)) {
-		EXPECTED(mCharacter->onWornSlotChange(payload->mFromSlot, wornOld, wornNew));
+		EXPECTED_BOOL(mCharacter->onWornSlotChange(payload->mFromSlot, wornOld, wornNew));
 	}
+
+	return true;
 }
 
 void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
@@ -2862,7 +2870,9 @@ void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacke
 
 	// OP_TradeRequestAck
 
-	// TODO: Check who the Player is trying to trade with.
+	// NOTE: Underfoot does appear to require a response.
+
+	mZone->handleTradeRequest(mCharacter, payload->mToSpawnID);
 }
 
 void ZoneClientConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
@@ -2890,17 +2900,38 @@ void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeCancel::sizeCheck(pPacket));
+	
+	// NOTE: Underfoot sends this twice when trade is canceled with an NPC
+	// TODO: Test whether this occurs when canceling with PC.
+	if (mCharacter->isTrading() == false) {
+		Log::info("Got OP_CancelTrade while not trading. Ignoring.");
+		return;
+	}
 
 	auto payload = TradeCancel::convert(pPacket);
 
+	EXPECTED(payload->mFromSpawnID == mCharacter->getSpawnID());
+	Log::info(payload->_debug());
+
+	mZone->handleTradeCancel(mCharacter, payload->mToSpawnID);
 }
 
 void ZoneClientConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeAccept::sizeCheck(pPacket->size));
+	EXPECTED(mCharacter->isTrading());
+
+	// TODO: I can check that mCharacter is trading with the specific Actor.
 
 	auto payload = TradeAccept::convert(pPacket->pBuffer);
+	Log::info(payload->_debug());
+
+	mZone->handleTradeAccept(mCharacter, payload->mFromSpawnID);
+
+	//sendTradeFinished();
+	//mCharacter->setTrading(false);
+	// TODO: Consume trade items.
 }
 
 void ZoneClientConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) {
@@ -3200,6 +3231,49 @@ void ZoneClientConnection::sendDeleteItem(const uint32 pSlot) {
 	EXPECTED(mConnected);
 
 	auto packet = DeleteItem::construct(pSlot);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendTradeRequestAcknowledge(const uint32 pToSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = TradeRequestAcknowledge::construct(mCharacter->getSpawnID(), pToSpawnID);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendTradeFinished() {
+	EXPECTED(mConnected);
+
+	auto packet = new EQApplicationPacket(OP_FinishTrade, 0);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendTradeCancel(const uint32 pToSpawnID) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	//auto packet = TradeCancel::construct(mCharacter->getSpawnID(), pToSpawnID);
+	auto packet = TradeCancel::construct(mCharacter->getSpawnID(), mCharacter->getSpawnID());
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendFinishWindow() {
+	EXPECTED(mConnected);
+
+	auto packet = new EQApplicationPacket(OP_FinishWindow, 0);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendFinishWindow2() {
+	EXPECTED(mConnected);
+
+	auto packet = new EQApplicationPacket(OP_FinishWindow, 0);
 	sendPacket(packet);
 	delete packet;
 }

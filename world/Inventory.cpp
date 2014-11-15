@@ -9,6 +9,7 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	for (auto& i : mItems) i = nullptr;
 	for (auto& i : mBank) i = nullptr;
 	for (auto& i : mSharedBank) i = nullptr;
+	for (auto& i : mTrade) i = nullptr;
 	
 	//auto itemData = new ItemData();
 	//itemData->mID = 2;
@@ -129,7 +130,6 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
 		return item;
 	}
-		
 
 	// Getting: Main Inventory or Worn.
 	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
@@ -137,7 +137,6 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
 		return item;
 	}
-		
 
 	// Getting: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {
@@ -149,7 +148,7 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
 		return item;
 	}
-	
+
 	// Getting: Bank.
 	if (SlotID::isBank(pSlot)) {
 		const uint32 index = SlotID::getIndex(pSlot);
@@ -186,6 +185,15 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 		EXPECTED_PTR(parentContainer);
 		const uint32 subIndex = SlotID::getSubIndex(pSlot);
 		Item* item = parentContainer->getContents(subIndex);
+		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
+		return item;
+	}
+
+	// Getting: Trade.
+	if (SlotID::isTrade(pSlot)) {
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_PTR(SlotID::isValidTradeIndex(index));
+		Item* item = mTrade[index];
 		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
 		return item;
 	}
@@ -236,6 +244,19 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 		const uint32 index = SlotID::getIndex(pSlot);
 		EXPECTED_BOOL(SlotID::isValidSharedBankIndex(index));
 		mSharedBank[index] = pItem;
+		return true;
+	}
+
+	// Putting: Trade.
+	if (SlotID::isTrade(pSlot)) {
+		// TODO: Not sure whether to check that the Item is tradeable here or not. I would need to be exposed to the trading context ><
+		Item* existingItem = getItem(pSlot);
+		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
+		pItem->setSlot(pSlot);
+
+		const uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
+		mTrade[index] = pItem;
 		return true;
 	}
 
@@ -516,6 +537,8 @@ const bool Inventoryy::_clear(const uint32 pSlot) {
 		mSharedBank[index] = nullptr;
 		return true;
 	}
+	// Clearing: Trade slot.
+	//if (isSl)
 
 	// Clearing: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {

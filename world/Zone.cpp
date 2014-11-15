@@ -787,7 +787,7 @@ void Zone::handleTarget(Character* pCharacter, const uint16 pSpawnID) {
 	EventDispatcher::getInstance().event(Event::Target, pCharacter);
 }
 
-Actor* Zone::findActor(const SpawnID pSpawnID) {
+Actor* Zone::findActor(const uint32 pSpawnID) const {
 	for (auto i : mActors) {
 		if (i->getSpawnID() == pSpawnID)
 			return i;
@@ -1314,4 +1314,65 @@ void Zone::handleHPChange(Actor* pActor) {
 	auto packet = ActorHPUpdate::construct(pActor->getSpawnID(), pActor->getHPPercent());
 	sendToVisible(pActor, packet);
 	safe_delete(packet);
+}
+
+void Zone::handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->getSpawnID() != pToSpawnID);
+	EXPECTED(pCharacter->isTrading() == false); // Check: Character is not already trading.
+
+	auto actor = findActor(pToSpawnID);
+	EXPECTED(actor);
+
+	// TODO: Check distance for trading.
+
+	// Requesting trade with an NPC.
+	if (actor->isNPC()) {
+		auto npc = Actor::cast<NPC*>(actor);
+		// Check: Is this NPC accepting trading requests?
+		if (npc->willTrade()) {
+			// Notify: NPC will accept trading.
+			pCharacter->getConnection()->sendTradeRequestAcknowledge(npc->getSpawnID());
+			pCharacter->setTradingWith(npc);
+			return;
+		}
+		else {
+			pCharacter->message(MessageType::White, "This NPC will not trade with you.");
+			return;
+		}
+	}
+	// Requesting trade with a Character.
+	else if (actor->isCharacter()) {
+		auto character = Actor::cast<Character*>(actor);
+		character->getConnection()->sendTradeRequest(pCharacter->getSpawnID());
+		return;
+	}
+}
+
+void Zone::handleTradeAccept(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
+	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
+	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
+
+	pCharacter->getConnection()->sendTradeFinished();
+	//pCharacter->getConnection()->sendCancelTrade(pSpawnID);
+	//pCharacter->getConnection()->sendFinishWindow();
+	//pCharacter->getConnection()->sendFinishWindow2();
+	pCharacter->setTradingWith(nullptr);
+}
+
+void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
+	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
+	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
+
+	//
+	pCharacter->getConnection()->sendTradeCancel(pSpawnID);
+	pCharacter->getConnection()->sendFinishWindow();
+	pCharacter->getConnection()->sendFinishWindow2();
+	pCharacter->setTradingWith(nullptr);
+
+	// TODO: Move Items back into Character Inventory.
 }

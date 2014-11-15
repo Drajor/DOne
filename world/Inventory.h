@@ -75,6 +75,7 @@ private:
 	std::queue<Item*> mCursor; // Slot 31
 	Item* mBank[SlotID::BANK_SLOTS]; // Slots 2000 - 2023
 	Item* mSharedBank[SlotID::SHARED_BANK_SLOTS]; // Slots 2500 - 2501
+	Item* mTrade[SlotID::TRADE_SLOTS]; // Slots 3000 - ?
 
 	void updateConsumables();
 	Item* findFirst(const uint8 pItemType);

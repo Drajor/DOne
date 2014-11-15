@@ -120,6 +120,12 @@ public:
 	void sendItemView(Item* pItem);
 	//void sendSpellCastOn();
 
+	void sendTradeRequestAcknowledge(const uint32 pToSpawnID);
+	void sendTradeFinished();
+	void sendFinishWindow();
+	void sendFinishWindow2();
+	void sendTradeCancel(const uint32 pToSpawnID);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
@@ -212,6 +218,7 @@ private:
 	void _handleEndLootRequest(const EQApplicationPacket* pPacket);
 	void _handleLootItem(const EQApplicationPacket* pPacket);
 	void _handleMoveItem(const EQApplicationPacket* pPacket);
+	const bool _handleMoveItemImpl(const EQApplicationPacket* pPacket);
 
 	void inventoryError();
 

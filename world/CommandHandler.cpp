@@ -1443,6 +1443,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 
 
 	}
+	else if (pCommandName == "info") {
+		auto target = pCharacter->getTarget();
+		if (target) {
+			pCharacter->notify(target->getName() + " ActorID = " + std::to_string(target->getSpawnID()));
+		}
+	}
 
 	//else if (pCommandName == "weather") {
 	//	uint32 unk = 0;

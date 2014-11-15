@@ -60,7 +60,9 @@ public:
 	inline const uint16 getPort() const { return mPort; }
 
 	Character* findCharacter(const String pCharacterName);
-	Actor* findActor(const SpawnID pSpawnID);
+
+	// Search for an Actor by Spawn ID.
+	Actor* findActor(const uint32 pSpawnID) const;
 
 	void addActor(Actor* pActor);
 	void removeActor(Actor* pActor);
@@ -132,6 +134,10 @@ public:
 
 	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
+	
+	void handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID);
+	void handleTradeAccept(Character* pCharacter, const uint32 pSpawnID);
+	void handleTradeCancel(Character* pCharacter, const uint32 pSpawnID);
 
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 

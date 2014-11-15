@@ -22,7 +22,7 @@ const bool NPC::initialise() {
 	//setName(baseName+std::to_string(getSpawnID()));
 	//setRaceID(6);
 	//setClass(ClassIDs::Cleric);
-	setClass(40);
+	//setClass(40);
 
 	return true;
 }

@@ -562,16 +562,52 @@ namespace Payload {
 			uint32 mFromSpawnID = 0;
 		};
 
+		// S->C
+		struct TradeRequestAcknowledge : public FixedT<TradeRequestAcknowledge, OP_TradeRequestAck> {
+			static EQApplicationPacket* construct(const uint32 pToSpawnID, const uint32 pFromSpawnID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mToSpawnID = pToSpawnID;
+				payload->mFromSpawnID = pFromSpawnID;
+
+				return packet;
+			}
+			uint32 mToSpawnID = 0;
+			uint32 mFromSpawnID = 0;
+		};
+
 		// C->S
 		struct TradeCancel : public FixedT<TradeCancel, OP_CancelTrade> {
+			static EQApplicationPacket* construct(const uint32 pToSpawnID, const uint32 pFromSpawnID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mToSpawnID = pToSpawnID;
+				payload->mFromSpawnID = pFromSpawnID;
+
+				return packet;
+			}
+			uint32 mToSpawnID = 0;
 			uint32 mFromSpawnID = 0;
-			uint32 mAction = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[TradeCancel] ";
+				PRINT_MEMBER(mToSpawnID);
+				PRINT_MEMBER(mFromSpawnID);
+				return ss.str();
+			}
 		};
 
 		// C->S
 		struct TradeAccept : public Fixed<TradeAccept> {
 			uint32 mFromSpawnID = 0;
 			uint32 mUnknown0 = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[TradeAccept] ";
+				PRINT_MEMBER(mFromSpawnID);
+				PRINT_MEMBER(mUnknown0);
+				return ss.str();
+			}
 		};
 
 		// C<->S

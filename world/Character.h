@@ -38,6 +38,10 @@ public:
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
 
+	inline Actor* getTradingWith() const { return mTradingWith; }
+	inline void setTradingWith(Actor* pActor) { mTradingWith = pActor; }
+	inline const bool isTrading() { return getTradingWith() != nullptr; }
+
 	// Zone Authentication
 	uint16 mAuthenticatedZoneID = 0;
 	uint16 mAuthicatedInstanceID = 0;
@@ -270,6 +274,7 @@ private:
 	bool mIsZoning = false;
 	bool mIsLinkDead = false;
 	Actor* mLootingCorpse = nullptr;
+	Actor* mTradingWith = nullptr;
 
 	Filters mFilters;
 

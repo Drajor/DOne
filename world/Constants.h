@@ -328,12 +328,20 @@ namespace SlotID {
 		SHARED_BANK_1_0 = 2542, // (Parent) Slot 2501
 		SHARED_BANK_1_9 = 2551, // (End of Slot 2542 sub-slots)
 
+		// Trade Primary
+
+		TRADE_0 = 3000,
+		TRADE_1 = 3001,
+		TRADE_2 = 3002,
+		TRADE_3 = 3003, // NPC Limit.
+
 		SLOT_DELETE = 4294967295
 	};
 	static const uint32 MAX_CONTENTS = 10;
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
 	static const uint32 BANK_SLOTS = (BANK_23 - BANK_0) + 1;
 	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
+	static const uint32 TRADE_SLOTS = (TRADE_3 - TRADE_1) + 1;
 
 	static const bool isPrimary(const uint32 pSlot) { return pSlot == Primary; }
 	static const bool isSecondary(const uint32 pSlot) { return pSlot == Secondary; }
@@ -351,10 +359,13 @@ namespace SlotID {
 	static const bool isSharedBank(const uint32 pSlot) { return pSlot >= SHARED_BANK_0 && pSlot <= SHARED_BANK_1; }
 	static const bool isSharedBankContents(const uint32 pSlot) { return pSlot >= SHARED_BANK_0_0 && pSlot <= SHARED_BANK_1_9; }
 
+	static const bool isTrade(const uint32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_3; }
+
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 
 	static const bool isValidBankIndex(const uint32 pIndex) { return pIndex < BANK_SLOTS; }
 	static const bool isValidSharedBankIndex(const uint32 pIndex) { return pIndex < SHARED_BANK_SLOTS; }
+	static const bool isValidTradeIndex(const uint32 pIndex) { return pIndex < TRADE_SLOTS; }
 
 	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex >= 0 && pSubIndex < MAX_CONTENTS; }
 
@@ -401,6 +412,9 @@ namespace SlotID {
 		}
 		if (isSharedBank(pSlot)) {
 			return pSlot - SHARED_BANK_0;
+		}
+		if (isTrade(pSlot)) {
+			return pSlot - TRADE_0;
 		}
 
 		// This is bad.

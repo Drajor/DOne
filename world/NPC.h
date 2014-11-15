@@ -41,6 +41,7 @@ public:
 	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
 
 	inline const bool isBanker() const { return getClass() == 40; }
+	inline const bool willTrade() const { return mAcceptTrade; }
 
 	void onLootBegin();
 	void addLootItem(Item* pItem) { mLootItems.push_back(pItem); }
@@ -54,6 +55,7 @@ private:
 	int32 mGold = 0;
 	int32 mPlatinum = 0;
 	std::vector<Item*> mLootItems;
+	bool mAcceptTrade = true;
 
 	SpawnPoint* mSpawnPoint = nullptr;
 };
