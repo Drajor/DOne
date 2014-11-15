@@ -414,6 +414,14 @@ const bool Item::isTradeable() {
 	return true;
 }
 
+const bool Item::addStacks(const uint32 pStacks) {
+	EXPECTED_BOOL(isStackable());
+	EXPECTED_BOOL(getStacks() + pStacks <= getMaxStacks()); // Over stacking. Bug!
+
+	mStacks += pStacks;
+	return true;
+}
+
 const bool Item::removeStacks(const uint32 pStacks) {
 	EXPECTED_BOOL(isStackable());
 	EXPECTED_BOOL(getStacks() > pStacks);

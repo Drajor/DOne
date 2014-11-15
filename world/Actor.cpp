@@ -144,4 +144,6 @@ void Actor::_clearPrimary() {
 	setPrimaryPrismaticDamage(0);
 	setPrimaryPhysicalDamage(0);
 	setPrimaryCorruptionDamage(0);
+
+	setPrimaryAttackAnimation(Animation::ANIM_HAND2HAND);
 }

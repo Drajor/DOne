@@ -29,8 +29,8 @@ struct ItemData {
 	}
 
 	// BEGIN chunk0
-	uint32 mStacks = 1; // Specified by Item.
-	uint32 __Unknown0 = 0;
+	uint32 mStacks = 0; // Specified by Item.
+	uint32 __Unknown0 = 0; // Charm Scale (Demonstarr55)
 	uint32 mSlot = 0; // Specified by Item.
 	uint32 mMerchantPrice = 0; // Maybe vendor price?
 	uint32 mMerchantSlot = 1; //1 if not a merchant item

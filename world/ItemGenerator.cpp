@@ -392,7 +392,7 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 Item* ItemGenerator::makeHandtoHand(const uint8 pLevel, const Rarity pRarity) {
 	Item* item = ItemGenerator::getInstance()._makeBaseItem();
 
-	item->setSlot(EquipSlots::PrimarySecondary);
+	item->setSlots(EquipSlots::PrimarySecondary);
 	item->setIsMagic(true);
 
 	item->setName("Hand to Hand");

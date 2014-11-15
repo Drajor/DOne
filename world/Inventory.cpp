@@ -329,6 +329,11 @@ Item* Inventoryy::_popCursor() {
 	return item;
 }
 
+Item* Inventoryy::_peekCursor() {
+	if (isCursorEmpty()) return nullptr;
+	return mCursor.front();
+}
+
 const bool Inventoryy::pushCursor(Item* pItem) {
 	EXPECTED_BOOL(pItem);
 	mCursor.push(pItem);
@@ -381,6 +386,8 @@ void Inventoryy::_calculateAdd(Item* pItem) {
 	mHealthRegen += pItem->_getHealthRegen();
 	mManaRegen += pItem->_getManaRegen();
 	mEnduranceRegen += pItem->_getEnduranceRegen();
+
+	// TODO: MOD2
 }
 
 void Inventoryy::_calculateRemove(Item* pItem) {
@@ -551,27 +558,31 @@ const bool Inventoryy::_clearContainerSlot(const uint32 pSlot) {
 }
 
 const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
-	Item* cursorItem = _popCursor();
-	EXPECTED_BOOL(cursorItem); // Failure = desync.
 
 	// Check: Existing Item in pToSlot.
 	Item* existing = getItem(pToSlot);
 	if (existing) {
 		// Potential stack merge.
 		if (pStackSize > 0) {
+			Item* cursorItem = _peekCursor();
+			EXPECTED_BOOL(cursorItem); // Failure = desync.
 			EXPECTED_BOOL(cursorItem->isStackable());
-			if (cursorItem->getID() == existing->getID()) {
-				// Full merge.
-				if (pStackSize == cursorItem->getStacks()) {
 
-				}
-				// Partial merge.
+			// Check: Both Items are the same.
+			if (cursorItem->getID() == existing->getID()) {
+				EXPECTED_BOOL(_stackMergeCursor(pToSlot, pStackSize));
+				return true;
 			}
 		}
-
-		// Pick up the existing Item.
-		EXPECTED_BOOL(_pickUp(pToSlot, existing->getStacks()));
 	}
+	
+	// Pop cursor head into limbo.
+	Item* cursorItem = _popCursor();
+	EXPECTED_BOOL(cursorItem); // Failure = desync.
+
+	// Pick up the existing Item. (Push cursor)
+	if (existing)
+		EXPECTED_BOOL(_pickUp(pToSlot, 0)); // pStackSize is set to 0 because 0 means the whole Item.
 
 	EXPECTED_BOOL(put(cursorItem, pToSlot));
 
@@ -590,6 +601,48 @@ const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
 		cursorItem->updateContentsSlots();
 
 	return true;
+}
+
+const bool Inventoryy::_stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize) {
+
+	Item* cursorItem = _peekCursor();
+	EXPECTED_BOOL(cursorItem); // Failure = desync.
+	EXPECTED_BOOL(cursorItem->isStackable());
+
+	Item* existing = getItem(pToSlot);
+	EXPECTED_BOOL(existing);
+	EXPECTED_BOOL(cursorItem->getID() == existing->getID());
+
+	const uint32 preMergeStacks = cursorItem->getStacks() + existing->getStacks();
+
+	// Full merge.
+	if (pStackSize == cursorItem->getStacks()) {
+
+		// Add stacks from cursor to the existing Item.
+		EXPECTED_BOOL(existing->addStacks(pStackSize));
+
+		// Delete cursor Item as it has been consumed in the full stack merge.
+		_popCursor();
+		delete cursorItem;
+		cursorItem = nullptr;
+
+		// Check: The total number of stacks remains the same.
+		EXPECTED_BOOL(existing->getStacks() == preMergeStacks);
+
+		return true;
+	}
+	// Partial merge.
+	else {
+		// Remove stacks from cursor.
+		EXPECTED_BOOL(cursorItem->removeStacks(pStackSize));
+		// Add stacks from cursor to the existing Item.
+		EXPECTED_BOOL(existing->addStacks(pStackSize));
+
+		// Check: The total number of stacks remains the same.
+		EXPECTED_BOOL(existing->getStacks() + cursorItem->getStacks() == preMergeStacks);
+
+		return true;
+	}
 }
 
 const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) {

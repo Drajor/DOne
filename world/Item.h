@@ -84,7 +84,8 @@ public:
 	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
 	inline const uint32 getStacks() const { return mStacks; }
 	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
-	const bool removeStacks(const uint32 pStacks);;
+	const bool addStacks(const uint32 pStacks);
+	const bool removeStacks(const uint32 pStacks);
 	inline const bool isAttuned() { return mAttuned; }
 	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
 
@@ -789,7 +790,7 @@ private:
 
 	// ItemData Overrides
 	uint32 mSlot = 0;
-	uint32 mStacks = 1;
+	uint32 mStacks = 0;
 	bool mAttuned = false;
 	uint16 mOrnamentationIcon = 0;
 	String mOrnamentationIDFile = "";

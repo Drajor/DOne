@@ -65,6 +65,7 @@ public:
 
 private:
 	Item* _popCursor();
+	Item* _peekCursor();
 	const bool _clear(const uint32 pSlot);
 	const bool _clearContainerSlot(const uint32 pSlot);
 
@@ -79,6 +80,7 @@ private:
 	Item* findFirst(const uint8 pItemType);
 	
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
+	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
