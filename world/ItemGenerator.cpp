@@ -656,3 +656,17 @@ Item* ItemGenerator::makeAugmentation(const uint8 pLevel, const Rarity pRarity) 
 
 	return item;
 }
+
+Item* ItemGenerator::makeDice(String pCharacterName) {
+	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+
+	item->setName(pCharacterName + "'s Lucky Dice");
+	item->setIcon(2889);
+	item->setItemType(ItemType::Miscellaneous);
+	item->setSlots(EquipSlots::PowerSource);
+	item->setMaxPower(100);
+	item->setPower(100);
+	item->setLore("\"God does not play dice\" - Albert Einstein");
+
+	return item;
+}

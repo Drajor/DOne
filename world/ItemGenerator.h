@@ -19,6 +19,8 @@ public:
 	static Item* makeDrink();
 	static Item* makePowerSource(const uint8 pLevel, const Rarity pRarity);
 
+	static Item* makeDice(String pCharacterName);
+
 	// Weapons
 	static Item* makeOneHandSlash(const uint8 pLevel, const Rarity pRarity);
 	static Item* makeTwoHandSlash(const uint8 pLevel, const Rarity pRarity);

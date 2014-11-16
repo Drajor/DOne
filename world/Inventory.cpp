@@ -60,6 +60,7 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
 	put(ItemGenerator::makeChest(0, Rarity::Common), 28);
 	put(ItemGenerator::makeAugmentation(0, Rarity::Common), 29);
+	put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 5.0), 27);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 6.0), 28);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 7.0), 29);
