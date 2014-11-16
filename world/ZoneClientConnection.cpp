@@ -506,6 +506,12 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_WeaponUnequip2:
 		Log::info("OP_WeaponUnequip2 size= " + std::to_string(pPacket->size));
 		break;
+	case OP_AugmentInfo:
+		_handleAugmentInfo(pPacket);
+		break;
+	case OP_ReadBook:
+		_handleReadBook(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3356,6 +3362,58 @@ void ZoneClientConnection::sendFinishWindow2() {
 	auto packet = new EQApplicationPacket(OP_FinishWindow, 0);
 	sendPacket(packet);
 	delete packet;
+}
+
+void ZoneClientConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(AugmentInformation::sizeCheck(pPacket));
+
+	auto payload = AugmentInformation::convert(pPacket);
+	Log::info(payload->_debug());
+
+	sendReadBook(payload->mWindow, 0, 2, "You must use a <c \"#FF0000\">monster cock</c> to remove this augment safely.");
+}
+
+void ZoneClientConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText) {
+	EXPECTED(mConnected);
+
+	uint32 size = 0;
+	size += sizeof(uint32); // Window
+	size += sizeof(uint32); // Slot
+	size += sizeof(uint32); // Type
+	size += pText.length() + 1;
+	size += sizeof(uint32); // unknown
+	size += sizeof(uint16); // unknown
+
+	unsigned char * data = new unsigned char[size];
+	Utility::DynamicStructure ds(data, size);
+
+	ds.write<uint32>(pWindow);
+	ds.write<uint32>(pSlot);
+	ds.write<uint32>(pType);
+	ds.write<uint32>(0); // unknown.
+	ds.write<uint16>(0); // unknown.
+	ds.writeString(pText);
+
+	EXPECTED(ds.check());
+
+	auto packet = new EQApplicationPacket(OP_ReadBook, data, size);
+	sendPacket(packet);
+	delete packet;
+
+	
+}
+
+void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(BookRequest::sizeCheck(pPacket));
+
+	auto payload = BookRequest::convert(pPacket);
+	Log::info(payload->_debug());
+
+	sendReadBook(payload->mWindow, payload->mSlot, payload->mType, "<c \"#00FF00\">+ 5% Magic Find</c><br><c \"#FF0000\">-2% Block Chance</c>");
 }
 
 //

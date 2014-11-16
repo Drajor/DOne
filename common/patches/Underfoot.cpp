@@ -1887,20 +1887,20 @@ ENCODE(OP_SomeItemPacketMaybe) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_ReadBook) {
-
-	ENCODE_LENGTH_ATLEAST(BookText_Struct);
-	SETUP_DIRECT_ENCODE(BookText_Struct, structs::BookRequest_Struct);
-
-	if(emu->window == 0xFF)
-		eq->window = 0xFFFFFFFF;
-	else
-		eq->window = emu->window;
-	OUT(type);
-	eq->invslot = TitaniumToUnderfootSlot(emu->invslot);
-	strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ReadBook) {
+//
+//	ENCODE_LENGTH_ATLEAST(BookText_Struct);
+//	SETUP_DIRECT_ENCODE(BookText_Struct, structs::BookRequest_Struct);
+//
+//	if(emu->window == 0xFF)
+//		eq->window = 0xFFFFFFFF;
+//	else
+//		eq->window = emu->window;
+//	OUT(type);
+//	eq->invslot = TitaniumToUnderfootSlot(emu->invslot);
+//	strn0cpy(eq->txtfile, emu->booktext, sizeof(eq->txtfile));
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Stun) {
 
@@ -3058,17 +3058,17 @@ DECODE(OP_TributeItem) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ReadBook) {
-	DECODE_LENGTH_EXACT(structs::BookRequest_Struct);
-	SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
-
-	IN(type);
-	emu->invslot = UnderfootToTitaniumSlot(eq->invslot);
-	emu->window = (uint8) eq->window;
-	strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ReadBook) {
+//	DECODE_LENGTH_EXACT(structs::BookRequest_Struct);
+//	SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
+//
+//	IN(type);
+//	emu->invslot = UnderfootToTitaniumSlot(eq->invslot);
+//	emu->window = (uint8) eq->window;
+//	strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_TradeSkillCombine) {
 	DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
@@ -3089,15 +3089,15 @@ DECODE(OP_TradeSkillCombine) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_AugmentInfo) {
-	DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
-	SETUP_DIRECT_DECODE(AugmentInfo_Struct, structs::AugmentInfo_Struct);
-
-	IN(itemid);
-	IN(window);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_AugmentInfo) {
+//	DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
+//	SETUP_DIRECT_DECODE(AugmentInfo_Struct, structs::AugmentInfo_Struct);
+//
+//	IN(itemid);
+//	IN(window);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_FaceChange) {
 

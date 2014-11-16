@@ -780,6 +780,44 @@ namespace Payload {
 				return ss.str();
 			}
 		};
+
+		// C->S
+		struct AugmentInformation : public Fixed<AugmentInformation> {
+			AugmentInformation() { memset(mUnknown, 0, sizeof(mUnknown)); }
+			uint32 mID = 0;
+			uint8 mWindow = 0;
+			uint8 mUnknown[71];
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{AugmentInformation} ";
+				PRINT_MEMBER(mID);
+				PRINT_MEMBER((int)mWindow);
+				return ss.str();
+			}
+		};
+
+		// C->S
+		struct BookRequest : Fixed<BookRequest> {
+			BookRequest() { memset(mText, 0, sizeof(mText)); }
+			uint32 mWindow = 0;		// where to display the text (0xFFFFFFFF means new window).
+			uint32 mSlot = 0;		// The inventory slot the book is in. Not used, but echoed in the response packet.
+			uint32 mType = 0;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
+			uint32 mUnknown0 = 0;
+			uint16 mUnknown1 = 0;
+			char mText[8194];
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{BookRequest} ";
+				PRINT_MEMBER(mWindow);
+				PRINT_MEMBER(mSlot);
+				PRINT_MEMBER(mType);
+				PRINT_MEMBER(mUnknown0);
+				PRINT_MEMBER(mUnknown1);
+				return ss.str();
+			}
+		};
 	}
 
 	namespace World {

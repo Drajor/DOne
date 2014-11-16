@@ -127,6 +127,10 @@ public:
 	void sendFinishWindow2();
 	void sendTradeCancel(const uint32 pToSpawnID);
 
+	void sendDeleteItem(const uint32 pSlot, const uint32 pStacks = 0xFFFFFFFF, const uint32 pToSlot = 0xFFFFFFFF);
+	void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
+	void sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
@@ -245,6 +249,8 @@ private:
 	void _handlePopupResponse(const EQApplicationPacket* pPacket);
 	void _handleClaimRequest(const EQApplicationPacket* pPacket);
 	void _handleAugmentItem(const EQApplicationPacket* pPacket);
+	void _handleAugmentInfo(const EQApplicationPacket* pPacket);
+	void _handleReadBook(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
@@ -258,8 +264,6 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void sendDeleteItem(const uint32 pSlot, const uint32 pStacks = 0xFFFFFFFF, const uint32 pToSlot = 0xFFFFFFFF);
-		void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;
