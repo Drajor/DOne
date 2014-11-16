@@ -350,7 +350,7 @@ Item* Inventoryy::_popCursor() {
 	return item;
 }
 
-Item* Inventoryy::_peekCursor() {
+Item* Inventoryy::_peekCursor() const {
 	if (isCursorEmpty()) return nullptr;
 	return mCursor.front();
 }
@@ -362,8 +362,23 @@ const bool Inventoryy::pushCursor(Item* pItem) {
 	return true;
 }
 
-const bool Inventoryy::consume(uint32 pSlot) {
+const bool Inventoryy::consume(const uint32 pSlot, const uint32 pStacks) {
 	// NOTE: UF will only consume from the Main Inventory
+
+	auto item = getItem(pSlot);
+	EXPECTED_BOOL(item);
+
+	// Consuming the whole Item.
+	if (item->getStacks() == pStacks || !item->isStackable()) {
+		EXPECTED_BOOL(_clear(pSlot));
+		delete item;
+		item = nullptr;
+	}
+	// Consuming stacks.
+	else {
+		EXPECTED_BOOL(item->removeStacks(pStacks));
+	}
+
 	return true;
 }
 
@@ -519,6 +534,12 @@ Item* Inventoryy::findFirst(const uint8 pItemType) {
 }
 
 const bool Inventoryy::_clear(const uint32 pSlot) {
+	// Clearing: Cursor
+	// NOTE: Only the first Item is removed.
+	if (SlotID::isCursor(pSlot)) {
+		EXPECTED_BOOL(_popCursor());
+		return true;
+	}
 	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
 		mItems[pSlot] = nullptr;
 		return true;

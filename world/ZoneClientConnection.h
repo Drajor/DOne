@@ -117,6 +117,7 @@ public:
 	void sendCrystals();
 
 	void sendPopup(const String& pTitle, const String& pText);
+	void sendItemSummon(Item* pItem);
 	void sendItemView(Item* pItem);
 	//void sendSpellCastOn();
 
@@ -257,7 +258,8 @@ private:
 	public:
 		static void initalise();
 		static void deinitialise();
-		void sendDeleteItem(const uint32 pSlot);
+		void sendDeleteItem(const uint32 pSlot, const uint32 pStacks = 0xFFFFFFFF, const uint32 pToSlot = 0xFFFFFFFF);
+		void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
 	private:
 	
 	static EQApplicationPacket* mPlayerProfilePacket;

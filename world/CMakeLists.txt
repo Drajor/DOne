@@ -43,6 +43,7 @@ SET(world_sources
 	LootAllocator.cpp
 	EventDispatcher.cpp
 	ItemDataStore.cpp
+	ItemFactory.cpp
 )
 
 SET(world_headers
@@ -91,6 +92,7 @@ SET(world_headers
 	LootAllocator.h
 	EventDispatcher.h
 	ItemDataStore.h
+	ItemFactory.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

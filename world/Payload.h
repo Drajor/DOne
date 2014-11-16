@@ -475,11 +475,19 @@ namespace Payload {
 		};
 
 		// C->S
-		// Based on: MoveItem_Struct
-		struct MoveItem : public Fixed<MoveItem> {
+		struct MoveItem : public FixedT<MoveItem, OP_MoveItem> {
+			static EQApplicationPacket* construct(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mFromSlot = pFromSlot;
+				payload->mToSlot = pToSlot;
+				payload->mStacks = pStacks;
+
+				return packet;
+			}
 			uint32 mFromSlot = 0;
 			uint32 mToSlot = 0;
-			uint32 mStackSize = 0;
+			uint32 mStacks = 0;
 		};
 
 		// S->C

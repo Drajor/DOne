@@ -652,7 +652,7 @@ Item* ItemGenerator::makeAugmentation(const uint8 pLevel, const Rarity pRarity) 
 	item->setHealth(100);
 	item->setItemType(ItemType::Augmentation);
 	item->setSlots(EquipSlots::VisibleArmor);
-	item->setAugmentationDistiller(2);
+	item->setAugmentationDistiller(ItemID::UniversalDistiller);
 
 	return item;
 }

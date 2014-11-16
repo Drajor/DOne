@@ -15,15 +15,39 @@ const bool ItemDataStore::initialise() {
 }
 
 void ItemDataStore::_bootstrap() {
+	// Radiant Crystal.
+	{
+		auto data = &mItemData[ItemID::RadiantCrystal];
+		data->mID = ItemID::RadiantCrystal;
+		auto item = new Item(data);
 
+		item->setName("Radiant Crystal");
+		item->setIcon(1536);
+		item->setItemType(ItemType::AlternateCurrency);
+		item->setMaxStacks(MaxRadiantCrystalsStacks);
+
+		delete item;
+	}
+	// Ebon Crystal.
+	{
+		auto data = &mItemData[ItemID::EbonCrystal];
+		data->mID = ItemID::EbonCrystal;
+		auto item = new Item(data);
+
+		item->setName("Ebon Crystal");
+		item->setIcon(1535);
+		item->setItemType(ItemType::AlternateCurrency);
+		item->setMaxStacks(MaxEbonCrystalsStacks);
+
+		delete item;
+	}
 	// Augmentation Sealer.
 	{
-		auto data = &mItemData[1];
-		data->mID = 1;
+		auto data = &mItemData[ItemID::AugmentationSealer];
+		data->mID = ItemID::AugmentationSealer;
 		auto item = new Item(data);
 
 		item->setName("Augmentation Sealer");
-		item->setIDFile("IT63");
 		item->setIcon(1142);
 		item->setItemClass(ItemClass::Container);
 		item->setContainerType(ContainerType::AugmentationSealer);
@@ -34,12 +58,11 @@ void ItemDataStore::_bootstrap() {
 	}
 	// Universal Distiller.
 	{
-		auto data = &mItemData[2];
-		data->mID = 2;
+		auto data = &mItemData[ItemID::UniversalDistiller];
+		data->mID = ItemID::UniversalDistiller;
 		auto item = new Item(data);
 
 		item->setName("Universal Distiller");
-		item->setIDFile("IT63");
 		item->setIcon(2267);
 		item->setItemType(ItemType::AugmentationDistiller);
 		item->setItemClass(ItemClass::Common);
@@ -49,12 +72,11 @@ void ItemDataStore::_bootstrap() {
 	}
 	// Universal Solvent.
 	{
-		auto data = &mItemData[3];
-		data->mID = 3;
+		auto data = &mItemData[ItemID::UniversalSolvent];
+		data->mID = ItemID::UniversalSolvent;
 		auto item = new Item(data);
 
 		item->setName("Universal Solvent");
-		item->setIDFile("IT63");
 		item->setIcon(2268);
 		item->setItemType(ItemType::AugmentationSolvent);
 		item->setItemClass(ItemClass::Common);
@@ -63,29 +85,29 @@ void ItemDataStore::_bootstrap() {
 		delete item;
 	}
 
-	// Test - Elemental Damage Augmentations
-	int id = 4;
-	for (auto i = 1; i < 20; i++) {
-		auto data = &mItemData[id];
-		data->mID = id;
-		auto item = new Item(data);
+	//// Test - Elemental Damage Augmentations
+	//int id = 4;
+	//for (auto i = 1; i < 20; i++) {
+	//	auto data = &mItemData[id];
+	//	data->mID = id;
+	//	auto item = new Item(data);
 
-		item->setName("Elemental Damage T(" + std::to_string(i)+")");
-		item->setIDFile("IT63");
-		item->setIcon(2187);
-		item->setItemType(ItemType::Augmentation);
-		item->setItemClass(ItemClass::Common);
-		item->setElementalDamageType(i);
-		item->setElementalDamage(7);
-		item->setSlots(EquipSlots::PrimarySecondary);
+	//	item->setName("Elemental Damage T(" + std::to_string(i)+")");
+	//	item->setIDFile("IT63");
+	//	item->setIcon(2187);
+	//	item->setItemType(ItemType::Augmentation);
+	//	item->setItemClass(ItemClass::Common);
+	//	item->setElementalDamageType(i);
+	//	item->setElementalDamage(7);
+	//	item->setSlots(EquipSlots::PrimarySecondary);
 
-		item->setAugmentationType(AugmentationSlotType::MultipleStat);
-		item->setAugmentationRestriction(AugmentationRestriction::None);
-		item->setAugmentationDistiller(2);
+	//	item->setAugmentationType(AugmentationSlotType::MultipleStat);
+	//	item->setAugmentationRestriction(AugmentationRestriction::None);
+	//	item->setAugmentationDistiller(2);
 
-		delete item;
-		id++;
-	}
+	//	delete item;
+	//	id++;
+	//}
 	
 }
 

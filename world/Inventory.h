@@ -18,7 +18,7 @@ public:
 
 	const unsigned char* getData(uint32& pSize); // Caller responsible for delete.
 	const bool move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
-	const bool consume(uint32 pSlot);
+	const bool consume(const uint32 pSlot, const uint32 pStacks);
 	const bool pushCursor(Item* pItem);
 	inline const bool isCursorEmpty() const { return mCursor.empty(); }
 
@@ -63,9 +63,11 @@ public:
 	inline const int32 getManaRegen() const { return mManaRegen; }
 	inline const int32 getEnduranceRegen() const { return mEnduranceRegen; }
 
+	inline Item* peekCursor() const { return _peekCursor(); }
+
 private:
 	Item* _popCursor();
-	Item* _peekCursor();
+	Item* _peekCursor() const;
 	const bool _clear(const uint32 pSlot);
 	const bool _clearContainerSlot(const uint32 pSlot);
 

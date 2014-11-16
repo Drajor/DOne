@@ -814,22 +814,10 @@ public:
 			}
 
 			mInvoker->getInventory()->pushCursor(item);
-			send(mInvoker, item);
+			mInvoker->getConnection()->sendItemSummon(item);
 		}
 
 		return true;
-	}
-
-	void send(Character* pInvoker, Item* pItem) {
-		EXPECTED(pInvoker);
-		EXPECTED(pItem);
-
-		uint32 payloadSize = 0;
-		const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
-
-		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-		pInvoker->getConnection()->sendPacket(outPacket);
-		safe_delete(outPacket);
 	}
 };
 
@@ -841,18 +829,6 @@ public:
 		mHelpMessages.push_back("Usage: #sri <type> <level> <rarity> <qty=1>");
 		mHelpMessages.push_back("Types: cont, head, chest, arms, wrists, legs, hands, feet ");
 	};
-
-	void send(Character* pInvoker, Item* pItem) {
-		EXPECTED(pInvoker);
-		EXPECTED(pItem);
-
-		uint32 payloadSize = 0;
-		const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
-
-		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-		pInvoker->getConnection()->sendPacket(outPacket);
-		safe_delete(outPacket);
-	}
 
 	const bool handleCommand(CommandParameters pParameters) {
 		// Check: Parameter #
@@ -894,7 +870,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeHead(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -905,7 +881,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeChest(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -916,7 +892,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeArms(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -927,7 +903,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeWrists(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -938,7 +914,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeLegs(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -949,7 +925,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeHands(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -960,7 +936,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeFeet(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -971,7 +947,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeRandomContainer(rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 
 			return true;
@@ -982,7 +958,7 @@ public:
 			for (auto i = 0; i < quantity; i++) {
 				Item* item = ItemGenerator::makeShield(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
-				send(mInvoker, item);
+				mInvoker->getConnection()->sendItemSummon(item);
 			}
 			return true;
 		}
@@ -1448,6 +1424,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		if (target) {
 			pCharacter->notify(target->getName() + " ActorID = " + std::to_string(target->getSpawnID()));
 		}
+	}
+
+	else if (pCommandName == "del") {
+		uint32 stacks = 0;
+		Utility::stoSafe(stacks, pParameters[0]);
+		pCharacter->getConnection()->sendMoveItem(SlotID::CURSOR, SlotID::SLOT_DELETE, stacks);
 	}
 
 	//else if (pCommandName == "weather") {

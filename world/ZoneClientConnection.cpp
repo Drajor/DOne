@@ -20,6 +20,7 @@
 #include "Payload.h"
 #include "Item.h"
 #include "ItemDataStore.h"
+#include "ItemFactory.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -2742,10 +2743,10 @@ void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(MoveItem::sizeCheck(pPacket->size));
+	EXPECTED_BOOL(MoveItem::sizeCheck(pPacket));
 
-	auto payload = MoveItem::convert(pPacket->pBuffer);
-	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStackSize));
+	auto payload = MoveItem::convert(pPacket);
+	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStacks));
 
 	Item* wornNew = nullptr; // Item that will be equipped after move.
 	Item* wornOld = nullptr; // Item that will be unequipped after move.
@@ -2777,7 +2778,7 @@ const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* 
 	}
 
 	// Move.
-	EXPECTED_BOOL(mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStackSize));
+	EXPECTED_BOOL(mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStacks));
 
 	// Notify Character that a worn slot has changed.
 	if (SlotID::isWorn(payload->mToSlot)) {
@@ -2798,7 +2799,7 @@ void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
 	auto payload = Consume::convert(pPacket->pBuffer);
 
 	Log::info("Consume from slot: " + std::to_string(payload->mSlot));
-	if (!mCharacter->getInventory()->consume(payload->mSlot)) {
+	if (!mCharacter->getInventory()->consume(payload->mSlot, 1)) {
 		inventoryError();
 	}
 	
@@ -3075,27 +3076,53 @@ void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPack
 	EXPECTED(pPacket);
 	EXPECTED(CrystalCreate::sizeCheck(pPacket));
 
-	auto payload = CrystalCreate::convert(pPacket);
-	Log::info(payload->_debug());
+	// NOTE: Underfoot will allow crystals to be summoned to the cursor even when there are Items on it.
+	// This is to keep things simple.
+	if (mCharacter->getInventory()->isCursorEmpty() == false) {
+		mCharacter->notify("Please clear your cursor and try again.");
+		return;
+	}
 
+	auto payload = CrystalCreate::convert(pPacket);
 	EXPECTED(payload->mType == CrystalCreate::RADIANT || payload->mType == CrystalCreate::EBON);
-	
+	uint32 itemID = 0;
+
+	uint32 stacks = payload->mAmount;
+	String crystalName;
+
 	// Creating Radiant Crystals.
 	if (payload->mType == CrystalCreate::RADIANT) {
-		EXPECTED(payload->mAmount <= mCharacter->getRadiantCrystals());
-		EXPECTED(mCharacter->removeRadiantCrystals(payload->mAmount));
-
-		// TODO: Summon Radiant Crystals.
+		itemID = ItemID::RadiantCrystal;
+		crystalName = "Radiant Crystals.";
+		// Adjust stacks to prevent over-stacking.
+		stacks = stacks > MaxRadiantCrystalsStacks ? MaxRadiantCrystalsStacks : stacks;
+		// Check: Not trying to create more than is possible.
+		EXPECTED(stacks <= mCharacter->getRadiantCrystals());
+		// Remove crystals from Character.
+		EXPECTED(mCharacter->removeRadiantCrystals(stacks));
 	}
-
 	// Creating Ebon Crystals.
-	if (payload->mType == CrystalCreate::EBON) {
-		EXPECTED(payload->mAmount <= mCharacter->getEbonCrystals());
-		EXPECTED(mCharacter->removeEbonCrystals(payload->mAmount));
-
-		// TODO: Summon Ebon Crystals.
+	else if (payload->mType == CrystalCreate::EBON) {
+		itemID = ItemID::EbonCrystal;
+		crystalName = "Ebon Crystals.";
+		// Adjust stacks to prevent over-stacking.
+		stacks = stacks > MaxEbonCrystalsStacks ? MaxEbonCrystalsStacks : stacks;
+		// Check: Not trying to create more than is possible.
+		EXPECTED(stacks <= mCharacter->getEbonCrystals());
+		// Remove crystals from Character.
+		EXPECTED(mCharacter->removeEbonCrystals(stacks));
+		
 	}
 
+	auto item = ItemFactory::make(itemID, stacks);
+	EXPECTED(item);
+	mCharacter->getInventory()->pushCursor(item);
+	sendItemSummon(item);
+
+	// Notify user.
+	mCharacter->notify("You have created (" + std::to_string(stacks) + ") " + crystalName);
+
+	// Update client.
 	sendCrystals();
 }
 
@@ -3103,7 +3130,39 @@ void ZoneClientConnection::_handleCrystalReclaim(const EQApplicationPacket* pPac
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 
-	// TODO: 
+	// Check: Character has Radiant or Ebon crystals on cursor.
+	Item* item = mCharacter->getInventory()->peekCursor();
+	if (!item || (item->getID() != ItemID::RadiantCrystal && item->getID() != ItemID::EbonCrystal)) {
+		mCharacter->notify("Please place crystals on your cursor and try again.");
+		return;
+	}
+
+	const uint32 stacks = item->getStacks();
+	String crystalName;
+
+	// Add Radiant Crystals.
+	if (item->getID() == ItemID::RadiantCrystal) {
+		crystalName = "Radiant Crystals.";
+		// Consume from Inventory.
+		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+		mCharacter->addRadiantCrystals(stacks);
+	}
+	// Add Ebon Crystals.
+	else if (item->getID() == ItemID::EbonCrystal) {
+		crystalName = "Ebon Crystals.";
+		// Consume from Inventory.
+		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+		mCharacter->addEbonCrystals(stacks);
+	}
+
+	// Clear cursor.
+	sendMoveItem(SlotID::CURSOR, SlotID::SLOT_DELETE);
+
+	// Notify user.
+	mCharacter->notify("You have reclaimed (" + std::to_string(stacks) + ") " + crystalName);
+
+	// Update client.
+	sendCrystals();
 }
 
 void ZoneClientConnection::sendCrystals() {
@@ -3159,6 +3218,18 @@ void ZoneClientConnection::sendItemView(Item* pItem) {
 	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketViewLink);
 
 	auto packet = new EQApplicationPacket(OP_ItemLinkResponse, data, payloadSize);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendItemSummon(Item* pItem) {
+	EXPECTED(pItem);
+	EXPECTED(mConnected);
+
+	uint32 payloadSize = 0;
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
+
+	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 	sendPacket(packet);
 	delete packet;
 }
@@ -3226,11 +3297,20 @@ void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket
 	}
 }
 
-void ZoneClientConnection::sendDeleteItem(const uint32 pSlot) {
+void ZoneClientConnection::sendDeleteItem(const uint32 pSlot, const uint32 pStacks, const uint32 pToSlot) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = DeleteItem::construct(pSlot);
+	auto packet = DeleteItem::construct(pSlot, pToSlot, pStacks);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStacks) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = MoveItem::construct(pFromSlot, pToSlot, pStacks);
 	sendPacket(packet);
 	delete packet;
 }

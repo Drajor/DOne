@@ -114,6 +114,20 @@ enum Rarity : uint8 { Common, Magic, Rare, Artifact, RarityMax };
 static const std::array<Rarity, RarityMax> RarityArray = { Rarity::Common, Rarity::Magic, Rarity::Rare, Rarity::Artifact };
 static bool RarityRangeCheck(const uint8 pRarity) { return pRarity <= Artifact; }
 
+// For bootstrap
+namespace ItemID {
+	enum : uint32 {
+		RadiantCrystal = 1,
+		EbonCrystal = 2,
+		AugmentationSealer = 3,
+		UniversalDistiller = 4,
+		UniversalSolvent = 5,
+	};
+}
+static const uint32 MaxRadiantCrystalsStacks = 10000;
+static const uint32 MaxEbonCrystalsStacks = 10000;
+
+
 enum PlayableRaceIDs {
 	Human = 1,
 	Barbarian = 2,
@@ -736,6 +750,8 @@ namespace ItemType {
 		Augmentation = 54,
 		AugmentationSolvent = 55,
 		AugmentationDistiller = 56,
+
+		AlternateCurrency = 63,
 	};
 }
 
