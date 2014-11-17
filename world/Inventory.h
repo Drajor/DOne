@@ -67,6 +67,20 @@ public:
 
 	inline Item* peekCursor() const { return _peekCursor(); }
 
+	// Radiant Crystals.
+	inline const uint32 getRadiantCrystals() const { return mRadiantCrystals; }
+	inline const uint32 getTotalRadiantCrystals() const { return mTotalRadiantCrystals; }
+	inline void addRadiantCrystals(const uint32 pCrystals) { mRadiantCrystals += pCrystals; mTotalRadiantCrystals += pCrystals; }
+	const bool removeRadiantCrystals(const uint32 pCrystals);
+	inline void _setRadiantCrystals(const uint32 pCurrent, const uint32 pTotal) { mRadiantCrystals = pCurrent; mTotalRadiantCrystals = pTotal; }
+
+	// Ebon Crystals.
+	inline const uint32 getEbonCrystals() const { return mEbonCrystals; }
+	inline const uint32 getTotalEbonCrystals() const { return mTotalEbonCrystals; }
+	inline void addEbonCrystals(const uint32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
+	const bool removeEbonCrystals(const uint32 pCrystals);
+	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
+
 private:
 	Item* _popCursor();
 	Item* _peekCursor() const;
@@ -129,4 +143,12 @@ private:
 	int32 mHealthRegen = 0;
 	int32 mManaRegen = 0;
 	int32 mEnduranceRegen = 0;
+
+	// Radiant Crystals
+	uint32 mRadiantCrystals = 0;
+	uint32 mTotalRadiantCrystals = 0;
+	
+	// Ebon Crystals
+	uint32 mEbonCrystals = 0;
+	uint32 mTotalEbonCrystals = 0;
 };

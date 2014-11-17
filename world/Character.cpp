@@ -157,8 +157,8 @@ bool Character::initialise() {
 	setAutoConsentRaid(mData->mAutoConsentRaid);
 	setAutoConsentGuild(mData->mAutoConsentGuild);
 
-	_setRadiantCrystals(mData->mRadiantCrystals, mData->mTotalRadiantCrystals);
-	_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
+	mInventory->_setRadiantCrystals(mData->mRadiantCrystals, mData->mTotalRadiantCrystals);
+	mInventory->_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
 
 	if (isCaster()) {
 		// Create and initialise SpellBook.
@@ -434,10 +434,10 @@ void Character::_updateForSave() {
 	mData->mAutoConsentRaid = getAutoConsentRaid();
 	mData->mAutoConsentGuild = getAutoConsentGuild();
 
-	mData->mRadiantCrystals = getRadiantCrystals();
-	mData->mTotalRadiantCrystals = getTotalRadiantCrystals();
-	mData->mEbonCrystals = getEbonCrystals();
-	mData->mTotalEbonCrystals = getTotalRadiantCrystals();
+	mData->mRadiantCrystals = mInventory->getRadiantCrystals();
+	mData->mTotalRadiantCrystals = mInventory->getTotalRadiantCrystals();
+	mData->mEbonCrystals = mInventory->getEbonCrystals();
+	mData->mTotalEbonCrystals = mInventory->getTotalEbonCrystals();
 
 	// Spell Book
 	if (mSpellBook) {
@@ -757,20 +757,6 @@ const bool Character::checkZoneChange(const uint16 pZoneID, const uint16 pInstan
 void Character::clearZoneChange() {
 	mZoneChange.mZoneID = 0;
 	mZoneChange.mInstanceID = 0;
-}
-
-const bool Character::removeRadiantCrystals(const uint32 pCrystals) {
-	EXPECTED_BOOL(mRadiantCrystals >= pCrystals);
-	
-	mRadiantCrystals -= pCrystals;
-	return true;
-}
-
-const bool Character::removeEbonCrystals(const uint32 pCrystals) {
-	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
-
-	mEbonCrystals -= pCrystals;
-	return true;
 }
 
 const uint64 Character::getTotalCurrency() const {

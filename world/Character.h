@@ -187,18 +187,6 @@ public:
 	const uint64 getTotalCurrency() const;
 	const bool currencyValid() const;
 
-	// Radiant Crystals.
-	inline const uint32 getRadiantCrystals() const { return mRadiantCrystals; }
-	inline const uint32 getTotalRadiantCrystals() const { return mTotalRadiantCrystals; }
-	inline void addRadiantCrystals(const uint32 pCrystals) { mRadiantCrystals += pCrystals; mTotalRadiantCrystals += pCrystals; }
-	const bool removeRadiantCrystals(const uint32 pCrystals);
-
-	// Ebon Crystals.
-	inline const uint32 getEbonCrystals() const { return mEbonCrystals; }
-	inline const uint32 getTotalEbonCrystals() const { return mTotalEbonCrystals; }
-	inline void addEbonCrystals(const uint32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
-	const bool removeEbonCrystals(const uint32 pCrystals);
-
 	inline void addVisibleNPC(NPC* pNPC) { mVisibleNPCs.push_back(pNPC); }
 	inline void removeVisibleNPC(NPC* pNPC) { mVisibleNPCs.remove(pNPC); }
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
@@ -282,14 +270,6 @@ private:
 	void _checkForLevelIncrease();
 
 	int32 mCurrency[MoneySlotID::MAX][MoneyType::MAX];
-
-	uint32 mRadiantCrystals = 0;
-	uint32 mTotalRadiantCrystals = 0;
-	inline void _setRadiantCrystals(const uint32 pCurrent, const uint32 pTotal) { mRadiantCrystals = pCurrent; mTotalRadiantCrystals = pTotal; }
-
-	uint32 mEbonCrystals = 0;
-	uint32 mTotalEbonCrystals = 0;
-	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;

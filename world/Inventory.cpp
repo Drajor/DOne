@@ -761,3 +761,17 @@ Item* Inventoryy::find(const uint32 pItemID, const uint32 pInstanceID) const {
 
 	return nullptr;
 }
+
+const bool Inventoryy::removeRadiantCrystals(const uint32 pCrystals) {
+	EXPECTED_BOOL(mRadiantCrystals >= pCrystals);
+
+	mRadiantCrystals -= pCrystals;
+	return true;
+}
+
+const bool Inventoryy::removeEbonCrystals(const uint32 pCrystals) {
+	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
+
+	mEbonCrystals -= pCrystals;
+	return true;
+}

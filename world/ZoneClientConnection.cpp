@@ -756,10 +756,10 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	//payload->recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 	payload->endurance = mCharacter->getCurrentEndurance();
 
-	payload->currentRadCrystals = mCharacter->getRadiantCrystals();
-	payload->careerRadCrystals = mCharacter->getTotalRadiantCrystals();
-	payload->currentEbonCrystals = mCharacter->getEbonCrystals();
-	payload->careerEbonCrystals = mCharacter->getTotalEbonCrystals();
+	payload->currentRadCrystals = mCharacter->getInventory()->getRadiantCrystals();
+	payload->careerRadCrystals = mCharacter->getInventory()->getTotalRadiantCrystals();
+	payload->currentEbonCrystals = mCharacter->getInventory()->getEbonCrystals();
+	payload->careerEbonCrystals = mCharacter->getInventory()->getTotalEbonCrystals();
 
 	payload->groupAutoconsent = mCharacter->getAutoConsentGroup() ? 1 : 0;
 	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
@@ -3103,9 +3103,9 @@ void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPack
 		// Adjust stacks to prevent over-stacking.
 		stacks = stacks > MaxRadiantCrystalsStacks ? MaxRadiantCrystalsStacks : stacks;
 		// Check: Not trying to create more than is possible.
-		EXPECTED(stacks <= mCharacter->getRadiantCrystals());
+		EXPECTED(stacks <= mCharacter->getInventory()->getRadiantCrystals());
 		// Remove crystals from Character.
-		EXPECTED(mCharacter->removeRadiantCrystals(stacks));
+		EXPECTED(mCharacter->getInventory()->removeRadiantCrystals(stacks));
 	}
 	// Creating Ebon Crystals.
 	else if (payload->mType == CrystalCreate::EBON) {
@@ -3114,9 +3114,9 @@ void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPack
 		// Adjust stacks to prevent over-stacking.
 		stacks = stacks > MaxEbonCrystalsStacks ? MaxEbonCrystalsStacks : stacks;
 		// Check: Not trying to create more than is possible.
-		EXPECTED(stacks <= mCharacter->getEbonCrystals());
+		EXPECTED(stacks <= mCharacter->getInventory()->getEbonCrystals());
 		// Remove crystals from Character.
-		EXPECTED(mCharacter->removeEbonCrystals(stacks));
+		EXPECTED(mCharacter->getInventory()->removeEbonCrystals(stacks));
 		
 	}
 
@@ -3151,14 +3151,14 @@ void ZoneClientConnection::_handleCrystalReclaim(const EQApplicationPacket* pPac
 		crystalName = "Radiant Crystals.";
 		// Consume from Inventory.
 		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
-		mCharacter->addRadiantCrystals(stacks);
+		mCharacter->getInventory()->addRadiantCrystals(stacks);
 	}
 	// Add Ebon Crystals.
 	else if (item->getID() == ItemID::EbonCrystal) {
 		crystalName = "Ebon Crystals.";
 		// Consume from Inventory.
 		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
-		mCharacter->addEbonCrystals(stacks);
+		mCharacter->getInventory()->addEbonCrystals(stacks);
 	}
 
 	// Clear cursor.
@@ -3176,10 +3176,10 @@ void ZoneClientConnection::sendCrystals() {
 	EXPECTED(mConnected);
 
 	CrystalUpdate payload;
-	payload.mRadiantCrystals = mCharacter->getRadiantCrystals();
-	payload.mTotalRadiantCrystals = mCharacter->getTotalRadiantCrystals();
-	payload.mEbonCrystals = mCharacter->getEbonCrystals();
-	payload.mTotalEbonCrystals = mCharacter->getTotalEbonCrystals();
+	payload.mRadiantCrystals = mCharacter->getInventory()->getRadiantCrystals();
+	payload.mTotalRadiantCrystals = mCharacter->getInventory()->getTotalRadiantCrystals();
+	payload.mEbonCrystals = mCharacter->getInventory()->getEbonCrystals();
+	payload.mTotalEbonCrystals = mCharacter->getInventory()->getTotalEbonCrystals();
 
 	auto packet = CrystalUpdate::create(payload);
 	sendPacket(packet);
