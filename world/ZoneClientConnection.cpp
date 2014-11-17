@@ -3055,15 +3055,14 @@ void ZoneClientConnection::sendMoneyUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	MoneyUpdate payload;
-	payload.mPlatinum = mCharacter->getInventory()->getPersonalPlatinum();
-	payload.mGold = mCharacter->getInventory()->getPersonalGold();
-	payload.mSilver = mCharacter->getInventory()->getPersonalSilver();
-	payload.mCopper = mCharacter->getInventory()->getPersonalCopper();
-
-	auto packet = MoneyUpdate::create();
-	mStreamInterface->QueuePacket(packet);
-	safe_delete(packet);
+	const int32 platinum = mCharacter->getInventory()->getPersonalPlatinum();
+	const int32 gold = mCharacter->getInventory()->getPersonalGold();
+	const int32 silver = mCharacter->getInventory()->getPersonalSilver();
+	const int32 copper = mCharacter->getInventory()->getPersonalCopper();
+	
+	auto packet = MoneyUpdate::construct(platinum, gold, silver, copper);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {

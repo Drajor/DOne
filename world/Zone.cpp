@@ -1375,4 +1375,10 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->setTradingWith(nullptr);
 
 	// TODO: Move Items back into Character Inventory.
+
+	// Update Inventory.
+	EXPECTED(pCharacter->getInventory()->onTradeCancel());
+
+	// Update client.
+	pCharacter->getConnection()->sendMoneyUpdate();
 }

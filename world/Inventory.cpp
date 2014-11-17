@@ -851,3 +851,29 @@ const bool Inventoryy::currencyValid() const {
 
 	return true;
 }
+
+const bool Inventoryy::onTradeCancel() {
+	// Record total current before moving anything.
+	const uint64 preMoveCurrency = getTotalCurrency();
+
+	const auto platinum = getTradePlatinum();
+	const auto gold = getTradeGold();
+	const auto silver = getTradeSilver();
+	const auto copper = getTradeCopper();
+
+	// Move trade slot currency to personal.
+	if (platinum > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::PLATINUM, MoneyType::PLATINUM, platinum)); }
+	if (gold > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::GOLD, MoneyType::GOLD, gold)); }
+	if (silver > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::SILVER, MoneyType::SILVER, silver)); }
+	if (copper > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::COPPER, MoneyType::COPPER, copper)); }
+
+	// Check: Total currency has not changed.
+	EXPECTED_BOOL(preMoveCurrency == getTotalCurrency());
+	
+	// Check: Currency is still in a valid state.
+	EXPECTED_BOOL(currencyValid());
+	
+	// TODO: I expect all trade slots to be zero now.
+
+	return true;
+}

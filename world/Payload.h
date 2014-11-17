@@ -654,6 +654,16 @@ namespace Payload {
 
 		// C<-S
 		struct MoneyUpdate : public FixedT<MoneyUpdate, OP_MoneyUpdate> {
+			static EQApplicationPacket* construct(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mPlatinum = pPlatinum;
+				payload->mGold = pGold;
+				payload->mSilver = pSilver;
+				payload->mCopper = pCopper;
+
+				return packet;
+			}
 			int32 mPlatinum = 0;
 			int32 mGold = 0;
 			int32 mSilver = 0;

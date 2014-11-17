@@ -37,19 +37,23 @@ public:
 	inline const int32 getCursorPlatinum() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::PLATINUM]; }
 	inline const int32 getPersonalPlatinum() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::PLATINUM]; }
 	inline const int32 getBankPlatinum() const { return mCurrency[MoneySlotID::BANK][MoneyType::PLATINUM]; }
+	inline const int32 getTradePlatinum() const { return mCurrency[MoneySlotID::TRADE][MoneyType::PLATINUM]; }
 	inline const int32 getSharedBankPlatinum() const { return mCurrency[MoneySlotID::SHARED_BANK][MoneyType::PLATINUM]; }
 
 	inline const int32 getCursorGold() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::GOLD]; }
 	inline const int32 getPersonalGold() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::GOLD]; }
 	inline const int32 getBankGold() const { return mCurrency[MoneySlotID::BANK][MoneyType::GOLD]; }
+	inline const int32 getTradeGold() const { return mCurrency[MoneySlotID::TRADE][MoneyType::GOLD]; }
 
 	inline const int32 getCursorSilver() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::SILVER]; }
 	inline const int32 getPersonalSilver() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::SILVER]; }
 	inline const int32 getBankSilver() const { return mCurrency[MoneySlotID::BANK][MoneyType::SILVER]; }
+	inline const int32 getTradeSilver() const { return mCurrency[MoneySlotID::TRADE][MoneyType::SILVER]; }
 
 	inline const int32 getCursorCopper() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::COPPER]; }
 	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
 	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
+	inline const int32 getTradeCopper() const { return mCurrency[MoneySlotID::TRADE][MoneyType::COPPER]; }
 
 	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
 	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
@@ -81,6 +85,8 @@ public:
 	// Sets the number of Ebon Crystals. Should only be used during initialisation.
 	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
+	const bool onTradeCancel();
+
 private:
 	Item* _popCursor();
 	Item* _peekCursor() const;
@@ -104,7 +110,7 @@ private:
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
-	
+
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 
