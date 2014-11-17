@@ -84,6 +84,50 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+	// Start Container
+	{
+		auto data = &mItemData[ItemID::StartContainer];
+		data->mID = ItemID::StartContainer;
+		auto item = new Item(data);
+
+		item->setName("Backpack");
+		item->setIcon(884);
+		item->setItemClass(ItemClass::Container);
+		item->setContainerType(ContainerType::Normal);
+		item->setContainerSlots(10);
+		item->setContainerSize(ContainerSize::Giant);
+
+		delete item;
+	}
+	// Start Food.
+	{
+		auto data = &mItemData[ItemID::StartFood];
+		data->mID = ItemID::StartFood;
+		auto item = new Item(data);
+
+		item->setName("Bread");
+		item->setIcon(537);
+		item->setItemType(ItemType::Food);
+		item->setMaxStacks(10000);
+		item->setFoodSize(10);
+
+		delete item;
+	}
+	// Start Drink.
+	{
+		auto data = &mItemData[ItemID::StartDrink];
+		data->mID = ItemID::StartDrink;
+		auto item = new Item(data);
+
+		item->setName("Water");
+		item->setIcon(584);
+		item->setItemType(ItemType::Drink);
+		item->setMaxStacks(10000);
+		item->setDrinkSize(10);
+
+		delete item;
+	}
+
 
 	//// Test - Elemental Damage Augmentations
 	//int id = 4;

@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Utility.h"
 #include "ItemGenerator.h"
+#include "ItemFactory.h"
 #include "Limits.h"
 
 Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
@@ -14,81 +15,13 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 
 	memset(mCurrency, 0, sizeof(mCurrency));
 
-	//auto itemData = new ItemData();
-	//itemData->mID = 2;
-	//itemData->mInstanceID = 2;
-	//itemData->mSlot = 23;
-	//itemData->mItemType = 17;
-	//itemData->mClasses = 65535;
-	//itemData->mIcon = 639;
-	//strcpy(itemData->mItemName, String("Test Item").c_str());
-	//strcpy(itemData->mIDFile, String("IT63").c_str());
-
-	//auto item = new Item(itemData);
-	//put(item, 23);
-
-	//for (auto i = )
-
-	//put(ItemGenerator::makeRandomContainer(ItemGenerator::COMMON), 23);
-	//put(ItemGenerator::makeRandomContainer(ItemGenerator::MAGIC), 24);
-	//put(ItemGenerator::makeRandomContainer(ItemGenerator::RARE), 25);
-	//put(ItemGenerator::makeRandomContainer(ItemGenerator::ARTIFACT), 26);
-
-	//put(ItemGenerator::makeFood(), 23);
-
-	//put(ItemGenerator::makeDrink(), 23);
-	//put(ItemGenerator::makeDrink(), 24);
-	//put(ItemGenerator::makeDrink(), 25);
-	//put(ItemGenerator::makeDrink(), 26);
-
-	//put(ItemGenerator::makeFood(), 27);
-	//put(ItemGenerator::makeFood(), 28);
-	//put(ItemGenerator::makeFood(), 29);
-	//put(ItemGenerator::makeFood(), 30);
-
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 24);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 25);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 26);
-
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 27);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 28);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 29);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 30);
-
-	put(ItemGenerator::makeTwoHandBlunt(0, Rarity::Common), 23);
-	//put(ItemGenerator::makePowerSource(0, Rarity::Common), 23);
-	//put(ItemGenerator::makeShield(0, Rarity::Common), 24);
-	put(ItemGenerator::makeHead(0, Rarity::Common), 26);
-	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
-	//put(ItemGenerator::makeChest(0, Rarity::Common), 28);
-	//put(ItemGenerator::makeAugmentation(0, Rarity::Common), 29);
 	put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
-	//put(ItemGenerator::makeHead(0, Rarity::Common, 5.0), 27);
-	//put(ItemGenerator::makeHead(0, Rarity::Common, 6.0), 28);
-	//put(ItemGenerator::makeHead(0, Rarity::Common, 7.0), 29);
-	//put(ItemGenerator::makeHead(0, Rarity::Common, 8.0), 30);
-	//put(ItemGenerator::makeRandomContainer(Rarity::Common), 26);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 24);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 25);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 36);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 28);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 29);
-	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 30);
 
-	Item* chest0 = ItemGenerator::makeChest(0, Rarity::Common);
-	chest0->setStrength(54);
-	chest0->setAgility(23);
-	chest0->setCharisma(58);
-	put(chest0, 28);
-
-	Item* chest1 = ItemGenerator::makeChest(0, Rarity::Common);
-	chest1->setStrength(91);
-	chest1->setAgility(9);
-	chest1->setCharisma(56);
-	put(chest1, 29);
-	
+	auto container = ItemFactory::make(ItemID::StartContainer);
+	container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
+	container->setContents(ItemFactory::make(ItemID::StartDrink, 10000), 9);
+	put(container, SlotID::MAIN_7);
+	container->updateContentsSlots();
 }
 
 const unsigned char* Inventoryy::getData(uint32& pSize) {

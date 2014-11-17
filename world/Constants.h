@@ -122,6 +122,10 @@ namespace ItemID {
 		AugmentationSealer = 3,
 		UniversalDistiller = 4,
 		UniversalSolvent = 5,
+
+		StartContainer = 6,
+		StartFood = 7,
+		StartDrink = 8
 	};
 }
 static const uint32 MaxRadiantCrystalsStacks = 10000;
