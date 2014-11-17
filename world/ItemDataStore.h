@@ -15,6 +15,8 @@ public:
 	const bool initialise();
 	ItemData* getNew();
 	ItemData* get(const uint32 pID);
+
+	const uint32 getNextSerial();
 private:
 	void _bootstrap();
 	bool mInitialised = false;
@@ -24,6 +26,5 @@ private:
 	uint32 mNextID = 10000;
 	const uint32 getNextID();
 	uint32 mNextSerial = 1;
-	const uint32 getNextSerial();
 	
 };

@@ -336,17 +336,17 @@ const char *ConvertArrayF(float input, char *returnchar)
 	return returnchar;
 }
 
-std::vector<std::string> SplitString(const std::string &str, char delim) {
-	std::vector<std::string> ret;
-	std::stringstream ss(str);
-    std::string item;
-
-    while(std::getline(ss, item, delim)) {
-        ret.push_back(item);
-    }
-	
-	return ret;
-}
+//std::vector<std::string> SplitString(const std::string &str, char delim) {
+//	std::vector<std::string> ret;
+//	std::stringstream ss(str);
+//    std::string item;
+//
+//    while(std::getline(ss, item, delim)) {
+//        ret.push_back(item);
+//    }
+//	
+//	return ret;
+//}
 
 std::string EscapeString(const std::string &s) {
 	std::string ret;

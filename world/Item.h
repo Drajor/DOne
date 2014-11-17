@@ -11,6 +11,10 @@ public:
 	Item* copy() const;
 	~Item();
 
+	const bool compare(Item * pItem, String& pText);
+
+	inline ItemData* getData() const { return mItemData; }
+
 	// Returns whether this Item is tradeable or not.
 	const bool isTradeable();
 
@@ -569,7 +573,7 @@ public:
 
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
 	inline void setMerchantSlot(const uint32 pValue) { mItemData->mMerchantSlot = pValue; }
-	inline void setSerial(const uint32 pValue) { mItemData->mInstanceID = pValue; }
+	inline void setInstanceID(const uint32 pValue) { mItemData->mInstanceID = pValue; }
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
 	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }

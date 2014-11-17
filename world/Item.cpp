@@ -429,3 +429,51 @@ const bool Item::removeStacks(const uint32 pStacks) {
 	mStacks -= pStacks;
 	return true;
 }
+
+const bool Item::compare(Item * pItem, String& pText) {
+	EXPECTED_BOOL(pItem);
+
+	Utility::PopupHelper helper;
+
+	// Strength
+	int strength = getStrength() - pItem->getStrength();
+	if (strength > 0) {
+		helper.startColour(Utility::PopupHelper::Colour::RED);
+		helper.writeBr("-" + std::to_string(strength) + " Strength" );
+		helper.endColour();
+	}
+	else if (strength < 0) {
+		helper.startColour(Utility::PopupHelper::Colour::GREEN);
+		helper.writeBr("+" + std::to_string(strength) + " Strength");
+		helper.endColour();
+	}
+
+	// Agility
+	int agility = getAgility() - pItem->getAgility();
+	if (agility > 0) {
+		helper.startColour(Utility::PopupHelper::Colour::RED);
+		helper.writeBr("-" + std::to_string(agility) + " Agility");
+		helper.endColour();
+	}
+	else if (agility < 0) {
+		helper.startColour(Utility::PopupHelper::Colour::GREEN);
+		helper.writeBr("+" + std::to_string(agility) + " Agility");
+		helper.endColour();
+	}
+
+	// Charisma
+	int charisma = getCharisma() - pItem->getCharisma();
+	if (charisma > 0) {
+		helper.startColour(Utility::PopupHelper::Colour::RED);
+		helper.writeBr("-" + std::to_string(charisma) + " Charisma");
+		helper.endColour();
+	}
+	else if (charisma < 0) {
+		helper.startColour(Utility::PopupHelper::Colour::GREEN);
+		helper.writeBr("+" + std::to_string(charisma) + " Charisma");
+		helper.endColour();
+	}
+
+	pText = helper.getText();
+	return true;
+}

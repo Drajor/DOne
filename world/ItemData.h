@@ -24,7 +24,7 @@ struct ItemData {
 		memset(mBardName, 0, sizeof(mBardName));
 
 		strcpy(mIDFile, "IT63");
-		strcpy(mCharmFile, "aids");
+		//strcpy(mCharmFile, "aids");
 
 		memset(mOrnamentationIDFile, 0, sizeof(mOrnamentationIDFile));
 	}

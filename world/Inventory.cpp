@@ -58,8 +58,8 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makeShield(0, Rarity::Common), 24);
 	put(ItemGenerator::makeHead(0, Rarity::Common), 26);
 	put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 27);
-	put(ItemGenerator::makeChest(0, Rarity::Common), 28);
-	put(ItemGenerator::makeAugmentation(0, Rarity::Common), 29);
+	//put(ItemGenerator::makeChest(0, Rarity::Common), 28);
+	//put(ItemGenerator::makeAugmentation(0, Rarity::Common), 29);
 	put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 5.0), 27);
 	//put(ItemGenerator::makeHead(0, Rarity::Common, 6.0), 28);
@@ -73,6 +73,18 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 28);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 29);
 	//put(ItemGenerator::makeOneHandBlunt(0, Rarity::Common), 30);
+
+	Item* chest0 = ItemGenerator::makeChest(0, Rarity::Common);
+	chest0->setStrength(54);
+	chest0->setAgility(23);
+	chest0->setCharisma(58);
+	put(chest0, 28);
+
+	Item* chest1 = ItemGenerator::makeChest(0, Rarity::Common);
+	chest1->setStrength(91);
+	chest1->setAgility(9);
+	chest1->setCharisma(56);
+	put(chest1, 29);
 	
 }
 
@@ -722,4 +734,30 @@ const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) 
 		_calculateRemove(pickUp);
 
 	return true;
+}
+
+Item* Inventoryy::find(const uint32 pItemID, const uint32 pInstanceID) const {
+
+	// Search Worn Slots
+	for (int i = SlotID::CHARM; i <= SlotID::AMMO; i++) {
+		if (mItems[i] && mItems[i]->getID() == pItemID && mItems[i]->getInstanceID() == pInstanceID)
+			return mItems[i];
+	}
+
+	// Search Primary Main.
+	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		if (mItems[i] && mItems[i]->getID() == pItemID && mItems[i]->getInstanceID() == pInstanceID) {
+			return mItems[i];
+		}
+		// Search Primary Contents.
+		else if (mItems[i] && mItems[i]->isContainer()) {
+			for (int j = 0; j < SlotID::MAX_CONTENTS; j++) {
+				if (mItems[j] && mItems[j]->getID() == pItemID && mItems[j]->getInstanceID() == pInstanceID) {
+					return mItems[j];
+				}
+			}
+		}
+	}
+
+	return nullptr;
 }

@@ -16,6 +16,8 @@ public:
 	// Returns the Item at pSlot or nullptr.
 	Item* getItem(const uint32 pSlot) const;
 
+	Item* find(const uint32 pItemID, const uint32 pInstanceID) const;
+
 	const unsigned char* getData(uint32& pSize); // Caller responsible for delete.
 	const bool move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
 	const bool consume(const uint32 pSlot, const uint32 pStacks);
@@ -85,6 +87,8 @@ private:
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
+	
+
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 

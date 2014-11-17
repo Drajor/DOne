@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Constants.h"
-#include <string>
-#include <sstream>
 #include "LogSystem.h"
 
 #define ARG_STR(pARG) #pARG
@@ -254,6 +252,23 @@ namespace Utility {
 	inline bool stoSafe(uint8_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
 	inline bool stoSafe(float& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stof); }
 	inline bool stoSafe(double& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stod); }
+
+	// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
+	std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {
+		StringStream ss(s);
+		String item;
+		while (std::getline(ss, item, delim)) {
+			elems.push_back(item);
+		}
+		return elems;
+	}
+
+	// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
+	std::vector<String> split(const String &s, char delim) {
+		std::vector<String> elems;
+		split(s, delim, elems);
+		return elems;
+	}
 
 	namespace Skills {
 		static const String SkillStrings[Limits::Skills::MAX_ID] = {

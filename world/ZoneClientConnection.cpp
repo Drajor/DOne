@@ -3413,7 +3413,50 @@ void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 	auto payload = BookRequest::convert(pPacket);
 	Log::info(payload->_debug());
 
-	sendReadBook(payload->mWindow, payload->mSlot, payload->mType, "<c \"#00FF00\">+ 5% Magic Find</c><br><c \"#FF0000\">-2% Block Chance</c>");
+	// Extract Item ID and Instance ID from text.
+	uint32 itemID = 0;
+	uint32 itemInstanceID = 0;
+
+	String text(payload->mText);
+	std::vector<String> elements = Utility::split(text, '|');
+	EXPECTED(elements.size() == 2);
+
+	EXPECTED(Utility::stoSafe(itemID, elements[0]));
+	EXPECTED(Utility::stoSafe(itemInstanceID, elements[1]));
+
+	auto item = mCharacter->getInventory()->find(itemID, itemInstanceID);
+
+	if (item) {
+		Log::info("Found Item " + item->getName());
+
+		// Check: Found Item is not in a worn slot.
+		if (SlotID::isWorn(item->getSlot()) == false) {
+			const uint32 slots = item->getSlots();
+
+			// Hardcode.
+			if (slots == EquipSlots::Chest) {
+				auto currentChestItem = mCharacter->getInventory()->getItem(SlotID::CHEST);
+				if (currentChestItem) {
+					String comparison;
+					currentChestItem->compare(item, comparison);
+					sendReadBook(payload->mWindow, payload->mSlot, payload->mType, comparison);
+				}
+			}
+		}
+	}
+
+	// You find it. Is it equipped? Dont care
+	// Not equipped. check slots. Then query Item  in its slot. calculate diff.
+
+	// If you don't find it. It probably came from an Item link from someone else. Can I embed Character ID into charmFiel.
+
+	// Determine whether this Item is equipped
+
+	// - The item will either be;
+	// - One that is already equipped  (easy to find)
+	// - Or not equipped. (may not be in caller's inventory, could be another link.
+
+	//sendReadBook(payload->mWindow, payload->mSlot, payload->mType, "<c \"#00FF00\">+ 5% Magic Find</c><br><c \"#FF0000\">-2% Block Chance</c>");
 }
 
 //

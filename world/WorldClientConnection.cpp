@@ -5,13 +5,13 @@
 #include "../common/EQPacket.h"
 #include "../common/EQStreamIntf.h"
 
-#include <iostream>
-#include <iomanip>
+//#include <iostream>
+//#include <iomanip>
 
 #include "World.h"
 #include "Utility.h"
 #include "Limits.h"
-#include "Constants.h"
+
 #include "LogSystem.h"
 #include "AccountManager.h"
 #include "Data.h"

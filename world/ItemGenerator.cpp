@@ -3,6 +3,7 @@
 #include "Item.h"
 #include "Random.h"
 #include "ItemDataStore.h"
+#include "ItemFactory.h"
 
 namespace RandomItemType {
 	enum : uint32 {
@@ -39,30 +40,31 @@ namespace RandomItemType {
 };
 
 Item* ItemGenerator::_makeBaseItem() {
-	auto data = ItemDataStore::getInstance().getNew();
-	return new Item(data);
+	return ItemFactory::make();
 }
 
 Item* ItemGenerator::_makeBaseArmorItem() {
-	auto data = ItemDataStore::getInstance().getNew();
+	auto item = _makeBaseItem();
+	auto data = item->getData();
 	data->mAugmentationSlots[0].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[1].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[2].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[3].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[4].mType = AugmentationSlotType::MultipleStat;
 
-	return new Item(data);
+	return item;
 }
 
 Item* ItemGenerator::_makeBaseOneHandWeapon() {
-	auto data = ItemDataStore::getInstance().getNew();
+	auto item = _makeBaseItem();
+	auto data = item->getData();
 	data->mAugmentationSlots[0].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[1].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[2].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[3].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[4].mType = AugmentationSlotType::MultipleStat;
 
-	return new Item(data);
+	return item;
 }
 
 Item* ItemGenerator::makeRandom(const uint8 pLevel, const Rarity pRarity) {

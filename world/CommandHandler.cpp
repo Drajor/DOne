@@ -8,10 +8,7 @@
 #include "GuildManager.h"
 #include "Utility.h"
 #include "LogSystem.h"
-#include <vector>
-#include <sstream>
 #include "ZoneClientConnection.h"
-#include "Constants.h"
 #include "Limits.h"
 #include "ItemGenerator.h"
 #include "ItemDataStore.h"
@@ -24,23 +21,6 @@
 #include "../common/EQPacket.h"
 #include "Payload.h"
 #endif
-
-// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {
-	StringStream ss(s);
-	String item;
-	while (std::getline(ss, item, delim)) {
-		elems.push_back(item);
-	}
-	return elems;
-}
-
-// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-std::vector<String> split(const String &s, char delim) {
-	std::vector<String> elems;
-	split(s, delim, elems);
-	return elems;
-}
 
 /*****************************************************************************************************************************/
 class ZoneCommand : public Command {
@@ -1174,7 +1154,7 @@ void CommandHandler::initialise() {
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 	// Break up the message.
-	std::vector<String> elements = split(pCommandMessage, ' ');
+	std::vector<String> elements = Utility::split(pCommandMessage, ' ');
 	// Extract command name.
 	String commandName = elements[0].substr(1, elements[0].length() - 1);
 	// Remove command name (#zone)
