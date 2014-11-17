@@ -93,6 +93,7 @@ SET(world_headers
 	EventDispatcher.h
 	ItemDataStore.h
 	ItemFactory.h
+	Bonuses.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

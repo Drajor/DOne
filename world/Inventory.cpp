@@ -398,43 +398,43 @@ const bool Inventoryy::consume(const uint32 pSlot, const uint32 pStacks) {
 void Inventoryy::_calculateAdd(Item* pItem) {
 	EXPECTED(pItem);
 
-	mStrength += pItem->_getStrength();
-	mStamina += pItem->_getStamina();
-	mIntelligence += pItem->_getIntelligence();
-	mWisdom += pItem->_getWisdom();
-	mAgility += pItem->_getAgility();
-	mDexterity += pItem->_getDexterity();
-	mCharisma += pItem->_getCharisma();
+	_addStrength(pItem->_getStrength());
+	_addStamina(pItem->_getStamina());
+	_addIntelligence(pItem->_getIntelligence());
+	_addWisdom(pItem->_getWisdom());
+	_addAgility(pItem->_getAgility());
+	_addDexterity(pItem->_getDexterity());
+	_addCharisma(pItem->_getCharisma());
 
-	mHeroicStrength += pItem->_getHeroicStrength();
-	mHeroicStamina += pItem->_getHeroicStamina();
-	mHeroicIntelligence += pItem->_getHeroicIntelligence();
-	mHeroicWisdom += pItem->_getHeroicWisdom();
-	mHeroicAgility += pItem->_getHeroicAgility();
-	mHeroicDexterity += pItem->_getHeroicDexterity();
-	mHeroicCharisma += pItem->_getHeroicCharisma();
+	_addHeroicStrength(pItem->_getHeroicStrength());
+	_addHeroicStamina(pItem->_getHeroicStamina());
+	_addHeroicIntelligence(pItem->_getHeroicIntelligence());
+	_addHeroicWisdom(pItem->_getHeroicWisdom());
+	_addHeroicAgility(pItem->_getHeroicAgility());
+	_addHeroicDexterity(pItem->_getHeroicDexterity());
+	_addHeroicCharisma(pItem->_getHeroicCharisma());
 
-	mMagicResist += pItem->_getMagicResist();
-	mFireResist += pItem->_getFireResist();
-	mColdResist += pItem->_getColdResist();
-	mDiseaseResist += pItem->_getDiseaseResist();
-	mPoisonResist += pItem->_getPoisonResist();
-	mCorruptionResist += pItem->getCorruptionResist();
+	_addMagicResist(pItem->_getMagicResist());
+	_addFireResist(pItem->_getFireResist());
+	_addColdResist(pItem->_getColdResist());
+	_addDiseaseResist(pItem->_getDiseaseResist());
+	_addPoisonResist(pItem->_getPoisonResist());
+	_addCorruptionResist(pItem->getCorruptionResist());
 
-	mHeroicMagicResist += pItem->_getHeroicMagicResist();
-	mHeroicFireResist += pItem->_getHeroicFireResist();
-	mHeroicColdResist += pItem->_getHeroicColdResist();
-	mHeroicDiseaseResist += pItem->_getHeroicDiseaseResist();
-	mHeroicPoisonResist += pItem->_getHeroicPoisonResist();
-	mHeroicCorruptionResist += pItem->_getHeroicCorruptionResist();
+	_addHeroicMagicResist(pItem->_getHeroicMagicResist());
+	_addHeroicFireResist(pItem->_getHeroicFireResist());
+	_addHeroicColdResist(pItem->_getHeroicColdResist());
+	_addHeroicDiseaseResist(pItem->_getHeroicDiseaseResist());
+	_addHeroicPoisonResist(pItem->_getHeroicPoisonResist());
+	_addHeroicCorruptionResist(pItem->_getHeroicCorruptionResist());
 
-	mHealth += pItem->_getHealth();
-	mMana += pItem->_getMana();
-	mEndurance += pItem->_getEndurance();
+	_addHealth(pItem->_getHealth());
+	_addMana(pItem->_getMana());
+	_addEndurance(pItem->_getEndurance());
 
-	mHealthRegen += pItem->_getHealthRegen();
-	mManaRegen += pItem->_getManaRegen();
-	mEnduranceRegen += pItem->_getEnduranceRegen();
+	_addHealthRegen(pItem->_getHealthRegen());
+	_addManaRegen(pItem->_getManaRegen());
+	_addEnduranceRegen(pItem->_getEnduranceRegen());
 
 	// TODO: MOD2
 }
@@ -442,43 +442,43 @@ void Inventoryy::_calculateAdd(Item* pItem) {
 void Inventoryy::_calculateRemove(Item* pItem) {
 	EXPECTED(pItem);
 
-	mStrength -= pItem->_getStrength();
-	mStamina -= pItem->_getStamina();
-	mIntelligence -= pItem->_getIntelligence();
-	mWisdom -= pItem->_getWisdom();
-	mAgility -= pItem->_getAgility();
-	mDexterity -= pItem->_getDexterity();
-	mCharisma -= pItem->_getCharisma();
+	_removeStrength(pItem->_getStrength());
+	_removeStamina(pItem->_getStamina());
+	_removeIntelligence(pItem->_getIntelligence());
+	_removeWisdom(pItem->_getWisdom());
+	_removeAgility(pItem->_getAgility());
+	_removeDexterity(pItem->_getDexterity());
+	_removeCharisma(pItem->_getCharisma());
 
-	mHeroicStrength -= pItem->_getHeroicStrength();
-	mHeroicStamina -= pItem->_getHeroicStamina();
-	mHeroicIntelligence -= pItem->_getHeroicIntelligence();
-	mHeroicWisdom -= pItem->_getHeroicWisdom();
-	mHeroicAgility -= pItem->_getHeroicAgility();
-	mHeroicDexterity -= pItem->_getHeroicDexterity();
-	mHeroicCharisma -= pItem->_getHeroicCharisma();
+	_removeHeroicStrength(pItem->_getHeroicStrength());
+	_removeHeroicStamina(pItem->_getHeroicStamina());
+	_removeHeroicIntelligence(pItem->_getHeroicIntelligence());
+	_removeHeroicWisdom(pItem->_getHeroicWisdom());
+	_removeHeroicAgility(pItem->_getHeroicAgility());
+	_removeHeroicDexterity(pItem->_getHeroicDexterity());
+	_removeHeroicCharisma(pItem->_getHeroicCharisma());
 
-	mMagicResist -= pItem->_getMagicResist();
-	mFireResist -= pItem->_getFireResist();
-	mColdResist -= pItem->_getColdResist();
-	mDiseaseResist -= pItem->_getDiseaseResist();
-	mPoisonResist -= pItem->_getPoisonResist();
-	mCorruptionResist -= pItem->getCorruptionResist();
+	_removeMagicResist(pItem->_getMagicResist());
+	_removeFireResist(pItem->_getFireResist());
+	_removeColdResist(pItem->_getColdResist());
+	_removeDiseaseResist(pItem->_getDiseaseResist());
+	_removePoisonResist(pItem->_getPoisonResist());
+	_removeCorruptionResist(pItem->getCorruptionResist());
 
-	mHeroicMagicResist -= pItem->_getHeroicMagicResist();
-	mHeroicFireResist -= pItem->_getHeroicFireResist();
-	mHeroicColdResist -= pItem->_getHeroicColdResist();
-	mHeroicDiseaseResist -= pItem->_getHeroicDiseaseResist();
-	mHeroicPoisonResist -= pItem->_getHeroicPoisonResist();
-	mHeroicCorruptionResist -= pItem->_getHeroicCorruptionResist();
+	_removeHeroicMagicResist(pItem->_getHeroicMagicResist());
+	_removeHeroicFireResist(pItem->_getHeroicFireResist());
+	_removeHeroicColdResist(pItem->_getHeroicColdResist());
+	_removeHeroicDiseaseResist(pItem->_getHeroicDiseaseResist());
+	_removeHeroicPoisonResist(pItem->_getHeroicPoisonResist());
+	_removeHeroicCorruptionResist(pItem->_getHeroicCorruptionResist());
 
-	mHealth -= pItem->_getHealth();
-	mMana -= pItem->_getMana();
-	mEndurance -= pItem->_getEndurance();
+	_removeHealth(pItem->_getHealth());
+	_removeMana(pItem->_getMana());
+	_removeEndurance(pItem->_getEndurance());
 
-	mHealthRegen -= pItem->_getHealthRegen();
-	mManaRegen -= pItem->_getManaRegen();
-	mEnduranceRegen -= pItem->_getEnduranceRegen();
+	_removeHealthRegen(pItem->_getHealthRegen());
+	_removeManaRegen(pItem->_getManaRegen());
+	_removeEnduranceRegen(pItem->_getEnduranceRegen());
 }
 
 void Inventoryy::updateConsumables() {
