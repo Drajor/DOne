@@ -243,6 +243,7 @@ private:
 	void _handleItemLinkClick(const EQApplicationPacket* pPacket);
 	void _handleItemView(const EQApplicationPacket* pPacket);
 	void _handleMoveCoin(const EQApplicationPacket* pPacket);
+	const bool _handleMoveCoinImpl(const EQApplicationPacket* pPacket);
 	void _handleCrystalCreate(const EQApplicationPacket* pPacket);
 	void _handleCrystalReclaim(const EQApplicationPacket* pPacket);
 	void _handleEnvironmentalDamage(const EQApplicationPacket* pPacket);

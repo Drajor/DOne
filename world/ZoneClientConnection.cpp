@@ -690,25 +690,25 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->heading = mCharacter->getHeading();
 
 	// Personal Currency.
-	payload->platinum = mCharacter->getPersonalPlatinum();
-	payload->gold = mCharacter->getPersonalGold();
-	payload->silver = mCharacter->getPersonalSilver();
-	payload->copper = mCharacter->getPersonalCopper();
+	payload->platinum = mCharacter->getInventory()->getPersonalPlatinum();
+	payload->gold = mCharacter->getInventory()->getPersonalGold();
+	payload->silver = mCharacter->getInventory()->getPersonalSilver();
+	payload->copper = mCharacter->getInventory()->getPersonalCopper();
 
 	// Bank Currency.
-	payload->platinum_bank = mCharacter->getBankPlatinum();
-	payload->gold_bank = mCharacter->getBankGold();
-	payload->silver_bank = mCharacter->getBankSilver();
-	payload->copper_bank = mCharacter->getBankCopper();
+	payload->platinum_bank = mCharacter->getInventory()->getBankPlatinum();
+	payload->gold_bank = mCharacter->getInventory()->getBankGold();
+	payload->silver_bank = mCharacter->getInventory()->getBankSilver();
+	payload->copper_bank = mCharacter->getInventory()->getBankCopper();
 
 	// Cursor Currency
-	payload->platinum_cursor = mCharacter->getCursorPlatinum();
-	payload->gold_cursor = mCharacter->getCursorGold();
-	payload->silver_cursor = mCharacter->getCursorSilver();
-	payload->copper_cursor = mCharacter->getCursorCopper();
+	payload->platinum_cursor = mCharacter->getInventory()->getCursorPlatinum();
+	payload->gold_cursor = mCharacter->getInventory()->getCursorGold();
+	payload->silver_cursor = mCharacter->getInventory()->getCursorSilver();
+	payload->copper_cursor = mCharacter->getInventory()->getCursorCopper();
 
 	// Shared Bank Platinum
-	payload->platinum_shared = mCharacter->getSharedBankPlatinum();
+	payload->platinum_shared = mCharacter->getInventory()->getSharedBankPlatinum();
 
 	//payload->pvp2;				//
 	//payload->pvptype;			//
@@ -2784,7 +2784,7 @@ const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* 
 	}
 
 	// Move.
-	EXPECTED_BOOL(mCharacter->getInventory()->move(payload->mFromSlot, payload->mToSlot, payload->mStacks));
+	EXPECTED_BOOL(mCharacter->getInventory()->moveItem(payload->mFromSlot, payload->mToSlot, payload->mStacks));
 
 	// Notify Character that a worn slot has changed.
 	if (SlotID::isWorn(payload->mToSlot)) {
@@ -2998,18 +2998,27 @@ void ZoneClientConnection::_handleItemView(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
+	if (!_handleMoveCoinImpl(pPacket)) {
+		inventoryError();
+	}
+}
+
+const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(MoveCoin::sizeCheck(pPacket));
+	EXPECTED_BOOL(pPacket);
+	EXPECTED_BOOL(MoveCoin::sizeCheck(pPacket));
 
 	auto payload = MoveCoin::convert(pPacket);
 
 	// Sanitise.
-	EXPECTED(Limits::General::moneySlotIDValid(payload->mFromSlot));
-	EXPECTED(Limits::General::moneySlotIDValid(payload->mToSlot));
-	EXPECTED(Limits::General::moneyTypeValid(payload->mFromType));
-	EXPECTED(Limits::General::moneyTypeValid(payload->mToType));
-	EXPECTED(payload->mAmount > 0); // There is no natural way for UF to send 0/negative values.
+	EXPECTED_BOOL(Limits::General::moneySlotIDValid(payload->mFromSlot));
+	EXPECTED_BOOL(Limits::General::moneySlotIDValid(payload->mToSlot));
+	EXPECTED_BOOL(Limits::General::moneyTypeValid(payload->mFromType));
+	EXPECTED_BOOL(Limits::General::moneyTypeValid(payload->mToType));
+
+	// Sanity.
+	EXPECTED_BOOL(MoneySlotID::isTrade(payload->mFromSlot) == false); // UF does not move currency from trade slots.
+	EXPECTED_BOOL(payload->mAmount > 0); // There is no natural way for UF to send 0/negative values.
 
 	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == MoneySlotID::BANK || pSlot == MoneySlotID::SHARED_BANK; };
 	const bool isConversion = payload->mFromType != payload->mToType;
@@ -3017,8 +3026,12 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 	const bool bankRequired = isConversion || isBankSlot;
 
 	// Check: Currency moving into Shared Bank is platinum only.
-	if (payload->mToSlot == MoneySlotID::SHARED_BANK) {
-		EXPECTED(payload->mToType == MoneyType::PLATINUM);
+	if (MoneySlotID::isSharedBank(payload->mToSlot)) {
+		EXPECTED_BOOL(payload->mToType == MoneyType::PLATINUM);
+	}
+	// Check: Currency moving from Shared Bank is platinum only.
+	if (MoneySlotID::isSharedBank(payload->mFromSlot)) {
+		EXPECTED_BOOL(payload->mToType == MoneyType::PLATINUM);
 	}
 
 	// Check: Character is in range of a bank.
@@ -3027,39 +3040,15 @@ void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 		mCharacter->notify("Cheat Detected! Expect to be contacted shortly.");
 	}
 
-	const int32 currencyAtFrom = mCharacter->getCurrency(payload->mFromSlot, payload->mFromType);
-	EXPECTED(currencyAtFrom >= payload->mAmount);
-
-	int32 addAmount = 0;
-	int32 removeAmount = 0;
-
-	// Trivial move (e.g. Gold to Gold)
-	if (payload->mFromType == payload->mToType) {
-		addAmount = payload->mAmount;
-		removeAmount = payload->mAmount;
-	}
-	// (Conversion) Moving larger currency to smaller currency
-	else if (payload->mFromType > payload->mToType) {
-		uint32 diff = payload->mFromType - payload->mToType;
-		addAmount = payload->mAmount * std::pow(10, diff); // Convert large to small
-		removeAmount = payload->mAmount;
-	}
-	// (Conversion) Moving smaller currency to larger currency
-	else {
-		uint32 diff = payload->mToType - payload->mFromType;
-		uint32 denominator = std::pow(10, diff);
-		addAmount = payload->mAmount / denominator; // Convert small to large
-		// NOTE: The remainder of the above division is ignored, the Client will keep it on their cursor.
-		removeAmount = payload->mAmount - (payload->mAmount % denominator);
+	// Check: Character is trading.
+	if (MoneySlotID::isTrade(payload->mToSlot)) {
+		EXPECTED_BOOL(mCharacter->isTrading());
 	}
 
-	const uint64 preTotalCurrency = mCharacter->getTotalCurrency();
+	// Move.
+	EXPECTED_BOOL(mCharacter->getInventory()->moveCurrency(payload->mFromSlot, payload->mToSlot, payload->mFromType, payload->mToType, payload->mAmount));
 
-	EXPECTED(mCharacter->removeCurrency(payload->mFromSlot, payload->mFromType, removeAmount));
-	EXPECTED(mCharacter->addCurrency(payload->mToSlot, payload->mToType, addAmount));
-
-	EXPECTED(preTotalCurrency == mCharacter->getTotalCurrency()); // Ensure total currency has not changed.
-	EXPECTED(mCharacter->currencyValid()); // Ensure currency is still in a valid state.
+	return true;
 }
 
 void ZoneClientConnection::sendMoneyUpdate() {
@@ -3067,10 +3056,10 @@ void ZoneClientConnection::sendMoneyUpdate() {
 	EXPECTED(mConnected);
 
 	MoneyUpdate payload;
-	payload.mPlatinum = mCharacter->getPersonalPlatinum();
-	payload.mGold = mCharacter->getPersonalGold();
-	payload.mSilver = mCharacter->getPersonalSilver();
-	payload.mCopper = mCharacter->getPersonalCopper();
+	payload.mPlatinum = mCharacter->getInventory()->getPersonalPlatinum();
+	payload.mGold = mCharacter->getInventory()->getPersonalGold();
+	payload.mSilver = mCharacter->getInventory()->getPersonalSilver();
+	payload.mCopper = mCharacter->getInventory()->getPersonalCopper();
 
 	auto packet = MoneyUpdate::create();
 	mStreamInterface->QueuePacket(packet);

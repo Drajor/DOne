@@ -1090,7 +1090,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 			npcCorpse->removeCurrency();
 
 			// Add currency to looter.
-			EXPECTED(pLooter->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper));
+			EXPECTED(pLooter->getInventory()->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper));
 		}
 
 		pLooter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);

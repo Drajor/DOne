@@ -29,8 +29,6 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	mSkills.fill(0);
 	mLanguages.fill(0);
 
-	memset(mCurrency, 0, sizeof(mCurrency));
-
 	mInventory = new Inventoryy(this);
 }
 
@@ -106,25 +104,25 @@ bool Character::initialise() {
 	setExperience(mData->mExperience);
 
 	// Personal Currency
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, mData->mPlatinumCharacter);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mGoldCharacter);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, mData->mSilverCharacter);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, mData->mCopperCharacter);
+	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, mData->mPlatinumCharacter);
+	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mGoldCharacter);
+	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, mData->mSilverCharacter);
+	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, mData->mCopperCharacter);
 
 	// Cursor Currency
-	setCurrency(MoneySlotID::CURSOR, MoneyType::PLATINUM, mData->mPlatinumCursor);
-	setCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, mData->mGoldCursor);
-	setCurrency(MoneySlotID::CURSOR, MoneyType::SILVER, mData->mSilverCursor);
-	setCurrency(MoneySlotID::CURSOR, MoneyType::COPPER, mData->mCopperCursor);
+	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::PLATINUM, mData->mPlatinumCursor);
+	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, mData->mGoldCursor);
+	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::SILVER, mData->mSilverCursor);
+	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::COPPER, mData->mCopperCursor);
 
 	// Bank Currency
-	setCurrency(MoneySlotID::BANK, MoneyType::PLATINUM, mData->mPlatinumBank);
-	setCurrency(MoneySlotID::BANK, MoneyType::GOLD, mData->mGoldBank);
-	setCurrency(MoneySlotID::BANK, MoneyType::SILVER, mData->mSilverBank);
-	setCurrency(MoneySlotID::BANK, MoneyType::COPPER, mData->mCopperBank);
+	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::PLATINUM, mData->mPlatinumBank);
+	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::GOLD, mData->mGoldBank);
+	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::SILVER, mData->mSilverBank);
+	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::COPPER, mData->mCopperBank);
 
 	// Shared Bank Currency
-	setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, AccountManager::getInstance().getSharedPlatinum(mAccountID));
+	mInventory->setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, AccountManager::getInstance().getSharedPlatinum(mAccountID));
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -378,25 +376,25 @@ void Character::_updateForSave() {
 	mData->mGender = getGender();
 
 	// Personal Currency
-	mData->mPlatinumCharacter = getPersonalPlatinum();
-	mData->mGoldCharacter = getPersonalGold();
-	mData->mSilverCharacter = getPersonalSilver();
-	mData->mCopperCharacter = getPersonalCopper();
+	mData->mPlatinumCharacter = mInventory->getPersonalPlatinum();
+	mData->mGoldCharacter = mInventory->getPersonalGold();
+	mData->mSilverCharacter = mInventory->getPersonalSilver();
+	mData->mCopperCharacter = mInventory->getPersonalCopper();
 
 	// Cursor Currency
-	mData->mPlatinumCursor = getCursorPlatinum();
-	mData->mGoldCursor = getCursorGold();
-	mData->mSilverCursor = getCursorSilver();
-	mData->mCopperCursor = getCursorCopper();
+	mData->mPlatinumCursor = mInventory->getCursorPlatinum();
+	mData->mGoldCursor = mInventory->getCursorGold();
+	mData->mSilverCursor = mInventory->getCursorSilver();
+	mData->mCopperCursor = mInventory->getCursorCopper();
 
 	// Bank Currency
-	mData->mPlatinumBank = getBankPlatinum();
-	mData->mGoldBank = getBankGold();
-	mData->mSilverBank = getBankSilver();
-	mData->mCopperBank = getBankCopper();
+	mData->mPlatinumBank = mInventory->getBankPlatinum();
+	mData->mGoldBank = mInventory->getBankGold();
+	mData->mSilverBank = mInventory->getBankSilver();
+	mData->mCopperBank = mInventory->getBankCopper();
 
 	// Shared Bank Currency
-	AccountManager::getInstance().setSharedPlatinum(mAccountID, getSharedBankPlatinum());
+	AccountManager::getInstance().setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum());
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
@@ -757,27 +755,6 @@ const bool Character::checkZoneChange(const uint16 pZoneID, const uint16 pInstan
 void Character::clearZoneChange() {
 	mZoneChange.mZoneID = 0;
 	mZoneChange.mInstanceID = 0;
-}
-
-const uint64 Character::getTotalCurrency() const {
-	uint64 total = 0;
-	for (auto i = 0; i < MoneySlotID::MAX; i++) {
-		for (auto j = 0; j < MoneyType::MAX; j++) {
-			total += getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
-		}
-	}
-	return total;
-}
-
-const bool Character::currencyValid() const {
-	for (auto i = 0; i < MoneySlotID::MAX; i++) {
-		for (auto j = 0; j < MoneyType::MAX; j++) {
-			if (getCurrency(i, j) < 0)
-				return false;
-		}
-	}
-
-	return true;
 }
 
 void Character::setAutoAttack(const bool pAttacking) {

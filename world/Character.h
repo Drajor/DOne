@@ -153,40 +153,6 @@ public:
 	inline const bool getAutoConsentGuild() const { return mAutoConsentGuild; }
 	inline void setAutoConsentGuild(const bool pConsent) { mAutoConsentGuild = pConsent; }
 
-	// Currency
-	inline const int32 getCursorPlatinum() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::PLATINUM]; }
-	inline const int32 getPersonalPlatinum() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::PLATINUM]; }
-	inline const int32 getBankPlatinum() const { return mCurrency[MoneySlotID::BANK][MoneyType::PLATINUM]; }
-	inline const int32 getSharedBankPlatinum() const { return mCurrency[MoneySlotID::SHARED_BANK][MoneyType::PLATINUM]; }
-
-	inline const int32 getCursorGold() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::GOLD]; }
-	inline const int32 getPersonalGold() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::GOLD]; }
-	inline const int32 getBankGold() const { return mCurrency[MoneySlotID::BANK][MoneyType::GOLD]; }
-
-	inline const int32 getCursorSilver() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::SILVER]; }
-	inline const int32 getPersonalSilver() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::SILVER]; }
-	inline const int32 getBankSilver() const { return mCurrency[MoneySlotID::BANK][MoneyType::SILVER]; }
-
-	inline const int32 getCursorCopper() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::COPPER]; }
-	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
-	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
-
-	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
-	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
-	inline bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
-		EXPECTED_BOOL(addCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
-		EXPECTED_BOOL(addCurrency(pSlot, MoneyType::GOLD, pGold));
-		EXPECTED_BOOL(addCurrency(pSlot, MoneyType::SILVER, pSilver));
-		EXPECTED_BOOL(addCurrency(pSlot, MoneyType::COPPER, pCopper));
-		return true;
-	}
-	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
-	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
-	
-	// Returns the total value of all currency in copper pieces.
-	const uint64 getTotalCurrency() const;
-	const bool currencyValid() const;
-
 	inline void addVisibleNPC(NPC* pNPC) { mVisibleNPCs.push_back(pNPC); }
 	inline void removeVisibleNPC(NPC* pNPC) { mVisibleNPCs.remove(pNPC); }
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
@@ -268,8 +234,6 @@ private:
 
 	uint32 mExperience = 0;
 	void _checkForLevelIncrease();
-
-	int32 mCurrency[MoneySlotID::MAX][MoneyType::MAX];
 
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;

@@ -22,7 +22,7 @@ public:
 	Item* find(const uint32 pItemID, const uint32 pInstanceID) const;
 
 	const unsigned char* getData(uint32& pSize); // Caller responsible for delete.
-	const bool move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
+	const bool moveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
 	const bool consume(const uint32 pSlot, const uint32 pStacks);
 	const bool pushCursor(Item* pItem);
 	inline const bool isCursorEmpty() const { return mCursor.empty(); }
@@ -30,6 +30,36 @@ public:
 	inline Item* peekCursor() const { return _peekCursor(); }
 
 	// Currency
+
+	const bool moveCurrency(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pFromType, const uint32 pToType, const int32 pAmount);
+
+	// Currency
+	inline const int32 getCursorPlatinum() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::PLATINUM]; }
+	inline const int32 getPersonalPlatinum() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::PLATINUM]; }
+	inline const int32 getBankPlatinum() const { return mCurrency[MoneySlotID::BANK][MoneyType::PLATINUM]; }
+	inline const int32 getSharedBankPlatinum() const { return mCurrency[MoneySlotID::SHARED_BANK][MoneyType::PLATINUM]; }
+
+	inline const int32 getCursorGold() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::GOLD]; }
+	inline const int32 getPersonalGold() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::GOLD]; }
+	inline const int32 getBankGold() const { return mCurrency[MoneySlotID::BANK][MoneyType::GOLD]; }
+
+	inline const int32 getCursorSilver() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::SILVER]; }
+	inline const int32 getPersonalSilver() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::SILVER]; }
+	inline const int32 getBankSilver() const { return mCurrency[MoneySlotID::BANK][MoneyType::SILVER]; }
+
+	inline const int32 getCursorCopper() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::COPPER]; }
+	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
+	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
+
+	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
+	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
+	const bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
+	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
+
+	// Returns the total value of all currency in copper pieces.
+	const uint64 getTotalCurrency() const;
+	const bool currencyValid() const;
 
 	// Alternate Currency
 
@@ -75,7 +105,6 @@ private:
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
 	
-
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 
@@ -86,4 +115,6 @@ private:
 	// Ebon Crystals
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
+
+	int32 mCurrency[MoneySlotID::MAX][MoneyType::MAX];
 };

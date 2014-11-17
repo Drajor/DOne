@@ -4,13 +4,16 @@
 #include "Character.h"
 #include "Utility.h"
 #include "ItemGenerator.h"
+#include "Limits.h"
 
 Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	for (auto& i : mItems) i = nullptr;
 	for (auto& i : mBank) i = nullptr;
 	for (auto& i : mSharedBank) i = nullptr;
 	for (auto& i : mTrade) i = nullptr;
-	
+
+	memset(mCurrency, 0, sizeof(mCurrency));
+
 	//auto itemData = new ItemData();
 	//itemData->mID = 2;
 	//itemData->mInstanceID = 2;
@@ -318,7 +321,7 @@ const bool Inventoryy::putContainer(Item* pItem, const uint32 pSlot) {
 	return true;
 }
 
-const bool Inventoryy::move(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize) {
+const bool Inventoryy::moveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize) {
 
 	// NOTE: The client sends this when an item is summoned to their cursor.
 	if (pFromSlot == pToSlot) {
@@ -773,5 +776,78 @@ const bool Inventoryy::removeEbonCrystals(const uint32 pCrystals) {
 	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
 
 	mEbonCrystals -= pCrystals;
+	return true;
+}
+
+const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pFromType, const uint32 pToType, const int32 pAmount) {
+	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pFromSlot));
+	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pToSlot));
+	EXPECTED_BOOL(Limits::General::moneyTypeValid(pFromType));
+	EXPECTED_BOOL(Limits::General::moneyTypeValid(pToType));
+	EXPECTED_BOOL(pAmount > 0);
+
+	const int32 currencyAtFrom = getCurrency(pFromSlot, pFromType);
+	EXPECTED_BOOL(currencyAtFrom >= pAmount);
+
+	int32 addAmount = 0;
+	int32 removeAmount = 0;
+
+	// Trivial move (e.g. Gold to Gold)
+	if (pFromType == pToType) {
+		addAmount = pAmount;
+		removeAmount = pAmount;
+	}
+	// (Conversion) Moving larger currency to smaller currency
+	else if (pFromType > pToType) {
+		uint32 diff = pFromType - pToType;
+		addAmount = pAmount * std::pow(10, diff); // Convert large to small
+		removeAmount = pAmount;
+	}
+	// (Conversion) Moving smaller currency to larger currency
+	else {
+		uint32 diff = pToType - pFromType;
+		uint32 denominator = std::pow(10, diff);
+		addAmount = pAmount / denominator; // Convert small to large
+		// NOTE: The remainder of the above division is ignored, the Client will keep it on their cursor.
+		removeAmount = pAmount - (pAmount % denominator);
+	}
+
+	const uint64 preTotalCurrency = getTotalCurrency();
+
+	EXPECTED_BOOL(removeCurrency(pFromSlot, pFromType, removeAmount));
+	EXPECTED_BOOL(addCurrency(pToSlot, pToType, addAmount));
+
+	EXPECTED_BOOL(preTotalCurrency == getTotalCurrency()); // Ensure total currency has not changed.
+	EXPECTED_BOOL(currencyValid()); // Ensure currency is still in a valid state.
+
+	return true;
+}
+
+const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
+	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::GOLD, pGold));
+	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::SILVER, pSilver));
+	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::COPPER, pCopper));
+	return true;
+}
+
+const uint64 Inventoryy::getTotalCurrency() const {
+	uint64 total = 0;
+	for (auto i = 0; i < MoneySlotID::MAX; i++) {
+		for (auto j = 0; j < MoneyType::MAX; j++) {
+			total += getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
+		}
+	}
+	return total;
+}
+
+const bool Inventoryy::currencyValid() const {
+	for (auto i = 0; i < MoneySlotID::MAX; i++) {
+		for (auto j = 0; j < MoneyType::MAX; j++) {
+			if (getCurrency(i, j) < 0)
+				return false;
+		}
+	}
+
 	return true;
 }

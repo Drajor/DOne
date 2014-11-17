@@ -142,6 +142,7 @@ const bool Limits::General::moneySlotIDValid(const uint32 pSlot) {
 	case MoneySlotID::CURSOR:
 	case MoneySlotID::PERSONAL:
 	case MoneySlotID::BANK:
+	case MoneySlotID::TRADE:
 	case MoneySlotID::SHARED_BANK:
 		return true;
 	default:

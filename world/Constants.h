@@ -206,6 +206,12 @@ namespace MoneySlotID {
 	static String toString(const uint32 pSlotID) {
 		return MoneySlotIDStrings[pSlotID];
 	}
+
+	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
+	static const bool isPersonal(const uint32 pSlot) { return pSlot == PERSONAL; }
+	static const bool isBank(const uint32 pSlot) { return pSlot == BANK; }
+	static const bool isTrade(const uint32 pSlot) { return pSlot == TRADE; }
+	static const bool isSharedBank(const uint32 pSlot) { return pSlot == SHARED_BANK; }
 }
 
 namespace MoneyType {
