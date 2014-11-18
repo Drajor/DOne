@@ -26,8 +26,8 @@ typedef int64_t int64;
 
 typedef uint16 DeityID;
 typedef uint8_t GenderID;
-//typedef uint32 ClassID;
-typedef uint8_t ClassID;
+////typedef uint32 ClassID;
+//typedef uint8_t ClassID;
 typedef uint32_t RaceID;
 typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
 typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
@@ -151,7 +151,7 @@ enum PlayableRaceIDs {
 	Drakkin = 522
 };
 
-enum ClassIDs : ClassID {
+enum ClassIDs : uint8 {
 	Warrior = 1,
 	Cleric = 2,
 	Paladin = 3,
@@ -358,6 +358,10 @@ namespace SlotID {
 		TRADE_1 = 3001,
 		TRADE_2 = 3002,
 		TRADE_3 = 3003, // NPC Limit.
+		TRADE_4 = 3004,
+		TRADE_5 = 3005,
+		TRADE_6 = 3006,
+		TRADE_7 = 3007,
 
 		SLOT_DELETE = 4294967295
 	};
@@ -365,7 +369,7 @@ namespace SlotID {
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
 	static const uint32 BANK_SLOTS = (BANK_23 - BANK_0) + 1;
 	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
-	static const uint32 TRADE_SLOTS = (TRADE_3 - TRADE_1) + 1;
+	static const uint32 TRADE_SLOTS = (TRADE_7 - TRADE_0) + 1;
 
 	static const bool isPrimary(const uint32 pSlot) { return pSlot == Primary; }
 	static const bool isSecondary(const uint32 pSlot) { return pSlot == Secondary; }
@@ -383,7 +387,7 @@ namespace SlotID {
 	static const bool isSharedBank(const uint32 pSlot) { return pSlot >= SHARED_BANK_0 && pSlot <= SHARED_BANK_1; }
 	static const bool isSharedBankContents(const uint32 pSlot) { return pSlot >= SHARED_BANK_0_0 && pSlot <= SHARED_BANK_1_9; }
 
-	static const bool isTrade(const uint32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_3; }
+	static const bool isTrade(const uint32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_7; }
 
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 

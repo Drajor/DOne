@@ -5,7 +5,9 @@
 
 #define ARG_STR(pARG) #pARG
 #define EXPECTED(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define EXPECTED_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define EXPECTED_VAR(pCondition, pReturn) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return pReturn; }
+//#define EXPECTED_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define EXPECTED_BOOL(pCondition) { EXPECTED_VAR(pCondition, false) }
 #define EXPECTED_PTR(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return nullptr; }
 #define EXPECTED_MAIN(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return 1; }
 
@@ -20,7 +22,7 @@ namespace Utility {
 	void print(String pMessage);
 	String getRandomName();
 
-	inline const bool isCaster(ClassID pClassID) {
+	inline const bool isCaster(const uint8 pClassID) {
 		switch (pClassID) {
 		case Warrior:
 		case Monk:
@@ -34,7 +36,7 @@ namespace Utility {
 	}
 
 	// Hybrid: A class that can both cast spells and use disciplines.
-	inline const bool isHybrid(const ClassID pClassID) {
+	inline const bool isHybrid(const uint8 pClassID) {
 		switch (pClassID) {
 		case Paladin:
 		case Ranger:
@@ -48,7 +50,7 @@ namespace Utility {
 		return false;
 	}
 
-	inline const bool isMelee(const ClassID pClassID) {
+	inline const bool isMelee(const uint8 pClassID) {
 		switch (pClassID) {
 		case Warrior:
 		case Monk:
@@ -61,7 +63,7 @@ namespace Utility {
 		return false;
 	}
 
-	inline const bool canClassTaunt(const ClassID pClassID) {
+	inline const bool canClassTaunt(const uint8 pClassID) {
 		switch (pClassID) {
 		case Warrior:
 		case Paladin:

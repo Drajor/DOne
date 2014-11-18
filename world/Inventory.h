@@ -86,7 +86,7 @@ public:
 	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
 	const bool onTradeCancel();
-
+	const uint32 findSlot(Item* pItem) const;
 private:
 	Item* _popCursor();
 	Item* _peekCursor() const;
@@ -110,7 +110,6 @@ private:
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
-
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 

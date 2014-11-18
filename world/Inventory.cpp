@@ -508,7 +508,12 @@ const bool Inventoryy::_clear(const uint32 pSlot) {
 		return true;
 	}
 	// Clearing: Trade slot.
-	//if (isSl)
+	if (SlotID::isTrade(pSlot)) {
+		uint32 index = SlotID::getIndex(pSlot);
+		EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
+		mTrade[index] = nullptr;
+		return true;
+	}
 
 	// Clearing: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {
@@ -808,5 +813,21 @@ const bool Inventoryy::onTradeCancel() {
 	
 	// TODO: I expect all trade slots to be zero now.
 
+	// Clear trade slots.
+	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++) {
+		EXPECTED_BOOL(_clear(i));
+	}
 	return true;
+}
+
+const uint32 Inventoryy::findSlot(Item* pItem) const {
+	EXPECTED_VAR(pItem, 0);
+
+	// Check: Primary
+	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = getItem(i);
+		if (!item) return i;
+	}
+
+	return 0;
 }

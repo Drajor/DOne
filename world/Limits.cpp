@@ -18,7 +18,7 @@ bool Limits::Character::surnameLengthClient(const String& pSurname) {
 	return stringLength(pSurname) <= Limits::Character::MAX_LAST_NAME_CLIENT_LENGTH;
 }
 
-bool Limits::Character::classID(const ClassID pClassID) {
+const bool Limits::Character::classID(const uint8 pClassID) {
 	switch (pClassID) {
 	case ClassIDs::Warrior:
 	case ClassIDs::Cleric:
@@ -42,6 +42,10 @@ bool Limits::Character::classID(const ClassID pClassID) {
 	}
 
 	return false;
+}
+
+const bool Limits::Character::raceID(const uint32 pRaceID) {
+	return true;
 }
 
 bool Limits::Guild::nameLength(const String& pGuildName) {

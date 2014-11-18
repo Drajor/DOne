@@ -2781,6 +2781,10 @@ const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* 
 	if (SlotID::isTrade(payload->mToSlot)) {
 		EXPECTED_BOOL(SlotID::isCursor(payload->mFromSlot)); // We expect the Item to be coming from the cursor.
 		EXPECTED_BOOL(mCharacter->isTrading());
+		auto item = mCharacter->getInventory()->getItem(payload->mFromSlot);
+		EXPECTED_BOOL(item);
+		// Check: Can not move stackable items with more than 1 stack.
+		if (item->isStackable()) { EXPECTED_BOOL(item->getStacks() == 1); }
 	}
 
 	// Move.
@@ -3227,6 +3231,19 @@ void ZoneClientConnection::sendItemSummon(Item* pItem) {
 	sendPacket(packet);
 	delete packet;
 }
+
+void ZoneClientConnection::sendItemTrade(Item* pItem) {
+	EXPECTED(pItem);
+	EXPECTED(mConnected);
+
+	uint32 payloadSize = 0;
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketTrade);
+
+	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+	sendPacket(packet);
+	delete packet;
+}
+
 
 void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;

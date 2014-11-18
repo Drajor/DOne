@@ -119,6 +119,7 @@ public:
 	void sendPopup(const String& pTitle, const String& pText);
 	void sendItemSummon(Item* pItem);
 	void sendItemView(Item* pItem);
+	void sendItemTrade(Item* pItem);
 	//void sendSpellCastOn();
 
 	void sendTradeRequestAcknowledge(const uint32 pToSpawnID);

@@ -96,6 +96,7 @@ void ItemDataStore::_bootstrap() {
 		item->setContainerType(ContainerType::Normal);
 		item->setContainerSlots(10);
 		item->setContainerSize(ContainerSize::Giant);
+		item->setIsNoDrop(true);
 
 		delete item;
 	}
@@ -110,6 +111,7 @@ void ItemDataStore::_bootstrap() {
 		item->setItemType(ItemType::Food);
 		item->setMaxStacks(10000);
 		item->setFoodSize(10);
+		item->setIsNoDrop(true);
 
 		delete item;
 	}
@@ -124,6 +126,7 @@ void ItemDataStore::_bootstrap() {
 		item->setItemType(ItemType::Drink);
 		item->setMaxStacks(10000);
 		item->setDrinkSize(10);
+		item->setIsNoDrop(true);
 
 		delete item;
 	}

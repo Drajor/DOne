@@ -1368,17 +1368,33 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
 	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
 
-	//
+	
 	pCharacter->getConnection()->sendTradeCancel(pSpawnID);
 	pCharacter->getConnection()->sendFinishWindow();
 	pCharacter->getConnection()->sendFinishWindow2();
 	pCharacter->setTradingWith(nullptr);
 
-	// TODO: Move Items back into Character Inventory.
+	// Make a list of Items that were in the trade window.
+	std::list<Item*> items;
+	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++) {
+		auto item = pCharacter->getInventory()->getItem(i);
+		if (item) {
+			items.push_back(item);
+		}
+	}
+	// Place Items back into Character Inventory.
+	for (auto i : items) {
+		const uint32 slotID = pCharacter->getInventory()->findSlot(i);
+		//pCharacter->getInventory()->moveItem(i->getSlot(), slotID, i->getStacks());
+		pCharacter->getInventory()->put(i, slotID);
+		pCharacter->getConnection()->sendItemTrade(i);
+	}
 
 	// Update Inventory.
 	EXPECTED(pCharacter->getInventory()->onTradeCancel());
 
 	// Update client.
 	pCharacter->getConnection()->sendMoneyUpdate();
+
+	
 }

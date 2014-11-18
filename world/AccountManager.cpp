@@ -5,6 +5,7 @@
 #include "Utility.h"
 #include "Profile.h"
 #include "Payload.h"
+#include "Limits.h"
 
 #include "Character.h"
 #include "Zone.h"
@@ -192,6 +193,14 @@ void AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
 bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
 	EXPECTED_BOOL(pPayload);
 
+	// Check: Class ID
+	EXPECTED_BOOL(Limits::Character::classID(pPayload->mClass));
+
+	// Check: Race ID
+	EXPECTED_BOOL(Limits::Character::raceID(pPayload->mRace));
+
+	// TODO: Check Race is unlocked for the account.
+
 	// Find Account that is creating the Character.
 	auto accountData = _find(pAccountID);
 	EXPECTED_BOOL(accountData);
@@ -201,7 +210,7 @@ bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String
 
 	auto characterData = new CharacterData();
 	characterData->mName = pCharacterName;
-	characterData->mClass = pPayload->mClass; // TODO: Sanity check
+	characterData->mClass = pPayload->mClass;
 	characterData->mZoneID = 1; // TODO:
 
 	// Appearance Data

@@ -32,7 +32,7 @@ struct AccountData {
 	struct CharacterData {
 		String mName = "<none>";
 		uint32 mLevel = 0;
-		ClassID mClass = 0;
+		uint8 mClass = 0;
 		RaceID mRace = 0;
 		GenderID mGender = 0;
 		DeityID mDeity = 0;
@@ -70,7 +70,7 @@ struct CharacterData {
 	}
 	String mName = "";
 	uint32 mLevel = 1;
-	ClassID mClass = ClassIDs::Warrior;
+	uint8 mClass = ClassIDs::Warrior;
 	uint32 mExperience = 0;
 	String mLastName = "";
 	String mTitle = "";
