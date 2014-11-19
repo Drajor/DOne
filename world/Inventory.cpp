@@ -463,8 +463,8 @@ void Inventoryy::updateConsumables() {
 	}
 }
 
-Item* Inventoryy::findFirst(const uint8 pItemType) {
-	// Search Main Inventory slots first.
+Item* Inventoryy::findFirst(const uint8 pItemType) const {
+	// Search: Main Inventory slots first.
 	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->getItemType() == pItemType)
 			return mItems[i];
@@ -474,6 +474,27 @@ Item* Inventoryy::findFirst(const uint8 pItemType) {
 	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->isContainer()) {
 			Item* item = mItems[i]->findFirst(pItemType);
+			if (item) {
+				return item;
+			}
+		}
+	}
+	return nullptr;
+}
+
+Item* Inventoryy::findStackable(const uint32 pItemID) const {
+	// Search: Main slots.
+	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = mItems[i];
+		if (item && item->getID() == pItemID && item->getStacks() < item->getMaxStacks())
+			return item;
+	}
+
+	// Search: Containers in main slots.
+	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto container = mItems[i];
+		if (container && container->isContainer()) {
+			Item* item = container->findStackable(pItemID);
 			if (item) {
 				return item;
 			}
@@ -810,13 +831,8 @@ const bool Inventoryy::onTradeCancel() {
 	
 	// Check: Currency is still in a valid state.
 	EXPECTED_BOOL(currencyValid());
-	
-	// TODO: I expect all trade slots to be zero now.
 
-	// Clear trade slots.
-	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++) {
-		EXPECTED_BOOL(_clear(i));
-	}
+
 	return true;
 }
 
@@ -830,4 +846,17 @@ const uint32 Inventoryy::findSlot(Item* pItem) const {
 	}
 
 	return 0;
+}
+
+void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
+	for (auto i : mTrade) {
+		if (i) pItems.push_back(i);
+	}
+}
+
+const bool Inventoryy::clearTradeItems() {
+	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++)
+		EXPECTED_BOOL(_clear(i));
+
+	return true;
 }

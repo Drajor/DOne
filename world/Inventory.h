@@ -85,8 +85,15 @@ public:
 	// Sets the number of Ebon Crystals. Should only be used during initialisation.
 	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
+	void getTradeItems(std::list<Item*>& pItems) const;
+	const bool clearTradeItems();
 	const bool onTradeCancel();
+
 	const uint32 findSlot(Item* pItem) const;
+	Item* findFirst(const uint8 pItemType) const;
+
+	// Finds and returns the first Item with pItemID that does not have full stacks.
+	Item* findStackable(const uint32 pItemID) const;
 private:
 	Item* _popCursor();
 	Item* _peekCursor() const;
@@ -105,7 +112,7 @@ private:
 	Item* mTrade[SlotID::TRADE_SLOTS]; // Slots 3000 - ?
 
 	void updateConsumables();
-	Item* findFirst(const uint8 pItemType);
+	
 	
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);

@@ -1369,29 +1369,60 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
 
 	
-	pCharacter->getConnection()->sendTradeCancel(pSpawnID);
-	pCharacter->getConnection()->sendFinishWindow();
-	pCharacter->getConnection()->sendFinishWindow2();
-	pCharacter->setTradingWith(nullptr);
 
 	// Make a list of Items that were in the trade window.
-	std::list<Item*> items;
-	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++) {
-		auto item = pCharacter->getInventory()->getItem(i);
-		if (item) {
-			items.push_back(item);
+	std::list<Item*> unordered;
+	pCharacter->getInventory()->getTradeItems(unordered);
+	
+	// Adjust order of Items so that containers are sent first.
+	std::list<Item*> ordered;
+	for (auto i = unordered.begin(); i != unordered.end();) {
+		if ((*i)->isContainer()) {
+			ordered.push_back(*i);
+			i = unordered.erase(i);
+			break;
 		}
+		i++;
 	}
+	// Add remaining Items.
+	for (auto i : unordered)
+		ordered.push_back(i);
+
+	// Clear all trade Items.
+	EXPECTED(pCharacter->getInventory()->clearTradeItems());
+
 	// Place Items back into Character Inventory.
-	for (auto i : items) {
-		const uint32 slotID = pCharacter->getInventory()->findSlot(i);
-		//pCharacter->getInventory()->moveItem(i->getSlot(), slotID, i->getStacks());
-		pCharacter->getInventory()->put(i, slotID);
-		pCharacter->getConnection()->sendItemTrade(i);
+	for (auto i : ordered) {
+		if (i->isStackable()) {
+			// When an Item is being return to the Character, try stacking first.
+			auto existing = pCharacter->getInventory()->findStackable(i->getID());
+			if (existing) {
+				existing->addStacks(1);
+				// This currently only works for primary slot stacking.. when I try to send into a container I get a broken item in the charm slot.
+				pCharacter->getConnection()->sendItemTrade(existing);
+				delete i;
+			}
+			// If there is no existing Item to stack on to, find a free slot.
+			else {
+				const uint32 slotID = pCharacter->getInventory()->findSlot(i);
+				pCharacter->getInventory()->put(i, slotID);
+				pCharacter->getConnection()->sendItemTrade(i);
+			}
+		}
+		else {
+			const uint32 slotID = pCharacter->getInventory()->findSlot(i);
+			pCharacter->getInventory()->put(i, slotID);
+			pCharacter->getConnection()->sendItemTrade(i);
+		}
 	}
 
 	// Update Inventory.
 	EXPECTED(pCharacter->getInventory()->onTradeCancel());
+
+	pCharacter->getConnection()->sendTradeCancel(pSpawnID);
+	pCharacter->getConnection()->sendFinishWindow();
+	pCharacter->getConnection()->sendFinishWindow2();
+	pCharacter->setTradingWith(nullptr);
 
 	// Update client.
 	pCharacter->getConnection()->sendMoneyUpdate();

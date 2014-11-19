@@ -242,9 +242,18 @@ void Item::_onCopy() {
 	}
 }
 
-Item* Item::findFirst(const uint8 pItemType) {
+Item* Item::findFirst(const uint8 pItemType) const {
 	for (auto i : mContents) {
 		if (i && i->getItemType() == pItemType)
+			return i;
+	}
+
+	return nullptr;
+}
+
+Item* Item::findStackable(const uint32 pItemID) const {
+	for (auto i : mContents) {
+		if (i && i->getID() == pItemID && i->getStacks() < i->getMaxStacks())
 			return i;
 	}
 

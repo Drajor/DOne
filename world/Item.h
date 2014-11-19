@@ -116,7 +116,8 @@ public:
 	uint32 getSubItems() const;
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
-	Item* findFirst(const uint8 pItemType);
+	Item* findFirst(const uint8 pItemType) const;
+	Item* findStackable(const uint32 pItemID) const;
 
 	// Augmentation
 	// TODO: This needs some error checking.
