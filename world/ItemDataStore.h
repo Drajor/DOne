@@ -19,6 +19,7 @@ public:
 	const uint32 getNextSerial();
 private:
 	void _bootstrap();
+	const bool _TransmutationComponentTest(const uint32 pItemID, const String& pName);
 	bool mInitialised = false;
 	std::vector<ItemData> mItemData;
 

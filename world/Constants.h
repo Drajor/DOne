@@ -129,8 +129,23 @@ namespace ItemID {
 		StartDrink = 8,
 
 		TransmuterTen = 9,
-		TestComponentZero = 10,
-		TestComponentOne = 11,
+		
+		// Transmutation Test Components.
+		TCStrength = 10,
+		TCStamina,
+		TCAgility,
+		TCDexterity,
+		TCWisdom,
+		TCIntelligence,
+		TCCharisma,
+
+		TCPoisonResist,
+		TCMagicResist,
+		TCDiseaseResist,
+		TCFireResist,
+		TCColdResist,
+		TCCorruptionResist
+
 	};
 }
 static const uint32 MaxRadiantCrystalsStacks = 10000;

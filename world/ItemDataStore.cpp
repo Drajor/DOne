@@ -146,32 +146,47 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
-	// Transmutation Test Zero
-	{
-		auto data = &mItemData[ItemID::TestComponentZero];
-		data->mID = ItemID::TestComponentZero;
-		auto item = new Item(data);
 
-		item->setName("Leaves");
-		item->setIcon(1073);
-		item->setItemType(ItemType::Miscellaneous);
-		item->setMaxStacks(100);
+	EXPECTED(_TransmutationComponentTest(ItemID::TCStrength, "TC Strength"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCStamina, "TC Stamina"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCAgility, "TC Agility"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCDexterity, "TC Dexterity"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCWisdom, "TC Wisdom"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCIntelligence, "TC Intelligence"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCCharisma, "TC Charisma"));
 
-		delete item;
-	}
-	// Transmutation Test One
-	{
-		auto data = &mItemData[ItemID::TestComponentOne];
-		data->mID = ItemID::TestComponentOne;
-		auto item = new Item(data);
+	EXPECTED(_TransmutationComponentTest(ItemID::TCPoisonResist, "TC Poison Resist"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCMagicResist, "TC Magic Resist"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCDiseaseResist, "TC Disease Resist"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCFireResist, "TC Fire Resist"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCColdResist, "TC Cold Resist"));
+	EXPECTED(_TransmutationComponentTest(ItemID::TCCorruptionResist, "TC Corruption Resist"));
+	//// Transmutation Test Zero
+	//{
+	//	auto data = &mItemData[ItemID::TestComponentZero];
+	//	data->mID = ItemID::TestComponentZero;
+	//	auto item = new Item(data);
 
-		item->setName("Sea Shells");
-		item->setIcon(998);
-		item->setItemType(ItemType::Miscellaneous);
-		item->setMaxStacks(100);
+	//	item->setName("TC Strength");
+	//	item->setIcon(666);
+	//	item->setItemType(ItemType::Miscellaneous);
+	//	item->setMaxStacks(100);
 
-		delete item;
-	}
+	//	delete item;
+	//}
+	//// Transmutation Test One
+	//{
+	//	auto data = &mItemData[ItemID::TestComponentOne];
+	//	data->mID = ItemID::TestComponentOne;
+	//	auto item = new Item(data);
+
+	//	item->setName("Sea Shells");
+	//	item->setIcon(998);
+	//	item->setItemType(ItemType::Miscellaneous);
+	//	item->setMaxStacks(100);
+
+	//	delete item;
+	//}
 
 
 	//// Test - Elemental Damage Augmentations
@@ -235,4 +250,19 @@ ItemData* ItemDataStore::get(const uint32 pID) {
 	EXPECTED_PTR(data->mID != 0); // Sanity Check: Returning an 'in use' ItemData.
 
 	return data;
+}
+
+const bool ItemDataStore::_TransmutationComponentTest(const uint32 pItemID, const String& pName) {
+	auto data = &mItemData[pItemID];
+	data->mID = pItemID;
+	auto item = new Item(data);
+
+	item->setName(pName);
+	item->setIcon(666);
+	item->setItemType(ItemType::Miscellaneous);
+	item->setMaxStacks(100);
+
+	delete item;
+
+	return true;
 }

@@ -17,6 +17,7 @@ public:
 	const bool initialise();
 	Item* transmute(std::list<Item*> pItems);
 private:
+	const int32 _roll(Item* pItem, TransmutationComponent* pComponent);
 	TransmutationComponent* _get(const uint32 pItemID) const;
 	void _bootstrap();
 	bool mInitialised = false;
