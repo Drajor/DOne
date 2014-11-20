@@ -131,6 +131,7 @@ public:
 	void sendDeleteItem(const uint32 pSlot, const uint32 pStacks = 0xFFFFFFFF, const uint32 pToSlot = 0xFFFFFFFF);
 	void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
 	void sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText);
+	void sendCombineReply();
 
 	void sendPacket(EQApplicationPacket* pPacket);
 
@@ -253,6 +254,7 @@ private:
 	void _handleAugmentItem(const EQApplicationPacket* pPacket);
 	void _handleAugmentInfo(const EQApplicationPacket* pPacket);
 	void _handleReadBook(const EQApplicationPacket* pPacket);
+	void _handleCombine(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

@@ -3151,19 +3151,19 @@ struct Split_Struct
 };
 
 
-/*
-** New Combine Struct
-** Client requesting to perform a tradeskill combine
-** Size: 4 bytes
-** Used In: OP_TradeSkillCombine
-** Last Updated: Oct-15-2003
-**
-*/
-struct NewCombine_Struct {
-/*00*/	int16	container_slot;
-/*02*/	char	unknown02[2];
-/*04*/
-};
+///*
+//** New Combine Struct
+//** Client requesting to perform a tradeskill combine
+//** Size: 4 bytes
+//** Used In: OP_TradeSkillCombine
+//** Last Updated: Oct-15-2003
+//**
+//*/
+//struct NewCombine_Struct {
+///*00*/	int16	container_slot;
+///*02*/	char	unknown02[2];
+///*04*/
+//};
 
 
 //client requesting favorite recipies

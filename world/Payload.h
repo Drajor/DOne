@@ -828,6 +828,17 @@ namespace Payload {
 				return ss.str();
 			}
 		};
+
+		// C->S
+		struct Combine : Fixed<Combine> {
+			uint32 mSlot = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "{Combine} ";
+				PRINT_MEMBER(mSlot);
+				return ss.str();
+			}
+		};
 	}
 
 	namespace World {

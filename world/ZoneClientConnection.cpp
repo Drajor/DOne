@@ -512,6 +512,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_ReadBook:
 		_handleReadBook(pPacket);
 		break;
+	case OP_TradeSkillCombine:
+		// NOTE: This occurs when a player presses the 'Combine' button on an opened container.
+		_handleCombine(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3449,19 +3453,48 @@ void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 			}
 		}
 	}
+}
 
-	// You find it. Is it equipped? Dont care
-	// Not equipped. check slots. Then query Item  in its slot. calculate diff.
+void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(Combine::sizeCheck(pPacket));
 
-	// If you don't find it. It probably came from an Item link from someone else. Can I embed Character ID into charmFiel.
+	auto payload = Combine::convert(pPacket);
+	Log::info(payload->_debug());
 
-	// Determine whether this Item is equipped
+	// Check: The combine is occurring from a valid slot id. (UF Client Checked)
+	EXPECTED(SlotID::isMainInventory(payload->mSlot));
 
-	// - The item will either be;
-	// - One that is already equipped  (easy to find)
-	// - Or not equipped. (may not be in caller's inventory, could be another link.
+	// Check: Cursor is empty. (UF Client Checked)
+	EXPECTED(mCharacter->getInventory()->isCursorEmpty() == true);
 
-	//sendReadBook(payload->mWindow, payload->mSlot, payload->mType, "<c \"#00FF00\">+ 5% Magic Find</c><br><c \"#FF0000\">-2% Block Chance</c>");
+	// Check: Valid Item at slot id.
+	auto container = mCharacter->getInventory()->getItem(payload->mSlot);
+	EXPECTED(container);
+
+	// Check: Item is a container.
+	EXPECTED(container->isContainer());
+	
+	// Check: Container has 'Combine' option.
+	EXPECTED(container->isCombineContainer());
+
+	// Check: Container is not empty. (UF Client Checked)
+	EXPECTED(container->isEmpty() == false);
+
+	// Check: None of the Items in the container have > 1 stacks. (UF Client Checked)
+	auto f = [](Item* pItem) { return pItem->getStacks() == (pItem->isStackable()) ? 1 : 0; }; // This is annoying. Non-stackable Items should still have getStacks == 1.
+	EXPECTED(container->forEachContents(f));
+
+	// Note: Underfoot locks the UI until a reply is received.
+	sendCombineReply();
+}
+
+void ZoneClientConnection::sendCombineReply() {
+	EXPECTED(mConnected);
+	auto packet = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 //

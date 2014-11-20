@@ -10,6 +10,7 @@
 #include <queue>
 #include <array>
 #include <iomanip>
+#include <functional>
 #include <safeint.h>
 #include <bitset>
 #include <cmath>
@@ -125,7 +126,9 @@ namespace ItemID {
 
 		StartContainer = 6,
 		StartFood = 7,
-		StartDrink = 8
+		StartDrink = 8,
+
+		TransmuterTen = 9,
 	};
 }
 static const uint32 MaxRadiantCrystalsStacks = 10000;
@@ -870,6 +873,7 @@ namespace ContainerType {
 		None = 0,
 		Normal = 1,
 
+		Quest = 13,
 		AugmentationSealer = 53,
 	};
 }

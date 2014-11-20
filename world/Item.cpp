@@ -486,3 +486,32 @@ const bool Item::compare(Item * pItem, String& pText) {
 	pText = helper.getText();
 	return true;
 }
+
+const bool Item::isCombineContainer() const {
+	switch (getContainerType()) {
+	case ContainerType::Quest:
+		return true;
+		// TODO: Add the rest.
+	default:
+		break;
+	}
+
+	return false;
+}
+
+const bool Item::isEmpty() const {
+	for (auto i : mContents) {
+		if (i) return false;
+	}
+
+	return true;
+}
+
+const bool Item::forEachContents(std::function<const bool(Item*)> pFunction) const {
+	for (auto i : mContents) {
+		if (i && !pFunction(i))
+			return false;
+	}
+
+	return true;
+}

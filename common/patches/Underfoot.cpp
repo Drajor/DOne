@@ -3070,14 +3070,14 @@ DECODE(OP_TributeItem) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_TradeSkillCombine) {
-	DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
-	SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
-
-	emu->container_slot = UnderfootToTitaniumSlot(eq->container_slot);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_TradeSkillCombine) {
+//	DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
+//	SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
+//
+//	emu->container_slot = UnderfootToTitaniumSlot(eq->container_slot);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_AugmentItem) {
 //	DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);

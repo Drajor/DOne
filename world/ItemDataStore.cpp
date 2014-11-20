@@ -130,6 +130,22 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+	// Transmuter.
+	{
+		auto data = &mItemData[ItemID::TransmuterTen];
+		data->mID = ItemID::TransmuterTen;
+		auto item = new Item(data);
+
+		item->setName("Transmuter");
+		item->setIcon(2304);
+		item->setItemClass(ItemClass::Container);
+		item->setContainerType(ContainerType::Quest);
+		item->setContainerSlots(10);
+		item->setContainerSize(ContainerSize::Giant);
+		item->setIsNoDrop(true);
+
+		delete item;
+	}
 
 
 	//// Test - Elemental Damage Augmentations

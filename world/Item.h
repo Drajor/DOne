@@ -116,6 +116,9 @@ public:
 	uint32 getSubItems() const;
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
+	const bool isCombineContainer() const;
+	const bool isEmpty() const;
+	const bool forEachContents(std::function<const bool(Item*)> pFunction) const;
 	Item* findFirst(const uint8 pItemType) const;
 	Item* findStackable(const uint32 pItemID) const;
 
