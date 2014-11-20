@@ -1,31 +1,19 @@
 #include "Transmutation.h"
-#include "Data.h"
+#include "DataStore.h"
 #include "Utility.h"
 #include "Item.h"
 #include "ItemFactory.h"
 #include "Random.h"
 
 const bool Transmutation::initialise() {
-	_bootstrap();
+	EXPECTED_BOOL(mInitialised == false);
+
+	Log::status("[Transmutation] Initialising.");
+	EXPECTED_BOOL(DataStore::getInstance().loadTransmutationComponents(mComponents));
+	Log::info("[Transmutation] Loaded data for " + std::to_string(mComponents.size()) + " Components.");
+
+	mInitialised = true;
 	return true;
-}
-
-void Transmutation::_bootstrap() {
-	auto test0 = new TransmutationComponent();
-	mComponents.push_back(test0);
-
-	test0->mItemID = ItemID::TestComponentZero;
-	test0->mMinimum = 1;
-	test0->mMaximum = 5;
-	test0->mAttribute = "str";
-
-	auto test1 = new TransmutationComponent();
-	mComponents.push_back(test1);
-
-	test1->mItemID = ItemID::TestComponentOne;
-	test1->mMinimum = 25;
-	test1->mMaximum = 125;
-	test1->mAttribute = "hp";
 }
 
 Item* Transmutation::transmute(std::list<Item*> pItems) {

@@ -39,6 +39,7 @@ public:
 	
 	// Items
 	const bool loadItems(ItemData* pItemData, uint32& pNumItemsLoaded);
+	const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents);
 private:
 
 	DataStore() {};

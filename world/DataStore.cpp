@@ -1266,3 +1266,48 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 	}
 	return true;
 }
+
+namespace TransmutationComponentXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/transmutation.xml";
+	namespace Tag {
+		SCA Components = "components";
+		SCA Component = "component";
+	}
+	namespace Attribute {
+		// Tag::Component
+		SCA ItemID = "item_id";
+		SCA Attribute = "attribute";
+		SCA Minimum = "min";
+		SCA Maximum = "max";
+		SCA RequiredLevel = "level";
+	}
+#undef SCA
+}
+const bool DataStore::loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) {
+	using namespace TransmutationComponentXML;
+	EXPECTED_BOOL(pComponents.empty());
+	Profile p("DataStore::loadTransmutationComponents");
+
+	TiXmlDocument document(TransmutationComponentXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto componentsElement = document.FirstChildElement(Tag::Components);
+	EXPECTED_BOOL(componentsElement);
+	auto componentElement = componentsElement->FirstChildElement(Tag::Component);
+
+	while (componentElement) {
+		TransmutationComponent* c = new TransmutationComponent();
+		pComponents.push_back(c);
+
+		EXPECTED_BOOL(readAttribute(componentElement, Attribute::ItemID, c->mItemID));
+		EXPECTED_BOOL(readAttribute(componentElement, Attribute::Attribute, c->mAttribute));
+		EXPECTED_BOOL(readAttribute(componentElement, Attribute::Minimum, c->mMinimum));
+		EXPECTED_BOOL(readAttribute(componentElement, Attribute::Maximum, c->mMaximum));
+		EXPECTED_BOOL(readAttribute(componentElement, Attribute::RequiredLevel, c->mRequiredLevel));
+
+		componentElement = componentElement->NextSiblingElement(Tag::Component);
+	}
+
+	return true;
+}
