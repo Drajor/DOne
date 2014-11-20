@@ -129,6 +129,8 @@ namespace ItemID {
 		StartDrink = 8,
 
 		TransmuterTen = 9,
+		TestComponentZero = 10,
+		TestComponentOne = 11,
 	};
 }
 static const uint32 MaxRadiantCrystalsStacks = 10000;

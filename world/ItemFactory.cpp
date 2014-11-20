@@ -31,3 +31,18 @@ Item* ItemFactory::_make() {
 
 	return item;
 }
+
+Item* ItemFactory::makeAugment() {
+	Item* augment = getInstance()._make();
+	EXPECTED_PTR(augment);
+
+	augment->setName("Unnamed Augmentation");
+	augment->setIcon(2876);
+	augment->setAugmentationType(AugmentationSlotType::MultipleStat);
+	augment->setAugmentationRestriction(AugmentationRestriction::None);
+	augment->setItemType(ItemType::Augmentation);
+	augment->setSlots(EquipSlots::VisibleArmor);
+	augment->setAugmentationDistiller(ItemID::UniversalDistiller);
+
+	return augment;
+}

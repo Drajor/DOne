@@ -44,6 +44,7 @@ SET(world_sources
 	EventDispatcher.cpp
 	ItemDataStore.cpp
 	ItemFactory.cpp
+	Transmutation.cpp
 )
 
 SET(world_headers
@@ -94,6 +95,7 @@ SET(world_headers
 	ItemDataStore.h
 	ItemFactory.h
 	Bonuses.h
+	Transmutation.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

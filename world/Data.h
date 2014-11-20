@@ -320,3 +320,11 @@ namespace AffixType{
 struct ItemAffix {
 
 };
+
+struct TransmutationComponent {
+	uint32 mItemID = 0;
+	String mAttribute = "";
+	int32 mMinimum = 0;
+	int32 mMaximum = 0;
+	uint8 mRequiredLevel = 0;
+};

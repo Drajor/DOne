@@ -15,6 +15,7 @@ private:
 public:
 	static Item* make(const uint32 pItemID, const uint32 pStacks = 0);
 	static Item* make();
+	static Item* makeAugment();
 private:
 	Item* _make(const uint32 pItemID, const uint32 pStacks);
 	Item* _make();

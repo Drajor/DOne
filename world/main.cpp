@@ -20,6 +20,7 @@
 #include "NPCFactory.h"
 #include "Timer.h"
 #include "TimeUtility.h"
+#include "Transmutation.h"
 
 uint64 TTimer::mCurrentTime = 0;
 
@@ -47,6 +48,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(StaticItemData::getInstance().initialise());
 	EXPECTED_MAIN(ItemDataStore::getInstance().initialise());
 	EXPECTED_MAIN(NPCFactory::getInstance().initialise());
+	EXPECTED_MAIN(Transmutation::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

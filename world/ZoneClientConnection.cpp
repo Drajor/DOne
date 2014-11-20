@@ -21,6 +21,7 @@
 #include "Item.h"
 #include "ItemDataStore.h"
 #include "ItemFactory.h"
+#include "Transmutation.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -3381,7 +3382,7 @@ void ZoneClientConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket
 	auto payload = AugmentInformation::convert(pPacket);
 	Log::info(payload->_debug());
 
-	sendReadBook(payload->mWindow, 0, 2, "You must use a <c \"#FF0000\">monster cock</c> to remove this augment safely.");
+	//sendReadBook(payload->mWindow, 0, 2, "You must use a <c \"#FF0000\">monster cock</c> to remove this augment safely.");
 }
 
 void ZoneClientConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText) {
@@ -3487,8 +3488,14 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	EXPECTED(container->forEachContents(f));
 
 	// Test.
+	std::list<Item*> results;
 	std::list<Item*> items;
 	container->getContents(items);
+
+	if (container->getID() == ItemID::TransmuterTen) {
+		Item* item = Transmutation::getInstance().transmute(items);
+		if (item) results.push_back(item);
+	}
 
 	for (auto i : items) {
 		// Update Client.
@@ -3504,6 +3511,11 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 
 	// Note: Underfoot locks the UI until a reply is received.
 	sendCombineReply();
+
+	for (auto i : results) {
+		mCharacter->getInventory()->pushCursor(i);
+		mCharacter->getConnection()->sendItemSummon(i);
+	}
 }
 
 void ZoneClientConnection::sendCombineReply() {

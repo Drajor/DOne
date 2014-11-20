@@ -146,6 +146,32 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+	// Transmutation Test Zero
+	{
+		auto data = &mItemData[ItemID::TestComponentZero];
+		data->mID = ItemID::TestComponentZero;
+		auto item = new Item(data);
+
+		item->setName("Leaves");
+		item->setIcon(1073);
+		item->setItemType(ItemType::Miscellaneous);
+		item->setMaxStacks(100);
+
+		delete item;
+	}
+	// Transmutation Test One
+	{
+		auto data = &mItemData[ItemID::TestComponentOne];
+		data->mID = ItemID::TestComponentOne;
+		auto item = new Item(data);
+
+		item->setName("Sea Shells");
+		item->setIcon(998);
+		item->setItemType(ItemType::Miscellaneous);
+		item->setMaxStacks(100);
+
+		delete item;
+	}
 
 
 	//// Test - Elemental Damage Augmentations
