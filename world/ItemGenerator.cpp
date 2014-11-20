@@ -668,7 +668,8 @@ Item* ItemGenerator::makeDice(String pCharacterName) {
 	item->setSlots(EquipSlots::PowerSource);
 	item->setMaxPower(100);
 	item->setPower(100);
-	item->setLore("\"God does not play dice\" - Albert Einstein");
+	item->setLore("\"God does not play dice.\" - Albert Einstein");
+	item->setIsNoDrop(true);
 
 	return item;
 }

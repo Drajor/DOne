@@ -845,7 +845,7 @@ const uint32 Inventoryy::findSlot(Item* pItem) const {
 		if (!item) return i;
 	}
 
-	return 0;
+	return SlotID::None;
 }
 
 void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {

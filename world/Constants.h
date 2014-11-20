@@ -363,13 +363,16 @@ namespace SlotID {
 		TRADE_6 = 3006,
 		TRADE_7 = 3007,
 
-		SLOT_DELETE = 4294967295
+		SLOT_DELETE = 4294967295,
+		None = SLOT_DELETE - 1, // Internal use only.
 	};
 	static const uint32 MAX_CONTENTS = 10;
 	static const uint32 MAIN_SLOTS = MAIN_7 + 1;
 	static const uint32 BANK_SLOTS = (BANK_23 - BANK_0) + 1;
 	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
 	static const uint32 TRADE_SLOTS = (TRADE_7 - TRADE_0) + 1;
+
+	static const bool isNone(const uint32 pSlot) { return pSlot == None; }
 
 	static const bool isPrimary(const uint32 pSlot) { return pSlot == Primary; }
 	static const bool isSecondary(const uint32 pSlot) { return pSlot == Secondary; }

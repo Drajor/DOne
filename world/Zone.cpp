@@ -1368,8 +1368,6 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
 	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
 
-	
-
 	// Make a list of Items that were in the trade window.
 	std::list<Item*> unordered;
 	pCharacter->getInventory()->getTradeItems(unordered);
@@ -1380,7 +1378,7 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 		if ((*i)->isContainer()) {
 			ordered.push_back(*i);
 			i = unordered.erase(i);
-			break;
+			continue;
 		}
 		i++;
 	}
@@ -1411,8 +1409,24 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 		}
 		else {
 			const uint32 slotID = pCharacter->getInventory()->findSlot(i);
-			pCharacter->getInventory()->put(i, slotID);
-			pCharacter->getConnection()->sendItemTrade(i);
+
+			// No slot was found, try cursor.
+			if (SlotID::isNone(slotID)) {
+				//if (pCharacter->getInventory()->)
+			}
+			else {
+				pCharacter->getInventory()->put(i, slotID);
+				
+				// Update container contents slots
+				if (i->isContainer()) {
+					// Check: Containers can only be moved into main slots.
+					EXPECTED(SlotID::isMainInventory(slotID));
+					i->updateContentsSlots();
+				}
+					
+
+				pCharacter->getConnection()->sendItemTrade(i);
+			}
 		}
 	}
 
