@@ -403,6 +403,8 @@ namespace SlotID {
 
 	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex >= 0 && pSubIndex < MAX_CONTENTS; }
 
+	static const bool isContainerSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isBank(pSlot) || isSharedBank(pSlot); }
+
 	// Returns the parent SlotID of pSlot
 	static const uint32 getParentSlot(const uint32 pSlot) {
 		// Main Inventory Contents.

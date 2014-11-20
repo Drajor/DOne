@@ -30,6 +30,12 @@ Item* Item::getContents(const uint8 pSlot) const {
 	return mContents[pSlot];
 }
 
+void Item::getContents(std::list<Item*>& pItems) const {
+	for (auto i : mContents) {
+		if (i) pItems.push_back(i);
+	}
+}
+
 const uint32 Item::getDataSize() const {
 	uint32 result = 0;
 

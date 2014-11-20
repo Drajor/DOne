@@ -3486,6 +3486,22 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	auto f = [](Item* pItem) { return pItem->getStacks() == (pItem->isStackable()) ? 1 : 0; }; // This is annoying. Non-stackable Items should still have getStacks == 1.
 	EXPECTED(container->forEachContents(f));
 
+	// Test.
+	std::list<Item*> items;
+	container->getContents(items);
+
+	for (auto i : items) {
+		// Update Client.
+		sendDeleteItem(i->getSlot());
+		// Update Inventory.
+		EXPECTED(container->clearContents(i->getSubIndex()));
+		// Free memory.
+		delete i;
+	}
+	items.clear();
+
+	EXPECTED(container->isEmpty()); // We expect the container to be empty at this point.
+
 	// Note: Underfoot locks the UI until a reply is received.
 	sendCombineReply();
 }

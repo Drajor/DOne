@@ -106,6 +106,7 @@ public:
 	Item* getAugment(const uint8 pSlot) const;
 
 	Item* getContents(const uint8 pSlot) const;
+	void getContents(std::list<Item*>& pItems) const;
 	const bool clearContents(const uint32 pSubIndex);
 	const bool setContents(Item* pItem, const uint32 pSubIndex);
 	void updateContentsSlots();
