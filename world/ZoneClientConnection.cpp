@@ -3595,7 +3595,7 @@ void ZoneClientConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
 	auto payload = MerchantSell::convert(pPacket);
 	Log::info(payload->_debug());
 
-	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks, payload->mPrice);
+	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
 }
 
 void ZoneClientConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {

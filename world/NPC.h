@@ -75,7 +75,7 @@ public:
 	inline const bool hasItems() const { return !mLootItems.empty(); }
 	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
 private:
-	float mSellRate = 1.0f;
+	float mSellRate = 2.457f;
 	int32 mCopper = 0;
 	int32 mSilver = 0;
 	int32 mGold = 0;

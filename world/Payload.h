@@ -891,7 +891,7 @@ namespace Payload {
 			uint32 mNPCSpawnID = 0;
 			uint32 mSlotID = 0;
 			uint32 mStacks = 0;
-			uint32 mPrice = 0;
+			uint32 mPrice = 0; // When UF sends this, mPrice is undefined. Ignore it.
 
 			String _debug() const {
 				StringStream ss;

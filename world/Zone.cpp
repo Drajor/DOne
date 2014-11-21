@@ -1501,7 +1501,7 @@ void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->getConnection()->sendShopEndReply();
 }
 
-void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 
@@ -1521,19 +1521,21 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	EXPECTED(item->isSellable());
 
 	// Check: Item has enough stacks.
-	EXPECTED(item->getStacks() >= pStacks);
+	//EXPECTED(item->getStacks() >= pStacks);
 
-	// NOTE: Client sent price is ignored for now. I don't understand it yet.
+	// Calculate sale price.
 	const uint32 price = item->getSellPrice(pStacks, npc->getSellRate());
+
+	const int32 copper = price % 10;
+	const int32 silver = (price % 100) / 10;
+	const int32 gold = (price % 1000) / 100;
+	const int32 platinum = (price / 1000);
+	
+	// Add currency to Character.
+	Log::info("Adding: P(" + std::to_string(platinum) + ") G(" + std::to_string(gold) + ") S(" + std::to_string(silver) + ") C(" + std::to_string(copper) + ")");
+	pCharacter->getInventory()->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper);
 
 	// Remove Item/stacks sold.
 
 	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
-
-	const uint64 preTotalCurrency = pCharacter->getInventory()->getTotalCurrency();
-
-	// Add currency to Character.
-
-	EXPECTED(preTotalCurrency + price == pCharacter->getInventory()->getTotalCurrency());
-	EXPECTED(pCharacter->getInventory()->currencyValid());
 }

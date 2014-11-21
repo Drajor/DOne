@@ -84,7 +84,7 @@ struct ItemData {
 	uint8 mAttunable = 0; // 0 = OFF, 1 = ON
 	uint8 mSize = 0;
 	uint32 mSlots = 0;
-	uint32 mPrice = 0;
+	uint32 mPrice = 0; // Total value in copper.
 	uint32 mIcon = 0;
 	uint8 __Unknown7 = 1; // 1 copied
 	uint8 __Unknown8 = 1; // 1 copied
