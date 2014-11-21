@@ -441,11 +441,15 @@ const bool Item::isSellable() const {
 	// Tested: Artifact is not blocked by UF.
 	// Tested: Summoned is not blocked by UF.
 	// Tested: Evolving is not blocked by UF.
+	// Tested: Heirloom is not blocked by UF.
+	// Tested: No Transfer is not blocked by UF.
+
+	// TODO: FVNoDrop
 
 	// Containers with Items inside can not be sold.
 	if (isContainer() && !isEmpty()) return false;
 
-	// Items with augmentations can not be sold.
+	// Items with augmentations can not be sold. // TODO: Double check this is true.
 	if (hasAugmentations()) return false;
 
 	return true;

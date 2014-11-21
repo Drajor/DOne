@@ -378,6 +378,10 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setIsMagic(true);
 	item->setSlots(EquipSlots::Primary);
 
+	//item->setIsHeirloom(true);
+	//item->setIsNoTransfer(true);
+	//item->setIsFVNoDrop(true);
+
 	//item->setIsEvolvingItem(1501);
 	//item->setIsEvolvingItem(true);
 	//item->setCurrentEvolvingLevel(3);

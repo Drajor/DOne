@@ -194,7 +194,7 @@ struct ItemData {
 	uint8 mArtifact = 0; // 0 = OFF, 1 = ON
 	uint8 mSummoned = 0; // 0 = OFF, 1 = ON
 	uint32 mFavor = 0;
-	uint8 mFVNoDrop = 0;
+	uint8 mFVNoDrop = 0; // TODO: Research this field.
 	int32 mDoTShield = 0;
 	int32 mAttack = 0;
 	int32 mHaste = 0;
@@ -307,7 +307,7 @@ struct ItemData {
 	uint8 __Unknown23 = 0;
 	uint16 __Unknown24 = 0;
 	uint8 __Unknown25 = 0;
-	uint8 mHeirloom = 0;
+	uint8 mHeirloom = 0; // 0 = OFF, 1 = ON
 	uint32 __Unknown26 = 0;
 	uint32 __Unknown27 = 0;
 	// END chunk4

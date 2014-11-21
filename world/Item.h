@@ -454,7 +454,7 @@ public:
 	inline const bool isArtifact() const { return mItemData->mArtifact == 1; }
 	inline const bool isSummoned() const { return mItemData->mSummoned == 1; }
 	inline const uint32 getFavor() const { return mItemData->mFavor; }
-	inline const uint8 getFVNoDrop() const { return mItemData->mFVNoDrop; }
+	inline const bool isFVNoDrop() const { return mItemData->mFVNoDrop == 1; }
 	
 	// Returns the DoT shield on this Item.
 	inline const int32 getDoTShield() const { return mItemData->mDoTShield; }
@@ -473,7 +473,7 @@ public:
 	// TODO: potion belt
 	inline const bool isStackable() const { return getMaxStacks() > 1; }
 	inline const uint32 getMaxStacks() const { return mItemData->mMaxStacks; }
-	inline const uint8 getIsNoTransfer() const { return mItemData->mNoTransfer; }
+	inline const bool isNoTransfer() const { return mItemData->mNoTransfer == 1; }
 	// TODO: expendablearrow
 	// TODO: Effects
 	inline const uint32 getScriptFileID() const { return mItemData->mScriptFileID; }
@@ -582,7 +582,7 @@ public:
 	inline const int32 _getClairvoyance() const { int32 count = 0; for (auto i : mAugments) if (i) count += i->getClairvoyance(); return getClairvoyance() + count; }
 
 	// Returns whether or not this Item is an heirloom.
-	inline const bool getIsHeirloom() const { return mItemData->mHeirloom == 1; }
+	inline const bool isHeirloom() const { return mItemData->mHeirloom == 1; }
 
 
 	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
@@ -725,7 +725,7 @@ public:
 	inline void setIsArtifact(const bool pValue) { mItemData->mArtifact = pValue ? 1 : 0; }
 	inline void setIsSummoned(const bool pValue) { mItemData->mSummoned = pValue ? 1 : 0; }
 	inline void setFavor(const uint32 pValue) { mItemData->mFavor = pValue; }
-	inline void setFVNoDrop(const uint8 pValue) { mItemData->mFVNoDrop = pValue; }
+	inline void setIsFVNoDrop(const bool pValue) { mItemData->mFVNoDrop = pValue ? 1 : 0; }
 	inline void setDoTShield(const int32 pValue) { mItemData->mDoTShield = pValue; }
 	inline void setAttack(const int32 pValue) { mItemData->mAttack = pValue; }
 	inline void setHaste(const int32 pValue) { mItemData->mHaste = pValue; }
@@ -735,7 +735,7 @@ public:
 	inline void setIsNoPet(const uint8 pValue) { mItemData->mNoPet = pValue; }
 	// TODO: potion belt
 	inline void setMaxStacks(const uint32 pValue) { mItemData->mMaxStacks = pValue; }
-	inline void setIsNoTransfer(const uint8 pValue) { mItemData->mNoTransfer = pValue; }
+	inline void setIsNoTransfer(const bool pValue) { mItemData->mNoTransfer = pValue ? 1 : 0; }
 	// TODO: expendablearrow
 	// TODO: Effects
 	inline void setScriptFileID(const uint32 pValue) { mItemData->mScriptFileID = pValue; }
