@@ -1535,15 +1535,21 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	Log::info("Adding: P(" + std::to_string(platinum) + ") G(" + std::to_string(gold) + ") S(" + std::to_string(silver) + ") C(" + std::to_string(copper) + ")");
 	pCharacter->getInventory()->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper);
 
-	const bool consumable = item->isFood() || item->isDrink();
+	// Detect when the Character's auto food / drink is being sold.
+	const bool updateConsumables = pCharacter->getInventory()->isAutoFood(item) || pCharacter->getInventory()->isAutoDrink(item);
 	
 	// Consume Item/stacks sold.
 	EXPECTED(pCharacter->getInventory()->consume(pSlotID, pStacks));
 	item = nullptr;
 
-	// Update consumables in the event that the player just sold their stat food.
-	if (consumable)
+	// Update consumables.
+	if (updateConsumables)
 		pCharacter->getInventory()->updateConsumables();
+
+	// Item being sold from a worn slot.
+	if (SlotID::isWorn(pSlotID)) {
+
+	}
 
 	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
 }

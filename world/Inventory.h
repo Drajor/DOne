@@ -96,6 +96,10 @@ public:
 	Item* findStackable(const uint32 pItemID) const;
 
 	void updateConsumables();
+
+	inline const bool isAutoFood(Item* pItem) const { return pItem == mAutoFood; }
+	inline const bool isAutoDrink(Item* pItem) const { return pItem == mAutoDrink; }
+
 private:
 	Item* _popCursor();
 	Item* _peekCursor() const;
