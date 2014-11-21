@@ -40,7 +40,11 @@ public:
 
 	inline Actor* getTradingWith() const { return mTradingWith; }
 	inline void setTradingWith(Actor* pActor) { mTradingWith = pActor; }
-	inline const bool isTrading() { return getTradingWith() != nullptr; }
+	inline const bool isTrading() const { return getTradingWith() != nullptr; }
+
+	inline NPC* getShoppingWith() const { return mShoppingWith; }
+	inline void setShoppingWith(NPC* pNPC) { mShoppingWith = pNPC; }
+	inline const bool isShopping() const { return getShoppingWith() != nullptr; }
 
 	// Zone Authentication
 	uint16 mAuthenticatedZoneID = 0;
@@ -219,6 +223,8 @@ public:
 	const bool onSecondarySlotChange(Item* pItem);
 	const bool onRangeItemChange(Item* pItem);
 
+	const bool canCombine() const;
+	const bool canShop() const;
 private:
 	ZoneChange mZoneChange;
 
@@ -229,6 +235,7 @@ private:
 	bool mIsLinkDead = false;
 	Actor* mLootingCorpse = nullptr;
 	Actor* mTradingWith = nullptr;
+	NPC* mShoppingWith = nullptr;
 
 	Filters mFilters;
 

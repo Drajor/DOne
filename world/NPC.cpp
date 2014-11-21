@@ -22,7 +22,7 @@ const bool NPC::initialise() {
 	//setName(baseName+std::to_string(getSpawnID()));
 	//setRaceID(6);
 	//setClass(ClassIDs::Cleric);
-	setClass(40);
+	setClass(41);
 
 	return true;
 }
@@ -61,10 +61,41 @@ void NPC::onDestroy() {
 		looter->setLootingCorpse(nullptr);
 		setLooter(nullptr);
 	}
+
+	// TODO: Clean up any Character shopping
+	if (isMerchant()) {
+
+	}
 }
 
 void NPC::onLootBegin() {
 	// Remove any null items from mLootItems
 	// These occur from previous looting.
 	mLootItems.erase(std::remove(begin(mLootItems), end(mLootItems), nullptr), end(mLootItems));
+}
+
+const bool NPC::isShopOpen() const {
+	EXPECTED_BOOL(isMerchant());
+
+	// TODO: Fighting or other conditions which would affect this.
+
+	return true;
+}
+
+const bool NPC::addShopper(Character* pCharacter) {
+	// Ensure Character is not already a shopper.
+	auto i = std::find(mShoppers.begin(), mShoppers.end(), pCharacter);
+	EXPECTED_BOOL(i == mShoppers.end());
+
+	mShoppers.push_back(pCharacter);
+	return true;
+}
+
+const bool NPC::removeShopper(Character* pCharacter) {
+	// Ensure Character is a shopper.
+	auto i = std::find(mShoppers.begin(), mShoppers.end(), pCharacter);
+	EXPECTED_BOOL(i != mShoppers.end());
+
+	mShoppers.remove(pCharacter);
+	return true;
 }

@@ -139,9 +139,13 @@ public:
 	void handleTradeAccept(Character* pCharacter, const uint32 pSpawnID);
 	void handleTradeCancel(Character* pCharacter, const uint32 pSpawnID);
 
+	void handleShopRequest(Character* pCharacter, const uint32 pSpawnID);
+	void handleShopEnd(Character* pCharacter, const uint32 pSpawnID);
+
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 
 	const bool canBank(Character* pCharacter);
+	const bool canShop(Character* pCharacter, NPC* pMerchant);
 
 	void handleCriticalHit(Character* pCharacter, int32 pDamage);
 	void handleHPChange(Actor* pActor);

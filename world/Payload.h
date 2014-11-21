@@ -839,6 +839,41 @@ namespace Payload {
 				return ss.str();
 			}
 		};
+
+		// C<->S
+		struct MerchantRequest : FixedT<MerchantRequest, OP_ShopRequest> {
+			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pCharacterSpawnID, const uint32 pAction) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mNPCSpawnID = pNPCSpawnID;
+				payload->mCharacterSpawnID = pCharacterSpawnID;
+				payload->mAction = pAction;
+				payload->mRate = 1.0f; // TODO: Test
+
+				return packet;
+			}
+
+			uint32 mNPCSpawnID = 0;
+			uint32 mCharacterSpawnID = 0;
+			uint32 mAction = 0;
+			float mRate = 0.0F;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{MerchantRequest} ";
+				PRINT_MEMBER(mNPCSpawnID);
+				PRINT_MEMBER(mCharacterSpawnID);
+				PRINT_MEMBER(mAction);
+				PRINT_MEMBER(mRate);
+				return ss.str();
+			}
+		};
+
+		// C->S
+		struct MerchantEnd : Fixed<MerchantEnd> {
+			uint32 mNPCSpawnID = 0;
+			uint32 mCharacterSpawnID = 0;
+		};
 	}
 
 	namespace World {

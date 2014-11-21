@@ -1294,6 +1294,15 @@ const bool Zone::canBank(Character* pCharacter) {
 	return closestDistance < MaxBankingDistance;
 }
 
+const bool Zone::canShop(Character* pCharacter, NPC* pMerchant) {
+	EXPECTED_BOOL(pCharacter);
+	EXPECTED_BOOL(pMerchant);
+
+	static const float MaxShoppingDistance = 405.0f; // This is fairly close. Have seen 401.
+
+	return pCharacter->squareDistanceTo(pMerchant) <= MaxShoppingDistance;
+}
+
 void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID) {
 	using namespace Payload::Zone;
 
@@ -1442,4 +1451,52 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->getConnection()->sendMoneyUpdate();
 
 	
+}
+
+void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+
+	// Check: Character is in a state that allows for shopping.
+	EXPECTED(pCharacter->canShop());
+
+	// Find Actor by pSpawnID.
+	auto actor = findActor(pSpawnID);
+	EXPECTED(actor);
+	EXPECTED(actor->isNPC());
+
+	auto npc = Actor::cast<NPC*>(actor);
+
+	// Check: NPC is a merchant.
+	EXPECTED(npc->isMerchant());
+
+	// Check: Distance to merchant.
+	EXPECTED(canShop(pCharacter, npc));
+
+	// Merchant is open for business.
+	if (npc->isShopOpen()) {
+		// Associate Character and NPC.
+		pCharacter->setShoppingWith(npc);
+		npc->addShopper(pCharacter);
+
+		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 1);
+	}
+	// Merchant is busy.
+	else {
+		pCharacter->getConnection()->sendSimpleMessage(MessageType::Yellow, StringID::MERCHANT_BUSY);
+		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 0);
+	}
+}
+
+void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isShopping());
+
+	NPC* npc = pCharacter->getShoppingWith();
+	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
+
+	// Disassociate Character and NPC.
+	EXPECTED(npc->removeShopper(pCharacter));
+	pCharacter->setShoppingWith(nullptr);
+	
+	pCharacter->getConnection()->sendShopEndReply();
 }

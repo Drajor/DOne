@@ -31,6 +31,7 @@ Item* Transmutation::transmute(std::list<Item*> pItems) {
 	
 	// TODO: lots of checks ;)
 
+	// Process components
 	Item* result = ItemFactory::makeAugment();
 	for (auto i : components) {
 		if (i->mAttribute == "str") { result->setStrength(_roll(result, i)); }

@@ -517,6 +517,16 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player presses the 'Combine' button on an opened container.
 		_handleCombine(pPacket);
 		break;
+	case OP_ShopRequest:
+		// NOTE: This occurs when a player right clicks on a merchant.
+		_handleShopRequest(pPacket);
+		break;
+	case OP_ShopEnd:
+		// NOTE: This occurs when a player presses the 'Done' button on the merchant window.
+		// NOTE: This occurs when a player presses 'escape' whilst a merchant window is open.
+		// NOTE: This occurs when a player moves their character too far away from a merchant.
+		_handleShopEnd(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3464,6 +3474,9 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	auto payload = Combine::convert(pPacket);
 	Log::info(payload->_debug());
 
+	// Check: Character is in a state that allows for combining.
+	EXPECTED(mCharacter->canCombine());
+
 	// Check: The combine is occurring from a valid slot id. (UF Client Checked)
 	EXPECTED(SlotID::isMainInventory(payload->mSlot));
 
@@ -3521,6 +3534,50 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::sendCombineReply() {
 	EXPECTED(mConnected);
 	auto packet = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::_handleShopRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MerchantRequest::sizeCheck(pPacket));
+
+	// Check: Character is in a state that allows for shopping.
+	EXPECTED(mCharacter->canShop());
+
+	auto payload = MerchantRequest::convert(pPacket);
+	Log::info(payload->_debug());
+
+	EXPECTED(mCharacter->getSpawnID() == payload->mCharacterSpawnID); // Sanity.
+
+	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
+}
+
+void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = MerchantRequest::construct(pNPCSpawnID, mCharacter->getSpawnID(), pAction);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MerchantEnd::sizeCheck(pPacket));
+
+	auto payload = MerchantEnd::convert(pPacket);
+
+	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
+	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
+}
+
+void ZoneClientConnection::sendShopEndReply() {
+	EXPECTED(mConnected);
+
+	auto packet = new EQApplicationPacket(OP_ShopEndConfirm, 0);
 	sendPacket(packet);
 	delete packet;
 }

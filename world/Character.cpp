@@ -881,6 +881,26 @@ const bool Character::onRangeItemChange(Item* pItem)
 	return true;
 }
 
+const bool Character::canCombine() const {
+	if (isDead()) return false;
+	if (isTrading()) return false;
+	if (isShopping()) return false;
+
+	// TODO: There will be more.
+
+	return true;
+}
+
+const bool Character::canShop() const {
+	if (isDead()) return false;
+	if (isTrading()) return false;
+	if (isShopping()) return false;
+
+	// TODO: There will be more.
+
+	return true;
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);

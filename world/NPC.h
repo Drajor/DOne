@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 
+class Character;
 class SpawnPoint;
 class Item;
 
@@ -40,7 +41,19 @@ public:
 	inline void addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) { addPlatinum(pPlatinum); addGold(pGold); addSilver(pSilver); addCopper(pCopper); }
 	inline void removeCurrency() { setCurrency(0, 0, 0, 0); }
 
+	// Returns whether this NPC is a banker or not.
 	inline const bool isBanker() const { return getClass() == 40; }
+
+	// Returns whether this NPC is a merchant or not.
+	inline const bool isMerchant() const { return getClass() == 41; }
+
+	// Returns whether this NPC is open for business.
+	const bool isShopOpen() const;
+
+	const bool addShopper(Character* pCharacter);
+	const bool removeShopper(Character* pCharacter);
+
+	// Returns whether or not this NPC is accepting trade.
 	inline const bool willTrade() const { return mAcceptTrade; }
 
 	void onLootBegin();
@@ -58,4 +71,6 @@ private:
 	bool mAcceptTrade = true;
 
 	SpawnPoint* mSpawnPoint = nullptr;
+
+	std::list<Character*> mShoppers;
 };
