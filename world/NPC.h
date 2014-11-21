@@ -50,11 +50,19 @@ public:
 	// Returns whether this NPC is open for business.
 	const bool isShopOpen() const;
 
+	// Sets the sell rate of this merchant (1 = normal, 10 = 10x)
 	inline void setSellRate(const float pSellRate) { mSellRate = pSellRate; }
+
+	// Returns the sell rate of this merchant.
 	inline const float getSellRate() const { return mSellRate; }
+
+	// Returns the reciprocal of sell rate of this merchant (Underfoot uses this for calculations).
 	inline const float _getSellRate() const { return 1.0f / mSellRate; }
 
+	// Adds a shopper to this merchant. Returns whether the operation succeeds.
 	const bool addShopper(Character* pCharacter);
+
+	// Removes a shopper from this merchant. Returns whether the operation succeeds.
 	const bool removeShopper(Character* pCharacter);
 
 	// Returns whether or not this NPC is accepting trade.
