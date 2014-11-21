@@ -1478,7 +1478,7 @@ void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
 		pCharacter->setShoppingWith(npc);
 		npc->addShopper(pCharacter);
 
-		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 1);
+		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 1, npc->_getSellRate());
 	}
 	// Merchant is busy.
 	else {

@@ -261,6 +261,7 @@ const bool ItemDataStore::_TransmutationComponentTest(const uint32 pItemID, cons
 	item->setIcon(666);
 	item->setItemType(ItemType::Miscellaneous);
 	item->setMaxStacks(100);
+	item->setPrice(1000);
 
 	delete item;
 

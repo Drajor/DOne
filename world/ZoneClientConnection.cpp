@@ -3554,11 +3554,11 @@ void ZoneClientConnection::_handleShopRequest(const EQApplicationPacket* pPacket
 	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
 }
 
-void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction) {
+void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = MerchantRequest::construct(pNPCSpawnID, mCharacter->getSpawnID(), pAction);
+	auto packet = MerchantRequest::construct(pNPCSpawnID, mCharacter->getSpawnID(), pAction, pRate);
 	sendPacket(packet);
 	delete packet;
 }

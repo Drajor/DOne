@@ -50,6 +50,10 @@ public:
 	// Returns whether this NPC is open for business.
 	const bool isShopOpen() const;
 
+	inline void setSellRate(const float pSellRate) { mSellRate = pSellRate; }
+	inline const float getSellRate() const { return mSellRate; }
+	inline const float _getSellRate() const { return 1.0f / mSellRate; }
+
 	const bool addShopper(Character* pCharacter);
 	const bool removeShopper(Character* pCharacter);
 
@@ -63,6 +67,7 @@ public:
 	inline const bool hasItems() const { return !mLootItems.empty(); }
 	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
 private:
+	float mSellRate = 1.0f;
 	int32 mCopper = 0;
 	int32 mSilver = 0;
 	int32 mGold = 0;

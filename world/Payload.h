@@ -842,13 +842,13 @@ namespace Payload {
 
 		// C<->S
 		struct MerchantRequest : FixedT<MerchantRequest, OP_ShopRequest> {
-			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pCharacterSpawnID, const uint32 pAction) {
+			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pCharacterSpawnID, const uint32 pAction, const float pRate) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mNPCSpawnID = pNPCSpawnID;
 				payload->mCharacterSpawnID = pCharacterSpawnID;
 				payload->mAction = pAction;
-				payload->mRate = 1.0f; // TODO: Test
+				payload->mRate = pRate;
 
 				return packet;
 			}
