@@ -66,6 +66,12 @@ public:
 	// Returns whether this Item is a weapon or not.
 	inline const bool isWeapon() const { return isOneHandWeapon() || isTwoHandWeapon() || isBow(); }
 
+	// Returns whether this Item is food or not.
+	inline const bool isFood() const { return getItemType() == ItemType::Food; }
+
+	// Returns whether this Item is drink or not.
+	inline const bool isDrink() const { return getItemType() == ItemType::Drink; }
+
 	inline const String getName() const { return String(mItemData->mName); }
 	inline const String getLore() const { return String(mItemData->mLore); }
 	inline const String getIDFile() const { return String(mItemData->mIDFile); }

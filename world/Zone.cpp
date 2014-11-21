@@ -1521,7 +1521,7 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	EXPECTED(item->isSellable());
 
 	// Check: Item has enough stacks.
-	//EXPECTED(item->getStacks() >= pStacks);
+	//EXPECTED(item->getStacks() >= pStacks); // TODO: Add this back when stacks are not fucked.
 
 	// Calculate sale price.
 	const uint32 price = item->getSellPrice(pStacks, npc->getSellRate());
@@ -1535,7 +1535,15 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	Log::info("Adding: P(" + std::to_string(platinum) + ") G(" + std::to_string(gold) + ") S(" + std::to_string(silver) + ") C(" + std::to_string(copper) + ")");
 	pCharacter->getInventory()->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper);
 
-	// Remove Item/stacks sold.
+	const bool consumable = item->isFood() || item->isDrink();
+	
+	// Consume Item/stacks sold.
+	EXPECTED(pCharacter->getInventory()->consume(pSlotID, pStacks));
+	item = nullptr;
+
+	// Update consumables in the event that the player just sold their stat food.
+	if (consumable)
+		pCharacter->getInventory()->updateConsumables();
 
 	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
 }
