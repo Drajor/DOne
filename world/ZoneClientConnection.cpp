@@ -527,6 +527,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player moves their character too far away from a merchant.
 		_handleShopEnd(pPacket);
 		break;
+	case OP_ShopPlayerSell:
+		// NOTE: This occurs when a player tries to sell an Item to a merchant.
+		_handleShopSell(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3070,7 +3074,7 @@ const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* 
 	return true;
 }
 
-void ZoneClientConnection::sendMoneyUpdate() {
+void ZoneClientConnection::sendCurrencyUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3578,6 +3582,27 @@ void ZoneClientConnection::sendShopEndReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_ShopEndConfirm, 0);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(MerchantSell::sizeCheck(pPacket));
+	EXPECTED(mCharacter->isShopping());
+
+	auto payload = MerchantSell::convert(pPacket);
+	Log::info(payload->_debug());
+
+	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks, payload->mPrice);
+}
+
+void ZoneClientConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = MerchantSell::construct(pSpawnID, pSlotID, pStacks, pPrice);
 	sendPacket(packet);
 	delete packet;
 }

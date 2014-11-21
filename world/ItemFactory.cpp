@@ -18,6 +18,8 @@ Item* ItemFactory::_make(const uint32 pItemID, const uint32 pStacks) {
 	item->setStacks(pStacks);
 	item->setCharmFile(std::to_string(item->getID()) + "|" + std::to_string(item->getInstanceID()));
 
+	item->setPrice(1234); // TEMP TESTING
+
 	// Instance ID.
 
 	return item;
@@ -28,6 +30,8 @@ Item* ItemFactory::_make() {
 	EXPECTED_PTR(data);
 	auto item = new Item(data);
 	item->setCharmFile(std::to_string(item->getID()) + "|" + std::to_string(item->getInstanceID()));
+
+	item->setPrice(1234); // TEMP TESTING
 
 	return item;
 }

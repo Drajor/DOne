@@ -1448,7 +1448,7 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->setTradingWith(nullptr);
 
 	// Update client.
-	pCharacter->getConnection()->sendMoneyUpdate();
+	pCharacter->getConnection()->sendCurrencyUpdate();
 
 	
 }
@@ -1499,4 +1499,41 @@ void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->setShoppingWith(nullptr);
 	
 	pCharacter->getConnection()->sendShopEndReply();
+}
+
+void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isShopping());
+
+	NPC* npc = pCharacter->getShoppingWith();
+	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
+
+	// Check: Distance to merchant.
+	EXPECTED(canShop(pCharacter, npc));
+
+	// Check: Items can be sold from pSlotID
+	EXPECTED(SlotID::isValidShopSellSlot(pSlotID));
+
+	auto item = pCharacter->getInventory()->getItem(pSlotID);
+	EXPECTED(item);
+
+	// Check: Item can be sold.
+	EXPECTED(item->isSellable());
+
+	// Check: Item has enough stacks.
+	EXPECTED(item->getStacks() >= pStacks);
+
+	// NOTE: Client sent price is ignored for now. I don't understand it yet.
+	const uint32 price = item->getSellPrice(pStacks, npc->getSellRate());
+
+	// Remove Item/stacks sold.
+
+	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
+
+	const uint64 preTotalCurrency = pCharacter->getInventory()->getTotalCurrency();
+
+	// Add currency to Character.
+
+	EXPECTED(preTotalCurrency + price == pCharacter->getInventory()->getTotalCurrency());
+	EXPECTED(pCharacter->getInventory()->currencyValid());
 }

@@ -15,8 +15,14 @@ public:
 
 	inline ItemData* getData() const { return mItemData; }
 
-	// Returns whether this Item is tradeable or not.
-	const bool isTradeable();
+	// Returns whether this Item can be traded or not.
+	const bool isTradeable() const;
+
+	// Returns whether this Item can be sold or not.
+	const bool isSellable() const;
+
+	// Returns the adjusted sell price based on a sell rate.
+	const uint32 getSellPrice(const uint32 pStacks, const float pSellRate) const;
 
 	// Returns whether this Item is armor or not.
 	inline const bool isArmor() const { return getItemType() == ItemType::Armor; }
@@ -90,7 +96,7 @@ public:
 	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
 	const bool addStacks(const uint32 pStacks);
 	const bool removeStacks(const uint32 pStacks);
-	inline const bool isAttuned() { return mAttuned; }
+	inline const bool isAttuned() const { return mAttuned; }
 	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
 
 	inline const uint32 getSubIndex() const { return mSubIndex; };
@@ -131,6 +137,9 @@ public:
 	// Returns whether pAugment is allowed to go into this Item.
 	const bool augmentAllowed(Item* pAugment);
 
+	// Returns whether this Item has any augmentations or not.
+	const bool hasAugmentations() const;
+
 	// Evolving.
 	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
 	inline void setCurrentEvolvingLevel(const int32 pValue) { mCurrentEvolvingLevel = pValue; }
@@ -155,13 +164,13 @@ public:
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
 	inline const uint32 getPower() const { return mItemData->mPower; }
 	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem > 0; }
-	inline const uint8 getIsCopied() const { return mItemData->mCopied; }
+	inline const bool isCopied() const { return mItemData->mCopied == 1; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
 	inline const uint32 getID() const { return mItemData->mID; }
 	inline const uint8 getWeight() const { return mItemData->mWeight; }
-	inline const uint8 isTemporary() const { return mItemData->mTemporary; }
-	inline const uint8 isNoDrop() const { return mItemData->mNoDrop; }
-	inline const uint8 isAttunable() const { return mItemData->mAttunable; }
+	inline const bool isTemporary() const { return mItemData->mTemporary == 0; }
+	inline const bool isNoDrop() const { return mItemData->mNoDrop == 0; }
+	inline const bool isAttunable() const { return mItemData->mAttunable == 1; }
 	inline const uint8 getSize() const { return mItemData->mSize; }
 	inline const uint32 getSlots() const { return mItemData->mSlots; }
 	// Returns slot restrictions based on this Item and augments.
@@ -442,8 +451,8 @@ public:
 	inline const uint8 getBook() const { return mItemData->mBook; }
 	inline const uint8 getBookType() const { return mItemData->mBookType; }
 	inline const int32 getLoreGroup() const { return mItemData->mLoreGroup; }
-	inline const uint8 getIsArtifact() const { return mItemData->mArtifact; }
-	inline const uint8 getIsSummoned() const { return mItemData->mSummoned; }
+	inline const bool isArtifact() const { return mItemData->mArtifact == 1; }
+	inline const bool isSummoned() const { return mItemData->mSummoned == 1; }
 	inline const uint32 getFavor() const { return mItemData->mFavor; }
 	inline const uint8 getFVNoDrop() const { return mItemData->mFVNoDrop; }
 	
@@ -587,7 +596,7 @@ public:
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
 	inline void setID(const uint32 pValue) { mItemData->mID = pValue; }
 	inline void setWeight(const uint8 pValue) { mItemData->mWeight = pValue; }
-	inline void setIsTemporary(const bool pValue) { mItemData->mTemporary = pValue ? 1 : 0; }
+	inline void setIsTemporary(const bool pValue) { mItemData->mTemporary = pValue ? 0 : 1; }
 	inline void setIsNoDrop(const bool pValue) { mItemData->mNoDrop = pValue ? 0 : 1; }
 	inline void setIsAttunable(const bool pValue) { mItemData->mAttunable = pValue ? 1 : 0; }
 	inline void setSize(const uint8 pValue) { mItemData->mSize = pValue; }
@@ -713,8 +722,8 @@ public:
 	inline void setBookType(const uint8 pValue) { mItemData->mBookType = pValue; }
 
 	inline void setLoreGroup(const int32 pValue) { mItemData->mLoreGroup = pValue; }
-	inline void setIsArtifact(const uint8 pValue) { mItemData->mArtifact = pValue; }
-	inline void setIsSummoned(const uint8 pValue) { mItemData->mSummoned = pValue; }
+	inline void setIsArtifact(const bool pValue) { mItemData->mArtifact = pValue ? 1 : 0; }
+	inline void setIsSummoned(const bool pValue) { mItemData->mSummoned = pValue ? 1 : 0; }
 	inline void setFavor(const uint32 pValue) { mItemData->mFavor = pValue; }
 	inline void setFVNoDrop(const uint8 pValue) { mItemData->mFVNoDrop = pValue; }
 	inline void setDoTShield(const int32 pValue) { mItemData->mDoTShield = pValue; }

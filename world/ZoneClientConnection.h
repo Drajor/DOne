@@ -113,7 +113,7 @@ public:
 	void sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID);
 	void sendTradeRequest(const uint32 pFromSpawnID);
 
-	void sendMoneyUpdate();
+	void sendCurrencyUpdate();
 	void sendCrystals();
 
 	void sendPopup(const String& pTitle, const String& pText);
@@ -134,6 +134,7 @@ public:
 	void sendCombineReply();
 	void sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate = 1.0f);
 	void sendShopEndReply();
+	void sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice);
 
 	void sendPacket(EQApplicationPacket* pPacket);
 
@@ -259,6 +260,7 @@ private:
 	void _handleCombine(const EQApplicationPacket* pPacket);
 	void _handleShopRequest(const EQApplicationPacket* pPacket);
 	void _handleShopEnd(const EQApplicationPacket* pPacket);
+	void _handleShopSell(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

@@ -874,6 +874,35 @@ namespace Payload {
 			uint32 mNPCSpawnID = 0;
 			uint32 mCharacterSpawnID = 0;
 		};
+
+		// C->S
+		struct MerchantSell : FixedT<MerchantSell, OP_ShopPlayerSell>{
+			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mNPCSpawnID = pNPCSpawnID;
+				payload->mSlotID = pSlotID;
+				payload->mStacks = pStacks;
+				payload->mPrice = pPrice;
+
+				return packet;
+			}
+
+			uint32 mNPCSpawnID = 0;
+			uint32 mSlotID = 0;
+			uint32 mStacks = 0;
+			uint32 mPrice = 0;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{MerchantSell} ";
+				PRINT_MEMBER(mNPCSpawnID);
+				PRINT_MEMBER(mSlotID);
+				PRINT_MEMBER(mStacks);
+				PRINT_MEMBER(mPrice);
+				return ss.str();
+			}
+		};
 	}
 
 	namespace World {

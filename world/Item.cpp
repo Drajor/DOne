@@ -412,9 +412,10 @@ const bool Item::setSubIndex(const uint32 pSubIndex) {
 	return true;
 }
 
-const bool Item::isTradeable() {
+const bool Item::isTradeable() const {
 	if (isNoDrop()) return false;
 	if (isAttuned()) return false;
+	// TODO: Test Copied
 	if (hasOrnamentationIcon()) return false;
 	if (hasOrnamentationIDFile()) return false;
 
@@ -425,6 +426,27 @@ const bool Item::isTradeable() {
 	for (auto i : mContents) {
 		if (i && !i->isTradeable()) return false;
 	}
+
+	return true;
+}
+
+const bool Item::isSellable() const {
+	if (getPrice() == 0) return false;
+	if (isNoDrop()) return false;
+	if (isAttuned()) return false;
+	if (isTemporary()) return false; // Tested.
+	if (isCopied()) return false; // Tested.
+	if (hasOrnamentationIcon()) return false; // Tested.
+	if (hasOrnamentationIDFile()) return false; // Tested.
+	// Tested: Artifact is not blocked by UF.
+	// Tested: Summoned is not blocked by UF.
+	// Tested: Evolving is not blocked by UF.
+
+	// Containers with Items inside can not be sold.
+	if (isContainer() && !isEmpty()) return false;
+
+	// Items with augmentations can not be sold.
+	if (hasAugmentations()) return false;
 
 	return true;
 }
@@ -520,4 +542,16 @@ const bool Item::forEachContents(std::function<const bool(Item*)> pFunction) con
 	}
 
 	return true;
+}
+
+const uint32 Item::getSellPrice(const uint32 pStacks, const float pSellRate) const {
+	return std::ceil(pStacks * getPrice() * pSellRate);
+}
+
+const bool Item::hasAugmentations() const {
+	for (auto i : mAugments) {
+		if (i) return false;
+	}
+
+	return false;
 }

@@ -1656,18 +1656,18 @@ ENCODE(OP_Illusion) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_ShopPlayerBuy)
-{
-	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
-	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-	OUT(npcid);
-	OUT(playerid);
-	OUT(itemslot);
-	OUT(quantity);
-	OUT(price);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ShopPlayerBuy)
+//{
+//	ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
+//	SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+//	OUT(npcid);
+//	OUT(playerid);
+//	OUT(itemslot);
+//	OUT(quantity);
+//	OUT(price);
+//
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_ClientUpdate) {
 //	ENCODE_LENGTH_EXACT(PlayerPositionUpdateServer_Struct);
@@ -1789,15 +1789,15 @@ ENCODE(OP_Buff) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_ShopPlayerSell) {
-	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
-	SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
-	OUT(npcid);
-	eq->itemslot = TitaniumToUnderfootSlot(emu->itemslot);
-	OUT(quantity);
-	OUT(price);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ShopPlayerSell) {
+//	ENCODE_LENGTH_EXACT(Merchant_Purchase_Struct);
+//	SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+//	OUT(npcid);
+//	eq->itemslot = TitaniumToUnderfootSlot(emu->itemslot);
+//	OUT(quantity);
+//	OUT(price);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_ApplyPoison) {
 	ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
@@ -2820,19 +2820,19 @@ DECODE(OP_CastSpell) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_ShopPlayerBuy)
-{
-	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
-	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-
-	IN(npcid);
-	IN(playerid);
-	IN(itemslot);
-	IN(quantity);
-	IN(price);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ShopPlayerBuy)
+//{
+//	DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
+//	SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
+//
+//	IN(npcid);
+//	IN(playerid);
+//	IN(itemslot);
+//	IN(quantity);
+//	IN(price);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_ClientUpdate) {
 //    // for some odd reason, there is an extra byte on the end of this on occasion..
@@ -2976,17 +2976,17 @@ DECODE(OP_Buff) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_ShopPlayerSell) {
-	DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);
-	SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
-
-	IN(npcid);
-	emu->itemslot = UnderfootToTitaniumSlot(eq->itemslot);
-	IN(quantity);
-	IN(price);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ShopPlayerSell) {
+//	DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);
+//	SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Struct);
+//
+//	IN(npcid);
+//	emu->itemslot = UnderfootToTitaniumSlot(eq->itemslot);
+//	IN(quantity);
+//	IN(price);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_Save) {
 	DECODE_LENGTH_EXACT(structs::Save_Struct);

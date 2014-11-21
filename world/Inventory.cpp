@@ -20,6 +20,7 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	auto container = ItemFactory::make(ItemID::StartContainer);
 	container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
 	container->setContents(ItemFactory::make(ItemID::StartDrink, 10000), 9);
+	container->setContents(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common), 0);
 	put(container, SlotID::MAIN_7);
 	container->updateContentsSlots();
 }

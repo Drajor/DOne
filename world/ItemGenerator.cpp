@@ -379,11 +379,11 @@ Item* ItemGenerator::makeTwoHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	item->setSlots(EquipSlots::Primary);
 
 	//item->setIsEvolvingItem(1501);
-	item->setIsEvolvingItem(true);
-	item->setCurrentEvolvingLevel(3);
-	item->setMaximumEvolvingLevel(4);
-	item->setEvolvingProgress(55.4);
-	item->setLoreGroup(1501);
+	//item->setIsEvolvingItem(true);
+	//item->setCurrentEvolvingLevel(3);
+	//item->setMaximumEvolvingLevel(4);
+	//item->setEvolvingProgress(55.4);
+	//item->setLoreGroup(1501);
 
 	//item->setOrnamentationIcon(2174);
 	//item->setOrnamentationIDFile("IT11107");
@@ -443,8 +443,8 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setIsAttunable(true);
 	item->setLore("This is a Head Slot item.");
 
-	item->setOrnamentationIcon(1000);
-	item->setOrnamentationIDFile("IT148");
+	//item->setOrnamentationIcon(1000);
+	//item->setOrnamentationIDFile("IT148");
 
 	return item;
 }
@@ -461,6 +461,8 @@ Item* ItemGenerator::makeChest(const uint8 pLevel, const Rarity pRarity) {
 	item->setMaterial(ItemMaterial::Plate);
 	item->setItemType(ItemType::Armor);
 	item->setRaces(EquipRaces::Human + EquipRaces::DarkElf);
+	//item->setIsArtifact(true);
+	//item->setIsSummoned(true);
 	//item->setDeities(EquipDeities::Agnostic + EquipDeities::RallosZek);
 
 	//item->setOrnamentationIcon(1568);
@@ -479,7 +481,6 @@ Item* ItemGenerator::makeArms(const uint8 pLevel, const Rarity pRarity) {
 	item->setIDFile("IT63");
 	item->setMaterial(ItemMaterial::Plate);
 	item->setItemType(ItemType::Armor);
-	
 	
 
 	return item;

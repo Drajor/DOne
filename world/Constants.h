@@ -422,6 +422,8 @@ namespace SlotID {
 
 	static const bool isContainerSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isBank(pSlot) || isSharedBank(pSlot); }
 
+	static const bool isValidShopSellSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isMainContents(pSlot) || isWorn(pSlot); }
+
 	// Returns the parent SlotID of pSlot
 	static const uint32 getParentSlot(const uint32 pSlot) {
 		// Main Inventory Contents.
