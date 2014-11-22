@@ -2,6 +2,8 @@
 #include "Character.h"
 #include "Zone.h"
 #include "Utility.h"
+#include "ItemGenerator.h"
+#include "Item.h"
 
 NPC::NPC() {
 	setRunSpeed(0.7f);
@@ -23,6 +25,11 @@ const bool NPC::initialise() {
 	//setRaceID(6);
 	//setClass(ClassIDs::Cleric);
 	setClass(41);
+
+	auto a = ItemGenerator::makeTwoHandBlunt(1, Rarity::Common);
+	a->setShopQuantity(-1);
+	a->setShopPrice(1234);
+	addShopItem(a);
 
 	return true;
 }

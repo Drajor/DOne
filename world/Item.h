@@ -165,8 +165,8 @@ public:
 	inline void setOrnamentationIDFile(const String& pValue) { mOrnamentationIDFile = pValue; }
 	inline const bool hasOrnamentationIDFile() const { return getOrnamentationIDFile().length() > 0; }
 
-	inline const uint32 getMerchantPrice() const { return mItemData->mMerchantPrice; }
-	inline const uint32 getMerchantSlot() const { return mItemData->mMerchantSlot; }
+	inline const uint32 getShopPrice() const { return mItemData->mShopPrice; }
+	inline const int32 getShopQuantity() const { return mItemData->mShopQuantity; }
 	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
 	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
 	inline const uint32 getCharges() const { return mItemData->mCharges; }
@@ -593,8 +593,8 @@ public:
 	inline const bool isHeirloom() const { return mItemData->mHeirloom == 1; }
 
 
-	inline void setMerchantPrice(const uint32 pValue) { mItemData->mMerchantPrice = pValue; }
-	inline void setMerchantSlot(const uint32 pValue) { mItemData->mMerchantSlot = pValue; }
+	inline void setShopPrice(const uint32 pValue) { mItemData->mShopPrice = pValue; }
+	inline void setShopQuantity(const int32 pValue) { mItemData->mShopQuantity = pValue; }
 	inline void setInstanceID(const uint32 pValue) { mItemData->mInstanceID = pValue; }
 	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
 	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }

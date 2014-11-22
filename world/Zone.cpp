@@ -1472,6 +1472,14 @@ void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
 	// Check: Distance to merchant.
 	EXPECTED(canShop(pCharacter, npc));
 
+	// Check: Character has Items on cursor.
+	// NOTE: UF does not prevent this, this is just to keep things more simple.
+	if (pCharacter->getInventory()->isCursorEmpty() == false) {
+		pCharacter->notify("Please clear your cursor and try again.");
+		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 0);
+		return;
+	}
+
 	// Merchant is open for business.
 	if (npc->isShopOpen()) {
 		// Associate Character and NPC.
@@ -1479,6 +1487,12 @@ void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
 		npc->addShopper(pCharacter);
 
 		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 1, npc->_getSellRate());
+
+		// Send shop Items.
+		std::list<Item*> shopItems = npc->getShopItems();
+		for (auto i : shopItems) {
+			pCharacter->getConnection()->sendItemShop(i);
+		}
 	}
 	// Merchant is busy.
 	else {
@@ -1552,4 +1566,6 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	}
 
 	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
+
+	// TODO: Dynamic merchant Items.
 }

@@ -3273,6 +3273,18 @@ void ZoneClientConnection::sendItemTrade(Item* pItem) {
 	delete packet;
 }
 
+void ZoneClientConnection::sendItemShop(Item* pItem) {
+	EXPECTED(pItem);
+	EXPECTED(mConnected);
+
+	uint32 payloadSize = 0;
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketMerchant);
+
+	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
+	sendPacket(packet);
+	delete packet;
+}
+
 
 void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
