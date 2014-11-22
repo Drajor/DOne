@@ -23,6 +23,9 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 	container->setContents(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common), 0);
 	put(container, SlotID::MAIN_7);
 	container->updateContentsSlots();
+
+	pushCursor(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common));
+	pushCursor(ItemGenerator::makeOneHandBlunt(1, Rarity::Common));
 }
 
 const unsigned char* Inventoryy::getData(uint32& pSize) {
@@ -47,6 +50,9 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 	
 	// Main Items.
 	calc(SlotID::MAIN_0, SlotID::MAIN_7);
+
+	// Cursor.
+	calc(SlotID::CURSOR, SlotID::CURSOR); // NOTE: Only the first Item on cursor is sent here.
 
 	// Bank Items
 	calc(SlotID::BANK_0, SlotID::BANK_23);
@@ -75,6 +81,9 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 
 	// Main Items.
 	copy(SlotID::MAIN_0, SlotID::MAIN_7);
+
+	// Cursor.
+	copy(SlotID::CURSOR, SlotID::CURSOR);
 
 	// Bank Items
 	copy(SlotID::BANK_0, SlotID::BANK_23);
@@ -174,7 +183,7 @@ const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
 
 	// Putting item on cursor.
 	if (SlotID::isCursor(pSlot)) {
-		mCursor.push(pItem);
+		mCursor.push_front(pItem);
 		pItem->setSlot(pSlot);
 		return true;
 	}
@@ -313,7 +322,7 @@ const bool Inventoryy::moveItem(const uint32 pFromSlot, const uint32 pToSlot, co
 Item* Inventoryy::_popCursor() {
 	EXPECTED_PTR(!mCursor.empty());
 	Item* item = mCursor.front();
-	mCursor.pop();
+	mCursor.pop_front();
 	return item;
 }
 
@@ -324,7 +333,7 @@ Item* Inventoryy::_peekCursor() const {
 
 const bool Inventoryy::pushCursor(Item* pItem) {
 	EXPECTED_BOOL(pItem);
-	mCursor.push(pItem);
+	mCursor.push_back(pItem);
 	pItem->setSlot(SlotID::CURSOR);
 	return true;
 }

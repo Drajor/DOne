@@ -837,6 +837,15 @@ void ZoneClientConnection::_sendInventory() {
 	auto outPacket = new EQApplicationPacket(OP_CharInventory, data, size);
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+
+	// Send the remaining cursor Items.
+	std::list<Item*> cursorItems = mCharacter->getInventory()->getCursor();
+	for (auto i = cursorItems.begin(); i != cursorItems.end(); i++) {
+		if (i == cursorItems.begin())
+			continue; // First cursor Item is sent with OP_CharInventory.
+
+		sendItemSummon(*i);
+	}
 }
 
 void ZoneClientConnection::_sendWeather() {

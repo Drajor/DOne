@@ -28,6 +28,7 @@ public:
 	inline const bool isCursorEmpty() const { return mCursor.empty(); }
 
 	inline Item* peekCursor() const { return _peekCursor(); }
+	inline std::list<Item*> getCursor() { return mCursor; }
 
 	// Currency
 
@@ -112,7 +113,7 @@ private:
 	Character* mCharacter = nullptr;
 
 	Item* mItems[SlotID::MAIN_SLOTS]; // Slots 0 - 30
-	std::queue<Item*> mCursor; // Slot 31
+	std::list<Item*> mCursor; // Slot 31
 	Item* mBank[SlotID::BANK_SLOTS]; // Slots 2000 - 2023
 	Item* mSharedBank[SlotID::SHARED_BANK_SLOTS]; // Slots 2500 - 2501
 	Item* mTrade[SlotID::TRADE_SLOTS]; // Slots 3000 - ?
