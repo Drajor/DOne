@@ -22,6 +22,7 @@
 #include "ItemDataStore.h"
 #include "ItemFactory.h"
 #include "Transmutation.h"
+#include "Random.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -3451,21 +3452,29 @@ void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 	auto item = mCharacter->getInventory()->find(itemID, itemInstanceID);
 
 	if (item) {
-		Log::info("Found Item " + item->getName());
-
+		Log::info("Found <u>Item</u> " + item->getName());
+		String text = "\x07 This item is ";
+		String texts[4] = {
+			"Common",
+			"<c \"#336699\">Magic</c>",
+			"<c \"#FFCC00\">Rare</c>",
+			"an <c \"#FF6600\">Artifact</c>",
+		};
+		text += texts[Random::make(3)] + " \x07";
+		sendReadBook(payload->mWindow, payload->mSlot, payload->mType, text);
 		// Check: Found Item is not in a worn slot.
 		if (SlotID::isWorn(item->getSlot()) == false) {
 			const uint32 slots = item->getSlots();
 
-			// Hardcode.
-			if (slots == EquipSlots::Chest) {
-				auto currentChestItem = mCharacter->getInventory()->getItem(SlotID::CHEST);
-				if (currentChestItem) {
-					String comparison;
-					currentChestItem->compare(item, comparison);
-					sendReadBook(payload->mWindow, payload->mSlot, payload->mType, comparison);
-				}
-			}
+			//// Hardcode.
+			//if (slots == EquipSlots::Chest) {
+			//	auto currentChestItem = mCharacter->getInventory()->getItem(SlotID::CHEST);
+			//	if (currentChestItem) {
+			//		String comparison;
+			//		currentChestItem->compare(item, comparison);
+			//		sendReadBook(payload->mWindow, payload->mSlot, payload->mType, comparison);
+			//	}
+			//}
 		}
 	}
 }

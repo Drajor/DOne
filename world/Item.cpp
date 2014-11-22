@@ -559,3 +559,29 @@ const bool Item::hasAugmentations() const {
 
 	return false;
 }
+
+String Item::getLink() const {
+	std::stringstream ss;
+	ss << "\x12";
+	ss << std::setw(1) << std::hex << 0; // Unknown ?
+	ss << std::setw(5) << std::hex << std::setfill('0') << getID();
+
+	for (auto i : mAugments) {
+		if (i) {
+			ss << std::setw(5) << std::hex << std::setfill('0') << i->getID();
+		}
+		else {
+			ss << std::setw(5) << std::hex << std::setfill('0') << 0;
+		}
+	}
+
+	ss << std::setw(1) << std::hex << std::setfill('0') << isEvolvingItem() ? 1 : 0;
+	ss << std::setw(4) << std::hex << std::setfill('0') << getLoreGroup();
+	ss << std::setw(1) << std::hex << std::setfill('0') << getCurrentEvolvingLevel();
+	ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Unknown ?
+	ss << std::setw(8) << std::hex << std::setfill('0') << 0; // Hash
+	ss << getName();
+	ss << "\x12";
+
+	return ss.str();
+}

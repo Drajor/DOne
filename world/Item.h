@@ -11,6 +11,8 @@ public:
 	Item* copy() const;
 	~Item();
 
+	String getLink() const;
+
 	const bool compare(Item * pItem, String& pText);
 
 	inline ItemData* getData() const { return mItemData; }

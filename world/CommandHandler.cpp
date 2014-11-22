@@ -1071,22 +1071,47 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		if (mInvoker->targetIsNPC()) {
-			NPC* target = Actor::cast<NPC*>(mInvoker->getTarget());
-			mInvoker->notify("== Items ==");
-			for (auto i : target->getLootItems()) {
-				mInvoker->notify(i->getName());
+		if (mInvoker->targetIsNPC()) { return inspectNPC(Actor::cast<NPC*>(mInvoker->getTarget())); }
+		if (mInvoker->targetIsCharacter()) { return inspectCharacter(Actor::cast<Character*>(mInvoker->getTarget())); }
+
+		return false;
+	}
+
+	const bool inspectCharacter(Character* pCharacter) {
+		mInvoker->notify("Inspecting " + pCharacter->getName());
+
+		for (auto i = 0; i <= SlotID::AMMO; i++) {
+			auto item = pCharacter->getInventory()->getItem(i);
+			StringStream ss;
+
+			ss << "[" << i << "] ";
+			if (item) {
+				ss << item->getLink();
+			}
+			else {
+				ss << "EMPTY";
 			}
 
-			mInvoker->notify("== Currency ==");
-			const int32 platinum = target->getPlatinum();
-			const int32 gold = target->getGold();
-			const int32 silver = target->getSilver();
-			const int32 copper = target->getCopper();
-			StringStream ss;
-			ss << "P(" << platinum << ") G(" << gold << ") S" << silver << ") C(" << copper << ")";
 			mInvoker->notify(ss.str());
 		}
+
+		return true;
+	}
+
+	const bool inspectNPC(NPC* pNPC) {
+		mInvoker->notify("== Items ==");
+		for (auto i : pNPC->getLootItems()) {
+			mInvoker->notify(i->getName());
+		}
+
+		mInvoker->notify("== Currency ==");
+		const int32 platinum = pNPC->getPlatinum();
+		const int32 gold = pNPC->getGold();
+		const int32 silver = pNPC->getSilver();
+		const int32 copper = pNPC->getCopper();
+		StringStream ss;
+		ss << "P(" << platinum << ") G(" << gold << ") S" << silver << ") C(" << copper << ")";
+		mInvoker->notify(ss.str());
 
 		return true;
 	}
