@@ -1521,7 +1521,7 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	EXPECTED(item->isSellable());
 
 	// Check: Item has enough stacks.
-	//EXPECTED(item->getStacks() >= pStacks); // TODO: Add this back when stacks are not fucked.
+	EXPECTED(item->getStacks() >= pStacks);
 
 	// Calculate sale price.
 	const uint32 price = item->getSellPrice(pStacks, npc->getSellRate());

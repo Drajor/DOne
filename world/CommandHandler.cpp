@@ -1077,26 +1077,42 @@ public:
 		return false;
 	}
 
+	String printItem(Item* pItem) {
+		StringStream ss;
+		ss << "[" << pItem->getSlot() << "] " << pItem->getLink();
+		if (pItem->isStackable()) {
+			ss << " (" << pItem->getStacks() << ")";
+		}
+		return ss.str();
+	}
+
 	const bool inspectCharacter(Character* pCharacter) {
 		mInvoker->notify("Inspecting " + pCharacter->getName());
 
-		auto f = [&pCharacter](Item* pItem) {
-			StringStream ss;
-
-			
+		auto f = [this](Item* pItem) {
+			StringStream ss;			
 			if (pItem) {
-				ss << "[" << pItem->getSlot() << "] " << pItem->getLink();
+				ss << printItem(pItem);
+				if (pItem->isContainer() && pItem->isEmpty() == false) {
+					std::list<Item*> contents;
+					pItem->getContents(contents);
+					for (auto i : contents) {
+						ss << printItem(i);
+					}
+				}
 			}
-			//else {
-			//	ss << "EMPTY";
-			//}
-
 			return ss.str();
 		};
 
 		// Worn.
 		for (auto i = 0; i <= SlotID::AMMO; i++) {
 			mInvoker->notify(f(pCharacter->getInventory()->getItem(i)));
+		}
+
+		// Main.
+		for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+			auto item = pCharacter->getInventory()->getItem(i);
+			mInvoker->notify(f(item));
 		}
 
 		// Cursor
