@@ -38,7 +38,6 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 			numItems++;
 			pSize += item->getDataSize();
 		}
-			
 	}
 
 	// Bank Items

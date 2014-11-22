@@ -37,20 +37,17 @@ void Item::getContents(std::list<Item*>& pItems) const {
 }
 
 const uint32 Item::getDataSize() const {
-	uint32 result = 0;
+	uint32 subItemSize = 0;
 
 	// Add augments.
 	for (auto i : mAugments)
-		if (i) result += i->getDataSize();
+		if (i) subItemSize += i->getDataSize();
 
 	// Add contents (container)
 	for (auto i : mContents)
-		if(i) result += i->getDataSize();
+		if(i) subItemSize += i->getDataSize();
 
-	//return _getDataSize() + result;
-	uint32 s = _getDataSize() + result;
-	Log::info("Item: " + getName() + " Size: " + std::to_string(s));
-	return s;
+	return _getDataSize() + subItemSize;
 }
 
 const uint32 Item::_getDataSize() const {
@@ -206,14 +203,16 @@ const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	unsigned char * data = nullptr;
 	pSize += getDataSize();
 
-	pSize += sizeof(uint32); // Item Count
+	pSize += sizeof(uint32); // Copy Type
 	data = new unsigned char[pSize];
 
 	Utility::DynamicStructure ds(data, pSize);
 	ds.write<uint32>(pCopyType);
 
+	// Copy Item data.
 	copyData(ds);
-
+	
+	// Check: The amount of data written matches what was calculated.
 	if (ds.check() == false) {
 		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
 	}
@@ -224,10 +223,8 @@ const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 uint32 Item::getSubItems() const {
 	uint32 count = 0;
 
-	for (auto i : mAugments)
-		if(i) count++;
-	for (auto i : mContents)
-		if(i) count++;
+	for (auto i : mAugments) { if (i) count++; }
+	for (auto i : mContents) { if (i) count++; }
 
 	return count;
 }
