@@ -816,7 +816,7 @@ private:
 
 	// ItemData Overrides
 	uint32 mSlot = 0;
-	uint32 mStacks = 0;
+	uint32 mStacks = 1;
 	bool mAttuned = false;
 	uint16 mOrnamentationIcon = 0;
 	String mOrnamentationIDFile = "";

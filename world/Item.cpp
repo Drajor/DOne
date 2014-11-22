@@ -214,7 +214,7 @@ const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	
 	// Check: The amount of data written matches what was calculated.
 	if (ds.check() == false) {
-		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+		Log::error("[Item] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
 	}
 
 	return data;

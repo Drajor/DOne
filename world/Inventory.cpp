@@ -29,20 +29,30 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 	unsigned char * data = nullptr;
 	uint32 numItems = 0;
 
-	// First we need to calculate how much memory will be required to store the inventory data.
+	// Calculate the number of Items and amount of memory required to send.
 
-	// Inventory
-	for (auto i = 0; i < 32; i++) {
-		auto item = getItem(i);
-		if (item) {
-			numItems++;
-			pSize += item->getDataSize();
+	// Calc: Iterates a slot range, counting number of items and data size.
+	auto calc = [this, &numItems, &pSize](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
+		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
+			auto item = getItem(i);
+			if (item) {
+				numItems++;
+				pSize += item->getDataSize();
+			}
 		}
-	}
+	};
+
+	// Worn Items.
+	calc(SlotID::CHARM, SlotID::AMMO);
+	
+	// Main Items.
+	calc(SlotID::MAIN_0, SlotID::MAIN_7);
 
 	// Bank Items
+	calc(SlotID::BANK_0, SlotID::BANK_23);
 
 	// Shared Bank Items.
+	calc(SlotID::SHARED_BANK_0, SlotID::SHARED_BANK_1);
 
 	// Allocate the required memory.
 	pSize += sizeof(uint32); // Item Count
@@ -51,19 +61,28 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 	Utility::DynamicStructure ds(data, pSize);
 	ds.write<uint32>(numItems);
 
-	// Second we need to copy
+	// Copy: Iterates a slot range and copies Item data.
+	auto copy = [this, &ds](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
+		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
+			auto item = getItem(i);
+			if (item)
+				item->copyData(ds);
+		}
+	};
 
-	// Inventory.
-	for (auto i = 0; i < 32; i++) {
-		auto item = getItem(i);
-		if (item)
-			item->copyData(ds);
-	}
+	// Worn Items.
+	copy(SlotID::CHARM, SlotID::AMMO);
+
+	// Main Items.
+	copy(SlotID::MAIN_0, SlotID::MAIN_7);
 
 	// Bank Items
+	copy(SlotID::BANK_0, SlotID::BANK_23);
 
 	// Shared Bank Items.
+	copy(SlotID::SHARED_BANK_0, SlotID::SHARED_BANK_1);
 
+	// Check: The amount of data written matches what was calculated.
 	if (ds.check() == false) {
 		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
 	}
