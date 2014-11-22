@@ -37,7 +37,6 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 		if (item) {
 			numItems++;
 			pSize += item->getDataSize();
-			numItems += item->getSubItems();
 		}
 			
 	}
