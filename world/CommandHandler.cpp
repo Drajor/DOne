@@ -1080,19 +1080,29 @@ public:
 	const bool inspectCharacter(Character* pCharacter) {
 		mInvoker->notify("Inspecting " + pCharacter->getName());
 
-		for (auto i = 0; i <= SlotID::AMMO; i++) {
-			auto item = pCharacter->getInventory()->getItem(i);
+		auto f = [&pCharacter](Item* pItem) {
 			StringStream ss;
 
-			ss << "[" << i << "] ";
-			if (item) {
-				ss << item->getLink();
+			
+			if (pItem) {
+				ss << "[" << pItem->getSlot() << "] " << pItem->getLink();
 			}
-			else {
-				ss << "EMPTY";
-			}
+			//else {
+			//	ss << "EMPTY";
+			//}
 
-			mInvoker->notify(ss.str());
+			return ss.str();
+		};
+
+		// Worn.
+		for (auto i = 0; i <= SlotID::AMMO; i++) {
+			mInvoker->notify(f(pCharacter->getInventory()->getItem(i)));
+		}
+
+		// Cursor
+		auto cursorItems = pCharacter->getInventory()->getCursor();
+		for (auto i : cursorItems) {
+			mInvoker->notify(f(i));
 		}
 
 		return true;

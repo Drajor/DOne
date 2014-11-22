@@ -834,9 +834,9 @@ void ZoneClientConnection::_sendInventory() {
 	EXPECTED(data);
 	EXPECTED(size >= 4); // 4 bytes = empty inventory.
 
-	auto outPacket = new EQApplicationPacket(OP_CharInventory, data, size);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_CharInventory, data, size);
+	sendPacket(packet);
+	safe_delete(packet);
 
 	// Send the remaining cursor Items.
 	std::list<Item*> cursorItems = mCharacter->getInventory()->getCursor();
