@@ -67,6 +67,7 @@ public:
 
 	void addShopItem(Item* pItem) { mShopItems.push_back(pItem); }
 	std::list<Item*> getShopItems() { return mShopItems; }
+	Item* getShopItem(const uint32 pInstanceID);
 
 	// Returns whether or not this NPC is accepting trade.
 	inline const bool willTrade() const { return mAcceptTrade; }

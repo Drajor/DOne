@@ -98,14 +98,71 @@ public:
 	inline void setScrollName(const String& pValue) { memset(mItemData->mScrollName, 0, sizeof(mItemData->mScrollName)); strcpy(mItemData->mScrollName, pValue.c_str()); }
 	inline void setBardName(const String& pValue) { memset(mItemData->mBardName, 0, sizeof(mItemData->mBardName)); strcpy(mItemData->mBardName, pValue.c_str()); }
 
-	inline const uint32 getSlot() const { return mSlot; }
-	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
+	// Returns the number of stacks this Item has.
 	inline const uint32 getStacks() const { return mStacks; }
-	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
-	const bool addStacks(const uint32 pStacks);
-	const bool removeStacks(const uint32 pStacks);
+
+	// Returns the slot this Item is in.
+	inline const uint32 getSlot() const { return mSlot; }
+
+	// Returns the shop price of the Item.
+	inline const uint32 getShopPrice() const { return mShopPrice; }
+
+	// Returns the shop quantity of the Item.
+	inline const int32 getShopQuantity() const { return mShopQuantity; }
+
+	// Returns the instance ID of this Item.
+	inline const uint32 getInstanceID() const { return mInstanceID; }
+
+	// Returns whether or not this Item is attuned.
 	inline const bool isAttuned() const { return mAttuned; }
+
+	// Returns the time stamp this Item was last cast.
+	inline const uint32 getLastCastTime() const { return mLastCastTime; }
+
+	// Returns the number of charges this Item has.
+	inline const uint32 getCharges() const { return mCharges; }
+
+	// Returns the power of this Item.
+	inline const uint32 getPower() const { return mPower; }
+
+	// Sets the number of stacks this Item has.
+	inline void setStacks(const uint32 pStacks) { mStacks = pStacks; }
+
+	// Sets the slot this Item is in.
+	inline void setSlot(const uint32 pSlot) { mSlot = pSlot; }
+
+	// Sets the shop price of the Item.
+	inline void setShopPrice(const uint32 pValue) { mShopPrice = pValue; }
+
+	// Sets the shop quantity of the Item.
+	inline void setShopQuantity(const int32 pValue) { mShopQuantity = pValue; }
+
+	// Sets the instance ID of this Item.
+	inline void setInstanceID(const uint32 pValue) { mInstanceID = pValue; }
+
+	// Sets the time stamp this Item was last cast.
+	inline void setLastCastTime(const uint32 pValue) { mLastCastTime = pValue; }
+
+	// Sets the number of charges this Item has.
+	inline void setCharges(const uint32 pValue) { mCharges = pValue; }
+
+	// Sets the power of this Item.
+	inline void setPower(const uint32 pValue) { mPower = pValue; }
+
+	// Sets whether or not this Item is attuned.
 	inline void setIsAttuned(const bool pAttuned) { mAttuned = pAttuned; }
+	
+	// Adds stacks to the Item.
+	const bool addStacks(const uint32 pStacks);
+
+	// Removes stacks from the Item.
+	const bool removeStacks(const uint32 pStacks);
+
+	// Adds charges to the Item.
+	const bool addCharges(const int32 pCharges) { return true; }
+
+	// Removes charges from the Item.
+	const bool removeCharges(const int32 pCharges) { return true; }
 
 	inline const uint32 getSubIndex() const { return mSubIndex; };
 	inline const bool hasValidSubIndex() const { return mSubIndex >= 0 && mSubIndex < SlotID::MAX_CONTENTS; }
@@ -149,11 +206,14 @@ public:
 	const bool hasAugmentations() const;
 
 	// Evolving.
-	inline const int32 getCurrentEvolvingLevel() const { return mCurrentEvolvingLevel; }
-	inline void setCurrentEvolvingLevel(const int32 pValue) { mCurrentEvolvingLevel = pValue; }
-	inline const int32 getMaximumEvolvingLevel() const { return mItemData->mEvolvingItem.mMaxLevel; }
-	inline void setMaximumEvolvingLevel(const int32 pValue) { mItemData->mEvolvingItem.mMaxLevel = pValue; }
+	inline const int32 getEvolvingLevel() const { return mEvolvingLevel; }
+	inline const bool getEvolvingActive() const { return mEvolvingActive; }
+	inline const int32 getEvolvingMaximumLevel() const { return mItemData->mEvolvingItem.mMaxLevel; }
 	inline const double getEvolvingProgress() const { return mEvolvingProgress; }
+
+	inline void setEvolvingLevel(const int32 pValue) { mEvolvingLevel = pValue; }
+	inline void setEvolvingActive(const bool pValue) { mEvolvingActive = pValue; }
+	inline void setEvolvingMaximumLevel(const int32 pValue) { mItemData->mEvolvingItem.mMaxLevel = pValue; }
 	inline void setEvolvingProgress(const double pProgress) { mEvolvingProgress = pProgress; }
 
 	// Ornamentation
@@ -165,12 +225,6 @@ public:
 	inline void setOrnamentationIDFile(const String& pValue) { mOrnamentationIDFile = pValue; }
 	inline const bool hasOrnamentationIDFile() const { return getOrnamentationIDFile().length() > 0; }
 
-	inline const uint32 getShopPrice() const { return mItemData->mShopPrice; }
-	inline const int32 getShopQuantity() const { return mItemData->mShopQuantity; }
-	inline const uint32 getInstanceID() const { return mItemData->mInstanceID; }
-	inline const uint32 getLastCastTime() const { return mItemData->mLastCastTime; }
-	inline const uint32 getCharges() const { return mItemData->mCharges; }
-	inline const uint32 getPower() const { return mItemData->mPower; }
 	inline const bool isEvolvingItem() const { return mItemData->mIsEvolvingItem > 0; }
 	inline const bool isCopied() const { return mItemData->mCopied == 1; }
 	inline const uint8 getItemClass() const { return mItemData->mItemClass; }
@@ -592,13 +646,6 @@ public:
 	// Returns whether or not this Item is an heirloom.
 	inline const bool isHeirloom() const { return mItemData->mHeirloom == 1; }
 
-
-	inline void setShopPrice(const uint32 pValue) { mItemData->mShopPrice = pValue; }
-	inline void setShopQuantity(const int32 pValue) { mItemData->mShopQuantity = pValue; }
-	inline void setInstanceID(const uint32 pValue) { mItemData->mInstanceID = pValue; }
-	inline void setLastCastTime(const uint32 pValue) { mItemData->mLastCastTime = pValue; }
-	inline void setCharges(const uint32 pValue) { mItemData->mCharges = pValue; }
-	inline void setPower(const uint32 pValue) { mItemData->mPower = pValue; }
 	inline void setIsEvolvingItem(const bool pValue) { mItemData->mIsEvolvingItem = pValue ? 1 : 0; }
 	inline void setIsCopied(const uint8 pValue) { mItemData->mCopied = pValue; }
 	inline void setItemClass(const uint8 pValue) { mItemData->mItemClass = pValue; }
@@ -808,7 +855,6 @@ public:
 
 private:
 	const uint32 _getDataSize() const;
-	void _onCopy();
 	Item* mParent = nullptr;
 	Item* mAugments[5];
 	Item* mContents[10];
@@ -816,7 +862,13 @@ private:
 
 	// ItemData Overrides
 	uint32 mSlot = 0;
+	uint32 mShopPrice = 0;
+	int32 mShopQuantity = 0;
 	uint32 mStacks = 1;
+	uint32 mInstanceID = 0;
+	uint32 mLastCastTime = 0;
+	uint32 mCharges = 0;
+	uint32 mPower = 0;
 	bool mAttuned = false;
 	uint16 mOrnamentationIcon = 0;
 	String mOrnamentationIDFile = "";
@@ -825,6 +877,7 @@ private:
 	// mSubIndex will be a value 0-9 that specifies the position it is stored.
 	int32 mSubIndex = -1;
 
-	int32 mCurrentEvolvingLevel = 0;
+	bool mEvolvingActive = false;
+	int32 mEvolvingLevel = 0;
 	double mEvolvingProgress = 0.0f;
 };

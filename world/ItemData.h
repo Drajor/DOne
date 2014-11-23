@@ -32,15 +32,15 @@ struct ItemData {
 	uint32 mStacks = 0; // Specified by Item.
 	uint32 __Unknown0 = 0; // Charm Scale (Demonstarr55)
 	uint32 mSlot = 0; // Specified by Item.
-	uint32 mShopPrice = 0;
-	int32 mShopQuantity = 0; // -1 = Unlimited
+	uint32 mShopPrice = 0; // Specified by Item.
+	int32 mShopQuantity = 0; // Specified by Item. Unlimited = -1
 	uint32 __Unknown1 = 0;
-	uint32 mInstanceID = 0; //unique instance id if not merchant item, else is merchant slot // what.the.fuck.
+	uint32 mInstanceID = 0; // Specified by Item.
 	uint32 __Unknown2 = 0;
-	uint32 mLastCastTime = 0;	// Unix Time from PP of last cast for this recast type if recast delay > 0
-	uint32 mCharges = 0; //Total Charges an item has (-1 for unlimited)
-	uint32 mAttuned = 0;
-	uint32 mPower = 0;
+	uint32 mLastCastTime = 0; // Specified by Item.
+	int32 mCharges = 0; // Specified by Item. Unlimited = -1
+	uint32 mAttuned = 0; // Specified by Item.
+	uint32 mPower = 0; // Specified by Item.
 	uint32 __Unknown3 = 0;
 	uint32 __Unknown4 = 0;
 	uint8 mIsEvolvingItem = 0; // 0 = OFF, 1 = ON

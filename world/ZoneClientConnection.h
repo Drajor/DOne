@@ -133,9 +133,12 @@ public:
 	void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
 	void sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText);
 	void sendCombineReply();
+
 	void sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate = 1.0f);
 	void sendShopEndReply();
 	void sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice);
+	void sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse = 0);
+	void sendShopDeleteItem(const uint32 pSpawnID, const uint32 pItemInstanceID, const int32 pUnknown);
 
 	void sendPacket(EQApplicationPacket* pPacket);
 
@@ -259,9 +262,11 @@ private:
 	void _handleAugmentInfo(const EQApplicationPacket* pPacket);
 	void _handleReadBook(const EQApplicationPacket* pPacket);
 	void _handleCombine(const EQApplicationPacket* pPacket);
+	
 	void _handleShopRequest(const EQApplicationPacket* pPacket);
 	void _handleShopEnd(const EQApplicationPacket* pPacket);
 	void _handleShopSell(const EQApplicationPacket* pPacket);
+	void _handleShopBuy(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

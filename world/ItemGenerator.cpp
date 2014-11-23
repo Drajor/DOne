@@ -353,8 +353,8 @@ Item* ItemGenerator::makeOneHandBlunt(const uint8 pLevel, const Rarity pRarity) 
 	//item->setIsCopied(8);
 
 	item->setIsEvolvingItem(true);
-	item->setCurrentEvolvingLevel(3);
-	item->setMaximumEvolvingLevel(4);
+	item->setEvolvingLevel(3);
+	item->setEvolvingMaximumLevel(4);
 	item->setEvolvingProgress(55.4);
 	item->setLoreGroup(1502);
 	//item
@@ -438,8 +438,8 @@ Item* ItemGenerator::makeHead(const uint8 pLevel, const Rarity pRarity) {
 	item->setSlots(EquipSlots::Head);
 	//item->setIsEvolvingItem(1500);
 	item->setIsEvolvingItem(true);
-	item->setCurrentEvolvingLevel(3);
-	item->setMaximumEvolvingLevel(4);
+	item->setEvolvingLevel(3);
+	item->setEvolvingMaximumLevel(4);
 	item->setEvolvingProgress(55.4);
 	item->setLoreGroup(item->getID()); // http://lucy.allakhazam.com/itemraw.html?id=85612 LoreGroup(loreItem) == ItemID
 	item->setWeight(150);

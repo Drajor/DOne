@@ -4,6 +4,7 @@
 #include "Utility.h"
 #include "ItemGenerator.h"
 #include "Item.h"
+#include "ItemFactory.h"
 
 NPC::NPC() {
 	setRunSpeed(0.7f);
@@ -27,9 +28,15 @@ const bool NPC::initialise() {
 	setClass(41);
 
 	auto a = ItemGenerator::makeTwoHandBlunt(1, Rarity::Common);
+	//auto a = ItemFactory::make(ItemID::StartFood);
 	a->setShopQuantity(-1);
 	a->setShopPrice(1234);
 	addShopItem(a);
+
+	auto b = ItemFactory::make(ItemID::StartDrink);
+	b->setShopQuantity(-1);
+	b->setShopPrice(2345);
+	addShopItem(b);
 
 	return true;
 }
@@ -105,4 +112,12 @@ const bool NPC::removeShopper(Character* pCharacter) {
 
 	mShoppers.remove(pCharacter);
 	return true;
+}
+
+Item* NPC::getShopItem(const uint32 pInstanceID) {
+	for (auto i : mShopItems) {
+		if (i->getInstanceID() == pInstanceID) return i;
+	}
+
+	return nullptr;
 }

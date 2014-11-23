@@ -94,31 +94,43 @@ const uint32 Item::_getDataSize() const {
 }
 
 const bool Item::copyData(Utility::DynamicStructure& pStructure) {
-	// Update ItemData with anything specific from this Item
-	_onCopy();
-
 	// Check: This Item is either an augment or within a bag.
 	if (hasParent()) {
 		EXPECTED_BOOL(hasValidSubIndex());
 		pStructure.write<uint32>(getSubIndex());
 	}
 
-	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mItemData->mEvolvingItem) - (unsigned int)&(mItemData->mStacks);
-	pStructure.writeChunk((void*)&(mItemData->mStacks), chunk0);
+	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
+
+	// Write Item Header.
+	pStructure.write(getStacks());
+	pStructure.write(mItemData->__Unknown0);
+	pStructure.write(getSlot());
+	pStructure.write(getShopPrice());
+	pStructure.write(getShopQuantity());
+	pStructure.write(mItemData->__Unknown1);
+	pStructure.write(getInstanceID());
+	pStructure.write(mItemData->__Unknown2);
+	pStructure.write(getLastCastTime());
+	pStructure.write(getCharges());
+	pStructure.write(isAttuned() ? 1 : 0);
+	pStructure.write(getPower());
+	pStructure.write(mItemData->__Unknown3);
+	pStructure.write(mItemData->__Unknown4);
+	pStructure.write(mItemData->mIsEvolvingItem);
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown0), sizeof(mItemData->mEvolvingItem.__Unknown0));
-		pStructure.write<int32>(mItemData->mEvolvingItem.mCurrentLevel);
-		pStructure.write<double>(mItemData->mEvolvingItem.mProgress);
-		pStructure.write<uint8>(mItemData->mEvolvingItem.mActive);
+		pStructure.write<int32>(getEvolvingLevel());
+		pStructure.write<double>(getEvolvingProgress());
+		pStructure.write<uint8>(getEvolvingActive());
 		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 	}
 
-	pStructure.writeString(String(mItemData->mOrnamentationIDFile));
-	pStructure.write<uint16>(mItemData->mOrnamentationIcon);
+	pStructure.writeString(getOrnamentationIDFile());
+	pStructure.write(getOrnamentationIcon());
 
 	pStructure.write<uint8>(mItemData->__Unknown5);
 	pStructure.write<uint8>(mItemData->__Unknown6);
@@ -227,22 +239,6 @@ uint32 Item::getSubItems() const {
 	for (auto i : mContents) { if (i) count++; }
 
 	return count;
-}
-
-void Item::_onCopy() {
-	mItemData->mSlot = mSlot;
-	mItemData->mStacks = mStacks;
-	mItemData->mAttuned = mAttuned ? 1 : 0;
-	mItemData->mOrnamentationIcon = mOrnamentationIcon;
-	memset(mItemData->mOrnamentationIDFile, 0, sizeof(mItemData->mOrnamentationIDFile));
-	strcpy(mItemData->mOrnamentationIDFile, mOrnamentationIDFile.c_str());
-
-	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
-
-	if (isEvolvingItem()) {
-		mItemData->mEvolvingItem.mCurrentLevel = mCurrentEvolvingLevel;
-		mItemData->mEvolvingItem.mProgress = mEvolvingProgress;
-	}
 }
 
 Item* Item::findFirst(const uint8 pItemType) const {
@@ -574,7 +570,7 @@ String Item::getLink() const {
 
 	ss << std::setw(1) << std::hex << std::setfill('0') << isEvolvingItem() ? 1 : 0;
 	ss << std::setw(4) << std::hex << std::setfill('0') << getLoreGroup();
-	ss << std::setw(1) << std::hex << std::setfill('0') << getCurrentEvolvingLevel();
+	ss << std::setw(1) << std::hex << std::setfill('0') << getEvolvingLevel();
 	ss << std::setw(5) << std::hex << std::setfill('0') << 0; // Unknown ?
 	ss << std::setw(8) << std::hex << std::setfill('0') << 0; // Hash
 	ss << getName();

@@ -50,3 +50,9 @@ Item* ItemFactory::makeAugment() {
 
 	return augment;
 }
+
+Item* ItemFactory::_copy(Item* pItem) {
+	auto item = make(pItem->getID(), pItem->getStacks());
+
+	return item;
+}

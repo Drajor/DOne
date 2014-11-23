@@ -532,6 +532,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player tries to sell an Item to a merchant.
 		_handleShopSell(pPacket);
 		break;
+	case OP_ShopPlayerBuy:
+		// NOTE: This occurs when a player tries to buy an Item from a merchant.
+		_handleShopBuy(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3005,7 +3009,7 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 
 	Item* item = new Item(itemData);
 
-	item->setCurrentEvolvingLevel(payload->mCurrentEvolvingLevel);
+	item->setEvolvingLevel(payload->mCurrentEvolvingLevel);
 	item->setOrnamentationIcon(payload->mOrnamentationIcon);
 	
 	// NOTE: Untested!
@@ -3575,12 +3579,12 @@ void ZoneClientConnection::sendCombineReply() {
 void ZoneClientConnection::_handleShopRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(MerchantRequest::sizeCheck(pPacket));
+	EXPECTED(ShopRequest::sizeCheck(pPacket));
 
 	// Check: Character is in a state that allows for shopping.
 	EXPECTED(mCharacter->canShop());
 
-	auto payload = MerchantRequest::convert(pPacket);
+	auto payload = ShopRequest::convert(pPacket);
 	Log::info(payload->_debug());
 
 	EXPECTED(mCharacter->getSpawnID() == payload->mCharacterSpawnID); // Sanity.
@@ -3592,7 +3596,7 @@ void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const 
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = MerchantRequest::construct(pNPCSpawnID, mCharacter->getSpawnID(), pAction, pRate);
+	auto packet = ShopRequest::construct(pNPCSpawnID, mCharacter->getSpawnID(), pAction, pRate);
 	sendPacket(packet);
 	delete packet;
 }
@@ -3600,9 +3604,9 @@ void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const 
 void ZoneClientConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(MerchantEnd::sizeCheck(pPacket));
+	EXPECTED(ShopEnd::sizeCheck(pPacket));
 
-	auto payload = MerchantEnd::convert(pPacket);
+	auto payload = ShopEnd::convert(pPacket);
 
 	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
 	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
@@ -3619,10 +3623,10 @@ void ZoneClientConnection::sendShopEndReply() {
 void ZoneClientConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(MerchantSell::sizeCheck(pPacket));
+	EXPECTED(ShopSell::sizeCheck(pPacket));
 	EXPECTED(mCharacter->isShopping());
 
-	auto payload = MerchantSell::convert(pPacket);
+	auto payload = ShopSell::convert(pPacket);
 	Log::info(payload->_debug());
 
 	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
@@ -3632,7 +3636,39 @@ void ZoneClientConnection::sendShopSellReply(const uint32 pSpawnID, const uint32
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = MerchantSell::construct(pSpawnID, pSlotID, pStacks, pPrice);
+	auto packet = ShopSell::construct(pSpawnID, pSlotID, pStacks, pPrice);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(ShopBuy::sizeCheck(pPacket));
+	EXPECTED(mCharacter->isShopping());
+
+	auto payload = ShopBuy::convert(pPacket);
+	Log::info(payload->_debug());
+
+	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
+
+	mZone->handleShopBuy(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
+}
+
+void ZoneClientConnection::sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = ShopBuy::construct(mCharacter->getSpawnID(), pSpawnID, pItemInstanceID, pSpawnID, pPrice, pResponse);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendShopDeleteItem(const uint32 pSpawnID, const uint32 pItemInstanceID, const int32 pUnknown) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = ShopDeleteItem::construct(mCharacter->getSpawnID(), pSpawnID, pItemInstanceID, pUnknown);
 	sendPacket(packet);
 	delete packet;
 }

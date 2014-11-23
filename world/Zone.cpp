@@ -26,6 +26,7 @@
 #include "Random.h"
 #include "LootAllocator.h"
 #include "Item.h"
+#include "ItemFactory.h"
 #include "Inventory.h"
 #include "EventDispatcher.h"
 
@@ -1568,4 +1569,63 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
 
 	// TODO: Dynamic merchant Items.
+}
+
+void Zone::handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks) {
+	EXPECTED(pCharacter);
+	EXPECTED(pCharacter->isShopping());
+
+	// Check: Cursor is empty. Underfoot checks this.
+	EXPECTED(pCharacter->getInventory()->isCursorEmpty());
+
+	NPC* npc = pCharacter->getShoppingWith();
+	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
+
+	// Check: Distance to merchant.
+	EXPECTED(canShop(pCharacter, npc));
+
+	uint64 price = 0;
+
+	// Find Item.
+	auto item = npc->getShopItem(pItemInstanceID);
+	if (!item) {
+		pCharacter->notify("I seem to have misplaced that. Sorry!");
+		// Send failure reply to prevent UI locking up.
+		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price, -1);
+		return;
+	}
+
+	Item* purchasedItem = nullptr;
+
+	// Unlimited quantity.
+	if (item->getShopQuantity() == -1) {
+		purchasedItem = ItemFactory::copy(item);
+		// Stacks?
+	}
+	else {
+
+	}
+	
+	if (purchasedItem->isStackable()) {
+		purchasedItem->setStacks(pStacks);
+	}
+	else {
+		const uint32 slotID = pCharacter->getInventory()->findSlot(purchasedItem);
+
+		// No slot was found
+		if (SlotID::isNone(slotID)) {
+			// Push to cursor.
+			EXPECTED(pCharacter->getInventory()->pushCursor(purchasedItem));
+		}
+		else {
+			// Put in free slot.
+			EXPECTED(pCharacter->getInventory()->put(purchasedItem, slotID));
+		}
+
+		pCharacter->getConnection()->sendItemTrade(purchasedItem);
+	}
+	
+
+	// Send success reply.
+	pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price);
 }

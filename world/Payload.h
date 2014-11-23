@@ -841,7 +841,7 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct MerchantRequest : FixedT<MerchantRequest, OP_ShopRequest> {
+		struct ShopRequest : FixedT<ShopRequest, OP_ShopRequest> {
 			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pCharacterSpawnID, const uint32 pAction, const float pRate) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -860,7 +860,7 @@ namespace Payload {
 
 			String _debug() const {
 				StringStream ss;
-				ss << "{MerchantRequest} ";
+				ss << "{ShopRequest} ";
 				PRINT_MEMBER(mNPCSpawnID);
 				PRINT_MEMBER(mCharacterSpawnID);
 				PRINT_MEMBER(mAction);
@@ -870,13 +870,13 @@ namespace Payload {
 		};
 
 		// C->S
-		struct MerchantEnd : Fixed<MerchantEnd> {
+		struct ShopEnd : Fixed<ShopEnd> {
 			uint32 mNPCSpawnID = 0;
 			uint32 mCharacterSpawnID = 0;
 		};
 
-		// C->S
-		struct MerchantSell : FixedT<MerchantSell, OP_ShopPlayerSell>{
+		// C<->S
+		struct ShopSell : FixedT<ShopSell, OP_ShopPlayerSell>{
 			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -895,13 +895,70 @@ namespace Payload {
 
 			String _debug() const {
 				StringStream ss;
-				ss << "{MerchantSell} ";
+				ss << "{ShopSell} ";
 				PRINT_MEMBER(mNPCSpawnID);
 				PRINT_MEMBER(mSlotID);
 				PRINT_MEMBER(mStacks);
 				PRINT_MEMBER(mPrice);
 				return ss.str();
 			}
+		};
+
+		// C<->S
+		struct ShopBuy : public FixedT<ShopBuy, OP_ShopPlayerBuy> {
+			static EQApplicationPacket* construct(const uint32 pCharacterSpawnID, const uint32 pNPCSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse = 0) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mNPCSpawnID = pNPCSpawnID;
+				payload->mCharacterSpawnID = pCharacterSpawnID;
+				payload->mItemInstanceID = pItemInstanceID;
+				payload->mResponse = pResponse;
+				payload->mStacks = pStacks;
+				payload->mPrice = pPrice;
+
+				return packet;
+			}
+
+			uint32 mNPCSpawnID = 0;
+			uint32 mCharacterSpawnID = 0;
+			uint32 mItemInstanceID = 0;
+			uint32 mResponse = 0; // -1 = silent failure, 0 = success.
+			uint32 mStacks = 0;
+			uint32 mUnknown4 = 0;
+			uint64 mPrice = 0;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{ShopBuy} ";
+				PRINT_MEMBER(mNPCSpawnID);
+				PRINT_MEMBER(mCharacterSpawnID);
+				PRINT_MEMBER(mItemInstanceID);
+				PRINT_MEMBER(mResponse);
+				PRINT_MEMBER(mStacks);
+				PRINT_MEMBER(mUnknown4);
+				PRINT_MEMBER(mPrice);
+				return ss.str();
+			}
+		};
+
+		// C->S
+		// Not sure how this works yet.
+		struct ShopDeleteItem : public FixedT<ShopDeleteItem, OP_ShopDelItem> {
+			static EQApplicationPacket* construct(const uint32 pCharacterSpawnID, const uint32 pNPCSpawnID, const uint32 pItemInstanceID, const uint32 pUnknown) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mNPCSpawnID = pNPCSpawnID;
+				payload->mCharacterSpawnID = pCharacterSpawnID;
+				payload->mItemInstanceID = pItemInstanceID;
+				payload->mUnknown = pUnknown;
+
+				return packet;
+			}
+
+			uint32 mNPCSpawnID = 0;
+			uint32 mCharacterSpawnID = 0;
+			uint32 mItemInstanceID = 0;
+			uint32 mUnknown = 0;
 		};
 	}
 
