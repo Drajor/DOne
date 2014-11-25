@@ -1617,7 +1617,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 			EXPECTED_BOOL(pStacks == 1);
 
 			// Try to find an empty slot for the Item.
-			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(pItem->getSize());
+			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(pItem->isContainer(), pItem->getSize());
 
 			// No empty slot found.
 			if (SlotID::isNone(slotID)) {
@@ -1625,24 +1625,30 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 				// X tells you, 'Your inventory appears full! How can you buy more?'
 				return false;
 			}
-
+			
+			// Make a copy of the shop Item.
 			Item* purchasedItem = ItemFactory::copy(pItem);
+
 			// Put Item into Inventory.
 			EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
 
 			// Update client.
 			pCharacter->getConnection()->sendItemTrade(purchasedItem);
 
+			// Update currency.
+
 			return true;
 		}
 		// Stackable
 		else {
 
+			// Try to find an existing stack.
+			//pCharacter->getInventory()->findStackable(pItem->getID());
 		}
 	}
 	// Limited Quantity.
 	else {
-
+		// TODO: Dynamic shop Items.
 	}
 
 	return false;

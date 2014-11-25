@@ -885,12 +885,14 @@ const uint32 Inventoryy::findEmptySlot(Item* pItem) const {
 	return SlotID::None;
 }
 
-const uint32 Inventoryy::findEmptySlot(const uint8 pItemSize) const {
+const uint32 Inventoryy::findEmptySlot(const bool pContainer, const uint8 pItemSize) const {
 	// Check: Main
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = getItem(i);
 		if (!item) return i;
 	}
+
+	if (pContainer) return SlotID::None;
 
 	// Check: Main Contents
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {

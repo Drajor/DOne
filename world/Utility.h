@@ -256,7 +256,7 @@ namespace Utility {
 	inline bool stoSafe(double& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stod); }
 
 	// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-	std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {
+	static std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {
 		StringStream ss(s);
 		String item;
 		while (std::getline(ss, item, delim)) {
@@ -266,7 +266,7 @@ namespace Utility {
 	}
 
 	// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
-	std::vector<String> split(const String &s, char delim) {
+	static std::vector<String> split(const String &s, char delim) {
 		std::vector<String> elems;
 		split(s, delim, elems);
 		return elems;

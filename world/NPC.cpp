@@ -38,6 +38,11 @@ const bool NPC::initialise() {
 	b->setShopPrice(2345);
 	addShopItem(b);
 
+	auto c = ItemFactory::make(ItemID::StartContainer);
+	c->setShopQuantity(-1);
+	c->setShopPrice(1);
+	addShopItem(c);
+
 	return true;
 }
 

@@ -91,7 +91,7 @@ public:
 	const bool onTradeCancel();
 
 	const uint32 findEmptySlot(Item* pItem) const;
-	const uint32 findEmptySlot(const uint8 pItemSize) const;
+	const uint32 findEmptySlot(const bool pContainer, const uint8 pItemSize) const;
 	Item* findFirst(const uint8 pItemType) const;
 
 	// Finds and returns the first Item with pItemID that does not have full stacks.
