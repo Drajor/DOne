@@ -32,7 +32,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		return;
 	}
 
-	bool hit = Random::make(1, 100) <= hitChance;
+	bool hit = Random::make<uint32>(1, 100) <= hitChance;
 	if (!hit) {
 		damage = AttackMiss;
 	}
@@ -41,7 +41,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	}
 
 	uint32 criticalChance = 50;
-	bool criticalHit = Random::make(0, 100) <= criticalChance;
+	bool criticalHit = Random::make<uint32>(0, 100) <= criticalChance;
 	if (criticalHit) {
 		damage *= 2;
 	}

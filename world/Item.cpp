@@ -544,7 +544,7 @@ const bool Item::forEachContents(std::function<const bool(Item*)> pFunction) con
 }
 
 const uint32 Item::getSellPrice(const uint32 pStacks, const float pSellRate) const {
-	return std::ceil(pStacks * getPrice() * pSellRate);
+	return static_cast<uint32>(std::ceil(pStacks * getPrice() * pSellRate));
 }
 
 const bool Item::hasAugmentations() const {

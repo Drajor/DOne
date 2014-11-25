@@ -604,10 +604,10 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	characterElement->SetAttribute(Attribute::Level, pCharacterData->mLevel);
 	characterElement->SetAttribute(Attribute::Class, pCharacterData->mClass);
 	characterElement->SetAttribute(Attribute::Zone, pCharacterData->mZoneID);
-	characterElement->SetAttribute(Attribute::X, pCharacterData->mX);
-	characterElement->SetAttribute(Attribute::Y, pCharacterData->mY);
-	characterElement->SetAttribute(Attribute::Z, pCharacterData->mZ);
-	characterElement->SetAttribute(Attribute::Heading, pCharacterData->mHeading);
+	characterElement->SetDoubleAttribute(Attribute::X, pCharacterData->mX);
+	characterElement->SetDoubleAttribute(Attribute::Y, pCharacterData->mY);
+	characterElement->SetDoubleAttribute(Attribute::Z, pCharacterData->mZ);
+	characterElement->SetDoubleAttribute(Attribute::Heading, pCharacterData->mHeading);
 	characterElement->SetAttribute(Attribute::Experience, pCharacterData->mExperience);
 	characterElement->SetAttribute(Attribute::LastName, pCharacterData->mLastName.c_str());
 	characterElement->SetAttribute(Attribute::Title, pCharacterData->mTitle.c_str());

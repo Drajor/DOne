@@ -212,7 +212,7 @@ struct SpellData {
 	String mCastOnOtherMessage = ""; // " is completely healed."
 	String mFadeMessage = "";
 
-	uint32 mManaCost = 0;
+	int32 mManaCost = 0;
 
 	// Class required levels.
 	uint8 mWarriorLevel = 255;

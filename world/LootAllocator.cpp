@@ -15,7 +15,7 @@ void LootAllocator::_allocateItems(NPC* pNPC) {
 	uint32 numItemsAllocated = 0;
 	
 	// Roll for max allocations.
-	for (auto i = 0; i < mMaximumItems; i++) {
+	for (uint32 i = 0; i < mMaximumItems; i++) {
 		if (Random::roll(mDropRate)) {
 			numItemsAllocated++;
 			Item* item = ItemGenerator::makeRandom(pNPC->getLevel(), Rarity::Common);

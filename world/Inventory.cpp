@@ -786,13 +786,13 @@ const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot
 	// (Conversion) Moving larger currency to smaller currency
 	else if (pFromType > pToType) {
 		uint32 diff = pFromType - pToType;
-		addAmount = pAmount * std::pow(10, diff); // Convert large to small
+		addAmount = static_cast<int32>(pAmount * std::pow(10, diff)); // Convert large to small
 		removeAmount = pAmount;
 	}
 	// (Conversion) Moving smaller currency to larger currency
 	else {
 		uint32 diff = pToType - pFromType;
-		uint32 denominator = std::pow(10, diff);
+		uint32 denominator = static_cast<uint32>(std::pow(10, diff));
 		addAmount = pAmount / denominator; // Convert small to large
 		// NOTE: The remainder of the above division is ignored, the Client will keep it on their cursor.
 		removeAmount = pAmount - (pAmount % denominator);

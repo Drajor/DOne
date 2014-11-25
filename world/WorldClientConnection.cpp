@@ -280,7 +280,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		valid = false;
 	}
 	// Check each character is alpha.
-	for (auto i = 0; i < characterName.length(); i++) {
+	for (String::size_type i = 0; i < characterName.length(); i++) {
 		if (!isalpha(characterName[i])) {
 			valid = false;
 			break;

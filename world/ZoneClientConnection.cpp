@@ -3535,7 +3535,7 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	EXPECTED(container->isEmpty() == false);
 
 	// Check: None of the Items in the container have > 1 stacks. (UF Client Checked)
-	auto f = [](Item* pItem) { return pItem->getStacks() == (pItem->isStackable()) ? 1 : 0; }; // This is annoying. Non-stackable Items should still have getStacks == 1.
+	auto f = [](Item* pItem) { return pItem->getStacks() == ((pItem->isStackable()) ? 1 : 0); }; // This is annoying. Non-stackable Items should still have getStacks == 1.
 	EXPECTED(container->forEachContents(f));
 
 	// Test.

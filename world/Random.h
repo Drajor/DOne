@@ -14,7 +14,7 @@ namespace Random {
 		}
 
 		auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-		mRandom.seed(seed);
+		mRandom.seed(static_cast<unsigned int>(seed));
 	}
 	
 	template <typename T>
