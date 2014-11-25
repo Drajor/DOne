@@ -25,6 +25,7 @@ class Scene;
 class SpawnPoint;
 struct ZonePoint;
 class LootAllocator;
+class Item;
 
 struct ZonePoint {
 	uint16 mID = 0;
@@ -143,6 +144,7 @@ public:
 	void handleShopEnd(Character* pCharacter, const uint32 pSpawnID);
 	void handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks);
 	void handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks);
+	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks);
 
 	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
 

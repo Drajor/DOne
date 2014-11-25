@@ -182,9 +182,9 @@ public:
 	const bool setContents(Item* pItem, const uint32 pSubIndex);
 	void updateContentsSlots();
 
-	const uint32 getDataSize() const;
+	const uint32 getDataSize(const uint32 pCopyType) const;
 	const unsigned char* copyData(uint32& pSize, const uint32 pCopyType);
-	const bool copyData(Utility::DynamicStructure& pStructure);
+	const bool copyData(Utility::DynamicStructure& pStructure, const uint32 pCopyType);
 	uint32 getSubItems() const;
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
@@ -193,6 +193,8 @@ public:
 	const bool forEachContents(std::function<const bool(Item*)> pFunction) const;
 	Item* findFirst(const uint8 pItemType) const;
 	Item* findStackable(const uint32 pItemID) const;
+
+	const uint32 findEmptySlot();
 
 	// Augmentation
 	// TODO: This needs some error checking.
@@ -854,7 +856,7 @@ public:
 	inline void setIsHeirloom(const bool pValue) { mItemData->mHeirloom = pValue ? 1 : 0; }
 
 private:
-	const uint32 _getDataSize() const;
+	const uint32 _getDataSize(const uint32 pCopyType) const;
 	Item* mParent = nullptr;
 	Item* mAugments[5];
 	Item* mContents[10];

@@ -197,7 +197,7 @@ namespace AccountCharacterDataXML {
 #undef SCA
 }
 
-bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
+const bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
@@ -264,7 +264,7 @@ bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 	return true;
 }
 
-bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
+const bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
 	using namespace AccountCharacterDataXML;
 	//Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);

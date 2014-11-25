@@ -40,7 +40,7 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 			auto item = getItem(i);
 			if (item) {
 				numItems++;
-				pSize += item->getDataSize();
+				pSize += item->getDataSize(Payload::ItemPacketCharInventory);
 			}
 		}
 	};
@@ -72,7 +72,7 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
 			auto item = getItem(i);
 			if (item)
-				item->copyData(ds);
+				item->copyData(ds, Payload::ItemPacketCharInventory);
 		}
 	};
 
@@ -863,13 +863,43 @@ const bool Inventoryy::onTradeCancel() {
 	return true;
 }
 
-const uint32 Inventoryy::findSlot(Item* pItem) const {
-	EXPECTED_VAR(pItem, 0);
+const uint32 Inventoryy::findEmptySlot(Item* pItem) const {
+	EXPECTED_VAR(pItem, SlotID::None); // This probably not wise :/
 
-	// Check: Primary
+	// Check: Main
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = getItem(i);
 		if (!item) return i;
+	}
+	
+	// Check: Main Contents
+	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = getItem(i);
+		if (item && item->isContainer() && item->getContainerSize() >= pItem->getSize()) {
+			const uint32 slotID = item->findEmptySlot();
+			if (SlotID::isNone(slotID) == false)
+				return slotID;
+		}
+	}
+
+	return SlotID::None;
+}
+
+const uint32 Inventoryy::findEmptySlot(const uint8 pItemSize) const {
+	// Check: Main
+	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = getItem(i);
+		if (!item) return i;
+	}
+
+	// Check: Main Contents
+	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = getItem(i);
+		if (item && item->isContainer() && item->getContainerSize() >= pItemSize) {
+			const uint32 slotID = item->findEmptySlot();
+			if (SlotID::isNone(slotID) == false)
+				return slotID;
+		}
 	}
 
 	return SlotID::None;

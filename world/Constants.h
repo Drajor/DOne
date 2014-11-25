@@ -457,8 +457,7 @@ namespace SlotID {
 			return SHARED_BANK_0_0 + (MAX_CONTENTS * (pSlot - SHARED_BANK_0)) + pSubIndex;
 		}
 
-		// This is bad.
-		return 0;
+		return SlotID::None;
 	}
 
 	static const uint32 getIndex(const uint32 pSlot) {

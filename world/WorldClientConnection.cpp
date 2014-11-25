@@ -233,7 +233,7 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 	}
 	// Going to: Character Selection Screen.
 	else {
-		AccountManager::getInstance().ensureAccountLoaded(accountID);
+		EXPECTED_BOOL(AccountManager::getInstance().ensureAccountLoaded(accountID));
 
 		_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
 		_sendLogServer();

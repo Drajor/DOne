@@ -19,8 +19,8 @@ public:
 	// Account Data
 	bool loadAccounts(std::list<AccountData*>& pAccounts);
 	bool saveAccounts(std::list<AccountData*>& pAccounts);
-	bool loadAccountCharacterData(AccountData* pAccount);
-	bool saveAccountCharacterData(AccountData* pAccount);
+	const bool loadAccountCharacterData(AccountData* pAccount);
+	const bool saveAccountCharacterData(AccountData* pAccount);
 
 	// Character Data
 	const bool loadCharacter(const String& pCharacterName, CharacterData* pCharacterData);

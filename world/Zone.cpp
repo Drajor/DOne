@@ -1412,13 +1412,13 @@ void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
 			}
 			// If there is no existing Item to stack on to, find a free slot.
 			else {
-				const uint32 slotID = pCharacter->getInventory()->findSlot(i);
+				const uint32 slotID = pCharacter->getInventory()->findEmptySlot(i);
 				pCharacter->getInventory()->put(i, slotID);
 				pCharacter->getConnection()->sendItemTrade(i);
 			}
 		}
 		else {
-			const uint32 slotID = pCharacter->getInventory()->findSlot(i);
+			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(i);
 
 			// No slot was found, try cursor.
 			if (SlotID::isNone(slotID)) {
@@ -1584,48 +1584,111 @@ void Zone::handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uin
 	// Check: Distance to merchant.
 	EXPECTED(canShop(pCharacter, npc));
 
-	uint64 price = 0;
-
 	// Find Item.
 	auto item = npc->getShopItem(pItemInstanceID);
 	if (!item) {
 		pCharacter->notify("I seem to have misplaced that. Sorry!");
 		// Send failure reply to prevent UI locking up.
-		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price, -1);
+		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, 0, -1);
 		return;
 	}
 
-	Item* purchasedItem = nullptr;
+	uint64 price = 0;
+	const bool success = _handleShopBuy(pCharacter, npc, item, pStacks);	
 
-	// Unlimited quantity.
-	if (item->getShopQuantity() == -1) {
-		purchasedItem = ItemFactory::copy(item);
-		// Stacks?
+	if (success) {
+		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price);
 	}
 	else {
-
+		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, 0, -1);
 	}
-	
-	if (purchasedItem->isStackable()) {
-		purchasedItem->setStacks(pStacks);
-	}
-	else {
-		const uint32 slotID = pCharacter->getInventory()->findSlot(purchasedItem);
+		
+}
 
-		// No slot was found
-		if (SlotID::isNone(slotID)) {
-			// Push to cursor.
-			EXPECTED(pCharacter->getInventory()->pushCursor(purchasedItem));
+const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks) {
+	EXPECTED_BOOL(pCharacter);
+	EXPECTED_BOOL(pNPC);
+	EXPECTED_BOOL(pItem);
+
+	// Unlimited Quantity.
+	if (pItem->getShopQuantity() == -1) {
+		// Non-stackable
+		if (pItem->isStackable() == false) {
+			EXPECTED_BOOL(pStacks == 1);
+
+			// Try to find an empty slot for the Item.
+			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(pItem->getSize());
+
+			// No empty slot found.
+			if (SlotID::isNone(slotID)) {
+				// NOTE: UF still sends the packet when it knows the Inventory is full. Go figure.
+				// X tells you, 'Your inventory appears full! How can you buy more?'
+				return false;
+			}
+
+			Item* purchasedItem = ItemFactory::copy(pItem);
+			// Put Item into Inventory.
+			EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
+
+			// Update client.
+			pCharacter->getConnection()->sendItemTrade(purchasedItem);
+
+			return true;
 		}
+		// Stackable
 		else {
-			// Put in free slot.
-			EXPECTED(pCharacter->getInventory()->put(purchasedItem, slotID));
+
 		}
-
-		pCharacter->getConnection()->sendItemTrade(purchasedItem);
 	}
-	
+	// Limited Quantity.
+	else {
 
-	// Send success reply.
-	pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price);
+	}
+
+	return false;
+
+	//return true;
+
+	//// Check: Shop has enough stacks.
+	//if (pStacks > 1) {
+	//	EXPECTED_BOOL(pItem->isStackable());
+
+	//	// Limited quantity.
+	//	if (pItem->getShopQuantity() != -1)
+	//		EXPECTED_BOOL(pItem->getShopQuantity() >= pStacks);
+	//}
+
+	//Item* purchasedItem = nullptr;
+
+	//// Unlimited quantity.
+	//if (pItem->getShopQuantity() == -1) {
+	//	purchasedItem = ItemFactory::copy(pItem);
+
+	//	if (pItem->isStackable())
+	//		purchasedItem->setStacks(pStacks);
+	//}
+	//else {
+
+	//}
+
+	//if (purchasedItem->isStackable()) {
+	//	purchasedItem->setStacks(pStacks);
+	//}
+	//else {
+	//	const uint32 slotID = pCharacter->getInventory()->findSlot(purchasedItem);
+
+	//	// No slot was found
+	//	if (SlotID::isNone(slotID)) {
+	//		// Push to cursor.
+	//		EXPECTED_BOOL(pCharacter->getInventory()->pushCursor(purchasedItem));
+	//	}
+	//	else {
+	//		// Put in free slot.
+	//		EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
+	//	}
+
+	//	pCharacter->getConnection()->sendItemTrade(purchasedItem);
+	//}
+
+	//return true;
 }

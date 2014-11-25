@@ -36,24 +36,25 @@ void Item::getContents(std::list<Item*>& pItems) const {
 	}
 }
 
-const uint32 Item::getDataSize() const {
+const uint32 Item::getDataSize(const uint32 pCopyType) const {
 	uint32 subItemSize = 0;
 
 	// Add augments.
 	for (auto i : mAugments)
-		if (i) subItemSize += i->getDataSize();
+		if (i) subItemSize += i->getDataSize(pCopyType);
 
 	// Add contents (container)
 	for (auto i : mContents)
-		if(i) subItemSize += i->getDataSize();
+		if (i) subItemSize += i->getDataSize(pCopyType);
 
-	return _getDataSize() + subItemSize;
+	return _getDataSize(pCopyType) + subItemSize;
 }
 
-const uint32 Item::_getDataSize() const {
+const uint32 Item::_getDataSize(const uint32 pCopyType) const {
 	uint32 result = sizeof(ItemData);
 
-	if (hasParent()) {
+	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
+	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
 		// Sub-Items need 4 extra bytes to store sub-index.
 		result += sizeof(uint32);
 	}
@@ -93,9 +94,10 @@ const uint32 Item::_getDataSize() const {
 	return result;
 }
 
-const bool Item::copyData(Utility::DynamicStructure& pStructure) {
+const bool Item::copyData(Utility::DynamicStructure& pStructure, const uint32 pCopyType) {
 	// Check: This Item is either an augment or within a bag.
-	if (hasParent()) {
+	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
+	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
 		EXPECTED_BOOL(hasValidSubIndex());
 		pStructure.write<uint32>(getSubIndex());
 	}
@@ -202,18 +204,18 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure) {
 
 	// Write augments
 	for (auto i : mAugments)
-		if (i) EXPECTED_BOOL(i->copyData(pStructure));		
+		if (i) EXPECTED_BOOL(i->copyData(pStructure, pCopyType));		
 
 	// Write contents
 	for (auto i : mContents)
-		if (i) EXPECTED_BOOL(i->copyData(pStructure));
+		if (i) EXPECTED_BOOL(i->copyData(pStructure, pCopyType));
 
 	return true;
 }
 
 const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	unsigned char * data = nullptr;
-	pSize += getDataSize();
+	pSize += getDataSize(pCopyType);
 
 	pSize += sizeof(uint32); // Copy Type
 	data = new unsigned char[pSize];
@@ -222,7 +224,7 @@ const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	ds.write<uint32>(pCopyType);
 
 	// Copy Item data.
-	copyData(ds);
+	copyData(ds, pCopyType);
 	
 	// Check: The amount of data written matches what was calculated.
 	if (ds.check() == false) {
@@ -577,4 +579,15 @@ String Item::getLink() const {
 	ss << "\x12";
 
 	return ss.str();
+}
+
+const uint32 Item::findEmptySlot() {
+	EXPECTED_VAR(isContainer(), SlotID::None);
+
+	for (int i = 0; i < SlotID::MAX_CONTENTS; i++) {
+		if (!mContents[i])
+			return SlotID::getChildSlot(getSlot(), i);
+	}
+
+	return SlotID::None;
 }

@@ -180,14 +180,15 @@ bool AccountManager::checkOwnership(const uint32 pAccountID, const String& pChar
 	return false;
 }
 
-void AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
+const bool AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
 	AccountData* accountData = _find(pAccountID);
-	EXPECTED(accountData);
+	EXPECTED_BOOL(accountData);
 
-	if (accountData->mCharacterDataLoaded) return;
+	if (accountData->mCharacterDataLoaded) return true;
 
-	EXPECTED(DataStore::getInstance().loadAccountCharacterData(accountData));
+	EXPECTED_BOOL(DataStore::getInstance().loadAccountCharacterData(accountData));
 	accountData->mCharacterDataLoaded = true;
+	return true;
 }
 
 bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
