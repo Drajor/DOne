@@ -770,7 +770,7 @@ void Zone::handleTarget(Character* pCharacter, const uint16 pSpawnID) {
 	EXPECTED(pCharacter);
 
 	// Character is clearing their target.
-	if (pSpawnID == NO_TARGET) {
+	if (pSpawnID == 0) {
 		pCharacter->clearTarget();
 		return;
 	}

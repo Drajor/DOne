@@ -27,7 +27,7 @@ struct GuildMember {
 	uint32 mLastTribute = 0;
 	String mPublicNote = "";
 	ZoneID mZoneID = 0;
-	InstanceID mInstanceID = 0;
+	uint16 mInstanceID = 0;
 	inline bool isOnline() { return mCharacter != nullptr; }
 	Character* mCharacter = nullptr; // Only valid when the guild member is online.
 };

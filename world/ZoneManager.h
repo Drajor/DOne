@@ -11,7 +11,7 @@ struct WhoFilter;
 struct ZoneSearchEntry {
 	String mName = "";
 	ZoneID mID = ZoneIDs::NoZone;
-	InstanceID mInstanceID = 0;
+	uint16 mInstanceID = 0;
 	uint32 mNumCharacters = 0;
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;

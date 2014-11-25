@@ -344,22 +344,22 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	};
 
 	static const std::list<int> PlayableClasses = {
-		ClassIDs::Warrior,
-		ClassIDs::Cleric,
-		ClassIDs::Paladin,
-		ClassIDs::Ranger,
-		ClassIDs::Shadowknight,
-		ClassIDs::Druid,
-		ClassIDs::Monk,
-		ClassIDs::Bard,
-		ClassIDs::Rogue,
-		ClassIDs::Shaman,
-		ClassIDs::Necromancer,
-		ClassIDs::Wizard,
-		ClassIDs::Magician,
-		ClassIDs::Enchanter,
-		ClassIDs::Beastlord,
-		ClassIDs::Berserker
+		ClassID::Warrior,
+		ClassID::Cleric,
+		ClassID::Paladin,
+		ClassID::Ranger,
+		ClassID::Shadowknight,
+		ClassID::Druid,
+		ClassID::Monk,
+		ClassID::Bard,
+		ClassID::Rogue,
+		ClassID::Shaman,
+		ClassID::Necromancer,
+		ClassID::Wizard,
+		ClassID::Magician,
+		ClassID::Enchanter,
+		ClassID::Beastlord,
+		ClassID::Berserker
 	};
 
 	std::list<RaceClassAllocation> raceClassAllocations;

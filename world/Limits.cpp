@@ -20,22 +20,22 @@ bool Limits::Character::surnameLengthClient(const String& pSurname) {
 
 const bool Limits::Character::classID(const uint8 pClassID) {
 	switch (pClassID) {
-	case ClassIDs::Warrior:
-	case ClassIDs::Cleric:
-	case ClassIDs::Paladin:
-	case ClassIDs::Ranger:
-	case ClassIDs::Shadowknight:
-	case ClassIDs::Druid:
-	case ClassIDs::Monk:
-	case ClassIDs::Bard:
-	case ClassIDs::Rogue:
-	case ClassIDs::Shaman:
-	case ClassIDs::Necromancer:
-	case ClassIDs::Wizard:
-	case ClassIDs::Magician:
-	case ClassIDs::Enchanter:
-	case ClassIDs::Beastlord:
-	case ClassIDs::Berserker:
+	case ClassID::Warrior:
+	case ClassID::Cleric:
+	case ClassID::Paladin:
+	case ClassID::Ranger:
+	case ClassID::Shadowknight:
+	case ClassID::Druid:
+	case ClassID::Monk:
+	case ClassID::Bard:
+	case ClassID::Rogue:
+	case ClassID::Shaman:
+	case ClassID::Necromancer:
+	case ClassID::Wizard:
+	case ClassID::Magician:
+	case ClassID::Enchanter:
+	case ClassID::Beastlord:
+	case ClassID::Berserker:
 		return true;
 	default:
 		break;

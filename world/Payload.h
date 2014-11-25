@@ -1192,7 +1192,7 @@ namespace Payload {
 			GuildID mGuildID;
 			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
 			ZoneID mZoneID;
-			InstanceID mInstanceID;
+			uint16 mInstanceID;
 			uint32 mLastSeen;
 		};
 	}

@@ -27,14 +27,9 @@ typedef int64_t int64;
 
 typedef uint16 DeityID;
 typedef uint8_t GenderID;
-////typedef uint32 ClassID;
-//typedef uint8_t ClassID;
 typedef uint32_t RaceID;
 typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
 typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
-typedef uint16_t InstanceID; // Zone Instance ID
-//typedef uint16_t SpawnID;
-typedef uint32 SpawnID; // Fucked at the moment, I need to remove this.
 typedef std::string String;
 typedef std::stringstream StringStream;
 typedef uint32_t GuildID;
@@ -44,7 +39,6 @@ typedef int8_t AccountStatus;
 static const String EmptyString = String("");
 
 static const GuildID NO_GUILD = 0xFFFFFFFF;
-static const SpawnID NO_TARGET = 0;
 
 enum ResponseID : AccountStatus { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNED = -2, FULL = -3 };
 
@@ -171,24 +165,47 @@ enum PlayableRaceIDs {
 	Drakkin = 522
 };
 
-enum ClassIDs : uint8 {
-	Warrior = 1,
-	Cleric = 2,
-	Paladin = 3,
-	Ranger = 4,
-	Shadowknight = 5,
-	Druid = 6,
-	Monk = 7,
-	Bard = 8,
-	Rogue = 9,
-	Shaman = 10,
-	Necromancer = 11,
-	Wizard = 12,
-	Magician = 13,
-	Enchanter = 14,
-	Beastlord = 15,
-	Berserker = 16
-};
+namespace ClassID {
+	enum : uint8 {
+		Warrior = 1,
+		Cleric = 2,
+		Paladin = 3,
+		Ranger = 4,
+		Shadowknight = 5,
+		Druid = 6,
+		Monk = 7,
+		Bard = 8,
+		Rogue = 9,
+		Shaman = 10,
+		Necromancer = 11,
+		Wizard = 12,
+		Magician = 13,
+		Enchanter = 14,
+		Beastlord = 15,
+		Berserker = 16,
+
+		Banker = 40,
+		Merchant = 41,
+	};
+	static std::map<uint8, String> ClassIDStrings = {
+		{ Warrior, "Warrior" },
+		{ Cleric, "Cleric" },
+		{ Paladin, "Paladin" },
+		{ Ranger, "Ranger" },
+		{ Shadowknight, "Shadowknight" },
+		{ Druid, "Druid" },
+		{ Monk, "Monk" },
+		{ Bard, "Bard" },
+		{ Rogue, "Rogue" },
+		{ Shaman, "Shaman" },
+		{ Necromancer, "Necromancer" },
+		{ Wizard, "Wizard" },
+		{ Magician, "Magician" },
+		{ Enchanter, "Enchanter" },
+		{ Beastlord, "Beastlord" },
+		{ Berserker, "Berserker" }
+	};
+}
 
 enum PlayerDeityIDs {
 	Bertoxxulous = 201,
@@ -579,22 +596,22 @@ namespace EquipClasses {
 	// Converts a Class ID to a Class Bit
 	static const uint32 convert(const uint32 pClassID) {
 		switch (pClassID) {
-		case ClassIDs::Warrior: return Warrior;
-		case ClassIDs::Cleric: return Cleric;
-		case ClassIDs::Paladin: return Paladin;
-		case ClassIDs::Ranger: return Ranger;
-		case ClassIDs::Shadowknight: return Shadowknight;
-		case ClassIDs::Druid: return Druid;
-		case ClassIDs::Monk: return Monk;
-		case ClassIDs::Bard: return Bard;
-		case ClassIDs::Rogue: return Rogue;
-		case ClassIDs::Shaman: return Shaman;
-		case ClassIDs::Necromancer: return Necromancer;
-		case ClassIDs::Wizard: return Wizard;
-		case ClassIDs::Magician: return Magician;
-		case ClassIDs::Enchanter: return Enchanter;
-		case ClassIDs::Beastlord: return Beastlord;
-		case ClassIDs::Berserker: return Berserker;
+		case ClassID::Warrior: return Warrior;
+		case ClassID::Cleric: return Cleric;
+		case ClassID::Paladin: return Paladin;
+		case ClassID::Ranger: return Ranger;
+		case ClassID::Shadowknight: return Shadowknight;
+		case ClassID::Druid: return Druid;
+		case ClassID::Monk: return Monk;
+		case ClassID::Bard: return Bard;
+		case ClassID::Rogue: return Rogue;
+		case ClassID::Shaman: return Shaman;
+		case ClassID::Necromancer: return Necromancer;
+		case ClassID::Wizard: return Wizard;
+		case ClassID::Magician: return Magician;
+		case ClassID::Enchanter: return Enchanter;
+		case ClassID::Beastlord: return Beastlord;
+		case ClassID::Berserker: return Berserker;
 		default: return None;
 		}
 	}

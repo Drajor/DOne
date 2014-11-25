@@ -2304,8 +2304,8 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(otherName));
 
-	bool banker = payload->mStatus & 0x01;
-	bool alt = payload->mStatus & 0x02;
+	bool banker = (payload->mStatus & 0x01) > 1;
+	bool alt = (payload->mStatus & 0x02) > 1;
 
 	GuildManager::getInstance().handleSetBanker(mCharacter, otherName, banker);
 	GuildManager::getInstance().handleSetAlt(mCharacter, otherName, alt);

@@ -70,7 +70,7 @@ struct CharacterData {
 	}
 	String mName = "";
 	uint32 mLevel = 1;
-	uint8 mClass = ClassIDs::Warrior;
+	uint8 mClass = ClassID::Warrior;
 	uint32 mExperience = 0;
 	String mLastName = "";
 	String mTitle = "";
@@ -79,7 +79,7 @@ struct CharacterData {
 	uint8 mStatus = 0;
 
 	ZoneID mZoneID = 0; // TODO: Choose a good default.
-	InstanceID mInstanceID = 0;
+	uint16 mInstanceID = 0;
 	float mX = 0.0f;
 	float mY = 0.0f;
 	float mZ = 0.0f;

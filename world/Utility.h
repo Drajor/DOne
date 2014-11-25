@@ -24,10 +24,10 @@ namespace Utility {
 
 	inline const bool isCaster(const uint8 pClassID) {
 		switch (pClassID) {
-		case Warrior:
-		case Monk:
-		case Rogue:
-		case Berserker:
+		case ClassID::Warrior:
+		case ClassID::Monk:
+		case ClassID::Rogue:
+		case ClassID::Berserker:
 			return false;
 		default:
 			break;
@@ -38,11 +38,11 @@ namespace Utility {
 	// Hybrid: A class that can both cast spells and use disciplines.
 	inline const bool isHybrid(const uint8 pClassID) {
 		switch (pClassID) {
-		case Paladin:
-		case Ranger:
-		case Shadowknight:
-		case Bard:
-		case Beastlord:
+		case ClassID::Paladin:
+		case ClassID::Ranger:
+		case ClassID::Shadowknight:
+		case ClassID::Bard:
+		case ClassID::Beastlord:
 			return true;
 		default:
 			break;
@@ -52,10 +52,10 @@ namespace Utility {
 
 	inline const bool isMelee(const uint8 pClassID) {
 		switch (pClassID) {
-		case Warrior:
-		case Monk:
-		case Rogue:
-		case Berserker:
+		case ClassID::Warrior:
+		case ClassID::Monk:
+		case ClassID::Rogue:
+		case ClassID::Berserker:
 			return true;
 		default:
 			break;
@@ -65,9 +65,9 @@ namespace Utility {
 
 	inline const bool canClassTaunt(const uint8 pClassID) {
 		switch (pClassID) {
-		case Warrior:
-		case Paladin:
-		case Shadowknight:
+		case ClassID::Warrior:
+		case ClassID::Paladin:
+		case ClassID::Shadowknight:
 			return true;
 		default:
 			break;
