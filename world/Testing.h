@@ -75,3 +75,130 @@ TEST_F(convertCurrencyTest, Test2) {
 	EXPECT_EQ(0, mSilver);
 	EXPECT_EQ(0, mCopper);
 }
+
+TEST_F(convertCurrencyTest, Test3) {
+	Utility::convertCurrency(190, mPlatinum, mGold, mSilver, mCopper);
+
+	EXPECT_EQ(0, mPlatinum);
+	EXPECT_EQ(1, mGold);
+	EXPECT_EQ(9, mSilver);
+	EXPECT_EQ(0, mCopper);
+}
+
+class convertCurrencyTest2 : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mResult = 0;
+		mPlatinum = 0;
+		mGold = 0;
+		mSilver = 0;
+		mCopper = 0;
+	}
+
+	int64 mResult = 0;
+	int32 mPlatinum = 0;
+	int32 mGold = 0;
+	int32 mSilver = 0;
+	int32 mCopper = 0;
+};
+
+TEST_F(convertCurrencyTest2, PlatinumZero) {
+	mPlatinum = 0;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, PlatinumOne) {
+	mPlatinum = 1;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(1000, mResult);
+}
+
+TEST_F(convertCurrencyTest2, PlatinumNine) {
+	mPlatinum = 9;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(9000, mResult);
+}
+
+TEST_F(convertCurrencyTest2, PlatinumNegative) {
+	mPlatinum = -1;
+	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, GoldZero) {
+	mGold = 0;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, GoldOne) {
+	mGold = 1;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(100, mResult);
+}
+
+TEST_F(convertCurrencyTest2, GoldNine) {
+	mGold = 9;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(900, mResult);
+}
+
+TEST_F(convertCurrencyTest2, GoldNegative) {
+	mGold = -1;
+	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, SilverZero) {
+	mSilver = 0;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, SilverOne) {
+	mSilver = 1;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(10, mResult);
+}
+TEST_F(convertCurrencyTest2, SilverNine) {
+	mSilver = 9;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(90, mResult);
+}
+
+TEST_F(convertCurrencyTest2, SilverNegative) {
+	mSilver = -1;
+	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, CopperZero) {
+	mCopper = 0;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, CopperOne) {
+	mCopper = 1;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(1, mResult);
+}
+
+TEST_F(convertCurrencyTest2, CopperNine) {
+	mCopper = 9;
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(9, mResult);
+}
+
+TEST_F(convertCurrencyTest2, CopperNegative) {
+	mCopper = -1;
+	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(0, mResult);
+}
+
+TEST_F(convertCurrencyTest2, ResultNonZero) {
+	mResult = -1;
+	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(-1, mResult);
+}

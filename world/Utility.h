@@ -41,19 +41,25 @@ namespace Utility {
 		temp = (pResult += pCopper);
 		
 		// Silver.
-		temp += pResult + (pSilver * 10);
-		EXPECTED_BOOL(temp > pResult); // wrap.
-		pResult = temp;
+		if (pSilver > 0) {
+			temp += pResult + (pSilver * 10);
+			EXPECTED_BOOL(temp >= pResult); // wrap.
+			pResult = temp;
+		}
 
 		// Gold.
-		temp += pResult + (pGold * 100);
-		EXPECTED_BOOL(temp > pResult); // wrap.
-		pResult = temp;
+		if (pGold > 0) {
+			temp += pResult + (pGold * 100);
+			EXPECTED_BOOL(temp >= pResult); // wrap.
+			pResult = temp;
+		}
 
 		// Platinum.
-		temp += pResult + (pGold * 1000);
-		EXPECTED_BOOL(temp > pResult); // wrap.
-		pResult = temp;
+		if (pPlatinum > 0) {
+			temp += pResult + (pPlatinum * 1000);
+			EXPECTED_BOOL(temp >= pResult); // wrap.
+			pResult = temp;
+		}
 
 		return true;
 	}
