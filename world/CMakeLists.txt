@@ -96,6 +96,7 @@ SET(world_headers
 	ItemFactory.h
 	Bonuses.h
 	Transmutation.h
+	Testing.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

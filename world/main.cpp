@@ -22,6 +22,7 @@
 #include "TimeUtility.h"
 #include "Transmutation.h"
 
+#include "Testing.h"
 #include "gtest/gtest.h"
 #pragma comment(lib, "../../dependencies/gtest/gtestd.lib")
 
@@ -29,6 +30,7 @@
 Google Test Notes
 - Changed CRT to static
 - Changed 'Debug Information Format' to 'Program Database'
+- Addition Includes + gtest
 */
 
 uint64 TTimer::mCurrentTime = 0;
@@ -36,7 +38,7 @@ uint64 TTimer::mCurrentTime = 0;
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
-	//system("pause");
+	system("pause");
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
 
