@@ -66,8 +66,14 @@ void Log::info(String pMessage) {
 
 void Log::error(String pMessage) {
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(consoleHandle, &csbi);
+
 	SetConsoleTextAttribute(consoleHandle, CC_RED);
 	Log::commonlog("[ERROR] " + pMessage);
+
+	SetConsoleTextAttribute(consoleHandle, csbi.wAttributes);
+
 }
 
 void Log::commonlog(String pMessage) {

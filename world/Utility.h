@@ -22,6 +22,7 @@ namespace Utility {
 	void print(String pMessage);
 	String getRandomName();
 
+	// Converts copper to platinum, gold, silver and copper.
 	inline void convertCurrency(const uint32 pValue, int32& pPlatinum, int32& pGold, int32& pSilver, int32& pCopper) {
 		pCopper = pValue % 10;
 		pSilver = (pValue % 100) / 10;
@@ -29,6 +30,7 @@ namespace Utility {
 		pPlatinum = (pValue / 1000);
 	}
 
+	// Converts platinum, gold, silver and copper to copper.
 	inline bool convertCurrency(int64& pResult, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
 		EXPECTED_BOOL(pResult == 0);
 		EXPECTED_BOOL(pPlatinum >= 0);
@@ -42,21 +44,21 @@ namespace Utility {
 		
 		// Silver.
 		if (pSilver > 0) {
-			temp += pResult + (pSilver * 10);
+			temp = pResult + (pSilver * 10);
 			EXPECTED_BOOL(temp >= pResult); // wrap.
 			pResult = temp;
 		}
 
 		// Gold.
 		if (pGold > 0) {
-			temp += pResult + (pGold * 100);
+			temp = pResult + (pGold * 100);
 			EXPECTED_BOOL(temp >= pResult); // wrap.
 			pResult = temp;
 		}
 
 		// Platinum.
 		if (pPlatinum > 0) {
-			temp += pResult + (pPlatinum * 1000);
+			temp = pResult + (pPlatinum * 1000);
 			EXPECTED_BOOL(temp >= pResult); // wrap.
 			pResult = temp;
 		}

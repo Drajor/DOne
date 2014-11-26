@@ -89,10 +89,14 @@ class convertCurrencyTest2 : public ::testing::Test {
 protected:
 	virtual void SetUp() {
 		mResult = 0;
-		mPlatinum = 0;
-		mGold = 0;
-		mSilver = 0;
-		mCopper = 0;
+		set();
+	}
+
+	void set(const int32 pPlatinum = 0, const int32 pGold = 0, const int32 pSilver = 0, const int32 pCopper = 0) {
+		mPlatinum = pPlatinum;
+		mGold = pGold;
+		mSilver = pSilver;
+		mCopper = pCopper;
 	}
 
 	int64 mResult = 0;
@@ -201,4 +205,40 @@ TEST_F(convertCurrencyTest2, ResultNonZero) {
 	mResult = -1;
 	EXPECT_FALSE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
 	EXPECT_EQ(-1, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test1) {
+	set(1, 2, 3, 4);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(1234, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test2) {
+	set(9, 9, 9, 9);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(9999, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test3) {
+	set(9913, 9953, 9925, 991);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(11008541, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test4) {
+	set(0, 9953, 9925, 991);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(1095541, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test5) {
+	set(0, 0, 9925, 991);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(100241, mResult);
+}
+
+TEST_F(convertCurrencyTest2, Test6) {
+	set(0, 0, 0, 991);
+	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
+	EXPECT_EQ(991, mResult);
 }
