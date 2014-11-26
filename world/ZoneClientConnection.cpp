@@ -3651,6 +3651,7 @@ void ZoneClientConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
 	Log::info(payload->_debug());
 
 	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
+	EXPECTED(payload->mStacks >= 1); // Sanity.
 
 	mZone->handleShopBuy(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
 }

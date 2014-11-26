@@ -817,6 +817,14 @@ const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, co
 	return true;
 }
 
+const bool Inventoryy::removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
+	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::GOLD, pGold));
+	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::SILVER, pSilver));
+	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::COPPER, pCopper));
+	return true;
+}
+
 const uint64 Inventoryy::getTotalCurrency() const {
 	uint64 total = 0;
 	for (auto i = 0; i < MoneySlotID::MAX; i++) {
@@ -918,4 +926,29 @@ const bool Inventoryy::clearTradeItems() {
 		EXPECTED_BOOL(_clear(i));
 
 	return true;
+}
+
+const bool Inventoryy::spendCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+	// Make a copy of existing currency.
+	auto currentPlatinum = getPersonalPlatinum();
+	auto currentGold = getPersonalGold();
+	auto currentSilver = getPersonalSilver();
+	auto currentCopper = getPersonalCopper();
+
+	int64 currentCurrency = 0;
+	Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper());
+
+
+	return true;
+}
+
+const int64 Inventoryy::getPersonalCurrency() {
+	int64 result = 0;
+
+	result += getPersonalCopper();
+	result += getPersonalSilver() * 10;
+	result += getPersonalGold() * 100;
+	result += getPersonalPlatinum() * 1000;
+
+	return result;
 }

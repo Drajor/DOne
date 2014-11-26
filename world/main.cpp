@@ -22,11 +22,24 @@
 #include "TimeUtility.h"
 #include "Transmutation.h"
 
+#include "gtest/gtest.h"
+#pragma comment(lib, "../../dependencies/gtest/gtestd.lib")
+
+/*
+Google Test Notes
+- Changed CRT to static
+- Changed 'Debug Information Format' to 'Program Database'
+*/
+
 uint64 TTimer::mCurrentTime = 0;
 
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
+	//system("pause");
+	::testing::InitGoogleTest(&argc, argv);
+	RUN_ALL_TESTS();
+
 	EXPECTED_MAIN(Log::start("logs/" + std::to_string(Time::nowMilliseconds()) + ".log"));
 	//system("pause");
 

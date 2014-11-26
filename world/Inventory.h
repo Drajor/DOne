@@ -56,11 +56,16 @@ public:
 	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
 	inline const int32 getTradeCopper() const { return mCurrency[MoneySlotID::TRADE][MoneyType::COPPER]; }
 
+	// Returns the total value of personal currency in copper pieces.
+	const int64 getPersonalCurrency();
+
 	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
 	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
 	const bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
+	const bool removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
+	const bool spendCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 
 	// Returns the total value of all currency in copper pieces.
 	const uint64 getTotalCurrency() const;

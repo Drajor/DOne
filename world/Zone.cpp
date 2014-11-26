@@ -1593,10 +1593,21 @@ void Zone::handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uin
 		return;
 	}
 
-	uint64 price = 0;
-	const bool success = _handleShopBuy(pCharacter, npc, item, pStacks);	
+	//uint64 price = 0;
+	const bool success = _handleShopBuy(pCharacter, npc, item, pStacks);
 
 	if (success) {
+		// Calculate cost.
+		const uint32 price = item->getShopPrice() * pStacks;
+		// Convert currency from single number to EQ currency.
+		int32 platinum = 0, gold = 0, silver = 0, copper = 0;
+		Utility::convertCurrency(price, platinum, gold, silver, copper);
+		// Remove currency from Character.
+		EXPECTED(pCharacter->getInventory()->spendCurrency(platinum, gold, silver, copper));
+
+		// Update client.
+		pCharacter->getConnection()->sendCurrencyUpdate();
+
 		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price);
 	}
 	else {
@@ -1636,6 +1647,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 			pCharacter->getConnection()->sendItemTrade(purchasedItem);
 
 			// Update currency.
+			//purchasedItem->getB
 
 			return true;
 		}
@@ -1649,6 +1661,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 	// Limited Quantity.
 	else {
 		// TODO: Dynamic shop Items.
+		// ItemPacketMerchant
 	}
 
 	return false;

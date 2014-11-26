@@ -22,6 +22,42 @@ namespace Utility {
 	void print(String pMessage);
 	String getRandomName();
 
+	inline void convertCurrency(const uint32 pValue, int32& pPlatinum, int32& pGold, int32& pSilver, int32& pCopper) {
+		pCopper = pValue % 10;
+		pSilver = (pValue % 100) / 10;
+		pGold = (pValue % 1000) / 100;
+		pPlatinum = (pValue / 1000);
+	}
+
+	inline bool convertCurrency(int64& pResult, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+		EXPECTED_BOOL(pResult == 0);
+		EXPECTED_BOOL(pPlatinum >= 0);
+		EXPECTED_BOOL(pGold >= 0);
+		EXPECTED_BOOL(pSilver >= 0);
+		EXPECTED_BOOL(pCopper >= 0);
+		int64 temp = 0;
+
+		// Copper.
+		temp = (pResult += pCopper);
+		
+		// Silver.
+		temp += pResult + (pSilver * 10);
+		EXPECTED_BOOL(temp > pResult); // wrap.
+		pResult = temp;
+
+		// Gold.
+		temp += pResult + (pGold * 100);
+		EXPECTED_BOOL(temp > pResult); // wrap.
+		pResult = temp;
+
+		// Platinum.
+		temp += pResult + (pGold * 1000);
+		EXPECTED_BOOL(temp > pResult); // wrap.
+		pResult = temp;
+
+		return true;
+	}
+
 	inline const bool isCaster(const uint8 pClassID) {
 		switch (pClassID) {
 		case ClassID::Warrior:
