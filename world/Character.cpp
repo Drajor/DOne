@@ -29,7 +29,7 @@ Character::Character(const uint32 pAccountID, CharacterData* pCharacterData) : m
 	mSkills.fill(0);
 	mLanguages.fill(0);
 
-	mInventory = new Inventoryy(this);
+	mInventory = new Inventoryy();
 }
 
 Character::~Character() {

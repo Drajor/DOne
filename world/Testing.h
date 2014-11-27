@@ -41,7 +41,7 @@ protected:
 };
 
 TEST_F(convertCurrencyTest, Zeros) {
-	Utility::convertCurrency(0, mPlatinum, mGold, mSilver, mCopper);
+	Utility::convertFromCopper(0, mPlatinum, mGold, mSilver, mCopper);
 
 	EXPECT_EQ(0, mPlatinum);
 	EXPECT_EQ(0, mGold);
@@ -50,7 +50,7 @@ TEST_F(convertCurrencyTest, Zeros) {
 }
 
 TEST_F(convertCurrencyTest, Nines) {
-	Utility::convertCurrency(999999999, mPlatinum, mGold, mSilver, mCopper);
+	Utility::convertFromCopper(999999999, mPlatinum, mGold, mSilver, mCopper);
 
 	EXPECT_EQ(999999, mPlatinum);
 	EXPECT_EQ(9, mGold);
@@ -59,7 +59,7 @@ TEST_F(convertCurrencyTest, Nines) {
 }
 
 TEST_F(convertCurrencyTest, Test1) {
-	Utility::convertCurrency(1234, mPlatinum, mGold, mSilver, mCopper);
+	Utility::convertFromCopper(1234, mPlatinum, mGold, mSilver, mCopper);
 
 	EXPECT_EQ(1, mPlatinum);
 	EXPECT_EQ(2, mGold);
@@ -68,7 +68,7 @@ TEST_F(convertCurrencyTest, Test1) {
 }
 
 TEST_F(convertCurrencyTest, Test2) {
-	Utility::convertCurrency(90000, mPlatinum, mGold, mSilver, mCopper);
+	Utility::convertFromCopper(90000, mPlatinum, mGold, mSilver, mCopper);
 
 	EXPECT_EQ(90, mPlatinum);
 	EXPECT_EQ(0, mGold);
@@ -77,7 +77,7 @@ TEST_F(convertCurrencyTest, Test2) {
 }
 
 TEST_F(convertCurrencyTest, Test3) {
-	Utility::convertCurrency(190, mPlatinum, mGold, mSilver, mCopper);
+	Utility::convertFromCopper(190, mPlatinum, mGold, mSilver, mCopper);
 
 	EXPECT_EQ(0, mPlatinum);
 	EXPECT_EQ(1, mGold);

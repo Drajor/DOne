@@ -1547,8 +1547,7 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	const int32 platinum = (price / 1000);
 	
 	// Add currency to Character.
-	Log::info("Adding: P(" + std::to_string(platinum) + ") G(" + std::to_string(gold) + ") S(" + std::to_string(silver) + ") C(" + std::to_string(copper) + ")");
-	pCharacter->getInventory()->addCurrency(MoneySlotID::PERSONAL, platinum, gold, silver, copper);
+	EXPECTED(pCharacter->getInventory()->addCurrency(platinum, gold, silver, copper));
 
 	// Detect when the Character's auto food / drink is being sold.
 	const bool updateConsumables = pCharacter->getInventory()->isAutoFood(item) || pCharacter->getInventory()->isAutoDrink(item);
@@ -1601,9 +1600,9 @@ void Zone::handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uin
 		const uint32 price = item->getShopPrice() * pStacks;
 		// Convert currency from single number to EQ currency.
 		int32 platinum = 0, gold = 0, silver = 0, copper = 0;
-		Utility::convertCurrency(price, platinum, gold, silver, copper);
+		Utility::convertFromCopper(price, platinum, gold, silver, copper);
 		// Remove currency from Character.
-		EXPECTED(pCharacter->getInventory()->spendCurrency(platinum, gold, silver, copper));
+		EXPECTED(pCharacter->getInventory()->removeCurrency(platinum, gold, silver, copper));
 
 		// Update client.
 		pCharacter->getConnection()->sendCurrencyUpdate();

@@ -1121,6 +1121,9 @@ public:
 			mInvoker->notify(f(i));
 		}
 
+		// Currency.
+
+
 		return true;
 	}
 

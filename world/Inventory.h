@@ -3,12 +3,11 @@
 #include "Constants.h"
 #include "Bonuses.h"
 
-class Character;
 class Item;
 class Inventoryy : public Bonuses { // We get an extra y for now.
 
 public:
-	Inventoryy(Character* pCharacter);
+	Inventoryy();
 
 	// Items
 
@@ -65,7 +64,12 @@ public:
 	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
 	const bool removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
-	const bool spendCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+	
+	// Adds 'personal' currency.
+	const bool addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+
+	// Removes 'personal' currency.
+	const bool removeCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 
 	// Returns the total value of all currency in copper pieces.
 	const uint64 getTotalCurrency() const;
@@ -115,8 +119,6 @@ private:
 
 	void _calculateAdd(Item* pItem);
 	void _calculateRemove(Item* pItem);
-
-	Character* mCharacter = nullptr;
 
 	Item* mItems[SlotID::MAIN_SLOTS]; // Slots 0 - 30
 	std::list<Item*> mCursor; // Slot 31

@@ -7,7 +7,7 @@
 #include "ItemFactory.h"
 #include "Limits.h"
 
-Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
+Inventoryy::Inventoryy() {
 	for (auto& i : mItems) i = nullptr;
 	for (auto& i : mBank) i = nullptr;
 	for (auto& i : mSharedBank) i = nullptr;
@@ -15,7 +15,8 @@ Inventoryy::Inventoryy(Character* pCharacter) : mCharacter(pCharacter) {
 
 	memset(mCurrency, 0, sizeof(mCurrency));
 
-	put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
+	//put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
+	put(ItemGenerator::makeDice("Yera"), SlotID::POWER_SOURCE);
 
 	auto container = ItemFactory::make(ItemID::StartContainer);
 	container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
@@ -928,16 +929,50 @@ const bool Inventoryy::clearTradeItems() {
 	return true;
 }
 
-const bool Inventoryy::spendCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
-	// Make a copy of existing currency.
-	auto currentPlatinum = getPersonalPlatinum();
-	auto currentGold = getPersonalGold();
-	auto currentSilver = getPersonalSilver();
-	auto currentCopper = getPersonalCopper();
-
+const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+	
+	// Get current currency as copper.
 	int64 currentCurrency = 0;
-	Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper());
+	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));
 
+	// Get amount being added as copper.
+	int64 addedCurrency = 0;
+	EXPECTED_BOOL(Utility::convertCurrency(addedCurrency, pPlatinum, pGold, pSilver, pCopper));
+
+	int64 newCurrency = currentCurrency + addedCurrency;
+	int32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
+	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
+
+	// Set new currency amounts.
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, newPlatinum);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, newGold);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, newSilver);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, newCopper);
+
+	return true;
+}
+
+const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+	
+	// Get current currency as copper.
+	int64 currentCurrency = 0;
+	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));
+
+	// Get amount being removed as copper.
+	int64 removedCurrency = 0;
+	EXPECTED_BOOL(Utility::convertCurrency(removedCurrency, pPlatinum, pGold, pSilver, pCopper));
+
+	EXPECTED_BOOL(currentCurrency >= removedCurrency);
+
+	int64 newCurrency = currentCurrency - removedCurrency;
+	int32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
+	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
+
+	// Set new currency amounts.
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, newPlatinum);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, newGold);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, newSilver);
+	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, newCopper);
 
 	return true;
 }
