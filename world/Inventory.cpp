@@ -812,14 +812,6 @@ const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, co
 	return true;
 }
 
-const bool Inventoryy::removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
-	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Platinum, pPlatinum));
-	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Gold, pGold));
-	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Silver, pSilver));
-	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Copper, pCopper));
-	return true;
-}
-
 const uint64 Inventoryy::getTotalCurrency() const {
 	uint64 total = 0;
 	for (auto i = 0; i < CurrencySlot::MAX; i++) {

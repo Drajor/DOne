@@ -374,6 +374,27 @@ TEST_F(InventoryCurrencyTest, AddPersonal) {
 	EXPECT_EQ(4321, mInventory->getTotalPersonalCurrency());
 }
 
+TEST_F(InventoryCurrencyTest, MoveDown) {
+	// Setup
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 434));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 249));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 67));
+
+	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
+
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Platinum, CurrencyType::Platinum, 67)); // Pick up
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Personal, CurrencyType::Platinum, CurrencyType::Gold, 67));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Gold, CurrencyType::Gold, 670 + 249)); // Pick up
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Personal, CurrencyType::Gold, CurrencyType::Silver, 670 + 249));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Silver, CurrencyType::Silver, 6700 + 2490 + 434)); // Pick up
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Personal, CurrencyType::Silver, CurrencyType::Copper, 6700 + 2490 + 434));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Copper, CurrencyType::Copper, 67000 + 24900 + 4340 + 897)); // Pick up
+
+	EXPECT_EQ(97137, mInventory->getTotalCurrency());
+	EXPECT_EQ(97137, mInventory->getTotalCursorCurrency());
+}
+
 TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	// Setup
 	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));

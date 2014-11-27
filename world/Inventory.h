@@ -58,9 +58,11 @@ public:
 	const bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount);
 
 	const bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+
 	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
-	const bool removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
-	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; } // Should only be called during initialisation.
+
+	// Sets the currency of pType at pSlot to pAmount.
+	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; }
 	
 	// Adds 'personal' currency.
 	const bool addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
@@ -71,9 +73,16 @@ public:
 	// Returns the total value of all currency in copper pieces.
 	const uint64 getTotalCurrency() const;
 
+	// Returns the total value of cursor currency in copper pieces.
 	const uint64 getTotalCursorCurrency() const;
+
+	// Returns the total value of personal currency in copper pieces.
 	const uint64 getTotalPersonalCurrency() const;
+
+	// Returns the total  value of bank currency in copper pieces.
 	const uint64 getTotalBankCurrency() const;
+
+	// Returns the total value of shared bank currency in copper pieces.
 	const uint64 getTotalSharedBankCurrency() const;
 
 	const bool currencyValid() const;
