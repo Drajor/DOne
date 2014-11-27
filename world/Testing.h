@@ -2,6 +2,8 @@
 
 #include "Constants.h"
 #include "Utility.h"
+#include "Inventory.h"
+
 #include "gtest/gtest.h"
 
 // 
@@ -241,4 +243,123 @@ TEST_F(convertCurrencyTest2, Test6) {
 	set(0, 0, 0, 991);
 	EXPECT_TRUE(Utility::convertCurrency(mResult, mPlatinum, mGold, mSilver, mCopper));
 	EXPECT_EQ(991, mResult);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class InventoryCurrencyTest : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mInventory = new Inventoryy();
+		mPlatinum = 0;
+		mGold = 0;
+		mSilver = 0;
+		mCopper = 0;
+	}
+
+	virtual void TearDown() {
+		delete mInventory;
+		mInventory = nullptr;
+	}
+
+	int32 mPlatinum = 0;
+	int32 mGold = 0;
+	int32 mSilver = 0;
+	int32 mCopper = 0;
+	Inventoryy* mInventory;
+};
+
+TEST_F(InventoryCurrencyTest, DefaultChecks) {
+	// Cursor.
+	EXPECT_EQ(0, mInventory->getCursorCopper());
+	EXPECT_EQ(0, mInventory->getCursorSilver());
+	EXPECT_EQ(0, mInventory->getCursorGold());
+	EXPECT_EQ(0, mInventory->getCursorPlatinum());
+
+	// Personal.
+	EXPECT_EQ(0, mInventory->getPersonalCopper());
+	EXPECT_EQ(0, mInventory->getPersonalSilver());
+	EXPECT_EQ(0, mInventory->getPersonalGold());
+	EXPECT_EQ(0, mInventory->getPersonalPlatinum());
+
+	// Bank.
+	EXPECT_EQ(0, mInventory->getBankCopper());
+	EXPECT_EQ(0, mInventory->getBankSilver());
+	EXPECT_EQ(0, mInventory->getBankGold());
+	EXPECT_EQ(0, mInventory->getBankPlatinum());
+
+	// Shared Bank.
+	EXPECT_EQ(0, mInventory->getSharedBankPlatinum());
+
+	// Total
+	EXPECT_EQ(0, mInventory->getTotalCursorCurrency());
+	EXPECT_EQ(0, mInventory->getTotalPersonalCurrency());
+	EXPECT_EQ(0, mInventory->getTotalBankCurrency());
+	EXPECT_EQ(0, mInventory->getTotalSharedBankCurrency());
+	EXPECT_EQ(0, mInventory->getTotalCurrency());
+}
+
+TEST_F(InventoryCurrencyTest, AddSingleSlotSingleCurrency) {
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
+	EXPECT_EQ(1, mInventory->getPersonalCopper());
+	
+	// Total
+	EXPECT_EQ(1, mInventory->getTotalCurrency());
+	EXPECT_EQ(1, mInventory->getTotalPersonalCurrency());
+}
+
+TEST_F(InventoryCurrencyTest, AddMultipleSlotSingleCurrency) {
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::COPPER, 3));
+	EXPECT_EQ(1, mInventory->getPersonalCopper());
+	EXPECT_EQ(3, mInventory->getBankCopper());
+	
+	// Total
+	EXPECT_EQ(4, mInventory->getTotalCurrency());
+	EXPECT_EQ(1, mInventory->getTotalPersonalCurrency());
+	EXPECT_EQ(3, mInventory->getTotalBankCurrency());
+}
+
+TEST_F(InventoryCurrencyTest, AddSingleSlotMultipleType) {
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 50));
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, 7));
+	EXPECT_EQ(50, mInventory->getPersonalCopper());
+	EXPECT_EQ(7, mInventory->getPersonalGold());
+
+	// Total
+	EXPECT_EQ(750, mInventory->getTotalCurrency());
+	EXPECT_EQ(750, mInventory->getTotalPersonalCurrency());
+}
+
+TEST_F(InventoryCurrencyTest, AddMultipleSlotMultipleType) {
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 11));
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::SILVER, 66));
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, 2));
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, 14));
+	
+	EXPECT_EQ(11, mInventory->getPersonalCopper());
+	EXPECT_EQ(66, mInventory->getBankSilver());
+	EXPECT_EQ(2, mInventory->getCursorGold());
+	EXPECT_EQ(14, mInventory->getSharedBankPlatinum());
+
+	// Total
+	EXPECT_EQ(14871, mInventory->getTotalCurrency());
+	EXPECT_EQ(11, mInventory->getTotalPersonalCurrency());
+	EXPECT_EQ(660, mInventory->getTotalBankCurrency());
+	EXPECT_EQ(200, mInventory->getTotalCursorCurrency());
+	EXPECT_EQ(14000, mInventory->getTotalSharedBankCurrency());
+}
+
+TEST_F(InventoryCurrencyTest, AddPersonal) {
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
+	EXPECT_EQ(1, mInventory->getPersonalCopper());
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, 2));
+	EXPECT_EQ(2, mInventory->getPersonalSilver());
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, 3));
+	EXPECT_EQ(3, mInventory->getPersonalGold());
+	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, 4));
+	EXPECT_EQ(4, mInventory->getPersonalPlatinum());
+
+	// Total
+	EXPECT_EQ(4321, mInventory->getTotalCurrency());
+	EXPECT_EQ(4321, mInventory->getTotalPersonalCurrency());
 }

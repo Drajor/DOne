@@ -15,18 +15,17 @@ Inventoryy::Inventoryy() {
 
 	memset(mCurrency, 0, sizeof(mCurrency));
 
-	//put(ItemGenerator::makeDice(pCharacter->getName()), SlotID::POWER_SOURCE);
-	put(ItemGenerator::makeDice("Yera"), SlotID::POWER_SOURCE);
+	//put(ItemGenerator::makeDice("Yera"), SlotID::POWER_SOURCE);
 
-	auto container = ItemFactory::make(ItemID::StartContainer);
-	container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
-	container->setContents(ItemFactory::make(ItemID::StartDrink, 10000), 9);
-	container->setContents(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common), 0);
-	put(container, SlotID::MAIN_7);
-	container->updateContentsSlots();
+	//auto container = ItemFactory::make(ItemID::StartContainer);
+	//container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
+	//container->setContents(ItemFactory::make(ItemID::StartDrink, 10000), 9);
+	//container->setContents(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common), 0);
+	//put(container, SlotID::MAIN_7);
+	//container->updateContentsSlots();
 
-	pushCursor(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common));
-	pushCursor(ItemGenerator::makeOneHandBlunt(1, Rarity::Common));
+	//pushCursor(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common));
+	//pushCursor(ItemGenerator::makeOneHandBlunt(1, Rarity::Common));
 }
 
 const unsigned char* Inventoryy::getData(uint32& pSize) {
@@ -773,7 +772,7 @@ const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot
 	EXPECTED_BOOL(Limits::General::moneyTypeValid(pToType));
 	EXPECTED_BOOL(pAmount > 0);
 
-	const int32 currencyAtFrom = getCurrency(pFromSlot, pFromType);
+	const int32 currencyAtFrom = _getCurrency(pFromSlot, pFromType);
 	EXPECTED_BOOL(currencyAtFrom >= pAmount);
 
 	int32 addAmount = 0;
@@ -830,7 +829,7 @@ const uint64 Inventoryy::getTotalCurrency() const {
 	uint64 total = 0;
 	for (auto i = 0; i < MoneySlotID::MAX; i++) {
 		for (auto j = 0; j < MoneyType::MAX; j++) {
-			total += getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
+			total += _getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
 		}
 	}
 	return total;
@@ -839,7 +838,7 @@ const uint64 Inventoryy::getTotalCurrency() const {
 const bool Inventoryy::currencyValid() const {
 	for (auto i = 0; i < MoneySlotID::MAX; i++) {
 		for (auto j = 0; j < MoneyType::MAX; j++) {
-			if (getCurrency(i, j) < 0)
+			if (_getCurrency(i, j) < 0)
 				return false;
 		}
 	}
@@ -952,6 +951,15 @@ const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, con
 	return true;
 }
 
+const bool Inventoryy::addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) {
+	EXPECTED_BOOL(MoneySlotID::isValid(pSlot));
+	EXPECTED_BOOL(MoneyType::isValid(pType));
+	EXPECTED_BOOL(pAmount >= 0);
+
+	mCurrency[pSlot][pType] += pAmount;
+	return true;
+}
+
 const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
 	
 	// Get current currency as copper.
@@ -977,13 +985,27 @@ const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, 
 	return true;
 }
 
-const int64 Inventoryy::getPersonalCurrency() {
-	int64 result = 0;
+const uint64 Inventoryy::getTotalCursorCurrency() const {
+	int64 value = 0;
+	EXPECTED_VAR(Utility::convertCurrency(value, getCursorPlatinum(), getCursorGold(), getCursorSilver(), getCursorCopper()), 0);
+	return value;
+}
 
-	result += getPersonalCopper();
-	result += getPersonalSilver() * 10;
-	result += getPersonalGold() * 100;
-	result += getPersonalPlatinum() * 1000;
+const uint64 Inventoryy::getTotalPersonalCurrency() const {
+	int64 value = 0;
+	EXPECTED_VAR(Utility::convertCurrency(value, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()), 0);
+	return value;
+}
 
-	return result;
+const uint64 Inventoryy::getTotalBankCurrency() const {
+	int64 value = 0;
+	EXPECTED_VAR(Utility::convertCurrency(value, getBankPlatinum(), getBankGold(), getBankSilver(), getBankCopper()), 0);
+	return value;
+}
+
+const uint64 Inventoryy::getTotalSharedBankCurrency() const {
+	int64 value = 0;
+	// NOTE: The shared bank only supports storing platinum.
+	EXPECTED_VAR(Utility::convertCurrency(value, getSharedBankPlatinum(), 0, 0, 0), 0);
+	return value;
 }

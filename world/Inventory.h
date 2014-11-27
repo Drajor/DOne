@@ -54,12 +54,9 @@ public:
 	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
 	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
 	inline const int32 getTradeCopper() const { return mCurrency[MoneySlotID::TRADE][MoneyType::COPPER]; }
+	
+	const bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount);
 
-	// Returns the total value of personal currency in copper pieces.
-	const int64 getPersonalCurrency();
-
-	inline const int32 getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; } // TODO: Guard this.
-	inline bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] += pAmount; return true; } // As below.
 	const bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
 	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
 	const bool removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
@@ -73,6 +70,12 @@ public:
 
 	// Returns the total value of all currency in copper pieces.
 	const uint64 getTotalCurrency() const;
+
+	const uint64 getTotalCursorCurrency() const;
+	const uint64 getTotalPersonalCurrency() const;
+	const uint64 getTotalBankCurrency() const;
+	const uint64 getTotalSharedBankCurrency() const;
+
 	const bool currencyValid() const;
 
 	// Alternate Currency
@@ -142,4 +145,6 @@ private:
 	uint32 mTotalEbonCrystals = 0;
 
 	int32 mCurrency[MoneySlotID::MAX][MoneyType::MAX];
+
+	inline const int32 _getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; }
 };

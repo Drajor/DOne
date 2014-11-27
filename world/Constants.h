@@ -253,6 +253,7 @@ namespace MoneySlotID {
 	static const bool isBank(const uint32 pSlot) { return pSlot == BANK; }
 	static const bool isTrade(const uint32 pSlot) { return pSlot == TRADE; }
 	static const bool isSharedBank(const uint32 pSlot) { return pSlot == SHARED_BANK; }
+	static const bool isValid(const uint32 pSlot) { return isCursor(pSlot) || isPersonal(pSlot) || isBank(pSlot) || isTrade(pSlot) || isSharedBank(pSlot); }
 }
 
 namespace MoneyType {
@@ -263,6 +264,7 @@ namespace MoneyType {
 		PLATINUM = 3,
 		MAX = 4
 	};
+	static const bool isValid(const int32 pType) { return pType >= COPPER && pType <= PLATINUM; }
 	static std::map<int32, String> MoneyTypeStrings{
 		{ COPPER, "Copper" },
 		{ SILVER, "Silver" },

@@ -67,10 +67,6 @@ namespace Utility {
 		return true;
 	}
 
-	inline const bool spendCurrency() {
-		return true;
-	}
-
 	inline const bool isCaster(const uint8 pClassID) {
 		switch (pClassID) {
 		case ClassID::Warrior:
