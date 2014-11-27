@@ -82,6 +82,9 @@ public:
 	// Returns the total  value of bank currency in copper pieces.
 	const uint64 getTotalBankCurrency() const;
 
+	// Returns the total  value of trade currency in copper pieces.
+	const uint64 getTotalTradeCurrency() const;
+
 	// Returns the total value of shared bank currency in copper pieces.
 	const uint64 getTotalSharedBankCurrency() const;
 

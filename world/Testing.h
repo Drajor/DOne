@@ -395,6 +395,43 @@ TEST_F(InventoryCurrencyTest, MoveDown) {
 	EXPECT_EQ(97137, mInventory->getTotalCursorCurrency());
 }
 
+TEST_F(InventoryCurrencyTest, CancelTrade) {
+	// Setup
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 434));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 249));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 67));
+
+	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
+
+	// Move platinum into trade.
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Platinum, CurrencyType::Platinum, 67));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Platinum, CurrencyType::Platinum, 67));
+
+	// Move gold into trade.
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Gold, CurrencyType::Gold, 249));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Gold, CurrencyType::Gold, 249));
+
+	// Move silver into trade.
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Silver, CurrencyType::Silver, 434));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Silver, CurrencyType::Silver, 434));
+
+	// Move copper into trade.
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Copper, CurrencyType::Copper, 897));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Copper, CurrencyType::Copper, 897));
+
+	EXPECT_EQ(0, mInventory->getTotalPersonalCurrency());
+	EXPECT_EQ(97137, mInventory->getTotalCurrency());
+	EXPECT_EQ(97137, mInventory->getTotalTradeCurrency());
+
+	// Cancel trade.
+	EXPECT_TRUE(mInventory->onTradeCancel());
+
+	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
+	EXPECT_EQ(97137, mInventory->getTotalCurrency());
+	EXPECT_EQ(0, mInventory->getTotalTradeCurrency());
+}
+
 TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	// Setup
 	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));

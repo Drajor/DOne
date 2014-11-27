@@ -990,6 +990,12 @@ const uint64 Inventoryy::getTotalBankCurrency() const {
 	return value;
 }
 
+const uint64 Inventoryy::getTotalTradeCurrency() const {
+	int64 value = 0;
+	EXPECTED_VAR(Utility::convertCurrency(value, getTradePlatinum(), getTradeGold(), getTradeSilver(), getTradeCopper()), 0);
+	return value;
+}
+
 const uint64 Inventoryy::getTotalSharedBankCurrency() const {
 	int64 value = 0;
 	// NOTE: The shared bank only supports storing platinum.
