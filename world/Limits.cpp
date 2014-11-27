@@ -143,11 +143,11 @@ const bool Limits::Languages::validID(const uint32 pLanguageID) {
 
 const bool Limits::General::moneySlotIDValid(const uint32 pSlot) {
 	switch (pSlot) {
-	case MoneySlotID::CURSOR:
-	case MoneySlotID::PERSONAL:
-	case MoneySlotID::BANK:
-	case MoneySlotID::TRADE:
-	case MoneySlotID::SHARED_BANK:
+	case CurrencySlot::Cursor:
+	case CurrencySlot::Personal:
+	case CurrencySlot::Bank:
+	case CurrencySlot::Trade:
+	case CurrencySlot::SharedBank:
 		return true;
 	default:
 		return false;
@@ -156,10 +156,10 @@ const bool Limits::General::moneySlotIDValid(const uint32 pSlot) {
 
 const bool Limits::General::moneyTypeValid(const uint32 pType) {
 	switch (pType) {
-	case MoneyType::COPPER:
-	case MoneyType::SILVER:
-	case MoneyType::GOLD:
-	case MoneyType::PLATINUM:
+	case CurrencyType::Copper:
+	case CurrencyType::Silver:
+	case CurrencyType::Gold:
+	case CurrencyType::Platinum:
 		return true;
 	default:
 		return false;

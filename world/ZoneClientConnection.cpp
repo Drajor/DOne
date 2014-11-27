@@ -3054,21 +3054,21 @@ const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* 
 	EXPECTED_BOOL(Limits::General::moneyTypeValid(payload->mToType));
 
 	// Sanity.
-	EXPECTED_BOOL(MoneySlotID::isTrade(payload->mFromSlot) == false); // UF does not move currency from trade slots.
+	EXPECTED_BOOL(CurrencySlot::isTrade(payload->mFromSlot) == false); // UF does not move currency from trade slots.
 	EXPECTED_BOOL(payload->mAmount > 0); // There is no natural way for UF to send 0/negative values.
 
-	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == MoneySlotID::BANK || pSlot == MoneySlotID::SHARED_BANK; };
+	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == CurrencySlot::Bank || pSlot == CurrencySlot::SharedBank; };
 	const bool isConversion = payload->mFromType != payload->mToType;
 	const bool isBankSlot = isBankingSlot(payload->mFromSlot) || isBankingSlot(payload->mToSlot);
 	const bool bankRequired = isConversion || isBankSlot;
 
 	// Check: Currency moving into Shared Bank is platinum only.
-	if (MoneySlotID::isSharedBank(payload->mToSlot)) {
-		EXPECTED_BOOL(payload->mToType == MoneyType::PLATINUM);
+	if (CurrencySlot::isSharedBank(payload->mToSlot)) {
+		EXPECTED_BOOL(payload->mToType == CurrencyType::Platinum);
 	}
 	// Check: Currency moving from Shared Bank is platinum only.
-	if (MoneySlotID::isSharedBank(payload->mFromSlot)) {
-		EXPECTED_BOOL(payload->mToType == MoneyType::PLATINUM);
+	if (CurrencySlot::isSharedBank(payload->mFromSlot)) {
+		EXPECTED_BOOL(payload->mToType == CurrencyType::Platinum);
 	}
 
 	// Check: Character is in range of a bank.
@@ -3078,7 +3078,7 @@ const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* 
 	}
 
 	// Check: Character is trading.
-	if (MoneySlotID::isTrade(payload->mToSlot)) {
+	if (CurrencySlot::isTrade(payload->mToSlot)) {
 		EXPECTED_BOOL(mCharacter->isTrading());
 	}
 

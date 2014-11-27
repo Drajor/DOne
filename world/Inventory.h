@@ -34,26 +34,26 @@ public:
 	const bool moveCurrency(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pFromType, const uint32 pToType, const int32 pAmount);
 
 	// Currency
-	inline const int32 getCursorPlatinum() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::PLATINUM]; }
-	inline const int32 getPersonalPlatinum() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::PLATINUM]; }
-	inline const int32 getBankPlatinum() const { return mCurrency[MoneySlotID::BANK][MoneyType::PLATINUM]; }
-	inline const int32 getTradePlatinum() const { return mCurrency[MoneySlotID::TRADE][MoneyType::PLATINUM]; }
-	inline const int32 getSharedBankPlatinum() const { return mCurrency[MoneySlotID::SHARED_BANK][MoneyType::PLATINUM]; }
+	inline const int32 getCursorPlatinum() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Platinum]; }
+	inline const int32 getPersonalPlatinum() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Platinum]; }
+	inline const int32 getBankPlatinum() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Platinum]; }
+	inline const int32 getTradePlatinum() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Platinum]; }
+	inline const int32 getSharedBankPlatinum() const { return mCurrency[CurrencySlot::SharedBank][CurrencyType::Platinum]; }
 
-	inline const int32 getCursorGold() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::GOLD]; }
-	inline const int32 getPersonalGold() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::GOLD]; }
-	inline const int32 getBankGold() const { return mCurrency[MoneySlotID::BANK][MoneyType::GOLD]; }
-	inline const int32 getTradeGold() const { return mCurrency[MoneySlotID::TRADE][MoneyType::GOLD]; }
+	inline const int32 getCursorGold() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Gold]; }
+	inline const int32 getPersonalGold() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Gold]; }
+	inline const int32 getBankGold() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Gold]; }
+	inline const int32 getTradeGold() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Gold]; }
 
-	inline const int32 getCursorSilver() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::SILVER]; }
-	inline const int32 getPersonalSilver() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::SILVER]; }
-	inline const int32 getBankSilver() const { return mCurrency[MoneySlotID::BANK][MoneyType::SILVER]; }
-	inline const int32 getTradeSilver() const { return mCurrency[MoneySlotID::TRADE][MoneyType::SILVER]; }
+	inline const int32 getCursorSilver() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Silver]; }
+	inline const int32 getPersonalSilver() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Silver]; }
+	inline const int32 getBankSilver() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Silver]; }
+	inline const int32 getTradeSilver() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Silver]; }
 
-	inline const int32 getCursorCopper() const { return mCurrency[MoneySlotID::CURSOR][MoneyType::COPPER]; }
-	inline const int32 getPersonalCopper() const { return mCurrency[MoneySlotID::PERSONAL][MoneyType::COPPER]; }
-	inline const int32 getBankCopper() const { return mCurrency[MoneySlotID::BANK][MoneyType::COPPER]; }
-	inline const int32 getTradeCopper() const { return mCurrency[MoneySlotID::TRADE][MoneyType::COPPER]; }
+	inline const int32 getCursorCopper() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Copper]; }
+	inline const int32 getPersonalCopper() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Copper]; }
+	inline const int32 getBankCopper() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Copper]; }
+	inline const int32 getTradeCopper() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Copper]; }
 	
 	const bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount);
 
@@ -144,7 +144,7 @@ private:
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
 
-	int32 mCurrency[MoneySlotID::MAX][MoneyType::MAX];
+	int32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];
 
 	inline const int32 _getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; }
 };

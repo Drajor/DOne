@@ -227,49 +227,49 @@ enum PlayerDeityIDs {
 	Agnostic = 396
 };
 
-namespace MoneySlotID {
+namespace CurrencySlot {
 	enum : uint32 {
-		CURSOR = 0,
-		PERSONAL = 1,
-		BANK = 2,
-		TRADE = 3,
-		SHARED_BANK = 4,
+		Cursor = 0,
+		Personal = 1,
+		Bank = 2,
+		Trade = 3,
+		SharedBank = 4,
 		MAX = 5,
 		SLOT_DELETE = 0xFFFFFFFF
 	};
 	static std::map<uint32, String> MoneySlotIDStrings = {
-		{ CURSOR, "Cursor" },
-		{ PERSONAL, "Personal" },
-		{ BANK, "Bank" },
-		{ TRADE, "Trade" },
-		{ SHARED_BANK, "Shared Bank" }
+		{ Cursor, "Cursor" },
+		{ Personal, "Personal" },
+		{ Bank, "Bank" },
+		{ Trade, "Trade" },
+		{ SharedBank, "Shared Bank" }
 	};
 	static String toString(const uint32 pSlotID) {
 		return MoneySlotIDStrings[pSlotID];
 	}
 
-	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
-	static const bool isPersonal(const uint32 pSlot) { return pSlot == PERSONAL; }
-	static const bool isBank(const uint32 pSlot) { return pSlot == BANK; }
-	static const bool isTrade(const uint32 pSlot) { return pSlot == TRADE; }
-	static const bool isSharedBank(const uint32 pSlot) { return pSlot == SHARED_BANK; }
+	static const bool isCursor(const uint32 pSlot) { return pSlot == Cursor; }
+	static const bool isPersonal(const uint32 pSlot) { return pSlot == Personal; }
+	static const bool isBank(const uint32 pSlot) { return pSlot == Bank; }
+	static const bool isTrade(const uint32 pSlot) { return pSlot == Trade; }
+	static const bool isSharedBank(const uint32 pSlot) { return pSlot == SharedBank; }
 	static const bool isValid(const uint32 pSlot) { return isCursor(pSlot) || isPersonal(pSlot) || isBank(pSlot) || isTrade(pSlot) || isSharedBank(pSlot); }
 }
 
-namespace MoneyType {
+namespace CurrencyType {
 	enum : int32 {
-		COPPER = 0,
-		SILVER = 1,
-		GOLD = 2,
-		PLATINUM = 3,
+		Copper = 0,
+		Silver = 1,
+		Gold = 2,
+		Platinum = 3,
 		MAX = 4
 	};
-	static const bool isValid(const int32 pType) { return pType >= COPPER && pType <= PLATINUM; }
+	static const bool isValid(const int32 pType) { return pType >= Copper && pType <= Platinum; }
 	static std::map<int32, String> MoneyTypeStrings{
-		{ COPPER, "Copper" },
-		{ SILVER, "Silver" },
-		{ GOLD, "Gold" },
-		{ PLATINUM, "Platinum" }
+		{ Copper, "Copper" },
+		{ Silver, "Silver" },
+		{ Gold, "Gold" },
+		{ Platinum, "Platinum" }
 	};
 	static String toString(const int32 pType) {
 		return MoneyTypeStrings[pType];

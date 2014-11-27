@@ -798,37 +798,32 @@ const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot
 		removeAmount = pAmount - (pAmount % denominator);
 	}
 
-	const uint64 preTotalCurrency = getTotalCurrency();
-
 	EXPECTED_BOOL(removeCurrency(pFromSlot, pFromType, removeAmount));
 	EXPECTED_BOOL(addCurrency(pToSlot, pToType, addAmount));
-
-	EXPECTED_BOOL(preTotalCurrency == getTotalCurrency()); // Ensure total currency has not changed.
-	EXPECTED_BOOL(currencyValid()); // Ensure currency is still in a valid state.
 
 	return true;
 }
 
 const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
-	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
-	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::GOLD, pGold));
-	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::SILVER, pSilver));
-	EXPECTED_BOOL(addCurrency(pSlot, MoneyType::COPPER, pCopper));
+	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Platinum, pPlatinum));
+	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Gold, pGold));
+	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Silver, pSilver));
+	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Copper, pCopper));
 	return true;
 }
 
 const bool Inventoryy::removeCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
-	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::PLATINUM, pPlatinum));
-	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::GOLD, pGold));
-	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::SILVER, pSilver));
-	EXPECTED_BOOL(removeCurrency(pSlot, MoneyType::COPPER, pCopper));
+	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Platinum, pPlatinum));
+	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Gold, pGold));
+	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Silver, pSilver));
+	EXPECTED_BOOL(removeCurrency(pSlot, CurrencyType::Copper, pCopper));
 	return true;
 }
 
 const uint64 Inventoryy::getTotalCurrency() const {
 	uint64 total = 0;
-	for (auto i = 0; i < MoneySlotID::MAX; i++) {
-		for (auto j = 0; j < MoneyType::MAX; j++) {
+	for (auto i = 0; i < CurrencySlot::MAX; i++) {
+		for (auto j = 0; j < CurrencyType::MAX; j++) {
 			total += _getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
 		}
 	}
@@ -836,8 +831,8 @@ const uint64 Inventoryy::getTotalCurrency() const {
 }
 
 const bool Inventoryy::currencyValid() const {
-	for (auto i = 0; i < MoneySlotID::MAX; i++) {
-		for (auto j = 0; j < MoneyType::MAX; j++) {
+	for (auto i = 0; i < CurrencySlot::MAX; i++) {
+		for (auto j = 0; j < CurrencyType::MAX; j++) {
 			if (_getCurrency(i, j) < 0)
 				return false;
 		}
@@ -856,10 +851,10 @@ const bool Inventoryy::onTradeCancel() {
 	const auto copper = getTradeCopper();
 
 	// Move trade slot currency to personal.
-	if (platinum > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::PLATINUM, MoneyType::PLATINUM, platinum)); }
-	if (gold > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::GOLD, MoneyType::GOLD, gold)); }
-	if (silver > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::SILVER, MoneyType::SILVER, silver)); }
-	if (copper > 0) { EXPECTED_BOOL(moveCurrency(MoneySlotID::TRADE, MoneySlotID::PERSONAL, MoneyType::COPPER, MoneyType::COPPER, copper)); }
+	if (platinum > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Platinum, CurrencyType::Platinum, platinum)); }
+	if (gold > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Gold, CurrencyType::Gold, gold)); }
+	if (silver > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Silver, CurrencyType::Silver, silver)); }
+	if (copper > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Copper, CurrencyType::Copper, copper)); }
 
 	// Check: Total currency has not changed.
 	EXPECTED_BOOL(preMoveCurrency == getTotalCurrency());
@@ -943,17 +938,17 @@ const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, con
 	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
 
 	// Set new currency amounts.
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, newPlatinum);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, newGold);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, newSilver);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, newCopper);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Platinum, newPlatinum);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Gold, newGold);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Silver, newSilver);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Copper, newCopper);
 
 	return true;
 }
 
 const bool Inventoryy::addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) {
-	EXPECTED_BOOL(MoneySlotID::isValid(pSlot));
-	EXPECTED_BOOL(MoneyType::isValid(pType));
+	EXPECTED_BOOL(CurrencySlot::isValid(pSlot));
+	EXPECTED_BOOL(CurrencyType::isValid(pType));
 	EXPECTED_BOOL(pAmount >= 0);
 
 	mCurrency[pSlot][pType] += pAmount;
@@ -977,10 +972,10 @@ const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, 
 	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
 
 	// Set new currency amounts.
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, newPlatinum);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, newGold);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, newSilver);
-	setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, newCopper);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Platinum, newPlatinum);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Gold, newGold);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Silver, newSilver);
+	setCurrency(CurrencySlot::Personal, CurrencyType::Copper, newCopper);
 
 	return true;
 }

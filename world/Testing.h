@@ -299,17 +299,17 @@ TEST_F(InventoryCurrencyTest, DefaultChecks) {
 }
 
 TEST_F(InventoryCurrencyTest, AddBadSlot) {
-	EXPECT_FALSE(mInventory->addCurrency(5, MoneyType::COPPER, 1));
+	EXPECT_FALSE(mInventory->addCurrency(5, CurrencyType::Copper, 1));
 	EXPECT_EQ(0, mInventory->getTotalCurrency());
 }
 
 TEST_F(InventoryCurrencyTest, AddBadType) {
-	EXPECT_FALSE(mInventory->addCurrency(MoneySlotID::PERSONAL, 4, 1));
+	EXPECT_FALSE(mInventory->addCurrency(CurrencySlot::Personal, 4, 1));
 	EXPECT_EQ(0, mInventory->getTotalCurrency());
 }
 
 TEST_F(InventoryCurrencyTest, AddSingleSlotSingleCurrency) {
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 1));
 	EXPECT_EQ(1, mInventory->getPersonalCopper());
 	
 	// Total
@@ -318,8 +318,8 @@ TEST_F(InventoryCurrencyTest, AddSingleSlotSingleCurrency) {
 }
 
 TEST_F(InventoryCurrencyTest, AddMultipleSlotSingleCurrency) {
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::COPPER, 3));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 1));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Copper, 3));
 	EXPECT_EQ(1, mInventory->getPersonalCopper());
 	EXPECT_EQ(3, mInventory->getBankCopper());
 	
@@ -330,8 +330,8 @@ TEST_F(InventoryCurrencyTest, AddMultipleSlotSingleCurrency) {
 }
 
 TEST_F(InventoryCurrencyTest, AddSingleSlotMultipleType) {
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 50));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, 7));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 50));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 7));
 	EXPECT_EQ(50, mInventory->getPersonalCopper());
 	EXPECT_EQ(7, mInventory->getPersonalGold());
 
@@ -341,10 +341,10 @@ TEST_F(InventoryCurrencyTest, AddSingleSlotMultipleType) {
 }
 
 TEST_F(InventoryCurrencyTest, AddMultipleSlotMultipleType) {
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 11));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::SILVER, 66));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, 2));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, 14));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 11));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Silver, 66));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Cursor, CurrencyType::Gold, 2));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, 14));
 	
 	EXPECT_EQ(11, mInventory->getPersonalCopper());
 	EXPECT_EQ(66, mInventory->getBankSilver());
@@ -360,13 +360,13 @@ TEST_F(InventoryCurrencyTest, AddMultipleSlotMultipleType) {
 }
 
 TEST_F(InventoryCurrencyTest, AddPersonal) {
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 1));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 1));
 	EXPECT_EQ(1, mInventory->getPersonalCopper());
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, 2));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 2));
 	EXPECT_EQ(2, mInventory->getPersonalSilver());
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, 3));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 3));
 	EXPECT_EQ(3, mInventory->getPersonalGold());
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, 4));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 4));
 	EXPECT_EQ(4, mInventory->getPersonalPlatinum());
 
 	// Total
@@ -376,17 +376,17 @@ TEST_F(InventoryCurrencyTest, AddPersonal) {
 
 TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	// Setup
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, 897));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, 434));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, 249));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, 67));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 434));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 249));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 67));
 
 	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
 
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::COPPER, 3));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::SILVER, 2));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::GOLD, 7));
-	EXPECT_TRUE(mInventory->addCurrency(MoneySlotID::BANK, MoneyType::PLATINUM, 12398));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Copper, 3));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Silver, 2));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Gold, 7));
+	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Bank, CurrencyType::Platinum, 12398));
 
 	EXPECT_EQ(12398723, mInventory->getTotalBankCurrency());
 
@@ -395,64 +395,64 @@ TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	// Transfer personal copper into bank.
 
 	// Pick up copper.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::PERSONAL, MoneySlotID::CURSOR, MoneyType::COPPER, MoneyType::COPPER, 897));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Copper, CurrencyType::Copper, 897));
 	EXPECT_EQ(0, mInventory->getPersonalCopper());
 	EXPECT_EQ(897, mInventory->getCursorCopper());
 	// Drop on bank gold.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::COPPER, MoneyType::GOLD, 897));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Copper, CurrencyType::Gold, 897));
 	EXPECT_EQ(97, mInventory->getCursorCopper());
 	EXPECT_EQ(15, mInventory->getBankGold());
 	// Drop on bank silver.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::COPPER, MoneyType::SILVER, 90));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Copper, CurrencyType::Silver, 90));
 	EXPECT_EQ(7, mInventory->getCursorCopper());
 	EXPECT_EQ(11, mInventory->getBankSilver());
 	// Drop on bank copper.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::COPPER, MoneyType::COPPER, 7));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Copper, CurrencyType::Copper, 7));
 	EXPECT_EQ(0, mInventory->getCursorCopper());
 	EXPECT_EQ(10, mInventory->getBankCopper());
 
 	// Transfer personal silver into bank.
 
 	// Pick up silver.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::PERSONAL, MoneySlotID::CURSOR, MoneyType::SILVER, MoneyType::SILVER, 434));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Silver, CurrencyType::Silver, 434));
 	EXPECT_EQ(0, mInventory->getPersonalSilver());
 	EXPECT_EQ(434, mInventory->getCursorSilver());
 	// Drop on bank platinum.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::SILVER, MoneyType::PLATINUM, 400));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Silver, CurrencyType::Platinum, 400));
 	EXPECT_EQ(34, mInventory->getCursorSilver());
 	EXPECT_EQ(12402, mInventory->getBankPlatinum());
 	// Drop on bank gold.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::SILVER, MoneyType::GOLD, 30));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Silver, CurrencyType::Gold, 30));
 	EXPECT_EQ(4, mInventory->getCursorSilver());
 	EXPECT_EQ(18, mInventory->getBankGold());
 	// Drop on bank silver.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::SILVER, MoneyType::SILVER, 4));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Silver, CurrencyType::Silver, 4));
 	EXPECT_EQ(0, mInventory->getCursorSilver());
 	EXPECT_EQ(15, mInventory->getBankSilver());
 
 	// Transfer personal gold into bank.
 	
 	// Pick up gold.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::PERSONAL, MoneySlotID::CURSOR, MoneyType::GOLD, MoneyType::GOLD, 249));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Gold, CurrencyType::Gold, 249));
 	EXPECT_EQ(0, mInventory->getPersonalGold());
 	EXPECT_EQ(249, mInventory->getCursorGold());
 	// Drop on bank platinum.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::GOLD, MoneyType::PLATINUM, 240));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Gold, CurrencyType::Platinum, 240));
 	EXPECT_EQ(9, mInventory->getCursorGold());
 	EXPECT_EQ(12426, mInventory->getBankPlatinum());
 	// Drop on bank gold.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::GOLD, MoneyType::GOLD, 9));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Gold, CurrencyType::Gold, 9));
 	EXPECT_EQ(0, mInventory->getCursorGold());
 	EXPECT_EQ(27, mInventory->getBankGold());
 
 	// Transfer personal platinum into bank.
 
 	// Pick up platinum.
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::PERSONAL, MoneySlotID::CURSOR, MoneyType::PLATINUM, MoneyType::PLATINUM, 67));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Platinum, CurrencyType::Platinum, 67));
 	EXPECT_EQ(0, mInventory->getPersonalPlatinum());
 	EXPECT_EQ(67, mInventory->getCursorPlatinum());
 	// Drop on bank platinum
-	EXPECT_TRUE(mInventory->moveCurrency(MoneySlotID::CURSOR, MoneySlotID::BANK, MoneyType::PLATINUM, MoneyType::PLATINUM, 67));
+	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Bank, CurrencyType::Platinum, CurrencyType::Platinum, 67));
 	EXPECT_EQ(0, mInventory->getCursorPlatinum());
 
 	EXPECT_EQ(0, mInventory->getTotalPersonalCurrency()); // All currency should be transfered into bank.

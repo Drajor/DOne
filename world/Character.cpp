@@ -104,25 +104,25 @@ bool Character::initialise() {
 	setExperience(mData->mExperience);
 
 	// Personal Currency
-	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::PLATINUM, mData->mPlatinumCharacter);
-	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::GOLD, mData->mGoldCharacter);
-	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::SILVER, mData->mSilverCharacter);
-	mInventory->setCurrency(MoneySlotID::PERSONAL, MoneyType::COPPER, mData->mCopperCharacter);
+	mInventory->setCurrency(CurrencySlot::Personal, CurrencyType::Platinum, mData->mPlatinumCharacter);
+	mInventory->setCurrency(CurrencySlot::Personal, CurrencyType::Gold, mData->mGoldCharacter);
+	mInventory->setCurrency(CurrencySlot::Personal, CurrencyType::Silver, mData->mSilverCharacter);
+	mInventory->setCurrency(CurrencySlot::Personal, CurrencyType::Copper, mData->mCopperCharacter);
 
 	// Cursor Currency
-	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::PLATINUM, mData->mPlatinumCursor);
-	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::GOLD, mData->mGoldCursor);
-	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::SILVER, mData->mSilverCursor);
-	mInventory->setCurrency(MoneySlotID::CURSOR, MoneyType::COPPER, mData->mCopperCursor);
+	mInventory->setCurrency(CurrencySlot::Cursor, CurrencyType::Platinum, mData->mPlatinumCursor);
+	mInventory->setCurrency(CurrencySlot::Cursor, CurrencyType::Gold, mData->mGoldCursor);
+	mInventory->setCurrency(CurrencySlot::Cursor, CurrencyType::Silver, mData->mSilverCursor);
+	mInventory->setCurrency(CurrencySlot::Cursor, CurrencyType::Copper, mData->mCopperCursor);
 
 	// Bank Currency
-	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::PLATINUM, mData->mPlatinumBank);
-	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::GOLD, mData->mGoldBank);
-	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::SILVER, mData->mSilverBank);
-	mInventory->setCurrency(MoneySlotID::BANK, MoneyType::COPPER, mData->mCopperBank);
+	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Platinum, mData->mPlatinumBank);
+	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Gold, mData->mGoldBank);
+	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Silver, mData->mSilverBank);
+	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Copper, mData->mCopperBank);
 
 	// Shared Bank Currency
-	mInventory->setCurrency(MoneySlotID::SHARED_BANK, MoneyType::PLATINUM, AccountManager::getInstance().getSharedPlatinum(mAccountID));
+	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, AccountManager::getInstance().getSharedPlatinum(mAccountID));
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
