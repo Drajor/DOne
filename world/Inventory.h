@@ -112,6 +112,7 @@ public:
 
 	void getTradeItems(std::list<Item*>& pItems) const;
 	const bool clearTradeItems();
+	const bool onTradeAccept();
 	const bool onTradeCancel();
 
 	const uint32 findEmptySlot(Item* pItem) const;

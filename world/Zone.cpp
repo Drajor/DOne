@@ -1370,6 +1370,9 @@ void Zone::handleTradeAccept(Character* pCharacter, const uint32 pSpawnID) {
 	//pCharacter->getConnection()->sendFinishWindow();
 	//pCharacter->getConnection()->sendFinishWindow2();
 	pCharacter->setTradingWith(nullptr);
+
+	const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
+	pCharacter->getInventory()->onTradeAccept();
 }
 
 void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {

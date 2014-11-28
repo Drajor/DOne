@@ -833,6 +833,16 @@ const bool Inventoryy::currencyValid() const {
 	return true;
 }
 
+const bool Inventoryy::onTradeAccept() {
+	// Clear trade currency.
+	setCurrency(CurrencySlot::Trade, CurrencyType::Platinum, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Gold, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Silver, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Copper, 0);
+
+	return true;
+}
+
 const bool Inventoryy::onTradeCancel() {
 	// Record total current before moving anything.
 	const uint64 preMoveCurrency = getTotalCurrency();
