@@ -140,6 +140,9 @@ public:
 	void sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse = 0);
 	void sendShopDeleteItem(const uint32 pSpawnID, const uint32 pItemInstanceID, const int32 pUnknown);
 
+	void sendAddNimbus(const uint32 pEffectID);
+	void sendRemoveNimbus(const uint32 pNimbusID);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:

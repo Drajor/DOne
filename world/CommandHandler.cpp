@@ -1519,6 +1519,18 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
 	}
+	else if (pCommandName == "se") {
+		uint32 effect = 0;
+		Utility::stoSafe(effect, pParameters[0]);
+
+		pCharacter->getConnection()->sendAddNimbus(effect);
+	}
+	else if (pCommandName == "re") {
+		uint32 effect = 0;
+		Utility::stoSafe(effect, pParameters[0]);
+
+		pCharacter->getConnection()->sendRemoveNimbus(effect);
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

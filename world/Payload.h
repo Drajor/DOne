@@ -180,6 +180,25 @@ namespace Payload {
 		};
 
 		// C->S
+		struct AddNimbus : public FixedT<AddNimbus, OP_SpellEffect> {
+			uint32 mNimbusID = 0;
+			uint32 mSpawnID = 0;
+			uint32 mSpawnID2 = 0;
+			uint32 mStartDelay = 1;
+			uint32 mStartDelay2 = 1;
+			uint32 Unknown020 = 1;	// Seen 3000
+			uint8 Unknown024 = 1;	// Seen 1 for SoD
+			uint8 Unknown025 = 1;	// Seen 1 for Live
+			uint16 Unknown026 = 1157;	// Seen 1157 and 1177 - varies per char
+		};
+
+		// C->S
+		struct RemoveNimbus : public FixedT<RemoveNimbus, OP_RemoveNimbusEffect> {
+			uint32 mSpawnID = 0;
+			uint32 mNimbusID = 0;
+		};
+
+		// C->S
 		struct SetTitle : public Fixed<SetTitle> {
 			enum : uint32 { SET_TITLE = 0, SET_SUFFIX = 1 };
 			uint32 mOption = SET_TITLE;

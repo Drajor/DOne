@@ -11,6 +11,8 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());
 	EXPECT_EQ(8, Payload::Zone::Time::size());
 	EXPECT_EQ(68, Payload::Zone::ZoneEntry::size());
+	EXPECT_EQ(28, Payload::Zone::AddNimbus::size());
+	EXPECT_EQ(8, Payload::Zone::RemoveNimbus::size());
 	//TODO: More.
 }
 
