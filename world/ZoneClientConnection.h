@@ -173,7 +173,7 @@ private:
 	void _handleDeleteSpawn(const EQApplicationPacket* pPacket);
 	void _handleRequestNewZoneData(const EQApplicationPacket* pPacket);
 
-	void _sendNewZoneData();
+	void _sendZoneData();
 	void _handleClientReady(const EQApplicationPacket* pPacket);
 	void _handleSendAATable(const EQApplicationPacket* pPacket);
 	void _handleUpdateAA(const EQApplicationPacket* pPacket);

@@ -702,74 +702,74 @@ const uint8 bytes[] = {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_NewZone) {
-	SETUP_DIRECT_ENCODE(NewZone_Struct, structs::NewZone_Struct);
-	OUT_str(char_name);
-	OUT_str(zone_short_name);
-	OUT_str(zone_long_name);
-	OUT(ztype);
-	int r;
-	for(r = 0; r < 4; r++) {
-		OUT(fog_red[r]);
-		OUT(fog_green[r]);
-		OUT(fog_blue[r]);
-		OUT(fog_minclip[r]);
-		OUT(fog_maxclip[r]);
-	}
-	OUT(gravity);
-	OUT(time_type);
-	for(r = 0; r < 4; r++) {
-		OUT(rain_chance[r]);
-	}
-	for(r = 0; r < 4; r++) {
-		OUT(rain_duration[r]);
-	}
-	for(r = 0; r < 4; r++) {
-		OUT(snow_chance[r]);
-	}
-	for(r = 0; r < 4; r++) {
-		OUT(snow_duration[r]);
-	}
-	for(r = 0; r < 32; r++) {
-		eq->unknown537[r] = 0xFF;	//observed
-	}
-	OUT(sky);
-	OUT(zone_exp_multiplier);
-	OUT(safe_y);
-	OUT(safe_x);
-	OUT(safe_z);
-	OUT(max_z);
-	OUT(underworld);
-	OUT(minclip);
-	OUT(maxclip);
-	OUT_str(zone_short_name2);
-	OUT(zone_id);
-	OUT(zone_instance);
-	OUT(SuspendBuffs);
-
-	eq->FogDensity = emu->fog_density;
-
-    /*fill in some unknowns with observed values, hopefully it will help */
-	eq->unknown800 = -1;
-	eq->unknown844 = 600;
-	eq->unknown880 = 50;
-	eq->unknown884 = 10;
-	eq->unknown888 = 1;
-	eq->unknown889 = 0;
-	eq->unknown890 = 1;
-	eq->unknown891 = 0;
-	eq->unknown892 = 0;
-	eq->unknown893 = 0;
-	eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
-	eq->unknown895 = 0;
-	eq->unknown896 = 180;
-	eq->unknown900 = 180;
-	eq->unknown904 = 180;
-	eq->unknown908 = 2;
-	eq->unknown912 = 2;
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_NewZone) {
+//	SETUP_DIRECT_ENCODE(NewZone_Struct, structs::NewZone_Struct);
+//	OUT_str(char_name);
+//	OUT_str(zone_short_name);
+//	OUT_str(zone_long_name);
+//	OUT(ztype);
+//	int r;
+//	for(r = 0; r < 4; r++) {
+//		OUT(fog_red[r]);
+//		OUT(fog_green[r]);
+//		OUT(fog_blue[r]);
+//		OUT(fog_minclip[r]);
+//		OUT(fog_maxclip[r]);
+//	}
+//	OUT(gravity);
+//	OUT(time_type);
+//	for(r = 0; r < 4; r++) {
+//		OUT(rain_chance[r]);
+//	}
+//	for(r = 0; r < 4; r++) {
+//		OUT(rain_duration[r]);
+//	}
+//	for(r = 0; r < 4; r++) {
+//		OUT(snow_chance[r]);
+//	}
+//	for(r = 0; r < 4; r++) {
+//		OUT(snow_duration[r]);
+//	}
+//	for(r = 0; r < 32; r++) {
+//		eq->unknown537[r] = 0xFF;	//observed
+//	}
+//	OUT(sky);
+//	OUT(zone_exp_multiplier);
+//	OUT(safe_y);
+//	OUT(safe_x);
+//	OUT(safe_z);
+//	OUT(max_z);
+//	OUT(underworld);
+//	OUT(minclip);
+//	OUT(maxclip);
+//	OUT_str(zone_short_name2);
+//	OUT(zone_id);
+//	OUT(zone_instance);
+//	OUT(SuspendBuffs);
+//
+//	eq->FogDensity = emu->fog_density;
+//
+//    /*fill in some unknowns with observed values, hopefully it will help */
+//	eq->unknown800 = -1;
+//	eq->unknown844 = 600;
+//	eq->unknown880 = 50;
+//	eq->unknown884 = 10;
+//	eq->unknown888 = 1;
+//	eq->unknown889 = 0;
+//	eq->unknown890 = 1;
+//	eq->unknown891 = 0;
+//	eq->unknown892 = 0;
+//	eq->unknown893 = 0;
+//	eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
+//	eq->unknown895 = 0;
+//	eq->unknown896 = 180;
+//	eq->unknown900 = 180;
+//	eq->unknown904 = 180;
+//	eq->unknown908 = 2;
+//	eq->unknown912 = 2;
+//
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Track)
 {

@@ -15,6 +15,8 @@ public:
 	inline std::list<String>& getAliases() { return mAliases; }
 	inline const uint8 getMinimumStatus() const { return mMinimumStatus; }
 	void setInvoker(Character* pCharacter) { mInvoker = pCharacter; }
+	inline void setParameters(CommandParameters pParameters) { mParameters = pParameters; }
+	inline void clearParameters() { mParameters.clear(); }
 	virtual const bool handleCommand(CommandParameters pParameters) = 0;
 	virtual void helpMessage();
 	inline const bool isLogged() const { return mLogged; }
@@ -25,9 +27,21 @@ public:
 protected:
 	virtual void conversionError(String& pParameter);
 
+	template <typename T>
+	const bool convertParameter(CommandParameters::size_type pIndex, T& pValue) {
+		if (pIndex >= mParameters.size()) return false;
+
+		if (!Utility::stoSafe(pValue, mParameters[pIndex])) {
+			conversionError(mParameters[pIndex]);
+			return false;
+		}
+		return true;
+	}
+
 	inline void setMinimumParameters(uint8 pValue) { mMinimumParameters = pValue; }
 	inline void setMaximumParameters(uint8 pValue) { mMaximumParameters = pValue; }
 	
+	CommandParameters mParameters;
 	std::list<String> mAliases;
 	uint8 mMinimumStatus;
 	std::list<String> mHelpMessages;

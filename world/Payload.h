@@ -10,6 +10,8 @@ enum GuildUpdateAction : uint32 {
 	GUILD_CHANNEL = 1
 };
 
+#pragma pack(1)
+
 struct Colour
 {
 	union
@@ -25,7 +27,6 @@ struct Colour
 	};
 };
 
-#pragma pack(1)
 namespace Payload {
 
 	template <typename T>
@@ -68,6 +69,111 @@ namespace Payload {
 
 	namespace Zone {
 
+		// C->S
+		struct ZoneData : public FixedT<ZoneData, OP_NewZone> {
+			ZoneData() {
+				memset(mCharacterName, 0, sizeof(mCharacterName));
+				memset(mShortName, 0, sizeof(mShortName));
+				memset(unknown0096, 0, sizeof(unknown0096));
+				memset(mLongName, 0, sizeof(mLongName));
+				memset(unknown537, 0, sizeof(unknown537));
+				memset(unknown571, 0, sizeof(unknown571));
+				memset(unknown620, 0, sizeof(unknown620));
+				memset(mShortName2, 0, sizeof(mShortName2));
+				memset(unknown804, 0, sizeof(unknown804));
+				memset(unknown856, 0, sizeof(unknown856));
+				memset(unknown932, 0, sizeof(unknown932));
+			}
+			struct Fog {
+				Fog() {
+					memset(mMinimumClip, 2, sizeof(mMinimumClip));
+					memset(mMaximumClip, 500, sizeof(mMaximumClip));
+					set(0, 255, 0, 0);
+					set(1, 0, 255, 0);
+					set(2, 0, 0, 255);
+					//memset(mRed, 50, sizeof(mRed));
+					//memset(mGreen, 150, sizeof(mGreen));
+					//memset(mBlue, 150, sizeof(mBlue));
+				}
+				void set(int i, uint8 pRed, uint8 pGreen, uint8 pBlue) {
+					mRed[i] = pRed;
+					mBlue[i] = pBlue;
+					mGreen[i] = pGreen;
+				}
+				uint8 mRed[4];
+				uint8 mGreen[4];
+				uint8 mBlue[4];
+				uint8 mUnknown = 0;
+				float mMinimumClip[4];
+				float mMaximumClip[4];
+			};
+
+			char mCharacterName[64];
+			char mShortName[32];
+			char unknown0096[96];
+			char mLongName[278];
+			uint8 mZoneType = 0xFF; // TODO: Enum?
+			Fog mFog;
+			float mGravity = 0.4f;
+			uint8 mTimeType = 0; // TODO: Enum?
+			uint32 mRainChance = 0;
+			uint32 mRainDuration = 0;
+			uint32 mSnowChance = 0;
+			uint32 mSnowDuration = 0;
+			uint8 unknown537[33];
+			uint8 mSkyType = 0; // TODO: Enum? 0 = blank.
+			uint8 unknown571[13];
+			float mExperienceModifier = 1.0f;
+			float mSafeY = 0.0f;
+			float mSafeX = 0.0f;
+			float mSafeZ = 0.0f;
+			float mMinimumZ = 0.0f;
+			float mMaximumZ = 0.0f;
+			float underworld = 0.0f;
+			float mMinimumClip = 0.0f;
+			float mMaximumClip = 0.0f;
+			uint8 unknown620[84];
+			char mShortName2[96];
+			int32 unknown800 = -1; // Copied.
+			char unknown804[40];
+			int32 unknown844 = 600; // Copied.
+			int32 unknown848 = 0;
+			uint16 mZoneID = 0;
+			uint16 mInstanceID = 0;
+			char unknown856[20];
+			uint32 mSuspendBuffs = 0;
+			uint32 unknown880 = 50; // Copied.
+			uint32 unknown884 = 10; // Copied.
+			uint8 unknown888 = 1; // Copied.
+			uint8 unknown889 = 0; // Copied.
+			uint8 unknown890 = 1; // Copied.
+			uint8 unknown891 = 0; // Copied.
+			uint8 unknown892 = 0; // Copied.
+			uint8 unknown893 = 0; // Copied.
+			uint8 mFallDamage = 1;
+			uint8 unknown895 = 0; // Copied.
+			uint32 unknown896 = 180; // Copied.
+			uint32 unknown900 = 180; // Copied.
+			uint32 unknown904 = 180; // Copied.
+			uint32 unknown908 = 2; // Copied.
+			uint32 unknown912 = 2; // Copied.
+			float FogDensity = 0.33f;
+			uint32 unknown920 = 0;
+			uint32 unknown924 = 0;
+			uint32 unknown928 = 0;
+			uint8 unknown932[12];
+		};
+
+		// C->S
+		struct Time : public FixedT<Time, OP_TimeOfDay> {
+			uint8 mHour = 0;
+			uint8 mMinute = 0;
+			uint8 mDay = 0;
+			uint8 mMonth = 0;
+			uint32 mYear = 0;
+		};
+
+		// Note: ZoneEntry is C->S fixed and S->C variable.
 		struct ZoneEntry : public Fixed<ZoneEntry> {
 			uint32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
@@ -466,8 +572,16 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: Weather_Struct
-		struct Weather : public Fixed<Weather> {
+		struct Weather : public FixedT<Weather, OP_Weather> {
+			static EQApplicationPacket* construct(const uint32 pA, const uint32 pB, const uint32 pC) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mUnknown0 = pA;
+				payload->mType = pB;
+				payload->mIntensity = pC;
+
+				return packet;
+			}
 			enum Type : uint32 { NORMAL = 0, SNOW = 2, RAIN = 3 };
 			uint32 mUnknown0 = 0;
 			uint32 mType = NORMAL;

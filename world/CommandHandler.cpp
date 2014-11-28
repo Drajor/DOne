@@ -1146,6 +1146,46 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class WeatherCommand : public Command {
+public:
+	WeatherCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #weather");
+		mMinimumParameters = 3;
+		mMaximumParameters = 3;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		uint32 a = 0;
+		if (!convertParameter(0, a)) { return false; }
+		uint32 b = 0;
+		if (!convertParameter(1, b)) { return false; }
+		uint32 c = 0;
+		if (!convertParameter(2, c)) { return false; }
+
+		auto packet = Payload::Zone::Weather::construct(a, b, c);
+		mInvoker->getConnection()->sendPacket(packet);
+		delete packet;
+
+		return true;
+
+		/*
+		
+		0,0,0 = clear
+
+		0,2,1 = rain
+		1,2,1 = snow (star snow flakes)
+		2,2,1 = snow (round snow flakes)
+		3,2,1 = clear
+
+		2,1,1 = patchy snow
+
+		1,31,1 = snow, seems heavy
+
+		*/
+	}
+};
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -1204,6 +1244,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new KickCommand(100, { "kick" }));
 	mCommands.push_back(new InvulnerableCommand(100, { "invul" }));
 	mCommands.push_back(new InspectCommand(100, { "inspect" }));
+	mCommands.push_back(new WeatherCommand(100, { "weather" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1246,8 +1287,10 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 		if (command->isLogged())
 			_logCommand(pCharacter, pCommandMessage);
 
+		command->setParameters(elements);
 		command->handleCommand(elements);
 		command->setInvoker(nullptr);
+		command->clearParameters();
 	}
 	else {
 		// Hack/Test commands can be handled in here.
@@ -1465,27 +1508,17 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		Utility::stoSafe(stacks, pParameters[0]);
 		pCharacter->getConnection()->sendMoveItem(SlotID::CURSOR, SlotID::SLOT_DELETE, stacks);
 	}
+	else if (pCommandName == "time") {
+		uint8 hour = 0;
+		Utility::stoSafe(hour, pParameters[0]);
 
-	//else if (pCommandName == "weather") {
-	//	uint32 unk = 0;
-	//	uint32 type = 0;
-	//	uint32 intensity = 0;
-	//	Utility::stoSafe(unk, pParameters[0]);
-	//	Utility::stoSafe(type, pParameters[1]);
-	//	Utility::stoSafe(intensity, pParameters[2]);
+		auto packet = Payload::Zone::Time::create();
+		auto payload = Payload::Zone::Time::convert(packet);
+		payload->mHour = hour;
 
-	//	auto outPacket = new EQApplicationPacket(OP_Weather, Payload::Zone::Weather::size());
-	//	auto payload = Payload::Zone::Weather::convert(outPacket->pBuffer);
-
-	//	payload->mUnknown0 = unk;
-	//	payload->mType = type;
-	//	payload->mIntensity = intensity;
-
-	//	mInvoker->getConnection()->sendPacket(outPacket);
-	//	safe_delete(outPacket);
-
-	//	//mInvoker->getConnection()->sendSkillValue(skillID, skillValue);
-	//}
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}
