@@ -13,6 +13,14 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(68, Payload::Zone::ZoneEntry::size());
 	EXPECT_EQ(28, Payload::Zone::AddNimbus::size());
 	EXPECT_EQ(8, Payload::Zone::RemoveNimbus::size());
+	EXPECT_EQ(8, Payload::Zone::SetTitle::size());
+	EXPECT_EQ(40, Payload::Zone::TitleUpdate::size());
+	EXPECT_EQ(19, Payload::Zone::FaceChange::size());
+	// WearChange
+	EXPECT_EQ(4, Payload::Zone::AutoAttack::size());
+	EXPECT_EQ(16, Payload::Zone::MemoriseSpell::size());
+	EXPECT_EQ(8, Payload::Zone::DeleteSpell::size());
+	// LoadSpellSet
 	//TODO: More.
 }
 

@@ -2425,12 +2425,12 @@ void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPack
 void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(DeleteSpell::sizeCheck(pPacket->size));
+	EXPECTED(DeleteSpell::sizeCheck(pPacket));
 	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
 
-	auto payload = DeleteSpell::convert(pPacket->pBuffer);
-	const bool success = mCharacter->handleDeleteSpell(payload->mSpellBookSlot);
-	sendDeleteSpellDelete(payload->mSpellBookSlot, success);
+	auto payload = DeleteSpell::convert(pPacket);
+	const bool success = mCharacter->handleDeleteSpell(payload->mSlot);
+	sendDeleteSpellDelete(payload->mSlot, success);
 }
 
 void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
@@ -2648,13 +2648,9 @@ void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool 
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_DeleteSpell, DeleteSpell::size());
-	auto payload = DeleteSpell::convert(outPacket->pBuffer);
-	payload->mSpellBookSlot = pSlot;
-	payload->mSuccess = pSuccess ? 1 : 0;
-
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = DeleteSpell::construct(pSlot, pSuccess ? 1 : 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction) {

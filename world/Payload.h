@@ -264,7 +264,6 @@ namespace Payload {
 		};
 
 		// C<->S
-		// Based on: MemorizeSpell_Struct
 		struct MemoriseSpell : public Fixed<MemoriseSpell> {
 			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
 			uint32 mSlot = 0;
@@ -274,10 +273,18 @@ namespace Payload {
 		};
 
 		// C<->S
-		struct DeleteSpell : public Fixed<DeleteSpell> {
-			int16 mSpellBookSlot = 0;
+		struct DeleteSpell : public FixedT<DeleteSpell, OP_DeleteSpell> {
+			static EQApplicationPacket* construct(const uint16 pSlot, const uint8 pSuccess) {
+				auto packet = create();
+				auto payload = convert(packet);
+				
+				payload->mSlot = pSlot;
+				payload->mSuccess = pSuccess;
+				return packet;
+			}
+			int16 mSlot = 0; // mSlot probably uint32
 			uint8 mUnknown0[2];
-			uint8 mSuccess = 0;
+			uint8 mSuccess = 0; // probably uint32.
 			uint8 mUnknown1[3];
 		};
 
