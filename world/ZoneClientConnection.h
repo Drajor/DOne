@@ -143,6 +143,14 @@ public:
 	void sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID);
 	void sendRemoveNimbus(const uint32 pNimbusID);
 
+	void sendAlternateCurrencies();
+
+	// Updates the 'Alt Currency' tab in the Inventory Window.
+	void sendAlternateCurrencyQuantities(const bool pSendZero);
+
+	void sendAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity);
+	void sendAlternateCurrencyQuantity(const uint32 pCurrencyID);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
@@ -270,6 +278,8 @@ private:
 	void _handleShopEnd(const EQApplicationPacket* pPacket);
 	void _handleShopSell(const EQApplicationPacket* pPacket);
 	void _handleShopBuy(const EQApplicationPacket* pPacket);
+
+	void _handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

@@ -45,6 +45,7 @@ SET(world_sources
 	ItemDataStore.cpp
 	ItemFactory.cpp
 	Transmutation.cpp
+	AlternateCurrencyManager.cpp
 )
 
 SET(world_headers
@@ -97,6 +98,7 @@ SET(world_headers
 	Bonuses.h
 	Transmutation.h
 	Testing.h
+	AlternateCurrencyManager.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -14,6 +14,7 @@
 #include "ItemDataStore.h"
 #include "Item.h"
 #include "Inventory.h"
+#include "AlternateCurrencyManager.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -1230,6 +1231,70 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class AddAlternateCurrencyCommand : public Command {
+public:
+	AddAlternateCurrencyCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+altcurrency <type> <quantity>");
+		mMinimumParameters = 2;
+		mMaximumParameters = 2;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is Character.
+		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
+
+		uint32 currencyID = 0;
+		if (!convertParameter(0, currencyID)) { return false; }
+
+		uint32 currencyQuantity = 0;
+		if (!convertParameter(1, currencyQuantity)) { return false; }
+
+		// Check: Valid currency ID.
+		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(currencyID);
+		if (itemID == 0) { return false; }
+
+		auto target = Actor::cast<Character*>(mInvoker->getTarget());
+		target->getInventory()->addAlternateCurrency(currencyID, currencyQuantity);
+		target->getConnection()->sendAlternateCurrencyQuantities(true);
+
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class RemoveAlternateCurrencyCommand : public Command {
+public:
+	RemoveAlternateCurrencyCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #-altcurrency <type> <quantity>");
+		mMinimumParameters = 2;
+		mMaximumParameters = 2;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is Character.
+		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
+
+		uint32 currencyID = 0;
+		if (!convertParameter(0, currencyID)) { return false; }
+
+		uint32 currencyQuantity = 0;
+		if (!convertParameter(1, currencyQuantity)) { return false; }
+
+		// Check: Valid currency ID.
+		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(currencyID);
+		if (itemID == 0) { return false; }
+
+		auto target = Actor::cast<Character*>(mInvoker->getTarget());
+		target->getInventory()->removeAlternateCurrency(currencyID, currencyQuantity);
+		target->getConnection()->sendAlternateCurrencyQuantities(true);
+
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1293,6 +1358,9 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new AddNimbusCommand(100, { "+nimbus" }));
 	mCommands.push_back(new RemoveNimbusCommand(100, { "-nimbus" }));
+
+	mCommands.push_back(new AddAlternateCurrencyCommand(100, { "+altcurrency" }));
+	mCommands.push_back(new RemoveAlternateCurrencyCommand(100, { "-altcurrency" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {

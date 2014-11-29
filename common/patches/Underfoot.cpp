@@ -2664,43 +2664,43 @@ ENCODE(OP_AltCurrencySell)
     OUT(cost);
     FINISH_ENCODE();
 }
-
-ENCODE(OP_AltCurrency)
-{
-    EQApplicationPacket *in = *p;
-	*p = nullptr;
-
-	unsigned char *emu_buffer = in->pBuffer;
-    uint32 opcode = *((uint32*)emu_buffer);
-
-    if(opcode == 8) {
-        AltCurrencyPopulate_Struct *populate = (AltCurrencyPopulate_Struct*)emu_buffer;
-
-        EQApplicationPacket *outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(structs::AltCurrencyPopulate_Struct)
-            + sizeof(structs::AltCurrencyPopulateEntry_Struct) * populate->count);
-        structs::AltCurrencyPopulate_Struct *out_populate = (structs::AltCurrencyPopulate_Struct*)outapp->pBuffer;
-
-        out_populate->opcode = populate->opcode;
-        out_populate->count = populate->count;
-        for(uint32 i = 0; i < populate->count; ++i) {
-            out_populate->entries[i].currency_number = populate->entries[i].currency_number;
-            out_populate->entries[i].currency_number2 = populate->entries[i].currency_number2;
-            out_populate->entries[i].item_id = populate->entries[i].item_id;
-            out_populate->entries[i].item_icon = populate->entries[i].item_icon;
-            out_populate->entries[i].stack_size = populate->entries[i].stack_size;
-            out_populate->entries[i].unknown00 = populate->entries[i].unknown00;
-        }
-
-        dest->FastQueuePacket(&outapp, ack_req);
-    } else {
-        EQApplicationPacket *outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
-        memcpy(outapp->pBuffer, emu_buffer, sizeof(AltCurrencyUpdate_Struct));
-        dest->FastQueuePacket(&outapp, ack_req);
-    }
-
-    //dest->FastQueuePacket(&outapp, ack_req);
-    delete in;
-}
+//
+//ENCODE(OP_AltCurrency)
+//{
+//    EQApplicationPacket *in = *p;
+//	*p = nullptr;
+//
+//	unsigned char *emu_buffer = in->pBuffer;
+//    uint32 opcode = *((uint32*)emu_buffer);
+//
+//    if(opcode == 8) {
+//        AltCurrencyPopulate_Struct *populate = (AltCurrencyPopulate_Struct*)emu_buffer;
+//
+//        EQApplicationPacket *outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(structs::AltCurrencyPopulate_Struct)
+//            + sizeof(structs::AltCurrencyPopulateEntry_Struct) * populate->count);
+//        structs::AltCurrencyPopulate_Struct *out_populate = (structs::AltCurrencyPopulate_Struct*)outapp->pBuffer;
+//
+//        out_populate->opcode = populate->opcode;
+//        out_populate->count = populate->count;
+//        for(uint32 i = 0; i < populate->count; ++i) {
+//            out_populate->entries[i].currency_number = populate->entries[i].currency_number;
+//            out_populate->entries[i].currency_number2 = populate->entries[i].currency_number2;
+//            out_populate->entries[i].item_id = populate->entries[i].item_id;
+//            out_populate->entries[i].item_icon = populate->entries[i].item_icon;
+//            out_populate->entries[i].stack_size = populate->entries[i].stack_size;
+//            out_populate->entries[i].unknown00 = populate->entries[i].unknown00;
+//        }
+//
+//        dest->FastQueuePacket(&outapp, ack_req);
+//    } else {
+//        EQApplicationPacket *outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
+//        memcpy(outapp->pBuffer, emu_buffer, sizeof(AltCurrencyUpdate_Struct));
+//        dest->FastQueuePacket(&outapp, ack_req);
+//    }
+//
+//    //dest->FastQueuePacket(&outapp, ack_req);
+//    delete in;
+//}
 
 ENCODE(OP_InspectRequest) {
 	ENCODE_LENGTH_EXACT(Inspect_Struct);

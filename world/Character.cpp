@@ -158,6 +158,11 @@ bool Character::initialise() {
 	mInventory->_setRadiantCrystals(mData->mRadiantCrystals, mData->mTotalRadiantCrystals);
 	mInventory->_setEbonCrystals(mData->mEbonCrystals, mData->mTotalEbonCrystals);
 
+	// Alternate Currency.
+	for (auto i : mData->mAlternateCurrency) {
+		mInventory->setAlternateCurrencyQuantity(i.first, i.second);
+	}
+
 	if (isCaster()) {
 		// Create and initialise SpellBook.
 		mSpellBook = new SpellBook();
@@ -436,6 +441,9 @@ void Character::_updateForSave() {
 	mData->mTotalRadiantCrystals = mInventory->getTotalRadiantCrystals();
 	mData->mEbonCrystals = mInventory->getEbonCrystals();
 	mData->mTotalEbonCrystals = mInventory->getTotalEbonCrystals();
+
+	// Alternate Currency
+	mData->mAlternateCurrency = mInventory->getAlternateCurrency(); // Copy.
 
 	// Spell Book
 	if (mSpellBook) {

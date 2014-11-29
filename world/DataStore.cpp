@@ -327,6 +327,8 @@ namespace CharacterDataXML {
 		SCA Crystals = "crystals";
 		SCA Radiant = "radiant";
 		SCA Ebon = "ebon";
+		SCA AlternateCurrencies = "alternate_currencies";
+		SCA AlternateCurrency = "currency";
 		SCA SpellBook = "spellbook";
 		SCA SpellBookSlot = "sb_slot";
 		SCA SpellBar = "spellbar";
@@ -397,6 +399,9 @@ namespace CharacterDataXML {
 		// Tag::Crystals / Radiant / Ebon
 		SCA Current = "current";
 		SCA Total = "total";
+		// Tag::AlternateCurrencies
+		SCA CurrencyID = "id";
+		SCA CurrencyQuantity = "quantity";
 		// Tag::SpellBook
 		SCA SpellBookSlot = "slot";
 		SCA SpellBookSpell = "id";
@@ -545,6 +550,21 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	EXPECTED_BOOL(ebonElement);
 	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Current, pCharacterData->mEbonCrystals));
 	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Total, pCharacterData->mTotalEbonCrystals));
+
+	// Tag::AlternateCurrencies
+	auto alternateCurrenciesElement = characterElement->FirstChildElement(Tag::AlternateCurrencies);
+	EXPECTED_BOOL(alternateCurrenciesElement);
+	auto alternateCurrencyElement = alternateCurrenciesElement->FirstChildElement(Tag::AlternateCurrency);
+	while (alternateCurrencyElement) {
+		// Tag::AlternateCurrency
+		uint32 currencyID = 0;
+		uint32 currencyQuantity = 0;
+		EXPECTED_BOOL(readAttribute(alternateCurrencyElement, Attribute::CurrencyID, currencyID));
+		EXPECTED_BOOL(readAttribute(alternateCurrencyElement, Attribute::CurrencyQuantity, currencyQuantity));
+		pCharacterData->mAlternateCurrency[currencyID] = currencyQuantity;
+
+		alternateCurrencyElement = alternateCurrencyElement->NextSiblingElement(Tag::AlternateCurrency);
+	}
 
 	// Caster Only
 	if (Utility::isCaster(pCharacterData->mClass)) {
@@ -697,6 +717,16 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	auto ebonElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Ebon)));
 	ebonElement->SetAttribute(Attribute::Current, pCharacterData->mEbonCrystals);
 	ebonElement->SetAttribute(Attribute::Total, pCharacterData->mTotalEbonCrystals);
+
+	// Tag::AlternateCurrencies
+	auto alternateCurrenciesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::AlternateCurrencies)));
+	for (auto i : pCharacterData->mAlternateCurrency) {
+		if (i.second == 0) continue;
+		// Tag::AlternateCurrency
+		auto currencyElement = static_cast<TiXmlElement*>(alternateCurrenciesElement->LinkEndChild(new TiXmlElement(Tag::AlternateCurrency)));
+		currencyElement->SetAttribute(Attribute::CurrencyID, i.first);
+		currencyElement->SetAttribute(Attribute::CurrencyQuantity, i.second);
+	}
 
 	// Caster Only
 	if (Utility::isCaster(pCharacterData->mClass)){
@@ -1309,5 +1339,47 @@ const bool DataStore::loadTransmutationComponents(std::list<TransmutationCompone
 		componentElement = componentElement->NextSiblingElement(Tag::Component);
 	}
 
+	return true;
+}
+
+namespace AlternateCurrencyXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/alternate_currency.xml";
+	namespace Tag {
+		SCA Currencies = "currencies";
+		SCA Currency = "currency";
+	}
+	namespace Attribute {
+		// Tag::Currency
+		SCA ID = "id";
+		SCA ItemID = "item_id";
+		SCA Icon = "icon";
+		SCA MaxStacks = "max_stacks";
+	}
+#undef SCA
+}
+const bool DataStore::loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies) {
+	using namespace AlternateCurrencyXML;
+	EXPECTED_BOOL(pCurrencies.empty());
+	Profile p("DataStore::loadAlternateCurrencies");
+
+	TiXmlDocument document(AlternateCurrencyXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto currenciesElement = document.FirstChildElement(Tag::Currencies);
+	EXPECTED_BOOL(currenciesElement);
+	auto currencyElement = currenciesElement->FirstChildElement(Tag::Currency);
+
+	while (currencyElement) {
+		AlternateCurrency* c = new AlternateCurrency();
+		pCurrencies.push_back(c);
+
+		EXPECTED_BOOL(readAttribute(currencyElement, Attribute::ID, c->mCurrencyID));
+		EXPECTED_BOOL(readAttribute(currencyElement, Attribute::ItemID, c->mItemID));
+		EXPECTED_BOOL(readAttribute(currencyElement, Attribute::Icon, c->mIcon));
+		EXPECTED_BOOL(readAttribute(currencyElement, Attribute::MaxStacks, c->mMaxStacks));
+
+		currencyElement = currencyElement->NextSiblingElement(Tag::Currency);
+	}
 	return true;
 }

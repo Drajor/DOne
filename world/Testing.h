@@ -22,6 +22,9 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::DeleteSpell::size());
 	// LoadSpellSet
 	//TODO: More.
+
+	EXPECT_EQ(88, Payload::Zone::UpdateAlternateCurrency::size());
+	EXPECT_EQ(16, Payload::Zone::AlternateCurrencyReclaim::size());
 }
 
 // 

@@ -21,6 +21,7 @@
 #include "Timer.h"
 #include "TimeUtility.h"
 #include "Transmutation.h"
+#include "AlternateCurrencyManager.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"
@@ -64,6 +65,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(ItemDataStore::getInstance().initialise());
 	EXPECTED_MAIN(NPCFactory::getInstance().initialise());
 	EXPECTED_MAIN(Transmutation::getInstance().initialise());
+	EXPECTED_MAIN(AlternateCurrencyManager::getInstance().initialise());
 
 	while(true) {
 		Timer::SetCurrentTime();

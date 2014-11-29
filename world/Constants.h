@@ -138,12 +138,18 @@ namespace ItemID {
 		TCDiseaseResist,
 		TCFireResist,
 		TCColdResist,
-		TCCorruptionResist
+		TCCorruptionResist,
+
+		// Alternate Currencies
+		Token = 100,
+		Adhesive = 101,
 
 	};
 }
 static const uint32 MaxRadiantCrystalsStacks = 10000;
 static const uint32 MaxEbonCrystalsStacks = 10000;
+static const uint32 MaxTokensStacks = 10000;
+static const uint32 MaxAdhesiveStacks = 10000;
 
 
 enum PlayableRaceIDs {

@@ -1012,3 +1012,22 @@ const uint64 Inventoryy::getTotalSharedBankCurrency() const {
 	EXPECTED_VAR(Utility::convertCurrency(value, getSharedBankPlatinum(), 0, 0, 0), 0);
 	return value;
 }
+
+const uint32 Inventoryy::getAlternateCurrencyQuantity(const uint32 pCurrencyID) const {
+	auto search = mAlternateCurrency.find(pCurrencyID);
+	if (search == mAlternateCurrency.end()) return 0;
+	return search->second;
+}
+
+void Inventoryy::addAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity) {
+	setAlternateCurrencyQuantity(pCurrencyID, getAlternateCurrencyQuantity(pCurrencyID) + pQuantity);
+}
+
+void Inventoryy::removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity) {
+	const uint32 currentQuantity = getAlternateCurrencyQuantity(pCurrencyID);
+	if (currentQuantity >= pQuantity)
+		setAlternateCurrencyQuantity(pCurrencyID, currentQuantity - pQuantity);
+	else {
+		setAlternateCurrencyQuantity(pCurrencyID, 0);
+	}
+}

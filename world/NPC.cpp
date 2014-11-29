@@ -43,7 +43,8 @@ const bool NPC::initialise() {
 	c->setShopPrice(1);
 	addShopItem(c);
 
-	addNimbus(448);
+	//addNimbus(448);
+	addNimbus(405);
 
 	return true;
 }

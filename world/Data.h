@@ -138,6 +138,7 @@ struct CharacterData {
 	uint32 mTotalRadiantCrystals = 0;
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
+	std::map<uint32, uint32> mAlternateCurrency;
 
 	std::vector<uint32> mSpellBook;
 	std::vector<uint32> mSpellBar;
@@ -327,4 +328,11 @@ struct TransmutationComponent {
 	int32 mMinimum = 0;
 	int32 mMaximum = 0;
 	uint8 mRequiredLevel = 0;
+};
+
+struct AlternateCurrency {
+	uint32 mCurrencyID = 0;
+	uint32 mItemID = 0;
+	uint32 mIcon = 0;
+	uint32 mMaxStacks = 0;
 };

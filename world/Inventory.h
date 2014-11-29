@@ -110,6 +110,18 @@ public:
 	// Sets the number of Ebon Crystals. Should only be used during initialisation.
 	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
+	// Returns the quantity of an alternate currency by ID.
+	const uint32 getAlternateCurrencyQuantity(const uint32 pCurrencyID) const;
+
+	// Returns a reference to the alternate currencies.
+	inline std::map<uint32, uint32>& getAlternateCurrency() { return mAlternateCurrency; }
+
+	// Sets the quantity of an alternate currency by ID.
+	inline void setAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) { mAlternateCurrency[pCurrencyID] = pQuantity; }
+
+	void addAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
+	void removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
+
 	void getTradeItems(std::list<Item*>& pItems) const;
 	const bool clearTradeItems();
 	const bool onTradeAccept();
@@ -156,6 +168,7 @@ private:
 	// Ebon Crystals
 	uint32 mEbonCrystals = 0;
 	uint32 mTotalEbonCrystals = 0;
+	std::map<uint32, uint32> mAlternateCurrency;
 
 	int32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];
 

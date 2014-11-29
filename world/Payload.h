@@ -1109,6 +1109,48 @@ namespace Payload {
 			uint32 mItemInstanceID = 0;
 			uint32 mUnknown = 0;
 		};
+
+		// S->C
+		struct UpdateAlternateCurrency : FixedT<UpdateAlternateCurrency, OP_AltCurrency> {
+			UpdateAlternateCurrency() {
+				memset(mCharacterName, 0, sizeof(mCharacterName));
+			}
+			static EQApplicationPacket* construct(const String& pCharacterName, const uint32 pCurrencyID, const uint32 pQuantity) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				payload->mCurrencyID = pCurrencyID;
+				payload->mQuantity = pQuantity;
+
+				return packet;
+			}
+			uint32 mAction = 7;
+			char mCharacterName[64];
+			uint32 mCurrencyID = 0;
+			uint32 mUnknown0 = 1; // Copied.
+			uint32 mQuantity = 0;
+			uint32 mUnknown1 = 0; // Copied.
+			uint32 mUnknown2 = 0; // Copied.
+		};
+
+		// C->S
+		struct AlternateCurrencyReclaim : Fixed<AlternateCurrencyReclaim> {
+			enum Action : uint32 { Create = 0, Reclaim = 1 };
+			uint32 mCurrencyID = 0;
+			uint32 mUnknown0 = 0;
+			uint32 mStacks = 0;
+			uint32 mAction = 0; //1 = this is reclaim
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{AlternateCurrencyReclaim} ";
+				PRINT_MEMBER(mCurrencyID);
+				PRINT_MEMBER(mUnknown0);
+				PRINT_MEMBER(mStacks);
+				PRINT_MEMBER(mAction);
+				return ss.str();
+			}
+		};
 	}
 
 	namespace World {

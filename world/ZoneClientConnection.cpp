@@ -23,6 +23,7 @@
 #include "ItemFactory.h"
 #include "Transmutation.h"
 #include "Random.h"
+#include "AlternateCurrencyManager.h"
 
 #include "../common/MiscFunctions.h"
 
@@ -536,6 +537,11 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player tries to buy an Item from a merchant.
 		_handleShopBuy(pPacket);
 		break;
+	case OP_AltCurrencyReclaim:
+		// NOTE: This occurs when a player presses the 'Reclaim' button in the 'Alt. Currency' tab (Inventory window).
+		// NOTE: This occurs when a player presses the 'Create' button in the 'Alt. Currency' tab (Inventory window).
+		_handleAlternateCurrencyReclaim(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -593,9 +599,9 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	_sendTimeOfDay();
 	// Tributes
 	_sendTributeUpdate();
-	// Bulk Inventory
+	// Inventory
 	_sendInventory();
-	// Cursor Items (only sent when some item is on the cursor)
+
 	// Tasks
 	// XTargets
 	// Weather
@@ -873,6 +879,10 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	_sendZoneServerReady();
 	_sendExpZoneIn();
 	_sendWorldObjectsSent();
+
+	// Alternate Currency
+	sendAlternateCurrencies();
+	sendAlternateCurrencyQuantities(false);
 
 	if (mCharacter->hasGuild()) {
 		GuildManager::getInstance().onEnterZone(mCharacter);
@@ -3715,6 +3725,177 @@ void ZoneClientConnection::sendRemoveNimbus(const uint32 pNimbusID) {
 
 	sendPacket(packet);
 	delete packet;
+}
+
+#pragma pack(1)
+struct Header {
+	enum Action : uint32 { Update = 7, Populate = 8, };
+	uint32 mAction = 0;
+};
+
+struct PopulateEntry {
+	uint32 mCurrencyID = 0; // This value affects the 'name' column in the 'Alt Currency' tab. X^18^ where X = mCurrencyID.
+	uint32 mUnknown0 = 1; // Copied.
+	uint32 mCurrencyID2 = 0; // = mCurrencyID
+	uint32 mItemID = 0;
+	uint32 mIcon = 0;
+	uint32 mMaxStacks = 0;
+	uint8 mUnknown1 = 0;
+};
+
+struct PopulateAlternateCurrencies {
+	Header mHeader;
+	uint32 mCount = 0;
+	// 0..n PopulateEntry
+};
+
+#pragma pack()
+
+void ZoneClientConnection::sendAlternateCurrencies() {
+	EXPECTED(mConnected);
+
+	auto currencies = AlternateCurrencyManager::getInstance().getCurrencies();
+
+	// Calculate payload size.
+	PopulateAlternateCurrencies populate;
+	populate.mHeader.mAction = Header::Populate;
+	populate.mCount = currencies.size();
+
+	uint32 size = 0;
+	size += sizeof(PopulateAlternateCurrencies);
+	size += sizeof(PopulateEntry) * populate.mCount;
+
+	// Allocate memory
+	unsigned char * data = new unsigned char[size];
+	Utility::DynamicStructure ds(data, size);
+
+	ds.write<PopulateAlternateCurrencies>(populate);
+
+	for (auto i : currencies) {
+		PopulateEntry entry;
+		entry.mCurrencyID = entry.mCurrencyID2 = i->mCurrencyID;
+		entry.mIcon = i->mIcon;
+		entry.mItemID = i->mItemID;
+		entry.mMaxStacks = i->mMaxStacks;
+		ds.write<PopulateEntry>(entry);
+	}
+
+	auto packet = new EQApplicationPacket(OP_AltCurrency, data, size);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendAlternateCurrencyQuantities(const bool pSendZero) {
+	EXPECTED(mConnected);
+
+	auto currencies = AlternateCurrencyManager::getInstance().getCurrencies();
+	for (auto i : currencies) {
+		const uint32 quantity = mCharacter->getInventory()->getAlternateCurrencyQuantity(i->mCurrencyID);
+		if (quantity > 0 || pSendZero)
+			sendAlternateCurrencyQuantity(i->mCurrencyID, quantity);
+	}
+}
+
+void ZoneClientConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = UpdateAlternateCurrency::construct(mCharacter->getName(), pCurrencyID, pQuantity);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID) {
+	EXPECTED(mConnected);
+	sendAlternateCurrencyQuantity(pCurrencyID, mCharacter->getInventory()->getAlternateCurrencyQuantity(pCurrencyID));
+}
+
+void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(AlternateCurrencyReclaim::sizeCheck(pPacket));
+
+	auto payload = AlternateCurrencyReclaim::convert(pPacket);
+	Log::info(payload->_debug());
+
+	// Handle: Create.
+	if (payload->mAction == AlternateCurrencyReclaim::Create) {
+		// NOTE: Underfoot will allow currencies to be summoned to the cursor even when there are Items on it.
+		if (mCharacter->getInventory()->isCursorEmpty() == false) {
+			mCharacter->notify("Please clear your cursor and try again.");
+			return;
+		}
+
+		// Check: Currency Type.
+		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(payload->mCurrencyID);
+		if (itemID == 0) {
+			// TODO: Logging.
+			return;
+		}
+
+		// Check: Stacks.
+		const uint32 currentQuantity = mCharacter->getInventory()->getAlternateCurrencyQuantity(payload->mCurrencyID);
+		if (currentQuantity < payload->mStacks) {
+			// TODO: Logging.
+			return;
+		}
+
+		// Update alternate currency.
+		mCharacter->getInventory()->removeAlternateCurrency(payload->mCurrencyID, payload->mStacks);
+
+		// Create Item
+		auto item = ItemFactory::make(itemID, payload->mStacks);
+		EXPECTED(item);
+
+		// Add to cursor.
+		mCharacter->getInventory()->pushCursor(item);
+		sendItemSummon(item);
+
+		// Notify user.
+		mCharacter->notify("You have created (" + std::to_string(item->getStacks()) + ") " + item->getName()+"s");
+
+		// Update client.
+		sendAlternateCurrencyQuantity(payload->mCurrencyID);
+	}
+	// Handle: Reclaim.
+	else if (payload->mAction == AlternateCurrencyReclaim::Reclaim) {
+		// Check: Character has an Item on the cursor.
+		Item* item = mCharacter->getInventory()->peekCursor();
+		if (!item) {
+			mCharacter->notify("Please place an alternate currency on your cursor and try again.");
+			return;
+		}
+
+		// Check: Item on cursor is alternate currency Item.
+		const uint32 currencyID = AlternateCurrencyManager::getInstance().getCurrencyID(item->getID());
+		if (currencyID == 0) {
+			mCharacter->notify("Please place an alternate currency on your cursor and try again.");
+			return;
+		}
+
+		const uint32 stacks = item->getStacks();
+		String currencyName = item->getName();
+
+		// Update alternate currency.
+		mCharacter->getInventory()->addAlternateCurrency(currencyID, stacks);
+		
+		// Consume from Inventory.
+		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+
+		// Clear cursor.
+		sendMoveItem(SlotID::CURSOR, SlotID::SLOT_DELETE);
+
+		// Notify user.
+		mCharacter->notify("You have reclaimed (" + std::to_string(stacks) + ") " + currencyName+"s");
+
+		// Update client.
+		sendAlternateCurrencyQuantity(currencyID);
+	}
+	else {
+		// Unknown Action.
+		// TODO: Logging.
+		return;
+	}
 }
 
 //

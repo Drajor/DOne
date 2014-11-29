@@ -146,6 +146,34 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+	// Token
+	{
+		auto data = &mItemData[ItemID::Token];
+		data->mID = ItemID::Token;
+		auto item = new Item(data);
+
+		item->setName("Token");
+		item->setIcon(3307);
+		item->setItemType(ItemType::AlternateCurrency);
+		item->setMaxStacks(MaxTokensStacks);
+		item->setIsNoDrop(true);
+
+		delete item;
+	}
+	// Adhesive
+	{
+		auto data = &mItemData[ItemID::Adhesive];
+		data->mID = ItemID::Adhesive;
+		auto item = new Item(data);
+
+		item->setName("Adhesive");
+		item->setIcon(2768);
+		item->setItemType(ItemType::AlternateCurrency);
+		item->setMaxStacks(MaxAdhesiveStacks);
+		item->setIsTradeskillsItem(true);
+
+		delete item;
+	}
 
 	EXPECTED(_TransmutationComponentTest(ItemID::TCStrength, "TC Strength"));
 	EXPECTED(_TransmutationComponentTest(ItemID::TCStamina, "TC Stamina"));
