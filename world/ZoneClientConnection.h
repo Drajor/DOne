@@ -155,6 +155,8 @@ public:
 	// Updates a specific alternate currency.
 	void sendAlternateCurrencyQuantity(const uint32 pCurrencyID);
 
+	void sendMOTD(const String& pMOTD);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:

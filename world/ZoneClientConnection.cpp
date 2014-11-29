@@ -884,6 +884,8 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	sendAlternateCurrencies();
 	sendAlternateCurrencyQuantities(false);
 
+	sendMOTD("Welcome to Fading Light.");
+
 	if (mCharacter->hasGuild()) {
 		GuildManager::getInstance().onEnterZone(mCharacter);
 	}
@@ -3885,6 +3887,14 @@ void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPa
 		// TODO: Logging.
 		return;
 	}
+}
+
+void ZoneClientConnection::sendMOTD(const String& pMOTD) {
+	EXPECTED(mConnected);
+
+	auto packet = new EQApplicationPacket(OP_MOTD, reinterpret_cast<const unsigned char*>(pMOTD.c_str()), pMOTD.size() + 1);
+	sendPacket(packet);
+	delete packet;
 }
 
 //
