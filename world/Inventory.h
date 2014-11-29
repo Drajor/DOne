@@ -119,7 +119,10 @@ public:
 	// Sets the quantity of an alternate currency by ID.
 	inline void setAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) { mAlternateCurrency[pCurrencyID] = pQuantity; }
 
+	// Adds a specified quantity to an alternate currency.
 	void addAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
+
+	// Removes a specified quantity from an alternate currency.
 	void removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
 
 	void getTradeItems(std::list<Item*>& pItems) const;

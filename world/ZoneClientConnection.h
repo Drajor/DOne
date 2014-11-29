@@ -143,12 +143,16 @@ public:
 	void sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID);
 	void sendRemoveNimbus(const uint32 pNimbusID);
 
+	// Populates the 'Alt Currency' tab (Inventory Window).
 	void sendAlternateCurrencies();
 
-	// Updates the 'Alt Currency' tab in the Inventory Window.
+	// Updates all alternate currencies.
 	void sendAlternateCurrencyQuantities(const bool pSendZero);
 
+	// Updates a specific alternate currency.
 	void sendAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity);
+
+	// Updates a specific alternate currency.
 	void sendAlternateCurrencyQuantity(const uint32 pCurrencyID);
 
 	void sendPacket(EQApplicationPacket* pPacket);

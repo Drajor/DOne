@@ -562,3 +562,46 @@ TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	EXPECT_EQ(12398723 + 97137, mInventory->getTotalCurrency());
 	EXPECT_EQ(12398723 + 97137, mInventory->getTotalBankCurrency());
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class InventoryAlternateCurrencyTest : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mInventory = new Inventoryy();
+	}
+
+	virtual void TearDown() {
+		delete mInventory;
+		mInventory = nullptr;
+	}
+
+	Inventoryy* mInventory;
+};
+
+TEST_F(InventoryAlternateCurrencyTest, General) {
+	
+	// Add
+	mInventory->addAlternateCurrency(1, 12);
+	mInventory->addAlternateCurrency(2, 57);
+	EXPECT_EQ(12, mInventory->getAlternateCurrencyQuantity(1));
+
+	mInventory->addAlternateCurrency(1, 4);
+	EXPECT_EQ(16, mInventory->getAlternateCurrencyQuantity(1));
+
+	// Remove
+	mInventory->removeAlternateCurrency(1, 7);
+	EXPECT_EQ(9, mInventory->getAlternateCurrencyQuantity(1));
+
+	mInventory->removeAlternateCurrency(1, 3);
+	EXPECT_EQ(6, mInventory->getAlternateCurrencyQuantity(1));
+
+	// Set
+	mInventory->setAlternateCurrencyQuantity(1, 999);
+	EXPECT_EQ(999, mInventory->getAlternateCurrencyQuantity(1));
+
+	// Get
+	auto currencies = mInventory->getAlternateCurrency();
+	EXPECT_EQ(2, currencies.size());
+	EXPECT_EQ(57, currencies[2]);
+	EXPECT_EQ(999, currencies[1]);
+}
