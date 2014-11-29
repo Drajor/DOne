@@ -397,6 +397,11 @@ public:
 	void damage(const int32 pAmount);
 
 	const TTimer& getDecayTimer() const { return mDecayTimer; }
+
+	inline void addNimbus(const uint32 pNimbusID) { mNimbuses.push_back(pNimbusID); }
+	inline void removeNimbus(const uint32 pNimbusID) { mNimbuses.remove(pNimbusID); }
+	inline std::list<uint32> getNimbuses() { return mNimbuses; }
+
 protected:
 
 	// Returns a number of type T between 0-100 representing current HP percentage.
@@ -488,6 +493,8 @@ private:
 	int32 mMaximumMana = 100;
 	int32 mCurrentEndurance = 100;
 	int32 mMaximumEndurance = 100;
+
+	std::list<uint32> mNimbuses;
 
 	float mVisibleRange = 3000.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.

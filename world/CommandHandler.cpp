@@ -1186,6 +1186,51 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class AddNimbusCommand : public Command {
+public:
+	AddNimbusCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+nimbus <id>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		uint32 nimbusID = 0;
+		if (!convertParameter(0, nimbusID)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->addNimbus(nimbusID);
+
+		target->getZone()->handleNimbusAdded(target, nimbusID);
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class RemoveNimbusCommand : public Command {
+public:
+	RemoveNimbusCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #-nimbus <id>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		uint32 nimbusID = 0;
+		if (!convertParameter(0, nimbusID)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->removeNimbus(nimbusID);
+
+		target->getZone()->handleNimbusRemoved(target, nimbusID);
+		return true;
+	}
+};
+
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -1245,6 +1290,9 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new InvulnerableCommand(100, { "invul" }));
 	mCommands.push_back(new InspectCommand(100, { "inspect" }));
 	mCommands.push_back(new WeatherCommand(100, { "weather" }));
+
+	mCommands.push_back(new AddNimbusCommand(100, { "+nimbus" }));
+	mCommands.push_back(new RemoveNimbusCommand(100, { "-nimbus" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1523,7 +1571,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		uint32 effect = 0;
 		Utility::stoSafe(effect, pParameters[0]);
 
-		pCharacter->getConnection()->sendAddNimbus(effect);
+		pCharacter->getConnection()->sendAddNimbus(pCharacter->getSpawnID(), effect);
 	}
 	else if (pCommandName == "re") {
 		uint32 effect = 0;

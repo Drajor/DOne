@@ -3692,7 +3692,7 @@ void ZoneClientConnection::sendShopDeleteItem(const uint32 pSpawnID, const uint3
 	delete packet;
 }
 
-void ZoneClientConnection::sendAddNimbus(const uint32 pEffectID) {
+void ZoneClientConnection::sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3700,8 +3700,8 @@ void ZoneClientConnection::sendAddNimbus(const uint32 pEffectID) {
 	auto payload = AddNimbus::convert(packet);
 
 	payload->mNimbusID = pEffectID;
-	payload->mSpawnID = mCharacter->getSpawnID();
-	payload->mSpawnID2 = mCharacter->getSpawnID();
+	payload->mSpawnID = pSpawnID;
+	payload->mSpawnID2 = pSpawnID;
 
 	sendPacket(packet);
 	delete packet;

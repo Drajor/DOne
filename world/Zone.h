@@ -153,6 +153,9 @@ public:
 
 	void handleCriticalHit(Character* pCharacter, int32 pDamage);
 	void handleHPChange(Actor* pActor);
+
+	void handleNimbusAdded(Actor * pActor, const uint32 pNimbusID);
+	void handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID);
 private:
 
 	const bool loadZonePoints();

@@ -805,8 +805,6 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	EXPECTED(pCharacter);
 	EXPECTED(pAddActor);
 
-	//Log::info(pCharacter->getName() + " can now see " + pAddActor->getName());
-
 	pAddActor->_syncPosition();
 
 	uint32 size = pAddActor->getDataSize();
@@ -817,6 +815,12 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	pCharacter->getConnection()->sendPacket(outPacket);
 	safe_delete(outPacket);
+
+	// Send nimbuses
+	auto nimbuses = pAddActor->getNimbuses();
+	for (auto i : nimbuses) {
+		pCharacter->getConnection()->sendAddNimbus(pAddActor->getSpawnID(), i);
+	}
 }
 
 void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
@@ -1712,4 +1716,41 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 	//}
 
 	//return true;
+}
+
+void Zone::handleNimbusAdded(Actor * pActor, const uint32 pNimbusID) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto packet = AddNimbus::create();
+	auto payload = AddNimbus::convert(packet);
+
+	payload->mNimbusID = pNimbusID;
+	payload->mSpawnID = pActor->getSpawnID();
+	payload->mSpawnID2 = pActor->getSpawnID();
+
+	if (pActor->isCharacter()) {
+		sendToVisible(Actor::cast<Character*>(pActor), packet, true);
+	}
+	else {
+		sendToVisible(pActor, packet);
+	}
+	
+	delete packet;
+}
+
+void Zone::handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto packet = RemoveNimbus::construct(pActor->getSpawnID(), pNimbusID);
+
+	if (pActor->isCharacter()) {
+		sendToVisible(Actor::cast<Character*>(pActor), packet, true);
+	}
+	else {
+		sendToVisible(pActor, packet);
+	}
+
+	delete packet;
 }

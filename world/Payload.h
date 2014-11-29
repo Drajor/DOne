@@ -194,6 +194,15 @@ namespace Payload {
 
 		// C->S
 		struct RemoveNimbus : public FixedT<RemoveNimbus, OP_RemoveNimbusEffect> {
+			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pNimbusID) {
+				auto packet = create();
+				auto payload = convert(packet);
+
+				payload->mSpawnID = pSpawnID;
+				payload->mNimbusID = pNimbusID;
+				return packet;
+			}
+
 			uint32 mSpawnID = 0;
 			uint32 mNimbusID = 0;
 		};
