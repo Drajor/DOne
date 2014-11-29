@@ -28,21 +28,18 @@ class ZoneCommand : public Command {
 public:
 	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #zone <Zone ID> <Zone Instance ID>");
+		mMinimumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameters
-		if (pParameters.size() != 2) {
-			invalidParameters(pParameters);
-			return false;
-		}
-
+		// Convert zone ID.
 		uint32 zoneID = 0;
+		if (!convertParameter(0, zoneID)) { return false; }
+
+		// Convert instance ID if required.
 		uint32 instanceID = 0;
-		const bool ok = Utility::stou32Safe(zoneID, pParameters[0]) && Utility::stou32Safe(instanceID, pParameters[1]);
-		if (!ok) {
-			// TODO: Parameter error.
-			return false;
+		if (pParameters.size() == 2) {
+			if (!convertParameter(1, instanceID)) { return false; }
 		}
 
 		Vector3 zoneSafePoint;
@@ -50,6 +47,9 @@ public:
 			// TODO:
 			return false;
 		}
+
+		// Already here!
+		if (mInvoker->getZone()->getID() == zoneID && mInvoker->getZone()->getInstanceID() == instanceID) { return true; }
 
 		mInvoker->setZoneChange(zoneID, instanceID);
 		mInvoker->getConnection()->sendRequestZoneChange(zoneID, instanceID, zoneSafePoint);
@@ -302,15 +302,10 @@ class ZoneSearchCommand : public Command {
 public:
 	ZoneSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #zs <text>");
+		mMinimumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
-		}
-
 		ZoneDataSearchResults results = ZoneDataManager::getInstance().searchByName(pParameters[0]);
 		mInvoker->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
 		for (auto i : results){

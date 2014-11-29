@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "LogSystem.h"
+#include <algorithm>
 
 #define ARG_STR(pARG) #pARG
 #define EXPECTED(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
@@ -21,6 +22,16 @@ namespace Utility {
 	}
 	void print(String pMessage);
 	String getRandomName();
+
+	// Searches pStringA for pStringB case insensitively.
+	static bool findCI(const String& pStringA, const String& pStringB) {
+		String a = pStringA;
+		std::transform(pStringA.begin(), pStringA.end(), a.begin(), ::toupper);
+		String b = pStringB;
+		std::transform(pStringB.begin(), pStringB.end(), b.begin(), ::toupper);
+
+		return a.find(b) != String::npos;
+	}
 
 	// Converts from copper to platinum, gold, silver and copper.
 	template <typename T>

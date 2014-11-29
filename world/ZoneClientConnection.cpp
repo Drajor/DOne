@@ -1297,11 +1297,14 @@ void ZoneClientConnection::_sendZoneData() {
 	auto packet = Payload::Zone::ZoneData::create();
 	auto payload = Payload::Zone::ZoneData::convert(packet);
 
+	String longName = mZone->getLongName();
+	longName += " [" + std::to_string(mZone->getInstanceID()) + "]";
+
 	strcpy(payload->mCharacterName, mCharacter->getName().c_str());
 	payload->mZoneID = mZone->getID();
 	payload->mInstanceID = mZone->getInstanceID();
 	strcpy(payload->mShortName, mZone->getShortName().c_str());
-	strcpy(payload->mLongName, mZone->getLongName().c_str()); // NOTE: This affects the zone in message "You have entered ..."
+	strcpy(payload->mLongName, longName.c_str()); // NOTE: This affects the zone in message "You have entered ..."
 	payload->mGravity = mZone->getGravity();
 	payload->underworld = mZone->getMinimumZ();
 	payload->mZoneType = mZone->getZoneType();
@@ -1321,20 +1324,6 @@ void ZoneClientConnection::_sendZoneData() {
 
 	sendPacket(packet);
 	delete packet;
-
-	//// TODO: Send some real data.
-	//auto outPacket = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
-	//auto payload = reinterpret_cast<NewZone_Struct*>(outPacket->pBuffer);
-	//strcpy(payload->char_name, mCharacter->getName().c_str());
-	//payload->zone_id = mZone->getID();
-	//payload->zone_instance = mZone->getInstanceID();
-	//strcpy(payload->zone_short_name, mZone->getShortName().c_str());
-	//strcpy(payload->zone_long_name, mZone->getLongName().c_str()); // NOTE: This affects the zone in message "You have entered ..."
-	//payload->gravity = mZone->getGravity();
-	//payload->underworld = mZone->getMinimumZ();
-	//payload->ztype = mZone->getZoneType();
-
-	//mStreamInterface->FastQueuePacket(&outPacket);
 }
 
 void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {

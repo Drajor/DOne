@@ -280,7 +280,7 @@ const bool ZoneDataManager::getLongNameStringID(const uint16 pZoneID, uint32& pS
 ZoneDataSearchResults ZoneDataManager::searchByName(String pSearchText) {
 	ZoneDataSearchResults results;
 	for (auto i : mZoneData) {
-		if (i->mShortName.find(pSearchText) != String::npos || i->mLongName.find(pSearchText) != String::npos) {
+		if (Utility::findCI(i->mShortName, pSearchText) || Utility::findCI(i->mLongName, pSearchText)) {
 			results.push_back({i->mID, i->mShortName, i->mLongName});
 		}
 	}
