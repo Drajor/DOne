@@ -33,6 +33,16 @@ namespace Utility {
 		return a.find(b) != String::npos;
 	}
 
+	// Compares pStringA and pStringB case insensitively.
+	static bool compareCI(const String& pStringA, const String& pStringB) {
+		String a = pStringA;
+		std::transform(pStringA.begin(), pStringA.end(), a.begin(), ::toupper);
+		String b = pStringB;
+		std::transform(pStringB.begin(), pStringB.end(), b.begin(), ::toupper);
+
+		return a == b;
+	}
+
 	// Converts from copper to platinum, gold, silver and copper.
 	template <typename T>
 	inline void convertFromCopper(const T pValue, int32& pPlatinum, int32& pGold, int32& pSilver, int32& pCopper) {

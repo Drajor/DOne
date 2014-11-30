@@ -288,6 +288,17 @@ ZoneDataSearchResults ZoneDataManager::searchByName(String pSearchText) {
 	return results;
 }
 
+const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
+	for (auto i : mZoneData) {
+		if (Utility::compareCI(i->mShortName, pSearchText) || Utility::compareCI(i->mLongName, pSearchText)) {
+			return i->mID;
+		}
+	}
+
+	return 0;
+}
+
+
 const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints) {
 	ZoneData* zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);

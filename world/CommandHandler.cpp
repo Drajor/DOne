@@ -27,14 +27,19 @@
 class ZoneCommand : public Command {
 public:
 	ZoneCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #zone <Zone ID> <Zone Instance ID>");
+		mHelpMessages.push_back("Usage: #zone <ID> *<Instance>");
+		mHelpMessages.push_back("Usage: #zone <name> *<Instance>");
 		mMinimumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Convert zone ID.
+		// Try: Convert zone ID.
 		uint32 zoneID = 0;
-		if (!convertParameter(0, zoneID)) { return false; }
+		if (!convertParameter(0, zoneID)) {
+			zoneID = ZoneDataManager::getInstance().findFirstByName(pParameters[0]);
+
+			if (zoneID == 0) { return false; }
+		}
 
 		// Convert instance ID if required.
 		uint32 instanceID = 0;

@@ -34,6 +34,7 @@ public:
 	const bool getZonePoints(const uint16 pZoneID, std::list<ZonePointData*>** pZonePoints);
 
 	ZoneDataSearchResults searchByName(String pSearchText);
+	const uint16 findFirstByName(const String& pSearchText);
 
 private:
 
