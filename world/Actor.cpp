@@ -4,6 +4,15 @@
 Actor::Actor() {
 }
 
+Actor::~Actor() {
+	// Check: Actor has been cleaned up correctly before delete.
+	if (mTarget != nullptr) {}
+	if (mLooter != nullptr) {}
+	if (mVisibleTo.empty() == false) {}
+	if (mTargeters.empty() == false) {}
+	
+}
+
 void Actor::setTarget(Actor* pActor) {
 	EXPECTED(pActor);
 	if (mTarget)

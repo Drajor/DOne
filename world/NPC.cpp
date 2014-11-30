@@ -11,39 +11,18 @@ NPC::NPC() {
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
 	setActorType(AT_NPC);
-	//setIsNPC(true);
 
 	setCurrency(4, 5, 6, 7);
+}
+
+NPC::~NPC() {
+	if (mShoppers.empty() == false) {}
 }
 
 const bool NPC::initialise() {
 	EXPECTED_BOOL(mZone);
 	EXPECTED_BOOL(getSpawnID() == 0);
 	setSpawnID(mZone->getNextSpawnID());
-
-	//String baseName = "Bob";
-	//setName(baseName+std::to_string(getSpawnID()));
-	//setRaceID(6);
-	//setClass(ClassIDs::Cleric);
-	//setClass(ClassID::Merchant);
-
-	auto a = ItemGenerator::makeTwoHandBlunt(1, Rarity::Common);
-	//auto a = ItemFactory::make(ItemID::StartFood);
-	a->setShopQuantity(-1);
-	a->setShopPrice(1234);
-	addShopItem(a);
-
-	auto b = ItemFactory::make(ItemID::StartDrink);
-	b->setShopQuantity(-1);
-	b->setShopPrice(2345);
-	addShopItem(b);
-
-	auto c = ItemFactory::make(ItemID::StartContainer);
-	c->setShopQuantity(-1);
-	c->setShopPrice(1);
-	addShopItem(c);
-
-	//addNimbus(448);
 	addNimbus(405);
 
 	return true;

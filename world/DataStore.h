@@ -42,6 +42,8 @@ public:
 	const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents);
 
 	const bool loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies);
+
+	const bool loadShops(std::list<ShopData*>& pShops);
 private:
 
 	DataStore() {};

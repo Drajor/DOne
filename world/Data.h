@@ -203,6 +203,12 @@ struct NPCTypeData {
 	String mName = "";
 	String mLastName = "";
 	uint8 mClass = 0;
+	uint32 mShopID = 0;
+};
+
+struct ShopData {
+	uint32 mID = 0;
+	std::map<uint32, int32> mItems;
 };
 
 struct SpellData {

@@ -970,6 +970,7 @@ namespace NPCTypeDataXML {
 		SCA Name = "name";
 		SCA LastName = "last_name";
 		SCA Class = "class";
+		SCA ShopID = "shop_id";
 	}
 #undef SCA
 }
@@ -993,6 +994,7 @@ const bool DataStore::loadNPCTypeData(std::list<NPCTypeData*>& pTypes) {
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::Name, d->mName));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::LastName, d->mLastName));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::Class, d->mClass));
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::ShopID, d->mShopID, false));
 
 		typeElement = typeElement->NextSiblingElement(Tag::Type);
 	}
@@ -1387,5 +1389,58 @@ const bool DataStore::loadAlternateCurrencies(std::list<AlternateCurrency*>& pCu
 
 		currencyElement = currencyElement->NextSiblingElement(Tag::Currency);
 	}
+	return true;
+}
+
+namespace ShopXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/shops.xml";
+	namespace Tag {
+		SCA Shops = "shops";
+		SCA Shop = "shop";
+		SCA Item = "item";
+	}
+	namespace Attribute {
+		// Tag::Shop
+		SCA ID = "id";
+		// Tag::Item
+		SCA ItemID = "id";
+		SCA Quantity = "quantity";
+	}
+#undef SCA
+}
+const bool DataStore::loadShops(std::list<ShopData*>& pShops) {
+	using namespace ShopXML;
+	EXPECTED_BOOL(pShops.empty());
+	Profile p("DataStore::loadShops");
+
+	TiXmlDocument document(ShopXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto shopsElement = document.FirstChildElement(Tag::Shops);
+	EXPECTED_BOOL(shopsElement);
+	auto shopElement = shopsElement->FirstChildElement(Tag::Shop);
+	
+	while (shopElement) {
+		ShopData* s = new ShopData();
+		pShops.push_back(s);
+
+		EXPECTED_BOOL(readAttribute(shopElement, Attribute::ID, s->mID));
+
+		auto itemElement = shopElement->FirstChildElement(Tag::Item);
+		EXPECTED_BOOL(itemElement);
+		while (itemElement) {
+			uint32 itemID = 0;
+			EXPECTED_BOOL(readAttribute(itemElement, Attribute::ItemID, itemID));
+			int32 quantity = 0;
+			EXPECTED_BOOL(readAttribute(itemElement, Attribute::Quantity, quantity));
+
+			s->mItems.insert(std::make_pair(itemID, quantity));
+			itemElement = itemElement->NextSiblingElement(Tag::Item);
+		}
+
+		shopElement = shopElement->NextSiblingElement(Tag::Shop);
+	}
+
 	return true;
 }

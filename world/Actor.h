@@ -38,7 +38,7 @@ class Zone;
 class Actor {
 public:
 	Actor();
-	virtual ~Actor() {};
+	virtual ~Actor();
 
 	void setZone(Zone* pZone) { mZone = pZone; }
 	Zone* getZone() const { return mZone; }

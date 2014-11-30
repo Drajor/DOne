@@ -29,4 +29,6 @@ private:
 	const bool validateNPCTypeData();
 	NPCTypeData* _findType(const uint32 pID);
 	std::list<NPCTypeData*> mNPCTypeData;
+
+	const bool initialiseMerchant(NPC* pNPC, NPCTypeData* pTypeData);
 };

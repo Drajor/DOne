@@ -2,6 +2,9 @@
 #include "Utility.h"
 #include "DataStore.h"
 #include "NPC.h"
+#include "ShopDataStore.h"
+#include "Item.h"
+#include "ItemFactory.h"
 
 const bool NPCFactory::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
@@ -147,6 +150,11 @@ NPC* NPCFactory::create(const uint32 pTypeID) {
 	npc->setMaterial(MaterialSlot::Mat_Primary, appearance->mPrimaryMaterial);
 	npc->setMaterial(MaterialSlot::Mat_Secondary, appearance->mSecondaryMaterial);
 
+	// NPC is a merchant.
+	if (npc->isMerchant()) {
+		initialiseMerchant(npc, type);
+	}
+
 	return npc;
 }
 
@@ -156,4 +164,20 @@ NPCTypeData* NPCFactory::_findType(const uint32 pID) {
 			return i;
 	}
 	return nullptr;
+}
+
+const bool NPCFactory::initialiseMerchant(NPC* pNPC, NPCTypeData* pTypeData) {
+	auto shopData = ShopDataStore::getInstance().getShopData(pTypeData->mShopID);
+	EXPECTED_BOOL(shopData);
+
+	// Add shop Items to NPC.
+	for (auto i : shopData->mItems) {
+		auto item = ItemFactory::make(i.first);
+		EXPECTED_BOOL(item);
+
+		item->setShopQuantity(i.second);
+		pNPC->addShopItem(item);
+	}
+
+	return true;
 }
