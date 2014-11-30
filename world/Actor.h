@@ -162,6 +162,7 @@ public:
 	inline const uint32 getDrakkinHeritage() const { return mActorData.mDrakkinHeritage; }
 	inline const uint32 getDrakkinTattoo() const { return mActorData.mDrakkinTattoo; }
 	inline const uint32 getDrakkinDetails() const { return mActorData.mDrakkinDetails; }
+	inline const uint8 getTexture() const { return mActorData.mTexture; }
 
 	inline void setFaceStyle(const uint8 pFaceStyle) { mActorData.mFaceStyle = pFaceStyle; }
 	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mActorData.mLeftEyeColour = pLeftEyeColour; }
@@ -173,6 +174,7 @@ public:
 	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mActorData.mDrakkinHeritage = pDrakkinHeritage; }
 	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
 	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
+	inline void setTexture(const uint8 pValue) { mActorData.mTexture = pValue; }
 
 	// Flags
 	inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }

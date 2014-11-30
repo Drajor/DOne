@@ -151,6 +151,7 @@ struct NPCAppearanceData {
 
 	uint32 mRaceID = 0;
 	uint8 mGender = Gender::Female;
+	uint8 mTexture = 0;
 	uint8 mBodyType = BodyType::BT_Humanoid;
 	float mSize = 5.0f;
 
@@ -173,6 +174,7 @@ struct NPCAppearanceData {
 	enum Attributes {
 		RaceID,
 		Gender,
+		Texture,
 		BodyType,
 		Size,
 		FaceStyle,

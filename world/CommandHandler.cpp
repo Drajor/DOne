@@ -48,7 +48,7 @@ public:
 		}
 
 		Vector3 zoneSafePoint;
-		if (!ZoneDataManager::getInstance().getSafePoint(zoneID, zoneSafePoint)){
+		if (!ZoneDataManager::getInstance().getSafePoint(zoneID, zoneSafePoint)) {
 			// TODO:
 			return false;
 		}
@@ -419,25 +419,26 @@ public:
 class WearChangeCommand : public Command {
 public:
 	WearChangeCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #wc <slot> <material> <colour>");
+		mHelpMessages.push_back("Usage: #wc <slot> <material> <elite material> <colour>");
+		mMinimumParameters = 4;
+		mMaximumParameters = 4;
+		mRequiresTarget = true;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		if (pParameters.size() != 3) {
-			invalidParameters(pParameters);
-			return false;
-		}
-
 		uint32 slotID = 0;
-		uint32 materialID = 0;
-		uint32 colour = 0;
-		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(slotID, pParameters[0]) && Utility::stou32Safe(materialID, pParameters[1]) && Utility::stou32Safe(colour, pParameters[2]);
-		if (!ok) {
-			return false;
-		}
+		if (!convertParameter(0, slotID)) { return false; }
 
-		mInvoker->getConnection()->sendWearChange(mInvoker->getSpawnID(), slotID, materialID, colour);
+		uint32 materialID = 0;
+		if (!convertParameter(1, materialID)) { return false; }
+
+		uint32 eliteMaterialID = 0;
+		if (!convertParameter(2, eliteMaterialID)) { return false; }
+
+		uint32 colour = 0;
+		if (!convertParameter(3, colour)) { return false; }
+
+		mInvoker->getConnection()->sendWearChange(mInvoker->getTarget()->getSpawnID(), materialID, eliteMaterialID, colour, slotID);
 		return true;
 	}
 };
@@ -1646,6 +1647,18 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		Utility::stoSafe(effect, pParameters[0]);
 
 		pCharacter->getConnection()->sendRemoveNimbus(effect);
+	}
+	else if (pCommandName == "fly") {
+		uint32 mode = 0;
+		if (!Utility::stoSafe(mode, pParameters[0])) { return; }
+		pCharacter->getConnection()->sendAppearance(19, mode);
+	}
+	else if (pCommandName == "app") {
+		uint16 type = 0;
+		if (!Utility::stoSafe(type, pParameters[0])) { return; }
+		uint32 paramater = 0;
+		if (!Utility::stoSafe(paramater, pParameters[1])) { return; }
+		pCharacter->getConnection()->sendAppearance(type, paramater);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

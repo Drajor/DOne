@@ -1184,7 +1184,7 @@ ENCODE(OP_BazaarSearch)
 //			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->equip_chest2); // unknown8
 //			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown9
 //			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown10
-//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // unknown11
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // unknown11	
 //			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 //			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
 //			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown12
@@ -2601,18 +2601,18 @@ ENCODE(OP_BuffCreate)
 	*/
 }
 
-ENCODE(OP_WearChange)
-{
-	ENCODE_LENGTH_EXACT(WearChange_Struct);
-	SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
-	OUT(spawn_id);
-	OUT(material);
-	OUT(unknown06);
-	OUT(elite_material);
-	OUT(color.color);
-	OUT(wear_slot_id);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_WearChange)
+//{
+//	ENCODE_LENGTH_EXACT(WearChange_Struct);
+//	SETUP_DIRECT_ENCODE(WearChange_Struct, structs::WearChange_Struct);
+//	OUT(spawn_id);
+//	OUT(material);
+//	OUT(unknown06);
+//	OUT(elite_material);
+//	OUT(color.color);
+//	OUT(wear_slot_id);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_SpawnAppearance)
 {
@@ -3005,19 +3005,19 @@ DECODE(OP_FindPersonRequest) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_WearChange) {
-	DECODE_LENGTH_EXACT(structs::WearChange_Struct);
-	SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
-	IN(spawn_id);
-	IN(material);
-	IN(unknown06);
-	IN(elite_material);
-	IN(color.color);
-	IN(wear_slot_id);
-	emu->hero_forge_model = 0;
-	emu->unknown18		  = 0;
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_WearChange) {
+//	DECODE_LENGTH_EXACT(structs::WearChange_Struct);
+//	SETUP_DIRECT_DECODE(WearChange_Struct, structs::WearChange_Struct);
+//	IN(spawn_id);
+//	IN(material);
+//	IN(unknown06);
+//	IN(elite_material);
+//	IN(color.color);
+//	IN(wear_slot_id);
+//	emu->hero_forge_model = 0;
+//	emu->unknown18		  = 0;
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_TraderBuy)
 {

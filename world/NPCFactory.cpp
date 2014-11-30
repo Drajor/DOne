@@ -48,6 +48,9 @@ const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
 	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::Gender] == 0)
 		pAppearance->mGender = parent->mGender;
 
+	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::Texture] == 0)
+		pAppearance->mTexture = parent->mTexture;
+
 	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::BodyType] == 0)
 		pAppearance->mBodyType = parent->mBodyType;
 
@@ -122,8 +125,8 @@ NPC* NPCFactory::create(const uint32 pTypeID) {
 	
 	npc->setRace(appearance->mRaceID);
 	npc->setGender(appearance->mGender);
-	//npc->setBodyType(appearance->mBodyType);
-	npc->setBodyType(BT_Humanoid);
+	npc->setTexture(appearance->mTexture);
+	npc->setBodyType(appearance->mBodyType);
 	npc->setSize(appearance->mSize);
 
 	npc->setFaceStyle(appearance->mFaceStyle);

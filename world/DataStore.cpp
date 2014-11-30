@@ -848,6 +848,7 @@ namespace NPCAppearanceDataXML {
 		SCA Parent = "parent";
 		SCA Race = "race";
 		SCA Gender = "gender";
+		SCA Texture = "texture";
 		SCA BodyType = "body_type";
 		SCA Size = "size";
 		SCA FaceStyle = "face_style";
@@ -900,6 +901,9 @@ const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppe
 		
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Gender, d->mGender, false, found));
 		d->mOverrides[NPCAppearanceData::Attributes::Gender] = found;
+
+		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Texture, d->mTexture, false, found));
+		d->mOverrides[NPCAppearanceData::Attributes::Texture] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BodyType, d->mBodyType, false, found));
 		d->mOverrides[NPCAppearanceData::Attributes::BodyType] = found;

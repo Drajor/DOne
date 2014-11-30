@@ -246,15 +246,24 @@ namespace Payload {
 		};
 
 		// S->C
-		struct WearChange : public Fixed<WearChange> {
+		struct WearChange : public FixedT<WearChange, OP_WearChange> {
+			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlot) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mMaterialID = pMaterialID;
+				payload->mEliteMaterialID = pEliteMaterialID;
+				payload->mColour = pColour;
+				payload->mSlot = pSlot;
+
+				return packet;
+			}
 			uint16 mSpawnID = 0;
 			uint32 mMaterialID = 0;
 			uint32 mUnused0 = 0;
-			uint32 mUnused1 = 0;
-			uint32 mUnused2 = 0;
-			uint32 mUnused3 = 0;
-			Colour mColour;
-			uint8 mSlotID = 0;
+			uint32 mEliteMaterialID = 0; // Not sure what this is.
+			uint32 mColour = 0;
+			uint8 mSlot = 0;
 		};
 		
 		// C->S
@@ -1439,13 +1448,14 @@ namespace Payload {
 			mFlags.mTargetable = 1;
 			mFlags.mTargetableWithHotkey = 1;
 			mFlags.mShowName = 1;
+			mFlags.mShowHelm = 1;
 		}
 		char mName[100]; // Variable
 		uint32 mSpawnID = 0;
 		uint8 mLevel = 1;
 		// Destructible Object writes 4 bytes, float = 10.
 		// Else writes 4 bytes, float, SpawnSize - 0.7 comment = eye height?
-		float mViewOffset = 20.0f;
+		float mViewOffset = 0.7f;
 		uint8 mActorType = 0;
 		struct ActorFlags {
 			unsigned mIsPet : 1;		// Could be 'is summoned pet' rather than just is pet.
@@ -1522,7 +1532,7 @@ namespace Payload {
 		float mWalkSpeed = 3.0f;
 		float mRunSpeed = 6.0f;
 		uint32 mRace = 0;
-		uint8 mPropertyCount = 1; // HC 1
+		uint8 mPropertyCount = 1; // HC 1. Add 4 bytes per count after.
 		uint32 mBodyType = 0;
 		uint8 mHPPercent = 100; // Percentage: 0-100
 		uint8 mHairColour = 0;
@@ -1543,10 +1553,10 @@ namespace Payload {
 		uint8 mStandState = 100;
 		uint8 mLight = 0;
 		uint8 mFlyMode = 0;
-		uint8 __Unknown4 = 0; // equip_chest2
+		uint8 mTexture = 0; // Does not affect Characters.
 		uint8 __Unknown5 = 0;
 		uint8 __Unknown6 = 0;
-		uint8 mShowHelm = 0;
+		uint8 mShowHelm = 0; // TODO: Figure out how this works.
 
 		char mLastName[100];
 

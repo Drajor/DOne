@@ -91,6 +91,20 @@ void Actor::_onCopy() {
 
 	if (isDestructible())
 		mActorData.mOtherFlags = mActorData.mOtherFlags | 0xd1;
+
+	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mEquip0 = 2;
+	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mEquip1 = 2;
+	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mItemID = 2;
+
+	//mActorData.mTexture = 5; 
+
+	// 0 = Nude
+	// 1 = Leather
+	// 2 = Chain
+	// 3 = Plate
+	// 4 = Leather?
+	// 5
+
 }
 
 const bool Actor::sendsEquipment() const {
