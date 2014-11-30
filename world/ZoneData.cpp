@@ -299,10 +299,10 @@ const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
 }
 
 
-const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>** pSpawnPoints) {
+const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>& pSpawnPointData) {
 	ZoneData* zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
-	*pSpawnPoints = &zoneData->mSpawnPoints;
+	pSpawnPointData = zoneData->mSpawnPoints;
 	return true;
 }
 

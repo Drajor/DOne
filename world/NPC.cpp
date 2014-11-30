@@ -25,7 +25,7 @@ const bool NPC::initialise() {
 	//setName(baseName+std::to_string(getSpawnID()));
 	//setRaceID(6);
 	//setClass(ClassIDs::Cleric);
-	setClass(ClassID::Merchant);
+	//setClass(ClassID::Merchant);
 
 	auto a = ItemGenerator::makeTwoHandBlunt(1, Rarity::Common);
 	//auto a = ItemFactory::make(ItemID::StartFood);

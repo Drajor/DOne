@@ -15,6 +15,7 @@
 #include "Item.h"
 #include "Inventory.h"
 #include "AlternateCurrencyManager.h"
+#include "NPCFactory.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -1296,6 +1297,33 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class SpawnNPCCommand : public Command {
+public:
+	SpawnNPCCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #npc <type id>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		uint32 typeID = 0;
+		if (!convertParameter(0, typeID)) { return false; };
+
+		auto npc = NPCFactory::getInstance().create(typeID);
+		if (!npc) return false;
+
+		npc->setZone(mInvoker->getZone());
+		npc->initialise();
+		npc->setPosition(mInvoker->getPosition());
+		npc->setHeading(mInvoker->getHeading());
+
+		mInvoker->getZone()->addActor(npc);
+
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1362,6 +1390,8 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new AddAlternateCurrencyCommand(100, { "+altcurrency" }));
 	mCommands.push_back(new RemoveAlternateCurrencyCommand(100, { "-altcurrency" }));
+
+	mCommands.push_back(new SpawnNPCCommand(100, { "npc" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {

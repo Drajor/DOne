@@ -34,6 +34,7 @@ SET(world_sources
 	TitleManager.cpp
 	SpellDataStore.cpp
 	SpawnPoint.cpp
+	SpawnPointManager.cpp
 	Item.cpp
 	Inventory.cpp
 	ItemGenerator.cpp
@@ -76,6 +77,7 @@ SET(world_headers
 	Scene.h
 	Vector3.h
 	SpawnPoint.h
+	SpawnPointManager.h
 	Settings.h
 	UCS.h
 	UCSClientConnection.h

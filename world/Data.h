@@ -202,6 +202,7 @@ struct NPCTypeData {
 
 	String mName = "";
 	String mLastName = "";
+	uint8 mClass = 0;
 };
 
 struct SpellData {

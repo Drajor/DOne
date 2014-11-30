@@ -15,6 +15,7 @@ public:
 	const bool onDeath();
 	void onDestroy();
 	const bool update();
+	inline const bool hasSpawnPoint() const { return mSpawnPoint != nullptr; }
 	inline SpawnPoint* getSpawnPoint() const { return mSpawnPoint; }
 	inline void setSpawnPoint(SpawnPoint* pSpawnPoint) { mSpawnPoint = pSpawnPoint; }
 

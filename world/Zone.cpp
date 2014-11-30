@@ -22,6 +22,7 @@
 #include "LogSystem.h"
 #include "Scene.h"
 #include "SpawnPoint.h"
+#include "SpawnPointManager.h"
 #include "NPCFactory.h"
 #include "Random.h"
 #include "LootAllocator.h"
@@ -43,8 +44,7 @@ Zone::~Zone() {
 	safe_delete(mStreamIdentifier);
 	safe_delete(mScene);
 	safe_delete(mLootAllocator);
-
-	mSpawnPoints.remove_if(Utility::containerEntryDelete<SpawnPoint*>);
+	safe_delete(mSpawnPointManager);
 }
 
 const bool Zone::initialise() {
@@ -67,8 +67,15 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getSafePoint(mID, mSafePoint));
 
 	EXPECTED_BOOL(loadZonePoints());
-	EXPECTED_BOOL(loadSpawnPoints());
 	EXPECTED_BOOL(populate());
+
+	// Load SpawnPointData for Zone.
+	std::list<SpawnPointData*> spawnPointData;
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), spawnPointData));
+	
+	// Pass to SpawnPointManager.
+	mSpawnPointManager = new SpawnPointManager();
+	EXPECTED_BOOL(mSpawnPointManager->initialise(this, spawnPointData));
 
 	mInitialised = true;
 	return true;
@@ -95,87 +102,34 @@ const bool Zone::loadZonePoints() {
 	return true;
 }
 
-const bool Zone::loadSpawnPoints() {
-	std::list<SpawnPointData*>* spawnPointData = nullptr;
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), &spawnPointData));
-	EXPECTED_BOOL(spawnPointData);
-
-	// Create SpawnPoints.
-	for (auto i : *spawnPointData) {
-		auto spawnPoint = new SpawnPoint();
-		mSpawnPoints.push_back(spawnPoint);
-
-		spawnPoint->setPosition(i->mPosition);
-		spawnPoint->setHeading(i->mHeading);
-		spawnPoint->setRespawnTime(i->mRespawnTime);
-		spawnPoint->setType(i->mType);
-		spawnPoint->setNPCType(i->mNPCType);
-		spawnPoint->setSpawnGroup(i->mSpawnGroupID);
-	}
-
-	return true;
-}
-
 const bool Zone::populate() {
-	EXPECTED_BOOL(mPopulated == false);
+	//EXPECTED_BOOL(mPopulated == false);
 
-	for (auto i : mSpawnPoints)
-		_populate(i);
+	//for (auto i : mSpawnPoints)
+	//	_populate(i);
 
-	mPopulated = true;
+	//mPopulated = true;
 	return true;
 }
 
 const bool Zone::depopulate() {
-	EXPECTED_BOOL(mPopulated);
+	//EXPECTED_BOOL(mPopulated);
 
-	for (auto i : mSpawnPoints) {
-		auto npc = i->getNPC();
-		if (npc) {
-			// Unlink NPC and SpawnPoint
-			i->setNPC(nullptr);
-			npc->setSpawnPoint(nullptr);
+	//for (auto i : mSpawnPoints) {
+	//	auto npc = i->getNPC();
+	//	if (npc) {
+	//		// Unlink NPC and SpawnPoint
+	//		i->setNPC(nullptr);
+	//		npc->setSpawnPoint(nullptr);
 
-			// Flag for destruction next update.
-			npc->destroy();
-		}
-	}
+	//		// Flag for destruction next update.
+	//		npc->destroy();
+	//	}
+	//}
 
-	mPopulated = false;
+	//mPopulated = false;
 	return true;
 }
-
-//void Zone::addAuthentication(ClientAuthentication& pAuthentication, String pCharacterName) {
-//	mAuthenticatedCharacters.insert(std::make_pair(pCharacterName, pAuthentication));
-//}
-//
-//void Zone::removeAuthentication(String pCharacterName) {
-//	mAuthenticatedCharacters.erase(pCharacterName);
-//}
-//
-//bool Zone::checkAuthentication(String pCharacterName) {
-//	for (auto i : mAuthenticatedCharacters) {
-//		if (i.first == pCharacterName) {
-//			Log::info("[Zone] Authentication Passed");
-//			return true;
-//		}
-//	}
-//
-//	Log::error("[Zone] checkAuthentication is returning false. This is unexpected.");
-//	return false;
-//}
-//
-//bool Zone::getAuthentication(String pCharacterName, ClientAuthentication& pAuthentication) {
-//	for (auto i : mAuthenticatedCharacters) {
-//		if (i.first == pCharacterName) {
-//			pAuthentication = i.second;
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-
 
 void Zone::update() {
 	// Check if any new clients are connecting to this Zone.
@@ -185,7 +139,8 @@ void Zone::update() {
 	_updateConnections();
 	_updateCharacters();
 	_updateNPCs();
-	_updateSpawnPoints();
+
+	mSpawnPointManager->update();
 
 	// Check: LD Characters for removal.
 	for (auto i = mLinkDeadCharacters.begin(); i != mLinkDeadCharacters.end();) {
@@ -853,10 +808,6 @@ void Zone::removeActor(Actor* pActor) {
 	EXPECTED(pActor);
 	mScene->remove(pActor);
 	mActors.remove(pActor);
-
-	//if (pActor->isNPC()) {
-	//	mNPCs.remove(Actor::cast<NPC*>(pActor));
-	//}
 }
 
 void Zone::handleSurnameChange(Actor* pActor) {
@@ -1010,13 +961,11 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 	// NPC Dead.
 	if (pActor->isNPC()) {
 		NPC* npc = pActor->cast<NPC*>(pActor);
+		
 		// Check: Associated with a SpawnPoint.
-		SpawnPoint* spawnPoint = npc->getSpawnPoint();
-		if (spawnPoint) {
-			spawnPoint->setNPC(nullptr);
-			npc->setSpawnPoint(nullptr);
-			// Add SpawnPoint to the respawn list.
-			_addRespawn(spawnPoint);
+		if (npc->hasSpawnPoint()) {
+			// Notify SpawnPointManager
+			mSpawnPointManager->onDeath(npc);
 		}
 
 		// Dispatch Event.
@@ -1182,47 +1131,6 @@ void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pS
 		safe_delete(outPacket);
 	}
 	
-}
-
-
-void Zone::_addRespawn(SpawnPoint* pSpawnPoint) {
-	EXPECTED(pSpawnPoint);
-	EXPECTED(pSpawnPoint->getNPC() == nullptr);
-
-	pSpawnPoint->start();
-	mRespawns.push_back(pSpawnPoint);
-}
-
-void Zone::_updateSpawnPoints() {
-	for (auto i = mRespawns.begin(); i != mRespawns.end();) {
-		SpawnPoint* spawnPoint = *i;
-		if (spawnPoint->update()) {
-			i++;
-			continue;
-		}
-		i = mRespawns.erase(i);
-		_populate(spawnPoint);
-	}
-}
-
-void Zone::_populate(SpawnPoint* pSpawnPoint) {
-	EXPECTED(pSpawnPoint);
-	EXPECTED(pSpawnPoint->getNPC() == nullptr);
-
-	auto npc = NPCFactory::getInstance().create(1);
-	npc->setZone(this);
-	npc->initialise();
-	npc->setPosition(pSpawnPoint->getPosition());
-	npc->setHeading(pSpawnPoint->getHeading());
-
-	// Link NPC / SpawnPoint
-	pSpawnPoint->setNPC(npc);
-	npc->setSpawnPoint(pSpawnPoint);
-
-	// Allocate Loot
-	mLootAllocator->allocate(npc);
-
-	addActor(npc);
 }
 
 void Zone::handleConsider(Character* pCharacter, const uint32 pSpawnID) {

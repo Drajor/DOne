@@ -22,7 +22,7 @@ class RaidManager;
 class Actor;
 class NPC;
 class Scene;
-class SpawnPoint;
+class SpawnPointManager;
 struct ZonePoint;
 class LootAllocator;
 class Item;
@@ -159,7 +159,6 @@ public:
 private:
 
 	const bool loadZonePoints();
-	const bool loadSpawnPoints();
 	
 
 	// Performs a global Character search.
@@ -199,11 +198,7 @@ private:
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	std::list<ZonePoint*> mZonePoints;
 
-	void _populate(SpawnPoint* pSpawnPoint);
-	void _addRespawn(SpawnPoint* pSpawnPoint);
-	void _updateSpawnPoints();
-	std::list<SpawnPoint*> mRespawns;
-	std::list<SpawnPoint*> mSpawnPoints;
+	SpawnPointManager* mSpawnPointManager = nullptr;
 	
 	LootAllocator* mLootAllocator = nullptr;
 
@@ -213,7 +208,7 @@ private:
 	std::list<Actor*> mActors;
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
-	std::list<ZoneClientConnection*> mConnections;
+	std::list<ZoneClientConnection*> mConnections; // In Zone, running around probably killing rats.
 
 	struct LinkDeadCharacter {
 		Timer* mTimer;

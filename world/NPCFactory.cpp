@@ -6,11 +6,14 @@
 const bool NPCFactory::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
+	Log::status("[NPCFactory] Initialising.");
 	EXPECTED_BOOL(DataStore::getInstance().loadNPCAppearanceData(mNPCAppearanceData));
 	EXPECTED_BOOL(calculateAppearanceData());
+	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCAppearanceData.size()) + " Appearances.");
 
 	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypeData));
 	EXPECTED_BOOL(validateNPCTypeData());
+	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCTypeData.size()) + " Types.");
 
 	mInitialised = true;
 	return true;
@@ -122,6 +125,7 @@ NPC* NPCFactory::create(const uint32 pTypeID) {
 	NPC* npc = new NPC();
 	npc->setName(type->mName);
 	npc->setLastName(type->mLastName);
+	npc->setClass(type->mClass);
 	
 	npc->setRace(appearance->mRaceID);
 	npc->setGender(appearance->mGender);
