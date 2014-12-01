@@ -1444,6 +1444,7 @@ namespace Payload {
 			memset(mUnknowns, 0, sizeof(mUnknowns));
 			memset(&mFlags, 0, sizeof(mFlags));
 			memset(&mPosition, 0, sizeof(mPosition));
+			memset(mColours, 0, sizeof(mColours));
 
 			mFlags.mTargetable = 1;
 			mFlags.mTargetableWithHotkey = 1;
