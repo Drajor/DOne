@@ -26,6 +26,8 @@ TEST(ZonePayload, FixedSizes) {
 
 	EXPECT_EQ(88, Payload::Zone::UpdateAlternateCurrency::size());
 	EXPECT_EQ(16, Payload::Zone::AlternateCurrencyReclaim::size());
+	EXPECT_EQ(8, Payload::Zone::RandomRequest::size());
+	EXPECT_EQ(76, Payload::Zone::RandomReply::size());
 }
 
 // 

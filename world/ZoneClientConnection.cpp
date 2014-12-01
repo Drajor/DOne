@@ -542,6 +542,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player presses the 'Create' button in the 'Alt. Currency' tab (Inventory window).
 		_handleAlternateCurrencyReclaim(pPacket);
 		break;
+	case OP_RandomReq:
+		// NOTE: This occurs when a player enters the /random command.
+		_handleRandomRequest(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -3890,6 +3894,16 @@ void ZoneClientConnection::sendMOTD(const String& pMOTD) {
 	auto packet = new EQApplicationPacket(OP_MOTD, reinterpret_cast<const unsigned char*>(pMOTD.c_str()), pMOTD.size() + 1);
 	sendPacket(packet);
 	delete packet;
+}
+
+void ZoneClientConnection::_handleRandomRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(RandomRequest::sizeCheck(pPacket));
+
+	auto payload = RandomRequest::convert(pPacket);
+
+	mZone->handleRandomRequest(mCharacter, payload->mLow, payload->mHigh);
 }
 
 //

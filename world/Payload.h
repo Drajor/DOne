@@ -1160,6 +1160,31 @@ namespace Payload {
 				return ss.str();
 			}
 		};
+
+		// C->S
+		struct RandomRequest : Fixed<RandomRequest> {
+			uint32 mLow = 0;
+			uint32 mHigh = 0;
+		};
+
+		// S->C
+		struct RandomReply : FixedT<RandomReply, OP_RandomReply> {
+			RandomReply() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
+			static EQApplicationPacket* construct(const String& pCharacterName, const u32 pLow, const u32 pHigh, const u32 pResult) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				payload->mLow = pLow;
+				payload->mHigh= pHigh;
+				payload->mResult = pResult;
+
+				return packet;
+			}
+			u32 mLow = 0;
+			u32 mHigh = 0;
+			u32 mResult = 0;
+			char mCharacterName[64];
+		};
 	}
 
 	namespace World {

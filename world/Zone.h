@@ -156,6 +156,8 @@ public:
 
 	void handleNimbusAdded(Actor * pActor, const uint32 pNimbusID);
 	void handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID);
+
+	void handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh);
 private:
 
 	const bool loadZonePoints();

@@ -1662,3 +1662,20 @@ void Zone::handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID) {
 
 	delete packet;
 }
+
+void Zone::handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh) {
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
+
+	u32 low = pLow;
+	u32 high = pHigh;
+
+	if (low == 0 && high == 0) { high = 100; }
+
+	EXPECTED(low <= high);
+
+	const uint32 result = Random::make(low, high);
+	auto packet = RandomReply::construct(pCharacter->getName(), low, high, result);
+	sendToVisible(pCharacter, packet, true);
+	delete packet;
+}

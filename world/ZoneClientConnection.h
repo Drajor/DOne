@@ -287,6 +287,8 @@ private:
 
 	void _handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
 
+	void _handleRandomRequest(const EQApplicationPacket* pPacket);
+
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
 	Timer mForceSendPositionTimer;
