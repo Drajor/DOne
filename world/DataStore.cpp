@@ -1003,7 +1003,7 @@ const bool DataStore::loadNPCTypeData(std::list<NPCTypeData*>& pTypes) {
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::ID, d->mID));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::AppearanceID, d->mAppearanceID));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::Name, d->mName));
-		EXPECTED_BOOL(readAttribute(typeElement, Attribute::LastName, d->mLastName));
+		EXPECTED_BOOL(readAttribute(typeElement, Attribute::LastName, d->mLastName, false));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::Class, d->mClass));
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::ShopID, d->mShopID, false));
 
