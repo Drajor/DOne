@@ -38,7 +38,7 @@ const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
 	if (pAppearance->mParentID == 0) return true;
 
 	uint32 parentID = pAppearance->mParentID;
-	NPCAppearanceData* parent = _findAppearance(parentID);
+	NPCAppearanceData* parent = getAppearance(parentID);
 	EXPECTED_BOOL(parent);
 
 	// Parent needs to be resolved.
@@ -103,17 +103,18 @@ const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
 	return true;
 }
 
-NPCAppearanceData* NPCFactory::_findAppearance(const uint32 pID) {
+NPCAppearanceData* NPCFactory::getAppearance(const uint32 pID) {
 	for (auto i : mNPCAppearanceData) {
 		if (i->mID == pID)
 			return i;
 	}
+
 	return nullptr;
 }
 
 const bool NPCFactory::validateNPCTypeData() {
 	for (auto i : mNPCTypeData) {
-		EXPECTED_BOOL(_findAppearance(i->mAppearanceID));
+		EXPECTED_BOOL(getAppearance(i->mAppearanceID));
 	}
 
 	return true;
@@ -122,7 +123,7 @@ const bool NPCFactory::validateNPCTypeData() {
 NPC* NPCFactory::create(const uint32 pTypeID) {
 	NPCTypeData* type = _findType(pTypeID);
 	EXPECTED_PTR(type);
-	NPCAppearanceData* appearance = _findAppearance(type->mAppearanceID);
+	NPCAppearanceData* appearance = getAppearance(type->mAppearanceID);
 	EXPECTED_PTR(appearance);
 
 	NPC* npc = new NPC();

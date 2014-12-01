@@ -73,7 +73,7 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 		return true;
 	}
 	pFound = true;
-	pAttributeValue = String(attribute) == "1";
+	pAttributeValue = String(attribute) == "1" || String(attribute) == "true";
 	return true;
 }
 
@@ -764,6 +764,7 @@ namespace SettingsDataXML {
 		SCA World = "world";
 		SCA LoginServer = "login_server";
 		SCA UCS = "ucs";
+		SCA Validation = "validation";
 	}
 	namespace Attribute {
 		// Tag::Server
@@ -775,6 +776,8 @@ namespace SettingsDataXML {
 		SCA Password = "password";
 		SCA Address = "address";
 		SCA Port = "port"; // Tag::UCS uses.
+		// Tag::Validation
+		SCA ValidationEnabled = "enabled";
 	}
 #undef SCA
 }
@@ -831,6 +834,14 @@ bool DataStore::loadSettings() {
 	uint16 ucsPort = 0;
 	EXPECTED_BOOL(readAttribute(ucsElement, Attribute::Port, ucsPort));
 	EXPECTED_BOOL(Settings::_setUCSPort(ucsPort));
+
+	// Tag::Validation
+	auto validationElement = settingsElement->FirstChildElement(Tag::Validation);
+	EXPECTED_BOOL(validationElement);
+	
+	bool validationEnabled = true;
+	EXPECTED_BOOL(readAttribute(validationElement, Attribute::ValidationEnabled, validationEnabled));
+	Settings::_setValidationEnabled(validationEnabled);
 
 	return true;
 }

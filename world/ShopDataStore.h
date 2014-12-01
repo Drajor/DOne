@@ -9,6 +9,9 @@ class ShopDataStore : public Singleton<ShopDataStore> {
 public:
 	const bool initialise();
 	ShopData* getShopData(const unsigned int pShopID) const;
+
+	// Returns the list of shop data.
+	inline std::list<ShopData*>& getShopData() { return mShopData; }
 private:
 	bool mInitialised = false;
 	std::list<ShopData*> mShopData;

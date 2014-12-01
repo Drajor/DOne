@@ -58,4 +58,7 @@ namespace Limits {
 		bool channelLength(const String& pChannel);
 		bool rankValid(const GuildRank pRank);
 	}
+	namespace Shop {
+		const bool quantityValid(i32 pQuantity);
+	}
 }

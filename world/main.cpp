@@ -3,6 +3,7 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 
+#include "DataValidation.h"
 #include "LogSystem.h"
 #include "World.h"
 #include "ZoneData.h"
@@ -23,6 +24,7 @@
 #include "Transmutation.h"
 #include "AlternateCurrencyManager.h"
 #include "ShopDataStore.h"
+#include "Settings.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"
@@ -68,6 +70,11 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(Transmutation::getInstance().initialise());
 	EXPECTED_MAIN(AlternateCurrencyManager::getInstance().initialise());
 	EXPECTED_MAIN(ShopDataStore::getInstance().initialise());
+
+	// Validate Data
+	if (Settings::getValidationEnabled()) {
+		EXPECTED_MAIN(validateData());
+	}
 
 	while(true) {
 		Timer::SetCurrentTime();

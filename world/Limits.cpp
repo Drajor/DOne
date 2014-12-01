@@ -165,3 +165,8 @@ const bool Limits::General::moneyTypeValid(const uint32 pType) {
 		return false;
 	}
 }
+
+const bool Limits::Shop::quantityValid(i32 pQuantity) {
+	// Negative 1 or any positive integer is valid.
+	return pQuantity == -1 || pQuantity > 0;
+}

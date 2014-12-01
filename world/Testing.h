@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "Utility.h"
+#include "Limits.h"
 #include "Inventory.h"
 #include "Payload.h"
 
@@ -46,6 +47,14 @@ TEST(canClassTaunt, PlayerClasses) {
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Enchanter));
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Beastlord));
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Berserker));
+}
+
+TEST(LimitsTest, ShopQuantityValid) {
+	EXPECT_TRUE(Limits::Shop::quantityValid(-1));
+	EXPECT_FALSE(Limits::Shop::quantityValid(-2));
+	EXPECT_FALSE(Limits::Shop::quantityValid(0));
+	EXPECT_TRUE(Limits::Shop::quantityValid(1));
+	EXPECT_TRUE(Limits::Shop::quantityValid(487422));
 }
 
 class convertCurrencyTest : public ::testing::Test {

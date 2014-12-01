@@ -17,12 +17,17 @@ private:
 public:
 	const bool initialise();
 	NPC* create(const uint32 pTypeID);
+
+	inline std::list<NPCTypeData*> getNPCTypes() { return mNPCTypeData; }
+
+	NPCAppearanceData* getAppearance(const uint32 pID);
+	inline std::list<NPCAppearanceData*> getNPCAppearances() { return mNPCAppearanceData; }
 private:
 	bool mInitialised = false;
 	// NPC Appearances
 	const bool calculateAppearanceData();
 	const bool _resolveAppearanceData(NPCAppearanceData* pAppearance);
-	NPCAppearanceData* _findAppearance(const uint32 pID);
+	
 	std::list<NPCAppearanceData*> mNPCAppearanceData;
 
 	// NPC Types

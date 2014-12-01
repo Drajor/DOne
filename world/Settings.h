@@ -13,6 +13,7 @@ public:
 	static inline const String& getLSAddress() { return mLoginServerAddress; }
 	static inline const uint16 getLSPort() { return mLoginServerPort; }
 	static inline const uint16 getUCSPort() { return mUCSPort; }
+	static inline const bool getValidationEnabled() { return mValidationEnabled; }
 private:
 
 	static const bool _setServerShortName(const String& pServerShortName);
@@ -23,6 +24,7 @@ private:
 	static inline const bool _setLSAddress(const String& pLSAddress) { mLoginServerAddress = pLSAddress; return true; }
 	static inline const bool _setLSPort(const uint16 pLSPort) { mLoginServerPort = pLSPort; return true; }
 	static inline const bool _setUCSPort(const uint16 pUCSPort) { mUCSPort = pUCSPort; return true; }
+	static inline void _setValidationEnabled(const bool pEnabled) { mValidationEnabled = pEnabled; }
 
 	static String mServerShortName;
 	static String mServerLongName;
@@ -34,4 +36,6 @@ private:
 	static uint16 mLoginServerPort;
 
 	static uint16 mUCSPort;
+
+	static bool mValidationEnabled;
 };
