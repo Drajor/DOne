@@ -17,6 +17,7 @@ private:
 public:
 	const bool initialise();
 	NPC* create(const uint32 pTypeID);
+	NPC* createInvisibleMan();
 
 	inline std::list<NPCTypeData*> getNPCTypes() { return mNPCTypeData; }
 

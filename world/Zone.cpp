@@ -1626,7 +1626,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 	//return true;
 }
 
-void Zone::handleNimbusAdded(Actor * pActor, const uint32 pNimbusID) {
+void Zone::handleNimbusAdded(Actor* pActor, const uint32 pNimbusID) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -1647,7 +1647,7 @@ void Zone::handleNimbusAdded(Actor * pActor, const uint32 pNimbusID) {
 	delete packet;
 }
 
-void Zone::handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID) {
+void Zone::handleNimbusRemoved(Actor* pActor, const uint32 pNimbusID) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 

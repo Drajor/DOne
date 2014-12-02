@@ -852,6 +852,8 @@ namespace NPCAppearanceDataXML {
 	namespace Tag {
 		SCA Appearances = "appearances";
 		SCA Appearance = "appearance";
+		SCA Colours = "colours";
+		SCA Colour = "colour";
 	}
 	namespace Attribute {
 		// Tag::Appearance
@@ -874,7 +876,12 @@ namespace NPCAppearanceDataXML {
 		SCA DrakkinDetails = "drakkin_details";
 		SCA HelmTexture = "helm_texture";
 		SCA PrimaryMaterial = "primary_material";
-		SCA SecondaryMaterial = "seconday_material";
+		SCA SecondaryMaterial = "secondary_material";
+		// Tag::Colour
+		SCA Slot = "slot";
+		SCA Red = "r";
+		SCA Green = "g";
+		SCA Blue = "b";
 	}
 #undef SCA
 }
@@ -960,6 +967,24 @@ const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppe
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::SecondaryMaterial, d->mSecondaryMaterial, false, found));
 		d->mOverrides[NPCAppearanceData::Attributes::SecondaryMaterial] = found;
+
+		// Colours.
+		auto coloursElement = appearanceElement->FirstChildElement(Tag::Colours);
+		if (coloursElement) {
+			auto colourElement = coloursElement->FirstChildElement(Tag::Colour);
+			while (colourElement) {
+				uint32 slot = 0;
+				Colour colour;
+				EXPECTED_BOOL(readAttribute(colourElement, Attribute::Slot, slot));
+				EXPECTED_BOOL(slot < 7);
+				EXPECTED_BOOL(readAttribute(colourElement, Attribute::Red, colour.mRGB.mRed));
+				EXPECTED_BOOL(readAttribute(colourElement, Attribute::Green, colour.mRGB.mGreen));
+				EXPECTED_BOOL(readAttribute(colourElement, Attribute::Blue, colour.mRGB.mBlue));
+				d->mColours[slot] = colour.mColour;
+
+				colourElement = colourElement->NextSiblingElement(Tag::Colour);
+			}
+		}
 
 		appearanceElement = appearanceElement->NextSiblingElement(Tag::Appearance);
 	}

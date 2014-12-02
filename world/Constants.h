@@ -56,6 +56,20 @@ static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypa
 static const uint32 DEFAULT_RESPAWN_TIME = 5000; // In seconds, 5 minutes.
 static const uint32 DEFAULT_CORPSE_ROT_TIME = 120; // In seconds.
 
+#pragma pack(1)
+struct Colour {
+	union {
+		struct {
+			uint8 mBlue;
+			uint8 mGreen;
+			uint8 mRed;
+			uint8 mUseTint;	// if there's a tint this is FF
+		} mRGB;
+		uint32 mColour = 0;
+	};
+};
+#pragma pack()
+
 namespace Limits {
 	namespace World {
 		static const auto Port = 9000; // [Client Limitation] World must use port 9000
@@ -1063,17 +1077,19 @@ namespace Limits {
 
 namespace TitleOption { enum : uint32 { Title, Suffix }; };
 
-enum MaterialSlot : uint8 {
-	Mat_Head,
-	Mat_Chest,
-	Mat_Arms,
-	Mat_Wrist,
-	Mat_Hands,
-	Mat_Legs,
-	Mat_Feet,
-	Mat_Primary,
-	Mat_Secondary
-};
+namespace MaterialSlot {
+	enum : uint8 {
+		Head,
+		Chest,
+		Arms,
+		Wrist,
+		Hands,
+		Legs,
+		Feet,
+		Primary,
+		Secondary
+	};
+}
 static const auto MAX_MATERIAL_SLOTS = 9;
 static const auto MAX_ARMOR_DYE_SLOTS = 7;
 

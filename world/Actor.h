@@ -40,13 +40,25 @@ public:
 	Actor();
 	virtual ~Actor();
 
+	// Sets the Zone this Actor is in.
 	void setZone(Zone* pZone) { mZone = pZone; }
+
+	// Returns the Zone this Actor is in.
 	Zone* getZone() const { return mZone; }
 
+	// Returns whether this Actor is a Character or not.
 	inline virtual const bool isCharacter() const { return false; }
+
+	// Returns whether this Actor is a Character corpse or not.
 	inline virtual const bool isCharacterCorpse() const { return false; }
+
+	// Returns whether this Actor is an NPC or not.
 	inline virtual const bool isNPC() const { return false; }
+
+	// Returns whether this Actor is an NPC corpse or not.
 	inline virtual const bool isNPCCorpse() const { return false; }
+
+	// Returns whether this Actor is a corpse or not.
 	inline const bool isCorpse() const { return (isCharacterCorpse() || isNPCCorpse()); }
 
 	// Target
@@ -88,7 +100,6 @@ public:
 
 	virtual const bool onDeath() = 0;
 
-	//inline const unsigned char* getPositionData() { return reinterpret_cast<unsigned char*>(&mActorData.mPosition); }
 	inline const Payload::ActorPosition& getPositionData() { return mActorData.mPosition; }
 
 	inline const float getVisibleRange() const { return mVisibleRange; }
@@ -240,52 +251,100 @@ public:
 		}
 	};
 
+	// Sets whether this Actor is LD or not.
 	inline const bool isLD() { return mActorData.mFlags.mIsLD == 1; }
+
+	// Returns whether this Actor is LD or not.
 	inline void setIsLD(const bool pValue) { mActorData.mFlags.mIsLD = pValue ? 1 : 0; }
 
+	// Returns whether this Actor shows their helm or not.
 	inline const bool getShowHelm() const { return mActorData.mFlags.mShowHelm & 1; }
+
+	// Sets whether this Actor shows their helm or not.
 	inline void setShowHelm(const bool pValue) { mActorData.mFlags.mShowHelm = pValue ? 1 : 0; }
 
+	// Returns whether this Actor shows their name or not.
 	inline const bool getShowName() const { return mActorData.mFlags.mShowName == 1; }
+
+	// Sets whether  this Actor shows their name or not.
 	inline void setShowName(const bool pValue) { mActorData.mFlags.mShowName = pValue ? 1 : 0; }
 
+	// Returns whether this Actor is a trader or not.
 	inline const bool isTrader() const { return mActorData.mFlags.mIsTrader == 1 ; }
-	inline const bool setIsTrader(const bool pValue) { mActorData.mFlags.mIsTrader = pValue ? 1 : 0; }
 
+	// Sets whether this Actor is a trader or not.
+	inline void setIsTrader(const bool pValue) { mActorData.mFlags.mIsTrader = pValue ? 1 : 0; }
+
+	// Returns whether this Actor is a buyer or not.
 	inline const bool isBuyer() const { return mActorData.mFlags.mIsBuyer == 1; }
-	inline const bool setIsBuyer(const bool pValue) { mActorData.mFlags.mIsBuyer = pValue ? 1 : 0; }
 	
+	// Sets whether this Actor is a buyer or not.
+	inline void setIsBuyer(const bool pValue) { mActorData.mFlags.mIsBuyer = pValue ? 1 : 0; }
+
+	// Returns whether this Actor is targetable is not.
+	inline const bool isTargetable() { return mActorData.mFlags.mTargetable == 1; }
+
+	// Sets whether this Actor is targetable or not.
+	inline void setTargetable(const bool pValue) { mActorData.mFlags.mTargetable = pValue ? 1 : 0; }
+	
+	// Returns the class of this Actor.
 	inline const uint8 getClass() const { return mActorData.mClass; }
+
+	// Sets the class of this Actor.
 	inline void setClass(const uint8 pClassID) { mActorData.mClass = pClassID; }
 	
 	//inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
 	//inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
 	
+	// Returns the deity of this Actor.
 	inline const uint32 getDeity() const { return mActorData.mDeity; }
+
+	// Sets the deity of this Actor.
 	inline void setDeityID(const uint32 pDeityID) { mActorData.mDeity = pDeityID; }
 
+	// Returns the size of this Actor.
 	inline const float getSize() const { return mActorData.mSize; }
+
+	// Sets the size of this Actor.
 	inline void setSize(const float pSize) { mActorData.mSize = pSize; }
 
+	// Returns the actor type of this Actor. See Constants 'ActorType' enumeration.
 	inline const uint8 getActorType() const { return mActorData.mActorType; }
+
+	// Sets the actor type of this Actor. See Constants 'ActorType' enumeration.
 	inline void setActorType(const uint8 pActorType) { mActorData.mActorType = pActorType; }
 
+	// Returns the health percentage of this Actor.
 	inline const uint8 getHPPercent() const { return mActorData.mHPPercent; }
+
+	// Sets the health percentage of this Actor.
 	inline void setHPPercent(const uint8 pValue) { mActorData.mHPPercent = pValue; }
 
+	// Returns the stand state of this Actor.
 	inline const uint8 getStandState() const { return mActorData.mStandState; }
+
+	// Sets the stand state of this Actor.
 	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
 
+	// Returns the level of this Actor.
 	inline const uint8 getLevel() const { return mActorData.mLevel; }
+
+	// Sets the level of this Actor.
 	inline void setLevel(const uint8 pLevel) { mActorData.mLevel = pLevel; }
 
+	// Returns the spawn ID of the owner of this Actor.
 	inline const uint32 getOwnerSpawnID() const { return mActorData.mOwnerSpawnID; }
+
+	// Sets the spawn ID of the owner of this Actor.
 	inline void setOwnerSpawnID(const uint32 pSpawnID) { mActorData.mOwnerSpawnID = pSpawnID; }
 
+	// Returns the guild rank or this Actor.
 	inline const uint32 getGuildRank() const { return mActorData.mGuildRank; }
+
+	// Sets the guild rank of this Actor.
 	inline void setGuildRank(const uint32 pGuildRank) { mActorData.mGuildRank = pGuildRank; }
 
-	inline const uint32 getMaterial(const MaterialSlot pSlotID) const {
+	inline const uint32 getMaterial(const u8 pSlotID) const {
 		// TODO: Guard this.
 		//return mSpawnData.mEquipmentMaterials[pSlotID];
 		// TODO!
@@ -297,10 +356,8 @@ public:
 		// TODO!
 		return 0;
 	}
-	inline void setMaterial(const MaterialSlot pSlotID, const uint32 pMaterial) {
-		// TODO: Guard this.
-		//mActorData.mEquipment[pSlotID] = pMaterial;
-		// TODO!
+	inline void setMaterial(const u8 pSlotID, const u32 pMaterial) {
+		mActorData.mEquipment[pSlotID].mMaterial = pMaterial;
 	}
 
 	inline const float getRunSpeed() const { return mActorData.mRunSpeed; }

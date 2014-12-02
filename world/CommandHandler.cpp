@@ -1690,6 +1690,18 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		if (!Utility::stoSafe(paramater, pParameters[1])) { return; }
 		pCharacter->getConnection()->sendAppearance(type, paramater);
 	}
+	else if (pCommandName == "man") {
+		u32 material = 0;
+		if (!Utility::stoSafe(material, pParameters[0])) { return; }
+		
+		auto npc = NPCFactory::getInstance().createInvisibleMan();
+		npc->setMaterial(MaterialSlot::Primary, material);
+		npc->setMaterial(MaterialSlot::Secondary, material);
+		npc->setPosition(pCharacter->getPosition());
+		npc->setHeading(pCharacter->getHeading());
+
+		pCharacter->getZone()->addActor(npc);
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

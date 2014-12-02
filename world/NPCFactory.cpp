@@ -147,14 +147,28 @@ NPC* NPCFactory::create(const uint32 pTypeID) {
 	npc->setDrakkinHeritage(appearance->mDrakkinHeritage);
 	npc->setDrakkinTattoo(appearance->mDrakkinTattoo);
 	npc->setDrakkinDetails(appearance->mDrakkinDetails);
+
+	for (int i = 0; i < 7; i++)
+		npc->setColour(i, appearance->mColours[i]);
+
 	//npc->helm Helm Texture
-	npc->setMaterial(MaterialSlot::Mat_Primary, appearance->mPrimaryMaterial);
-	npc->setMaterial(MaterialSlot::Mat_Secondary, appearance->mSecondaryMaterial);
+	npc->setMaterial(MaterialSlot::Primary, appearance->mPrimaryMaterial);
+	npc->setMaterial(MaterialSlot::Secondary, appearance->mSecondaryMaterial);
 
 	// NPC is a merchant.
 	if (npc->isMerchant()) {
 		initialiseMerchant(npc, type);
 	}
+
+	return npc;
+}
+
+NPC* NPCFactory::createInvisibleMan() {
+	NPC* npc = new NPC();
+	npc->setRace(127);
+	npc->setBodyType(66);
+	npc->setTargetable(false);
+	npc->setShowName(false);
 
 	return npc;
 }

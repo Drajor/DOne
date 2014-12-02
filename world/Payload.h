@@ -12,21 +12,6 @@ enum GuildUpdateAction : uint32 {
 
 #pragma pack(1)
 
-struct Colour
-{
-	union
-	{
-		struct
-		{
-			uint8 mBlue;
-			uint8 mGreen;
-			uint8 mRed;
-			uint8 mUseTint;	// if there's a tint this is FF
-		} mRGB;
-		uint32 mColour;
-	};
-};
-
 namespace Payload {
 
 	template <typename T>
@@ -1602,7 +1587,7 @@ namespace Payload {
 		uint32 mColours[9];
 
 		struct Equipment {
-			uint32 mEquip0 = 0;
+			uint32 mMaterial = 0;
 			uint32 mEquip1 = 0;
 			uint32 mItemID = 0;
 		};

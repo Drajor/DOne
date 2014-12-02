@@ -41,8 +41,10 @@ const uint32 Actor::getDataSize() const {
 	if (hasSuffix())
 		result += strlen(mActorData.mSuffix) + 1;
 
-	if (!sendsEquipment())
-		result -= sizeof(mActorData.mEquipment);
+	if (!sendsEquipment()) {
+		result -= sizeof(mActorData.mColours);
+		result -= sizeof(Payload::ActorData::Equipment) * 6;
+	}
 
 	return result;
 }
@@ -60,14 +62,23 @@ const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
 	// Write last name.
 	pStructure.writeString(String(mActorData.mLastName));
 
-	// Chunk One.
+	// Check One.
+	std::size_t chunk1Size = (unsigned int)&(mActorData.mColours) - (unsigned int)&(mActorData.mAAtitle);
+	pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1Size);
+
 	if (sendsEquipment()) {
-		std::size_t chunk1 = (unsigned int)&(mActorData.mTitle) - (unsigned int)&(mActorData.mAAtitle);
-		pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
+		// Write colours.
+		pStructure.writeChunk((void*)&(mActorData.mColours), sizeof(mActorData.mColours));
+		// Write equipment.
+		pStructure.writeChunk((void*)&(mActorData.mEquipment), sizeof(mActorData.mEquipment));
 	}
 	else {
-		std::size_t chunk1 = (unsigned int)&(mActorData.mEquipment) - (unsigned int)&(mActorData.mAAtitle);
-		pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1);
+		pStructure.write<uint32>(0);
+		pStructure.write<uint32>(0);
+		pStructure.write<uint32>(0);
+
+		pStructure.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Primary]);
+		pStructure.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Secondary]);
 	}
 
 	// Write optional title.
@@ -100,20 +111,6 @@ void Actor::_onCopy() {
 
 	if (isDestructible())
 		mActorData.mOtherFlags = mActorData.mOtherFlags | 0xd1;
-
-	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mEquip0 = 2;
-	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mEquip1 = 2;
-	//mActorData.mEquipment[MaterialSlot::Mat_Legs].mItemID = 2;
-
-	//mActorData.mTexture = 5; 
-
-	// 0 = Nude
-	// 1 = Leather
-	// 2 = Chain
-	// 3 = Plate
-	// 4 = Leather?
-	// 5
-
 }
 
 const bool Actor::sendsEquipment() const {

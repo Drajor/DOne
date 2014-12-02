@@ -145,7 +145,10 @@ struct CharacterData {
 };
 
 struct NPCAppearanceData {
-	NPCAppearanceData() { mOverrides.set(0); }
+	NPCAppearanceData() {
+		mOverrides.set(0);
+		memset(&mColours, 0, sizeof(mColours));
+	}
 	uint32 mID = 0;
 	uint32 mParentID = 0;
 
@@ -170,6 +173,8 @@ struct NPCAppearanceData {
 
 	uint32 mPrimaryMaterial = 0;
 	uint32 mSecondaryMaterial = 0;
+
+	uint32 mColours[7];
 
 	enum Attributes {
 		RaceID,
