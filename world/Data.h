@@ -284,9 +284,7 @@ namespace Data {
 		u32 mLongNameStringID = 0;
 		String mLongName = "";
 		String mShortName = "";
-		float mSafeX = 0.0f;
-		float mSafeY = 0.0f;
-		float mSafeZ = 0.0f;
+		Vector3 mSafePosition;
 		std::list<ZonePoint*> mZonePoints;
 		std::list<SpawnGroup*> mSpawnGroups;
 		std::list<SpawnPoint*> mSpawnPoints;

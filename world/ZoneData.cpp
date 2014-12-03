@@ -320,9 +320,7 @@ const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<Data::
 const bool ZoneDataManager::getSafePoint(const uint16 pZoneID, Vector3& pSafePoint) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
-	pSafePoint.x = zoneData->mSafeX;
-	pSafePoint.y = zoneData->mSafeY;
-	pSafePoint.z = zoneData->mSafeZ;
+	pSafePoint = zoneData->mSafePosition;
 
 	return true;
 }

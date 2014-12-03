@@ -1282,9 +1282,9 @@ const bool DataStore::loadZoneData(std::list<Data::Zone*>& pZoneData) {
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ID, zoneData->mID));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ShortName, zoneData->mShortName));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::LongName, zoneData->mLongName));
-		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeX, zoneData->mSafeX));
-		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafeY));
-		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafeZ));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeX, zoneData->mSafePosition.x));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafePosition.y));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafePosition.z));
 
 		// Read Zone Points.
 		auto zonePointsElement = zoneElement->FirstChildElement(Tag::ZonePoints);
@@ -1377,9 +1377,9 @@ const bool DataStore::saveZoneData(std::list<Data::Zone*>& pZoneData) {
 		zoneElement->SetAttribute(Attribute::ID, i->mID);
 		zoneElement->SetAttribute(Attribute::ShortName, i->mShortName.c_str());
 		zoneElement->SetAttribute(Attribute::LongName, i->mLongName.c_str());
-		zoneElement->SetDoubleAttribute(Attribute::SafeX, i->mSafeX);
-		zoneElement->SetDoubleAttribute(Attribute::SafeY, i->mSafeY);
-		zoneElement->SetDoubleAttribute(Attribute::SafeZ, i->mSafeZ);
+		zoneElement->SetDoubleAttribute(Attribute::SafeX, i->mSafePosition.x);
+		zoneElement->SetDoubleAttribute(Attribute::SafeY, i->mSafePosition.y);
+		zoneElement->SetDoubleAttribute(Attribute::SafeZ, i->mSafePosition.z);
 
 		// Write Zone Points.
 		auto zonePointsElement = new TiXmlElement(Tag::ZonePoints);
