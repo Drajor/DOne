@@ -251,7 +251,7 @@ const bool ZoneDataManager::initialise() {
 	return true;
 }
 
-Data::Zone* ZoneDataManager::_find(const uint16 pZoneID) const {
+Data::Zone* ZoneDataManager::_find(const u16 pZoneID) const {
 	for (auto i : mZoneData) {
 		if (pZoneID == i->mID)
 			return i;
@@ -260,21 +260,21 @@ Data::Zone* ZoneDataManager::_find(const uint16 pZoneID) const {
 	return nullptr;
 }
 
-const bool ZoneDataManager::getLongName(const uint16 pZoneID, String& pLongName) {
+const bool ZoneDataManager::getLongName(const u16 pZoneID, String& pLongName) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pLongName = zoneData->mLongName;
 	return true;
 }
 
-const bool ZoneDataManager::getShortName(const uint16 pZoneID, String& pShortName){
+const bool ZoneDataManager::getShortName(const u16 pZoneID, String& pShortName){
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pShortName = zoneData->mShortName;
 	return true;
 }
 
-const bool ZoneDataManager::getLongNameStringID(const uint16 pZoneID, uint32& pStringID) {
+const bool ZoneDataManager::getLongNameStringID(const u16 pZoneID, u32& pStringID) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pStringID = zoneData->mLongNameStringID;
@@ -302,25 +302,30 @@ const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
 	return 0;
 }
 
+const bool ZoneDataManager::getSpawnGroups(const u16 pZoneID, std::list<Data::SpawnGroup*>& pSpawnGroupData) {
+	auto zoneData = _find(pZoneID);
+	EXPECTED_BOOL(zoneData);
+	pSpawnGroupData = zoneData->mSpawnGroups;
+	return true;
+}
 
-const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData) {
+const bool ZoneDataManager::getSpawnPoints(const u16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSpawnPointData = zoneData->mSpawnPoints;
 	return true;
 }
 
-const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<Data::ZonePoint*>** pZonePoints) {
+const bool ZoneDataManager::getZonePoints(const u16 pZoneID, std::list<Data::ZonePoint*>& pZonePoints) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
-	*pZonePoints = &zoneData->mZonePoints;
+	pZonePoints = zoneData->mZonePoints;
 	return true;
 }
 
-const bool ZoneDataManager::getSafePoint(const uint16 pZoneID, Vector3& pSafePoint) {
+const bool ZoneDataManager::getSafePoint(const u16 pZoneID, Vector3& pSafePoint) {
 	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSafePoint = zoneData->mSafePosition;
-
 	return true;
 }

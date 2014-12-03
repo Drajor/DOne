@@ -1,18 +1,29 @@
 #include "SpawnPointManager.h"
 #include "SpawnPoint.h"
+#include "SpawnGroup.h"
 #include "Data.h"
 #include "Zone.h"
 #include "NPC.h"
 #include "NPCFactory.h"
 #include "LogSystem.h"
 
-const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnPoint*>& pSpawnPointData) {
+const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData) {
 	if (mInitialised) { return false; }
 	if (!pZone) { return false; }
 
 	Log::status("[SpawnPointManager] Initialising.");
 
 	mZone = pZone;
+
+	// Create SpawnGroups
+	for (auto i : pSpawnGroupData) {
+		auto spawnGroup = new SpawnGroup(i->mID);
+		mSpawnGroups.push_back(spawnGroup);
+
+		for (auto j : i->mEntries) {
+			spawnGroup->add(j->mNPCType, j->mChance);
+		}
+	}
 
 	// Create SpawnPoints.
 	for (auto i : pSpawnPointData) {
@@ -23,7 +34,11 @@ const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnPoint
 		spawnPoint->setPosition(i->mPosition);
 		spawnPoint->setHeading(i->mHeading);
 		spawnPoint->setRespawnTime(i->mRespawnTime);
-		spawnPoint->setSpawnGroup(i->mSpawnGroupID);
+		
+		// Assign SpawnGroup
+		auto spawnGroup = findSpawnGroup(i->mSpawnGroupID);
+		EXPECTED_BOOL(spawnGroup);
+		spawnPoint->setSpawnGroup(spawnGroup);
 	}
 
 	Log::info("[SpawnPointManager] Finished initialising. " + std::to_string(pSpawnPointData.size()) + " Spawn Points.");
@@ -58,28 +73,14 @@ void SpawnPointManager::onDeath(NPC* pNPC) {
 	mRespawnSpawnPoints.push_back(spawnPoint);
 }
 
-struct A {
-	u32 mNPCTypeID = 0;
-	u32 mWeight = 0;
-};
-
-class SpawnGroup {
-public:
-	// Returns the ID of this SpawnGroup.
-	inline const u32 getID() const { return mID; }
-	inline const u32 getNPCTypeID() { return 0; }
-private:
-	u32 mID = 0;
-	std::list<u32> mNPCTypes;
-};
-
 void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
 
 	// Determine what NPC to spawn.
-	//auto spawnGroup = pSpawnPoint->getSpawnGroup();
-	//auto npcTypeID = spawnGroup->getNPCTypeID();
+	const u32 NPCTypeID = pSpawnPoint->getSpawnGroup()->roll();
 
-	auto npc = NPCFactory::getInstance().create(1);
+	auto npc = NPCFactory::getInstance().create(NPCTypeID);
+	EXPECTED(npc);
+
 	npc->setZone(mZone);
 	npc->initialise();
 	npc->setPosition(pSpawnPoint->getPosition());
@@ -91,4 +92,12 @@ void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
 
 	// Add NPC to Zone.
 	mZone->addActor(npc);
+}
+
+SpawnGroup* SpawnPointManager::findSpawnGroup(const u32 pID) const {
+	for (auto i : mSpawnGroups) {
+		if (i->getID() == pID)
+			return i;
+	}
+	return nullptr;
 }

@@ -69,25 +69,28 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(loadZonePoints());
 	EXPECTED_BOOL(populate());
 
-	// Load SpawnPointData for Zone.
+	// Load SpawnPoint Data for Zone.
 	std::list<Data::SpawnPoint*> spawnPointData;
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), spawnPointData));
+
+	// Load SpawnGroup Data for Zone.
+	std::list<Data::SpawnGroup*> spawnGroupData;
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnGroups(getID(), spawnGroupData));
 	
 	// Pass to SpawnPointManager.
 	mSpawnPointManager = new SpawnPointManager();
-	EXPECTED_BOOL(mSpawnPointManager->initialise(this, spawnPointData));
+	EXPECTED_BOOL(mSpawnPointManager->initialise(this, spawnGroupData, spawnPointData));
 
 	mInitialised = true;
 	return true;
 }
 
 const bool Zone::loadZonePoints() {
-	std::list<Data::ZonePoint*>* zonePointData = nullptr;
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getZonePoints(getID(), &zonePointData));
-	EXPECTED_BOOL(zonePointData);
+	std::list<Data::ZonePoint*> zonePointData;
+	EXPECTED_BOOL(ZoneDataManager::getInstance().getZonePoints(getID(), zonePointData));
 
 	// Create ZonePoints.
-	for (auto i : *zonePointData) {
+	for (auto i : zonePointData) {
 		auto zonePoint = new ZonePoint();
 		mZonePoints.push_back(zonePoint);
 
