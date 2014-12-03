@@ -257,8 +257,6 @@ struct SpawnGroupData {
 struct SpawnPointData {
 	Vector3 mPosition;
 	float mHeading = 0.0f;
-	uint32 mType = SpawnPointType::TRASH;
-	uint32 mNPCType = 0;
 	uint32 mSpawnGroupID = 0;
 	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
 };

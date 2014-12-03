@@ -19,14 +19,9 @@ public:
 	inline NPC* getNPC() const { return mNPC; }
 	inline void setNPC(NPC* pNPC) { mNPC = pNPC; }
 	inline void setRespawnTime(const uint32 pRespawnTime) { mRespawnTime = pRespawnTime; }
-	inline void setType(uint32 pType) { mType = pType; }
-	inline const uint32 getType() const { return mType; }
-	inline void setNPCType(uint32 pNPCType) { mNPCType = pNPCType; }
-	inline const uint32 getNPCType() const { return mNPCType; }
 	inline void setSpawnGroup(uint32 pSpawnGroupID) { mSpawnGroupID = pSpawnGroupID; }
 	inline const uint32 getSpawnGroup() const { return mSpawnGroupID; }
 private:
-	uint32 mType = SpawnPointType::TRASH;
 	uint32 mNPCType = 0;
 	uint32 mSpawnGroupID = 0;
 	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;

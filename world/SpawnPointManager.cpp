@@ -23,8 +23,6 @@ const bool SpawnPointManager::initialise(Zone* pZone, std::list<SpawnPointData*>
 		spawnPoint->setPosition(i->mPosition);
 		spawnPoint->setHeading(i->mHeading);
 		spawnPoint->setRespawnTime(i->mRespawnTime);
-		spawnPoint->setType(i->mType);
-		spawnPoint->setNPCType(i->mNPCType);
 		spawnPoint->setSpawnGroup(i->mSpawnGroupID);
 	}
 

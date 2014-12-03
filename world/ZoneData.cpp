@@ -243,6 +243,8 @@ const bool ZoneDataManager::initialise() {
 	EXPECTED_BOOL(DataStore::getInstance().loadZoneData(mZoneData));
 	Log::info("[Zone Data] Loaded data for " + std::to_string(mZoneData.size()) + " Zones.");
 	
+	EXPECTED_BOOL(DataStore::getInstance().saveZoneData(mZoneData));
+
 	mInitialised = true;
 	return true;
 }

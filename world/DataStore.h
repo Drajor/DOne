@@ -29,6 +29,7 @@ public:
 
 	// Zone Data
 	const bool loadZoneData(std::list<ZoneData*>& pZoneData);
+	const bool saveZoneData(std::list<ZoneData*>& pZoneData);
 
 	// NPC
 	const bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);

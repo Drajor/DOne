@@ -928,12 +928,6 @@ namespace ContainerType {
 	};
 }
 
-enum SpawnPointType : uint32 {
-	TRASH = 0,
-	SPECIFIC = 1,
-	SPAWN_GROUP = 2
-};
-
 /*
 DamageType
 - UF defaults to "X punches YOU" for any DamageType other than those listed below.

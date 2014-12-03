@@ -1225,6 +1225,8 @@ namespace ZoneDataXML {
 		SCA ZonePoint = "zone_point";
 		SCA SpawnPoints = "spawn_points";
 		SCA SpawnPoint = "spawn_point";
+		SCA SpawnGroups = "spawn_groups";
+		SCA SpawnGroup = "spawn_group";
 	}
 	namespace Attribute {
 		// Tag::Zone
@@ -1246,14 +1248,12 @@ namespace ZoneDataXML {
 		SCA ZPDestZ = "dest_z";
 		SCA ZPDestHeading = "dest_heading";
 		// Tag::SpawnPoint
-		SCA SPType = "type";
+		SCA SPSpawnGroup = "spawn_group";
+		SCA SPRespawn = "respawn";
 		SCA SPX = "x";
 		SCA SPY = "y";
 		SCA SPZ = "z";
 		SCA SPHeading = "heading";
-		SCA SPRespawn = "respawn";
-		SCA SPNPCType = "npc_type";
-		SCA SPSpawnGroup = "spawn_group";
 	}
 #undef SCA
 }
@@ -1280,7 +1280,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafeY));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafeZ));
 
-		// Read ZonePoints.
+		// Read Zone Points.
 		auto zonePointsElement = zoneElement->FirstChildElement(Tag::ZonePoints);
 		EXPECTED_BOOL(zonePointsElement);
 		auto zonePointElement = zonePointsElement->FirstChildElement(Tag::ZonePoint);
@@ -1303,7 +1303,16 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 			zonePointElement = zonePointElement->NextSiblingElement(Tag::ZonePoint);
 		}
 
-		// Read SpawnPoints
+		// Read Spawn Groups.
+		auto spawnGroupsElement = zoneElement->FirstChildElement(Tag::SpawnGroups);
+		EXPECTED_BOOL(spawnGroupsElement);
+		auto spawnGroupElement = spawnGroupsElement->FirstChildElement(Tag::SpawnGroup);
+		while (spawnGroupElement) {
+
+			spawnGroupElement = spawnGroupElement->NextSiblingElement(Tag::SpawnGroup);
+		}
+
+		// Read Spawn Points.
 		auto spawnPointsElement = zoneElement->FirstChildElement(Tag::SpawnPoints);
 		EXPECTED_BOOL(spawnPointsElement);
 		auto spawnPointElement = spawnPointsElement->FirstChildElement(Tag::SpawnPoint);
@@ -1312,32 +1321,85 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 			zoneData->mSpawnPoints.push_back(sp);
 
 			// Required Attributes.
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPSpawnGroup, sp->mSpawnGroupID));
+			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPRespawn, sp->mRespawnTime));
 			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPX, sp->mPosition.x));
 			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPY, sp->mPosition.y));
 			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPZ, sp->mPosition.z));
 			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPHeading, sp->mHeading));
-			EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPType, sp->mType));
-
-			// TODO: Respawn Time.
-			switch (sp->mType) {
-			case SpawnPointType::TRASH:
-				break;
-			case SpawnPointType::SPECIFIC:
-				EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPNPCType, sp->mNPCType));
-				break;
-			case SpawnPointType::SPAWN_GROUP:
-				EXPECTED_BOOL(readAttribute(spawnPointElement, Attribute::SPSpawnGroup, sp->mSpawnGroupID));
-				break;
-			default:
-				Log::error("Unknown SpawnPointType");
-				return false;
-			}
 
 			spawnPointElement = spawnPointElement->NextSiblingElement(Tag::SpawnPoint);
 		}
 
 		zoneElement = zoneElement->NextSiblingElement(Tag::Zone);
 	}
+	return true;
+}
+
+const bool DataStore::saveZoneData(std::list<ZoneData*>& pZoneData) {
+	using namespace ZoneDataXML;
+	Profile p("DataStore::saveZoneData");
+	TiXmlDocument document(ZoneDataXML::FileLocation);
+
+	auto zonesElement = new TiXmlElement(Tag::Zones);
+	document.LinkEndChild(zonesElement);
+
+	for (auto i : pZoneData) {
+		// Zone.
+		auto zoneElement = new TiXmlElement(Tag::Zone);
+		zonesElement->LinkEndChild(zoneElement);
+
+		zoneElement->SetAttribute(Attribute::ID, i->mID);
+		zoneElement->SetAttribute(Attribute::ShortName, i->mShortName.c_str());
+		zoneElement->SetAttribute(Attribute::LongName, i->mLongName.c_str());
+		zoneElement->SetDoubleAttribute(Attribute::SafeX, i->mSafeX);
+		zoneElement->SetDoubleAttribute(Attribute::SafeY, i->mSafeY);
+		zoneElement->SetDoubleAttribute(Attribute::SafeZ, i->mSafeZ);
+
+		// Write Zone Points.
+		auto zonePointsElement = new TiXmlElement(Tag::ZonePoints);
+		zoneElement->LinkEndChild(zonePointsElement);
+
+		for (auto j : i->mZonePoints) {
+			// Zone Point.
+			auto zonePointElement = new TiXmlElement(Tag::ZonePoint);
+			zonePointsElement->LinkEndChild(zonePointElement);
+
+			zonePointElement->SetAttribute(Attribute::ZPID, j->mID);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPX, j->mPosition.x);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPY, j->mPosition.y);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPZ, j->mPosition.z);
+			zonePointElement->SetAttribute(Attribute::ZPDestZoneID, j->mDestinationZoneID);
+			zonePointElement->SetAttribute(Attribute::ZPDestInstanceID, j->mDestinationInstanceID);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPDestX, j->mDestinationPosition.x);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPDestY, j->mDestinationPosition.y);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPDestZ, j->mDestinationPosition.z);
+			zonePointElement->SetDoubleAttribute(Attribute::ZPDestHeading, j->mDestinationHeading);
+		}
+
+		// Write Spawn Groups.
+		auto spawnGroupsElement = new TiXmlElement(Tag::SpawnGroups);
+		zoneElement->LinkEndChild(spawnGroupsElement);
+
+		// Write Spawn Points.
+		auto spawnPointsElement = new TiXmlElement(Tag::SpawnPoints);
+		zoneElement->LinkEndChild(spawnPointsElement);
+
+		for (auto j : i->mSpawnPoints) {
+			// Spawn Point.
+			auto spawnPointElement = new TiXmlElement(Tag::SpawnPoint);
+			spawnPointsElement->LinkEndChild(spawnPointElement);
+
+			spawnPointElement->SetAttribute(Attribute::SPSpawnGroup, j->mSpawnGroupID);
+			spawnPointElement->SetAttribute(Attribute::SPRespawn, j->mRespawnTime);
+			spawnPointElement->SetDoubleAttribute(Attribute::SPX, j->mPosition.x);
+			spawnPointElement->SetDoubleAttribute(Attribute::SPY, j->mPosition.y);
+			spawnPointElement->SetDoubleAttribute(Attribute::SPZ, j->mPosition.z);
+			spawnPointElement->SetAttribute(Attribute::SPHeading, j->mHeading);
+		}
+	}
+
+	EXPECTED_BOOL(document.SaveFile());
 	return true;
 }
 
