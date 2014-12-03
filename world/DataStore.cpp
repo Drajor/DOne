@@ -1227,6 +1227,7 @@ namespace ZoneDataXML {
 		SCA SpawnPoint = "spawn_point";
 		SCA SpawnGroups = "spawn_groups";
 		SCA SpawnGroup = "spawn_group";
+		SCA SpawnGroupEntry = "spawn_group_entry";
 	}
 	namespace Attribute {
 		// Tag::Zone
@@ -1247,6 +1248,11 @@ namespace ZoneDataXML {
 		SCA ZPDestY = "dest_y";
 		SCA ZPDestZ = "dest_z";
 		SCA ZPDestHeading = "dest_heading";
+		// Tag::SpawnGroup
+		SCA SGID = "id";
+		// Tag::SpawnGroupEntry
+		SCA SGENPCType = "npc_type";
+		SCA SGEChance = "chance";
 		// Tag::SpawnPoint
 		SCA SPSpawnGroup = "spawn_group";
 		SCA SPRespawn = "respawn";
@@ -1285,6 +1291,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		EXPECTED_BOOL(zonePointsElement);
 		auto zonePointElement = zonePointsElement->FirstChildElement(Tag::ZonePoint);
 		while (zonePointElement) {
+			// Read Zone Point.
 			auto zp = new ZonePointData();
 			zoneData->mZonePoints.push_back(zp);
 
@@ -1299,7 +1306,6 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestZ, zp->mDestinationPosition.z));
 			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestHeading, zp->mDestinationHeading));
 
-
 			zonePointElement = zonePointElement->NextSiblingElement(Tag::ZonePoint);
 		}
 
@@ -1308,6 +1314,25 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		EXPECTED_BOOL(spawnGroupsElement);
 		auto spawnGroupElement = spawnGroupsElement->FirstChildElement(Tag::SpawnGroup);
 		while (spawnGroupElement) {
+			// Read Spawn Group.
+			auto sg = new Data::SpawnGroup();
+			zoneData->mSpawnGroups.push_back(sg);
+
+			EXPECTED_BOOL(readAttribute(spawnGroupElement, Attribute::SGID, sg->mID));
+
+			// Read Spawn Group Entries.
+			auto spawnGroupEntryElement = spawnGroupElement->FirstChildElement(Tag::SpawnGroupEntry);
+			EXPECTED_BOOL(spawnGroupEntryElement); // At least one entry is required.
+			while (spawnGroupEntryElement) {
+				// Read Spawn Group Entry.
+				auto sge = new Data::SpawnGroupEntry();
+				sg->mEntries.push_back(sge);
+
+				EXPECTED_BOOL(readAttribute(spawnGroupEntryElement, Attribute::SGENPCType, sge->mNPCType));
+				EXPECTED_BOOL(readAttribute(spawnGroupEntryElement, Attribute::SGEChance, sge->mChance));
+
+				spawnGroupEntryElement = spawnGroupEntryElement->NextSiblingElement(Tag::SpawnGroupEntry);
+			}
 
 			spawnGroupElement = spawnGroupElement->NextSiblingElement(Tag::SpawnGroup);
 		}
@@ -1361,7 +1386,7 @@ const bool DataStore::saveZoneData(std::list<ZoneData*>& pZoneData) {
 		zoneElement->LinkEndChild(zonePointsElement);
 
 		for (auto j : i->mZonePoints) {
-			// Zone Point.
+			// Write Zone Point.
 			auto zonePointElement = new TiXmlElement(Tag::ZonePoint);
 			zonePointsElement->LinkEndChild(zonePointElement);
 
@@ -1381,12 +1406,30 @@ const bool DataStore::saveZoneData(std::list<ZoneData*>& pZoneData) {
 		auto spawnGroupsElement = new TiXmlElement(Tag::SpawnGroups);
 		zoneElement->LinkEndChild(spawnGroupsElement);
 
+		for (auto j : i->mSpawnGroups) {
+			// Write Spawn Group.
+			auto spawnGroupElement = new TiXmlElement(Tag::SpawnGroup);
+			spawnGroupsElement->LinkEndChild(spawnGroupElement);
+
+			spawnGroupElement->SetAttribute(Attribute::SGID, j->mID);
+
+			// Write Spawn Group Entries.
+			for (auto k : j->mEntries) {
+				// Write Spawn Group Entry.
+				auto spawnGroupEntryElement = new TiXmlElement(Tag::SpawnGroupEntry);
+				spawnGroupElement->LinkEndChild(spawnGroupEntryElement);
+
+				spawnGroupEntryElement->SetAttribute(Attribute::SGENPCType, k->mNPCType);
+				spawnGroupEntryElement->SetAttribute(Attribute::SGEChance, k->mChance);
+			}
+		}
+
 		// Write Spawn Points.
 		auto spawnPointsElement = new TiXmlElement(Tag::SpawnPoints);
 		zoneElement->LinkEndChild(spawnPointsElement);
 
 		for (auto j : i->mSpawnPoints) {
-			// Spawn Point.
+			// Write Spawn Point.
 			auto spawnPointElement = new TiXmlElement(Tag::SpawnPoint);
 			spawnPointsElement->LinkEndChild(spawnPointElement);
 
@@ -1395,7 +1438,7 @@ const bool DataStore::saveZoneData(std::list<ZoneData*>& pZoneData) {
 			spawnPointElement->SetDoubleAttribute(Attribute::SPX, j->mPosition.x);
 			spawnPointElement->SetDoubleAttribute(Attribute::SPY, j->mPosition.y);
 			spawnPointElement->SetDoubleAttribute(Attribute::SPZ, j->mPosition.z);
-			spawnPointElement->SetAttribute(Attribute::SPHeading, j->mHeading);
+			spawnPointElement->SetDoubleAttribute(Attribute::SPHeading, j->mHeading);
 		}
 	}
 

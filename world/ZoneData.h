@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 #include "Singleton.h"
-#include "Vector3.h"
+#include <list>
 
 // For the #zonesearch command.
 struct ZoneDataSearchEntry {
-	ZoneID mID;
+	u16 mID;
 	String mShortName;
 	String mLongName;
 }; // NOTE: No initializer due to PoD rules.
@@ -15,6 +15,8 @@ typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 struct ZoneData;
 struct SpawnPointData;
 struct ZonePointData;
+struct Vector3;
+
 class ZoneDataManager : public Singleton<ZoneDataManager> {
 private:
 	friend class Singleton<ZoneDataManager>;

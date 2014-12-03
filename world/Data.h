@@ -250,38 +250,48 @@ struct SpellData {
 
 };
 
-struct SpawnGroupData {
-	uint32 mID = 0;
-};
+namespace Data {
+	struct SpawnGroup {
+		struct Entry {
+			u32 mNPCType = 0;
+			u32 mChance = 0;
+		};
+
+		u32 mID = 0;
+		std::list<Entry*> mEntries;
+	};
+	typedef SpawnGroup::Entry SpawnGroupEntry;
+}
 
 struct SpawnPointData {
 	Vector3 mPosition;
 	float mHeading = 0.0f;
-	uint32 mSpawnGroupID = 0;
-	uint32 mRespawnTime = DEFAULT_RESPAWN_TIME;
+	u32 mSpawnGroupID = 0;
+	u32 mRespawnTime = DEFAULT_RESPAWN_TIME;
 };
 
 struct ZonePointData {
-	uint16 mID = 0;
+	u16 mID = 0;
 	Vector3 mPosition;
 	float mHeading = 0.0f;
 
-	uint16 mDestinationZoneID = 0;
-	uint16 mDestinationInstanceID = 0;
+	u16 mDestinationZoneID = 0;
+	u16 mDestinationInstanceID = 0;
 	Vector3 mDestinationPosition;
 	float mDestinationHeading = 0.0f;
 };
 
 struct ZoneData {
-	ZoneID mID = 0;
-	uint32 mLongNameStringID = 0;
+	u16 mID = 0;
+	u32 mLongNameStringID = 0;
 	String mLongName = "";
 	String mShortName = "";
 	float mSafeX = 0.0f;
 	float mSafeY = 0.0f;
 	float mSafeZ = 0.0f;
-	std::list<SpawnPointData*> mSpawnPoints;
 	std::list<ZonePointData*> mZonePoints;
+	std::list<Data::SpawnGroup*> mSpawnGroups;
+	std::list<SpawnPointData*> mSpawnPoints;
 };
 
 namespace AffixType{

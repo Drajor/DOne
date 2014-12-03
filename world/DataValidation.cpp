@@ -12,6 +12,7 @@ const bool validateShopData();
 const bool validateTransmutationData();
 const bool validateAlternateCurrencies();
 const bool validateNPCTypes();
+const bool validateZoneData();
 
 const bool validateData() {
 	Profile p("validateData");
@@ -21,6 +22,7 @@ const bool validateData() {
 	EXPECTED_BOOL(validateTransmutationData());
 	EXPECTED_BOOL(validateAlternateCurrencies());
 	EXPECTED_BOOL(validateNPCTypes());
+	EXPECTED_BOOL(validateZoneData());
 	
 	Log::info("[Data Validation] Validation finished.");
 	return true;
@@ -78,6 +80,14 @@ const bool validateNPCTypes() {
 			EXPECTED_BOOL(ShopDataStore::getInstance().getShopData(i->mShopID));
 		}
 	}
+
+	return true;
+}
+
+const bool validateZoneData() {
+	Profile p("validateZoneData");
+
+	//ZoneDataS
 
 	return true;
 }

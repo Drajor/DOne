@@ -2,6 +2,8 @@
 #include "DataStore.h"
 #include "Utility.h"
 #include "LogSystem.h"
+#include "Vector3.h"
+
 /*
 2243 South Qeynos
 2244 North Qeynos

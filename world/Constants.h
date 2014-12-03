@@ -21,8 +21,7 @@ typedef uint8_t GenderID;
 typedef uint32_t RaceID;
 typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
 typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
-typedef std::string String;
-typedef std::stringstream StringStream;
+
 typedef uint32_t GuildID;
 typedef uint8_t GuildRank;
 typedef int8_t AccountStatus;
