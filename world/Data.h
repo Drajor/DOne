@@ -260,39 +260,38 @@ namespace Data {
 		u32 mID = 0;
 		std::list<Entry*> mEntries;
 	};
-	typedef SpawnGroup::Entry SpawnGroupEntry;
+
+	struct SpawnPoint {
+		Vector3 mPosition;
+		float mHeading = 0.0f;
+		u32 mSpawnGroupID = 0;
+		u32 mRespawnTime = DEFAULT_RESPAWN_TIME;
+	};
+
+	struct ZonePoint {
+		u16 mID = 0;
+		Vector3 mPosition;
+		float mHeading = 0.0f;
+
+		u16 mDestinationZoneID = 0;
+		u16 mDestinationInstanceID = 0;
+		Vector3 mDestinationPosition;
+		float mDestinationHeading = 0.0f;
+	};
+
+	struct Zone {
+		u16 mID = 0;
+		u32 mLongNameStringID = 0;
+		String mLongName = "";
+		String mShortName = "";
+		float mSafeX = 0.0f;
+		float mSafeY = 0.0f;
+		float mSafeZ = 0.0f;
+		std::list<ZonePoint*> mZonePoints;
+		std::list<SpawnGroup*> mSpawnGroups;
+		std::list<SpawnPoint*> mSpawnPoints;
+	};
 }
-
-struct SpawnPointData {
-	Vector3 mPosition;
-	float mHeading = 0.0f;
-	u32 mSpawnGroupID = 0;
-	u32 mRespawnTime = DEFAULT_RESPAWN_TIME;
-};
-
-struct ZonePointData {
-	u16 mID = 0;
-	Vector3 mPosition;
-	float mHeading = 0.0f;
-
-	u16 mDestinationZoneID = 0;
-	u16 mDestinationInstanceID = 0;
-	Vector3 mDestinationPosition;
-	float mDestinationHeading = 0.0f;
-};
-
-struct ZoneData {
-	u16 mID = 0;
-	u32 mLongNameStringID = 0;
-	String mLongName = "";
-	String mShortName = "";
-	float mSafeX = 0.0f;
-	float mSafeY = 0.0f;
-	float mSafeZ = 0.0f;
-	std::list<ZonePointData*> mZonePoints;
-	std::list<Data::SpawnGroup*> mSpawnGroups;
-	std::list<SpawnPointData*> mSpawnPoints;
-};
 
 namespace AffixType{
 	enum {

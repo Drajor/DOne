@@ -1263,7 +1263,7 @@ namespace ZoneDataXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
+const bool DataStore::loadZoneData(std::list<Data::Zone*>& pZoneData) {
 	using namespace ZoneDataXML;
 	EXPECTED_BOOL(pZoneData.empty());
 	Profile p("DataStore::loadZoneData");
@@ -1276,7 +1276,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 	auto zoneElement = zonesElement->FirstChildElement(Tag::Zone);
 
 	while (zoneElement) {
-		ZoneData* zoneData = new ZoneData();
+		auto zoneData = new Data::Zone();
 		pZoneData.push_back(zoneData);
 
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ID, zoneData->mID));
@@ -1292,7 +1292,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		auto zonePointElement = zonePointsElement->FirstChildElement(Tag::ZonePoint);
 		while (zonePointElement) {
 			// Read Zone Point.
-			auto zp = new ZonePointData();
+			auto zp = new Data::ZonePoint();
 			zoneData->mZonePoints.push_back(zp);
 
 			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPID, zp->mID));
@@ -1325,7 +1325,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 			EXPECTED_BOOL(spawnGroupEntryElement); // At least one entry is required.
 			while (spawnGroupEntryElement) {
 				// Read Spawn Group Entry.
-				auto sge = new Data::SpawnGroupEntry();
+				auto sge = new Data::SpawnGroup::Entry();
 				sg->mEntries.push_back(sge);
 
 				EXPECTED_BOOL(readAttribute(spawnGroupEntryElement, Attribute::SGENPCType, sge->mNPCType));
@@ -1342,7 +1342,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 		EXPECTED_BOOL(spawnPointsElement);
 		auto spawnPointElement = spawnPointsElement->FirstChildElement(Tag::SpawnPoint);
 		while (spawnPointElement) {
-			auto sp = new SpawnPointData();
+			auto sp = new Data::SpawnPoint();
 			zoneData->mSpawnPoints.push_back(sp);
 
 			// Required Attributes.
@@ -1361,7 +1361,7 @@ const bool DataStore::loadZoneData(std::list<ZoneData*>& pZoneData) {
 	return true;
 }
 
-const bool DataStore::saveZoneData(std::list<ZoneData*>& pZoneData) {
+const bool DataStore::saveZoneData(std::list<Data::Zone*>& pZoneData) {
 	using namespace ZoneDataXML;
 	Profile p("DataStore::saveZoneData");
 	TiXmlDocument document(ZoneDataXML::FileLocation);

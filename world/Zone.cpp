@@ -70,7 +70,7 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(populate());
 
 	// Load SpawnPointData for Zone.
-	std::list<SpawnPointData*> spawnPointData;
+	std::list<Data::SpawnPoint*> spawnPointData;
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), spawnPointData));
 	
 	// Pass to SpawnPointManager.
@@ -82,7 +82,7 @@ const bool Zone::initialise() {
 }
 
 const bool Zone::loadZonePoints() {
-	std::list<ZonePointData*>* zonePointData = nullptr;
+	std::list<Data::ZonePoint*>* zonePointData = nullptr;
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getZonePoints(getID(), &zonePointData));
 	EXPECTED_BOOL(zonePointData);
 

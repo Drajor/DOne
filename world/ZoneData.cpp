@@ -251,7 +251,7 @@ const bool ZoneDataManager::initialise() {
 	return true;
 }
 
-ZoneData* ZoneDataManager::_find(const uint16 pZoneID) const {
+Data::Zone* ZoneDataManager::_find(const uint16 pZoneID) const {
 	for (auto i : mZoneData) {
 		if (pZoneID == i->mID)
 			return i;
@@ -261,21 +261,21 @@ ZoneData* ZoneDataManager::_find(const uint16 pZoneID) const {
 }
 
 const bool ZoneDataManager::getLongName(const uint16 pZoneID, String& pLongName) {
-	ZoneData* zoneData = _find(pZoneID);
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pLongName = zoneData->mLongName;
 	return true;
 }
 
 const bool ZoneDataManager::getShortName(const uint16 pZoneID, String& pShortName){
-	ZoneData* zoneData = _find(pZoneID);
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pShortName = zoneData->mShortName;
 	return true;
 }
 
 const bool ZoneDataManager::getLongNameStringID(const uint16 pZoneID, uint32& pStringID) {
-	ZoneData* zoneData = _find(pZoneID);
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pStringID = zoneData->mLongNameStringID;
 	return true;
@@ -303,22 +303,22 @@ const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
 }
 
 
-const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<SpawnPointData*>& pSpawnPointData) {
-	ZoneData* zoneData = _find(pZoneID);
+const bool ZoneDataManager::getSpawnPoints(const uint16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData) {
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSpawnPointData = zoneData->mSpawnPoints;
 	return true;
 }
 
-const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<ZonePointData*>** pZonePoints) {
-	ZoneData* zoneData = _find(pZoneID);
+const bool ZoneDataManager::getZonePoints(const uint16 pZoneID, std::list<Data::ZonePoint*>** pZonePoints) {
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	*pZonePoints = &zoneData->mZonePoints;
 	return true;
 }
 
 const bool ZoneDataManager::getSafePoint(const uint16 pZoneID, Vector3& pSafePoint) {
-	ZoneData* zoneData = _find(pZoneID);
+	auto zoneData = _find(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSafePoint.x = zoneData->mSafeX;
 	pSafePoint.y = zoneData->mSafeY;

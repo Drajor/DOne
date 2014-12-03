@@ -6,7 +6,7 @@
 #include "NPCFactory.h"
 #include "LogSystem.h"
 
-const bool SpawnPointManager::initialise(Zone* pZone, std::list<SpawnPointData*>& pSpawnPointData) {
+const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnPoint*>& pSpawnPointData) {
 	if (mInitialised) { return false; }
 	if (!pZone) { return false; }
 

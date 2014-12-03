@@ -5,11 +5,14 @@
 class Zone;
 class SpawnPoint;
 class NPC;
-struct SpawnPointData;
+
+namespace Data {
+	struct SpawnPoint;
+}
 
 class SpawnPointManager {
 public:
-	const bool initialise(Zone* pZone, std::list<SpawnPointData*>& pSpawnPointData);
+	const bool initialise(Zone* pZone, std::list<Data::SpawnPoint*>& pSpawnPointData);
 	void update();
 	void onDeath(NPC* pNPC);
 private:

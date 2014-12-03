@@ -28,8 +28,8 @@ public:
 	const bool deleteCharacter(const String& pCharacterName);
 
 	// Zone Data
-	const bool loadZoneData(std::list<ZoneData*>& pZoneData);
-	const bool saveZoneData(std::list<ZoneData*>& pZoneData);
+	const bool loadZoneData(std::list<Data::Zone*>& pZoneData);
+	const bool saveZoneData(std::list<Data::Zone*>& pZoneData);
 
 	// NPC
 	const bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
