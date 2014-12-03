@@ -4,12 +4,6 @@
 #include "Vector3.h"
 #include "../common/timer.h"
 
-//class SpawnGroup {
-//public:
-//private:
-//	std::list<uint32> mNPC
-//};
-
 class NPC;
 class SpawnPoint {
 public:

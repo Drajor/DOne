@@ -48,6 +48,9 @@ SET(world_sources
 	Transmutation.cpp
 	AlternateCurrencyManager.cpp
 	ShopDataStore.cpp
+	Random.cpp
+	DataValidation.cpp
+	SpawnGroup.cpp
 )
 
 SET(world_headers
@@ -103,6 +106,10 @@ SET(world_headers
 	Testing.h
 	AlternateCurrencyManager.h
 	ShopDataStore.h
+	Random.h
+	DataValidation.h
+	SpawnGroup.h
+	Types.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

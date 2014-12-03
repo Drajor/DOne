@@ -5,18 +5,15 @@
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
 
-class Zone;
 class NPC;
 class Group;
 class Guild;
 class Raid;
 class EQApplicationPacket;
-class EQStreamInterface;
 class ZoneClientConnection;
 
 struct CharacterData;
 struct SpellData;
-class SpellBook;
 class Inventoryy;
 class Item;
 
@@ -38,12 +35,22 @@ public:
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
 
+	// Returns the Actor this Character is trading with.
 	inline Actor* getTradingWith() const { return mTradingWith; }
+
+	// Sets the Actor this Character is trading with.
 	inline void setTradingWith(Actor* pActor) { mTradingWith = pActor; }
+
+	// Returns whether this Character is trading.
 	inline const bool isTrading() const { return getTradingWith() != nullptr; }
 
+	// Returns the NPC this Character is shopping with.
 	inline NPC* getShoppingWith() const { return mShoppingWith; }
+
+	// Sets the NPC this Character is shopping with.
 	inline void setShoppingWith(NPC* pNPC) { mShoppingWith = pNPC; }
+
+	// Returns whether this Character is shopping.
 	inline const bool isShopping() const { return getShoppingWith() != nullptr; }
 
 	// Zone Authentication
