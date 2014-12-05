@@ -1,13 +1,16 @@
 #pragma once
 
 #include "Types.h"
-#include "Data.h"
 #include <list>
 
 struct ItemData;
+struct TransmutationComponent;
+struct SpellData;
 
 namespace Data {
 	struct Account;
+	struct Character;
+	struct Zone;
 	struct NPCType;
 	struct NPCAppearance;
 	struct Shop;
@@ -39,8 +42,8 @@ public:
 	const bool saveAccountCharacterData(Data::Account* pAccount);
 
 	// Character Data
-	const bool loadCharacter(const String& pCharacterName, CharacterData* pCharacterData);
-	const bool saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData);
+	const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData);
+	const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData);
 	const bool deleteCharacter(const String& pCharacterName);
 
 	// Zone Data

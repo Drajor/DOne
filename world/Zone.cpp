@@ -11,6 +11,7 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
+#include "Data.h"
 #include "SpellDataStore.h"
 #include "Utility.h"
 #include "Limits.h"

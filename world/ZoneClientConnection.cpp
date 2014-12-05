@@ -10,6 +10,7 @@
 #include "Inventory.h"
 #include "LogSystem.h"
 #include "DataStore.h"
+#include "Data.h"
 #include "CommandHandler.h"
 #include "../common/EQStreamIntf.h"
 #include "../common/emu_opcodes.h"

@@ -197,7 +197,7 @@ bool AccountManager::handleCharacterCreate(const u32 pAccountID, const String& p
 
 	// Create CharacterData for the new Character.
 
-	auto characterData = new CharacterData();
+	auto characterData = new Data::Character();
 	characterData->mName = pCharacterName;
 	characterData->mClass = pPayload->mClass;
 	characterData->mZoneID = 1; // TODO:

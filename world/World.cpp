@@ -255,7 +255,7 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	EXPECTED_BOOL(pConnection);
 
 	// Check: CharacterData could be loaded.
-	CharacterData* characterData = new CharacterData();
+	auto characterData = new Data::Character();
 	if (!DataStore::getInstance().loadCharacter(pCharacterName, characterData)) {
 		delete characterData;
 		return false;

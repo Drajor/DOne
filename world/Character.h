@@ -12,10 +12,13 @@ class Raid;
 class EQApplicationPacket;
 class ZoneClientConnection;
 
-struct CharacterData;
 struct SpellData;
 class Inventoryy;
 class Item;
+
+namespace Data {
+	struct Character;
+}
 
 class Character : public Actor {
 	friend ZoneClientConnection;
@@ -25,7 +28,7 @@ public:
 		uint16 mInstanceID = 0;
 	};
 public:
-	Character(const uint32 pAccountID, CharacterData* pCharacterData);
+	Character(const uint32 pAccountID, Data::Character* pCharacterData);
 	~Character();
 	inline const uint32 getAccountID() const { return mAccountID; }
 	inline const bool isCharacter() const { return true; }
@@ -177,7 +180,7 @@ public:
 	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
 	const bool finishCasting();
 
-	const CharacterData* getData() const { return mData; }
+	const Data::Character* getData() const { return mData; }
 
 	inline const bool isCaster() const { return Utility::isCaster(getClass()); }
 	inline const bool isHybrid() const { return Utility::isHybrid(getClass()); }
@@ -287,7 +290,7 @@ private:
 	String mPendingGuildInviteName = "";
 
 	ZoneClientConnection* mConnection = nullptr;
-	CharacterData* mData = nullptr;
+	Data::Character* mData = nullptr;
 	
 
 	std::list<NPC*> mVisibleNPCs; // NPCs that are visible to this Character

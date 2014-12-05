@@ -1,4 +1,5 @@
 #include "DataStore.h"
+#include "Data.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Profile.h"
@@ -314,7 +315,7 @@ const bool DataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	return true;
 }
 
-namespace CharacterDataXML {
+namespace CharacterXML {
 #define SCA static const auto
 	namespace Tag {
 		SCA Character = "character";
@@ -418,58 +419,58 @@ namespace CharacterDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData* pCharacterData) {
+const bool DataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
 	Profile p("DataStore::loadCharacter");
-	using namespace CharacterDataXML;
-	EXPECTED_BOOL(pCharacterData);
+	using namespace CharacterXML;
+	EXPECTED_BOOL(pCharacter);
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
 
 	// Tag::Character
 	auto characterElement = document.FirstChildElement(Tag::Character);
 	EXPECTED_BOOL(characterElement);
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacterData->mName));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacterData->mGM));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Status, pCharacterData->mStatus));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, pCharacterData->mLevel));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacterData->mClass));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacterData->mZoneID));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::X, pCharacterData->mX));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Y, pCharacterData->mY));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Z, pCharacterData->mZ));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Heading, pCharacterData->mHeading));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Experience, pCharacterData->mExperience));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacterData->mLastName));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacterData->mTitle));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacterData->mSuffix));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGroup, pCharacterData->mAutoConsentGroup));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentRaid, pCharacterData->mAutoConsentRaid));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGuild, pCharacterData->mAutoConsentGuild));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacter->mName));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacter->mGM));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Status, pCharacter->mStatus));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, pCharacter->mLevel));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacter->mClass));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacter->mZoneID));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::X, pCharacter->mX));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Y, pCharacter->mY));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Z, pCharacter->mZ));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Heading, pCharacter->mHeading));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Experience, pCharacter->mExperience));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacter->mLastName));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacter->mTitle));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacter->mSuffix));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild));
 
 	// Tag::Stats
 	auto statsElement = characterElement->FirstChildElement(Tag::Stats);
 	EXPECTED_BOOL(statsElement);
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Strength, pCharacterData->mStrength));
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Stamina, pCharacterData->mStamina));
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Charisma, pCharacterData->mCharisma));
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Intelligence, pCharacterData->mIntelligence));
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Agility, pCharacterData->mAgility));
-	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Wisdom, pCharacterData->mWisdom));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Strength, pCharacter->mStrength));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Stamina, pCharacter->mStamina));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Charisma, pCharacter->mCharisma));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Intelligence, pCharacter->mIntelligence));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Agility, pCharacter->mAgility));
+	EXPECTED_BOOL(readAttribute(statsElement, Attribute::Wisdom, pCharacter->mWisdom));
 
 	// Tag::Visual
 	auto visualElement = characterElement->FirstChildElement(Tag::Visual);
 	EXPECTED_BOOL(visualElement);
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Race, pCharacterData->mRace));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Gender, pCharacterData->mGender));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Face, pCharacterData->mFaceStyle));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairStyle, pCharacterData->mHairStyle));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairColour, pCharacterData->mHairColour));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardStyle, pCharacterData->mBeardStyle));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardColour, pCharacterData->mBeardColour));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour1, pCharacterData->mEyeColourLeft));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour2, pCharacterData->mEyeColourRight));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage));
-	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Race, pCharacter->mRace));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Gender, pCharacter->mGender));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::Face, pCharacter->mFaceStyle));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairStyle, pCharacter->mHairStyle));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::HairColour, pCharacter->mHairColour));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardStyle, pCharacter->mBeardStyle));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::BeardColour, pCharacter->mBeardColour));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour1, pCharacter->mEyeColourLeft));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour2, pCharacter->mEyeColourRight));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinHeritage, pCharacter->mDrakkinHeritage));
+	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinTattoo, pCharacter->mDrakkinTattoo));
 
 	// Tag::Dyes
 	auto dyesElement = characterElement->FirstChildElement(Tag::Dyes);
@@ -477,7 +478,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	int slotID = 0;
 	auto dyeElement = dyesElement->FirstChildElement(Tag::Dye);
 	while (dyeElement) {
-		EXPECTED_BOOL(readAttribute(dyeElement, Attribute::Colour, pCharacterData->mDyes[slotID]));
+		EXPECTED_BOOL(readAttribute(dyeElement, Attribute::Colour, pCharacter->mDyes[slotID]));
 		slotID++;
 		dyeElement = dyeElement->NextSiblingElement(Tag::Dye);
 	}
@@ -494,7 +495,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 		EXPECTED_BOOL(readAttribute(skillElement, Attribute::SkillID, skillID));
 		EXPECTED_BOOL(readAttribute(skillElement, Attribute::SkillValue, skillValue));
 		EXPECTED_BOOL(Limits::Skills::validID(skillID));
-		pCharacterData->mSkills[skillID] = skillValue;
+		pCharacter->mSkills[skillID] = skillValue;
 
 		skillElement = skillElement->NextSiblingElement(Tag::Skill);
 	}
@@ -510,7 +511,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 		EXPECTED_BOOL(readAttribute(languageElement, Attribute::LanguageID, languageID));
 		EXPECTED_BOOL(readAttribute(languageElement, Attribute::LanguageValue, languageValue));
 		EXPECTED_BOOL(Limits::Languages::validID(languageID));
-		pCharacterData->mLanguages[languageID] = languageValue;
+		pCharacter->mLanguages[languageID] = languageValue;
 
 		languageElement = languageElement->NextSiblingElement(Tag::Language);
 	}
@@ -518,24 +519,24 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	// Tag::Guild
 	auto guildElement = characterElement->FirstChildElement(Tag::Guild);
 	EXPECTED_BOOL(guildElement);
-	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildID, pCharacterData->mGuildID));
-	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildRank, pCharacterData->mGuildRank));
+	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildID, pCharacter->mGuildID));
+	EXPECTED_BOOL(readAttribute(guildElement, Attribute::GuildRank, pCharacter->mGuildRank));
 
 	// Tag::Currency
 	auto currencyElement = characterElement->FirstChildElement(Tag::Currency);
 	EXPECTED_BOOL(currencyElement);
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCharacter, pCharacterData->mPlatinumCharacter));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumBank, pCharacterData->mPlatinumBank));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCursor, pCharacterData->mPlatinumCursor));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCharacter, pCharacterData->mGoldCharacter));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldBank, pCharacterData->mGoldBank));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCursor, pCharacterData->mGoldCursor));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCharacter, pCharacterData->mSilverCharacter));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverBank, pCharacterData->mSilverBank));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCursor, pCharacterData->mSilverCursor));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCharacter, pCharacterData->mCopperCharacter));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperBank, pCharacterData->mCopperBank));
-	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCursor, pCharacterData->mCopperCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCharacter, pCharacter->mPlatinumCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumBank, pCharacter->mPlatinumBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::PlatinumCursor, pCharacter->mPlatinumCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCharacter, pCharacter->mGoldCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldBank, pCharacter->mGoldBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::GoldCursor, pCharacter->mGoldCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCharacter, pCharacter->mSilverCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverBank, pCharacter->mSilverBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::SilverCursor, pCharacter->mSilverCursor));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCharacter, pCharacter->mCopperCharacter));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperBank, pCharacter->mCopperBank));
+	EXPECTED_BOOL(readAttribute(currencyElement, Attribute::CopperCursor, pCharacter->mCopperCursor));
 
 	// Tag::Crystals
 	auto crystalsElement = characterElement->FirstChildElement(Tag::Crystals);
@@ -543,13 +544,13 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	// Tag::Radiant
 	auto radiantElement = crystalsElement->FirstChildElement(Tag::Radiant);
 	EXPECTED_BOOL(radiantElement);
-	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Current, pCharacterData->mRadiantCrystals));
-	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Total, pCharacterData->mTotalRadiantCrystals));
+	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Current, pCharacter->mRadiantCrystals));
+	EXPECTED_BOOL(readAttribute(radiantElement, Attribute::Total, pCharacter->mTotalRadiantCrystals));
 	// Tag::Ebon
 	auto ebonElement = crystalsElement->FirstChildElement(Tag::Ebon);
 	EXPECTED_BOOL(ebonElement);
-	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Current, pCharacterData->mEbonCrystals));
-	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Total, pCharacterData->mTotalEbonCrystals));
+	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Current, pCharacter->mEbonCrystals));
+	EXPECTED_BOOL(readAttribute(ebonElement, Attribute::Total, pCharacter->mTotalEbonCrystals));
 
 	// Tag::AlternateCurrencies
 	auto alternateCurrenciesElement = characterElement->FirstChildElement(Tag::AlternateCurrencies);
@@ -561,13 +562,13 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 		uint32 currencyQuantity = 0;
 		EXPECTED_BOOL(readAttribute(alternateCurrencyElement, Attribute::CurrencyID, currencyID));
 		EXPECTED_BOOL(readAttribute(alternateCurrencyElement, Attribute::CurrencyQuantity, currencyQuantity));
-		pCharacterData->mAlternateCurrency[currencyID] = currencyQuantity;
+		pCharacter->mAlternateCurrency[currencyID] = currencyQuantity;
 
 		alternateCurrencyElement = alternateCurrencyElement->NextSiblingElement(Tag::AlternateCurrency);
 	}
 
 	// Caster Only
-	if (Utility::isCaster(pCharacterData->mClass)) {
+	if (Utility::isCaster(pCharacter->mClass)) {
 		// Tag::SpellBook
 		{
 			auto spellbookElement = characterElement->FirstChildElement(Tag::SpellBook);
@@ -581,7 +582,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 				EXPECTED_BOOL(Limits::SpellBook::slotValid(slotID));
 				EXPECTED_BOOL(Limits::SpellBook::spellIDValid(spellID));
 
-				pCharacterData->mSpellBook[slotID] = spellID;
+				pCharacter->mSpellBook[slotID] = spellID;
 
 				slotElement = slotElement->NextSiblingElement(Tag::SpellBookSlot);
 			}
@@ -599,7 +600,7 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 				EXPECTED_BOOL(Limits::SpellBar::slotValid(slotID));
 				EXPECTED_BOOL(Limits::SpellBar::spellIDValid(spellID));
 
-				pCharacterData->mSpellBar[slotID] = spellID;
+				pCharacter->mSpellBar[slotID] = spellID;
 
 				slotElement = slotElement->NextSiblingElement(Tag::SpellBarSlot);
 			}
@@ -609,118 +610,118 @@ const bool DataStore::loadCharacter(const String& pCharacterName, CharacterData*
 	return true;
 }
 
-const bool DataStore::saveCharacter(const String& pCharacterName, const CharacterData* pCharacterData) {
+const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
 	//Profile p("DataStore::saveCharacter");
-	using namespace CharacterDataXML;
+	using namespace CharacterXML;
 
-	EXPECTED_BOOL(pCharacterData);
+	EXPECTED_BOOL(pCharacter);
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
 
 	// Tag::Character
 	auto characterElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Character)));
-	characterElement->SetAttribute(Attribute::Name, pCharacterData->mName.c_str());
-	characterElement->SetAttribute(Attribute::GM, pCharacterData->mGM);
-	characterElement->SetAttribute(Attribute::Status, pCharacterData->mStatus);
-	characterElement->SetAttribute(Attribute::Level, pCharacterData->mLevel);
-	characterElement->SetAttribute(Attribute::Class, pCharacterData->mClass);
-	characterElement->SetAttribute(Attribute::Zone, pCharacterData->mZoneID);
-	characterElement->SetDoubleAttribute(Attribute::X, pCharacterData->mX);
-	characterElement->SetDoubleAttribute(Attribute::Y, pCharacterData->mY);
-	characterElement->SetDoubleAttribute(Attribute::Z, pCharacterData->mZ);
-	characterElement->SetDoubleAttribute(Attribute::Heading, pCharacterData->mHeading);
-	characterElement->SetAttribute(Attribute::Experience, pCharacterData->mExperience);
-	characterElement->SetAttribute(Attribute::LastName, pCharacterData->mLastName.c_str());
-	characterElement->SetAttribute(Attribute::Title, pCharacterData->mTitle.c_str());
-	characterElement->SetAttribute(Attribute::Suffix, pCharacterData->mSuffix.c_str());
-	characterElement->SetAttribute(Attribute::AutoConsentGroup, pCharacterData->mAutoConsentGroup);
-	characterElement->SetAttribute(Attribute::AutoConsentRaid, pCharacterData->mAutoConsentRaid);
-	characterElement->SetAttribute(Attribute::AutoConsentGuild, pCharacterData->mAutoConsentGuild);
+	characterElement->SetAttribute(Attribute::Name, pCharacter->mName.c_str());
+	characterElement->SetAttribute(Attribute::GM, pCharacter->mGM);
+	characterElement->SetAttribute(Attribute::Status, pCharacter->mStatus);
+	characterElement->SetAttribute(Attribute::Level, pCharacter->mLevel);
+	characterElement->SetAttribute(Attribute::Class, pCharacter->mClass);
+	characterElement->SetAttribute(Attribute::Zone, pCharacter->mZoneID);
+	characterElement->SetDoubleAttribute(Attribute::X, pCharacter->mX);
+	characterElement->SetDoubleAttribute(Attribute::Y, pCharacter->mY);
+	characterElement->SetDoubleAttribute(Attribute::Z, pCharacter->mZ);
+	characterElement->SetDoubleAttribute(Attribute::Heading, pCharacter->mHeading);
+	characterElement->SetAttribute(Attribute::Experience, pCharacter->mExperience);
+	characterElement->SetAttribute(Attribute::LastName, pCharacter->mLastName.c_str());
+	characterElement->SetAttribute(Attribute::Title, pCharacter->mTitle.c_str());
+	characterElement->SetAttribute(Attribute::Suffix, pCharacter->mSuffix.c_str());
+	characterElement->SetAttribute(Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup);
+	characterElement->SetAttribute(Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid);
+	characterElement->SetAttribute(Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild);
 
 	// Tag::Stats
 	auto statsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Stats)));
-	statsElement->SetAttribute(Attribute::Strength, pCharacterData->mStrength);
-	statsElement->SetAttribute(Attribute::Stamina, pCharacterData->mStamina);
-	statsElement->SetAttribute(Attribute::Charisma, pCharacterData->mCharisma);
-	statsElement->SetAttribute(Attribute::Intelligence, pCharacterData->mIntelligence);
-	statsElement->SetAttribute(Attribute::Agility, pCharacterData->mAgility);
-	statsElement->SetAttribute(Attribute::Wisdom, pCharacterData->mWisdom);
+	statsElement->SetAttribute(Attribute::Strength, pCharacter->mStrength);
+	statsElement->SetAttribute(Attribute::Stamina, pCharacter->mStamina);
+	statsElement->SetAttribute(Attribute::Charisma, pCharacter->mCharisma);
+	statsElement->SetAttribute(Attribute::Intelligence, pCharacter->mIntelligence);
+	statsElement->SetAttribute(Attribute::Agility, pCharacter->mAgility);
+	statsElement->SetAttribute(Attribute::Wisdom, pCharacter->mWisdom);
 
 	// Tag::Visual
 	auto visualElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Visual)));
-	visualElement->SetAttribute(Attribute::Race, pCharacterData->mRace);
-	visualElement->SetAttribute(Attribute::Gender, pCharacterData->mGender);
-	visualElement->SetAttribute(Attribute::Face, pCharacterData->mFaceStyle);
-	visualElement->SetAttribute(Attribute::HairStyle, pCharacterData->mHairStyle);
-	visualElement->SetAttribute(Attribute::HairColour, pCharacterData->mHairColour);
-	visualElement->SetAttribute(Attribute::BeardStyle, pCharacterData->mBeardStyle);
-	visualElement->SetAttribute(Attribute::BeardColour, pCharacterData->mBeardColour);
-	visualElement->SetAttribute(Attribute::EyeColour1, pCharacterData->mEyeColourLeft);
-	visualElement->SetAttribute(Attribute::EyeColour2, pCharacterData->mEyeColourRight);
-	visualElement->SetAttribute(Attribute::DrakkinHeritage, pCharacterData->mDrakkinHeritage);
-	visualElement->SetAttribute(Attribute::DrakkinTattoo, pCharacterData->mDrakkinTattoo);
+	visualElement->SetAttribute(Attribute::Race, pCharacter->mRace);
+	visualElement->SetAttribute(Attribute::Gender, pCharacter->mGender);
+	visualElement->SetAttribute(Attribute::Face, pCharacter->mFaceStyle);
+	visualElement->SetAttribute(Attribute::HairStyle, pCharacter->mHairStyle);
+	visualElement->SetAttribute(Attribute::HairColour, pCharacter->mHairColour);
+	visualElement->SetAttribute(Attribute::BeardStyle, pCharacter->mBeardStyle);
+	visualElement->SetAttribute(Attribute::BeardColour, pCharacter->mBeardColour);
+	visualElement->SetAttribute(Attribute::EyeColour1, pCharacter->mEyeColourLeft);
+	visualElement->SetAttribute(Attribute::EyeColour2, pCharacter->mEyeColourRight);
+	visualElement->SetAttribute(Attribute::DrakkinHeritage, pCharacter->mDrakkinHeritage);
+	visualElement->SetAttribute(Attribute::DrakkinTattoo, pCharacter->mDrakkinTattoo);
 
 	// Tag::Dyes
 	auto dyesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Dyes)));
 	for (int i = 0; i < MAX_ARMOR_DYE_SLOTS; i++) {
 		// Tag::Dye
 		auto dyeElement = static_cast<TiXmlElement*>(dyesElement->LinkEndChild(new TiXmlElement(Tag::Dye)));
-		dyeElement->SetAttribute(Attribute::Colour, pCharacterData->mDyes[i]);
+		dyeElement->SetAttribute(Attribute::Colour, pCharacter->mDyes[i]);
 	}
 
 	// Tag::Skills
 	auto skillsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Skills)));
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
-		if (pCharacterData->mSkills[i] == 0) continue;
+		if (pCharacter->mSkills[i] == 0) continue;
 		// Tag::Skill
 		auto skillElement = static_cast<TiXmlElement*>(skillsElement->LinkEndChild(new TiXmlElement(Tag::Skill)));
 		skillElement->SetAttribute(Attribute::SkillID, i);
-		skillElement->SetAttribute(Attribute::SkillValue, pCharacterData->mSkills[i]);
+		skillElement->SetAttribute(Attribute::SkillValue, pCharacter->mSkills[i]);
 	}
 
 	// Tag::Languages
 	auto LanguagesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Lanaguages)));
 	for (int i = 0; i < Limits::Languages::MAX_ID; i++) {
-		if (pCharacterData->mLanguages[i] == 0) continue;
+		if (pCharacter->mLanguages[i] == 0) continue;
 		// Tag::Language
 		auto languageElement = static_cast<TiXmlElement*>(LanguagesElement->LinkEndChild(new TiXmlElement(Tag::Language)));
 		languageElement->SetAttribute(Attribute::LanguageID, i);
-		languageElement->SetAttribute(Attribute::LanguageValue, pCharacterData->mLanguages[i]);
+		languageElement->SetAttribute(Attribute::LanguageValue, pCharacter->mLanguages[i]);
 	}
 
 	// Tag::Guild
 	auto guildElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Guild)));
-	guildElement->SetAttribute(Attribute::GuildID, pCharacterData->mGuildID);
-	guildElement->SetAttribute(Attribute::GuildRank, pCharacterData->mGuildRank);
+	guildElement->SetAttribute(Attribute::GuildID, pCharacter->mGuildID);
+	guildElement->SetAttribute(Attribute::GuildRank, pCharacter->mGuildRank);
 
 	// Tag::Currency
 	auto currencyElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Currency)));
-	currencyElement->SetAttribute(Attribute::PlatinumCharacter, pCharacterData->mPlatinumCharacter);
-	currencyElement->SetAttribute(Attribute::PlatinumBank, pCharacterData->mPlatinumBank);
-	currencyElement->SetAttribute(Attribute::PlatinumCursor, pCharacterData->mPlatinumCursor);
-	currencyElement->SetAttribute(Attribute::GoldCharacter, pCharacterData->mGoldCharacter);
-	currencyElement->SetAttribute(Attribute::GoldBank, pCharacterData->mGoldBank);
-	currencyElement->SetAttribute(Attribute::GoldCursor, pCharacterData->mGoldCursor);
-	currencyElement->SetAttribute(Attribute::SilverCharacter, pCharacterData->mSilverCharacter);
-	currencyElement->SetAttribute(Attribute::SilverBank, pCharacterData->mSilverBank);
-	currencyElement->SetAttribute(Attribute::SilverCursor, pCharacterData->mSilverCursor);
-	currencyElement->SetAttribute(Attribute::CopperCharacter, pCharacterData->mCopperCharacter);
-	currencyElement->SetAttribute(Attribute::CopperBank, pCharacterData->mCopperBank);
-	currencyElement->SetAttribute(Attribute::CopperCursor, pCharacterData->mCopperCursor);
+	currencyElement->SetAttribute(Attribute::PlatinumCharacter, pCharacter->mPlatinumCharacter);
+	currencyElement->SetAttribute(Attribute::PlatinumBank, pCharacter->mPlatinumBank);
+	currencyElement->SetAttribute(Attribute::PlatinumCursor, pCharacter->mPlatinumCursor);
+	currencyElement->SetAttribute(Attribute::GoldCharacter, pCharacter->mGoldCharacter);
+	currencyElement->SetAttribute(Attribute::GoldBank, pCharacter->mGoldBank);
+	currencyElement->SetAttribute(Attribute::GoldCursor, pCharacter->mGoldCursor);
+	currencyElement->SetAttribute(Attribute::SilverCharacter, pCharacter->mSilverCharacter);
+	currencyElement->SetAttribute(Attribute::SilverBank, pCharacter->mSilverBank);
+	currencyElement->SetAttribute(Attribute::SilverCursor, pCharacter->mSilverCursor);
+	currencyElement->SetAttribute(Attribute::CopperCharacter, pCharacter->mCopperCharacter);
+	currencyElement->SetAttribute(Attribute::CopperBank, pCharacter->mCopperBank);
+	currencyElement->SetAttribute(Attribute::CopperCursor, pCharacter->mCopperCursor);
 
 	// Tag::Crystals
 	auto crystalsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Crystals)));
 	// Tag::Radiant
 	auto radiantElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Radiant)));
-	radiantElement->SetAttribute(Attribute::Current, pCharacterData->mRadiantCrystals);
-	radiantElement->SetAttribute(Attribute::Total, pCharacterData->mTotalRadiantCrystals);
+	radiantElement->SetAttribute(Attribute::Current, pCharacter->mRadiantCrystals);
+	radiantElement->SetAttribute(Attribute::Total, pCharacter->mTotalRadiantCrystals);
 	// Tag::Ebon
 	auto ebonElement = static_cast<TiXmlElement*>(crystalsElement->LinkEndChild(new TiXmlElement(Tag::Ebon)));
-	ebonElement->SetAttribute(Attribute::Current, pCharacterData->mEbonCrystals);
-	ebonElement->SetAttribute(Attribute::Total, pCharacterData->mTotalEbonCrystals);
+	ebonElement->SetAttribute(Attribute::Current, pCharacter->mEbonCrystals);
+	ebonElement->SetAttribute(Attribute::Total, pCharacter->mTotalEbonCrystals);
 
 	// Tag::AlternateCurrencies
 	auto alternateCurrenciesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::AlternateCurrencies)));
-	for (auto i : pCharacterData->mAlternateCurrency) {
+	for (auto i : pCharacter->mAlternateCurrency) {
 		if (i.second == 0) continue;
 		// Tag::AlternateCurrency
 		auto currencyElement = static_cast<TiXmlElement*>(alternateCurrenciesElement->LinkEndChild(new TiXmlElement(Tag::AlternateCurrency)));
@@ -729,26 +730,26 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	}
 
 	// Caster Only
-	if (Utility::isCaster(pCharacterData->mClass)){
+	if (Utility::isCaster(pCharacter->mClass)){
 		// Tag::SpellBook
 		auto spellbookElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::SpellBook)));
 		for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
-			if (pCharacterData->mSpellBook[i] == 0)
+			if (pCharacter->mSpellBook[i] == 0)
 				continue;
 			
 			auto slotElement = static_cast<TiXmlElement*>(spellbookElement->LinkEndChild(new TiXmlElement(Tag::SpellBookSlot)));
 			slotElement->SetAttribute(Attribute::SpellBookSlot, i);
-			slotElement->SetAttribute(Attribute::SpellBookSpell, pCharacterData->mSpellBook[i]);
+			slotElement->SetAttribute(Attribute::SpellBookSpell, pCharacter->mSpellBook[i]);
 		}
 		// Tag::SpellBar
 		auto spellbarElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::SpellBar)));
 		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++) {
-			if (pCharacterData->mSpellBar[i] == 0)
+			if (pCharacter->mSpellBar[i] == 0)
 				continue;
 
 			auto slotElement = static_cast<TiXmlElement*>(spellbarElement->LinkEndChild(new TiXmlElement(Tag::SpellBarSlot)));
 			slotElement->SetAttribute(Attribute::SpellBarSlot, i);
-			slotElement->SetAttribute(Attribute::SpellBarSpell, pCharacterData->mSpellBar[i]);
+			slotElement->SetAttribute(Attribute::SpellBarSpell, pCharacter->mSpellBar[i]);
 		}
 	}
 
@@ -1215,7 +1216,7 @@ const bool DataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
 	return true;
 }
 
-namespace ZoneDataXML {
+namespace ZoneXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/zones.xml";
 	namespace Tag {
@@ -1264,11 +1265,11 @@ namespace ZoneDataXML {
 #undef SCA
 }
 const bool DataStore::loadZones(Data::ZoneList pZones) {
-	using namespace ZoneDataXML;
+	using namespace ZoneXML;
 	EXPECTED_BOOL(pZones.empty());
 	Profile p("DataStore::loadZones");
 
-	TiXmlDocument document(ZoneDataXML::FileLocation);
+	TiXmlDocument document(ZoneXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	auto zonesElement = document.FirstChildElement(Tag::Zones);
@@ -1362,9 +1363,9 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 }
 
 const bool DataStore::saveZones(Data::ZoneList pZones) {
-	using namespace ZoneDataXML;
+	using namespace ZoneXML;
 	Profile p("DataStore::saveZones");
-	TiXmlDocument document(ZoneDataXML::FileLocation);
+	TiXmlDocument document(ZoneXML::FileLocation);
 
 	auto zonesElement = new TiXmlElement(Tag::Zones);
 	document.LinkEndChild(zonesElement);

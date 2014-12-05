@@ -1,5 +1,6 @@
 #include "ZoneData.h"
 #include "DataStore.h"
+#include "Data.h"
 #include "Utility.h"
 #include "LogSystem.h"
 #include "Vector3.h"

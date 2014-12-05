@@ -1,6 +1,7 @@
 #include "NPCFactory.h"
 #include "Utility.h"
 #include "DataStore.h"
+#include "Data.h"
 #include "NPC.h"
 #include "ShopDataStore.h"
 #include "Item.h"
