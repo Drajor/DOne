@@ -1438,6 +1438,37 @@ const bool DataStore::saveZones(Data::ZoneList pZones) {
 		zoneElement->SetDoubleAttribute(Attribute::SafeY, i->mSafePosition.y);
 		zoneElement->SetDoubleAttribute(Attribute::SafeZ, i->mSafePosition.z);
 
+		// Write Zone Fog.
+		auto fogParentElement = new TiXmlElement(Tag::Fog);
+		zoneElement->LinkEndChild(fogParentElement);
+		for (auto j = 0; j < 4; j++) {
+			// Write Fog.
+			auto fogElement = new TiXmlElement(Tag::Fog);
+			fogParentElement->LinkEndChild(fogElement);
+
+			fogElement->SetAttribute(Attribute::Index, j);
+			fogElement->SetAttribute(Attribute::Red, i->mFog[j].mRed);
+			fogElement->SetAttribute(Attribute::Green, i->mFog[j].mGreen);
+			fogElement->SetAttribute(Attribute::Blue, i->mFog[j].mBlue);
+			fogElement->SetDoubleAttribute(Attribute::Minimum, i->mFog[j].mMinimumClip);
+			fogElement->SetDoubleAttribute(Attribute::Maximum, i->mFog[j].mMaximumClip);
+		}
+
+		// Write Zone Weather.
+		auto weatherParentElement = new TiXmlElement(Tag::Weather);
+		zoneElement->LinkEndChild(weatherParentElement);
+		for (auto j = 0; j < 4; j++) {
+			// Write Weather.
+			auto weatherElement = new TiXmlElement(Tag::Weather);
+			weatherParentElement->LinkEndChild(weatherElement);
+
+			weatherElement->SetAttribute(Attribute::Index, j);
+			weatherElement->SetAttribute(Attribute::RainChance, i->mWeather[j].mRainChance);
+			weatherElement->SetAttribute(Attribute::RainDuration, i->mWeather[j].mRainDuration);
+			weatherElement->SetAttribute(Attribute::SnowChance, i->mWeather[j].mSnowChance);
+			weatherElement->SetAttribute(Attribute::SnowDuration, i->mWeather[j].mSnowDuration);
+		}
+
 		// Write Zone Points.
 		auto zonePointsElement = new TiXmlElement(Tag::ZonePoints);
 		zoneElement->LinkEndChild(zonePointsElement);
