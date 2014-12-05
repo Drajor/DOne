@@ -14,20 +14,18 @@ const bool AlternateCurrencyManager::initialise() {
 	return true;
 }
 
-const uint32 AlternateCurrencyManager::getItemID(const uint32 pCurrencyID) const {
+const u32 AlternateCurrencyManager::getItemID(const u32 pCurrencyID) const {
 	for (auto i : mCurrencies) {
 		if (i->mCurrencyID == pCurrencyID)
 			return i->mItemID;
 	}
-
 	return 0;
 }
 
-const uint32 AlternateCurrencyManager::getCurrencyID(const uint32 pItemID) const {
+const u32 AlternateCurrencyManager::getCurrencyID(const u32 pItemID) const {
 	for (auto i : mCurrencies) {
 		if (i->mItemID == pItemID)
 			return i->mCurrencyID;
 	}
-
 	return 0;
 }

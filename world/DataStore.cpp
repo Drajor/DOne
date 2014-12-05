@@ -101,7 +101,7 @@ namespace AccountXML {
 #undef SCA
 }
 
-bool DataStore::loadAccounts(std::list<Data::Account*>& pAccounts) {
+bool DataStore::loadAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 	Profile p("DataStore::loadAccounts");
 	EXPECTED_BOOL(pAccounts.empty());
@@ -134,7 +134,7 @@ bool DataStore::loadAccounts(std::list<Data::Account*>& pAccounts) {
 	return true;
 }
 
-bool DataStore::saveAccounts(std::list<Data::Account*>& pAccounts) {
+bool DataStore::saveAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 	Profile p("DataStore::saveAccounts");
 	TiXmlDocument document(FileLocation);
@@ -1263,10 +1263,10 @@ namespace ZoneDataXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadZoneData(std::list<Data::Zone*>& pZoneData) {
+const bool DataStore::loadZones(Data::ZoneList pZones) {
 	using namespace ZoneDataXML;
-	EXPECTED_BOOL(pZoneData.empty());
-	Profile p("DataStore::loadZoneData");
+	EXPECTED_BOOL(pZones.empty());
+	Profile p("DataStore::loadZones");
 
 	TiXmlDocument document(ZoneDataXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1277,7 +1277,7 @@ const bool DataStore::loadZoneData(std::list<Data::Zone*>& pZoneData) {
 
 	while (zoneElement) {
 		auto zoneData = new Data::Zone();
-		pZoneData.push_back(zoneData);
+		pZones.push_back(zoneData);
 
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ID, zoneData->mID));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ShortName, zoneData->mShortName));
@@ -1361,15 +1361,15 @@ const bool DataStore::loadZoneData(std::list<Data::Zone*>& pZoneData) {
 	return true;
 }
 
-const bool DataStore::saveZoneData(std::list<Data::Zone*>& pZoneData) {
+const bool DataStore::saveZones(Data::ZoneList pZones) {
 	using namespace ZoneDataXML;
-	Profile p("DataStore::saveZoneData");
+	Profile p("DataStore::saveZones");
 	TiXmlDocument document(ZoneDataXML::FileLocation);
 
 	auto zonesElement = new TiXmlElement(Tag::Zones);
 	document.LinkEndChild(zonesElement);
 
-	for (auto i : pZoneData) {
+	for (auto i : pZones) {
 		// Zone.
 		auto zoneElement = new TiXmlElement(Tag::Zone);
 		zonesElement->LinkEndChild(zoneElement);
@@ -1507,7 +1507,7 @@ namespace AlternateCurrencyXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies) {
+const bool DataStore::loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) {
 	using namespace AlternateCurrencyXML;
 	EXPECTED_BOOL(pCurrencies.empty());
 	Profile p("DataStore::loadAlternateCurrencies");
@@ -1520,7 +1520,7 @@ const bool DataStore::loadAlternateCurrencies(std::list<AlternateCurrency*>& pCu
 	auto currencyElement = currenciesElement->FirstChildElement(Tag::Currency);
 
 	while (currencyElement) {
-		AlternateCurrency* c = new AlternateCurrency();
+		auto c = new Data::AlternateCurrency();
 		pCurrencies.push_back(c);
 
 		EXPECTED_BOOL(readAttribute(currencyElement, Attribute::ID, c->mCurrencyID));
@@ -1550,7 +1550,7 @@ namespace ShopXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadShops(std::list<Data::Shop*>& pShops) {
+const bool DataStore::loadShops(Data::ShopList pShops) {
 	using namespace ShopXML;
 	EXPECTED_BOOL(pShops.empty());
 	Profile p("DataStore::loadShops");

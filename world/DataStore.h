@@ -11,6 +11,14 @@ namespace Data {
 	struct NPCType;
 	struct NPCAppearance;
 	struct Shop;
+	struct AlternateCurrency;
+
+	typedef std::list<Data::Account*>& AccountList;
+	typedef std::list<Data::Zone*>& ZoneList;
+	typedef std::list<Data::NPCAppearance*>& NPCAppearanceList;
+	typedef std::list<Data::NPCType*>& NPCTypeList;
+	typedef std::list<Data::Shop*>& ShopList;
+	typedef std::list<Data::AlternateCurrency*>& AlternateCurrencyList;
 }
 
 class DataStore {
@@ -25,8 +33,8 @@ public:
 	static bool loadSettings();
 
 	// Account Data
-	bool loadAccounts(std::list<Data::Account*>& pAccounts);
-	bool saveAccounts(std::list<Data::Account*>& pAccounts);
+	bool loadAccounts(Data::AccountList pAccounts);
+	bool saveAccounts(Data::AccountList pAccounts);
 	const bool loadAccountCharacterData(Data::Account* pAccount);
 	const bool saveAccountCharacterData(Data::Account* pAccount);
 
@@ -36,12 +44,12 @@ public:
 	const bool deleteCharacter(const String& pCharacterName);
 
 	// Zone Data
-	const bool loadZoneData(std::list<Data::Zone*>& pZoneData);
-	const bool saveZoneData(std::list<Data::Zone*>& pZoneData);
+	const bool loadZones(Data::ZoneList pZones);
+	const bool saveZones(Data::ZoneList pZones);
 
 	// NPC
-	const bool loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances);
-	const bool loadNPCTypeData(std::list<Data::NPCType*>& pTypes);
+	const bool loadNPCAppearanceData(Data::NPCAppearanceList pAppearances);
+	const bool loadNPCTypeData(Data::NPCTypeList pTypes);
 
 	// Spells
 	const bool loadSpells(SpellData* pSpellData, u32& pNumSpellsLoaded);
@@ -50,9 +58,9 @@ public:
 	const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded);
 	const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents);
 
-	const bool loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies);
+	const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies);
 
-	const bool loadShops(std::list<Data::Shop*>& pShops);
+	const bool loadShops(Data::ShopList pShops);
 private:
 
 	DataStore() {};

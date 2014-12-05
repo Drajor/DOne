@@ -353,9 +353,11 @@ struct TransmutationComponent {
 	uint8 mRequiredLevel = 0;
 };
 
-struct AlternateCurrency {
-	uint32 mCurrencyID = 0;
-	uint32 mItemID = 0;
-	uint32 mIcon = 0;
-	uint32 mMaxStacks = 0;
-};
+namespace Data {
+	struct AlternateCurrency {
+		u32 mCurrencyID = 0;
+		u32 mItemID = 0;
+		u32 mIcon = 0;
+		u32 mMaxStacks = 0;
+	};
+}

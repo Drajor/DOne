@@ -1,9 +1,12 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 #include "Singleton.h"
+#include <list>
 
-struct AlternateCurrency;
+namespace Data {
+	struct AlternateCurrency;
+}
 
 class AlternateCurrencyManager : public Singleton<AlternateCurrencyManager>{
 private:
@@ -18,16 +21,16 @@ public:
 	const bool initialise();
 
 	// Returns the list of alternate currencies.
-	inline std::list<AlternateCurrency*>& getCurrencies() { return mCurrencies; }
+	inline std::list<Data::AlternateCurrency*>& getCurrencies() { return mCurrencies; }
 
 	// Returns the Item ID associated with a currency ID. Returns zero if not found.
-	const uint32 getItemID(const uint32 pCurrencyID) const;
+	const u32 getItemID(const u32 pCurrencyID) const;
 	
 	// Returns the currency ID associated with an Item ID. Returns zero if not found.
-	const uint32 getCurrencyID(const uint32 pItemID) const;
+	const u32 getCurrencyID(const u32 pItemID) const;
 
 private:
 
 	bool mInitialised = false;
-	std::list<AlternateCurrency*> mCurrencies;
+	std::list<Data::AlternateCurrency*> mCurrencies;
 };
