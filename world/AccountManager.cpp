@@ -12,7 +12,7 @@
 
 #include "Shlwapi.h"
 
-static bool deleteAll(AccountData* pValue) { delete pValue; return true; };
+static bool deleteAll(Data::Account* pValue) { delete pValue; return true; };
 AccountManager::~AccountManager() {
 	_save();
 	_clear();
@@ -29,10 +29,10 @@ bool AccountManager::initialise() {
 	return true;
 }
 
-bool AccountManager::createAccount(const uint32 pAccountID, const String pAccoutName){
+bool AccountManager::createAccount(const u32 pAccountID, const String pAccoutName){
 	EXPECTED_BOOL(exists(pAccountID) == false);
 
-	AccountData* accountData = new AccountData();
+	auto accountData = new Data::Account();
 	accountData->mAccountID = pAccountID;
 	accountData->mAccountName = pAccoutName;
 	accountData->mCreated = Utility::Time::now();
@@ -46,7 +46,7 @@ bool AccountManager::createAccount(const uint32 pAccountID, const String pAccout
 }
 
 void AccountManager::_clear() {
-	mAccounts.remove_if(Utility::containerEntryDelete<AccountData*>);
+	mAccounts.remove_if(Utility::containerEntryDelete<Data::Account*>);
 }
 bool AccountManager::_save() {
 	EXPECTED_BOOL(DataStore::getInstance().saveAccounts(mAccounts));
@@ -54,34 +54,24 @@ bool AccountManager::_save() {
 	return true;
 }
 
-bool AccountManager::_save(AccountData* pAccountData) {
+bool AccountManager::_save(Data::Account* pAccountData) {
 	EXPECTED_BOOL(pAccountData);
 	EXPECTED_BOOL(DataStore::getInstance().saveAccountCharacterData(pAccountData));
 
 	return true;
 }
 
-bool AccountManager::_loadAccount(const String& pAccountName) {
-	//EXPECTED_BOOL(exists(pAccountName));
-
-	return true;
-}
-
-bool AccountManager::exists(const uint32 pAccountID){
-	AccountData* account = _find(pAccountID);
+bool AccountManager::exists(const u32 pAccountID){
+	auto account = _find(pAccountID);
 	return account ? true : false;
 }
 
-AccountData* AccountManager::_load(const String& pAccountName) {
-	return nullptr;
-}
-
-AccountStatus AccountManager::getStatus(const uint32 pAccountID) {
+AccountStatus AccountManager::getStatus(const u32 pAccountID) {
 	auto account = _find(pAccountID);
 	return account ? account->mStatus : ResponseID::ALLOWED;
 }
 
-bool AccountManager::deleteCharacter(const uint32 pAccountID, const String& pCharacterName) {
+bool AccountManager::deleteCharacter(const u32 pAccountID, const String& pCharacterName) {
 	auto account = _find(pAccountID);
 	EXPECTED_BOOL(account);
 	EXPECTED_BOOL(DataStore::getInstance().deleteCharacter(pCharacterName));
@@ -107,70 +97,68 @@ bool AccountManager::isCharacterNameUnique(const String& pCharacterName)
 	return true;
 }
 
-AccountData* AccountManager::_find(const uint32 pAccountID) const {
+Data::Account* AccountManager::_find(const u32 pAccountID) const {
 	for (auto i : mAccounts) {
 		if (i->mAccountID == pAccountID)
 			return i;
 	}
-
 	return nullptr;
 }
 
-AccountData* AccountManager::_find(const String& pAccountName) const {
+Data::Account* AccountManager::_find(const String& pAccountName) const {
 	for (auto i : mAccounts) {
 		if (i->mAccountName == pAccountName)
 			return i;
 	}
-
 	return nullptr;
 }
 
 bool AccountManager::ban(const String& pAccountName) {
-	AccountData* accountData = _find(pAccountName);
+	auto accountData = _find(pAccountName);
 	EXPECTED_BOOL(accountData);
 	accountData->mStatus = ResponseID::BANNED;
 
-	_save();
+	EXPECTED_BOOL(_save());
 	return true;
 }
 
 bool AccountManager::removeBan(const String& pAccountName) {
-	AccountData* accountData = _find(pAccountName);
+	auto accountData = _find(pAccountName);
 	EXPECTED_BOOL(accountData);
 	accountData->mStatus = ResponseID::ALLOWED;
 
-	_save();
+	EXPECTED_BOOL(_save());
 	return true;
 }
 
-bool AccountManager::suspend(const String& pAccountName, const uint32 pSuspendUntil) {
-	AccountData* accountData = _find(pAccountName);
+bool AccountManager::suspend(const String& pAccountName, const u32 pSuspendUntil) {
+	auto accountData = _find(pAccountName);
 	EXPECTED_BOOL(accountData);
 	accountData->mStatus = ResponseID::SUSPENDED;
 	accountData->mSuspendedUntil = pSuspendUntil;
 
-	_save();
+	EXPECTED_BOOL(_save());
 	return true;
 }
 
 bool AccountManager::removeSuspend(const String& pAccountName) {
-	AccountData* accountData = _find(pAccountName);
+	auto accountData = _find(pAccountName);
 	EXPECTED_BOOL(accountData);
 	accountData->mStatus = ResponseID::ALLOWED;
 	accountData->mSuspendedUntil = 0;
 
-	_save();
+	EXPECTED_BOOL(_save());
 	return true;
 }
 
-AccountData* AccountManager::getAccount(uint32 pAccountID) {
-	AccountData* accountData = _find(pAccountID);
+Data::Account* AccountManager::getAccount(const u32 pAccountID) const {
+	auto accountData = _find(pAccountID);
 	EXPECTED_PTR(accountData);
 	return accountData;
 }
 
-bool AccountManager::checkOwnership(const uint32 pAccountID, const String& pCharacterName) {
-	AccountData* accountData = _find(pAccountID);
+bool AccountManager::checkOwnership(const u32 pAccountID, const String& pCharacterName) {
+	auto accountData = _find(pAccountID);
 	EXPECTED_BOOL(accountData);
 	for (auto i : accountData->mCharacterData) {
 		if (i->mName == pCharacterName)
@@ -180,8 +168,8 @@ bool AccountManager::checkOwnership(const uint32 pAccountID, const String& pChar
 	return false;
 }
 
-const bool AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
-	AccountData* accountData = _find(pAccountID);
+const bool AccountManager::ensureAccountLoaded(const u32 pAccountID) {
+	auto accountData = _find(pAccountID);
 	EXPECTED_BOOL(accountData);
 
 	if (accountData->mCharacterDataLoaded) return true;
@@ -191,7 +179,7 @@ const bool AccountManager::ensureAccountLoaded(const uint32 pAccountID) {
 	return true;
 }
 
-bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
+bool AccountManager::handleCharacterCreate(const u32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
 	EXPECTED_BOOL(pPayload);
 
 	// Check: Class ID
@@ -233,7 +221,7 @@ bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String
 
 	// Create Account::CharacterData for the new Character.
 	
-	auto accountCharacterData = new AccountData::CharacterData();
+	auto accountCharacterData = new Data::Account::CharacterData();
 	accountCharacterData->mName = pCharacterName;
 	accountCharacterData->mLevel = characterData->mLevel;
 	accountCharacterData->mRace = characterData->mRace;
@@ -261,13 +249,13 @@ bool AccountManager::handleCharacterCreate(const uint32 pAccountID, const String
 	return true;
 }
 
-const bool AccountManager::updateCharacter(const uint32 pAccountID, const Character* pCharacter) {
+const bool AccountManager::updateCharacter(const u32 pAccountID, const Character* pCharacter) {
 	EXPECTED_BOOL(pCharacter);
-	AccountData* accountData = _find(pAccountID);
+	auto accountData = _find(pAccountID);
 	EXPECTED_BOOL(accountData);
 	EXPECTED_BOOL(accountData->mCharacterDataLoaded);
 
-	AccountData::CharacterData* accountCharacterData = nullptr;
+	Data::Account::CharacterData* accountCharacterData = nullptr;
 	for (auto i : accountData->mCharacterData) {
 		if (i->mName == pCharacter->getName()) {
 			accountCharacterData = i;
@@ -304,7 +292,7 @@ const bool AccountManager::updateCharacter(const uint32 pAccountID, const Charac
 	return true;
 }
 
-const uint32 AccountManager::getNumCharacters(const uint32 pAccountID) {
+const u32 AccountManager::getNumCharacters(const u32 pAccountID) const {
 	auto account = _find(pAccountID);
 	if (!account) {
 		Log::error("Failed to find account with id " + std::to_string(pAccountID));
@@ -313,7 +301,7 @@ const uint32 AccountManager::getNumCharacters(const uint32 pAccountID) {
 	return account->mCharacterData.size();
 }
 
-const int32 AccountManager::getSharedPlatinum(const uint32 pAccountID) const {
+const i32 AccountManager::getSharedPlatinum(const u32 pAccountID) const {
 	auto account = _find(pAccountID);
 	if (!account) {
 		Log::error("Failed to find account with id " + std::to_string(pAccountID));
@@ -322,13 +310,10 @@ const int32 AccountManager::getSharedPlatinum(const uint32 pAccountID) const {
 	return account->mPlatinumSharedBank;
 }
 
-const bool AccountManager::setSharedPlatinum(const uint32 pAccountID, const int32 pPlatinum) {
+const bool AccountManager::setSharedPlatinum(const u32 pAccountID, const i32 pPlatinum) {
 	auto account = _find(pAccountID);
-	if (!account) {
-		Log::error("Failed to find account with id " + std::to_string(pAccountID));
-		return false;
-	}
-
+	EXPECTED_BOOL(account);
 	account->mPlatinumSharedBank = pPlatinum;
+
 	return true;
 }

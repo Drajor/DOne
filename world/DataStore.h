@@ -1,11 +1,13 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 #include "Data.h"
+#include <list>
 
 struct ItemData;
 
 namespace Data {
+	struct Account;
 	struct NPCType;
 	struct NPCAppearance;
 	struct Shop;
@@ -23,10 +25,10 @@ public:
 	static bool loadSettings();
 
 	// Account Data
-	bool loadAccounts(std::list<AccountData*>& pAccounts);
-	bool saveAccounts(std::list<AccountData*>& pAccounts);
-	const bool loadAccountCharacterData(AccountData* pAccount);
-	const bool saveAccountCharacterData(AccountData* pAccount);
+	bool loadAccounts(std::list<Data::Account*>& pAccounts);
+	bool saveAccounts(std::list<Data::Account*>& pAccounts);
+	const bool loadAccountCharacterData(Data::Account* pAccount);
+	const bool saveAccountCharacterData(Data::Account* pAccount);
 
 	// Character Data
 	const bool loadCharacter(const String& pCharacterName, CharacterData* pCharacterData);
@@ -42,10 +44,10 @@ public:
 	const bool loadNPCTypeData(std::list<Data::NPCType*>& pTypes);
 
 	// Spells
-	const bool loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded);
+	const bool loadSpells(SpellData* pSpellData, u32& pNumSpellsLoaded);
 	
 	// Items
-	const bool loadItems(ItemData* pItemData, uint32& pNumItemsLoaded);
+	const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded);
 	const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents);
 
 	const bool loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies);

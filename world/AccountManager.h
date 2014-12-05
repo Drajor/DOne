@@ -4,6 +4,10 @@
 #include "Singleton.h"
 #include "Data.h"
 
+namespace Data {
+	struct Account;
+}
+
 namespace Payload {
 	namespace World {
 		struct CreateCharacter;
@@ -21,42 +25,40 @@ private:
 public:
 	bool initialise();
 
-	AccountData* getAccount(uint32 pAccountID);
-	bool checkOwnership(const uint32 pAccountID, const String& pCharacterName);
-	bool createAccount(const uint32 pAccountID, const String pAccoutName);
+	// Returns an Account by ID.
+	Data::Account* getAccount(const u32 pID) const;
+	bool checkOwnership(const u32 pAccountID, const String& pCharacterName);
+	bool createAccount(const u32 pAccountID, const String pAccoutName);
 
-	AccountStatus getStatus(const uint32 pAccountID);
+	AccountStatus getStatus(const u32 pAccountID);
 	bool create(const String& pAccountName);
-	bool exists(const uint32 pAccountID);
+	bool exists(const u32 pAccountID);
 
 	// Returns the number of Characters belonging to the Account.
-	const uint32 getNumCharacters(const uint32 pAccountID);
+	const u32 getNumCharacters(const u32 pAccountID) const;
 	bool isCharacterNameUnique(const String& pCharacterName);
 
-	bool handleCharacterCreate(const uint32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
-	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
-	const bool updateCharacter(const uint32 pAccountID, const Character* pCharacter);
+	bool handleCharacterCreate(const u32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload);
+	bool deleteCharacter(const u32 pAccountID, const String& pCharacterName);
+	const bool updateCharacter(const u32 pAccountID, const Character* pCharacter);
 
 	bool ban(const String& pAccountName);
 	bool removeBan(const String& pAccountName);
 
-	bool suspend(const String& pAccountName, const uint32 pSuspendUntil);
+	bool suspend(const String& pAccountName, const u32 pSuspendUntil);
 	bool removeSuspend(const String& pAccountName);
-	const bool ensureAccountLoaded(const uint32 pAccountID);
+	const bool ensureAccountLoaded(const u32 pAccountID);
 
-	const int32 getSharedPlatinum(const uint32 pAccountID) const;
-	const bool setSharedPlatinum(const uint32 pAccountID, const int32 pPlatinum);
+	const i32 getSharedPlatinum(const u32 pAccountID) const;
+	const bool setSharedPlatinum(const u32 pAccountID, const i32 pPlatinum);
 
 private:
 	void _clear();
-	bool _save(AccountData* pAccountData);
+	bool _save(Data::Account* pAccountData);
 	bool _save();
 
-	AccountData* _load(const String& pAccountName);
-	bool _loadAccount(const String& pAccountName);
-
-	AccountData* _find(const uint32 pAccountID) const;
-	AccountData* _find(const String& pAccountName) const;
+	Data::Account* _find(const u32 pAccountID) const;
+	Data::Account* _find(const String& pAccountName) const;
 	std::list<String> mCharacterNames;
-	std::list<AccountData*> mAccounts;
+	std::list<Data::Account*> mAccounts;
 };

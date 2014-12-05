@@ -149,7 +149,7 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 	using namespace Payload::World;
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
 	auto payload = CharacterSelect::convert(outPacket->pBuffer);
-	AccountData* accountData = AccountManager::getInstance().getAccount(mAccountID);
+	auto accountData = AccountManager::getInstance().getAccount(mAccountID);
 	EXPECTED(accountData);
 
 	int charSlot = 0;

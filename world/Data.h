@@ -3,62 +3,64 @@
 #include "Constants.h"
 #include "Vector3.h"
 
-struct AccountData {
-	AccountData() {
-		setRaceUnlocked(PlayableRaceIDs::Human, true);
-		setRaceUnlocked(PlayableRaceIDs::Barbarian, false);
-		setRaceUnlocked(PlayableRaceIDs::Erudite, false);
-		setRaceUnlocked(PlayableRaceIDs::WoodElf, false);
-		setRaceUnlocked(PlayableRaceIDs::HighElf, false);
-		setRaceUnlocked(PlayableRaceIDs::DarkElf, false);
-		setRaceUnlocked(PlayableRaceIDs::HalfElf, false);
-		setRaceUnlocked(PlayableRaceIDs::Dwarf, false);
-		setRaceUnlocked(PlayableRaceIDs::Troll, false);
-		setRaceUnlocked(PlayableRaceIDs::Ogre, false);
-		setRaceUnlocked(PlayableRaceIDs::Halfling, false);
-		setRaceUnlocked(PlayableRaceIDs::Iksar, false);
-		setRaceUnlocked(PlayableRaceIDs::Vahshir, false);
-		setRaceUnlocked(PlayableRaceIDs::Froglok, false);
-		setRaceUnlocked(PlayableRaceIDs::Drakkin, false);
-	}
-	void setRaceUnlocked(const uint32 pRaceID, const bool pLocked) { mRacesUnlocked.push_back(std::make_pair(pRaceID, pLocked)); }
+namespace Data {
+	struct Account {
+		Account() {
+			setRaceUnlocked(PlayableRaceIDs::Human, true);
+			setRaceUnlocked(PlayableRaceIDs::Barbarian, false);
+			setRaceUnlocked(PlayableRaceIDs::Erudite, false);
+			setRaceUnlocked(PlayableRaceIDs::WoodElf, false);
+			setRaceUnlocked(PlayableRaceIDs::HighElf, false);
+			setRaceUnlocked(PlayableRaceIDs::DarkElf, false);
+			setRaceUnlocked(PlayableRaceIDs::HalfElf, false);
+			setRaceUnlocked(PlayableRaceIDs::Dwarf, false);
+			setRaceUnlocked(PlayableRaceIDs::Troll, false);
+			setRaceUnlocked(PlayableRaceIDs::Ogre, false);
+			setRaceUnlocked(PlayableRaceIDs::Halfling, false);
+			setRaceUnlocked(PlayableRaceIDs::Iksar, false);
+			setRaceUnlocked(PlayableRaceIDs::Vahshir, false);
+			setRaceUnlocked(PlayableRaceIDs::Froglok, false);
+			setRaceUnlocked(PlayableRaceIDs::Drakkin, false);
+		}
+		void setRaceUnlocked(const uint32 pRaceID, const bool pLocked) { mRacesUnlocked.push_back(std::make_pair(pRaceID, pLocked)); }
 
-	uint32 mAccountID = 0;		// Provided by Login Server
-	String mAccountName = "";	// Provided by Login Server
-	AccountStatus mStatus = 0;
-	uint32 mSuspendedUntil = 0;
-	uint32 mCreated = 0;
-	int32 mPlatinumSharedBank = 0;
-	struct CharacterData {
-		String mName = "<none>";
-		uint32 mLevel = 0;
-		uint8 mClass = 0;
-		RaceID mRace = 0;
-		GenderID mGender = 0;
-		DeityID mDeity = 0;
-		ZoneID mZoneID = 0;
-		FaceID mFaceStyle = 0;
-		uint8 mHairStyle = 0;
-		uint8 mHairColour = 0;
-		uint8 mBeardStyle = 0;
-		uint8 mBeardColour = 0;
-		uint8 mEyeColourLeft = 0;
-		uint8 mEyeColourRight = 0;
-		uint32 mDrakkinHeritage = 0;
-		uint32 mDrakkinTattoo = 0;
-		uint32 mDrakkinDetails = 0;
-		uint32 mPrimary = 0;
-		uint32 mSecondary = 0;
-		struct Equipment {
-			uint32 mMaterial = 0;
-			uint32 mColour = 0;
+		uint32 mAccountID = 0;		// Provided by Login Server
+		String mAccountName = "";	// Provided by Login Server
+		AccountStatus mStatus = 0;
+		uint32 mSuspendedUntil = 0;
+		uint32 mCreated = 0;
+		int32 mPlatinumSharedBank = 0;
+		struct CharacterData {
+			String mName = "<none>";
+			uint32 mLevel = 0;
+			uint8 mClass = 0;
+			RaceID mRace = 0;
+			GenderID mGender = 0;
+			DeityID mDeity = 0;
+			ZoneID mZoneID = 0;
+			FaceID mFaceStyle = 0;
+			uint8 mHairStyle = 0;
+			uint8 mHairColour = 0;
+			uint8 mBeardStyle = 0;
+			uint8 mBeardColour = 0;
+			uint8 mEyeColourLeft = 0;
+			uint8 mEyeColourRight = 0;
+			uint32 mDrakkinHeritage = 0;
+			uint32 mDrakkinTattoo = 0;
+			uint32 mDrakkinDetails = 0;
+			uint32 mPrimary = 0;
+			uint32 mSecondary = 0;
+			struct Equipment {
+				uint32 mMaterial = 0;
+				uint32 mColour = 0;
+			};
+			Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
 		};
-		Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
+		std::list<CharacterData*> mCharacterData;
+		std::list<std::pair<uint32, bool>> mRacesUnlocked;
+		bool mCharacterDataLoaded = false;
 	};
-	std::list<CharacterData*> mCharacterData;
-	std::list<std::pair<uint32, bool>> mRacesUnlocked;
-	bool mCharacterDataLoaded = false;
-};
+}
 
 struct CharacterData {
 	CharacterData() {

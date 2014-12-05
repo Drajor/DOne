@@ -82,7 +82,7 @@ bool DataStore::initialise() {
 	return true;
 }
 
-namespace AccountDataXML {
+namespace AccountXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/accounts.xml";
 	namespace Tag {
@@ -101,11 +101,11 @@ namespace AccountDataXML {
 #undef SCA
 }
 
-bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
-	using namespace AccountDataXML;
+bool DataStore::loadAccounts(std::list<Data::Account*>& pAccounts) {
+	using namespace AccountXML;
 	Profile p("DataStore::loadAccounts");
 	EXPECTED_BOOL(pAccounts.empty());
-	TiXmlDocument document(AccountDataXML::FileLocation);
+	TiXmlDocument document(AccountXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	auto accountsElement = document.FirstChildElement(Tag::Accounts);
@@ -118,7 +118,7 @@ bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
 
 	// Iterate over each "account" element.
 	while (accountElement) {
-		auto accountData = new AccountData();
+		auto accountData = new Data::Account();
 		pAccounts.push_back(accountData);
 
 		EXPECTED_BOOL(readAttribute(accountElement, Attribute::ID, accountData->mAccountID));
@@ -134,8 +134,8 @@ bool DataStore::loadAccounts(std::list<AccountData*>& pAccounts) {
 	return true;
 }
 
-bool DataStore::saveAccounts(std::list<AccountData*>& pAccounts) {
-	using namespace AccountDataXML;
+bool DataStore::saveAccounts(std::list<Data::Account*>& pAccounts) {
+	using namespace AccountXML;
 	Profile p("DataStore::saveAccounts");
 	TiXmlDocument document(FileLocation);
 
@@ -197,7 +197,7 @@ namespace AccountCharacterDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
+const bool DataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
@@ -218,7 +218,7 @@ const bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 	// Iterate over each "account" element.
 	auto characterSlot = 0;
 	while (characterElement && characterSlot < Limits::Account::MAX_NUM_CHARACTERS) {
-		auto characterData = new AccountData::CharacterData();
+		auto characterData = new Data::Account::CharacterData();
 		pAccount->mCharacterData.push_back(characterData);
 
 		// Read the basic/visual information about each character.
@@ -264,7 +264,7 @@ const bool DataStore::loadAccountCharacterData(AccountData* pAccount) {
 	return true;
 }
 
-const bool DataStore::saveAccountCharacterData(AccountData* pAccount) {
+const bool DataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	//Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
@@ -756,7 +756,7 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Characte
 	return true;
 }
 
-namespace SettingsDataXML {
+namespace SettingsXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/settings.xml";
 	namespace Tag {
@@ -783,8 +783,8 @@ namespace SettingsDataXML {
 }
 
 bool DataStore::loadSettings() {
-	using namespace SettingsDataXML;
-	TiXmlDocument document(SettingsDataXML::FileLocation);
+	using namespace SettingsXML;
+	TiXmlDocument document(SettingsXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	// Tag::Settings
@@ -846,7 +846,7 @@ bool DataStore::loadSettings() {
 	return true;
 }
 
-namespace NPCAppearanceDataXML {
+namespace NPCAppearanceXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/npc/appearances.xml";
 	namespace Tag {
@@ -887,10 +887,10 @@ namespace NPCAppearanceDataXML {
 }
 
 const bool DataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
-	using namespace NPCAppearanceDataXML;
+	using namespace NPCAppearanceXML;
 	Profile p("DataStore::loadNPCAppearanceData");
 	EXPECTED_BOOL(pAppearances.empty());
-	TiXmlDocument document(NPCAppearanceDataXML::FileLocation);
+	TiXmlDocument document(NPCAppearanceXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	auto appearancesElement = document.FirstChildElement(Tag::Appearances);
@@ -992,7 +992,7 @@ const bool DataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAp
 	return true;
 }
 
-namespace NPCTypeDataXML {
+namespace NPCTypeXML {
 #define SCA static const auto
 	SCA FileLocation = "./data/npc/types.xml";
 	namespace Tag {
@@ -1011,10 +1011,10 @@ namespace NPCTypeDataXML {
 #undef SCA
 }
 const bool DataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
-	using namespace NPCTypeDataXML;
+	using namespace NPCTypeXML;
 	Profile p("DataStore::loadNPCTypeData");
 	EXPECTED_BOOL(pTypes.empty());
-	TiXmlDocument document(NPCTypeDataXML::FileLocation);
+	TiXmlDocument document(NPCTypeXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
 
 	auto typesElement = document.FirstChildElement(Tag::Types);
