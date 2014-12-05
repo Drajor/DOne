@@ -10,20 +10,20 @@ const bool NPCFactory::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
 	Log::status("[NPCFactory] Initialising.");
-	EXPECTED_BOOL(DataStore::getInstance().loadNPCAppearanceData(mNPCAppearanceData));
+	EXPECTED_BOOL(DataStore::getInstance().loadNPCAppearanceData(mNPCAppearances));
 	EXPECTED_BOOL(calculateAppearanceData());
-	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCAppearanceData.size()) + " Appearances.");
+	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCAppearances.size()) + " Appearances.");
 
-	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypeData));
+	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypes));
 	EXPECTED_BOOL(validateNPCTypeData());
-	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCTypeData.size()) + " Types.");
+	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCTypes.size()) + " Types.");
 
 	mInitialised = true;
 	return true;
 }
 
 const bool NPCFactory::calculateAppearanceData() {
-	for (auto i : mNPCAppearanceData) {
+	for (auto i : mNPCAppearances) {
 		if (!_resolveAppearanceData(i))
 			return false;
 	}
@@ -31,14 +31,14 @@ const bool NPCFactory::calculateAppearanceData() {
 	return true;
 }
 
-const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
+const bool NPCFactory::_resolveAppearanceData(Data::NPCAppearance* pAppearance) {
 	EXPECTED_BOOL(pAppearance);
 
 	if (pAppearance->mResolved) return true;
 	if (pAppearance->mParentID == 0) return true;
 
-	uint32 parentID = pAppearance->mParentID;
-	NPCAppearanceData* parent = getAppearance(parentID);
+	u32 parentID = pAppearance->mParentID;
+	auto parent = findAppearance(parentID);
 	EXPECTED_BOOL(parent);
 
 	// Parent needs to be resolved.
@@ -48,82 +48,73 @@ const bool NPCFactory::_resolveAppearanceData(NPCAppearanceData* pAppearance) {
 	}
 
 	// Copy data from parent.
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::RaceID] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::RaceID] == 0)
 		pAppearance->mRaceID = parent->mRaceID;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::Gender] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::Gender] == 0)
 		pAppearance->mGender = parent->mGender;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::Texture] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::Texture] == 0)
 		pAppearance->mTexture = parent->mTexture;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::BodyType] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::BodyType] == 0)
 		pAppearance->mBodyType = parent->mBodyType;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::Size] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::Size] == 0)
 		pAppearance->mSize = parent->mSize;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::FaceStyle] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::FaceStyle] == 0)
 		pAppearance->mFaceStyle = parent->mFaceStyle;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::HairStyle] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::HairStyle] == 0)
 		pAppearance->mHairStyle = parent->mHairStyle;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::BeardStyle] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::BeardStyle] == 0)
 		pAppearance->mBeardStyle = parent->mBeardStyle;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::BeardColour] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::BeardColour] == 0)
 		pAppearance->mBeardColour = parent->mBeardColour;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::EyeColourLeft] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::EyeColourLeft] == 0)
 		pAppearance->mEyeColourLeft = parent->mEyeColourLeft;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::EyeColourRight] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::EyeColourRight] == 0)
 		pAppearance->mEyeColourRight = parent->mEyeColourRight;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::DrakkinHeritage] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::DrakkinHeritage] == 0)
 		pAppearance->mDrakkinHeritage = parent->mDrakkinHeritage;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::DrakkinTattoo] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::DrakkinTattoo] == 0)
 		pAppearance->mDrakkinTattoo = parent->mDrakkinTattoo;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::DrakkinDetails] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::DrakkinDetails] == 0)
 		pAppearance->mDrakkinDetails = parent->mDrakkinDetails;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::HelmTexture] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::HelmTexture] == 0)
 		pAppearance->mHelmTexture = parent->mHelmTexture;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::PrimaryMaterial] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::PrimaryMaterial] == 0)
 		pAppearance->mPrimaryMaterial = parent->mPrimaryMaterial;
 
-	if (pAppearance->mOverrides[NPCAppearanceData::Attributes::SecondaryMaterial] == 0)
+	if (pAppearance->mOverrides[Data::NPCAppearance::Attributes::SecondaryMaterial] == 0)
 		pAppearance->mSecondaryMaterial = parent->mSecondaryMaterial;
 
 	pAppearance->mResolved = true;
 	return true;
 }
 
-NPCAppearanceData* NPCFactory::getAppearance(const uint32 pID) {
-	for (auto i : mNPCAppearanceData) {
-		if (i->mID == pID)
-			return i;
-	}
-
-	return nullptr;
-}
-
 const bool NPCFactory::validateNPCTypeData() {
-	for (auto i : mNPCTypeData) {
-		EXPECTED_BOOL(getAppearance(i->mAppearanceID));
+	for (auto i : mNPCTypes) {
+		EXPECTED_BOOL(findAppearance(i->mAppearanceID));
 	}
 
 	return true;
 }
 
-NPC* NPCFactory::create(const uint32 pTypeID) {
-	NPCTypeData* type = _findType(pTypeID);
+NPC* NPCFactory::create(const u32 pTypeID) {
+	auto type = findType(pTypeID);
 	EXPECTED_PTR(type);
-	NPCAppearanceData* appearance = getAppearance(type->mAppearanceID);
+	auto appearance = findAppearance(type->mAppearanceID);
 	EXPECTED_PTR(appearance);
 
 	NPC* npc = new NPC();
@@ -173,16 +164,11 @@ NPC* NPCFactory::createInvisibleMan() {
 	return npc;
 }
 
-NPCTypeData* NPCFactory::_findType(const uint32 pID) {
-	for (auto i : mNPCTypeData) {
-		if (i->mID == pID)
-			return i;
-	}
-	return nullptr;
-}
+const bool NPCFactory::initialiseMerchant(NPC* pNPC, Data::NPCType* pType) {
+	EXPECTED_BOOL(pNPC);
+	EXPECTED_BOOL(pType);
 
-const bool NPCFactory::initialiseMerchant(NPC* pNPC, NPCTypeData* pTypeData) {
-	auto shopData = ShopDataStore::getInstance().getShopData(pTypeData->mShopID);
+	auto shopData = ShopDataStore::getInstance().getShopData(pType->mShopID);
 	EXPECTED_BOOL(shopData);
 
 	// Add shop Items to NPC.
@@ -195,4 +181,20 @@ const bool NPCFactory::initialiseMerchant(NPC* pNPC, NPCTypeData* pTypeData) {
 	}
 
 	return true;
+}
+
+Data::NPCType* NPCFactory::findType(const u32 pID) const {
+	for (auto i : mNPCTypes) {
+		if (i->mID == pID)
+			return i;
+	}
+	return nullptr;
+}
+
+Data::NPCAppearance* NPCFactory::findAppearance(const u32 pID) const {
+	for (auto i : mNPCAppearances) {
+		if (i->mID == pID)
+			return i;
+	}
+	return nullptr;
 }

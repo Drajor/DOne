@@ -42,6 +42,7 @@ public:
 	ZoneDataSearchResults searchByName(String pSearchText);
 	const uint16 findFirstByName(const String& pSearchText);
 
+	inline std::list<Data::Zone*>& getZoneData() { return mZoneData; }
 private:
 
 	bool mInitialised = false;

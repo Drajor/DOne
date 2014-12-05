@@ -5,6 +5,12 @@
 
 struct ItemData;
 
+namespace Data {
+	struct NPCType;
+	struct NPCAppearance;
+	struct Shop;
+}
+
 class DataStore {
 public:
 	static DataStore& getInstance() {
@@ -32,8 +38,8 @@ public:
 	const bool saveZoneData(std::list<Data::Zone*>& pZoneData);
 
 	// NPC
-	const bool loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances);
-	const bool loadNPCTypeData(std::list<NPCTypeData*>& pTypes);
+	const bool loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances);
+	const bool loadNPCTypeData(std::list<Data::NPCType*>& pTypes);
 
 	// Spells
 	const bool loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded);
@@ -44,7 +50,7 @@ public:
 
 	const bool loadAlternateCurrencies(std::list<AlternateCurrency*>& pCurrencies);
 
-	const bool loadShops(std::list<ShopData*>& pShops);
+	const bool loadShops(std::list<Data::Shop*>& pShops);
 private:
 
 	DataStore() {};

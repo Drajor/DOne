@@ -7,6 +7,7 @@
 #include "AlternateCurrencyManager.h"
 #include "NPCFactory.h"
 #include "ShopDataStore.h"
+#include "ZoneData.h"
 
 const bool validateShopData();
 const bool validateTransmutationData();
@@ -70,7 +71,7 @@ const bool validateNPCTypes() {
 	auto npcTypes = NPCFactory::getInstance().getNPCTypes();
 	for (auto i : npcTypes) {
 		// Check: Appearance exists.
-		EXPECTED_BOOL(NPCFactory::getInstance().getAppearance(i->mAppearanceID));
+		EXPECTED_BOOL(NPCFactory::getInstance().findAppearance(i->mAppearanceID));
 
 		// Special checks for merchant type.
 		if (i->mClass == ClassID::Merchant) {
@@ -87,7 +88,20 @@ const bool validateNPCTypes() {
 const bool validateZoneData() {
 	Profile p("validateZoneData");
 
-	//ZoneDataS
+	auto zoneData = ZoneDataManager::getInstance().getZoneData();
+	for (auto i : zoneData) {
+		// Spawn Groups.
+		for (auto j : i->mSpawnGroups) {
+			for (auto k : j->mEntries) {
+				// Check: NPCType exists.
+				EXPECTED_BOOL(NPCFactory::getInstance().findType(k->mNPCType));
+			}
+		}
 
+		// Spawn Points.
+		for (auto j : i->mSpawnPoints) {
+			// TODO: Find SpawnGroup associated with SpawnPoint.
+		}
+	}
 	return true;
 }

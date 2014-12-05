@@ -886,7 +886,7 @@ namespace NPCAppearanceDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppearances) {
+const bool DataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
 	using namespace NPCAppearanceDataXML;
 	Profile p("DataStore::loadNPCAppearanceData");
 	EXPECTED_BOOL(pAppearances.empty());
@@ -898,7 +898,7 @@ const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppe
 	auto appearanceElement = appearancesElement->FirstChildElement(Tag::Appearance);
 
 	while (appearanceElement) {
-		auto d = new NPCAppearanceData();
+		auto d = new Data::NPCAppearance();
 		pAppearances.push_back(d);
 
 		// Required.
@@ -915,58 +915,58 @@ const bool DataStore::loadNPCAppearanceData(std::list<NPCAppearanceData*>& pAppe
 		bool found = false;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Race, d->mRaceID, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::RaceID] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::RaceID] = found;
 		
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Gender, d->mGender, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::Gender] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::Gender] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Texture, d->mTexture, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::Texture] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::Texture] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BodyType, d->mBodyType, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::BodyType] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::BodyType] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::Size, d->mSize, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::Size] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::Size] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::FaceStyle, d->mFaceStyle, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::FaceStyle] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::FaceStyle] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairStyle, d->mHairStyle, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::HairStyle] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::HairStyle] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardStyle, d->mBeardStyle, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::BeardStyle] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::BeardStyle] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HairColour, d->mHairColour, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::HairColour] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::HairColour] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::BeardColour, d->mBeardColour, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::BeardColour] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::BeardColour] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::LeftEyeColour, d->mEyeColourLeft, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::EyeColourLeft] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::EyeColourLeft] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::RightEyeColour, d->mEyeColourRight, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::EyeColourRight] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::EyeColourRight] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinHeritage, d->mDrakkinHeritage, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::DrakkinHeritage] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::DrakkinHeritage] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinTattoo, d->mDrakkinTattoo, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::DrakkinTattoo] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::DrakkinTattoo] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::DrakkinDetails, d->mDrakkinDetails, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::DrakkinDetails] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::DrakkinDetails] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::HelmTexture, d->mHelmTexture, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::HelmTexture] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::HelmTexture] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::PrimaryMaterial, d->mPrimaryMaterial, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::PrimaryMaterial] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::PrimaryMaterial] = found;
 
 		EXPECTED_BOOL(readAttribute(appearanceElement, Attribute::SecondaryMaterial, d->mSecondaryMaterial, false, found));
-		d->mOverrides[NPCAppearanceData::Attributes::SecondaryMaterial] = found;
+		d->mOverrides[Data::NPCAppearance::Attributes::SecondaryMaterial] = found;
 
 		// Colours.
 		auto coloursElement = appearanceElement->FirstChildElement(Tag::Colours);
@@ -1010,7 +1010,7 @@ namespace NPCTypeDataXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadNPCTypeData(std::list<NPCTypeData*>& pTypes) {
+const bool DataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
 	using namespace NPCTypeDataXML;
 	Profile p("DataStore::loadNPCTypeData");
 	EXPECTED_BOOL(pTypes.empty());
@@ -1022,7 +1022,7 @@ const bool DataStore::loadNPCTypeData(std::list<NPCTypeData*>& pTypes) {
 	auto typeElement = typesElement->FirstChildElement(Tag::Type);
 
 	while (typeElement) {
-		auto d = new NPCTypeData();
+		auto d = new Data::NPCType();
 		pTypes.push_back(d);
 
 		EXPECTED_BOOL(readAttribute(typeElement, Attribute::ID, d->mID));
@@ -1550,7 +1550,7 @@ namespace ShopXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadShops(std::list<ShopData*>& pShops) {
+const bool DataStore::loadShops(std::list<Data::Shop*>& pShops) {
 	using namespace ShopXML;
 	EXPECTED_BOOL(pShops.empty());
 	Profile p("DataStore::loadShops");
@@ -1563,7 +1563,7 @@ const bool DataStore::loadShops(std::list<ShopData*>& pShops) {
 	auto shopElement = shopsElement->FirstChildElement(Tag::Shop);
 	
 	while (shopElement) {
-		ShopData* s = new ShopData();
+		auto s = new Data::Shop();
 		pShops.push_back(s);
 
 		EXPECTED_BOOL(readAttribute(shopElement, Attribute::ID, s->mID));

@@ -1,10 +1,13 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 #include "Singleton.h"
+#include <list>
 
-struct NPCAppearanceData;
-struct NPCTypeData;
+namespace Data {
+	struct NPCAppearance;
+	struct NPCType;
+}
 class NPC;
 
 class NPCFactory : public Singleton<NPCFactory> {
@@ -16,25 +19,27 @@ private:
 	void operator=(NPCFactory const&); // Do not implement.
 public:
 	const bool initialise();
-	NPC* create(const uint32 pTypeID);
+	NPC* create(const u32 pTypeID);
 	NPC* createInvisibleMan();
 
-	inline std::list<NPCTypeData*> getNPCTypes() { return mNPCTypeData; }
+	// Finds a NPCType by ID.
+	Data::NPCType* findType(const u32 pID) const;
+	inline std::list<Data::NPCType*> getNPCTypes() { return mNPCTypes; }
 
-	NPCAppearanceData* getAppearance(const uint32 pID);
-	inline std::list<NPCAppearanceData*> getNPCAppearances() { return mNPCAppearanceData; }
+	// Finds an NPCAppearance by ID.
+	Data::NPCAppearance* findAppearance(const u32 pID) const;
+	inline std::list<Data::NPCAppearance*> getNPCAppearances() { return mNPCAppearances; }
 private:
 	bool mInitialised = false;
 	// NPC Appearances
 	const bool calculateAppearanceData();
-	const bool _resolveAppearanceData(NPCAppearanceData* pAppearance);
+	const bool _resolveAppearanceData(Data::NPCAppearance* pAppearance);
 	
-	std::list<NPCAppearanceData*> mNPCAppearanceData;
+	std::list<Data::NPCAppearance*> mNPCAppearances;
 
 	// NPC Types
 	const bool validateNPCTypeData();
-	NPCTypeData* _findType(const uint32 pID);
-	std::list<NPCTypeData*> mNPCTypeData;
+	std::list<Data::NPCType*> mNPCTypes;
 
-	const bool initialiseMerchant(NPC* pNPC, NPCTypeData* pTypeData);
+	const bool initialiseMerchant(NPC* pNPC, Data::NPCType* pType);
 };

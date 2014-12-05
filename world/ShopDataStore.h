@@ -1,20 +1,23 @@
 #pragma once
 
 #include "Singleton.h"
+#include "Types.h"
 #include <list>
 
-struct ShopData;
+namespace Data {
+	struct Shop;
+}
 
 class ShopDataStore : public Singleton<ShopDataStore> {
 public:
 	const bool initialise();
-	ShopData* getShopData(const unsigned int pShopID) const;
+	Data::Shop* getShopData(const u32 pID) const;
 
 	// Returns the list of shop data.
-	inline std::list<ShopData*>& getShopData() { return mShopData; }
+	inline std::list<Data::Shop*>& getShopData() { return mShopData; }
 private:
 	bool mInitialised = false;
-	std::list<ShopData*> mShopData;
+	std::list<Data::Shop*> mShopData;
 private:
 	friend class Singleton<ShopDataStore>;
 	ShopDataStore() {};

@@ -14,9 +14,9 @@ const bool ShopDataStore::initialise() {
 	return true;
 }
 
-ShopData* ShopDataStore::getShopData(const unsigned int pShopID) const {
+Data::Shop* ShopDataStore::getShopData(const u32 pID) const {
 	for (auto i : mShopData) {
-		if (i->mID == pShopID)
+		if (i->mID == pID)
 			return i;
 	}
 

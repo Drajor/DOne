@@ -144,77 +144,79 @@ struct CharacterData {
 	std::vector<uint32> mSpellBar;
 };
 
-struct NPCAppearanceData {
-	NPCAppearanceData() {
-		mOverrides.set(0);
-		memset(&mColours, 0, sizeof(mColours));
-	}
-	uint32 mID = 0;
-	uint32 mParentID = 0;
+namespace Data {
+	struct NPCAppearance {
+		NPCAppearance() {
+			mOverrides.set(0);
+			memset(&mColours, 0, sizeof(mColours));
+		}
+		u32 mID = 0;
+		u32 mParentID = 0;
 
-	uint32 mRaceID = 0;
-	uint8 mGender = Gender::Female;
-	uint8 mTexture = 0;
-	uint8 mBodyType = BodyType::BT_Humanoid;
-	float mSize = 5.0f;
+		u32 mRaceID = 0;
+		u8 mGender = Gender::Female;
+		u8 mTexture = 0;
+		u8 mBodyType = BodyType::BT_Humanoid;
+		float mSize = 5.0f;
 
-	FaceID mFaceStyle = 0;
-	uint8 mHairStyle = 0;
-	uint8 mHairColour = 0;
-	uint8 mBeardStyle = 0;
-	uint8 mBeardColour = 0;
-	uint8 mEyeColourLeft = 0;
-	uint8 mEyeColourRight = 0;
-	uint32 mDrakkinHeritage = 0;
-	uint32 mDrakkinTattoo = 0;
-	uint32 mDrakkinDetails = 0;
+		u8 mFaceStyle = 0;
+		u8 mHairStyle = 0;
+		u8 mHairColour = 0;
+		u8 mBeardStyle = 0;
+		u8 mBeardColour = 0;
+		u8 mEyeColourLeft = 0;
+		u8 mEyeColourRight = 0;
+		u32 mDrakkinHeritage = 0;
+		u32 mDrakkinTattoo = 0;
+		u32 mDrakkinDetails = 0;
 
-	uint8 mHelmTexture = 0;
+		u8 mHelmTexture = 0;
 
-	uint32 mPrimaryMaterial = 0;
-	uint32 mSecondaryMaterial = 0;
+		u32 mPrimaryMaterial = 0;
+		u32 mSecondaryMaterial = 0;
 
-	uint32 mColours[7];
+		u32 mColours[7];
 
-	enum Attributes {
-		RaceID,
-		Gender,
-		Texture,
-		BodyType,
-		Size,
-		FaceStyle,
-		HairStyle,
-		HairColour,
-		BeardStyle,
-		BeardColour,
-		EyeColourLeft,
-		EyeColourRight,
-		DrakkinHeritage,
-		DrakkinTattoo,
-		DrakkinDetails,
-		HelmTexture,
-		PrimaryMaterial,
-		SecondaryMaterial,
-		MAX
+		enum Attributes {
+			RaceID,
+			Gender,
+			Texture,
+			BodyType,
+			Size,
+			FaceStyle,
+			HairStyle,
+			HairColour,
+			BeardStyle,
+			BeardColour,
+			EyeColourLeft,
+			EyeColourRight,
+			DrakkinHeritage,
+			DrakkinTattoo,
+			DrakkinDetails,
+			HelmTexture,
+			PrimaryMaterial,
+			SecondaryMaterial,
+			MAX
+		};
+		std::bitset<Attributes::MAX> mOverrides;
+		bool mResolved = false;
 	};
-	std::bitset<Attributes::MAX> mOverrides;
-	bool mResolved = false;
-};
 
-struct NPCTypeData {
-	uint32 mID = 0;
-	uint32 mAppearanceID = 0;
+	struct NPCType {
+		u32 mID = 0;
+		u32 mAppearanceID = 0;
 
-	String mName = "";
-	String mLastName = "";
-	uint8 mClass = 0;
-	uint32 mShopID = 0;
-};
+		String mName = "";
+		String mLastName = "";
+		u8 mClass = 0;
+		u32 mShopID = 0;
+	};
 
-struct ShopData {
-	uint32 mID = 0;
-	std::map<uint32, int32> mItems;
-};
+	struct Shop {
+		u32 mID = 0;
+		std::map<u32, i32> mItems;
+	};
+}
 
 struct SpellData {
 	bool mInUse = false;
