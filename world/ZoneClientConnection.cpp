@@ -27,6 +27,7 @@
 #include "AlternateCurrencyManager.h"
 
 #include "../common/MiscFunctions.h"
+#include "../common/packet_dump_file.h"
 
 /*
 Known GM Commands
@@ -1314,11 +1315,18 @@ void ZoneClientConnection::_sendZoneData() {
 	strcpy(payload->mLongName, longName.c_str()); // NOTE: This affects the zone in message "You have entered ..."
 	payload->mGravity = mZone->getGravity();
 	payload->underworld = mZone->getMinimumZ();
-	payload->mZoneType = mZone->getZoneType();
+	//payload->mZoneType = mZone->getZoneType();
+	//payload->mSkyType = 1;
 
+	//payload->mSkyType = 0;
+	
+	// Crushbone copy.
+	payload->mZoneType = 0;
 	payload->mSkyType = 1;
-	payload->mMinimumClip = 50;
-	payload->mMaximumClip = 400;
+	payload->mMinimumClip = 200;
+	payload->mMaximumClip = 1000;
+
+	strcpy(payload->mShortName2, mZone->getShortName().c_str());
 
 	//for (auto i = 0; i < 4; i++) {
 	//	payload->mFog.mMinimumClip[i] = 500;
@@ -1328,6 +1336,8 @@ void ZoneClientConnection::_sendZoneData() {
 	//payload->mFog.mBlue = 150;
 	//payload->mFog.mRed = 150;
 	//payload->mFog.mGreen = 150;
+
+	FileDumpPacketHex("mine.bin", packet);
 
 	sendPacket(packet);
 	delete packet;

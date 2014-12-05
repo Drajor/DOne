@@ -246,7 +246,7 @@ const bool ZoneDataManager::initialise() {
 	EXPECTED_BOOL(DataStore::getInstance().loadZones(mZoneData));
 	Log::info("[Zone Data] Loaded data for " + std::to_string(mZoneData.size()) + " Zones.");
 	
-	EXPECTED_BOOL(DataStore::getInstance().saveZones(mZoneData));
+	//EXPECTED_BOOL(DataStore::getInstance().saveZones(mZoneData));
 
 	mInitialised = true;
 	return true;

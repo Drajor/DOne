@@ -61,7 +61,7 @@ namespace Payload {
 				memset(mShortName, 0, sizeof(mShortName));
 				memset(unknown0096, 0, sizeof(unknown0096));
 				memset(mLongName, 0, sizeof(mLongName));
-				memset(unknown537, 0, sizeof(unknown537));
+				memset(unknown537, 0xFF, sizeof(unknown537));
 				memset(unknown571, 0, sizeof(unknown571));
 				memset(unknown620, 0, sizeof(unknown620));
 				memset(mShortName2, 0, sizeof(mShortName2));
@@ -71,19 +71,29 @@ namespace Payload {
 			}
 			struct Fog {
 				Fog() {
-					memset(mMinimumClip, 2, sizeof(mMinimumClip));
-					memset(mMaximumClip, 500, sizeof(mMaximumClip));
-					set(0, 255, 0, 0);
-					set(1, 0, 255, 0);
-					set(2, 0, 0, 255);
-					//memset(mRed, 50, sizeof(mRed));
-					//memset(mGreen, 150, sizeof(mGreen));
-					//memset(mBlue, 150, sizeof(mBlue));
+					memset(mMinimumClip, 0, sizeof(mMinimumClip));
+					memset(mMaximumClip, 0, sizeof(mMaximumClip));
+					memset(mRed, 0, sizeof(mRed));
+					memset(mGreen, 0, sizeof(mGreen));
+					memset(mBlue, 0, sizeof(mBlue));
+					// Halas copy.
+					//set(0, 200, 230, 255, 10.0f, 300.0f);
+					//set(1, 200, 230, 255, 10.0f, 300.0f);
+					//set(2, 200, 230, 255, 10.0f, 300.0f);
+					//set(3, 200, 230, 255, 10.0f, 300.0f);
+
+					// Crushbone copy.
+					set(0, 90, 90, 190, 200.0f, 1000.0f);
+					set(1, 90, 90, 190, 200.0f, 1000.0f);
+					set(2, 90, 90, 190, 200.0f, 1000.0f);
+					set(3, 90, 90, 190, 200.0f, 1000.0f);
 				}
-				void set(int i, uint8 pRed, uint8 pGreen, uint8 pBlue) {
+				void set(int i, uint8 pRed, uint8 pGreen, uint8 pBlue, float pMinimumClip, float pMaximumClip) {
 					mRed[i] = pRed;
 					mBlue[i] = pBlue;
 					mGreen[i] = pGreen;
+					mMinimumClip[i] = pMinimumClip;
+					mMaximumClip[i] = pMaximumClip;
 				}
 				uint8 mRed[4];
 				uint8 mGreen[4];
@@ -91,6 +101,31 @@ namespace Payload {
 				uint8 mUnknown = 0;
 				float mMinimumClip[4];
 				float mMaximumClip[4];
+			};
+
+			struct Weather {
+				Weather() {
+					memset(mRainChance, 0, sizeof(mRainChance));
+					memset(mRainDuration, 0, sizeof(mRainDuration));
+					memset(mSnowChance, 0, sizeof(mSnowChance));
+					memset(mSnowDuration, 0, sizeof(mSnowDuration));
+
+					// Crushbone copy.
+					set(0, 0, 0, 10, 1);
+					set(1, 10, 2, 0, 0);
+					set(2, 5, 2, 0, 0);
+					set(3, 0, 0, 5, 1);
+				}
+				void set(i32 i, u8 pRainChance, u8 pRainDuration, u8 pSnowChance, u8 pSnowDuration) {
+					mRainChance[i] = pRainChance;
+					mRainDuration[i] = pRainDuration;
+					mSnowChance[i] = pSnowChance;
+					mSnowDuration[i] = pSnowDuration;
+				}
+				u8 mRainChance[4];
+				u8 mRainDuration[4];
+				u8 mSnowChance[4];
+				u8 mSnowDuration[4];
 			};
 
 			char mCharacterName[64];
@@ -101,10 +136,7 @@ namespace Payload {
 			Fog mFog;
 			float mGravity = 0.4f;
 			uint8 mTimeType = 0; // TODO: Enum?
-			uint32 mRainChance = 0;
-			uint32 mRainDuration = 0;
-			uint32 mSnowChance = 0;
-			uint32 mSnowDuration = 0;
+			Weather mWeather;
 			uint8 unknown537[33];
 			uint8 mSkyType = 0; // TODO: Enum? 0 = blank.
 			uint8 unknown571[13];
@@ -135,7 +167,7 @@ namespace Payload {
 			uint8 unknown891 = 0; // Copied.
 			uint8 unknown892 = 0; // Copied.
 			uint8 unknown893 = 0; // Copied.
-			uint8 mFallDamage = 1;
+			uint8 mFallDamage = 0;
 			uint8 unknown895 = 0; // Copied.
 			uint32 unknown896 = 180; // Copied.
 			uint32 unknown900 = 180; // Copied.

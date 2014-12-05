@@ -97,7 +97,7 @@ namespace Data {
 		u16 mDeity = 0;
 		RaceID mRace = 0;
 		GenderID mGender = 0;
-		FaceID mFaceStyle = 0;
+		u8 mFaceStyle = 0;
 		u8 mHairStyle = 0;
 		u8 mHairColour = 0;
 		u8 mBeardStyle = 0;
@@ -253,6 +253,21 @@ struct SpellData {
 };
 
 namespace Data {
+	struct Fog {
+		u8 mRed = 0;
+		u8 mGreen = 0;
+		u8 mBlue = 0;
+		float mMinimumClip = 0.0f;
+		float mMaximumClip = 0.0f;
+	};
+
+	struct Weather {
+		u8 mRainChance = 0;
+		u8 mRainDuration = 0;
+		u8 mSnowChance = 0;
+		u8 mSnowDuration = 0;
+	};
+
 	struct SpawnGroup {
 		struct Entry {
 			u32 mNPCType = 0;
@@ -287,6 +302,8 @@ namespace Data {
 		String mLongName = "";
 		String mShortName = "";
 		Vector3 mSafePosition;
+		Fog mFog[4];
+		Weather mWeather[4];
 		std::list<ZonePoint*> mZonePoints;
 		std::list<SpawnGroup*> mSpawnGroups;
 		std::list<SpawnPoint*> mSpawnPoints;

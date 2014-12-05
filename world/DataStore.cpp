@@ -1229,6 +1229,8 @@ namespace ZoneXML {
 		SCA SpawnGroups = "spawn_groups";
 		SCA SpawnGroup = "spawn_group";
 		SCA SpawnGroupEntry = "spawn_group_entry";
+		SCA Fog = "fog";
+		SCA Weather = "weather";
 	}
 	namespace Attribute {
 		// Tag::Zone
@@ -1261,6 +1263,19 @@ namespace ZoneXML {
 		SCA SPY = "y";
 		SCA SPZ = "z";
 		SCA SPHeading = "heading";
+		// Tag::Fog / Tag::Weather
+		SCA Index = "index";
+		// Tag::Fog
+		SCA Red = "r";
+		SCA Green = "g";
+		SCA Blue = "b";
+		SCA Minimum = "minimum";
+		SCA Maximum = "maximum";
+		// Tag::Weather
+		SCA RainChance = "rain_chance";
+		SCA RainDuration = "rain_duration";
+		SCA SnowChance = "snow_chance";
+		SCA SnowDuration = "snow_duration";
 	}
 #undef SCA
 }
@@ -1286,6 +1301,47 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeX, zoneData->mSafePosition.x));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafePosition.y));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafePosition.z));
+
+		// Read Zone Fog.
+		auto fogParentElement = zoneElement->FirstChildElement(Tag::Fog);
+		// Optional for now.
+		if (fogParentElement) {
+			auto fogElement = fogParentElement->FirstChildElement(Tag::Fog);
+			EXPECTED_BOOL(fogElement);
+			while (fogElement) {
+				u8 index = 0;
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Index, index));
+				EXPECTED_BOOL(index <= 3);
+
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Red, zoneData->mFog[index].mRed));
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Green, zoneData->mFog[index].mGreen));
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Blue, zoneData->mFog[index].mBlue));
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Minimum, zoneData->mFog[index].mMinimumClip));
+				EXPECTED_BOOL(readAttribute(fogElement, Attribute::Maximum, zoneData->mFog[index].mMaximumClip));
+
+				fogElement = fogElement->NextSiblingElement(Tag::Fog);
+			}
+		}
+
+		// Read Zone Weather.
+		auto weatherParentElement = zoneElement->FirstChildElement(Tag::Weather);
+		// Optional for now.
+		if (weatherParentElement) {
+			auto weatherElement = weatherParentElement->FirstChildElement(Tag::Weather);
+			EXPECTED_BOOL(weatherElement);
+			while (weatherElement) {
+				u8 index = 0;
+				EXPECTED_BOOL(readAttribute(weatherElement, Attribute::Index, index));
+				EXPECTED_BOOL(index <= 3);
+
+				EXPECTED_BOOL(readAttribute(weatherElement, Attribute::RainChance, zoneData->mWeather[index].mRainChance));
+				EXPECTED_BOOL(readAttribute(weatherElement, Attribute::RainDuration, zoneData->mWeather[index].mRainDuration));
+				EXPECTED_BOOL(readAttribute(weatherElement, Attribute::SnowChance, zoneData->mWeather[index].mSnowChance));
+				EXPECTED_BOOL(readAttribute(weatherElement, Attribute::SnowDuration, zoneData->mWeather[index].mSnowDuration));
+
+				weatherElement = weatherElement->NextSiblingElement(Tag::Weather);
+			}
+		}
 
 		// Read Zone Points.
 		auto zonePointsElement = zoneElement->FirstChildElement(Tag::ZonePoints);

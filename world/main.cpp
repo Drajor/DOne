@@ -42,7 +42,7 @@ uint64 TTimer::mCurrentTime = 0;
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
-	//system("pause");
+	system("pause");
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
 
