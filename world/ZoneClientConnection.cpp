@@ -1315,10 +1315,6 @@ void ZoneClientConnection::_sendZoneData() {
 	strcpy(payload->mLongName, longName.c_str()); // NOTE: This affects the zone in message "You have entered ..."
 	payload->mGravity = mZone->getGravity();
 	payload->underworld = mZone->getMinimumZ();
-	//payload->mZoneType = mZone->getZoneType();
-	//payload->mSkyType = 1;
-
-	//payload->mSkyType = 0;
 	
 	// Crushbone copy.
 	payload->mZoneType = 0;
@@ -1328,16 +1324,27 @@ void ZoneClientConnection::_sendZoneData() {
 
 	strcpy(payload->mShortName2, mZone->getShortName().c_str());
 
-	//for (auto i = 0; i < 4; i++) {
-	//	payload->mFog.mMinimumClip[i] = 500;
-	//	payload->mFog.mMaximumClip[i] = 1500;
-	//}
+	// Temp until I decide how I want to represent fog and weather in Zone.
+	auto zoneData = ZoneDataManager::getInstance().getZoneData(mZone->getID());
+	EXPECTED(zoneData);
 
-	//payload->mFog.mBlue = 150;
-	//payload->mFog.mRed = 150;
-	//payload->mFog.mGreen = 150;
+	// Fog.
+	for (auto i = 0; i < 4; i++) {
+		payload->mFog.mRed[i] = zoneData->mFog[i].mRed;
+		payload->mFog.mGreen[i] = zoneData->mFog[i].mGreen;
+		payload->mFog.mBlue[i] = zoneData->mFog[i].mBlue;
+		
+		payload->mFog.mMinimumClip[i] = zoneData->mFog[i].mMinimumClip;
+		payload->mFog.mMaximumClip[i] = zoneData->mFog[i].mMaximumClip;
+	}
 
-	FileDumpPacketHex("mine.bin", packet);
+	// Weather.
+	for (auto i = 0; i < 4; i++) {
+		payload->mWeather.mRainChance[i] = zoneData->mWeather[i].mRainChance;
+		payload->mWeather.mRainDuration[i] = zoneData->mWeather[i].mRainDuration;
+		payload->mWeather.mSnowChance[i] = zoneData->mWeather[i].mSnowChance;
+		payload->mWeather.mSnowDuration[i] = zoneData->mWeather[i].mSnowDuration;
+	}
 
 	sendPacket(packet);
 	delete packet;

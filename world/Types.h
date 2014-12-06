@@ -25,3 +25,16 @@ typedef int64_t i64;
 #include <sstream>
 typedef std::string String;
 typedef std::stringstream StringStream;
+
+struct Colour3 {
+	u8 mRed = 0;
+	u8 mGreen = 0;
+	u8 mBlue = 0;
+};
+
+struct Colour4 {
+	u8 mRed = 0;
+	u8 mGreen = 0;
+	u8 mBlue = 0;
+	u8 mTint = 0;
+};

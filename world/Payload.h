@@ -56,6 +56,22 @@ namespace Payload {
 
 		// C->S
 		struct ZoneData : public FixedT<ZoneData, OP_NewZone> {
+			struct Fog {
+				uint8 mRed[4];
+				uint8 mGreen[4];
+				uint8 mBlue[4];
+				uint8 mUnknown = 0;
+				float mMinimumClip[4];
+				float mMaximumClip[4];
+			};
+
+			struct Weather {
+				u8 mRainChance[4];
+				u8 mRainDuration[4];
+				u8 mSnowChance[4];
+				u8 mSnowDuration[4];
+			};
+
 			ZoneData() {
 				memset(mCharacterName, 0, sizeof(mCharacterName));
 				memset(mShortName, 0, sizeof(mShortName));
@@ -68,65 +84,9 @@ namespace Payload {
 				memset(unknown804, 0, sizeof(unknown804));
 				memset(unknown856, 0, sizeof(unknown856));
 				memset(unknown932, 0, sizeof(unknown932));
+				memset(&mFog, 0, sizeof(Fog));
+				memset(&mWeather, 0, sizeof(Weather));
 			}
-			struct Fog {
-				Fog() {
-					memset(mMinimumClip, 0, sizeof(mMinimumClip));
-					memset(mMaximumClip, 0, sizeof(mMaximumClip));
-					memset(mRed, 0, sizeof(mRed));
-					memset(mGreen, 0, sizeof(mGreen));
-					memset(mBlue, 0, sizeof(mBlue));
-					// Halas copy.
-					//set(0, 200, 230, 255, 10.0f, 300.0f);
-					//set(1, 200, 230, 255, 10.0f, 300.0f);
-					//set(2, 200, 230, 255, 10.0f, 300.0f);
-					//set(3, 200, 230, 255, 10.0f, 300.0f);
-
-					// Crushbone copy.
-					set(0, 90, 90, 190, 200.0f, 1000.0f);
-					set(1, 90, 90, 190, 200.0f, 1000.0f);
-					set(2, 90, 90, 190, 200.0f, 1000.0f);
-					set(3, 90, 90, 190, 200.0f, 1000.0f);
-				}
-				void set(int i, uint8 pRed, uint8 pGreen, uint8 pBlue, float pMinimumClip, float pMaximumClip) {
-					mRed[i] = pRed;
-					mBlue[i] = pBlue;
-					mGreen[i] = pGreen;
-					mMinimumClip[i] = pMinimumClip;
-					mMaximumClip[i] = pMaximumClip;
-				}
-				uint8 mRed[4];
-				uint8 mGreen[4];
-				uint8 mBlue[4];
-				uint8 mUnknown = 0;
-				float mMinimumClip[4];
-				float mMaximumClip[4];
-			};
-
-			struct Weather {
-				Weather() {
-					memset(mRainChance, 0, sizeof(mRainChance));
-					memset(mRainDuration, 0, sizeof(mRainDuration));
-					memset(mSnowChance, 0, sizeof(mSnowChance));
-					memset(mSnowDuration, 0, sizeof(mSnowDuration));
-
-					// Crushbone copy.
-					set(0, 0, 0, 10, 1);
-					set(1, 10, 2, 0, 0);
-					set(2, 5, 2, 0, 0);
-					set(3, 0, 0, 5, 1);
-				}
-				void set(i32 i, u8 pRainChance, u8 pRainDuration, u8 pSnowChance, u8 pSnowDuration) {
-					mRainChance[i] = pRainChance;
-					mRainDuration[i] = pRainDuration;
-					mSnowChance[i] = pSnowChance;
-					mSnowDuration[i] = pSnowDuration;
-				}
-				u8 mRainChance[4];
-				u8 mRainDuration[4];
-				u8 mSnowChance[4];
-				u8 mSnowDuration[4];
-			};
 
 			char mCharacterName[64];
 			char mShortName[32];
