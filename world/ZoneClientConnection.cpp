@@ -1315,10 +1315,12 @@ void ZoneClientConnection::_sendZoneData() {
 	strcpy(payload->mLongName, longName.c_str()); // NOTE: This affects the zone in message "You have entered ..."
 	payload->mGravity = mZone->getGravity();
 	payload->underworld = mZone->getMinimumZ();
-	
-	// Crushbone copy.
-	payload->mZoneType = 0;
-	payload->mSkyType = 1;
+
+	payload->mZoneType = mZone->getZoneType();
+	payload->mTimeType = mZone->getTimeType();
+	payload->mSkyType = mZone->getSkyType();
+	payload->mFogDensity = mZone->getFogDensity();
+
 	payload->mMinimumClip = 200;
 	payload->mMaximumClip = 1000;
 

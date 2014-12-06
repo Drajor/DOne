@@ -134,7 +134,7 @@ namespace Payload {
 			uint32 unknown904 = 180; // Copied.
 			uint32 unknown908 = 2; // Copied.
 			uint32 unknown912 = 2; // Copied.
-			float FogDensity = 0.33f;
+			float mFogDensity = 0.0f;
 			uint32 unknown920 = 0;
 			uint32 unknown924 = 0;
 			uint32 unknown928 = 0;

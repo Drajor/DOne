@@ -62,6 +62,14 @@ const bool Zone::initialise() {
 
 	mLootAllocator = new LootAllocator();
 
+	auto zoneData = ZoneDataManager::getInstance().getZoneData(mID);
+	EXPECTED_BOOL(zoneData);
+
+	mZoneType = zoneData->mZoneType;
+	mTimeType = zoneData->mTimeType;
+	mSkyType = zoneData->mSkyType;
+	mFogDensity = zoneData->mFogDensity;
+
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongNameStringID(mID, mLongNameStringID));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getShortName(mID, mShortName));

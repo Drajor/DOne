@@ -54,7 +54,11 @@ public:
 	inline const uint32 getLongNameStringID() const { return mLongNameStringID; }
 	inline const float getGravity() const { return 0.4f; }
 	inline const float getMinimumZ() const { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
-	inline const uint8 getZoneType() const { return 255; } // Unknown.
+	inline const u8 getZoneType() const { return mZoneType; }
+	inline const u8 getTimeType() const { return mTimeType; }
+	inline const u8 getSkyType() const { return mSkyType; }
+	inline const float getFogDensity() const { return mFogDensity; }
+	
 	inline const uint32 getNumCharacters() const { return mCharacters.size(); }
 	inline const uint16 getID() const { return mID; }
 	inline const uint16 getInstanceID() const { return mInstanceID; }
@@ -182,6 +186,11 @@ private:
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
+
+	u8 mZoneType = 0;
+	u8 mTimeType = 0;
+	u8 mSkyType = 0;
+	float mFogDensity = 0.0f;
 
 	uint32 mLongNameStringID = 0;
 	String mLongName = "";

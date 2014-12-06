@@ -301,7 +301,11 @@ namespace Data {
 		u32 mLongNameStringID = 0;
 		String mLongName = "";
 		String mShortName = "";
+		u8 mZoneType = 0;
+		u8 mTimeType = 0;
+		u8 mSkyType = 0;
 		Vector3 mSafePosition;
+		float mFogDensity = 0.0f;
 		Fog mFog[4];
 		Weather mWeather[4];
 		std::list<ZonePoint*> mZonePoints;
