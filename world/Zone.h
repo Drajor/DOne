@@ -58,6 +58,8 @@ public:
 	inline const u8 getTimeType() const { return mTimeType; }
 	inline const u8 getSkyType() const { return mSkyType; }
 	inline const float getFogDensity() const { return mFogDensity; }
+	inline const float getMinimumClip() const { return mMinimumClip; }
+	inline const float getMaximumClip() const { return mMaximumClip; }
 	
 	inline const uint32 getNumCharacters() const { return mCharacters.size(); }
 	inline const uint16 getID() const { return mID; }
@@ -191,6 +193,8 @@ private:
 	u8 mTimeType = 0;
 	u8 mSkyType = 0;
 	float mFogDensity = 0.0f;
+	float mMinimumClip = 0.0f;
+	float mMaximumClip = 0.0f;
 
 	uint32 mLongNameStringID = 0;
 	String mLongName = "";

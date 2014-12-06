@@ -301,6 +301,8 @@ namespace Data {
 		u32 mLongNameStringID = 0;
 		String mLongName = "";
 		String mShortName = "";
+		float mMinimumClip = 200.0f;
+		float mMaximumClip = 1000.0f;
 		u8 mZoneType = 0;
 		u8 mTimeType = 0;
 		u8 mSkyType = 0;

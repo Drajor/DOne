@@ -1240,6 +1240,8 @@ namespace ZoneXML {
 		SCA ZoneType = "zone_type";
 		SCA TimeType = "time_type";
 		SCA SkyType = "sky_type";
+		SCA MinimumClip = "minimum_clip";
+		SCA MaximumClip = "maximum_clip";
 		SCA SafeX = "safe_x";
 		SCA SafeY = "safe_y";
 		SCA SafeZ = "safe_z";
@@ -1305,6 +1307,8 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::ZoneType, zoneData->mZoneType));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::TimeType, zoneData->mTimeType));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SkyType, zoneData->mSkyType));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::MinimumClip, zoneData->mMinimumClip));
+		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::MaximumClip, zoneData->mMaximumClip));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeX, zoneData->mSafePosition.x));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeY, zoneData->mSafePosition.y));
 		EXPECTED_BOOL(readAttribute(zoneElement, Attribute::SafeZ, zoneData->mSafePosition.z));
@@ -1443,6 +1447,8 @@ const bool DataStore::saveZones(Data::ZoneList pZones) {
 		zoneElement->SetAttribute(Attribute::ZoneType, i->mZoneType);
 		zoneElement->SetAttribute(Attribute::TimeType, i->mTimeType);
 		zoneElement->SetAttribute(Attribute::SkyType, i->mSkyType);
+		zoneElement->SetDoubleAttribute(Attribute::MinimumClip, i->mMinimumClip);
+		zoneElement->SetDoubleAttribute(Attribute::MaximumClip, i->mMaximumClip);
 		zoneElement->SetDoubleAttribute(Attribute::SafeX, i->mSafePosition.x);
 		zoneElement->SetDoubleAttribute(Attribute::SafeY, i->mSafePosition.y);
 		zoneElement->SetDoubleAttribute(Attribute::SafeZ, i->mSafePosition.z);
