@@ -271,6 +271,7 @@ namespace Data {
 	struct Object {
 		u32 mType = 0; // TODO: Enumeration?
 		String mAsset;
+		float mSize = 1.0f;
 		float mHeading = 0.0f;
 		Vector3 mPosition;
 	};

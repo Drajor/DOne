@@ -1280,6 +1280,7 @@ namespace ZoneXML {
 			SCA Type = "type";
 			SCA Asset = "asset";
 			SCA Heading = "heading";
+			SCA Size = "size";
 		}
 		// Tag::Door
 		namespace Door {
@@ -1416,6 +1417,7 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 
 			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Type, o->mType));
 			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Asset, o->mAsset));
+			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Size, o->mSize));
 			EXPECTED_BOOL(readVector3(objectElement, o->mPosition));
 			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Heading, o->mHeading));
 
@@ -1578,6 +1580,7 @@ const bool DataStore::saveZones(Data::ZoneList pZones) {
 
 			objectElement->SetAttribute(Attribute::Object::Type, j->mType);
 			objectElement->SetAttribute(Attribute::Object::Asset, j->mAsset.c_str());
+			objectElement->SetDoubleAttribute(Attribute::Object::Size, j->mSize);
 			writeVector3(objectElement, j->mPosition);
 			objectElement->SetDoubleAttribute(Attribute::Object::Heading, j->mHeading);
 		}
