@@ -1487,14 +1487,13 @@ void ZoneClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Emote_Struct);
-
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(Emote::sizeCheck(pPacket));
 
-	static const unsigned int MAX_EMOTE_SIZE = 1024;
-	auto payload = reinterpret_cast<Emote_Struct*>(pPacket->pBuffer);
-	String message = Utility::safeString(payload->message, MAX_EMOTE_SIZE);
+	auto payload = Emote::convert(pPacket);
+
+	String message = Utility::safeString(payload->mMessage, EmoteLimits::MAX_MESSAGE);
 	mZone->handleEmote(mCharacter, message);
 }
 

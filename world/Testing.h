@@ -30,6 +30,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(76, Payload::Zone::RandomReply::size());
 	EXPECT_EQ(8, Payload::Zone::ExperienceUpdate::size());
 	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
+	EXPECT_EQ(1028, Payload::Zone::Emote::size());
 }
 
 // 
@@ -51,6 +52,13 @@ TEST(canClassTaunt, PlayerClasses) {
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Enchanter));
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Beastlord));
 	EXPECT_FALSE(Utility::canClassTaunt(ClassID::Berserker));
+}
+
+// Utility
+TEST(safeString, Strings) {
+	// Long String
+	char buffer[] = "HelloWorld";
+	EXPECT_EQ("", Utility::safeString(buffer, 2));
 }
 
 TEST(LimitsTest, ShopQuantityValid) {

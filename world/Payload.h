@@ -1216,6 +1216,21 @@ namespace Payload {
 			u32 mPreviousLevel = 0;
 			u32 mExperience = 0;
 		};
+
+		// C->S
+		namespace EmoteLimits { static const auto MAX_MESSAGE = 1024; }
+		struct Emote : public FixedT <Emote, OP_Emote> {
+			static EQApplicationPacket* construct(const String& pMessage) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mMessage, pMessage.c_str());
+
+				return packet;
+			}
+			u32 mUnknown = 0;
+			char mMessage[EmoteLimits::MAX_MESSAGE];
+		};
+		
 	}
 
 	namespace World {

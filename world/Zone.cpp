@@ -437,18 +437,13 @@ void Zone::handleOOC(Character* pCharacter, const String pMessage) {
 }
 
 void Zone::handleEmote(Character* pCharacter, const String pMessage) {
-	const ZoneClientConnection* sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_Emote, 4 + pMessage.length() + pCharacter->getName().length() + 2);
-	Emote_Struct* payload = reinterpret_cast<Emote_Struct*>(outPacket->pBuffer);
-	char* Buffer = (char*)payload;
-	Buffer += 4;
-	snprintf(Buffer, sizeof(Emote_Struct)-4, "%s %s", pCharacter->getName().c_str(), pMessage.c_str());
+	using namespace Payload::Zone;
+	EXPECTED(pCharacter);
 
-	for (auto i : mConnections) {
-		if (i != sender)
-			i->sendPacket(outPacket);
-	}
-	safe_delete(outPacket);
+	String message = pCharacter->getName() + " " + pMessage;
+	auto packet = Emote::construct(message);
+	sendToVisible(pCharacter, packet, false);
+	delete packet;
 }
 
 void Zone::_sendDespawn(const uint16 pSpawnID, const bool pDecay) {
