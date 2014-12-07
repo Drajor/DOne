@@ -5,7 +5,7 @@
 #include "Vector3.h"
 #include "../common/EQPacket.h"
 
-enum GuildUpdateAction : uint32 {
+enum GuildUpdateAction : u32 {
 	GUILD_URL = 0,
 	GUILD_CHANNEL = 1
 };
@@ -57,10 +57,10 @@ namespace Payload {
 		// C->S
 		struct ZoneData : public FixedT<ZoneData, OP_NewZone> {
 			struct Fog {
-				uint8 mRed[4];
-				uint8 mGreen[4];
-				uint8 mBlue[4];
-				uint8 mUnknown = 0;
+				u8 mRed[4];
+				u8 mGreen[4];
+				u8 mBlue[4];
+				u8 mUnknown = 0;
 				float mMinimumClip[4];
 				float mMaximumClip[4];
 			};
@@ -92,14 +92,14 @@ namespace Payload {
 			char mShortName[32];
 			char unknown0096[96];
 			char mLongName[278];
-			uint8 mZoneType = 0xFF; // TODO: Enum?
+			u8 mZoneType = 0xFF; // TODO: Enum?
 			Fog mFog;
 			float mGravity = 0.4f;
-			uint8 mTimeType = 0; // TODO: Enum?
+			u8 mTimeType = 0; // TODO: Enum?
 			Weather mWeather;
-			uint8 unknown537[33];
-			uint8 mSkyType = 0; // TODO: Enum? 0 = blank.
-			uint8 unknown571[13];
+			u8 unknown537[33];
+			u8 mSkyType = 0; // TODO: Enum? 0 = blank.
+			u8 unknown571[13];
 			float mExperienceModifier = 1.0f;
 			float mSafeY = 0.0f;
 			float mSafeX = 0.0f;
@@ -109,69 +109,69 @@ namespace Payload {
 			float underworld = 0.0f;
 			float mMinimumClip = 0.0f;
 			float mMaximumClip = 0.0f;
-			uint8 unknown620[84];
+			u8 unknown620[84];
 			char mShortName2[96];
-			int32 unknown800 = -1; // Copied.
+			i32 unknown800 = -1; // Copied.
 			char unknown804[40];
-			int32 unknown844 = 600; // Copied.
-			int32 unknown848 = 0;
-			uint16 mZoneID = 0;
-			uint16 mInstanceID = 0;
+			i32 unknown844 = 600; // Copied.
+			i32 unknown848 = 0;
+			u16 mZoneID = 0;
+			u16 mInstanceID = 0;
 			char unknown856[20];
-			uint32 mSuspendBuffs = 0;
-			uint32 unknown880 = 50; // Copied.
-			uint32 unknown884 = 10; // Copied.
-			uint8 unknown888 = 1; // Copied.
-			uint8 unknown889 = 0; // Copied.
-			uint8 unknown890 = 1; // Copied.
-			uint8 unknown891 = 0; // Copied.
-			uint8 unknown892 = 0; // Copied.
-			uint8 unknown893 = 0; // Copied.
-			uint8 mFallDamage = 0;
-			uint8 unknown895 = 0; // Copied.
-			uint32 unknown896 = 180; // Copied.
-			uint32 unknown900 = 180; // Copied.
-			uint32 unknown904 = 180; // Copied.
-			uint32 unknown908 = 2; // Copied.
-			uint32 unknown912 = 2; // Copied.
+			u32 mSuspendBuffs = 0;
+			u32 unknown880 = 50; // Copied.
+			u32 unknown884 = 10; // Copied.
+			u8 unknown888 = 1; // Copied.
+			u8 unknown889 = 0; // Copied.
+			u8 unknown890 = 1; // Copied.
+			u8 unknown891 = 0; // Copied.
+			u8 unknown892 = 0; // Copied.
+			u8 unknown893 = 0; // Copied.
+			u8 mFallDamage = 0;
+			u8 unknown895 = 0; // Copied.
+			u32 unknown896 = 180; // Copied.
+			u32 unknown900 = 180; // Copied.
+			u32 unknown904 = 180; // Copied.
+			u32 unknown908 = 2; // Copied.
+			u32 unknown912 = 2; // Copied.
 			float mFogDensity = 0.0f;
-			uint32 unknown920 = 0;
-			uint32 unknown924 = 0;
-			uint32 unknown928 = 0;
-			uint8 unknown932[12];
+			u32 unknown920 = 0;
+			u32 unknown924 = 0;
+			u32 unknown928 = 0;
+			u8 unknown932[12];
 		};
 
 		// C->S
 		struct Time : public FixedT<Time, OP_TimeOfDay> {
-			uint8 mHour = 0;
-			uint8 mMinute = 0;
-			uint8 mDay = 0;
-			uint8 mMonth = 0;
-			uint32 mYear = 0;
+			u8 mHour = 0;
+			u8 mMinute = 0;
+			u8 mDay = 0;
+			u8 mMonth = 0;
+			u32 mYear = 0;
 		};
 
 		// Note: ZoneEntry is C->S fixed and S->C variable.
 		struct ZoneEntry : public Fixed<ZoneEntry> {
-			uint32 mUnknown = 0;
+			u32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
 
 		// C->S
 		struct AddNimbus : public FixedT<AddNimbus, OP_SpellEffect> {
-			uint32 mNimbusID = 0;
-			uint32 mSpawnID = 0;
-			uint32 mSpawnID2 = 0;
-			uint32 mStartDelay = 1;
-			uint32 mStartDelay2 = 1;
-			uint32 Unknown020 = 1;	// Seen 3000
-			uint8 Unknown024 = 1;	// Seen 1 for SoD
-			uint8 Unknown025 = 1;	// Seen 1 for Live
-			uint16 Unknown026 = 1157;	// Seen 1157 and 1177 - varies per char
+			u32 mNimbusID = 0;
+			u32 mSpawnID = 0;
+			u32 mSpawnID2 = 0;
+			u32 mStartDelay = 1;
+			u32 mStartDelay2 = 1;
+			u32 Unknown020 = 1;	// Seen 3000
+			u8 Unknown024 = 1;	// Seen 1 for SoD
+			u8 Unknown025 = 1;	// Seen 1 for Live
+			u16 Unknown026 = 1157;	// Seen 1157 and 1177 - varies per char
 		};
 
 		// C->S
 		struct RemoveNimbus : public FixedT<RemoveNimbus, OP_RemoveNimbusEffect> {
-			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pNimbusID) {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const u32 pNimbusID) {
 				auto packet = create();
 				auto payload = convert(packet);
 
@@ -180,20 +180,20 @@ namespace Payload {
 				return packet;
 			}
 
-			uint32 mSpawnID = 0;
-			uint32 mNimbusID = 0;
+			u32 mSpawnID = 0;
+			u32 mNimbusID = 0;
 		};
 
 		// C->S
 		struct SetTitle : public Fixed<SetTitle> {
-			enum : uint32 { SET_TITLE = 0, SET_SUFFIX = 1 };
-			uint32 mOption = SET_TITLE;
-			uint32 mTitleID = 0;
+			enum : u32 { SET_TITLE = 0, SET_SUFFIX = 1 };
+			u32 mOption = SET_TITLE;
+			u32 mTitleID = 0;
 		};
 
 		// S->C
 		struct TitleUpdate : public FixedT<TitleUpdate, OP_SetTitleReply> {
-			static EQApplicationPacket* construct(const uint32 pOption, const uint32 pSpawnID, const String& pText) {
+			static EQApplicationPacket* construct(const u32 pOption, const u32 pSpawnID, const String& pText) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mOption = pOption;
@@ -202,29 +202,29 @@ namespace Payload {
 
 				return packet;
 			}
-			enum : uint32 { UPDATE_TITLE = 0, UPDATE_SUFFIX = 1 };
-			uint32 mOption = UPDATE_TITLE;
+			enum : u32 { UPDATE_TITLE = 0, UPDATE_SUFFIX = 1 };
+			u32 mOption = UPDATE_TITLE;
 			char mText[32];
-			uint32 mSpawnID = 0;
+			u32 mSpawnID = 0;
 		};
 
 		// C->S
 		struct FaceChange : public Fixed<FaceChange> {
-			uint8 mHairColour = 0;
-			uint8 mBeardColour = 0;
-			uint8 mLeftEyeColour = 0;
-			uint8 mRightEyeColour = 0;
-			uint8 mHairStyle = 0;
-			uint8 mBeardStyle = 0;
-			uint8 mFaceStyle = 0;
-			uint32 mDrakkinHeritage = 0;
-			uint32 mDrakkinTattoo = 0;
-			uint32 mDrakkinDetails = 0;
+			u8 mHairColour = 0;
+			u8 mBeardColour = 0;
+			u8 mLeftEyeColour = 0;
+			u8 mRightEyeColour = 0;
+			u8 mHairStyle = 0;
+			u8 mBeardStyle = 0;
+			u8 mFaceStyle = 0;
+			u32 mDrakkinHeritage = 0;
+			u32 mDrakkinTattoo = 0;
+			u32 mDrakkinDetails = 0;
 		};
 
 		// S->C
 		struct WearChange : public FixedT<WearChange, OP_WearChange> {
-			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlot) {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u32 pMaterialID, const u32 pEliteMaterialID, const u32 pColour, const u8 pSlot) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -235,12 +235,12 @@ namespace Payload {
 
 				return packet;
 			}
-			uint16 mSpawnID = 0;
-			uint32 mMaterialID = 0;
-			uint32 mUnused0 = 0;
-			uint32 mEliteMaterialID = 0; // Not sure what this is.
-			uint32 mColour = 0;
-			uint8 mSlot = 0;
+			u16 mSpawnID = 0;
+			u32 mMaterialID = 0;
+			u32 mUnused0 = 0;
+			u32 mEliteMaterialID = 0; // Not sure what this is.
+			u32 mColour = 0;
+			u8 mSlot = 0;
 		};
 		
 		// C->S
@@ -251,11 +251,11 @@ namespace Payload {
 
 		// C<->S
 		struct MemoriseSpell : public Fixed<MemoriseSpell> {
-			enum Action : uint32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
-			uint32 mSlot = 0;
-			uint32 mSpellID = 0;
+			enum Action : u32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
+			u32 mSlot = 0;
+			u32 mSpellID = 0;
 			Action mAction = SCRIBE;
-			uint32 mUnknown0 = 0;
+			u32 mUnknown0 = 0;
 		};
 
 		// C<->S
@@ -313,8 +313,8 @@ namespace Payload {
 		// Based on: InterruptCast_Struct
 		// NOTE: This is not actually fixed size. TODO
 		struct InterruptCast : public Fixed<InterruptCast> {
-			uint32 mSpawnID = 0;
-			uint32 mMessageID = 0;
+			u32 mSpawnID = 0;
+			u32 mMessageID = 0;
 			char mMessage[0];
 		};
 
@@ -371,38 +371,38 @@ namespace Payload {
 		// S->C
 		// Based on: Action_Struct
 		struct Action : public Fixed<Action> {
-			uint16 mTargetSpawnID = 0;
-			uint16 mSourceSpawnID = 0;
-			uint16 mCasterLevel = 1;
-			uint16 instrument_mod = 0;
-			uint32 bard_focus_id = 0;
-			uint16 mUnknown0 = 0;
-			uint32 mSequence = 0;
-			uint32 mUnknown1 = 0;
-			uint8 mType = 0;		// 231 (0xE7) for spells
-			uint32 mUnknown2 = 0;
-			uint16 mSpellID = 0; // uint16?? hmm
-			uint8 mUnknown3 = 0;
-			uint8 buff_unknown = 0;	// if this is 4, a buff icon is made
+			u16 mTargetSpawnID = 0;
+			u16 mSourceSpawnID = 0;
+			u16 mCasterLevel = 1;
+			u16 instrument_mod = 0;
+			u32 bard_focus_id = 0;
+			u16 mUnknown0 = 0;
+			u32 mSequence = 0;
+			u32 mUnknown1 = 0;
+			u8 mType = 0;		// 231 (0xE7) for spells
+			u32 mUnknown2 = 0;
+			u16 mSpellID = 0; // u16?? hmm
+			u8 mUnknown3 = 0;
+			u8 buff_unknown = 0;	// if this is 4, a buff icon is made
 		};
 
 		// C->S
 		// Based on: CombatAbility_Struct
 		struct CombatAbility : public Fixed<CombatAbility> {
-			uint32 mTargetID = 0;
-			uint32 mAttack = 0;
-			uint32 mSkill = 0;
+			u32 mTargetID = 0;
+			u32 mAttack = 0;
+			u32 mSkill = 0;
 		};
 
 		// C->S
 		struct Taunt : Fixed<Taunt> {
-			uint32 mSpawnID = 0;
+			u32 mSpawnID = 0;
 		};
 
 		// C<->S
 		struct Consider : FixedT<Consider, OP_Consider> {
 			enum Message { Ally = 1, Warmly = 2, Kindly = 3, Amiably = 4, Indifferent = 5, Scowls = 6, Threateningly = 7, Dubiously = 8, Apprehensively = 9  };
-			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pTargetSpawnID, const uint32 pMessage) {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const u32 pTargetSpawnID, const u32 pMessage) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -418,25 +418,25 @@ namespace Payload {
 				PRINT_MEMBER(mTargetSpawnID);
 				PRINT_MEMBER(mMessage);
 				PRINT_MEMBER(mTargetLevel);
-				PRINT_MEMBER((int32)mIsPVP);
-				PRINT_MEMBER((int32)mUnknown0);
-				PRINT_MEMBER((int32)mUnknown1);
-				PRINT_MEMBER((int32)mUnknown2);
+				PRINT_MEMBER((i32)mIsPVP);
+				PRINT_MEMBER((i32)mUnknown0);
+				PRINT_MEMBER((i32)mUnknown1);
+				PRINT_MEMBER((i32)mUnknown2);
 				return ss.str();
 			}
-			uint32 mSpawnID = 0;
-			uint32 mTargetSpawnID = 0;
-			uint32 mMessage = Message::Indifferent;
-			uint32 mTargetLevel = 0;
-			uint8 mIsPVP = 0;
-			uint8 mUnknown0 = 0;
-			uint8 mUnknown1 = 0;
-			uint8 mUnknown2 = 0;
+			u32 mSpawnID = 0;
+			u32 mTargetSpawnID = 0;
+			u32 mMessage = Message::Indifferent;
+			u32 mTargetLevel = 0;
+			u8 mIsPVP = 0;
+			u8 mUnknown0 = 0;
+			u8 mUnknown1 = 0;
+			u8 mUnknown2 = 0;
 		};
 
 		// C<->S
 		struct Surname : public FixedT<Surname, OP_Surname> {
-			static EQApplicationPacket* construct(const uint32 pApproved, const String& pName, const String& pLastName) {
+			static EQApplicationPacket* construct(const u32 pApproved, const String& pName, const String& pLastName) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mApproved = pApproved;
@@ -446,7 +446,7 @@ namespace Payload {
 				return packet;
 			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-			uint32 mApproved = 0;
+			u32 mApproved = 0;
 			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
 		};
 
@@ -456,19 +456,19 @@ namespace Payload {
 			char mCharaterName[Limits::Character::MAX_NAME_LENGTH];
 			char mGMName[Limits::Character::MAX_NAME_LENGTH];
 			char mLastName[Limits::Character::MAX_NAME_LENGTH];
-			uint16 mUnknown0[4];
+			u16 mUnknown0[4];
 		};
 
 		// C<->S
 		struct SpawnAppearance : public FixedT<SpawnAppearance, OP_SpawnAppearance> {
-			uint16 mSpawnID = 0;
-			uint16 mType = 0;
-			uint32 mParameter = 0;
+			u16 mSpawnID = 0;
+			u16 mType = 0;
+			u32 mParameter = 0;
 		};
 
 		// S->C
 		struct ActorAnimation : public FixedT<ActorAnimation, OP_Animation> {
-			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pAnimation, const uint8 pSpeed = 10) {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u8 pAnimation, const u8 pSpeed = 10) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -477,21 +477,21 @@ namespace Payload {
 
 				return packet;
 			}
-			uint16 mSpawnID = 0;
-			uint8 mSpeed = 0;
-			uint8 mAnimation = 0;
+			u16 mSpawnID = 0;
+			u8 mSpeed = 0;
+			u8 mAnimation = 0;
 		};
 
 		// S->C
 		// Based on: SkillUpdate_Struct
 		struct SkillUpdate : public Fixed<SkillUpdate> {
-			uint32 mID = 0;
-			uint32 mValue = 0;
+			u32 mID = 0;
+			u32 mValue = 0;
 		};
 
 		// S->C
 		struct Death : public FixedT<Death, OP_Death> {
-			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pKillerSpawnID, const uint32 pDamage, const uint32 pSkill) {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const u32 pKillerSpawnID, const u32 pDamage, const u32 pSkill) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -501,20 +501,20 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mSpawnID = 0;
-			uint32 mKillerSpawnID = 0;
-			uint32 mCorpseID = 0; // ??
-			uint32 mBindZoneID = 0;
-			uint32 mSpellID = 0xFFFFFFFF;
-			uint32 mSkillID = 0;
-			uint32 mDamage = 0;
-			uint32 mUnknown0 = 0;
+			u32 mSpawnID = 0;
+			u32 mKillerSpawnID = 0;
+			u32 mCorpseID = 0; // ??
+			u32 mBindZoneID = 0;
+			u32 mSpellID = 0xFFFFFFFF;
+			u32 mSkillID = 0;
+			u32 mDamage = 0;
+			u32 mUnknown0 = 0;
 		};
 
 		// S->C
 		struct Damage : public FixedT<Damage, OP_Damage> {
 			Damage() { memset(__Unknown1, 0, sizeof(__Unknown1)); }
-			static EQApplicationPacket* construct(const uint16 pTarget, const uint16 pSource, const uint32 pAmount, const uint8 pType, const uint32 pSequence, const uint16 pSpellID = 0) {
+			static EQApplicationPacket* construct(const u16 pTarget, const u16 pSource, const u32 pAmount, const u8 pType, const u32 pSequence, const u16 pSpellID = 0) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mTargetSpawnID = pTarget;
@@ -525,51 +525,51 @@ namespace Payload {
 				payload->mSequence = pSequence;
 				return packet;
 			}
-			uint16 mTargetSpawnID = 0;
-			uint16 mSourceSpawnID = 0;
-			uint8 mType = 0; // See Constants, DamageType
-			uint16 mSpellID = 0;
-			int32 mAmount = 0;
+			u16 mTargetSpawnID = 0;
+			u16 mSourceSpawnID = 0;
+			u8 mType = 0; // See Constants, DamageType
+			u16 mSpellID = 0;
+			i32 mAmount = 0;
 			float __Unknown0 = 0.0f;
-			uint32 mSequence = 0;
-			uint8 __Unknown1[9];
+			u32 mSequence = 0;
+			u8 __Unknown1[9];
 		};
 
 		// C->S
 		struct LootBeginRequest : public Fixed<LootBeginRequest> {
-			uint32 mSpawnID = 0;
+			u32 mSpawnID = 0;
 		};
 		// C->S
 		struct LootEndRequest : public Fixed<LootEndRequest> {
-			uint32 mSpawnID = 0;
+			u32 mSpawnID = 0;
 		};
 
 		// S->C
 		// Based on: moneyOnCorpseStruct
 		struct LootResponse : public Fixed<LootResponse> {
-			enum Response : uint8 { 
+			enum Response : u8 { 
 				ALREADY = 0,
 				LOOT = 1,
 				DENY = 2,
 				TOO_FAR = 3,
 				HOSTILE = 7, // "You cannot loot while a hostile create is aware of your presence"
 			};
-			uint8 mResponse = DENY;
-			uint8 mUnknown0 = 0x5a;
-			uint8 mUnknown1 = 0x40;
-			uint8 mUnknown2 = 0;
-			uint32 mPlatinum = 0;
-			uint32 mGold = 0;
-			uint32 mSilver = 0;
-			uint32 mCopper = 0;
+			u8 mResponse = DENY;
+			u8 mUnknown0 = 0x5a;
+			u8 mUnknown1 = 0x40;
+			u8 mUnknown2 = 0;
+			u32 mPlatinum = 0;
+			u32 mGold = 0;
+			u32 mSilver = 0;
+			u32 mCopper = 0;
 		};
 
 		struct LootItem : Fixed<LootItem> {
-			uint32 mCorpseSpawnID = 0;
-			uint32 mLooterSpawnID = 0;
-			uint32 mSlotID = 0;
-			uint32 mAutoLoot = 0;
-			uint32 mUnknown0 = 0; // Right0, 
+			u32 mCorpseSpawnID = 0;
+			u32 mLooterSpawnID = 0;
+			u32 mSlotID = 0;
+			u32 mAutoLoot = 0;
+			u32 mUnknown0 = 0; // Right0, 
 			String _debug() const {
 				StringStream ss;
 				ss << "[LootItem] ";
@@ -589,12 +589,12 @@ namespace Payload {
 		// C->S
 		// Based on: ClientTarget_Struct
 		struct Target : public Fixed<Target> {
-			uint32 mSpawnID = 0;
+			u32 mSpawnID = 0;
 		};
 
 		// S->C
 		struct RequestZoneChange : public FixedT<RequestZoneChange, OP_RequestClientZoneChange> {
-			static EQApplicationPacket* construct(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
+			static EQApplicationPacket* construct(const u16 pZoneID, const u16 pInstanceID, const Vector3& pPosition) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mZoneID = pZoneID;
@@ -605,19 +605,19 @@ namespace Payload {
 
 				return packet;
 			}
-			uint16 mZoneID = 0;
-			uint16 mInstanceID = 0;
+			u16 mZoneID = 0;
+			u16 mInstanceID = 0;
 			float mY = 0.0f;
 			float mX = 0.0f;
 			float mZ = 0.0f;
 			float mHeading = 0.0f;
-			uint32 mType = 0; // NOTE: I tried various values for mType and found they did nothing I noticed.
+			u32 mType = 0; // NOTE: I tried various values for mType and found they did nothing I noticed.
 		};
 
 		// C<->S
 		struct ZoneChange : public FixedT<ZoneChange, OP_ZoneChange> {
 			ZoneChange() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
-			static EQApplicationPacket* construct(const String& pCharacterName, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
+			static EQApplicationPacket* construct(const String& pCharacterName, const u16 pZoneID, const u16 pInstanceID, const Vector3& pPosition, const i32 pSuccess) {
 				auto packet = create();
 				auto payload = convert(packet);
 				strcpy(payload->mCharacterName, pCharacterName.c_str());
@@ -631,18 +631,18 @@ namespace Payload {
 				return packet;
 			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-			uint16 mZoneID = 0;
-			uint16 mInstanceID = 0;
+			u16 mZoneID = 0;
+			u16 mInstanceID = 0;
 			float mY = 0.0f;
 			float mX = 0.0f;
 			float mZ = 0.0f;
-			uint32 mReason = 0;
-			int32 mSuccess = 0; // =0 client->server, =1 server->client, -X=specific error
+			u32 mReason = 0;
+			i32 mSuccess = 0; // =0 client->server, =1 server->client, -X=specific error
 		};
 
 		// S->C
 		struct Weather : public FixedT<Weather, OP_Weather> {
-			static EQApplicationPacket* construct(const uint32 pA, const uint32 pB, const uint32 pC) {
+			static EQApplicationPacket* construct(const u32 pA, const u32 pB, const u32 pC) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mUnknown0 = pA;
@@ -651,15 +651,15 @@ namespace Payload {
 
 				return packet;
 			}
-			enum Type : uint32 { NORMAL = 0, SNOW = 2, RAIN = 3 };
-			uint32 mUnknown0 = 0;
-			uint32 mType = NORMAL;
-			uint32 mIntensity = 0;
+			enum Type : u32 { NORMAL = 0, SNOW = 2, RAIN = 3 };
+			u32 mUnknown0 = 0;
+			u32 mType = NORMAL;
+			u32 mIntensity = 0;
 		};
 
 		// C->S
 		struct MoveItem : public FixedT<MoveItem, OP_MoveItem> {
-			static EQApplicationPacket* construct(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF) {
+			static EQApplicationPacket* construct(const u32 pFromSlot, const u32 pToSlot = 0xFFFFFFFF, const u32 pStacks = 0xFFFFFFFF) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mFromSlot = pFromSlot;
@@ -668,14 +668,14 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mFromSlot = 0;
-			uint32 mToSlot = 0;
-			uint32 mStacks = 0;
+			u32 mFromSlot = 0;
+			u32 mToSlot = 0;
+			u32 mStacks = 0;
 		};
 
 		// S->C
 		struct DeleteItem : public FixedT<DeleteItem, OP_DeleteItem> {
-			static EQApplicationPacket* construct(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF) {
+			static EQApplicationPacket* construct(const u32 pFromSlot, const u32 pToSlot = 0xFFFFFFFF, const u32 pStacks = 0xFFFFFFFF) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mFromSlot = pFromSlot;
@@ -684,42 +684,42 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mFromSlot = 0;
-			uint32 mToSlot = 0;
-			uint32 mStacks = 0;
+			u32 mFromSlot = 0;
+			u32 mToSlot = 0;
+			u32 mStacks = 0;
 		};
 
 		// C->S
 		// Based on: Consume_Struct
 		struct Consume : public Fixed<Consume> {
-			enum ConsumeAction : uint32{ AUTO = 0xFFFFFF, MANUAL = 999 };
-			enum ConsumeType : uint8 { FOOD = 1, DRINK = 2 };
-			uint32 mSlot = 0;
-			uint32 mConsumeAction = AUTO; // ConsumeAction
-			uint8 c_unknown1[4];
-			uint8 mType = 0; // ConsumeType
-			uint8 unknown13[3];
+			enum ConsumeAction : u32{ AUTO = 0xFFFFFF, MANUAL = 999 };
+			enum ConsumeType : u8 { FOOD = 1, DRINK = 2 };
+			u32 mSlot = 0;
+			u32 mConsumeAction = AUTO; // ConsumeAction
+			u8 c_unknown1[4];
+			u8 mType = 0; // ConsumeType
+			u8 unknown13[3];
 		};
 
 		// S->C
 		// Based on: Stamina_Struct
 		struct Stamina : public FixedT<Stamina, OP_Stamina> {
-			uint32 mHunger = 0;
-			uint32 mThirst = 0;
+			u32 mHunger = 0;
+			u32 mThirst = 0;
 		};
 
 		// C->S
 		// Based on: ItemVerifyRequest_Struct
 		struct ItemRightClick : public Fixed<ItemRightClick> {
-			int32 mSlot = 0;
-			uint32 mTargetSpawnID = 0;
+			i32 mSlot = 0;
+			u32 mTargetSpawnID = 0;
 		};
 
 		// S->C
 		struct ItemRightClickResponse : public FixedT<ItemRightClickResponse, OP_ItemVerifyReply> {
-			int32 mSlot = 0;
-			uint32 mSpellID = 0;
-			uint32 mTargetSpawnID = 0;
+			i32 mSlot = 0;
+			u32 mSpellID = 0;
+			u32 mTargetSpawnID = 0;
 		};
 
 		// C->S
@@ -731,31 +731,31 @@ namespace Payload {
 				memset(mAugments, 0, sizeof(mAugments));
 				memset(unknown046, 0, sizeof(unknown046));
 			}
-			uint32 mItemID = 0;
-			uint32 mAugments[5];
-			uint32 mHash = 0;
-			uint32 mUnknown0 = 0; // Always 4 it appears.
-			int32 mUnknown1 = 0; // Seen: 1 for evolving, 0 non-evolving.
-			int32 mUnknown2 = 0; // Seen: 5 for evolving, 0 non-evolving.
-			int32 mCurrentEvolvingLevel = 0;
-			uint16 mOrnamentationIcon = 0;
+			u32 mItemID = 0;
+			u32 mAugments[5];
+			u32 mHash = 0;
+			u32 mUnknown0 = 0; // Always 4 it appears.
+			i32 mUnknown1 = 0; // Seen: 1 for evolving, 0 non-evolving.
+			i32 mUnknown2 = 0; // Seen: 5 for evolving, 0 non-evolving.
+			i32 mCurrentEvolvingLevel = 0;
+			u16 mOrnamentationIcon = 0;
 			char unknown046[2];
 		};
 
 		// C->S
 		struct OpenContainer : public Fixed<OpenContainer> {
-			uint32 mSlot = 0;
+			u32 mSlot = 0;
 		};
 
 		// C<->S
 		struct TradeRequest : public FixedT<TradeRequest, OP_TradeRequest> {
-			uint32 mToSpawnID = 0;
-			uint32 mFromSpawnID = 0;
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
 		};
 
 		// S->C
 		struct TradeRequestAcknowledge : public FixedT<TradeRequestAcknowledge, OP_TradeRequestAck> {
-			static EQApplicationPacket* construct(const uint32 pToSpawnID, const uint32 pFromSpawnID) {
+			static EQApplicationPacket* construct(const u32 pToSpawnID, const u32 pFromSpawnID) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mToSpawnID = pToSpawnID;
@@ -763,13 +763,13 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mToSpawnID = 0;
-			uint32 mFromSpawnID = 0;
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
 		};
 
 		// C->S
 		struct TradeCancel : public FixedT<TradeCancel, OP_CancelTrade> {
-			static EQApplicationPacket* construct(const uint32 pToSpawnID, const uint32 pFromSpawnID) {
+			static EQApplicationPacket* construct(const u32 pToSpawnID, const u32 pFromSpawnID) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mToSpawnID = pToSpawnID;
@@ -777,8 +777,8 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mToSpawnID = 0;
-			uint32 mFromSpawnID = 0;
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "[TradeCancel] ";
@@ -790,8 +790,8 @@ namespace Payload {
 
 		// C->S
 		struct TradeAccept : public Fixed<TradeAccept> {
-			uint32 mFromSpawnID = 0;
-			uint32 mUnknown0 = 0;
+			u32 mFromSpawnID = 0;
+			u32 mUnknown0 = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "[TradeAccept] ";
@@ -803,12 +803,12 @@ namespace Payload {
 
 		// C<->S
 		struct TradeBusy : public Fixed<TradeBusy> {
-			uint32 mToSpawnID = 0;
-			uint32 mFromSpawnID = 0;
-			uint8 mType = 0;
-			uint8 mUnknown0 = 0;
-			uint8 mUnknown1 = 0;
-			uint8 mUnknown2 = 0;
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
+			u8 mType = 0;
+			u8 mUnknown0 = 0;
+			u8 mUnknown1 = 0;
+			u8 mUnknown2 = 0;
 		};
 
 		// C->S
@@ -818,11 +818,11 @@ namespace Payload {
 
 		// C->S
 		struct MoveCoin : public Fixed<MoveCoin> {
-			uint32 mFromSlot = 0;
-			uint32 mToSlot = 0;
-			uint32 mFromType = 0;
-			uint32 mToType = 0;
-			int32 mAmount = 0;
+			u32 mFromSlot = 0;
+			u32 mToSlot = 0;
+			u32 mFromType = 0;
+			u32 mToType = 0;
+			i32 mAmount = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "[MoveCoin] ";
@@ -837,7 +837,7 @@ namespace Payload {
 
 		// C<-S
 		struct MoneyUpdate : public FixedT<MoneyUpdate, OP_MoneyUpdate> {
-			static EQApplicationPacket* construct(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+			static EQApplicationPacket* construct(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mPlatinum = pPlatinum;
@@ -847,17 +847,17 @@ namespace Payload {
 
 				return packet;
 			}
-			int32 mPlatinum = 0;
-			int32 mGold = 0;
-			int32 mSilver = 0;
-			int32 mCopper = 0;
+			i32 mPlatinum = 0;
+			i32 mGold = 0;
+			i32 mSilver = 0;
+			i32 mCopper = 0;
 		};
 
 		// C->S
 		struct CrystalCreate : public Fixed<CrystalCreate>  {
-			enum Type : uint32 { RADIANT = 4, EBON = 5 };
-			uint32 mType = 0;
-			uint32 mAmount = 0;
+			enum Type : u32 { RADIANT = 4, EBON = 5 };
+			u32 mType = 0;
+			u32 mAmount = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "[CrystalCreate] ";
@@ -869,10 +869,10 @@ namespace Payload {
 
 		// S->C
 		struct CrystalUpdate : public FixedT<CrystalUpdate, OP_CrystalCountUpdate> {
-			uint32 mRadiantCrystals = 0;
-			uint32 mEbonCrystals = 0;
-			uint32 mTotalRadiantCrystals = 0;
-			uint32 mTotalEbonCrystals = 0;
+			u32 mRadiantCrystals = 0;
+			u32 mEbonCrystals = 0;
+			u32 mTotalRadiantCrystals = 0;
+			u32 mTotalEbonCrystals = 0;
 		};
 
 		// S->C
@@ -898,7 +898,7 @@ namespace Payload {
 
 		// S->C
 		struct ActorHPUpdate : public FixedT<ActorHPUpdate, OP_MobHealth> {
-			static EQApplicationPacket* construct(const uint16 pSpawnID, const uint8 pHPPercent) {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u8 pHPPercent) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -906,14 +906,14 @@ namespace Payload {
 
 				return packet;
 			}
-			int16 mSpawnID = 0;
-			uint8 mHPPercent = 0;
+			i16 mSpawnID = 0;
+			u8 mHPPercent = 0;
 		};
 
 		// C->S
 		struct MarkNPC : public FixedT<MarkNPC, OP_MarkNPC> {
 			MarkNPC() { memset(mName, 0, sizeof(mName)); }
-			static EQApplicationPacket* construct(const uint32 pSpawnID, const uint32 pNumber, const String& pName) {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const u32 pNumber, const String& pName) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
@@ -922,8 +922,8 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mSpawnID = 0;
-			uint32 mNumber = 1;
+			u32 mSpawnID = 0;
+			u32 mNumber = 1;
 			char mName[64];
 		};
 
@@ -948,20 +948,20 @@ namespace Payload {
 			char mText[4096];
 			char mLeftButtonName[25];
 			char mRightButtonName[25];
-			uint8 mShowButtons = 0;
-			uint8 __Unknown0 = 0;
-			uint32 mDuration = 0;
-			uint32 mLeftButtonResponse = 1;
-			uint32 mRightButtonResponse = 2;
-			uint32 __Unknown1 = 0;
+			u8 mShowButtons = 0;
+			u8 __Unknown0 = 0;
+			u32 mDuration = 0;
+			u32 mLeftButtonResponse = 1;
+			u32 mRightButtonResponse = 2;
+			u32 __Unknown1 = 0;
 		};
 
 		// C->S
 		struct AugmentItem : public Fixed<AugmentItem> {
 			AugmentItem() { memset(mUnknown, 0, sizeof(mUnknown)); }
-			int16 mContainerSlot = 0;
+			i16 mContainerSlot = 0;
 			char mUnknown[2];
-			int32 mAugmentSlot = 0; // -1 = Insert
+			i32 mAugmentSlot = 0; // -1 = Insert
 
 			String _debug() const {
 				StringStream ss;
@@ -977,9 +977,9 @@ namespace Payload {
 		// C->S
 		struct AugmentInformation : public Fixed<AugmentInformation> {
 			AugmentInformation() { memset(mUnknown, 0, sizeof(mUnknown)); }
-			uint32 mID = 0;
-			uint8 mWindow = 0;
-			uint8 mUnknown[71];
+			u32 mID = 0;
+			u8 mWindow = 0;
+			u8 mUnknown[71];
 
 			String _debug() const {
 				StringStream ss;
@@ -993,11 +993,11 @@ namespace Payload {
 		// C->S
 		struct BookRequest : Fixed<BookRequest> {
 			BookRequest() { memset(mText, 0, sizeof(mText)); }
-			uint32 mWindow = 0;		// where to display the text (0xFFFFFFFF means new window).
-			uint32 mSlot = 0;		// The inventory slot the book is in. Not used, but echoed in the response packet.
-			uint32 mType = 0;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
-			uint32 mUnknown0 = 0;
-			uint16 mUnknown1 = 0;
+			u32 mWindow = 0;		// where to display the text (0xFFFFFFFF means new window).
+			u32 mSlot = 0;		// The inventory slot the book is in. Not used, but echoed in the response packet.
+			u32 mType = 0;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
+			u32 mUnknown0 = 0;
+			u16 mUnknown1 = 0;
 			char mText[8194];
 
 			String _debug() const {
@@ -1014,7 +1014,7 @@ namespace Payload {
 
 		// C->S
 		struct Combine : Fixed<Combine> {
-			uint32 mSlot = 0;
+			u32 mSlot = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "{Combine} ";
@@ -1025,7 +1025,7 @@ namespace Payload {
 
 		// C<->S
 		struct ShopRequest : FixedT<ShopRequest, OP_ShopRequest> {
-			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pCharacterSpawnID, const uint32 pAction, const float pRate) {
+			static EQApplicationPacket* construct(const u32 pNPCSpawnID, const u32 pCharacterSpawnID, const u32 pAction, const float pRate) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mNPCSpawnID = pNPCSpawnID;
@@ -1036,9 +1036,9 @@ namespace Payload {
 				return packet;
 			}
 
-			uint32 mNPCSpawnID = 0;
-			uint32 mCharacterSpawnID = 0;
-			uint32 mAction = 0;
+			u32 mNPCSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
+			u32 mAction = 0;
 			float mRate = 0.0F;
 
 			String _debug() const {
@@ -1054,13 +1054,13 @@ namespace Payload {
 
 		// C->S
 		struct ShopEnd : Fixed<ShopEnd> {
-			uint32 mNPCSpawnID = 0;
-			uint32 mCharacterSpawnID = 0;
+			u32 mNPCSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
 		};
 
 		// C<->S
 		struct ShopSell : FixedT<ShopSell, OP_ShopPlayerSell>{
-			static EQApplicationPacket* construct(const uint32 pNPCSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+			static EQApplicationPacket* construct(const u32 pNPCSpawnID, const u32 pSlotID, const u32 pStacks, const u32 pPrice) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mNPCSpawnID = pNPCSpawnID;
@@ -1071,10 +1071,10 @@ namespace Payload {
 				return packet;
 			}
 
-			uint32 mNPCSpawnID = 0;
-			uint32 mSlotID = 0;
-			uint32 mStacks = 0;
-			uint32 mPrice = 0; // When UF sends this, mPrice is undefined. Ignore it.
+			u32 mNPCSpawnID = 0;
+			u32 mSlotID = 0;
+			u32 mStacks = 0;
+			u32 mPrice = 0; // When UF sends this, mPrice is undefined. Ignore it.
 
 			String _debug() const {
 				StringStream ss;
@@ -1089,7 +1089,7 @@ namespace Payload {
 
 		// C<->S
 		struct ShopBuy : public FixedT<ShopBuy, OP_ShopPlayerBuy> {
-			static EQApplicationPacket* construct(const uint32 pCharacterSpawnID, const uint32 pNPCSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse = 0) {
+			static EQApplicationPacket* construct(const u32 pCharacterSpawnID, const u32 pNPCSpawnID, const u32 pItemInstanceID, const u32 pStacks, const uint64 pPrice, const u32 pResponse = 0) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mNPCSpawnID = pNPCSpawnID;
@@ -1102,12 +1102,12 @@ namespace Payload {
 				return packet;
 			}
 
-			uint32 mNPCSpawnID = 0;
-			uint32 mCharacterSpawnID = 0;
-			uint32 mItemInstanceID = 0;
-			uint32 mResponse = 0; // -1 = silent failure, 0 = success.
-			uint32 mStacks = 0;
-			uint32 mUnknown4 = 0;
+			u32 mNPCSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
+			u32 mItemInstanceID = 0;
+			u32 mResponse = 0; // -1 = silent failure, 0 = success.
+			u32 mStacks = 0;
+			u32 mUnknown4 = 0;
 			uint64 mPrice = 0;
 
 			String _debug() const {
@@ -1127,7 +1127,7 @@ namespace Payload {
 		// C->S
 		// Not sure how this works yet.
 		struct ShopDeleteItem : public FixedT<ShopDeleteItem, OP_ShopDelItem> {
-			static EQApplicationPacket* construct(const uint32 pCharacterSpawnID, const uint32 pNPCSpawnID, const uint32 pItemInstanceID, const uint32 pUnknown) {
+			static EQApplicationPacket* construct(const u32 pCharacterSpawnID, const u32 pNPCSpawnID, const u32 pItemInstanceID, const u32 pUnknown) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mNPCSpawnID = pNPCSpawnID;
@@ -1138,10 +1138,10 @@ namespace Payload {
 				return packet;
 			}
 
-			uint32 mNPCSpawnID = 0;
-			uint32 mCharacterSpawnID = 0;
-			uint32 mItemInstanceID = 0;
-			uint32 mUnknown = 0;
+			u32 mNPCSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
+			u32 mItemInstanceID = 0;
+			u32 mUnknown = 0;
 		};
 
 		// S->C
@@ -1149,7 +1149,7 @@ namespace Payload {
 			UpdateAlternateCurrency() {
 				memset(mCharacterName, 0, sizeof(mCharacterName));
 			}
-			static EQApplicationPacket* construct(const String& pCharacterName, const uint32 pCurrencyID, const uint32 pQuantity) {
+			static EQApplicationPacket* construct(const String& pCharacterName, const u32 pCurrencyID, const u32 pQuantity) {
 				auto packet = create();
 				auto payload = convert(packet);
 				strcpy(payload->mCharacterName, pCharacterName.c_str());
@@ -1158,22 +1158,22 @@ namespace Payload {
 
 				return packet;
 			}
-			uint32 mAction = 7;
+			u32 mAction = 7;
 			char mCharacterName[64];
-			uint32 mCurrencyID = 0;
-			uint32 mUnknown0 = 1; // Copied.
-			uint32 mQuantity = 0;
-			uint32 mUnknown1 = 0; // Copied.
-			uint32 mUnknown2 = 0; // Copied.
+			u32 mCurrencyID = 0;
+			u32 mUnknown0 = 1; // Copied.
+			u32 mQuantity = 0;
+			u32 mUnknown1 = 0; // Copied.
+			u32 mUnknown2 = 0; // Copied.
 		};
 
 		// C->S
 		struct AlternateCurrencyReclaim : Fixed<AlternateCurrencyReclaim> {
-			enum Action : uint32 { Create = 0, Reclaim = 1 };
-			uint32 mCurrencyID = 0;
-			uint32 mUnknown0 = 0;
-			uint32 mStacks = 0;
-			uint32 mAction = 0; //1 = this is reclaim
+			enum Action : u32 { Create = 0, Reclaim = 1 };
+			u32 mCurrencyID = 0;
+			u32 mUnknown0 = 0;
+			u32 mStacks = 0;
+			u32 mAction = 0; //1 = this is reclaim
 
 			String _debug() const {
 				StringStream ss;
@@ -1188,8 +1188,8 @@ namespace Payload {
 
 		// C->S
 		struct RandomRequest : Fixed<RandomRequest> {
-			uint32 mLow = 0;
-			uint32 mHigh = 0;
+			u32 mLow = 0;
+			u32 mHigh = 0;
 		};
 
 		// S->C
@@ -1215,24 +1215,24 @@ namespace Payload {
 		//	Object() {
 		//		memset(mAsset, 0, sizeof(mAsset));
 		//	}
-		//	uint32	linked_list_addr[2];
-		//	uint32	unknown008 = 0;
-		//	uint32	drop_id = 0;
+		//	u32	linked_list_addr[2];
+		//	u32	unknown008 = 0;
+		//	u32	drop_id = 0;
 		//	u16	mZoneID = 0;
 		//	u16 mInstanceID = 0;
-		//	uint32	unknown020 = 0;
-		//	uint32	unknown024 = 0;
+		//	u32	unknown020 = 0;
+		//	u32	unknown024 = 0;
 		//	float mHeading = 0.0f;
-		//	uint8	unknown032[8];
+		//	u8	unknown032[8];
 		//	float mSize = 1.0f;
 		//	float mZ = 0.0f;
 		//	float mX = 0.0f;
 		//	float mY = 0.0f;
 		//	char mAsset[32];
-		//	uint32	unknown088;
+		//	u32	unknown088;
 		//	u32 mType = 0;
-		//	uint8	unknown096[4];
-		//	uint32 mSpawnID = 0;
+		//	u8	unknown096[4];
+		//	u32 mSpawnID = 0;
 		//};
 
 		// S->C
@@ -1300,16 +1300,16 @@ namespace Payload {
 		// C->S
 		struct LoginInformation : public Fixed<LoginInformation> {
 			char mInformation[64]; // Account ID and Account Key
-			uint8 mUnknown0[124];
-			uint8 mZoning;
-			uint8 mUnknown1[275];
+			u8 mUnknown0[124];
+			u8 mZoning;
+			u8 mUnknown1[275];
 		};
 
 		// C->S
 		struct EnterWorld : public Fixed<EnterWorld> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-			uint32 mTutorial = 0;
-			uint32 mReturnHome = 0;
+			u32 mTutorial = 0;
+			u32 mReturnHome = 0;
 		};
 
 		// C->S
@@ -1321,99 +1321,99 @@ namespace Payload {
 		};
 
 		struct CreateCharacter : public Fixed<CreateCharacter> {
-			uint32 mClass = 0;
-			uint32 mHairColour = 0;
-			uint32 mBeardColour = 0;
-			uint32 mBeardStyle = 0;
-			uint32 mGender = 0;
-			uint32 mRace = 0;
-			uint32 mStartZoneID = 0;
-			uint32 mHairStyle = 0;
-			uint32 mDeity = 0;
-			uint32 mStrength = 0;
-			uint32 mStamina = 0;
-			uint32 mAgility = 0;
-			uint32 mDexterity = 0;
-			uint32 mWisdom = 0;
-			uint32 mIntelligence = 0;
-			uint32 mCharisma = 0;
-			uint32 mFaceStyle = 0;
-			uint32 mEyeColour1 = 0;
-			uint32 mEyeColour2 = 0;
-			uint32 mDrakkinHeritage = 0;
-			uint32 mDrakkinTattoo = 0;
-			uint32 mDrakkinDetails = 0;
+			u32 mClass = 0;
+			u32 mHairColour = 0;
+			u32 mBeardColour = 0;
+			u32 mBeardStyle = 0;
+			u32 mGender = 0;
+			u32 mRace = 0;
+			u32 mStartZoneID = 0;
+			u32 mHairStyle = 0;
+			u32 mDeity = 0;
+			u32 mStrength = 0;
+			u32 mStamina = 0;
+			u32 mAgility = 0;
+			u32 mDexterity = 0;
+			u32 mWisdom = 0;
+			u32 mIntelligence = 0;
+			u32 mCharisma = 0;
+			u32 mFaceStyle = 0;
+			u32 mEyeColour1 = 0;
+			u32 mEyeColour2 = 0;
+			u32 mDrakkinHeritage = 0;
+			u32 mDrakkinTattoo = 0;
+			u32 mDrakkinDetails = 0;
 		};
 
 		// S->C
 		// Based on: LogServer_Struct
 		struct LogServer : public Fixed<LogServer> {
-			uint32 mUknown0 = 0;
-			uint8 mPVPEnabled = 0;
-			uint8 mUnknown1 = 0;
-			uint8 mUnknown2 = 0;
-			uint8 mUnknown3 = 0;
-			uint8 mFVEnabled = 0;
-			uint8 mUnknown4 = 0;
-			uint8 mUnknown5 = 0;
-			uint8 mUnknown6 = 0;
-			uint32 mUnknown7 = 0;
-			uint32 mUnknown8 = 0;
-			uint8 mUnknown9 = 0;
+			u32 mUknown0 = 0;
+			u8 mPVPEnabled = 0;
+			u8 mUnknown1 = 0;
+			u8 mUnknown2 = 0;
+			u8 mUnknown3 = 0;
+			u8 mFVEnabled = 0;
+			u8 mUnknown4 = 0;
+			u8 mUnknown5 = 0;
+			u8 mUnknown6 = 0;
+			u32 mUnknown7 = 0;
+			u32 mUnknown8 = 0;
+			u8 mUnknown9 = 0;
 			char mWorldShortName[32];
-			uint8 mUnknown10[32];
+			u8 mUnknown10[32];
 			char mUnknown11[16];
 			char mUnknown12[16];
-			uint8 mUnknown13[48];
-			uint32 mUnknown14;
+			u8 mUnknown13[48];
+			u32 mUnknown14;
 			char mUnknown15[80];
-			uint8 mEnablePetitionWindow = 0;
-			uint8 mEnabledVoiceMacros = 0;
-			uint8 mEnableEmail = 0;
-			uint8 mEnableTutorial = 0;
+			u8 mEnablePetitionWindow = 0;
+			u8 mEnabledVoiceMacros = 0;
+			u8 mEnableEmail = 0;
+			u8 mEnableTutorial = 0;
 		};
 
 		// S->C
 		// Based on: ExpansionInfo_Struct
 		struct ExpansionInfo : public Fixed<ExpansionInfo> {
-			uint32 mExpansions = 0;
+			u32 mExpansions = 0;
 		};
 
 		// S->C
 		// Based on: CharacterSelect_Struct
 		struct CharacterSelect : public Fixed<CharacterSelect> {
-			uint32 mRaces[18];
+			u32 mRaces[18];
 			Colour mEquipmentColours[18][9];
-			uint8 mBeardColours[18];
-			uint8 mHairStyles[18];
-			uint32 mEquipment[18][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
-			uint32 mSecondaryItems[18];
-			uint32 mDrakkinHeritages[18];
-			uint32 mDrakkinTattoos[18];
-			uint32 mDrakkinDetails[18];
-			uint32 mDeities[18];
-			uint8 mGoHomeAvailable[18];
-			uint8 mTutorialAvailable[18];
-			uint8 mBeardStyles[18];
-			uint8	unknown902[18];			// 10x ff
-			uint32 mPrimaryItems[18]; // ID File
-			uint8 mHairColours[18];
-			uint8	unknown0962[2];			// 2x 00
-			uint32 mZoneIDs[18];
-			uint8 mClasses[18];
-			uint8 mFaceStyles[18];
+			u8 mBeardColours[18];
+			u8 mHairStyles[18];
+			u32 mEquipment[18][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
+			u32 mSecondaryItems[18];
+			u32 mDrakkinHeritages[18];
+			u32 mDrakkinTattoos[18];
+			u32 mDrakkinDetails[18];
+			u32 mDeities[18];
+			u8 mGoHomeAvailable[18];
+			u8 mTutorialAvailable[18];
+			u8 mBeardStyles[18];
+			u8	unknown902[18];			// 10x ff
+			u32 mPrimaryItems[18]; // ID File
+			u8 mHairColours[18];
+			u8	unknown0962[2];			// 2x 00
+			u32 mZoneIDs[18];
+			u8 mClasses[18];
+			u8 mFaceStyles[18];
 			char mNames[18][64];
-			uint8 mGenders[18];
-			uint8	eyecolor1[18];			// Characters Eye Color
-			uint8	eyecolor2[18];			// Characters Eye 2 Color
-			uint8 mLevels[18];
+			u8 mGenders[18];
+			u8	eyecolor1[18];			// Characters Eye Color
+			u8	eyecolor2[18];			// Characters Eye 2 Color
+			u8 mLevels[18];
 		};
 
 		// S->C
 		// Based on: NameGeneration_Struct
 		struct NameGeneration : public Fixed<NameGeneration> {
-			uint32 mRace = 0;
-			uint32 mGender = 0;
+			u32 mRace = 0;
+			u32 mGender = 0;
 			char mName[64];
 		};
 
@@ -1421,48 +1421,48 @@ namespace Payload {
 		// Based on: ZoneServerInfo_Struct
 		struct ZoneServerInfo : public Fixed<ZoneServerInfo> {
 			char mIP[128];
-			uint16 mPort = 0;
+			u16 mPort = 0;
 		};
 
 		// S->C
 		// Based on: ZoneUnavail_Struct
 		struct ZoneUnavailable : public Fixed<ZoneUnavailable> {
 			char mZoneName[16];
-			int16 mUnknown0[4];
+			i16 mUnknown0[4];
 		};
 
 		// S->C
 		// Based on: ApproveWorld_Struct
 		struct ApproveWorld : public Fixed<ApproveWorld> {
-			uint8 mUnknown0[544];
+			u8 mUnknown0[544];
 		};
 	}
 
 	namespace LoginServer {
 
 		struct ConnectRequest : public Fixed<ConnectRequest> {
-			uint32 mAccountID = 0;
-			uint32 mWorldID = 0;
-			uint32 mFromID = 0;
-			uint32 mToID = 0;
+			u32 mAccountID = 0;
+			u32 mWorldID = 0;
+			u32 mFromID = 0;
+			u32 mToID = 0;
 		};
 
 		struct ConnectResponse : public Fixed<ConnectResponse> {
-			uint32 mAccountID = 0;
-			uint32 mWorldID = 0;
+			u32 mAccountID = 0;
+			u32 mWorldID = 0;
 			ResponseID mResponse = ResponseID::ALLOWED;
-			uint32 mFromID = 0;
-			uint32 mToID = 0;
+			u32 mFromID = 0;
+			u32 mToID = 0;
 		};
 
 		struct ClientAuthentication : public Fixed<ClientAuthentication> {
-			uint32 mAccountID = 0;
+			u32 mAccountID = 0;
 			char mAccountName[Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH];
 			char mKey[Limits::LoginServer::MAX_KEY_LENGTH];
-			uint8 mLoginServerAdmin = 0; // Ignored.
-			int16 mWorldAdmin = 0; // Ignored.
-			uint32 mIP = 0;
-			uint8 mLocal = 0;
+			u8 mLoginServerAdmin = 0; // Ignored.
+			i16 mWorldAdmin = 0; // Ignored.
+			u32 mIP = 0;
+			u8 mLocal = 0;
 		};
 	}
 
@@ -1480,10 +1480,10 @@ namespace Payload {
 
 		// Used for changing both banker and alt status of a guild member.
 		struct BankerAltStatus : public Fixed<BankerAltStatus> {
-			uint32 mUnknown = 0;
+			u32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
 			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
-			uint32 mStatus = 0;
+			u32 mStatus = 0;
 		};
 
 		// S->C
@@ -1495,19 +1495,19 @@ namespace Payload {
 		struct LevelUpdate {
 			GuildID mGuildID; // why?!
 			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
-			uint32 mLevel;
+			u32 mLevel;
 		};
 
 		struct MOTD {
-			uint32 mUnknown0;
+			u32 mUnknown0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Receiver name.. why.
 			char mSetByName[Limits::Character::MAX_NAME_LENGTH];
-			uint32 mUnknown1;
+			u32 mUnknown1;
 			char mMOTD[Limits::Guild::MAX_MOTD_LENGTH];
 		};
 
 		struct GuildUpdate {
-			enum Action : uint32 { GUILD_URL = 0, GUILD_CHANNEL = 1 };
+			enum Action : u32 { GUILD_URL = 0, GUILD_CHANNEL = 1 };
 			Action mAction;
 			char mUnknown0[76];
 			char mText[512];
@@ -1515,7 +1515,7 @@ namespace Payload {
 		};
 
 		struct PublicNote {
-			uint32 mUnknown;
+			u32 mUnknown;
 			char mSenderName[Limits::Character::MAX_NAME_LENGTH];
 			char mTargetName[Limits::Character::MAX_NAME_LENGTH];
 			char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
@@ -1525,16 +1525,16 @@ namespace Payload {
 			GuildID mGuildID;
 			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
 			ZoneID mZoneID;
-			uint16 mInstanceID;
-			uint32 mLastSeen;
+			u16 mInstanceID;
+			u32 mLastSeen;
 		};
 	}
 
 	// C->S
 	struct PositionUpdate : public Fixed<PositionUpdate> {
-		uint16 mSpawnID = 0;
-		uint16 mSequence = 0;
-		/*0004*/ uint8		unknown0004[4];		// ***Placeholder
+		u16 mSpawnID = 0;
+		u16 mSequence = 0;
+		/*0004*/ u8		unknown0004[4];		// ***Placeholder
 		float mX = 0.0f;
 		float mY = 0.0f;
 		/*0016*/ signed		delta_heading : 10;	// change in heading
@@ -1552,7 +1552,7 @@ namespace Payload {
 
 	// S->C
 	struct ActorPosition : public FixedT<ActorPosition, OP_ClientUpdate> {
-		uint16 mSpawnID = 0;
+		u16 mSpawnID = 0;
 		signed padding0000 : 12;
 		signed mDeltaX : 13;
 		signed padding0005 : 7;
@@ -1585,12 +1585,12 @@ namespace Payload {
 			mFlags.mShowHelm = 1;
 		}
 		char mName[100]; // Variable
-		uint32 mSpawnID = 0;
-		uint8 mLevel = 1;
+		u32 mSpawnID = 0;
+		u8 mLevel = 1;
 		// Destructible Object writes 4 bytes, float = 10.
 		// Else writes 4 bytes, float, SpawnSize - 0.7 comment = eye height?
 		float mViewOffset = 0.7f;
-		uint8 mActorType = 0;
+		u8 mActorType = 0;
 		struct ActorFlags {
 			unsigned mIsPet : 1;		// Could be 'is summoned pet' rather than just is pet.
 			unsigned mIsAFK : 1;		// 0=no, 1=afk
@@ -1626,7 +1626,7 @@ namespace Payload {
 			unsigned mIsBuyer : 1; // No observed effect on NPCs. Added "Buyer" to PC name + <Unknown Guild> + removed title.
 		};
 		ActorFlags mFlags;
-		uint8 mOtherFlags = 0;
+		u8 mOtherFlags = 0;
 		float __Unknown0 = -1; // Destructible writes 0, else writes -1 float.
 		float __Unknown1 = 0; // HC as 0
 
@@ -1641,87 +1641,87 @@ namespace Payload {
 		char mName[100]; // Variable
 		char mUnknown[100]; // Variable, Unknown
 
-		uint32 mAppearance = 0;
-		uint32 mUnknown0 = 0;
+		u32 mAppearance = 0;
+		u32 mUnknown0 = 0;
 
-		uint32 mID0 = 0;
-		uint32 mID1 = 0;
-		uint32 mID2 = 0;
-		uint32 mID3 = 0;
+		u32 mID0 = 0;
+		u32 mID1 = 0;
+		u32 mID2 = 0;
+		u32 mID3 = 0;
 
-		uint32 mUnknown1 = 0;
-		uint32 mUnknown2 = 0;
-		uint32 mUnknown3 = 0;
-		uint32 mUnknown4 = 0;
-		uint32 mUnknown5 = 0;
-		uint32 mUnknown6 = 0;
-		uint8 mUnknown7
-		uint32 mUnknown8 = 0;
+		u32 mUnknown1 = 0;
+		u32 mUnknown2 = 0;
+		u32 mUnknown3 = 0;
+		u32 mUnknown4 = 0;
+		u32 mUnknown5 = 0;
+		u32 mUnknown6 = 0;
+		u8 mUnknown7
+		u32 mUnknown8 = 0;
 		};
 		Destructible mDestructible;
 		*/
 
 		float mSize = 0.0f;
-		uint8 mFaceStyle = 0;
+		u8 mFaceStyle = 0;
 		float mWalkSpeed = 3.0f;
 		float mRunSpeed = 6.0f;
-		uint32 mRace = 0;
-		uint8 mPropertyCount = 1; // HC 1. Add 4 bytes per count after.
-		uint32 mBodyType = 0;
-		uint8 mHPPercent = 100; // Percentage: 0-100
-		uint8 mHairColour = 0;
-		uint8 mBeardColour = 0;
-		uint8 mLeftEyeColour = 0;
-		uint8 mRightEyeColour = 0;
-		uint8 mHairStyle = 0;
-		uint8 mBeardStyle = 0;
-		uint32 mDrakkinHeritage = 0;
-		uint32 mDrakkinTattoo = 0;
-		uint32 mDrakkinDetails = 0;
-		uint8 __Unknown3 = 0;
-		uint32 mDeity = 0;
-		uint32 mGuildID = NO_GUILD;
-		uint32 mGuildRank = 0;
-		uint8 mClass = 0;
-		uint8 mPVP = 0;
-		uint8 mStandState = 100;
-		uint8 mLight = 0;
-		uint8 mFlyMode = 0;
-		uint8 mTexture = 0; // Does not affect Characters.
-		uint8 __Unknown5 = 0;
-		uint8 __Unknown6 = 0;
-		uint8 mShowHelm = 0; // TODO: Figure out how this works.
+		u32 mRace = 0;
+		u8 mPropertyCount = 1; // HC 1. Add 4 bytes per count after.
+		u32 mBodyType = 0;
+		u8 mHPPercent = 100; // Percentage: 0-100
+		u8 mHairColour = 0;
+		u8 mBeardColour = 0;
+		u8 mLeftEyeColour = 0;
+		u8 mRightEyeColour = 0;
+		u8 mHairStyle = 0;
+		u8 mBeardStyle = 0;
+		u32 mDrakkinHeritage = 0;
+		u32 mDrakkinTattoo = 0;
+		u32 mDrakkinDetails = 0;
+		u8 __Unknown3 = 0;
+		u32 mDeity = 0;
+		u32 mGuildID = NO_GUILD;
+		u32 mGuildRank = 0;
+		u8 mClass = 0;
+		u8 mPVP = 0;
+		u8 mStandState = 100;
+		u8 mLight = 0;
+		u8 mFlyMode = 0;
+		u8 mTexture = 0; // Does not affect Characters.
+		u8 __Unknown5 = 0;
+		u8 __Unknown6 = 0;
+		u8 mShowHelm = 0; // TODO: Figure out how this works.
 
 		char mLastName[100];
 
-		uint32 mAAtitle = 0; // TODO: Figure out how this works.
-		uint8 __Unknown8 = 0;
-		uint32 mOwnerSpawnID = 0; // Pet Owner.
-		uint8 __Unknown9 = 0;
-		uint32 __Unknown10 = 0; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
-		uint32 __Unknown11 = 0;
-		uint32 __Unknown12 = 0;
-		uint32 __Unknown13 = 0;
-		uint32 __Unknown14 = 0xFFFFFFFF; // Copied HC
-		uint16 __Unknown15 = 0xFFFF; // Copied HC
+		u32 mAAtitle = 0; // TODO: Figure out how this works.
+		u8 __Unknown8 = 0;
+		u32 mOwnerSpawnID = 0; // Pet Owner.
+		u8 __Unknown9 = 0;
+		u32 __Unknown10 = 0; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+		u32 __Unknown11 = 0;
+		u32 __Unknown12 = 0;
+		u32 __Unknown13 = 0;
+		u32 __Unknown14 = 0xFFFFFFFF; // Copied HC
+		u16 __Unknown15 = 0xFFFF; // Copied HC
 
 		ActorPosition mPosition;
 
-		uint32 mColours[9];
+		u32 mColours[9];
 
 		struct Equipment {
-			uint32 mMaterial = 0;
-			uint32 mEquip1 = 0;
-			uint32 mItemID = 0;
+			u32 mMaterial = 0;
+			u32 mEquip1 = 0;
+			u32 mItemID = 0;
 		};
 		Equipment mEquipment[9];
 
 		char mTitle[100]; // Variable
 		char mSuffix[100]; // Variable
 
-		uint32 __Unknown16 = 0;
-		uint32 __Unknown17 = 0;
-		uint8 mIsMercenary = 0;
+		u32 __Unknown16 = 0;
+		u32 __Unknown17 = 0;
+		u8 mIsMercenary = 0;
 
 		char mUnknowns[28];
 	};
