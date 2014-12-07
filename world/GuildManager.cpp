@@ -785,7 +785,7 @@ void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCha
 		return;
 	}
 
-	StringID stringID = StringID::SI_NONE;
+	u32 stringID = StringID::SI_NONE;
 	String message = "";
 
 	// Same Guild

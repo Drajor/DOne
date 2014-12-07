@@ -833,8 +833,8 @@ namespace Payload {
 		};
 
 		// S->C
-		struct HPUpdate : public FixedT<HPUpdate, OP_HPUpdate> {
-			static EQApplicationPacket* construct(const int16 pSpawnID, const int32 pCurrentHP, const int32 pMaximumHP) {
+		struct HealthUpdate : public FixedT<HealthUpdate, OP_HPUpdate> {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const i32 pCurrentHP, const i32 pMaximumHP) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mCurrentHP = pCurrentHP;
@@ -843,9 +843,9 @@ namespace Payload {
 
 				return packet;
 			}
-			int32 mCurrentHP = 0;
-			int32 mMaximumHP = 0;
-			int16 mSpawnID = 0;
+			i32 mCurrentHP = 0;
+			i32 mMaximumHP = 0;
+			u16 mSpawnID = 0;
 		};
 
 		// S->C
@@ -1231,6 +1231,20 @@ namespace Payload {
 			char mMessage[EmoteLimits::MAX_MESSAGE];
 		};
 		
+		// S->C
+		struct SimpleMessage : FixedT<SimpleMessage, OP_SimpleMessage> {
+			static EQApplicationPacket* construct(const u32 pStringID, const u32 pType) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mStringID = pStringID;
+				payload->mType = pType;
+
+				return packet;
+			}
+			u32 mStringID = 0;
+			u32 mType = 0;
+			u32 mUnknown = 0;
+		};
 	}
 
 	namespace World {

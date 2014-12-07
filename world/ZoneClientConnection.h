@@ -49,11 +49,11 @@ public:
 	void dropConnection();
 
 	void sendPosition();
-	void sendMessage(MessageType pType, String pMessage);
-	void sendSimpleMessage(MessageType pType, StringID pStringID);
-	void sendSimpleMessage(MessageType pType, StringID pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
+	void sendMessage(const u32 pType, String pMessage);
+	void sendSimpleMessage(const u32 pType, const u32 pStringID);
+	void sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
 	void sendAppearance(uint16 pType, uint32 pParameter);
-	void sendHPUpdate();
+	void sendHealthUpdate();
 
 	void sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID);
 

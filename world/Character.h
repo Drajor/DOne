@@ -116,7 +116,7 @@ public:
 	inline void setZoningOut() { mIsZoningOut = true; }
 	inline bool isZoningOut() { return mIsZoningOut; }
 
-	void message(MessageType pType, String pMessage);
+	void message(const u32 pType, String pMessage);
 
 	// Target Group Buff
 	inline void setTGB(bool pTGB) { mTGB = pTGB; }

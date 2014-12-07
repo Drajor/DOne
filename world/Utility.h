@@ -156,7 +156,7 @@ namespace Utility {
 		return String(pCString);
 	}
 
-	static String StringIDString(StringID pStringID) {
+	static String StringIDString(const u32 pStringID) {
 		return std::to_string(static_cast<uint32>(pStringID));
 	}
 

@@ -1249,7 +1249,7 @@ header[0]
 header[1]
 */
 
-void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
+void ZoneClientConnection::sendMessage(const u32 pType, String pMessage) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
@@ -1257,7 +1257,7 @@ void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
 	payload->header[0] = 0x00; // Header used for #emote style messages..
 	payload->header[1] = 0x00; // Play around with these to see other types
 	payload->header[2] = 0x00;
-	payload->msg_type = static_cast<uint32>(pType);
+	payload->msg_type = pType;
 	strcpy(payload->message, pMessage.c_str());
 
 	sendPacket(packet);
@@ -1412,19 +1412,16 @@ void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 	// Ignore anything else, including the extra 2 packet UF sends.
 }
 
-void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID) {
+void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID) {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
-	auto payload = reinterpret_cast<SimpleMessage_Struct*>(packet->pBuffer);
-	payload->color = static_cast<uint32>(pType);
-	payload->string_id = static_cast<uint32>(pStringID);
-
+	auto packet = SimpleMessage::construct(pType, pStringID);
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
 	EXPECTED(mConnected);
 
 	int packetSize = 0;
@@ -1444,8 +1441,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	packetSize += sizeof(FormattedMessage_Struct);
 	auto packet = new EQApplicationPacket(OP_FormattedMessage, packetSize);
 	auto payload = reinterpret_cast<FormattedMessage_Struct*>(packet->pBuffer);
-	payload->type = static_cast<uint32>(pType);
-	payload->string_id = static_cast<uint32>(pStringID);
+	payload->type = pType;
+	payload->string_id = pStringID;
 
 	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
 	ds.movePointer(sizeof(FormattedMessage_Struct));
@@ -1467,18 +1464,13 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::sendHPUpdate() {
+void ZoneClientConnection::sendHealthUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	HPUpdate payload;
-	payload.mSpawnID = mCharacter->getSpawnID();
-	payload.mCurrentHP = mCharacter->getCurrentHP();
-	payload.mMaximumHP = mCharacter->getMaximumHP();
-
-	auto packet = HPUpdate::create(payload);
+	auto packet = HealthUpdate::construct(mCharacter->getSpawnID(), mCharacter->getCurrentHP(), mCharacter->getMaximumHP());
 	sendPacket(packet);
-	safe_delete(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
@@ -3261,7 +3253,7 @@ void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
 
 void ZoneClientConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
 {
-	sendHPUpdate();
+	sendHealthUpdate();
 }
 
 void ZoneClientConnection::sendPopup(const String& pTitle, const String& pText) {

@@ -210,12 +210,12 @@ void Character::startCamp() {
 	mCampTimer.Start(29000, true);
 }
 
-void Character::message(MessageType pType, String pMessage) {
+void Character::message(const u32 pType, String pMessage) {
 	mConnection->sendMessage(pType, pMessage);
 }
 
 void Character::healPercentage(int pPercent) {
-	mConnection->sendHPUpdate();
+	mConnection->sendHealthUpdate();
 }
 
 //void Character::damage(uint32 pAmount) {
