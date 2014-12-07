@@ -29,6 +29,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::RandomRequest::size());
 	EXPECT_EQ(76, Payload::Zone::RandomReply::size());
 	EXPECT_EQ(8, Payload::Zone::ExperienceUpdate::size());
+	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
 }
 
 // 
