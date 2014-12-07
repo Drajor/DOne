@@ -5,7 +5,6 @@
 
 struct ItemData;
 struct TransmutationComponent;
-struct SpellData;
 
 namespace Data {
 	struct Account;
@@ -15,6 +14,7 @@ namespace Data {
 	struct NPCAppearance;
 	struct Shop;
 	struct AlternateCurrency;
+	struct Spell;
 
 	typedef std::list<Data::Account*>& AccountList;
 	typedef std::list<Data::Zone*>& ZoneList;
@@ -55,7 +55,7 @@ public:
 	const bool loadNPCTypeData(Data::NPCTypeList pTypes);
 
 	// Spells
-	const bool loadSpells(SpellData* pSpellData, u32& pNumSpellsLoaded);
+	const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded);
 	
 	// Items
 	const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded);

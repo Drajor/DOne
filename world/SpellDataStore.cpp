@@ -10,7 +10,7 @@ const bool SpellDataStore::initialise() {
 	Log::status("[Spell Data Store] Initialising.");
 
 	// Allocate block of memory for spells.
-	mSpellData = new SpellData[Limits::Spells::MAX_SPELL_ID];
+	mSpellData = new Data::Spell[Limits::Spells::MAX_SPELL_ID];
 
 	// DataStore to load and populate.
 	uint32 numSpellsLoaded = 0;
@@ -20,7 +20,7 @@ const bool SpellDataStore::initialise() {
 	return true;
 }
 
-const SpellData* SpellDataStore::getData(const uint16 pSpellID) {
+const Data::Spell* SpellDataStore::getData(const uint16 pSpellID) {
 	EXPECTED_PTR(Limits::Spells::spellIDValid(pSpellID));
 	
 	auto spell = &mSpellData[pSpellID];
@@ -31,17 +31,17 @@ const SpellData* SpellDataStore::getData(const uint16 pSpellID) {
 }
 
 namespace Spell {
-	const SpellData* get(const uint16 pSpellID) {
+	const Data::Spell* get(const uint16 pSpellID) {
 		return SpellDataStore::getInstance().getData(pSpellID);
 	}
 
-	const bool canClassUse(const SpellData* pSpell, const uint8 pClassID, const uint8 pLevel) {
+	const bool canClassUse(const Data::Spell* pSpell, const uint8 pClassID, const uint8 pLevel) {
 		EXPECTED_BOOL(pSpell);
 		EXPECTED_BOOL(Limits::Character::classID(pClassID));
 		return pSpell->mRequiredClassLevels[pClassID] <= pLevel;
 	}
 
-	const bool zoneAllowed(const SpellData* pSpell, const Zone* pZone) {
+	const bool zoneAllowed(const Data::Spell* pSpell, const Zone* pZone) {
 		EXPECTED_BOOL(pSpell);
 		EXPECTED_BOOL(pZone);
 		// TODO:

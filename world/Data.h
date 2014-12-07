@@ -216,43 +216,41 @@ namespace Data {
 		u32 mID = 0;
 		std::map<u32, i32> mItems;
 	};
-}
 
-struct SpellData {
-	bool mInUse = false;
-	u32 mID = 0;
-	String mName = "";
+	struct Spell {
+		bool mInUse = false;
+		u32 mID = 0;
+		String mName = "";
 
-	String mYouCastMessage = "";
-	String mOtherCastsMessage = "";
-	String mCastOnYouMessage = ""; // "You are completely healed."
-	String mCastOnOtherMessage = ""; // " is completely healed."
-	String mFadeMessage = "";
+		String mYouCastMessage = "";
+		String mOtherCastsMessage = "";
+		String mCastOnYouMessage = ""; // "You are completely healed."
+		String mCastOnOtherMessage = ""; // " is completely healed."
+		String mFadeMessage = "";
 
-	i32 mManaCost = 0;
+		i32 mManaCost = 0;
 
-	// Class required levels.
-	u8 mWarriorLevel = 255;
-	u8 mClericLevel = 255;
-	u8 mPaladinLevel = 255;
-	u8 mRangerLevel = 255;
-	u8 mShadowKnightLevel = 255;
-	u8 mDruidLevel = 255;
-	u8 mMonkLevel = 255;
-	u8 mBardLevel = 255;
-	u8 mRogueLevel = 255;
-	u8 mShamanLevel = 255;
-	u8 mNecromancerLevel = 255;
-	u8 mWizardLevel = 255;
-	u8 mMagicianLevel = 255;
-	u8 mEnchanterLevel = 255;
-	u8 mBeastlordLevel = 255;
-	u8 mBerserkerLevel = 255;
-	u8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
+		// Class required levels.
+		u8 mWarriorLevel = 255;
+		u8 mClericLevel = 255;
+		u8 mPaladinLevel = 255;
+		u8 mRangerLevel = 255;
+		u8 mShadowKnightLevel = 255;
+		u8 mDruidLevel = 255;
+		u8 mMonkLevel = 255;
+		u8 mBardLevel = 255;
+		u8 mRogueLevel = 255;
+		u8 mShamanLevel = 255;
+		u8 mNecromancerLevel = 255;
+		u8 mWizardLevel = 255;
+		u8 mMagicianLevel = 255;
+		u8 mEnchanterLevel = 255;
+		u8 mBeastlordLevel = 255;
+		u8 mBerserkerLevel = 255;
+		u8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
 
-};
+	};
 
-namespace Data {
 	struct Fog {
 		u8 mRed = 0;
 		u8 mGreen = 0;

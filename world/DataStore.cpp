@@ -1080,9 +1080,9 @@ namespace SpellDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded) {
+const bool DataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
 	using namespace SpellDataXML;
-	EXPECTED_BOOL(pSpellData);
+	EXPECTED_BOOL(pSpells);
 	Profile p("DataStore::loadSpells");
 
 	pNumSpellsLoaded = 0;
@@ -1097,7 +1097,7 @@ const bool DataStore::loadSpells(SpellData* pSpellData, uint32& pNumSpellsLoaded
 		auto spellID = 0;
 		EXPECTED_BOOL(readAttribute(spellElement, Attribute::ID, spellID));
 		EXPECTED_BOOL(spellID > 0 && spellID < Limits::Spells::MAX_SPELL_ID);
-		SpellData* currentSpell = &pSpellData[spellID];
+		auto currentSpell = &pSpells[spellID];
 		currentSpell->mInUse = true;
 		currentSpell->mID = spellID;
 

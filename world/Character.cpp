@@ -679,7 +679,7 @@ const bool Character::finishCasting() {
 	return true;
 }
 
-const bool Character::preCastingChecks(const SpellData* pSpell) {
+const bool Character::preCastingChecks(const Data::Spell* pSpell) {
 	EXPECTED_BOOL(pSpell);
 
 	// Check: Caster has enough mana.
@@ -703,7 +703,7 @@ const bool Character::preCastingChecks(const SpellData* pSpell) {
 	return true;
 }
 
-const bool Character::postCastingChecks(const SpellData* pSpell) {
+const bool Character::postCastingChecks(const Data::Spell* pSpell) {
 	return true;
 }
 

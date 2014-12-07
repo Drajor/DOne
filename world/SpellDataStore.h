@@ -1,10 +1,14 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 #include "Singleton.h"
 
 class Zone;
-struct SpellData;
+
+namespace Data {
+	struct Spell;
+}
+
 class SpellDataStore : public Singleton<SpellDataStore> {
 private:
 	friend class Singleton<SpellDataStore>;
@@ -14,13 +18,13 @@ private:
 	void operator=(SpellDataStore const&); // Do not implement.
 public:
 	const bool initialise();
-	const SpellData* getData(const uint16 pSpellID);
+	const Data::Spell* getData(const uint16 pSpellID);
 private:
-	SpellData* mSpellData = nullptr;
+	Data::Spell* mSpellData = nullptr;
 };
 
 namespace Spell {
-	const SpellData* get(const uint16 pSpellID);
-	const bool canClassUse(const SpellData* pSpell, const uint8 pClassID, const uint8 pLevel);
-	const bool zoneAllowed(const SpellData* pSpell, const Zone* pZone);
+	const Data::Spell* get(const uint16 pSpellID);
+	const bool canClassUse(const Data::Spell* pSpell, const uint8 pClassID, const uint8 pLevel);
+	const bool zoneAllowed(const Data::Spell* pSpell, const Zone* pZone);
 }

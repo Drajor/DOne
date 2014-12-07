@@ -12,12 +12,12 @@ class Raid;
 class EQApplicationPacket;
 class ZoneClientConnection;
 
-struct SpellData;
 class Inventoryy;
 class Item;
 
 namespace Data {
 	struct Character;
+	struct Spell;
 }
 
 class Character : public Actor {
@@ -187,8 +187,8 @@ public:
 	const u16 getSpellBookSlot(const u32 pSpellID) const;
 
 	const bool canCast(const uint32 pSpellID) const;
-	const bool preCastingChecks(const SpellData* pSpell);
-	const bool postCastingChecks(const SpellData* pSpell);
+	const bool preCastingChecks(const Data::Spell* pSpell);
+	const bool postCastingChecks(const Data::Spell* pSpell);
 	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
 	const bool finishCasting();
 
