@@ -23,6 +23,7 @@ public:
 	inline const uint8 getMinimumParameters() const { return mMinimumParameters; }
 	inline const uint8 getMaximumParameters() const { return mMaximumParameters; }
 	inline const bool getRequiresTarget() const { return mRequiresTarget; }
+	inline void setRequiredParameters(const u8 pMinimum, const u8 pMaximum) { mMinimumParameters = pMinimum; mMaximumParameters = pMaximum; }
 	virtual void invalidParameters(CommandParameters pParameters);
 protected:
 	virtual void conversionError(String& pParameter);

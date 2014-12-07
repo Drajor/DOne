@@ -1340,6 +1340,75 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class AddSpellCommand : public Command {
+public:
+	AddSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+spell <spell ID>");
+		setRequiredParameters(1, 1);
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is Character.
+		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
+		
+		auto target = Actor::cast<Character*>(mInvoker->getTarget());
+
+		// Check: Character is a caster.
+		if (target->isCaster() == false) { return false; }
+
+		u32 spellID = 0;
+		if (!convertParameter(0, spellID)) { return false; }
+
+		// Check: Character can cast the specified spell.
+		if (target->canCast(spellID) == false) { return false; }
+
+		// Check: Character already has that spell.
+		if (target->hasSpell(spellID)) { return false; }
+
+		u16 freeSlot = target->getFreeSpellBookSlot();
+
+		// Check: Character has a free slot in their SpellBook.
+		if (freeSlot == 0) { return false; }
+
+		EXPECTED_BOOL(target->handleScribeSpell(freeSlot, spellID));
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class RemoveSpellCommand : public Command {
+public:
+	RemoveSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #-spell <spell ID>");
+		setRequiredParameters(1, 1);
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is Character.
+		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
+
+		auto target = Actor::cast<Character*>(mInvoker->getTarget());
+
+		// Check: Character is a caster.
+		if (target->isCaster() == false) { return false; }
+
+		u32 spellID = 0;
+		if (!convertParameter(0, spellID)) { return false; }
+
+		u16 spellSlot = target->getSpellBookSlot(spellID);
+
+		// Check: Character has the spell their SpellBook.
+		if (spellSlot == 0) { return false; }
+
+		EXPECTED_BOOL(target->handleDeleteSpell(spellSlot));
+		target->getConnection()->sendDeleteSpellDelete(spellSlot, true);
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1403,6 +1472,8 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new AddNimbusCommand(100, { "+nimbus" }));
 	mCommands.push_back(new RemoveNimbusCommand(100, { "-nimbus" }));
+	mCommands.push_back(new AddSpellCommand(100, { "+spell" }));
+	mCommands.push_back(new RemoveSpellCommand(100, { "-spell" }));
 
 	mCommands.push_back(new AddAlternateCurrencyCommand(100, { "+altcurrency" }));
 	mCommands.push_back(new RemoveAlternateCurrencyCommand(100, { "-altcurrency" }));
@@ -1722,6 +1793,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		npc->setHeading(pCharacter->getHeading());
 
 		pCharacter->getZone()->addActor(npc);
+	}
+	else if(pCommandName == "xx"){
+		pCharacter->getConnection()->sendDeleteSpellDelete(0, true);
+	}
+	else if (pCommandName == "xxx"){
+		pCharacter->getConnection()->sendDeleteSpellDelete(0, false);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

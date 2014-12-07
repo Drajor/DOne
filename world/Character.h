@@ -173,7 +173,19 @@ public:
 	inline void clearVisibleNPCs() { mVisibleNPCs.clear(); }
 
 	inline const bool isCasting() const { return mIsCasting; }
+
+	// Returns whether this Character has a spell in their SpellBook
+	const bool hasSpell(const u32 pSpellID) const;
+
+	// Returns whether this Character has a specific spell in a specific SpellBar slot.
 	const bool hasSpell(const uint16 pSlot, const uint32 pSpellID) const;
+
+	// Returns the first free spell book slot.
+	const u16 getFreeSpellBookSlot() const;
+
+	// Returns the slot that contains a specified spell.
+	const u16 getSpellBookSlot(const u32 pSpellID) const;
+
 	const bool canCast(const uint32 pSpellID) const;
 	const bool preCastingChecks(const SpellData* pSpell);
 	const bool postCastingChecks(const SpellData* pSpell);
@@ -200,7 +212,7 @@ public:
 	const bool handleUnmemoriseSpell(const uint16 pSlot);
 
 	// Adds a spell to the Spell Book.
-	const bool handleScribeSpell(const uint16 pSlot, const uint32 pSpellID);
+	const bool handleScribeSpell(const u16 pSlot, const u32 pSpellID);
 
 	const uint32 getSkill(const uint32 pSkillID) const;
 	const bool setSkill(const uint32 pSkillID, const uint32 pValue);
@@ -316,6 +328,13 @@ private:
 		const bool deleteSpell(const uint16 pSlot);
 		const bool swapSpells(const uint16 pFrom, const uint16 pTo);
 		const bool hasSpell(const uint32 pSpellID);
+		const u16 getFreeSlot() const;
+
+		// Returns whether a specific spell slot is free.
+		const bool isSlotFree(const u16 pSlot) const;
+
+		// Returns the slot containing a specific spell.
+		const u16 getSlot(const u32 pSpellID) const;
 	private:
 		std::vector<uint32> mSpellIDs;
 	};

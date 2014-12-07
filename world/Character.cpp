@@ -612,8 +612,19 @@ const bool Character::handleUnmemoriseSpell(const uint16 pSlot) {
 	return true;
 }
 
-const bool Character::handleScribeSpell(const uint16 pSlot, const uint32 pSpellID) {
-	// TODO: Items
+const bool Character::handleScribeSpell(const u16 pSlot, const u32 pSpellID) {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook);
+
+	// Check: Character does not already have the spell.
+	EXPECTED_BOOL(hasSpell(pSpellID) == false);
+
+	// Check: The SpellBook slot is free.
+	EXPECTED_BOOL(mSpellBook->isSlotFree(pSlot));
+
+	mSpellBook->setSpell(pSlot, pSpellID);
+	mConnection->sendScribeSpell(pSlot, pSpellID);
+
 	return true;
 }
 
@@ -623,6 +634,13 @@ const bool Character::hasSpell(const uint16 pSlot, const uint32 pSpellID) const 
 
 	const bool matches = mSpellBar->getSpellID(pSlot) == pSpellID;
 	return matches;
+}
+
+const bool Character::hasSpell(const u32 pSpellID) const {
+	EXPECTED_BOOL(isCaster());
+	EXPECTED_BOOL(mSpellBook);
+
+	return mSpellBook->hasSpell(pSpellID);
 }
 
 const bool Character::canCast(const uint32 pSpellID) const {
@@ -909,6 +927,20 @@ const bool Character::canShop() const {
 	return true;
 }
 
+const u16 Character::getFreeSpellBookSlot() const {
+	EXPECTED_VAR(isCaster(), 0);
+	EXPECTED_BOOL(mSpellBook);
+
+	return mSpellBook->getFreeSlot();
+}
+
+const u16 Character::getSpellBookSlot(const u32 pSpellID) const {
+	EXPECTED_VAR(isCaster(), 0);
+	EXPECTED_BOOL(mSpellBook);
+
+	return mSpellBook->getSlot(pSpellID);
+}
+
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {
 	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
 	EXPECTED_BOOL(mSpellIDs[pSlot] != 0);
@@ -942,6 +974,29 @@ const bool Character::SpellBook::hasSpell(const uint32 pSpellID) {
 	}
 
 	return false;
+}
+
+const u16 Character::SpellBook::getFreeSlot() const {
+	for (u16 i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
+		if (mSpellIDs[i] == 0)
+			return i;
+	}
+	return 0;
+}
+
+const bool Character::SpellBook::isSlotFree(const u16 pSlot) const {
+	EXPECTED_BOOL(Limits::SpellBook::slotValid(pSlot));
+	return mSpellIDs[pSlot] == 0;
+}
+
+const u16 Character::SpellBook::getSlot(const u32 pSpellID) const {
+	EXPECTED_VAR(Limits::SpellBar::spellIDValid(pSpellID), 0);
+
+	for (u16 i = 0; i < Limits::SpellBook::MAX_SLOTS; i++) {
+		if (mSpellIDs[i] == pSpellID)
+			return i;
+	}
+	return 0;
 }
 
 void Character::SpellBar::setSpell(const uint16 pSlot, const uint32 pSpellID) {

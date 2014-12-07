@@ -96,6 +96,7 @@ public:
 	void sendSurnameApproval(const bool pSuccess);
 
 	void sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess);
+	void sendScribeSpell(const u16 pSlot, const u32 pSpellID);
 	void sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID);
 	void _sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction);
 	void sendUnmemoriseSpell(const uint16 pSlot);

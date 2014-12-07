@@ -260,51 +260,58 @@ namespace Payload {
 
 		// C<->S
 		struct DeleteSpell : public FixedT<DeleteSpell, OP_DeleteSpell> {
-			static EQApplicationPacket* construct(const uint16 pSlot, const uint8 pSuccess) {
+			static EQApplicationPacket* construct(const u32 pSlot, const u32 pResponse) {
 				auto packet = create();
 				auto payload = convert(packet);
-				
 				payload->mSlot = pSlot;
-				payload->mSuccess = pSuccess;
+				payload->mResponse = pResponse;
+
 				return packet;
 			}
-			int16 mSlot = 0; // mSlot probably uint32
-			uint8 mUnknown0[2];
-			uint8 mSuccess = 0; // probably uint32.
-			uint8 mUnknown1[3];
+			u32 mSlot = 0;
+			u32 mResponse = 0; // 1 = Success, 0 = Failure.
 		};
 
 		// C->S
 		struct LoadSpellSet : public Fixed<LoadSpellSet> {
-			uint32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
-			uint32 mUnknown0 = 0;
+			u32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+			u32 mUnknown0 = 0;
 		};
 
 		// C->S
 		struct SwapSpell : public Fixed<SwapSpell> {
-			uint32 mFrom = 0;
-			uint32 mTo = 0;
+			u32 mFrom = 0;
+			u32 mTo = 0;
 		};
 
 		// C->S
 		struct CastSpell : public Fixed<CastSpell> {
-			uint32 mSlot = 0;
-			uint32 mSpellID = 0;
-			uint32 mInventorySlot = 0; // slot for clicky item, 0xFFFF = normal cast
-			uint32 mTargetID; // SpawnID?
-			uint8 mUnknown0[4];
+			u32 mSlot = 0;
+			u32 mSpellID = 0;
+			u32 mInventorySlot = 0; // slot for clicky item, 0xFFFF = normal cast
+			u32 mTargetID; // SpawnID?
+			u32 mUnknown0[5];
 		};
 
 		// S->C
-		// Based on: BeginCast_Struct
-		struct BeginCast : public Fixed<BeginCast> {
-			uint16 mSpawnID = 0; // Caster
-			uint16 mSpellID = 0;
-			uint32 mCastTime = 0; // MS
+		struct BeginCast : public FixedT<BeginCast, OP_BeginCast> {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u16 pSpellID, const u32 pCastTime) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mSpellID = pSpellID;
+				payload->mCastTime = pCastTime;
+
+				return packet;
+			}
+			u16 mSpawnID = 0; // Caster
+			u16 mSpellID = 0;
+			u32 mCastTime = 0; // MS
 		};
 
 		// S->C
 		// Based on: InterruptCast_Struct
+		// NOTE: This is not actually fixed size. TODO
 		struct InterruptCast : public Fixed<InterruptCast> {
 			uint32 mSpawnID = 0;
 			uint32 mMessageID = 0;

@@ -2419,18 +2419,21 @@ void ZoneClientConnection::_handleAutoAttack(const EQApplicationPacket* pPacket)
 void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(MemoriseSpell::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+	EXPECTED(MemoriseSpell::sizeCheck(pPacket));
+	EXPECTED(mCharacter->isCaster());
 
 	auto payload = MemoriseSpell::convert(pPacket->pBuffer);
 
 	switch (payload->mAction){
+		// Character is scribing a spell into the SpellBook.
 	case MemoriseSpell::SCRIBE:
 		EXPECTED(mCharacter->handleScribeSpell(payload->mSlot, payload->mSpellID));
 		break;
+		// Character is adding a spell to the SpellBar.
 	case MemoriseSpell::MEMORISE:
 		EXPECTED(mCharacter->handleMemoriseSpell(payload->mSlot, payload->mSpellID));
 		break;
+		// Character is removing a spell from the SpellBar.
 	case MemoriseSpell::UNMEMORISE:
 		EXPECTED(mCharacter->handleUnmemoriseSpell(payload->mSlot));
 		break;
@@ -2454,8 +2457,8 @@ void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket
 void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(LoadSpellSet::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+	EXPECTED(LoadSpellSet::sizeCheck(pPacket));
+	EXPECTED(mCharacter->isCaster()); // Sanity.
 
 	auto payload = LoadSpellSet::convert(pPacket->pBuffer);
 }
@@ -2463,8 +2466,8 @@ void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacke
 void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(SwapSpell::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+	EXPECTED(SwapSpell::sizeCheck(pPacket));
+	EXPECTED(mCharacter->isCaster()); // Sanity.
 
 	auto payload = SwapSpell::convert(pPacket->pBuffer);
 	EXPECTED(mCharacter->handleSwapSpells(payload->mFrom, payload->mTo));
@@ -2476,7 +2479,7 @@ void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) 
 void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(CastSpell::sizeCheck(pPacket->size));
+	EXPECTED(CastSpell::sizeCheck(pPacket));
 	EXPECTED(mCharacter->isCasting() == false);
 	
 	auto payload = CastSpell::convert(pPacket->pBuffer);
@@ -2683,6 +2686,10 @@ void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 p
 
 	sendPacket(packet);
 	delete packet;
+}
+
+void ZoneClientConnection::sendScribeSpell(const u16 pSlot, const u32 pSpellID) {
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SCRIBE);
 }
 
 void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {

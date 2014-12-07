@@ -2771,24 +2771,24 @@ DECODE(OP_ApplyPoison) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_CastSpell) {
-	DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
-	SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
-
-	if(eq->slot == 13)
-	{
-		emu->slot = 10;
-	}
-	else
-	{
-		IN(slot);
-	}
-	IN(spell_id);
-	emu->inventoryslot = UnderfootToTitaniumSlot(eq->inventoryslot);
-	IN(target_id);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_CastSpell) {
+//	DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
+//	SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
+//
+//	if(eq->slot == 13)
+//	{
+//		emu->slot = 10;
+//	}
+//	else
+//	{
+//		IN(slot);
+//	}
+//	IN(spell_id);
+//	emu->inventoryslot = UnderfootToTitaniumSlot(eq->inventoryslot);
+//	IN(target_id);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_ItemLinkClick) {
 //	DECODE_LENGTH_EXACT(structs::ItemViewRequest_Struct);

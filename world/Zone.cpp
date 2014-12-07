@@ -892,17 +892,10 @@ void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const u
 	// Update Character state.
 	EXPECTED(pCharacter->beginCasting(pSlot, pSpellID));
 
-	//spellData->mID = 2;
-
-	auto outPacket = new EQApplicationPacket(OP_BeginCast, BeginCast::size());
-	auto payload = BeginCast::convert(outPacket->pBuffer);
-	payload->mSpawnID = pCharacter->getSpawnID();
-	payload->mSpellID = pSpellID;
-	payload->mCastTime = 500; // TODO:
-
 	// Update Character + those visible to
-	sendToVisible(pCharacter, outPacket, true);
-	safe_delete(outPacket);
+	auto packet = BeginCast::construct(pCharacter->getSpawnID(), pSpellID, 500);
+	sendToVisible(pCharacter, packet, true);
+	delete packet;
 }
 
 void Zone::handleCastingFinished(Actor* pActor) {
