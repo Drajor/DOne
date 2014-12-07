@@ -624,18 +624,19 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 void ZoneClientConnection::_sendTimeOfDay() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
-	auto payload = (TimeOfDay_Struct*)outPacket->pBuffer;
+	auto packet = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+	auto payload = (TimeOfDay_Struct*)packet->pBuffer;
 	memset(payload, 0, sizeof(TimeOfDay_Struct)); // TODO:
-	outPacket->priority = 6; // TODO: Look into this.
-	mStreamInterface->FastQueuePacket(&outPacket);
+
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendPlayerProfile() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
-	auto payload = reinterpret_cast<PlayerProfile_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
+	auto payload = reinterpret_cast<PlayerProfile_Struct*>(packet->pBuffer);
 	*payload = { 0 }; // Clear memory.
 
 	// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
@@ -806,8 +807,9 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
 	payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
 
-	outPacket->priority = 6;
-	mStreamInterface->FastQueuePacket(&outPacket);
+	packet->priority = 6;
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendZoneEntry() {
@@ -820,28 +822,28 @@ void ZoneClientConnection::_sendZoneEntry() {
 	Utility::DynamicStructure ds(data, size);
 	EXPECTED(mCharacter->copyData(ds));
 	
-	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_ZoneEntry, data, size);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendZoneSpawns() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
+	auto packet = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
 	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendTributeUpdate() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
-	auto payload = (TributeInfo_Struct *)outPacket->pBuffer;
+	auto packet = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
+	auto payload = (TributeInfo_Struct *)packet->pBuffer;
 	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendInventory() {
@@ -946,8 +948,8 @@ void ZoneClientConnection::_sendZonePoints() {
 	packetSize *= numZonePoints;
 	packetSize += sizeof(uint32); // count.
 
-	auto outPacket = new EQApplicationPacket(OP_SendZonepoints, packetSize);
-	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	auto packet = new EQApplicationPacket(OP_SendZonepoints, packetSize);
+	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
 	
 	ds.write<uint32>(numZonePoints); // Count.
 	for (auto i : zonePoints) {
@@ -960,36 +962,39 @@ void ZoneClientConnection::_sendZonePoints() {
 		ds.write<uint16>(i->mDestinationInstanceID);
 	}
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::_sendAAStats() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SendAAStats, 0);
-	mStreamInterface->QueuePacket(outPacket);
+	auto packet = new EQApplicationPacket(OP_SendAAStats, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendZoneServerReady() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneServerReady, 0);
-	mStreamInterface->FastQueuePacket(&outPacket);
+	auto packet = new EQApplicationPacket(OP_ZoneServerReady, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendExpZoneIn() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SendExpZonein, 0);
-	mStreamInterface->FastQueuePacket(&outPacket);
+	auto packet = new EQApplicationPacket(OP_SendExpZonein, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendWorldObjectsSent() {
-	auto outPacket = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_WorldObjectsSent, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
@@ -1247,26 +1252,29 @@ header[1]
 void ZoneClientConnection::sendMessage(MessageType pType, String pMessage) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
-	auto payload = reinterpret_cast<SpecialMesg_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
+	auto payload = reinterpret_cast<SpecialMesg_Struct*>(packet->pBuffer);
 	payload->header[0] = 0x00; // Header used for #emote style messages..
 	payload->header[1] = 0x00; // Play around with these to see other types
 	payload->header[2] = 0x00;
 	payload->msg_type = static_cast<uint32>(pType);
 	strcpy(payload->message, pMessage.c_str());
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
-	auto payload = reinterpret_cast<CancelTrade_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
+	auto payload = reinterpret_cast<CancelTrade_Struct*>(packet->pBuffer);
 	payload->fromid = mCharacter->getSpawnID();
 	payload->action = groupActUpdate;
-	mStreamInterface->FastQueuePacket(&outPacket);
+
+	sendPacket(packet);
+	delete packet;
 
 	_sendPreLogOutReply();
 	_sendLogOutReply();
@@ -1280,17 +1288,17 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_sendLogOutReply() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_LogoutReply);
-	mStreamInterface->FastQueuePacket(&outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_LogoutReply);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendPreLogOutReply() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_PreLogoutReply);
-	mStreamInterface->FastQueuePacket(&outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_PreLogoutReply);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
@@ -1361,14 +1369,14 @@ void ZoneClientConnection::_sendZoneData() {
 void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	EXPECTED(mConnected);
 	
-	auto outPacket = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(packet->pBuffer);
 	payload->spawn_id = mCharacter->getSpawnID();
 	payload->type = pType;
 	payload->parameter = pParameter;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
@@ -1407,13 +1415,13 @@ void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
-	auto payload = reinterpret_cast<SimpleMessage_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
+	auto payload = reinterpret_cast<SimpleMessage_Struct*>(packet->pBuffer);
 	payload->color = static_cast<uint32>(pType);
 	payload->string_id = static_cast<uint32>(pStringID);
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
@@ -1434,12 +1442,12 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	if (pParameter9.length() != 0) packetSize += pParameter9.length() + 1;
 
 	packetSize += sizeof(FormattedMessage_Struct);
-	auto outPacket = new EQApplicationPacket(OP_FormattedMessage, packetSize);
-	auto payload = reinterpret_cast<FormattedMessage_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_FormattedMessage, packetSize);
+	auto payload = reinterpret_cast<FormattedMessage_Struct*>(packet->pBuffer);
 	payload->type = static_cast<uint32>(pType);
 	payload->string_id = static_cast<uint32>(pStringID);
 
-	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
 	ds.movePointer(sizeof(FormattedMessage_Struct));
 
 	if (pParameter0.length() != 0) ds.writeString(pParameter0);
@@ -1454,8 +1462,8 @@ void ZoneClientConnection::sendSimpleMessage(MessageType pType, StringID pString
 	if (pParameter9.length() != 0) ds.writeString(pParameter9);
 
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
@@ -1473,7 +1481,7 @@ void ZoneClientConnection::sendHPUpdate() {
 	safe_delete(packet);
 }
 
-void ZoneClientConnection::sendPacket(EQApplicationPacket* pPacket) {
+void ZoneClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
 	EXPECTED(mConnected);
 	mStreamInterface->QueuePacket(pPacket);
 }
@@ -1504,22 +1512,24 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 void ZoneClientConnection::sendExperienceUpdate() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	auto payload = reinterpret_cast<ExpUpdate_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+	auto payload = reinterpret_cast<ExpUpdate_Struct*>(packet->pBuffer);
 	payload->exp = mCharacter->getExperienceRatio();
-	mStreamInterface->FastQueuePacket(&outPacket);
+
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendLevelUpdate() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
-	auto payload = reinterpret_cast<LevelUpdate_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
+	auto payload = reinterpret_cast<LevelUpdate_Struct*>(packet->pBuffer);
 	payload->level = mCharacter->getLevel();
 	payload->exp = mCharacter->getExperienceRatio();
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendExperienceGain() {
@@ -1552,11 +1562,11 @@ void ZoneClientConnection::sendLevelAppearance() {
 void ZoneClientConnection::sendStats() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	auto payload = (IncreaseStat_Struct*)outPacket->pBuffer;
+	auto packet = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
+	auto payload = (IncreaseStat_Struct*)packet->pBuffer;
 	payload->str = 5;
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPacket) {
@@ -1602,8 +1612,8 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	}
 
 	packetSize += sizeof(WhoAllReturnStruct) + (numResults * sizeof(WhoAllPlayer));
-	auto outPacket = new EQApplicationPacket(OP_WhoAllResponse, packetSize);
-	auto payload = reinterpret_cast<WhoAllReturnStruct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_WhoAllResponse, packetSize);
+	auto payload = reinterpret_cast<WhoAllReturnStruct*>(packet->pBuffer);
 	payload->id = 0;
 	payload->playerineqstring = 5001; // TODO: Magic.
 	strcpy(payload->line, LINE.c_str());
@@ -1623,7 +1633,7 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 	ss << "Size WhoAllPlayer= " << sizeof(WhoAllPlayer);
 	Log::error(ss.str());
 
-	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
 	ds.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
 
 	ss << "Written 1: " << ds.getBytesWritten();
@@ -1714,24 +1724,24 @@ void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
 		//ss.str("");
 	}
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
-	auto payload = reinterpret_cast<ChannelMessage_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
+	auto payload = reinterpret_cast<ChannelMessage_Struct*>(packet->pBuffer);
 	payload->language = Languages::COMMON_TONGUE_LANG;
 	payload->skill_in_language = 0;
 	payload->chan_num = static_cast<uint32>(pChannel);
 	strcpy(payload->message, pMessage.c_str());
 	strcpy(payload->sender, pSenderName.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendTell(const String& pSenderName, const String& pMessage) {
@@ -1769,13 +1779,13 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
-	auto payload = reinterpret_cast<GroupInvite_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
+	auto payload = reinterpret_cast<GroupInvite_Struct*>(packet->pBuffer);
 	strcpy(payload->inviter_name, pFromCharacterName.c_str());
 	strcpy(payload->invitee_name, mCharacter->getName().c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
@@ -1813,9 +1823,9 @@ void ZoneClientConnection::sendGroupCreate() {
 	EXPECTED(mConnected);
 
 	int packetSize = 31 + mCharacter->getName().length() + 1; // Magic number due to no packet structure.
-	auto outPacket = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
+	auto packet = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
 
-	Utility::DynamicStructure ds(outPacket->pBuffer, packetSize);
+	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
 	ds.write<uint32>(0); // 4
 	ds.write<uint32>(1); // 8
 	ds.write<uint8>(0); // 9
@@ -1830,8 +1840,8 @@ void ZoneClientConnection::sendGroupCreate() {
 	ds.write<uint32>(0); // 29
 	ds.write<uint16>(0); // 31
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
@@ -1843,30 +1853,29 @@ void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
 	*payload = { 0 }; // Clear memory.
 	strcpy(payload->LeaderName, pCharacterName.c_str());
 
-	// Send.
-	mStreamInterface->QueuePacket(mGroupLeaderChangePacket);
+	sendPacket(mGroupLeaderChangePacket);
 }
 
 void ZoneClientConnection::sendGroupAcknowledge() {
 	EXPECTED(mConnected);
 
 	static const auto PACKET_SIZE = 4;
-	auto outPacket = new EQApplicationPacket(OP_GroupAcknowledge, PACKET_SIZE);
+	auto packet = new EQApplicationPacket(OP_GroupAcknowledge, PACKET_SIZE);
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
-	auto payload = reinterpret_cast<GroupGeneric_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
+	auto payload = reinterpret_cast<GroupGeneric_Struct*>(packet->pBuffer);
 	strcpy(payload->name1, pLeaderCharacterName.c_str());
 	strcpy(payload->name2, pMemberCharacterName.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
@@ -1879,8 +1888,7 @@ void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
 	strcpy(payload->membername, pCharacterName.c_str());
 	strcpy(payload->yourname, mCharacter->getName().c_str());
 
-	// Send.
-	mStreamInterface->QueuePacket(mGroupJoinPacket);
+	sendPacket(mGroupJoinPacket);
 }
 
 void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
@@ -1898,8 +1906,7 @@ void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames)
 		count++;
 	}
 	
-	// Send.
-	mStreamInterface->QueuePacket(mGroupUpdateMembersPacket);
+	sendPacket(mGroupUpdateMembersPacket);
 }
 
 void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
@@ -1919,26 +1926,26 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 }
 
 void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
-	// Configure.
+	EXPECTED(mConnected);
+
 	auto payload = reinterpret_cast<GroupJoin_Struct*>(mGroupLeavePacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
 	payload->action = groupActLeave;
 	strcpy(payload->yourname, mCharacter->getName().c_str());
 	strcpy(payload->membername, pLeavingCharacterName.c_str());
 
-	// Send.
-	mStreamInterface->QueuePacket(mGroupLeavePacket);
+	sendPacket(mGroupLeavePacket);
 }
 
 void ZoneClientConnection::sendGroupDisband() {
-	// Configure.
+	EXPECTED(mConnected);
+
 	auto payload = reinterpret_cast<GroupUpdate_Struct*>(mGroupDisbandPacket->pBuffer);
 	*payload = { 0 }; // Clear memory.
 	payload->action = groupActDisband;
 	strcpy(payload->yourname, mCharacter->getName().c_str());
 
-	// Send.
-	mStreamInterface->QueuePacket(mGroupDisbandPacket);
+	sendPacket(mGroupDisbandPacket);
 }
 
 void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
@@ -1962,9 +1969,8 @@ void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uin
 	EXPECTED(mConnected);
 
 	auto packet = RequestZoneChange::construct(pZoneID, pInstanceID, pPosition);
-	Log::info("sendRequestZoneChange: " + pPosition.toString());
-	mStreamInterface->QueuePacket(packet);
-	safe_delete(packet);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
@@ -2008,26 +2014,26 @@ void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket
 void ZoneClientConnection::sendGuildRank() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
-	auto payload = reinterpret_cast<GuildSetRank_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
+	auto payload = reinterpret_cast<GuildSetRank_Struct*>(packet->pBuffer);
 	payload->Rank = mCharacter->getGuildRank();
 	payload->Banker = 0;
 	strcpy(payload->MemberName, mCharacter->getName().c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_sendGuildNames() {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildsList);
-	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+	auto packet = new EQApplicationPacket(OP_GuildsList);
+	packet->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	packet->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
 
-	mStreamInterface->QueuePacket(outPacket);
-	outPacket->pBuffer = nullptr;
-	safe_delete(outPacket);
+	sendPacket(packet);
+	packet->pBuffer = nullptr; // Important: This prevents the payload from being deleted.
+	delete packet;
 }
 
 void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
@@ -2082,16 +2088,16 @@ void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID
 	EXPECTED(mCharacter->hasGuild() == false);
 	EXPECTED(mCharacter->getPendingGuildInviteID() == pGuildID);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildInvite, sizeof(GuildCommand_Struct));
-	auto payload = reinterpret_cast<GuildCommand_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GuildInvite, sizeof(GuildCommand_Struct));
+	auto payload = reinterpret_cast<GuildCommand_Struct*>(packet->pBuffer);
 
 	payload->guildeqid = pGuildID;
 	// NOTE: myname/othername were poor choices for variable names.
 	strcpy(payload->othername, mCharacter->getName().c_str());
 	strcpy(payload->myname, pInviterName.c_str());
 	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
@@ -2149,30 +2155,30 @@ void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOT
 	EXPECTED(mConnected);
 	//EXPECTED(mCharacter->hasGuild());
 
-	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
-	auto payload = reinterpret_cast<GuildMOTD_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
+	auto payload = reinterpret_cast<GuildMOTD_Struct*>(packet->pBuffer);
 	payload->unknown0 = 0;
 	strcpy(payload->name, mCharacter->getName().c_str());
 	strcpy(payload->setby_name, pMOTDSetByName.c_str());
 	strcpy(payload->motd, pMOTD.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName) {
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
 
-	auto outPacket = new EQApplicationPacket(OP_GetGuildMOTDReply, sizeof(GuildMOTD_Struct));
-	auto payload = reinterpret_cast<GuildMOTD_Struct*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GetGuildMOTDReply, sizeof(GuildMOTD_Struct));
+	auto payload = reinterpret_cast<GuildMOTD_Struct*>(packet->pBuffer);
 	payload->unknown0 = 0;
 	strcpy(payload->name, mCharacter->getName().c_str());
 	strcpy(payload->setby_name, pMOTDSetByName.c_str());
 	strcpy(payload->motd, pMOTD.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
@@ -2199,9 +2205,9 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 		notesLength += i->mPublicNote.length();
 	}
 
-	auto outPacket = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
+	auto packet = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
 	
-	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
+	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
 	
 	// Write Header.
 	ds.writeFixedString(mCharacter->getName(), Limits::Character::MAX_NAME_LENGTH);
@@ -2231,33 +2237,33 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 		ds.writeString(i->mPublicNote);
 	}
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendGuildURL(const String& pURL) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(packet->pBuffer);
 	payload->mAction = Payload::Guild::GuildUpdate::GUILD_URL;
 	strcpy(&payload->mText[0], pURL.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
+	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(packet->pBuffer);
 	payload->mAction = Payload::Guild::GuildUpdate::GUILD_CHANNEL;
 	strcpy(&payload->mText[0], pChannel.c_str());
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
@@ -2478,7 +2484,7 @@ void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) 
 	EXPECTED(mCharacter->handleSwapSpells(payload->mFrom, payload->mTo));
 
 	// Client requires a reply.
-	mStreamInterface->QueuePacket(pPacket);
+	sendPacket(pPacket);
 }
 
 void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
@@ -2655,8 +2661,8 @@ void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPack
 		payloadSize += i->mSuffix.length() + 1; // +1 for null terminator.
 	}
 
-	auto outPacket = new EQApplicationPacket(OP_SendTitleList, payloadSize);
-	Utility::DynamicStructure ds(outPacket->pBuffer, payloadSize);
+	auto packet = new EQApplicationPacket(OP_SendTitleList, payloadSize);
+	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
 	
 	ds.write<uint32>(availableTitles.size());
 	for (auto i : availableTitles) {
@@ -2665,8 +2671,8 @@ void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPack
 		ds.writeString(i->mSuffix);
 	}
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 	EXPECTED(ds.check());
 }
 
@@ -2683,14 +2689,14 @@ void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 p
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
-	auto payload = MemoriseSpell::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
+	auto payload = MemoriseSpell::convert(packet->pBuffer);
 	payload->mAction = static_cast<MemoriseSpell::Action>(pAction);
 	payload->mSlot = pSlot;
 	payload->mSpellID = pSpellID;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
@@ -2705,13 +2711,13 @@ void ZoneClientConnection::sendInterruptCast() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_InterruptCast, InterruptCast::size());
-	auto payload = InterruptCast::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_InterruptCast, InterruptCast::size());
+	auto payload = InterruptCast::convert(packet->pBuffer);
 	payload->mSpawnID = mCharacter->getSpawnID();
 	payload->mMessageID = static_cast<uint32>(StringID::INTERRUPT_SPELL);
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID) {
@@ -2722,27 +2728,27 @@ void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_ManaChange, ManaChange::size());
-	auto payload = ManaChange::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_ManaChange, ManaChange::size());
+	auto payload = ManaChange::convert(packet->pBuffer);
 	payload->mMana = mCharacter->getCurrentMana();
 	payload->mEndurance = mCharacter->getCurrentEndurance();
 	payload->mSpellID = pSpellID;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_SkillUpdate, SkillUpdate::size());
-	auto payload = SkillUpdate::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SkillUpdate, SkillUpdate::size());
+	auto payload = SkillUpdate::convert(packet->pBuffer);
 	payload->mID = pSkillID;
 	payload->mValue = pValue;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleBeginLootRequest(const EQApplicationPacket* pPacket) {
@@ -2765,25 +2771,26 @@ void ZoneClientConnection::_handleEndLootRequest(const EQApplicationPacket* pPac
 
 void ZoneClientConnection::sendLootComplete() {
 	EXPECTED(mConnected);
-	auto outPacket = new EQApplicationPacket(OP_LootComplete, 0);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+
+	auto packet = new EQApplicationPacket(OP_LootComplete, 0);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, uint32 pGold, uint32 pSilver, uint32 pCopper) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto outPacket = new EQApplicationPacket(OP_MoneyOnCorpse, LootResponse::size());
-	auto payload = LootResponse::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_MoneyOnCorpse, LootResponse::size());
+	auto payload = LootResponse::convert(packet->pBuffer);
 	payload->mResponse = pResponse;
 	payload->mPlatinum = pPlatinum;
 	payload->mGold = pGold;
 	payload->mSilver = pSilver;
 	payload->mCopper = pCopper;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID, const uint32 pMessage) {
@@ -2897,9 +2904,9 @@ void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirs
 	payload.mHunger = pHunger;
 	payload.mThirst = pThirst;
 
-	auto outPacket = Stamina::create(payload);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = Stamina::create(payload);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handlePotionBelt(const EQApplicationPacket* pPacket) {
@@ -2924,9 +2931,9 @@ void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const u
 	payload.mTargetSpawnID = pTargetSpawnID;
 	payload.mSpellID = 0;
 	
-	auto outPacket = ItemRightClickResponse::create(payload);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = ItemRightClickResponse::create(payload);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::inventoryError(){
@@ -2975,9 +2982,9 @@ void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	payload.mToSpawnID = mCharacter->getSpawnID();
 	payload.mFromSpawnID = pFromSpawnID;
 
-	auto outPacket = TradeRequest::create(payload);
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = TradeRequest::create(payload);
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {

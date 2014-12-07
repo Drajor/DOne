@@ -161,7 +161,7 @@ public:
 
 	void sendObject(Object* pObject);
 
-	void sendPacket(EQApplicationPacket* pPacket);
+	void sendPacket(const EQApplicationPacket* pPacket);
 
 private:
 	void _handleUnknown(const EQApplicationPacket* pPacket);
