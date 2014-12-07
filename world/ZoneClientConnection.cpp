@@ -1510,12 +1510,10 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 }
 
 void ZoneClientConnection::sendExperienceUpdate() {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	auto payload = reinterpret_cast<ExpUpdate_Struct*>(packet->pBuffer);
-	payload->exp = mCharacter->getExperienceRatio();
-
+	auto packet = ExperienceUpdate::construct(mCharacter->getExperienceRatio(), 20);
 	sendPacket(packet);
 	delete packet;
 }

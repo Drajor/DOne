@@ -1163,28 +1163,42 @@ namespace Payload {
 			char mCharacterName[64];
 		};
 
-		struct Object : FixedT<Object, OP_GroundSpawn> {
-			Object() {
-				memset(mAsset, 0, sizeof(mAsset));
+		//struct Object : FixedT<Object, OP_GroundSpawn> {
+		//	Object() {
+		//		memset(mAsset, 0, sizeof(mAsset));
+		//	}
+		//	uint32	linked_list_addr[2];
+		//	uint32	unknown008 = 0;
+		//	uint32	drop_id = 0;
+		//	u16	mZoneID = 0;
+		//	u16 mInstanceID = 0;
+		//	uint32	unknown020 = 0;
+		//	uint32	unknown024 = 0;
+		//	float mHeading = 0.0f;
+		//	uint8	unknown032[8];
+		//	float mSize = 1.0f;
+		//	float mZ = 0.0f;
+		//	float mX = 0.0f;
+		//	float mY = 0.0f;
+		//	char mAsset[32];
+		//	uint32	unknown088;
+		//	u32 mType = 0;
+		//	uint8	unknown096[4];
+		//	uint32 mSpawnID = 0;
+		//};
+
+		// C->S
+		struct ExperienceUpdate : public FixedT<ExperienceUpdate, OP_ExpUpdate> {
+			static EQApplicationPacket* construct(const u32 pExperience, const u32 pAAExperience) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mExperience = pExperience;
+				payload->mAAExperience = pAAExperience;
+
+				return packet;
 			}
-			uint32	linked_list_addr[2];
-			uint32	unknown008 = 0;
-			uint32	drop_id = 0;
-			u16	mZoneID = 0;
-			u16 mInstanceID = 0;
-			uint32	unknown020 = 0;
-			uint32	unknown024 = 0;
-			float mHeading = 0.0f;
-			uint8	unknown032[8];
-			float mSize = 1.0f;
-			float mZ = 0.0f;
-			float mX = 0.0f;
-			float mY = 0.0f;
-			char mAsset[32];
-			uint32	unknown088;
-			u32 mType = 0;
-			uint8	unknown096[4];
-			uint32 mSpawnID = 0;
+			u32 mExperience = 0;
+			u32 mAAExperience = 0;
 		};
 	}
 

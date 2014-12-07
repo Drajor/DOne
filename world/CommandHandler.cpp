@@ -167,24 +167,20 @@ public:
 class AddExperienceCommand : public Command {
 public:
 	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #addexp <number>");
+		mHelpMessages.push_back("Usage: #+exp <number>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
-		}
+		// Check: Target is a Character.
+		if (!mInvoker->targetIsCharacter()) { return false; }
 
-		uint32 expAdd = 0;
-		// Check: Parameter conversion.
-		const bool ok = Utility::stou32Safe(expAdd, pParameters[0]);
-		if (!ok) {
-			return false;
-		}
+		u32 experience = 0;
+		if (!convertParameter(0, experience)) { return false; }
 
-		mInvoker->addExperience(expAdd);
+		Actor::cast<Character*>(mInvoker->getTarget())->addExperience(experience);
 		return true;
 	}
 };
@@ -193,24 +189,20 @@ public:
 class RemoveExperienceCommand : public Command {
 public:
 	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #remexp <number>");
+		mHelpMessages.push_back("Usage: #-exp <number>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
-		}
+		// Check: Target is a Character.
+		if (!mInvoker->targetIsCharacter()) { return false; }
 
-		uint32 expRemove = 0;
-		// Check: Parameter conversion.
-		const bool ok = Utility::stou32Safe(expRemove, pParameters[0]);
-		if (!ok) {
-			return false;
-		}
+		u32 experience = 0;
+		if (!convertParameter(0, experience)) { return false; }
 
-		mInvoker->removeExperience(expRemove);
+		Actor::cast<Character*>(mInvoker->getTarget())->removeExperience(experience);
 		return true;
 	}
 };
