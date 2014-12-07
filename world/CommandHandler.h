@@ -32,7 +32,7 @@ protected:
 		if (pIndex >= mParameters.size()) return false;
 
 		if (!Utility::stoSafe(pValue, mParameters[pIndex])) {
-			conversionError(mParameters[pIndex]);
+			//conversionError(mParameters[pIndex]);
 			return false;
 		}
 		return true;

@@ -1691,3 +1691,14 @@ void Zone::handleRandomRequest(Character* pCharacter, const uint32 pLow, const u
 	sendToVisible(pCharacter, packet, true);
 	delete packet;
 }
+
+void Zone::handleDropItem(Character* pCharacter) {
+	EXPECTED(pCharacter);
+
+	auto item = pCharacter->getInventory()->peekCursor();
+	EXPECTED(item);
+	EXPECTED(item->isTradeable());
+
+	// Consume 
+	EXPECTED(pCharacter->getInventory()->consume(SlotID::CURSOR, item->getStacks()));
+}

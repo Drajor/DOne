@@ -1162,6 +1162,30 @@ namespace Payload {
 			u32 mResult = 0;
 			char mCharacterName[64];
 		};
+
+		struct Object : FixedT<Object, OP_GroundSpawn> {
+			Object() {
+				memset(mAsset, 0, sizeof(mAsset));
+			}
+			uint32	linked_list_addr[2];
+			uint32	unknown008 = 0;
+			uint32	drop_id = 0;
+			u16	mZoneID = 0;
+			u16 mInstanceID = 0;
+			uint32	unknown020 = 0;
+			uint32	unknown024 = 0;
+			float mHeading = 0.0f;
+			uint8	unknown032[8];
+			float mSize = 1.0f;
+			float mZ = 0.0f;
+			float mX = 0.0f;
+			float mY = 0.0f;
+			char mAsset[32];
+			uint32	unknown088;
+			u32 mType = 0;
+			uint8	unknown096[4];
+			uint32 mSpawnID = 0;
+		};
 	}
 
 	namespace World {

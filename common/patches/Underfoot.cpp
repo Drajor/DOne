@@ -1562,49 +1562,49 @@ ENCODE(OP_SpawnDoor) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_GroundSpawn)
-{
-
-	// We are not encoding the spawn_id field here, or a size but it doesn't appear to matter.
-	//
-	EQApplicationPacket *in = *p;
-	*p = nullptr;
-
-	Object_Struct *emu = (Object_Struct *) in->pBuffer;
-
-	unsigned char *__emu_buffer = in->pBuffer;
-
-	in->size = strlen(emu->object_name) + 58;
-
-	in->pBuffer = new unsigned char[in->size];
-
-	char *OutBuffer = (char *)in->pBuffer;
-
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->drop_id);
-	VARSTRUCT_ENCODE_STRING(OutBuffer, emu->object_name);
-	VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, emu->zone_id);
-	VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, emu->zone_instance);
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0x00006762
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observer 0x7fffbb64
-	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->heading);
-	// This next field is actually a float. There is a groundspawn in freeportwest (sack of money sitting on some barrels) which requires this
-	// field to be set to (float)255.0 to appear at all, and also the size field below to be 5, to be the correct size. I think SoD has the same
-	// issue.
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// This appears to be the size field.
-	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
-	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
-	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->z);
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->object_type);	// Unknown, observed 0x00000014
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0xffffffff);	// Unknown, observed 0xffffffff
-	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0x00000014
-	VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown, observed 0x00
-
-	delete[] __emu_buffer;
-
-	dest->FastQueuePacket(&in, ack_req);
-}
+//ENCODE(OP_GroundSpawn)
+//{
+//
+//	// We are not encoding the spawn_id field here, or a size but it doesn't appear to matter.
+//	//
+//	EQApplicationPacket *in = *p;
+//	*p = nullptr;
+//
+//	Object_Struct *emu = (Object_Struct *) in->pBuffer;
+//
+//	unsigned char *__emu_buffer = in->pBuffer;
+//
+//	in->size = strlen(emu->object_name) + 58;
+//
+//	in->pBuffer = new unsigned char[in->size];
+//
+//	char *OutBuffer = (char *)in->pBuffer;
+//
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->drop_id);
+//	VARSTRUCT_ENCODE_STRING(OutBuffer, emu->object_name);
+//	VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, emu->zone_id);
+//	VARSTRUCT_ENCODE_TYPE(uint16, OutBuffer, emu->zone_instance);
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0x00006762
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observer 0x7fffbb64
+//	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->heading);
+//	// This next field is actually a float. There is a groundspawn in freeportwest (sack of money sitting on some barrels) which requires this
+//	// field to be set to (float)255.0 to appear at all, and also the size field below to be 5, to be the correct size. I think SoD has the same
+//	// issue.
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// This appears to be the size field.
+//	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
+//	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
+//	VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->z);
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->object_type);	// Unknown, observed 0x00000014
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0xffffffff);	// Unknown, observed 0xffffffff
+//	VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0x00000014
+//	VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown, observed 0x00
+//
+//	delete[] __emu_buffer;
+//
+//	dest->FastQueuePacket(&in, ack_req);
+//}
 
 ENCODE(OP_ManaChange) {
 	ENCODE_LENGTH_EXACT(ManaChange_Struct);

@@ -1324,6 +1324,34 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class SpawnObject : public Command {
+public:
+	SpawnObject(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: ");
+		mMinimumParameters = 2;
+		mMaximumParameters = 2;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		String asset;
+		u32 assetID = 0;
+		if (convertParameter(0, assetID)) {
+			asset = "IT" + pParameters[0] + "_ACTORDEF";
+		}
+		else {
+			asset = pParameters[0];
+		}
+		
+		u32 type = 0;
+		if (!convertParameter(1, type)) { return false; }
+
+		mInvoker->getConnection()->sendObjectSpawn(asset, type, mInvoker->getPosition());
+
+		return true;
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1392,6 +1420,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new RemoveAlternateCurrencyCommand(100, { "-altcurrency" }));
 
 	mCommands.push_back(new SpawnNPCCommand(100, { "npc" }));
+	mCommands.push_back(new SpawnObject(100, { "object" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1435,9 +1464,13 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 			_logCommand(pCharacter, pCommandMessage);
 
 		command->setParameters(elements);
-		command->handleCommand(elements);
+		bool success = command->handleCommand(elements);
 		command->setInvoker(nullptr);
 		command->clearParameters();
+
+		if (!success) {
+			pCharacter->notify("Command failed.");
+		}
 	}
 	else {
 		// Hack/Test commands can be handled in here.

@@ -548,6 +548,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player enters the /random command.
 		_handleRandomRequest(pPacket);
 		break;
+	case OP_GroundSpawn:
+		// NOTE: This occurs when a player drops an Item on the ground.
+		_handleDropItem(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -1320,9 +1324,8 @@ void ZoneClientConnection::_sendZoneData() {
 	payload->mTimeType = mZone->getTimeType();
 	payload->mSkyType = mZone->getSkyType();
 	payload->mFogDensity = mZone->getFogDensity();
-
-	payload->mMinimumClip = 200;
-	payload->mMaximumClip = 1000;
+	payload->mMinimumClip = mZone->getMinimumClip();
+	payload->mMaximumClip = mZone->getMaximumClip();
 
 	strcpy(payload->mShortName2, mZone->getShortName().c_str());
 
@@ -3924,6 +3927,47 @@ void ZoneClientConnection::_handleRandomRequest(const EQApplicationPacket* pPack
 	auto payload = RandomRequest::convert(pPacket);
 
 	mZone->handleRandomRequest(mCharacter, payload->mLow, payload->mHigh);
+}
+
+void ZoneClientConnection::_handleDropItem(const EQApplicationPacket* pPacket) {
+	mZone->handleDropItem(mCharacter);
+}
+
+void ZoneClientConnection::sendObjectSpawn(const String& pAsset, const u32 pType, const Vector3& pPosition) {
+	EXPECTED(mConnected);
+
+	u32 payloadSize = 0;
+	payloadSize += pAsset.length() + 1 + 57;
+
+	char* data = new char[payloadSize];
+
+	Utility::DynamicStructure ds(data, payloadSize);
+
+	ds.write<u32>(1); // Drop ID.
+	ds.writeString(pAsset);
+	ds.write<u16>(mZone->getID());
+	ds.write<u16>(mZone->getInstanceID());
+	ds.write<u32>(2); // Unknown.
+	ds.write<u32>(33); // Unknown.
+	ds.write<float>(0.0f); // Heading.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<float>(50.5);
+	ds.write<float>(pPosition.y);
+	ds.write<float>(pPosition.x);
+	ds.write<float>(pPosition.z + 4);
+	ds.write<u32>(pType);
+	ds.write<u32>(0xFFFFFFFF); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u8>(0); // Unknown.
+
+	if (ds.check() == false) {
+		Log::error("[ObjectSpawn] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	}
+
+	auto packet = new EQApplicationPacket(OP_GroundSpawn, reinterpret_cast<const unsigned char*>(data), payloadSize);
+	sendPacket(packet);
+	delete packet;
 }
 
 //

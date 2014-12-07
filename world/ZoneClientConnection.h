@@ -157,6 +157,8 @@ public:
 
 	void sendMOTD(const String& pMOTD);
 
+	void sendObjectSpawn(const String& pAsset, const u32 pType, const Vector3& pPosition);
+
 	void sendPacket(EQApplicationPacket* pPacket);
 
 private:
@@ -288,6 +290,7 @@ private:
 	void _handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
 
 	void _handleRandomRequest(const EQApplicationPacket* pPacket);
+	void _handleDropItem(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

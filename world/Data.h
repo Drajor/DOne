@@ -268,6 +268,19 @@ namespace Data {
 		u8 mSnowDuration = 0;
 	};
 
+	struct Object {
+		u32 mType = 0; // TODO: Enumeration?
+		String mAsset;
+		float mHeading = 0.0f;
+		Vector3 mPosition;
+	};
+
+	struct Door {
+		String mAsset;
+		float mHeading = 0.0f;
+		Vector3 mPosition;
+	};
+
 	struct SpawnGroup {
 		struct Entry {
 			u32 mNPCType = 0;
@@ -311,6 +324,8 @@ namespace Data {
 		Fog mFog[4];
 		Weather mWeather[4];
 		std::list<ZonePoint*> mZonePoints;
+		std::list<Object*> mObjects;
+		std::list<Door*> mDoors;
 		std::list<SpawnGroup*> mSpawnGroups;
 		std::list<SpawnPoint*> mSpawnPoints;
 	};

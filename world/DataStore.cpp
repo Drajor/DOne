@@ -78,6 +78,21 @@ inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, 
 	return true;
 }
 
+inline bool readVector3(TiXmlElement* pElement, Vector3& pVector) {
+	EXPECTED_BOOL(pElement);
+	EXPECTED_BOOL(readAttribute(pElement, "x", pVector.x));
+	EXPECTED_BOOL(readAttribute(pElement, "y", pVector.y));
+	EXPECTED_BOOL(readAttribute(pElement, "z", pVector.z));
+	return true;
+}
+
+inline void writeVector3(TiXmlElement* pElement, Vector3& pVector) {
+	EXPECTED(pElement);
+	pElement->SetDoubleAttribute("x", pVector.x);
+	pElement->SetDoubleAttribute("y", pVector.y);
+	pElement->SetDoubleAttribute("z", pVector.z);
+}
+
 bool DataStore::initialise() {
 
 	return true;
@@ -1231,6 +1246,10 @@ namespace ZoneXML {
 		SCA SpawnGroupEntry = "spawn_group_entry";
 		SCA Fog = "fog";
 		SCA Weather = "weather";
+		SCA Objects = "objects";
+		SCA Object = "object";
+		SCA Doors = "doors";
+		SCA Door = "door";
 	}
 	namespace Attribute {
 		// Tag::Zone
@@ -1256,6 +1275,17 @@ namespace ZoneXML {
 		SCA ZPDestY = "dest_y";
 		SCA ZPDestZ = "dest_z";
 		SCA ZPDestHeading = "dest_heading";
+		// Tag::Object
+		namespace Object {
+			SCA Type = "type";
+			SCA Asset = "asset";
+			SCA Heading = "heading";
+		}
+		// Tag::Door
+		namespace Door {
+			SCA Asset = "asset";
+			SCA Heading = "heading";
+		}
 		// Tag::SpawnGroup
 		SCA SGID = "id";
 		// Tag::SpawnGroupEntry
@@ -1374,6 +1404,37 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 			EXPECTED_BOOL(readAttribute(zonePointElement, Attribute::ZPDestHeading, zp->mDestinationHeading));
 
 			zonePointElement = zonePointElement->NextSiblingElement(Tag::ZonePoint);
+		}
+
+		// Read Objects.
+		auto objectsElement = zoneElement->FirstChildElement(Tag::Objects);
+		EXPECTED_BOOL(objectsElement);
+		auto objectElement = objectsElement->FirstChildElement(Tag::Object);
+		while (objectElement) {
+			auto o = new Data::Object();
+			zoneData->mObjects.push_back(o);
+
+			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Type, o->mType));
+			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Asset, o->mAsset));
+			EXPECTED_BOOL(readVector3(objectElement, o->mPosition));
+			EXPECTED_BOOL(readAttribute(objectElement, Attribute::Object::Heading, o->mHeading));
+
+			objectElement = objectElement->NextSiblingElement(Tag::Object);
+		}
+
+		// Read Doors.
+		auto doorsElement = zoneElement->FirstChildElement(Tag::Doors);
+		EXPECTED_BOOL(doorsElement);
+		auto doorElement = doorsElement->FirstChildElement(Tag::Door);
+		while (doorElement) {
+			auto d = new Data::Door();
+			zoneData->mDoors.push_back(d);
+
+			EXPECTED_BOOL(readAttribute(doorElement, Attribute::Door::Asset, d->mAsset));
+			EXPECTED_BOOL(readVector3(doorElement, d->mPosition));
+			EXPECTED_BOOL(readAttribute(doorElement, Attribute::Door::Heading, d->mHeading));
+
+			doorElement = doorElement->NextSiblingElement(Tag::Door);
 		}
 
 		// Read Spawn Groups.
@@ -1504,6 +1565,35 @@ const bool DataStore::saveZones(Data::ZoneList pZones) {
 			zonePointElement->SetDoubleAttribute(Attribute::ZPDestY, j->mDestinationPosition.y);
 			zonePointElement->SetDoubleAttribute(Attribute::ZPDestZ, j->mDestinationPosition.z);
 			zonePointElement->SetDoubleAttribute(Attribute::ZPDestHeading, j->mDestinationHeading);
+		}
+
+		// Write Objects.
+		auto objectsElement = new TiXmlElement(Tag::Objects);
+		zoneElement->LinkEndChild(objectsElement);
+
+		for (auto j : i->mObjects) {
+			// Write Object.
+			auto objectElement = new TiXmlElement(Tag::Object);
+			objectsElement->LinkEndChild(objectElement);
+
+			objectElement->SetAttribute(Attribute::Object::Type, j->mType);
+			objectElement->SetAttribute(Attribute::Object::Asset, j->mAsset.c_str());
+			writeVector3(objectElement, j->mPosition);
+			objectElement->SetDoubleAttribute(Attribute::Object::Heading, j->mHeading);
+		}
+
+		// Write Doors.
+		auto doorsElement = new TiXmlElement(Tag::Doors);
+		zoneElement->LinkEndChild(doorsElement);
+
+		for (auto j : i->mDoors) {
+			// Write Door.
+			auto doorElement = new TiXmlElement(Tag::Door);
+			doorElement->LinkEndChild(doorElement);
+
+			doorElement->SetAttribute(Attribute::Door::Asset, j->mAsset.c_str());
+			writeVector3(doorElement, j->mPosition);
+			doorElement->SetDoubleAttribute(Attribute::Door::Heading, j->mHeading);
 		}
 
 		// Write Spawn Groups.
