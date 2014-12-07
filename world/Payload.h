@@ -1187,7 +1187,7 @@ namespace Payload {
 		//	uint32 mSpawnID = 0;
 		//};
 
-		// S->C
+		// C->S
 		struct ExperienceUpdate : public FixedT<ExperienceUpdate, OP_ExpUpdate> {
 			static EQApplicationPacket* construct(const u32 pExperience, const u32 pAAExperience) {
 				auto packet = create();
@@ -1199,22 +1199,6 @@ namespace Payload {
 			}
 			u32 mExperience = 0;
 			u32 mAAExperience = 0;
-		};
-
-		// S->C
-		struct LevelUpdate : public FixedT<LevelUpdate, OP_LevelUpdate> {
-			static EQApplicationPacket* construct(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperience) {
-				auto packet = create();
-				auto payload = convert(packet);
-				payload->mLevel = pLevel;
-				payload->mPreviousLevel = pPreviousLevel;
-				payload->mExperience = pExperience;
-
-				return packet;
-			}
-			u32 mLevel = 0;
-			u32 mPreviousLevel = 0;
-			u32 mExperience = 0;
 		};
 	}
 

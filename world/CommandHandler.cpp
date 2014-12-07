@@ -229,19 +229,23 @@ class LevelCommand : public Command {
 public:
 	LevelCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #level <number>");
-		mMinimumParameters = 1;
-		mMaximumParameters = 1;
-		mRequiresTarget = true;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Target is a Character.
-		if (!mInvoker->targetIsCharacter()) { return false; }
+		// Check: Parameter #
+		if (pParameters.size() != 1) {
+			invalidParameters(pParameters);
+			return false;
+		}
 
-		u8 level = 0;
-		if (!convertParameter(0, level)) { return false; }
+		uint32 level = 0;
+		// Check: Parameter conversion.
+		const bool ok = Utility::stou32Safe(level, pParameters[0]);
+		if (!ok) {
+			return false;
+		}
 
-		Actor::cast<Character*>(mInvoker->getTarget())->setCharacterLevel(level);
+		mInvoker->setCharacterLevel(static_cast<uint8>(level));
 		return true;
 	}
 };

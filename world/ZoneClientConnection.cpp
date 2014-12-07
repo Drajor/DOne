@@ -1513,16 +1513,19 @@ void ZoneClientConnection::sendExperienceUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = ExperienceUpdate::construct(mCharacter->getExperienceRatio(), 0);
+	auto packet = ExperienceUpdate::construct(mCharacter->getExperienceRatio(), 20);
 	sendPacket(packet);
 	delete packet;
 }
 
 void ZoneClientConnection::sendLevelUpdate() {
-	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = LevelUpdate::construct(mCharacter->getLevel(), 0, mCharacter->getExperienceRatio());
+	auto packet = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
+	auto payload = reinterpret_cast<LevelUpdate_Struct*>(packet->pBuffer);
+	payload->level = mCharacter->getLevel();
+	payload->exp = mCharacter->getExperienceRatio();
+
 	sendPacket(packet);
 	delete packet;
 }
