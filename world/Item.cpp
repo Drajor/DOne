@@ -22,11 +22,11 @@ Item::~Item() {
 	}
 }
 
-Item* Item::getAugment(const uint8 pSlot) const {
+Item* Item::getAugment(const u8 pSlot) const {
 	return mAugments[pSlot];
 }
 
-Item* Item::getContents(const uint8 pSlot) const {
+Item* Item::getContents(const u8 pSlot) const {
 	return mContents[pSlot];
 }
 
@@ -36,8 +36,8 @@ void Item::getContents(std::list<Item*>& pItems) const {
 	}
 }
 
-const uint32 Item::getDataSize(const uint32 pCopyType) const {
-	uint32 subItemSize = 0;
+const u32 Item::getDataSize(const u32 pCopyType) const {
+	u32 subItemSize = 0;
 
 	// Add augments.
 	for (auto i : mAugments)
@@ -50,13 +50,13 @@ const uint32 Item::getDataSize(const uint32 pCopyType) const {
 	return _getDataSize(pCopyType) + subItemSize;
 }
 
-const uint32 Item::_getDataSize(const uint32 pCopyType) const {
-	uint32 result = sizeof(ItemData);
+const u32 Item::_getDataSize(const u32 pCopyType) const {
+	u32 result = sizeof(ItemData);
 
 	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
 	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
 		// Sub-Items need 4 extra bytes to store sub-index.
-		result += sizeof(uint32);
+		result += sizeof(u32);
 	}
 
 	if (!isEvolvingItem()) {
@@ -94,12 +94,12 @@ const uint32 Item::_getDataSize(const uint32 pCopyType) const {
 	return result;
 }
 
-const bool Item::copyData(Utility::DynamicStructure& pStructure, const uint32 pCopyType) {
+const bool Item::copyData(Utility::DynamicStructure& pStructure, const u32 pCopyType) {
 	// Check: This Item is either an augment or within a bag.
 	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
 	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
 		EXPECTED_BOOL(hasValidSubIndex());
-		pStructure.write<uint32>(getSubIndex());
+		pStructure.write<u32>(getSubIndex());
 	}
 
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
@@ -124,21 +124,21 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure, const uint32 pC
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown0), sizeof(mItemData->mEvolvingItem.__Unknown0));
-		pStructure.write<int32>(getEvolvingLevel());
+		pStructure.write<i32>(getEvolvingLevel());
 		pStructure.write<double>(getEvolvingProgress());
-		pStructure.write<uint8>(getEvolvingActive());
-		pStructure.write<int32>(mItemData->mEvolvingItem.mMaxLevel);
+		pStructure.write<u8>(getEvolvingActive());
+		pStructure.write<i32>(mItemData->mEvolvingItem.mMaxLevel);
 		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 	}
 
 	pStructure.writeString(getOrnamentationIDFile());
 	pStructure.write(getOrnamentationIcon());
 
-	pStructure.write<uint8>(mItemData->__Unknown5);
-	pStructure.write<uint8>(mItemData->__Unknown6);
+	pStructure.write<u8>(mItemData->__Unknown5);
+	pStructure.write<u8>(mItemData->__Unknown6);
 
-	pStructure.write<uint8>(mItemData->mCopied);
-	pStructure.write<uint8>(mItemData->mItemClass);
+	pStructure.write<u8>(mItemData->mCopied);
+	pStructure.write<u8>(mItemData->mItemClass);
 	
 	// HEADER - END
 
@@ -168,39 +168,39 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure, const uint32 pC
 	// Click Effect.
 	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffect);
 	pStructure.writeString(String(mItemData->mClickName));
-	pStructure.write<int32>(mItemData->mClickUnknown);
+	pStructure.write<i32>(mItemData->mClickUnknown);
 	
 	// Proc Effect.
 	pStructure.write<ItemData::ProcEffectStruct>(mItemData->mProcEffect);
 	pStructure.writeString(String(mItemData->mProcName));
-	pStructure.write<int32>(mItemData->mProcUnknown);
+	pStructure.write<i32>(mItemData->mProcUnknown);
 
 	// Worn Effect.
 	pStructure.write<ItemData::Effect>(mItemData->mWornEffect);
 	pStructure.writeString(String(mItemData->mWornName));
-	pStructure.write<int32>(mItemData->mWornUnknown);
+	pStructure.write<i32>(mItemData->mWornUnknown);
 
 	// Focus Effect.
 	pStructure.write<ItemData::Effect>(mItemData->mFocusEffect);
 	pStructure.writeString(String(mItemData->mFocusName));
-	pStructure.write<int32>(mItemData->mWornUnknown);
+	pStructure.write<i32>(mItemData->mWornUnknown);
 
 	// Scroll Effect.
 	pStructure.write<ItemData::Effect>(mItemData->mScrollEffect);
 	pStructure.writeString(String(mItemData->mScrollName));
-	pStructure.write<int32>(mItemData->mScrollUnknown);
+	pStructure.write<i32>(mItemData->mScrollUnknown);
 
 	// Bard Effect.
 	pStructure.write<ItemData::Effect>(mItemData->mBardEffect);
 	pStructure.writeString(String(mItemData->mBardName));
-	pStructure.write<int32>(mItemData->mBardUnknown);
+	pStructure.write<i32>(mItemData->mBardUnknown);
 
 	// Chunk Four.
 	std::size_t chunk4 = (unsigned int)&(mItemData->mNumSubItems) - (unsigned int)&(mItemData->mScriptFileID);
 	pStructure.writeChunk((void*)&(mItemData->mScriptFileID), chunk4);
 
 	// Child Items.
-	pStructure.write<uint32>(getSubItems());
+	pStructure.write<u32>(getSubItems());
 
 	// Write augments
 	for (auto i : mAugments)
@@ -213,15 +213,15 @@ const bool Item::copyData(Utility::DynamicStructure& pStructure, const uint32 pC
 	return true;
 }
 
-const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
+const unsigned char* Item::copyData(u32& pSize, const u32 pCopyType) {
 	unsigned char * data = nullptr;
 	pSize += getDataSize(pCopyType);
 
-	pSize += sizeof(uint32); // Copy Type
+	pSize += sizeof(u32); // Copy Type
 	data = new unsigned char[pSize];
 
 	Utility::DynamicStructure ds(data, pSize);
-	ds.write<uint32>(pCopyType);
+	ds.write<u32>(pCopyType);
 
 	// Copy Item data.
 	copyData(ds, pCopyType);
@@ -234,8 +234,8 @@ const unsigned char* Item::copyData(uint32& pSize, const uint32 pCopyType) {
 	return data;
 }
 
-uint32 Item::getSubItems() const {
-	uint32 count = 0;
+u32 Item::getSubItems() const {
+	u32 count = 0;
 
 	for (auto i : mAugments) { if (i) count++; }
 	for (auto i : mContents) { if (i) count++; }
@@ -243,7 +243,7 @@ uint32 Item::getSubItems() const {
 	return count;
 }
 
-Item* Item::findFirst(const uint8 pItemType) const {
+Item* Item::findFirst(const u8 pItemType) const {
 	for (auto i : mContents) {
 		if (i && i->getItemType() == pItemType)
 			return i;
@@ -252,7 +252,7 @@ Item* Item::findFirst(const uint8 pItemType) const {
 	return nullptr;
 }
 
-Item* Item::findStackable(const uint32 pItemID) const {
+Item* Item::findStackable(const u32 pItemID) const {
 	for (auto i : mContents) {
 		if (i && i->getID() == pItemID && i->getStacks() < i->getMaxStacks())
 			return i;
@@ -348,7 +348,7 @@ const bool Item::augmentAllowed(Item* pAugment) {
 	return true;
 }
 
-const bool Item::clearContents(const uint32 pSubIndex) {
+const bool Item::clearContents(const u32 pSubIndex) {
 	EXPECTED_BOOL(isContainer());
 	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
 	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
@@ -365,7 +365,7 @@ const bool Item::clearContents(const uint32 pSubIndex) {
 	return true;
 }
 
-const bool Item::setContents(Item* pItem, const uint32 pSubIndex) {
+const bool Item::setContents(Item* pItem, const u32 pSubIndex) {
 	EXPECTED_BOOL(pItem);
 	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
 	EXPECTED_BOOL(mContents[pSubIndex] == nullptr); // Prevent overriding Item pointer. Failure = bug.
@@ -398,7 +398,7 @@ const bool Item::setParent(Item* pParent) {
 	return true;
 }
 
-const bool Item::setSubIndex(const uint32 pSubIndex) {
+const bool Item::setSubIndex(const u32 pSubIndex) {
 	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
 	EXPECTED_BOOL(getSubIndex() == -1);
 
@@ -450,7 +450,7 @@ const bool Item::isSellable() const {
 	return true;
 }
 
-const bool Item::addStacks(const uint32 pStacks) {
+const bool Item::addStacks(const u32 pStacks) {
 	EXPECTED_BOOL(isStackable());
 	EXPECTED_BOOL(getStacks() + pStacks <= getMaxStacks()); // Over stacking. Bug!
 
@@ -458,7 +458,7 @@ const bool Item::addStacks(const uint32 pStacks) {
 	return true;
 }
 
-const bool Item::removeStacks(const uint32 pStacks) {
+const bool Item::removeStacks(const u32 pStacks) {
 	EXPECTED_BOOL(isStackable());
 	EXPECTED_BOOL(getStacks() > pStacks);
 
@@ -543,8 +543,8 @@ const bool Item::forEachContents(std::function<const bool(Item*)> pFunction) con
 	return true;
 }
 
-const uint32 Item::getSellPrice(const uint32 pStacks, const float pSellRate) const {
-	return static_cast<uint32>(std::ceil(pStacks * getPrice() * pSellRate));
+const u32 Item::getSellPrice(const u32 pStacks, const float pSellRate) const {
+	return static_cast<u32>(std::ceil(pStacks * getPrice() * pSellRate));
 }
 
 const bool Item::hasAugmentations() const {
@@ -581,7 +581,7 @@ String Item::getLink() const {
 	return ss.str();
 }
 
-const uint32 Item::findEmptySlot() {
+const u32 Item::findEmptySlot() {
 	EXPECTED_VAR(isContainer(), SlotID::None);
 
 	for (int i = 0; i < SlotID::MAX_CONTENTS; i++) {

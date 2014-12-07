@@ -31,6 +31,14 @@ TEST(ZonePayload, FixedSizes) {
 	// LoadSpellSet
 	//TODO: More.
 
+	// AugmentInformation
+	EXPECT_EQ(9212, Payload::Zone::BookRequest::size());
+	EXPECT_EQ(4, Payload::Zone::Combine::size());
+	EXPECT_EQ(16, Payload::Zone::ShopRequest::size());
+	EXPECT_EQ(8, Payload::Zone::ShopEnd::size());
+	EXPECT_EQ(16, Payload::Zone::ShopSell::size());
+	EXPECT_EQ(32, Payload::Zone::ShopBuy::size());
+	// ShopDeleteItem
 	EXPECT_EQ(88, Payload::Zone::UpdateAlternateCurrency::size());
 	EXPECT_EQ(16, Payload::Zone::AlternateCurrencyReclaim::size());
 	EXPECT_EQ(8, Payload::Zone::RandomRequest::size());
