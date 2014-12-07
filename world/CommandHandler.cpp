@@ -1538,11 +1538,21 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 	}
 }
 
-void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, std::vector<String> pParameters) {
+void CommandHandler::_handleCommand(Character* pCharacter, const String& pCommandName, std::vector<String> pParameters) {
 
 	// #heal
 	if (pCommandName == "heal") {
 		pCharacter->healPercentage(100);
+	}
+	// #mana
+	else if (pCommandName == "mana") {
+		pCharacter->setCurrentMana(pCharacter->getMaximumMana());
+		pCharacter->getConnection()->sendManaUpdate();
+	}
+	// #endurance
+	else if (pCommandName == "endurance") {
+		pCharacter->setCurrentEndurance(pCharacter->getMaximumEndurance());
+		pCharacter->getConnection()->sendEnduranceUpdate();
 	}
 	// #damage <amount>
 	else if (pCommandName == "damage" && pParameters.size() == 1 && pCharacter->hasTarget()) {
@@ -1795,10 +1805,8 @@ void CommandHandler::_handleCommand(Character* pCharacter, String pCommandName, 
 		pCharacter->getZone()->addActor(npc);
 	}
 	else if(pCommandName == "xx"){
-		pCharacter->getConnection()->sendDeleteSpellDelete(0, true);
-	}
-	else if (pCommandName == "xxx"){
-		pCharacter->getConnection()->sendDeleteSpellDelete(0, false);
+		pCharacter->setCurrentMana(0);
+		pCharacter->getConnection()->sendManaUpdate();
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

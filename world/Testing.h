@@ -25,6 +25,9 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::SwapSpell::size());
 	EXPECT_EQ(36, Payload::Zone::CastSpell::size());
 	EXPECT_EQ(8, Payload::Zone::BeginCast::size());
+	EXPECT_EQ(20, Payload::Zone::ManaChange::size());
+	EXPECT_EQ(10, Payload::Zone::ManaUpdate::size());
+	EXPECT_EQ(10, Payload::Zone::EnduranceUpdate::size());
 	// LoadSpellSet
 	//TODO: More.
 

@@ -319,12 +319,53 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: ManaChange_Struct
-		struct ManaChange : public Fixed<ManaChange> {
-			uint32 mMana = 0;
-			uint32 mEndurance = 0;
-			uint32 mSpellID = 0;
-			uint32 mUnknown0 = 0;
+		struct ManaChange : public FixedT<ManaChange, OP_ManaChange> {
+			static EQApplicationPacket* construct(const u32 pCurrentMana, const u32 pCurrentEndurance, const u32 pSpellID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mMana = pCurrentMana;
+				payload->mEndurance = pCurrentEndurance;
+				payload->mSpellID = pSpellID;
+
+				return packet;
+			}
+			u32 mMana = 0;
+			u32 mEndurance = 0;
+			u32 mSpellID = 0;
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+		};
+
+		// S->C
+		struct ManaUpdate : public FixedT<ManaUpdate, OP_ManaUpdate> {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u32 pCurrentMana, const u32 pMaximumMana) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mCurrentMana = pCurrentMana;
+				payload->mMaximumMana = pMaximumMana;
+				payload->mSpawnID = pSpawnID;
+
+				return packet;
+			}
+			u32 mCurrentMana = 0;
+			u32 mMaximumMana = 0;
+			u16 mSpawnID = 0;
+		};
+
+		// S->C
+		struct EnduranceUpdate : FixedT<EnduranceUpdate, OP_EnduranceUpdate> {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u32 pCurrentEndurance, const u32 pMaximumEndurance) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mCurrentEndurance = pCurrentEndurance;
+				payload->mMaximumEndurance = pMaximumEndurance;
+				payload->mSpawnID = pSpawnID;
+
+				return packet;
+			}
+			u32 mCurrentEndurance = 0;
+			u32 mMaximumEndurance = 0;
+			u16 mSpawnID = 0;
 		};
 
 		// S->C

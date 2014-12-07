@@ -2721,12 +2721,7 @@ void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_ManaChange, ManaChange::size());
-	auto payload = ManaChange::convert(packet->pBuffer);
-	payload->mMana = mCharacter->getCurrentMana();
-	payload->mEndurance = mCharacter->getCurrentEndurance();
-	payload->mSpellID = pSpellID;
-
+	auto packet = ManaChange::construct(mCharacter->getCurrentMana(), mCharacter->getCurrentEndurance(), pSpellID);
 	sendPacket(packet);
 	delete packet;
 }
@@ -3970,6 +3965,24 @@ void ZoneClientConnection::sendObject(Object* pObject) {
 	}
 
 	auto packet = new EQApplicationPacket(OP_GroundSpawn, reinterpret_cast<const unsigned char*>(data), payloadSize);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendManaUpdate() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = ManaUpdate::construct(mCharacter->getSpawnID(), mCharacter->getCurrentMana(), mCharacter->getMaximumMana());
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendEnduranceUpdate() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = EnduranceUpdate::construct(mCharacter->getSpawnID(), mCharacter->getCurrentEndurance(), mCharacter->getMaximumEndurance());
 	sendPacket(packet);
 	delete packet;
 }

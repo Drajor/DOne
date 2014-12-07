@@ -61,6 +61,6 @@ public:
 private:
 	void _logCommand(Character* pCharacter, String pCommandMessage);
 	Command* findCommand(String pCommandName);
-	void _handleCommand(Character* pCharacter, String pCommandName, std::vector<String> pParameters);
+	void _handleCommand(Character* pCharacter, const String& pCommandName, std::vector<String> pParameters);
 	std::list<Command*> mCommands;
 };

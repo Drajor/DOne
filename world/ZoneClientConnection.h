@@ -104,6 +104,9 @@ public:
 	void sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID);
 	void sendEnableSpellBar(const uint32 pSpellID);
 
+	void sendManaUpdate();
+	void sendEnduranceUpdate();
+
 	void sendSkillValue(const uint32 pSkillID, const uint32 pValue);
 	void sendLanguageValue(const uint32 pLanguageID, const uint32 pValue) { sendSkillValue(pLanguageID + 100, pValue); }
 

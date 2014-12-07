@@ -1606,15 +1606,15 @@ ENCODE(OP_SpawnDoor) {
 //	dest->FastQueuePacket(&in, ack_req);
 //}
 
-ENCODE(OP_ManaChange) {
-	ENCODE_LENGTH_EXACT(ManaChange_Struct);
-	SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
-	OUT(new_mana);
-	OUT(stamina);
-	OUT(spell_id);
-	eq->unknown16 = -1; // Self Interrupt/Success = -1, Fizzle = 1, Other Interrupt = 2?
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ManaChange) {
+//	ENCODE_LENGTH_EXACT(ManaChange_Struct);
+//	SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
+//	OUT(new_mana);
+//	OUT(stamina);
+//	OUT(spell_id);
+//	eq->unknown16 = -1; // Self Interrupt/Success = -1, Fizzle = 1, Other Interrupt = 2?
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_OnLevelMessage)
 //{
