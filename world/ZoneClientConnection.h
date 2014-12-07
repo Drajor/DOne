@@ -9,6 +9,8 @@ class EQStreamInterface;
 class EQApplicationPacket;
 class Zone;
 class Character;
+class Object;
+class Door;
 class DataStore;
 class CommandHandler;
 class Guild;
@@ -157,7 +159,7 @@ public:
 
 	void sendMOTD(const String& pMOTD);
 
-	void sendObjectSpawn(const String& pAsset, const u32 pType, const Vector3& pPosition);
+	void sendObject(Object* pObject);
 
 	void sendPacket(EQApplicationPacket* pPacket);
 

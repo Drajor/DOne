@@ -25,6 +25,7 @@
 #include "Transmutation.h"
 #include "Random.h"
 #include "AlternateCurrencyManager.h"
+#include "Object.h"
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
@@ -922,9 +923,11 @@ void ZoneClientConnection::_sendDoors() {
 
 void ZoneClientConnection::_sendObjects() {
 	EXPECTED(mConnected);
-	return;
-	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_GroundSpawn, 0);
-	//mStreamInterface->QueuePacket(outPacket);
+	
+	const auto objects = mZone->getObjects();
+	for (auto i : objects) {
+		sendObject(i);
+	}
 }
 
 void ZoneClientConnection::_sendZonePoints() {
@@ -3933,30 +3936,31 @@ void ZoneClientConnection::_handleDropItem(const EQApplicationPacket* pPacket) {
 	mZone->handleDropItem(mCharacter);
 }
 
-void ZoneClientConnection::sendObjectSpawn(const String& pAsset, const u32 pType, const Vector3& pPosition) {
+void ZoneClientConnection::sendObject(Object* pObject) {
 	EXPECTED(mConnected);
+	EXPECTED(pObject);
 
 	u32 payloadSize = 0;
-	payloadSize += pAsset.length() + 1 + 57;
+	payloadSize += pObject->getAsset().length() + 1 + 57;
 
 	char* data = new char[payloadSize];
 
 	Utility::DynamicStructure ds(data, payloadSize);
 
 	ds.write<u32>(1); // Drop ID.
-	ds.writeString(pAsset);
+	ds.writeString(pObject->getAsset());
 	ds.write<u16>(mZone->getID());
 	ds.write<u16>(mZone->getInstanceID());
-	ds.write<u32>(2); // Unknown.
-	ds.write<u32>(33); // Unknown.
-	ds.write<float>(0.0f); // Heading.
 	ds.write<u32>(0); // Unknown.
 	ds.write<u32>(0); // Unknown.
-	ds.write<float>(50.5);
-	ds.write<float>(pPosition.y);
-	ds.write<float>(pPosition.x);
-	ds.write<float>(pPosition.z + 4);
-	ds.write<u32>(pType);
+	ds.write<float>(pObject->getHeading());
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<float>(pObject->getSize());
+	ds.write<float>(pObject->getPosition().y);
+	ds.write<float>(pObject->getPosition().x);
+	ds.write<float>(pObject->getPosition().z);
+	ds.write<u32>(pObject->getType());
 	ds.write<u32>(0xFFFFFFFF); // Unknown.
 	ds.write<u32>(0); // Unknown.
 	ds.write<u8>(0); // Unknown.

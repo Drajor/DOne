@@ -31,8 +31,9 @@
 #include "ItemFactory.h"
 #include "Inventory.h"
 #include "EventDispatcher.h"
+#include "Object.h"
 
-Zone::Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID) :
+Zone::Zone(const u32 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
@@ -89,6 +90,12 @@ const bool Zone::initialise() {
 	// Pass to SpawnPointManager.
 	mSpawnPointManager = new SpawnPointManager();
 	EXPECTED_BOOL(mSpawnPointManager->initialise(this, spawnGroupData, spawnPointData));
+
+	// Objects.
+	EXPECTED_BOOL(loadObjects(zoneData->mObjects));
+
+	// Doors.
+	EXPECTED_BOOL(loadDoors(zoneData->mDoors));
 
 	mInitialised = true;
 	return true;
@@ -1701,4 +1708,23 @@ void Zone::handleDropItem(Character* pCharacter) {
 
 	// Consume 
 	EXPECTED(pCharacter->getInventory()->consume(SlotID::CURSOR, item->getStacks()));
+}
+
+const bool Zone::loadObjects(Data::ObjectList pObjects) {
+	for (auto i : pObjects) {
+		auto o = new Object();
+		mObjects.push_back(o);
+
+		o->setType(i->mType);
+		o->setAsset(i->mAsset);
+		o->setSize(i->mSize);
+		o->setHeading(i->mHeading);
+		o->setPosition(i->mPosition);
+	}
+
+	return true;
+}
+
+const bool Zone::loadDoors(Data::DoorList pDoors) {
+	return true;
 }

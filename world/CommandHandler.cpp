@@ -1346,7 +1346,7 @@ public:
 		u32 type = 0;
 		if (!convertParameter(1, type)) { return false; }
 
-		mInvoker->getConnection()->sendObjectSpawn(asset, type, mInvoker->getPosition());
+		//mInvoker->getConnection()->sendObjectSpawn(asset, type, mInvoker->getPosition());
 
 		return true;
 	}

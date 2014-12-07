@@ -26,6 +26,19 @@ class SpawnPointManager;
 struct ZonePoint;
 class LootAllocator;
 class Item;
+class Object;
+class Door;
+
+namespace Data {
+	struct Object;
+	struct Door;
+	typedef std::list<Data::Object*>& ObjectList;
+	typedef std::list<Data::Door*>& DoorList;
+}
+
+typedef std::list<ZonePoint*> ZonePointList;
+typedef std::list<Object*> ObjectList;
+typedef std::list<Door*> DoorList;
 
 struct ZonePoint {
 	uint16 mID = 0;
@@ -40,7 +53,7 @@ struct ZonePoint {
 
 class Zone {
 public:
-	Zone(const uint32 pPort, const uint16 pZoneID, const uint16 pInstanceID);
+	Zone(const u32 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
 	const bool initialise();
@@ -61,10 +74,10 @@ public:
 	inline const float getMinimumClip() const { return mMinimumClip; }
 	inline const float getMaximumClip() const { return mMaximumClip; }
 	
-	inline const uint32 getNumCharacters() const { return mCharacters.size(); }
-	inline const uint16 getID() const { return mID; }
-	inline const uint16 getInstanceID() const { return mInstanceID; }
-	inline const uint16 getPort() const { return mPort; }
+	inline const u32 getNumCharacters() const { return mCharacters.size(); }
+	inline const u16 getID() const { return mID; }
+	inline const u16 getInstanceID() const { return mInstanceID; }
+	inline const u32 getPort() const { return mPort; }
 
 	Character* findCharacter(const String pCharacterName);
 
@@ -152,7 +165,8 @@ public:
 	void handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks);
 	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks);
 
-	const std::list<ZonePoint*>& getZonePoints() { return mZonePoints; }
+	const ZonePointList& getZonePoints() { return mZonePoints; }
+	const ObjectList& getObjects() { return mObjects; }
 
 	const bool canBank(Character* pCharacter);
 	const bool canShop(Character* pCharacter, NPC* pMerchant);
@@ -190,6 +204,9 @@ private:
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
 
+	const bool loadObjects(Data::ObjectList pObjects);
+	const bool loadDoors(Data::DoorList pDoors);
+
 	u8 mZoneType = 0;
 	u8 mTimeType = 0;
 	u8 mSkyType = 0;
@@ -202,9 +219,9 @@ private:
 	String mShortName = "";
 	Vector3 mSafePoint;
 	uint16 mNextSpawnID = 1;
-	const uint16 mID;
-	const uint16 mInstanceID;
-	const uint32 mPort;
+	const u16 mID;
+	const u16 mInstanceID;
+	const u32 mPort;
 
 	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
 	bool mPopulated = false;
@@ -212,7 +229,7 @@ private:
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
-	std::list<ZonePoint*> mZonePoints;
+	ZonePointList mZonePoints;
 
 	SpawnPointManager* mSpawnPointManager = nullptr;
 	
@@ -222,6 +239,8 @@ private:
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
 	std::list<Actor*> mActors;
+	ObjectList mObjects;
+	DoorList mDoors;
 
 	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
 	std::list<ZoneClientConnection*> mConnections; // In Zone, running around probably killing rats.
