@@ -16,6 +16,7 @@
 #include "Inventory.h"
 #include "AlternateCurrencyManager.h"
 #include "NPCFactory.h"
+#include "Random.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -1807,6 +1808,61 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	else if(pCommandName == "xx"){
 		pCharacter->setCurrentMana(0);
 		pCharacter->getConnection()->sendManaUpdate();
+	}
+	else if (pCommandName == "race") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+
+		u16 race = 0;
+		if (!Utility::stoSafe(race, pParameters[0])) { return; }
+		target->setRace(race);
+		target->getZone()->handleAppearanceChange(target);
+	}
+	else if (pCommandName == "gender") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+
+		u8 gender = 0;
+		if (!Utility::stoSafe(gender, pParameters[0])) { return; }
+		target->setGender(gender);
+		target->getZone()->handleAppearanceChange(target);
+	}
+	else if (pCommandName == "size") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+
+		float size = 1.0f;
+		if (!Utility::stoSafe(size, pParameters[0])) { return; }
+		target->setSize(size);
+		target->getZone()->handleAppearanceChange(target);
+	}
+	else if (pCommandName == "texture") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+
+		u8 texture = 0;
+		if (!Utility::stoSafe(texture, pParameters[0])) { return; }
+		target->setTexture(texture);
+		target->getZone()->handleAppearanceChange(target);
+	}
+	else if (pCommandName == "helmtexture") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+		
+		u8 texture = 0;
+		if (!Utility::stoSafe(texture, pParameters[0])) { return; }
+		target->setHelmTexture(texture);
+		target->getZone()->handleAppearanceChange(target);
+	}
+	// #showhelm - Not sure how this works yet.
+	else if (pCommandName == "showhelm") {
+		auto target = pCharacter->getTarget();
+		if (!target) { return; }
+
+		u32 showHelm = 0;
+		if (!Utility::stoSafe(showHelm, pParameters[0])) { return; }
+		target->setShowHelm(showHelm == 1 ? true : false);
+		target->getZone()->handleShowHelm(target);
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

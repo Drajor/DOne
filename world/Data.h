@@ -218,6 +218,19 @@ namespace Data {
 	};
 
 	struct Spell {
+		struct Effect {
+			u32 mBaseValue = 0;
+			u32 mLimitValue = 0;
+			u32 mMaximum = 0;
+			u32 mFormula = 0;
+			u32 mEffectID = 0;
+		};
+		
+		struct Component {
+			u32 mItemID = 0;
+			u32 mStacks = 0;
+		};
+
 		bool mInUse = false;
 		u32 mID = 0;
 		String mName = "";
@@ -230,24 +243,13 @@ namespace Data {
 
 		i32 mManaCost = 0;
 
-		// Class required levels.
-		u8 mWarriorLevel = 255;
-		u8 mClericLevel = 255;
-		u8 mPaladinLevel = 255;
-		u8 mRangerLevel = 255;
-		u8 mShadowKnightLevel = 255;
-		u8 mDruidLevel = 255;
-		u8 mMonkLevel = 255;
-		u8 mBardLevel = 255;
-		u8 mRogueLevel = 255;
-		u8 mShamanLevel = 255;
-		u8 mNecromancerLevel = 255;
-		u8 mWizardLevel = 255;
-		u8 mMagicianLevel = 255;
-		u8 mEnchanterLevel = 255;
-		u8 mBeastlordLevel = 255;
-		u8 mBerserkerLevel = 255;
+		u32 mTargetType = 0; // TODO: Enumeration.
+
 		u8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
+		u8 mRequiredDeities[16];
+
+		Effect mEffects[12];
+		Component mComponents[4];
 
 	};
 

@@ -1532,35 +1532,35 @@ ENCODE(OP_GuildMemberList) {
 }
 
 
-ENCODE(OP_SpawnDoor) {
-	SETUP_VAR_ENCODE(Door_Struct);
-	int door_count = __packet->size/sizeof(Door_Struct);
-	int total_length = door_count * sizeof(structs::Door_Struct);
-	ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
-	int r;
-	for(r = 0; r < door_count; r++) {
-		strcpy(eq[r].name, emu[r].name);
-		eq[r].xPos = emu[r].xPos;
-		eq[r].yPos = emu[r].yPos;
-		eq[r].zPos = emu[r].zPos;
-		eq[r].heading = emu[r].heading;
-		eq[r].incline = emu[r].incline;
-		eq[r].size = emu[r].size;
-		eq[r].doorId = emu[r].doorId;
-		eq[r].opentype = emu[r].opentype;
-		eq[r].state_at_spawn = emu[r].state_at_spawn;
-		eq[r].invert_state = emu[r].invert_state;
-		eq[r].door_param = emu[r].door_param;
-		eq[r].unknown0076 = 0;
-		eq[r].unknown0077 = 1; // Both must be 1 to allow clicking doors
-		eq[r].unknown0078 = 0;
-		eq[r].unknown0079 = 1; // Both must be 1 to allow clicking doors
-		eq[r].unknown0080 = 0;
-		eq[r].unknown0081 = 0;
-		eq[r].unknown0082 = 0;
-	}
-	FINISH_ENCODE();
-}
+//ENCODE(OP_SpawnDoor) {
+//	SETUP_VAR_ENCODE(Door_Struct);
+//	int door_count = __packet->size/sizeof(Door_Struct);
+//	int total_length = door_count * sizeof(structs::Door_Struct);
+//	ALLOC_VAR_ENCODE(structs::Door_Struct, total_length);
+//	int r;
+//	for(r = 0; r < door_count; r++) {
+//		strcpy(eq[r].name, emu[r].name);
+//		eq[r].xPos = emu[r].xPos;
+//		eq[r].yPos = emu[r].yPos;
+//		eq[r].zPos = emu[r].zPos;
+//		eq[r].heading = emu[r].heading;
+//		eq[r].incline = emu[r].incline;
+//		eq[r].size = emu[r].size;
+//		eq[r].doorId = emu[r].doorId;
+//		eq[r].opentype = emu[r].opentype;
+//		eq[r].state_at_spawn = emu[r].state_at_spawn;
+//		eq[r].invert_state = emu[r].invert_state;
+//		eq[r].door_param = emu[r].door_param;
+//		eq[r].unknown0076 = 0;
+//		eq[r].unknown0077 = 1; // Both must be 1 to allow clicking doors
+//		eq[r].unknown0078 = 0;
+//		eq[r].unknown0079 = 1; // Both must be 1 to allow clicking doors
+//		eq[r].unknown0080 = 0;
+//		eq[r].unknown0081 = 0;
+//		eq[r].unknown0082 = 0;
+//	}
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_GroundSpawn)
 //{
@@ -1632,29 +1632,29 @@ ENCODE(OP_SpawnDoor) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_Illusion) {
-	ENCODE_LENGTH_EXACT(Illusion_Struct);
-	SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
-	OUT(spawnid);
-	OUT_str(charname);
-	OUT(race);
-	OUT(unknown006[0]);
-	OUT(unknown006[1]);
-	OUT(gender);
-	OUT(texture);
-	OUT(helmtexture);
-	OUT(face);
-	OUT(hairstyle);
-	OUT(haircolor);
-	OUT(beard);
-	OUT(beardcolor);
-	OUT(size);
-	OUT(drakkin_heritage);
-	OUT(drakkin_tattoo);
-	OUT(drakkin_details);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_Illusion) {
+//	ENCODE_LENGTH_EXACT(Illusion_Struct);
+//	SETUP_DIRECT_ENCODE(Illusion_Struct, structs::Illusion_Struct);
+//	OUT(spawnid);
+//	OUT_str(charname);
+//	OUT(race);
+//	OUT(unknown006[0]);
+//	OUT(unknown006[1]);
+//	OUT(gender);
+//	OUT(texture);
+//	OUT(helmtexture);
+//	OUT(face);
+//	OUT(hairstyle);
+//	OUT(haircolor);
+//	OUT(beard);
+//	OUT(beardcolor);
+//	OUT(size);
+//	OUT(drakkin_heritage);
+//	OUT(drakkin_tattoo);
+//	OUT(drakkin_details);
+//
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_ShopPlayerBuy)
 //{
@@ -3099,23 +3099,23 @@ DECODE(OP_TributeItem) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_FaceChange) {
-
-	DECODE_LENGTH_EXACT(structs::FaceChange_Struct);
-	SETUP_DIRECT_DECODE(FaceChange_Struct, structs::FaceChange_Struct);
-	IN(haircolor);
-	IN(beardcolor);
-	IN(eyecolor1);
-	IN(eyecolor2);
-	IN(hairstyle);
-	IN(beard);
-	IN(face);
-	IN(drakkin_heritage);
-	IN(drakkin_tattoo);
-	IN(drakkin_details);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_FaceChange) {
+//
+//	DECODE_LENGTH_EXACT(structs::FaceChange_Struct);
+//	SETUP_DIRECT_DECODE(FaceChange_Struct, structs::FaceChange_Struct);
+//	IN(haircolor);
+//	IN(beardcolor);
+//	IN(eyecolor1);
+//	IN(eyecolor2);
+//	IN(hairstyle);
+//	IN(beard);
+//	IN(face);
+//	IN(drakkin_heritage);
+//	IN(drakkin_tattoo);
+//	IN(drakkin_details);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_LoadSpellSet)
 {

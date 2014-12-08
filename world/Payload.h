@@ -192,6 +192,7 @@ namespace Payload {
 		};
 
 		// S->C
+		namespace TitleUpdateLimits { static const auto MAX_TEXT = 32; }
 		struct TitleUpdate : public FixedT<TitleUpdate, OP_SetTitleReply> {
 			static EQApplicationPacket* construct(const u32 pOption, const u32 pSpawnID, const String& pText) {
 				auto packet = create();
@@ -204,7 +205,7 @@ namespace Payload {
 			}
 			enum : u32 { UPDATE_TITLE = 0, UPDATE_SUFFIX = 1 };
 			u32 mOption = UPDATE_TITLE;
-			char mText[32];
+			char mText[TitleUpdateLimits::MAX_TEXT];
 			u32 mSpawnID = 0;
 		};
 
@@ -217,9 +218,28 @@ namespace Payload {
 			u8 mHairStyle = 0;
 			u8 mBeardStyle = 0;
 			u8 mFaceStyle = 0;
+			u8 mUnknown0 = 0;
 			u32 mDrakkinHeritage = 0;
 			u32 mDrakkinTattoo = 0;
 			u32 mDrakkinDetails = 0;
+			u32 mUnknown1 = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[FaceChange] ";
+				PRINT_MEMBER((i32)mHairColour);
+				PRINT_MEMBER((i32)mBeardColour);
+				PRINT_MEMBER((i32)mLeftEyeColour);
+				PRINT_MEMBER((i32)mRightEyeColour);
+				PRINT_MEMBER((i32)mHairStyle);
+				PRINT_MEMBER((i32)mBeardStyle);
+				PRINT_MEMBER((i32)mFaceStyle);
+				PRINT_MEMBER((i32)mUnknown0);
+				PRINT_MEMBER(mDrakkinHeritage);
+				PRINT_MEMBER(mDrakkinTattoo);
+				PRINT_MEMBER(mDrakkinDetails);
+				PRINT_MEMBER(mUnknown1);
+				return ss.str();
+			}
 		};
 
 		// S->C
@@ -876,8 +896,38 @@ namespace Payload {
 		};
 
 		// S->C
-		struct Illusion : public FixedT<Illusion, OP_Illusion> {
-
+		struct AppearanceUpdate : public FixedT<AppearanceUpdate, OP_Illusion> {
+			AppearanceUpdate() {
+				memset(mActorName, 0, sizeof(mActorName));
+				memset(mUnknowns0, 0, sizeof(mUnknowns0));
+				memset(mUnknowns1, 0, sizeof(mUnknowns1));
+				memset(mUnknowns2, 0, sizeof(mUnknowns2));
+			}
+			// Where is eye colours?!
+			u32 mSpawnID = 0; // Tested 4 bytes.
+			char mActorName[64];
+			u16 mRace = 0;
+			u16 mIsIllusion = 0; // 0 = OFF, 1 = ON.
+			u8 mGender = 0; // Tested.
+			u8 mTexture = 0; // Tested.
+			u8 mUnknown1 = 0;
+			u8 mUnknown2 = 0;
+			u8 mHelmTexture = 0;
+			u8 mUnknown3 = 0;
+			u8 mUnknown4 = 0;
+			u8 mUnknown5 = 0;
+			u8 mFaceStyle = 0; // Tested.
+			u8 mUnknowns0[3];
+			u8 mHairStyle = 0; // Tested.
+			u8 mHairColour = 0;
+			u8 mBeardStyle = 0;
+			u8 mBeardColour = 0;
+			float mSize = 1.0f; // Tested.
+			u8 mUnknowns1[148];
+			u8 mUnknowns2[4];
+			u32 mDrakkinHeritage = 0; // Drakkin stuff appears wrong.
+			u32 mDrakkinTattoo = 0;
+			u32 mDrakkinDetails = 0;
 		};
 
 		// S->C
@@ -1293,6 +1343,38 @@ namespace Payload {
 			u32 mType = 0;
 			u32 mUnknown = 0;
 		};
+
+		namespace DoorLimits { static const auto MAX_TEXT = 32; }
+		struct Door : public FixedT<Door, OP_SpawnDoor> {
+			Door() {
+				memset(mUnknowns0, 0, sizeof(mUnknowns0));
+			}
+			char mAsset[DoorLimits::MAX_TEXT];
+			float mY = 0.0f;
+			float mX = 0.0f;
+			float mZ = 0.0f;
+			float mHeading = 0.0f;
+			u32 mInline = 0;
+			u32 mSize = 100;
+			u8 mUnknowns0[4];
+			u8 mID = 0;
+			u8 mOpenType = 0;
+			u8 mState = 0;
+			u8 mInvertState = 0; // if this is 1, the door is normally open
+			u32 door_param; // normally ff ff ff ff (-1)
+			u32 unknown0068; // 00 00 00 00
+			u32 unknown0072; // 00 00 00 00
+			u8 unknown0076; // seen 1 or 0
+			u8 unknown0077; // seen 1 (always?)
+			u8 unknown0078; // seen 0 (always?)
+			u8 unknown0079; // seen 1 (always?)
+			u8 unknown0080; // seen 0 (always?)
+			u8 unknown0081; // seen 1 or 0 or rarely 2C or 90 or ED or 2D or A1
+			u8 unknown0082; // seen 0 or rarely FF or FE or 10 or 5A or 82
+			u8 unknown0083; // seen 0 or rarely 02 or 7C
+			u8 unknown0084[8]; // mostly 0s, the last 3 bytes are something tho
+		};
+
 	}
 
 	namespace World {
@@ -1582,7 +1664,7 @@ namespace Payload {
 			mFlags.mTargetable = 1;
 			mFlags.mTargetableWithHotkey = 1;
 			mFlags.mShowName = 1;
-			mFlags.mShowHelm = 1;
+			mFlags.mShowHelm = 0;
 		}
 		char mName[100]; // Variable
 		u32 mSpawnID = 0;
@@ -1616,7 +1698,7 @@ namespace Payload {
 			unsigned mGender : 2; // See Constants Gender
 			unsigned mIsLD : 1;
 			unsigned betabuffed : 1;
-			unsigned mShowHelm : 1;
+			unsigned mShowHelm : 1; // Works for NPC
 			unsigned padding26 : 1;
 			unsigned mTargetable : 1;
 			unsigned mTargetableWithHotkey : 1;

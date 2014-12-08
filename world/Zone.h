@@ -91,7 +91,7 @@ public:
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
 	void handleAFK(Character* pCharacter);
-	void handleShowHelm(Character* pCharacter);
+	void handleShowHelm(Actor* pActor);
 	void handleAnonymous(Character* pCharacter);
 	void handleStanding(Character* pCharacter);
 	void handleSitting(Character* pCharacter);
@@ -179,6 +179,7 @@ public:
 
 	void handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh);
 	void handleDropItem(Character* pCharacter);
+	void handleAppearanceChange(Actor* pActor);
 private:
 
 	const bool loadZonePoints();
@@ -194,7 +195,8 @@ private:
 
 	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
 	void _sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage);
-	void _sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
+	void _sendSpawnAppearance(Actor* pActor, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
+	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);

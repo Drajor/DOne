@@ -16,7 +16,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::RemoveNimbus::size());
 	EXPECT_EQ(8, Payload::Zone::SetTitle::size());
 	EXPECT_EQ(40, Payload::Zone::TitleUpdate::size());
-	EXPECT_EQ(19, Payload::Zone::FaceChange::size());
+	EXPECT_EQ(24, Payload::Zone::FaceChange::size());
 	// WearChange
 	EXPECT_EQ(4, Payload::Zone::AutoAttack::size());
 	EXPECT_EQ(16, Payload::Zone::MemoriseSpell::size());
@@ -31,8 +31,10 @@ TEST(ZonePayload, FixedSizes) {
 	// LoadSpellSet
 	//TODO: More.
 
+	EXPECT_EQ(256, Payload::Zone::AppearanceUpdate::size());
+
 	// AugmentInformation
-	EXPECT_EQ(9212, Payload::Zone::BookRequest::size());
+	EXPECT_EQ(8212, Payload::Zone::BookRequest::size());
 	EXPECT_EQ(4, Payload::Zone::Combine::size());
 	EXPECT_EQ(16, Payload::Zone::ShopRequest::size());
 	EXPECT_EQ(8, Payload::Zone::ShopEnd::size());

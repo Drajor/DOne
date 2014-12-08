@@ -174,6 +174,7 @@ public:
 	inline const uint32 getDrakkinTattoo() const { return mActorData.mDrakkinTattoo; }
 	inline const uint32 getDrakkinDetails() const { return mActorData.mDrakkinDetails; }
 	inline const uint8 getTexture() const { return mActorData.mTexture; }
+	inline const u8 getHelmTexture() const { return mActorData.mShowHelm; }
 
 	inline void setFaceStyle(const uint8 pFaceStyle) { mActorData.mFaceStyle = pFaceStyle; }
 	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mActorData.mLeftEyeColour = pLeftEyeColour; }
@@ -186,6 +187,7 @@ public:
 	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
 	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
 	inline void setTexture(const uint8 pValue) { mActorData.mTexture = pValue; }
+	inline void setHelmTexture(const u8 pValue) { mActorData.mShowHelm = pValue; }
 
 	// Flags
 	inline const bool isPet() const { return mActorData.mFlags.mIsPet == 1; }

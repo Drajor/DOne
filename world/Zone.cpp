@@ -382,7 +382,7 @@ void Zone::handleActorPositionChange(Actor* pActor) {
 
 
 void Zone::handleAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->isAFK()); }
-void Zone::handleShowHelm(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::ShowHelm, pCharacter->getShowHelm()); }
+void Zone::handleShowHelm(Actor* pActor) { _sendSpawnAppearance(pActor, SpawnAppearanceType::ShowHelm, pActor->getShowHelm()); }
 void Zone::handleAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
 void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Standing); }
 void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Sitting); }
@@ -390,18 +390,25 @@ void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharac
 void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->isGM() ? 1 : 0, true); }
 void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
 
-void Zone::_sendSpawnAppearance(Character* pCharacter, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
+void Zone::_sendSpawnAppearance(Actor* pActor, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	EXPECTED(pActor);
 
 	SpawnAppearance payload;
-	payload.mSpawnID = pCharacter->getSpawnID();
+	payload.mSpawnID = pActor->getSpawnID();
 	payload.mType = pType;
 	payload.mParameter = pParameter;
 
-	auto outPacket = SpawnAppearance::create(payload);
-	sendToVisible(pCharacter, outPacket, pIncludeSender);
-	safe_delete(outPacket);
+	auto packet = SpawnAppearance::create(payload);
+	// Character
+	if (pActor->isCharacter()) {
+		sendToVisible(Actor::cast<Character*>(pActor), packet, pIncludeSender);
+	}
+	// Actor
+	else {
+		sendToVisible(pActor, packet);
+	}
+	delete packet;
 }
 
 void Zone::handleSay(Character* pCharacter, const String pMessage) {
@@ -767,7 +774,8 @@ Actor* Zone::findActor(const uint32 pSpawnID) const {
 }
 
 void Zone::handleFaceChange(Character* pCharacter) {
-	// TODO: Notify others in zone.
+	EXPECTED(pCharacter);
+	_sendAppearanceUpdate(pCharacter);
 }
 
 void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
@@ -1715,4 +1723,42 @@ const bool Zone::loadObjects(Data::ObjectList pObjects) {
 
 const bool Zone::loadDoors(Data::DoorList pDoors) {
 	return true;
+}
+
+void Zone::_sendAppearanceUpdate(Actor* pActor) {
+	using namespace Payload::Zone;
+	EXPECTED(pActor);
+
+	auto packet = AppearanceUpdate::create();
+	auto payload = AppearanceUpdate::convert(packet);
+
+	payload->mSpawnID = pActor->getSpawnID();
+	strcpy(payload->mActorName, pActor->getName().c_str());
+
+	payload->mRace = pActor->getRace();
+	payload->mGender = pActor->getGender();
+	payload->mTexture = pActor->getTexture();
+	//payload->mHelmTexture = pActor->getHelmTexture(); // Not sure how this works yet.
+	payload->mFaceStyle = pActor->getFaceStyle();
+	payload->mHairStyle = pActor->getHairStyle();
+	payload->mHairColour = pActor->getHairColour();
+	payload->mBeardStyle = pActor->getBeardStyle();
+	payload->mBeardColour = pActor->getBeardColour();
+	payload->mSize = pActor->getSize();
+	payload->mDrakkinHeritage = pActor->getDrakkinHeritage();
+	payload->mDrakkinTattoo = pActor->getDrakkinTattoo();
+	payload->mDrakkinDetails = pActor->getDrakkinDetails();
+
+	// Character
+	if (pActor->isCharacter()) {
+		sendToVisible(Actor::cast<Character*>(pActor), packet, true);
+	}
+	// Actor
+	else {
+		sendToVisible(pActor, packet);
+	}
+}
+
+void Zone::handleAppearanceChange(Actor* pActor) {
+	_sendAppearanceUpdate(pActor);
 }

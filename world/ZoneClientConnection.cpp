@@ -2380,6 +2380,7 @@ void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket)
 	EXPECTED(FaceChange::sizeCheck(pPacket->size));
 
 	auto payload = FaceChange::convert(pPacket->pBuffer);
+	Log::info(payload->_debug());
 
 	// TODO: Validation of values?
 
@@ -2447,7 +2448,7 @@ void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(DeleteSpell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCaster()); // Check: Sanity- This class can cast spells.
+	EXPECTED(mCharacter->isCaster()); // Sanity.
 
 	auto payload = DeleteSpell::convert(pPacket);
 	const bool success = mCharacter->handleDeleteSpell(payload->mSlot);
