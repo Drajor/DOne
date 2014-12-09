@@ -353,6 +353,7 @@ namespace CharacterXML {
 		SCA Skill = "skill";
 		SCA Lanaguages = "languages";
 		SCA Language = "language";
+		SCA Inventory = "inventory";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -432,6 +433,64 @@ namespace CharacterXML {
 		SCA LanguageValue = "value";
 	}
 #undef SCA
+}
+
+namespace InventoryXML {
+#define SCA static const auto
+	namespace Tag {
+		SCA Item = "item";
+	}
+	namespace Attribute {
+		SCA ID = "id";
+		SCA Slot = "slot";
+		SCA Stacks = "stacks";
+		SCA Charges = "charges";
+		SCA Attuned = "attuned";
+		SCA LastCastTime = "last_cast_time";
+	}
+#undef SCA
+}
+
+const bool loadItem(TiXmlElement* pElement, Data::Item* pItem) {
+	using namespace InventoryXML;
+	EXPECTED_BOOL(pElement);
+	EXPECTED_BOOL(pItem);
+
+	// Load Item
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pItem->mItemID));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Slot, pItem->mSlot));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Stacks, pItem->mStacks));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Charges, pItem->mCharges));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Attuned, pItem->mAttuned));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::LastCastTime, pItem->mLastCastTime));
+
+	// Load Sub-items
+	auto itemElement = pElement->FirstChildElement(Tag::Item);
+	while (itemElement) {
+		auto i = new Data::Item();
+		pItem->mSubItems.push_back(i);
+		EXPECTED_BOOL(loadItem(itemElement, i));
+		itemElement = itemElement->NextSiblingElement(Tag::Item);
+	}
+
+	return true;
+}
+
+const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
+	using namespace InventoryXML;
+	Profile p("DataStore::loadInventory");
+	EXPECTED_BOOL(pElement);
+
+	auto itemElement = pElement->FirstChildElement(Tag::Item);
+	while (itemElement) {
+		auto i = new Data::Item();
+		pInventory.mItems.push_back(i);
+		EXPECTED_BOOL(loadItem(itemElement, i));
+
+		itemElement = itemElement->NextSiblingElement(Tag::Item);
+	}
+
+	return true;
 }
 
 const bool DataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
@@ -622,6 +681,42 @@ const bool DataStore::loadCharacter(const String& pCharacterName, Data::Characte
 		}
 	}
 
+	// Tag::Inventory
+	auto inventoryElement = characterElement->FirstChildElement(Tag::Inventory);
+	EXPECTED_BOOL(inventoryElement);
+	EXPECTED_BOOL(loadInventory(inventoryElement, pCharacter->mInventory));
+
+	return true;
+}
+
+const bool saveItem(TiXmlElement* pParent, const Data::Item* pItem) {
+	using namespace InventoryXML;
+	EXPECTED_BOOL(pItem);
+	// Save Item
+	auto itemElement = static_cast<TiXmlElement*>(pParent->LinkEndChild(new TiXmlElement(Tag::Item)));
+
+	itemElement->SetAttribute(Attribute::ID, pItem->mItemID);
+	itemElement->SetAttribute(Attribute::Slot, pItem->mSlot); // Subslot or full slot?...
+	itemElement->SetAttribute(Attribute::Stacks, pItem->mStacks);
+	itemElement->SetAttribute(Attribute::Charges, pItem->mCharges);
+	itemElement->SetAttribute(Attribute::Attuned, pItem->mAttuned);
+	itemElement->SetAttribute(Attribute::LastCastTime, pItem->mLastCastTime);
+
+	// Save Sub-Items
+	for (auto i : pItem->mSubItems)
+		EXPECTED_BOOL(saveItem(itemElement, i));
+
+	return true;
+}
+
+const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInventory) {
+	using namespace InventoryXML;
+	Profile p("DataStore::saveInventory");
+	EXPECTED_BOOL(pElement);
+
+	for (auto i : pInventory.mItems)
+		EXPECTED_BOOL(saveItem(pElement, i));
+
 	return true;
 }
 
@@ -767,6 +862,10 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Ch
 			slotElement->SetAttribute(Attribute::SpellBarSpell, pCharacter->mSpellBar[i]);
 		}
 	}
+
+	// Tag::Inventory
+	auto inventoryElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Inventory)));
+	EXPECTED_BOOL(saveInventory(inventoryElement, pCharacter->mInventory));
 
 	EXPECTED_BOOL(document.SaveFile());
 	return true;

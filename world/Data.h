@@ -61,6 +61,20 @@ namespace Data {
 		bool mCharacterDataLoaded = false;
 	};
 
+	struct Item {
+		u32 mItemID = 0;
+		u32 mSlot = 0;
+		u32 mStacks = 1;
+		u32 mCharges = 0;
+		u32 mAttuned = 0;
+		u32 mLastCastTime = 0;
+		std::list<Item*> mSubItems;
+	};
+
+	struct Inventory {
+		std::list<Item*> mItems;
+	};
+
 	struct Character {
 		Character() {
 			mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
@@ -143,6 +157,8 @@ namespace Data {
 
 		std::vector<u32> mSpellBook;
 		std::vector<u32> mSpellBar;
+
+		Inventory mInventory;
 	};
 
 	struct NPCAppearance {
