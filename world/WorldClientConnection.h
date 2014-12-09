@@ -5,10 +5,11 @@
 
 class EQApplicationPacket;
 class EQStreamInterface;
+class World;
 
 class WorldClientConnection {
 public:
-	WorldClientConnection(EQStreamInterface* pStreamInterface);
+	WorldClientConnection(World* pWorld, EQStreamInterface* pStreamInterface);
 	~WorldClientConnection();
 
 	bool update();
@@ -17,16 +18,13 @@ public:
 	inline const uint32 getIP() const { return mIP; }
 	inline const uint16 getPort() const { return mPort; }
 
-	inline void setAccountID(const uint32 pAccountID) { mAccountID = pAccountID; mAuthentication.mLoginServerAccountID = pAccountID; }
-	inline const uint32 getAccountID() const { return mAccountID; }
-	inline void setKey(const String& pKey) { mKey = pKey; mAuthentication.mKey = pKey; }
-	inline void setAccountName(const String& pAccountName) { mAccountName = pAccountName; mAuthentication.mLoginServerAccountName = pAccountName; }
-
-	void _setAuthenticated(const bool pAuthenticated) { mAuthenticated = pAuthenticated; }
-
+	inline const u32 getAccountID() const { return mAccountID; }
 	void _sendChatServer(const String& pCharacterName);
 	void _sendZoneServerInfo(const uint16 pPort);
 private:
+
+	inline void setAccountID(const uint32 pAccountID) { mAccountID = pAccountID; mAuthentication.mLoginServerAccountID = pAccountID; }
+	void _setAuthenticated(const bool pAuthenticated) { mAuthenticated = pAuthenticated; }
 
 	void _sendCharacterSelectInfo();
 	void _sendGuildList();
@@ -55,10 +53,9 @@ private:
 	uint16 mPort = 0;
 	uint32 mIP = 0;
 	uint32 mAccountID = 0;
-	String mAccountName = "";
-	String mKey = "";
 	String mReservedCharacterName = "";
 	uint32 ClientVersionBit = 0;
 
 	EQStreamInterface* const mStreamInterface;
+	World* mWorld = nullptr;
 };

@@ -168,7 +168,7 @@ void Zone::update() {
 			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
 
 			// Remove World Authentication - allowing them to log back in.
-			World::getInstance().removeAuthentication(i->mCharacter->getAuthentication());
+			World::getInstance().removeAuthentication(i->mCharacter->getAccountID());
 
 			// Save
 			i->mCharacter->_updateForSave();

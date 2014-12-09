@@ -19,8 +19,8 @@
 #include "Settings.h"
 
 
-WorldClientConnection::WorldClientConnection(EQStreamInterface* pStreamInterface) :
-	mStreamInterface(pStreamInterface)
+WorldClientConnection::WorldClientConnection(World* pWorld, EQStreamInterface* pStreamInterface) :
+mStreamInterface(pStreamInterface), mWorld(pWorld)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
@@ -209,13 +209,76 @@ bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket
 
 	String accountIDStr = Utility::safeString(payload->mInformation, 19);
 	String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
-
+	
 	uint32 accountID = 0;
 	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
+	
+	// Check: Login Server bypass.
 
-	// Check authentication.
-	// NOTE: This ensures that World is expecting a connection from this account.
-	EXPECTED_BOOL(World::getInstance().checkAuthentication(this, accountID, accountKey));
+
+	//if (bypassFound) {
+	//	//accountID = World::getInstance().
+	//}
+
+	
+	
+
+	//// Check authentication.
+	//// NOTE: This ensures that World is expecting a connection from this account.
+	//const bool authenticated = World::getInstance().checkAuthentication(this, accountID, accountKey);
+	//if (!authenticated) {
+	//	// Check: Login Server Bypass.
+	//	static const std::map<u32, String> bypass = {
+	//		{ 2, "passwords" },
+	//	};
+	//	auto bypassSearch = bypass.find(accountID);
+	//	const bool bypassFound = bypassSearch != bypass.end() ? bypassSearch->second == accountKey : false;
+
+	//	// Not authenticated and no bypass found.
+	//	if (!bypassFound) {
+	//		return false;
+	//	}
+
+	//	auto account = AccountManager::getInstance().getAccount(accountID);
+	//	EXPECTED_BOOL(account);
+
+	//	//// Add authentication.
+	//	//ClientAuthentication authentication;
+	//	//authentication.mLoginServerAccountID = accountID;
+	//	//authentication.mLoginServerAccountName = account->mAccountName;
+	//	//authentication.mKey = accountKey;
+	//	//authentication.mIP = mIP;
+
+	//	//World::getInstance().addAuthentication(authentication);
+	//	//World::getInstance().handleClientAuthentication(accountID, )
+	//}
+
+	// Check: World is expecting this connection.
+	const bool authenticated = mWorld->checkAuthentication(accountID, accountKey);
+	if (!authenticated) {
+		// Check: Login Server Bypass.
+		static const std::map<u32, String> bypass = {
+			{ 2, "passwords" },
+			{ 3, "passwords" },
+		};
+		auto bypassSearch = bypass.find(accountID);
+		const bool bypassFound = bypassSearch != bypass.end() ? bypassSearch->second == accountKey : false;
+
+		// Not authenticated and no bypass found.
+		if (!bypassFound) {
+			return false;
+		}
+
+		// Hack.
+		// TODO: Tidy this up. AccountName needs to accessible in a better way.
+		auto accountData = AccountManager::getInstance().getAccount(accountID);
+		EXPECTED_BOOL(accountData);
+		mWorld->addAuthentication(accountID, accountData->mAccountName, accountKey, mIP);
+		EXPECTED_BOOL(AccountManager::getInstance().ensureAccountLoaded(accountID));
+	}
+
+	_setAuthenticated(true);
+	setAccountID(accountID);
 
 	mZoning = (payload->mZoning == 1);
 

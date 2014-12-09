@@ -1,4 +1,5 @@
 #include "World.h"
+#include "Constants.h"
 #include "Character.h"
 #include "Utility.h"
 #include "ZoneManager.h"
@@ -15,6 +16,11 @@
 
 #include "WorldClientConnection.h"
 #include "Settings.h"
+#include "TimeUtility.h"
+
+static const int StatusUpdateInterval = 15000;
+
+World::World() : mLog("[World]"), mStatusUpdateTimer(StatusUpdateInterval) { }
 
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
@@ -31,9 +37,7 @@ bool World::initialise() {
 
 	mLocked = Settings::getLocked();
 
-	// Create our connection to the Login Server
-	mLoginServerConnection = new LoginServerConnection();
-	EXPECTED_BOOL(mLoginServerConnection->initialise());
+	EXPECTED_BOOL(_initialiseLoginServerConnection());
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::Port);
@@ -47,6 +51,16 @@ bool World::initialise() {
 
 	mInitialised = true;
 	mLog.status("Initialised.");
+	return true;
+}
+
+bool World::_initialiseLoginServerConnection() {
+	// Create our connection to the Login Server
+	mLoginServerConnection = new LoginServerConnection(this);
+	EXPECTED_BOOL(mLoginServerConnection->initialise(Settings::getLSAddress(), Settings::getLSPort()));
+	mLoginServerConnection->sendWorldInformation(Settings::getLSAccountName(), Settings::getLSPassword(), Settings::getServerLongName(), Settings::getServerShortName());
+	_updateLoginServer();
+
 	return true;
 }
 
@@ -68,6 +82,16 @@ void World::update() {
 			i = mClientConnections.erase(i);
 		}
 	}
+
+	// Check: Time to update the Login Server with new numbers.
+	if (mStatusUpdateTimer.Check()) {
+		_updateLoginServer();
+		mStatusUpdateTimer.Start();
+	}
+}
+
+void World::handleConnectRequest(const u32 pAccountID) {
+	mLoginServerConnection->sendConnectResponse(pAccountID, getConnectResponse(pAccountID));
 }
 
 void World::_handleIncomingClientConnections() {
@@ -85,7 +109,7 @@ void World::_handleIncomingClientConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		mLog.error("TODO: Check Bans.");
 		//mLog.info("Connection from " + incomingStreamInterface->GetRemoteIP());
-		mClientConnections.push_back(new WorldClientConnection(incomingStreamInterface));
+		mClientConnections.push_back(new WorldClientConnection(this, incomingStreamInterface));
 	}
 }
 
@@ -93,67 +117,49 @@ bool World::isLoginServerConnected() {
 	return mLoginServerConnection->isConnected();
 }
 
-void World::addAuthentication(ClientAuthentication& pAuthentication) {
-	// Save our copy
-	ClientAuthentication* authentication = new ClientAuthentication(pAuthentication);
-	mAuthenticatedClients.push_back(authentication);
-}
-
-void World::removeAuthentication(ClientAuthentication& pAuthentication) {
-	for (auto i : mAuthenticatedClients) {
-		// Only need to match on Account IDs
-		if (i->mLoginServerAccountID == pAuthentication.mLoginServerAccountID) {
-			mLog.info("Removing authentication for account " + std::to_string(i->mLoginServerAccountID));
-			mAuthenticatedClients.remove(i);
+void World::removeAuthentication(const u32 pAccountID) {
+	for (auto i = mAuthentations.begin(); i != mAuthentations.end(); i++) {
+		if ((*i)->mAccountID == pAccountID) {
+			mAuthentations.erase(i);
 			return;
 		}
 	}
 }
 
-bool World::checkAuthentication(WorldClientConnection* pConnection, const uint32 pAccountID, const String& pKey) {
-	EXPECTED_BOOL(pConnection);
-	EXPECTED_BOOL(!pConnection->getAuthenticated());
-
-	for (auto i = mAuthenticatedClients.begin(); i != mAuthenticatedClients.end(); i++) {
-		ClientAuthentication* incClient = *i;
-		if (pAccountID == incClient->mLoginServerAccountID && pKey == incClient->mKey) {
-			pConnection->_setAuthenticated(true);
-			pConnection->setAccountID(incClient->mLoginServerAccountID);
-			pConnection->setAccountName(incClient->mLoginServerAccountName);
-			pConnection->setKey(incClient->mKey);
+const bool World::checkAuthentication(const u32 pAccountID, const String& pKey) const {
+	for (auto i : mAuthentations) {
+		if (i->mAccountID == pAccountID && i->mKey == pKey)
 			return true;
-		}
 	}
 	return false;
 }
 
-bool World::authenticationExists(uint32 pLoginServerID) {
-	for (auto i : mAuthenticatedClients) {
-		if (i->mLoginServerAccountID == pLoginServerID)
+const bool World::authenticationExists(const u32 pAccountID) const {
+	for (auto i : mAuthentations) {
+		if (i->mAccountID == pAccountID)
 			return true;
 	}
-
 	return false;
 }
 
 void World::setLocked(bool pLocked) {
 	mLocked = pLocked;
-	// Notify Login Server!
-	mLoginServerConnection->sendWorldStatus();
+
+	// Notify Login Server.
+	_updateLoginServer();
 }
 
-ResponseID World::getConnectResponse(uint32 pLoginServerAccountID) {
+const u8 World::getConnectResponse(const u32 pAccountID) {
 	// Fetch the Account Status.
-	uint32 accountStatus = AccountManager::getInstance().getStatus(pLoginServerAccountID);
+	auto accountStatus = AccountManager::getInstance().getStatus(pAccountID);
 
 	// Account Suspended.
 	if (accountStatus == ResponseID::SUSPENDED) return ResponseID::SUSPENDED;
 	// Account Banned.
 	if (accountStatus == ResponseID::BANNED) return ResponseID::BANNED;
 
-	// Check for existing authentication
-	// This prevents same account sign in.
-	if (authenticationExists(pLoginServerAccountID)) return ResponseID::FULL;
+	// Check for existing authentication, this prevents same account sign in.
+	if (authenticationExists(pAccountID)) return ResponseID::FULL;
 
 	// Server is Locked (Only GM/Admin may enter)
 	if (mLocked && accountStatus >= LOCK_BYPASS_STATUS) return ResponseID::ALLOWED;
@@ -195,24 +201,6 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	}
 
 	mLog.info("Delete Success!");
-	return true;
-}
-
-ClientAuthentication* World::findAuthentication(uint32 pLoginServerAccountID){
-	for (auto i : mAuthenticatedClients) {
-		if (i->mLoginServerAccountID == pLoginServerAccountID)
-			return i;
-	}
-
-	return 0;
-}
-
-bool World::ensureAccountExists(const uint32 pAccountID, const String& pAccountName) {
-	if (AccountManager::getInstance().exists(pAccountID))
-		return true; // Account already exists.
-
-	// Create a new Account.
-	EXPECTED_BOOL(AccountManager::getInstance().createAccount(pAccountID, pAccountName));
 	return true;
 }
 
@@ -284,4 +272,36 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(zoneID, instanceID));
 
 	return true;
+}
+
+void World::_updateLoginServer() const {
+	mLoginServerConnection->sendWorldStatus(getStatus(), getPlayers(), getZones());
+}
+
+void World::handleClientAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP) {
+	// Check: Account exists.
+	const bool accountExists = AccountManager::getInstance().exists(pAccountID);
+
+	// Make a new Account.
+	if (!accountExists) {
+		EXPECTED(AccountManager::getInstance().createAccount(pAccountID, pAccountName));
+	}
+
+	// Check: Account status.
+	auto accountStatus = AccountManager::getInstance().getStatus(pAccountID);
+	if (accountStatus < ResponseID::ALLOWED)
+		return;
+
+	addAuthentication(pAccountID, pAccountName, pKey, pIP);
+}
+
+void World::addAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP) {
+	// Add Authentication.
+	auto a = new Authentication();
+	a->mAccountID = pAccountID;
+	a->mAccountName = pAccountName;
+	a->mKey = pKey;
+	a->mIP = pIP;
+	a->mExpiryTime = Time::nowSeconds() + 10000;
+	mAuthentations.push_back(a);
 }

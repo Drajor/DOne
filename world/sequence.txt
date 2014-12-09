@@ -1,0 +1,9 @@
+LoginServerConnection
+
+- ConnectRequest
+	- World responds with ConnectResponse.
+	- ConnectResponse can reject or allow entry to the server.
+
+- ClientAuthentication
+	- Sent after Login Server receives ConnectResponse
+	- Login Server sends authentication details for the Login Server Account.

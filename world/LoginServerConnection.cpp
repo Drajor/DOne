@@ -1,57 +1,20 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+#include "LoginServerConnection.h"
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #include "../common/debug.h"
 #include "../common/version.h"
 
-#ifdef _WINDOWS
-#else
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <pthread.h>
-	#include <unistd.h>
-	#include <errno.h>
 
-	#include "../common/unix.h"
-
-	#define SOCKET_ERROR -1
-	#define INVALID_SOCKET -1
-	extern int errno;
-#endif
-
-#include "LoginServerConnection.h"
 #include "../common/EmuTCPConnection.h"
 #include "../common/servertalk.h"
-#include "../common/eq_packet_structs.h"
-#include "../common/packet_dump.h"
-#include "../common/StringUtil.h"
 
 #include "Utility.h"
 #include "World.h"
 #include "AccountManager.h"
 #include "LogSystem.h"
 #include "Payload.h"
-#include "Settings.h"
 
-static const int StatusUpdateInterval = 15000;
-
-LoginServerConnection::LoginServerConnection() :
-	mStatusUpdateTimer(StatusUpdateInterval)
+LoginServerConnection::LoginServerConnection(World* pWorld) :
+	mWorld(pWorld)
 {
 	mTCPConnection = new EmuTCPConnection(true);
 	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
@@ -61,61 +24,15 @@ LoginServerConnection::~LoginServerConnection() {
 	delete mTCPConnection;
 }
 
-void LoginServerConnection::update() {
-	if (mStatusUpdateTimer.Check()) {
-		sendWorldStatus();
-		mStatusUpdateTimer.Start();
-	}
-
-	ServerPacket* packet = 0;
-	while((packet = mTCPConnection->PopPacket())) {
-		switch(packet->opcode) {
-			case 0:
-				break;
-			case ServerOP_KeepAlive: {
-				break;
-			}
-			case ServerOP_UsertoWorldReq: {
-				_handleUserToWorldRequest(packet);
-				break;
-			}
-			case ServerOP_LSClientAuth: {
-				_handleLoginServerClientAuth(packet);
-				break;
-			}
-			case ServerOP_LSFatalError: {
-				// Ignored. Public LS may or may not send this, local LS does not.
-				break;
-			}
-			case ServerOP_SystemwideMessage: {
-				// Ignored.
-				break;
-			}
-			case ServerOP_LSRemoteAddr: {
-				// Ignored. I am unsure if this is required or not. Local LS does not send this but the public LS may.
-				break;
-			}
-			case ServerOP_LSAccountUpdate: {
-				// Ignored.
-				break;
-			}
-			default: {
-				Log::error("[Login Server Connection] Got unexpected packet, ignoring.");
-				break;
-			}
-		}
-		delete packet;
-	}
-}
-
-bool LoginServerConnection::initialise() {
+bool LoginServerConnection::initialise(const String& pAddress, const u16 pPort) {
 	Log::status("[Login Server Connection] Initialising.");
 	if (isConnected()) return true;
 
 	if (_isConnectReady()) {
 		Log::status("[Login Server Connection] Connecting");
-		connect();
-	} else {
+		connect(pAddress, pPort);
+	}
+	else {
 		Log::error("[Login Server Connection] Not ready to connect.");
 		return false;
 	}
@@ -124,23 +41,18 @@ bool LoginServerConnection::initialise() {
 	return true;
 }
 
-bool LoginServerConnection::connect() {
+bool LoginServerConnection::connect(const String& pAddress, const u16 pPort) {
+	EXPECTED_BOOL(pPort != 0);
+
 	char errbuf[TCPConnection_ErrorBufferSize];
 
-	mLoginServerIP = ResolveIP(Settings::getLSAddress().c_str(), errbuf);
+	mLoginServerIP = ResolveIP(pAddress.c_str(), errbuf);
 	if (mLoginServerIP == 0) {
 		Log::error("[Login Server Connection] Unable to resolve Login Server IP");
 		return false;
 	}
 
-	if (Settings::getLSPort() == 0) {
-		Log::error("[Login Server Connection] Login Server port not set.");
-		return false;
-	}
-
-	if (mTCPConnection->ConnectIP(mLoginServerIP, Settings::getLSPort(), errbuf)) {
-		_sendWorldInformation();
-		sendWorldStatus();
+	if (mTCPConnection->ConnectIP(mLoginServerIP, pPort, errbuf)) {
 		Log::status("[Login Server Connection] Connected to Login Server");
 		return true;
 	}
@@ -149,75 +61,104 @@ bool LoginServerConnection::connect() {
 	return false;
 }
 
-void LoginServerConnection::_handleUserToWorldRequest(ServerPacket* pPacket) {
+void LoginServerConnection::update() {
 	using namespace Payload::LoginServer;
-	EXPECTED(ConnectRequest::sizeCheck(pPacket->size));
 
-	auto payload = ConnectRequest::convert(pPacket->pBuffer);
+	// Process any incoming packets.
+	auto packet = mTCPConnection->PopPacket();
+	while(packet) {
+		if (packet->opcode == OpCode::ConnectRequest) {
+			// NOTE: This occurs when a client clicks 'X' at the Server Selection Screen.
+			_handleConnectRequest(packet);
+		}
+		else if (packet->opcode == OpCode::ClientAuthentication) {
+			// NOTE: This occurs when the Login Server receives a positive ConnectResponse.
+			_handleClientAuthentication(packet);
+		}
 
-	auto outPacket = new ServerPacket(ServerOP_UsertoWorldResp, sizeof(ConnectResponse));
-	auto outPayload = ConnectResponse::convert(outPacket->pBuffer);
-	outPayload->mAccountID = payload->mAccountID;
-	outPayload->mToID = payload->mFromID;
-	outPayload->mWorldID = payload->mWorldID;
-	//outPayload->mResponse = mWorld->getConnectResponse(payload->mLoginServerAccountID); // Get response from World.
-	outPayload->mResponse = ResponseID::ALLOWED;
-	// NOTE: Currently just allow everyone. If the LS sent the LS account name I would do a proper look up
-
-	_sendPacket(outPacket);
-	safe_delete(outPacket);
-}
-
-void LoginServerConnection::_handleLoginServerClientAuth(ServerPacket* pPacket) {
-	//using namespace Payload::LoginServer;
-	auto expectedSize = sizeof(Payload::LoginServer::ClientAuthentication);
-	auto actualSize = pPacket->size;
-	EXPECTED(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket->size));
-
-	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket->pBuffer);
-
-	// Add authentication for the incoming client.
-	ClientAuthentication authentication;
-	authentication.mLoginServerAccountID = payload->mAccountID;
-	authentication.mLoginServerAccountName = Utility::safeString(payload->mAccountName, Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH);
-	authentication.mKey = Utility::safeString(payload->mKey, Limits::LoginServer::MAX_KEY_LENGTH);
-	authentication.mWorldAdmin = payload->mWorldAdmin;
-	authentication.mIP = payload->mIP;
-	authentication.mLocal = payload->mLocal;
-	World::getInstance().addAuthentication(authentication);
-
-	// Check if client does not yet have an account.
-	if (!World::getInstance().ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
-		Log::error("[Login Server Connection] accountCheck failed.");
+		delete packet;
+		packet = mTCPConnection->PopPacket();
 	}
 }
 
-void LoginServerConnection::_sendWorldInformation() {
-	auto outPacket = new ServerPacket(ServerOP_NewLSInfo, sizeof(ServerNewLSInfo_Struct));
-	auto payload = reinterpret_cast<ServerNewLSInfo_Struct*>(outPacket->pBuffer);
-	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(payload->serverversion, LOGIN_VERSION);
-	strcpy(payload->name, Settings::getServerLongName().c_str());
-	strcpy(payload->shortname, Settings::getServerShortName().c_str());
-	strcpy(payload->account, Settings::getLSAccountName().c_str());
-	strcpy(payload->password, Settings::getLSPassword().c_str());
+void LoginServerConnection::_handleConnectRequest(ServerPacket* pPacket) {
+	using namespace Payload::LoginServer;
+	EXPECTED(pPacket);
+	EXPECTED(ConnectRequest::sizeCheck(pPacket));
 
-	_sendPacket(outPacket);
-	safe_delete(outPacket);
+	auto payload = ConnectRequest::convert(pPacket);
+
+	// Notify World.
+	mWorld->handleConnectRequest(payload->mAccountID);
 }
 
-void LoginServerConnection::sendWorldStatus() {
-	auto outPacket = new ServerPacket(ServerOP_LSStatus, sizeof(ServerLSStatus_Struct));
-	auto payload = reinterpret_cast<ServerLSStatus_Struct*>(outPacket->pBuffer);
+void LoginServerConnection::sendConnectResponse(const u32 pAccountID, const u8 pResponse) {
+	using namespace Payload::LoginServer;
 
-	if (World::getInstance().getLocked())
-		payload->status = -2;
-	else payload->status = 100;
+	auto packet = new ServerPacket(OpCode::ConnectResponse, ConnectResponse::size());
+	auto payload = ConnectResponse::convert(packet->pBuffer);
 
-	payload->num_zones = 100; // TODO:
-	payload->num_players = 100;
-	_sendPacket(outPacket);
-	safe_delete(outPacket);
+	payload->mAccountID = pAccountID;
+	payload->mResponse = pResponse;
+	
+	_sendPacket(packet);
+	delete packet;
+}
+
+void LoginServerConnection::_handleClientAuthentication(ServerPacket* pPacket) {
+	//using namespace Payload::LoginServer;
+	EXPECTED(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket));
+
+	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket);
+
+	//// Add authentication for the incoming client.
+	//ClientAuthentication authentication;
+	//authentication.mLoginServerAccountID = payload->mAccountID;
+	//authentication.mLoginServerAccountName = Utility::safeString(payload->mAccountName, Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH);
+	//authentication.mKey = Utility::safeString(payload->mKey, Limits::LoginServer::MAX_KEY_LENGTH);
+	//authentication.mWorldAdmin = payload->mWorldAdmin;
+	//authentication.mIP = payload->mIP;
+	//authentication.mLocal = payload->mLocal;
+	//World::getInstance().addAuthentication(authentication);
+
+	//// Check if client does not yet have an account.
+	//if (!World::getInstance().ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
+	//	Log::error("[Login Server Connection] accountCheck failed.");
+	//}
+
+	// Notify World.
+	mWorld->handleClientAuthentication(payload->mAccountID, payload->mAccountName, payload->mKey, payload->mIP);
+}
+
+void LoginServerConnection::sendWorldInformation(const String& pAccount, const String& pPassword, const String& pLongName, const String& pShortName) {
+	using namespace Payload::LoginServer;
+
+	auto packet = new ServerPacket(OpCode::WorldInformation, WorldInformation::size());
+	auto payload = WorldInformation::convert(packet);
+
+	strcpy(payload->mAccount, pAccount.c_str());
+	strcpy(payload->mPassword, pPassword.c_str());
+	strcpy(payload->mLongName, pLongName.c_str());
+	strcpy(payload->mShortName, pShortName.c_str());
+	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
+	strcpy(payload->serverversion, LOGIN_VERSION);
+
+	_sendPacket(packet);
+	delete packet;
+}
+
+void LoginServerConnection::sendWorldStatus(const i32 pStatus, const i32 pPlayers, const i32 pZones) {
+	using namespace Payload::LoginServer;
+
+	auto packet = new ServerPacket(OpCode::WorldStatus, WorldStatus::size());
+	auto payload = WorldStatus::convert(packet);
+
+	payload->mStatus = pStatus;
+	payload->mPlayers = pPlayers;
+	payload->mZones = pZones;
+
+	_sendPacket(packet);
+	delete packet;
 }
 
 void LoginServerConnection::_sendPacket(ServerPacket* pPacket) { mTCPConnection->SendPacket(pPacket); }

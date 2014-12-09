@@ -16,10 +16,12 @@ namespace Payload {
 
 	template <typename T>
 	struct Fixed {
-		inline static T* convert(const EQApplicationPacket* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
+		template <typename P>
+		inline static T* convert(const P* pPacket) { return reinterpret_cast<T*>(pPacket->pBuffer); }
 		inline static T* convert(unsigned char* pData) { return reinterpret_cast<T*>(pData); }
 		inline static const bool sizeCheck(const std::size_t pSize) { return pSize == sizeof(T); }
-		inline static const bool sizeCheck(const EQApplicationPacket* pPacket) { return pPacket->size == size(); }
+		template <typename P>
+		inline static const bool sizeCheck(const P* pPacket) { return pPacket->size == size(); }
 		inline static const std::size_t size() { return sizeof(T); }
 		inline static EQApplicationPacket* make(EmuOpcode pOpCode) { return new EQApplicationPacket(pOpCode, size()); }
 	};
@@ -1521,7 +1523,17 @@ namespace Payload {
 	}
 
 	namespace LoginServer {
+		namespace OpCode {
+			enum : u16 {
+				WorldInformation = 0x1008,
+				WorldStatus = 0x1001,
+				ConnectRequest = 0xAB00,
+				ConnectResponse = 0xAB01,
+				ClientAuthentication = 0x1002,
+			};
+		}
 
+		// LS->W
 		struct ConnectRequest : public Fixed<ConnectRequest> {
 			u32 mAccountID = 0;
 			u32 mWorldID = 0;
@@ -1529,22 +1541,48 @@ namespace Payload {
 			u32 mToID = 0;
 		};
 
+		// W->LS
 		struct ConnectResponse : public Fixed<ConnectResponse> {
 			u32 mAccountID = 0;
 			u32 mWorldID = 0;
-			ResponseID mResponse = ResponseID::ALLOWED;
-			u32 mFromID = 0;
-			u32 mToID = 0;
+			u8 mResponse = ResponseID::ALLOWED;
+			u32 mFromID = 0; // Ignored in LS.
+			u32 mToID = 0; // Ignored in LS.
 		};
 
+		// LS->W
+		namespace ClientAuthenticationLimits {
+			static const auto MAX_ACCOUNT = 30;
+			static const auto MAX_KEY = 30;
+		}
 		struct ClientAuthentication : public Fixed<ClientAuthentication> {
 			u32 mAccountID = 0;
-			char mAccountName[Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH];
-			char mKey[Limits::LoginServer::MAX_KEY_LENGTH];
+			char mAccountName[ClientAuthenticationLimits::MAX_ACCOUNT];
+			char mKey[ClientAuthenticationLimits::MAX_KEY];
 			u8 mLoginServerAdmin = 0; // Ignored.
 			i16 mWorldAdmin = 0; // Ignored.
 			u32 mIP = 0;
 			u8 mLocal = 0;
+		};
+
+		// W->LS
+		struct WorldStatus : public Fixed<WorldStatus> {
+			i32 mStatus = 0;
+			i32 mPlayers = 0;
+			i32 mZones = 0;
+		};
+
+		// W->LS
+		struct WorldInformation : public Fixed<WorldInformation> {
+			char mLongName[201];
+			char mShortName[50];
+			char	remote_address[125];			// DNS address of the server
+			char	local_address[125];			// DNS address of the server
+			char mAccount[31];
+			char mPassword[31];
+			char	protocolversion[25];	// Major protocol version number
+			char	serverversion[64];		// minor server software version number
+			uint8 mServerType = 0;
 		};
 	}
 

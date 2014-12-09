@@ -48,6 +48,15 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::ExperienceUpdate::size());
 	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
 	EXPECT_EQ(1028, Payload::Zone::Emote::size());
+
+
+	// Login Server Connection
+	
+	EXPECT_EQ(12, Payload::LoginServer::WorldStatus::size());
+	EXPECT_EQ(16, Payload::LoginServer::ConnectRequest::size());
+	EXPECT_EQ(17, Payload::LoginServer::ConnectResponse::size());
+	EXPECT_EQ(653, Payload::LoginServer::WorldInformation::size());
+	//EXPECT_EQ(20, Payload::LoginServer::ClientAuthentication::size());
 }
 
 // 
