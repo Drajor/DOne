@@ -15,15 +15,15 @@ public:
 	bool update();
 
 	inline const bool getAuthenticated() const { return mAuthenticated; }
-	inline const uint32 getIP() const { return mIP; }
-	inline const uint16 getPort() const { return mPort; }
+	inline const u32 getIP() const { return mIP; }
+	inline const u16 getPort() const { return mPort; }
 
 	inline const u32 getAccountID() const { return mAccountID; }
 	void _sendChatServer(const String& pCharacterName);
-	void _sendZoneServerInfo(const uint16 pPort);
+	void _sendZoneServerInfo(const u16 pPort);
 private:
 
-	inline void setAccountID(const uint32 pAccountID) { mAccountID = pAccountID; mAuthentication.mLoginServerAccountID = pAccountID; }
+	inline void setAccountID(const u32 pAccountID) { mAccountID = pAccountID; }
 	void _setAuthenticated(const bool pAuthenticated) { mAuthenticated = pAuthenticated; }
 
 	void _sendCharacterSelectInfo();
@@ -49,12 +49,11 @@ private:
 	bool mConnectionDropped = false;
 	bool mZoning = false;
 	bool mAuthenticated = false;
-	ClientAuthentication mAuthentication;
-	uint16 mPort = 0;
-	uint32 mIP = 0;
-	uint32 mAccountID = 0;
+	u16 mPort = 0;
+	u32 mIP = 0;
+	u32 mAccountID = 0;
 	String mReservedCharacterName = "";
-	uint32 ClientVersionBit = 0;
+	u32 ClientVersionBit = 0;
 
 	EQStreamInterface* const mStreamInterface;
 	World* mWorld = nullptr;

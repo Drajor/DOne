@@ -5,9 +5,6 @@
 #include "../common/EQPacket.h"
 #include "../common/EQStreamIntf.h"
 
-//#include <iostream>
-//#include <iomanip>
-
 #include "World.h"
 #include "Utility.h"
 #include "Limits.h"
@@ -57,7 +54,7 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(pPacket);
 
 	// Check if unidentified and sending something other than OP_SendLoginInfo
-	// NOTE: Many functions called below assume getIdentified is checked here so do not remove it.
+	// NOTE: Many functions called below assume getAuthenticated is checked here so do not remove it.
 	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
 		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
 		return false;
@@ -203,56 +200,16 @@ void WorldClientConnection::_sendPostEnterWorld() {
 bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(LoginInformation::sizeCheck(pPacket->size));
+	EXPECTED_BOOL(LoginInformation::sizeCheck(pPacket));
 
-	auto payload = LoginInformation::convert(pPacket->pBuffer);
+	auto payload = LoginInformation::convert(pPacket);
 
 	String accountIDStr = Utility::safeString(payload->mInformation, 19);
 	String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
 	
-	uint32 accountID = 0;
+	u32 accountID = 0;
 	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
 	
-	// Check: Login Server bypass.
-
-
-	//if (bypassFound) {
-	//	//accountID = World::getInstance().
-	//}
-
-	
-	
-
-	//// Check authentication.
-	//// NOTE: This ensures that World is expecting a connection from this account.
-	//const bool authenticated = World::getInstance().checkAuthentication(this, accountID, accountKey);
-	//if (!authenticated) {
-	//	// Check: Login Server Bypass.
-	//	static const std::map<u32, String> bypass = {
-	//		{ 2, "passwords" },
-	//	};
-	//	auto bypassSearch = bypass.find(accountID);
-	//	const bool bypassFound = bypassSearch != bypass.end() ? bypassSearch->second == accountKey : false;
-
-	//	// Not authenticated and no bypass found.
-	//	if (!bypassFound) {
-	//		return false;
-	//	}
-
-	//	auto account = AccountManager::getInstance().getAccount(accountID);
-	//	EXPECTED_BOOL(account);
-
-	//	//// Add authentication.
-	//	//ClientAuthentication authentication;
-	//	//authentication.mLoginServerAccountID = accountID;
-	//	//authentication.mLoginServerAccountName = account->mAccountName;
-	//	//authentication.mKey = accountKey;
-	//	//authentication.mIP = mIP;
-
-	//	//World::getInstance().addAuthentication(authentication);
-	//	//World::getInstance().handleClientAuthentication(accountID, )
-	//}
-
 	// Check: World is expecting this connection.
 	const bool authenticated = mWorld->checkAuthentication(accountID, accountKey);
 	if (!authenticated) {
@@ -439,29 +396,29 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 		}
 	}
 
-	uint32 allocs = raceClassAllocations.size();
-	uint32 combos = raceClassCombos.size();
-	uint32 len = sizeof(RaceClassAllocation) * allocs;
+	u32 allocs = raceClassAllocations.size();
+	u32 combos = raceClassCombos.size();
+	u32 len = sizeof(RaceClassAllocation) * allocs;
 	len += sizeof(RaceClassCombos) * combos;
 	len += sizeof(uint8);
-	len += sizeof(uint32);
-	len += sizeof(uint32);
+	len += sizeof(u32);
+	len += sizeof(u32);
 
 	auto outPacket = new EQApplicationPacket(OP_CharacterCreateRequest, len);
 	unsigned char *ptr = outPacket->pBuffer;
 	*((uint8*)ptr) = 0;
 	ptr += sizeof(uint8);
 
-	*((uint32*)ptr) = allocs; // number of allocs.
-	ptr += sizeof(uint32);
+	*((u32*)ptr) = allocs; // number of allocs.
+	ptr += sizeof(u32);
 
 	for (auto i : raceClassAllocations) {
 		memcpy(ptr, &i, sizeof(RaceClassAllocation));
 		ptr += sizeof(RaceClassAllocation);
 	}
 
-	*((uint32*)ptr) = combos; // number of combos.
-	ptr += sizeof(uint32);
+	*((u32*)ptr) = combos; // number of combos.
+	ptr += sizeof(u32);
 	for (auto i : raceClassCombos) {
 		memcpy(ptr, &i, sizeof(RaceClassCombos));
 		ptr += sizeof(RaceClassCombos);
@@ -552,7 +509,7 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	return false;
 }
 
-void WorldClientConnection::_sendZoneServerInfo(const uint16 pPort) {
+void WorldClientConnection::_sendZoneServerInfo(const u16 pPort) {
 	using namespace Payload::World;
 	
 	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, ZoneServerInfo::size());
