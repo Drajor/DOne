@@ -1,6 +1,7 @@
 #include "Inventory.h"
 #include "Item.h"
 #include "ItemData.h"
+#include "Data.h"
 #include "Character.h"
 #include "Utility.h"
 #include "ItemGenerator.h"
@@ -1030,4 +1031,77 @@ void Inventoryy::removeAlternateCurrency(const uint32 pCurrencyID, const uint32 
 	else {
 		setAlternateCurrencyQuantity(pCurrencyID, 0);
 	}
+}
+
+const bool save(Item* pItem, Data::Item* pDataItem) {
+	return true;
+}
+
+const bool saveItem(Item* pItem, std::list<Data::Item>& pList) {
+	EXPECTED_BOOL(pItem);
+
+	// Copy data from Item to Data::Item.
+	Data::Item item;
+	item.mItemID = pItem->getID();
+	item.mSlot = pItem->hasParent() ? pItem->getSubIndex() : pItem->getSlot();
+	item.mStacks = pItem->getStacks();
+	item.mCharges = pItem->getCharges();
+	item.mAttuned = pItem->isAttuned();
+	item.mLastCastTime = pItem->getLastCastTime();
+
+	// Copy container contents.
+	if (pItem->isContainer()) {
+		std::list<Item*> contents;
+		pItem->getContents(contents);
+		
+		for (auto i : contents)
+			EXPECTED_BOOL(saveItem(i, item.mSubItems));
+	}
+	// Copy Item augmentations.
+	else if (pItem->hasAugmentations()) {
+		std::list<Item*> augmentations;
+		pItem->getAugmentations(augmentations);
+
+		for (auto i : augmentations)
+			EXPECTED_BOOL(saveItem(i, item.mSubItems));
+	}
+
+	pList.push_back(item);
+	return true;
+}
+
+const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
+	// Worn / Primary Inventory.
+	for (auto i : mItems) {
+		if (i) {
+			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
+		}
+	}
+
+	// Cursor
+	for (auto i : mCursor)
+		EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
+
+	// Bank
+	for (auto i : mBank) {
+		if (i) {
+			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
+		}
+	}
+	
+	// Shared Bank
+	for (auto i : mSharedBank) {
+		if (i) {
+			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
+		}
+	}
+
+	// Trade
+	for (auto i : mTrade) {
+		if (i) {
+			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
+		}
+	}
+
+	return true;
 }

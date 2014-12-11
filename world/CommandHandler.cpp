@@ -1864,6 +1864,11 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		target->setShowHelm(showHelm == 1 ? true : false);
 		target->getZone()->handleShowHelm(target);
 	}
+	// Force save.
+	else if (pCommandName == "save") {
+		pCharacter->_updateForSave();
+		pCharacter->getZone()->requestSave(pCharacter);
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

@@ -351,9 +351,9 @@ float Character::getDefaultSize(uint32 pRace) {
 	}
 }
 
-void Character::_updateForSave() {
-	EXPECTED(mData);
-	EXPECTED(mZone);
+const bool Character::_updateForSave() {
+	EXPECTED_BOOL(mData);
+	EXPECTED_BOOL(mZone);
 
 	mData->mGM = isGM();
 	mData->mName = getName();
@@ -399,7 +399,7 @@ void Character::_updateForSave() {
 	mData->mCopperBank = mInventory->getBankCopper();
 
 	// Shared Bank Currency
-	AccountManager::getInstance().setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum());
+	EXPECTED_BOOL(AccountManager::getInstance().setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum()));
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
@@ -458,6 +458,12 @@ void Character::_updateForSave() {
 		for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
 			mData->mSpellBar[i] = spellBar[i];
 	}
+
+	// Inventory.
+	mData->mInventory.mItems.clear(); // TODO: Need to copy before clearing. Otherwise failure will wipe inventory.
+	EXPECTED_BOOL(mInventory->updateForSave(mData->mInventory));
+
+	return true;
 }
 
 uint32 Character::getBaseStatistic(Statistic pStatistic) {

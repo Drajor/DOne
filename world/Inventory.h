@@ -3,12 +3,16 @@
 #include "Constants.h"
 #include "Bonuses.h"
 
+namespace Data {
+	struct Inventory;
+}
+
 class Item;
 class Inventoryy : public Bonuses { // We get an extra y for now.
 
 public:
 	Inventoryy();
-
+	const bool updateForSave(Data::Inventory& pInventoryData);
 	// Items
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
@@ -156,7 +160,6 @@ private:
 	Item* mBank[SlotID::BANK_SLOTS]; // Slots 2000 - 2023
 	Item* mSharedBank[SlotID::SHARED_BANK_SLOTS]; // Slots 2500 - 2501
 	Item* mTrade[SlotID::TRADE_SLOTS]; // Slots 3000 - ?
-	
 	
 	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
 	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);

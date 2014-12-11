@@ -222,7 +222,7 @@ public:
 	const bool setLanguage(const uint32 pLanguageID, const uint32 pValue);
 
 	void notify(const String& pMessage);
-	void _updateForSave();
+	const bool _updateForSave();
 
 	inline const bool isLooting() const { return mLootingCorpse != nullptr; }
 	inline void setLootingCorpse(Actor* pCorpse) { mLootingCorpse = pCorpse; }

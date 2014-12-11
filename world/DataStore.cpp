@@ -451,25 +451,26 @@ namespace InventoryXML {
 #undef SCA
 }
 
-const bool loadItem(TiXmlElement* pElement, Data::Item* pItem) {
+const bool loadItem(TiXmlElement* pElement, Data::Item& pItem) {
 	using namespace InventoryXML;
 	EXPECTED_BOOL(pElement);
-	EXPECTED_BOOL(pItem);
 
 	// Load Item
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pItem->mItemID));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Slot, pItem->mSlot));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Stacks, pItem->mStacks));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Charges, pItem->mCharges));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Attuned, pItem->mAttuned));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::LastCastTime, pItem->mLastCastTime));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pItem.mItemID));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Slot, pItem.mSlot));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Stacks, pItem.mStacks));
+
+	// Optional.
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Charges, pItem.mCharges, false));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Attuned, pItem.mAttuned, false));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::LastCastTime, pItem.mLastCastTime, false));
 
 	// Load Sub-items
 	auto itemElement = pElement->FirstChildElement(Tag::Item);
 	while (itemElement) {
-		auto i = new Data::Item();
-		pItem->mSubItems.push_back(i);
+		Data::Item i;
 		EXPECTED_BOOL(loadItem(itemElement, i));
+		pItem.mSubItems.push_back(i);
 		itemElement = itemElement->NextSiblingElement(Tag::Item);
 	}
 
@@ -483,9 +484,9 @@ const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
 
 	auto itemElement = pElement->FirstChildElement(Tag::Item);
 	while (itemElement) {
-		auto i = new Data::Item();
-		pInventory.mItems.push_back(i);
+		Data::Item i;
 		EXPECTED_BOOL(loadItem(itemElement, i));
+		pInventory.mItems.push_back(i);
 
 		itemElement = itemElement->NextSiblingElement(Tag::Item);
 	}
@@ -689,21 +690,25 @@ const bool DataStore::loadCharacter(const String& pCharacterName, Data::Characte
 	return true;
 }
 
-const bool saveItem(TiXmlElement* pParent, const Data::Item* pItem) {
+const bool saveItem(TiXmlElement* pParent, const Data::Item& pItem) {
 	using namespace InventoryXML;
-	EXPECTED_BOOL(pItem);
 	// Save Item
 	auto itemElement = static_cast<TiXmlElement*>(pParent->LinkEndChild(new TiXmlElement(Tag::Item)));
 
-	itemElement->SetAttribute(Attribute::ID, pItem->mItemID);
-	itemElement->SetAttribute(Attribute::Slot, pItem->mSlot); // Subslot or full slot?...
-	itemElement->SetAttribute(Attribute::Stacks, pItem->mStacks);
-	itemElement->SetAttribute(Attribute::Charges, pItem->mCharges);
-	itemElement->SetAttribute(Attribute::Attuned, pItem->mAttuned);
-	itemElement->SetAttribute(Attribute::LastCastTime, pItem->mLastCastTime);
+	itemElement->SetAttribute(Attribute::ID, pItem.mItemID);
+	itemElement->SetAttribute(Attribute::Slot, pItem.mSlot);	
+	itemElement->SetAttribute(Attribute::Stacks, pItem.mStacks);
+
+	// Optional.
+	if (pItem.mCharges > 0)
+		itemElement->SetAttribute(Attribute::Charges, pItem.mCharges);
+	if (pItem.mAttuned != 0)
+		itemElement->SetAttribute(Attribute::Attuned, pItem.mAttuned);
+	if (pItem.mLastCastTime != 0)
+		itemElement->SetAttribute(Attribute::LastCastTime, pItem.mLastCastTime);
 
 	// Save Sub-Items
-	for (auto i : pItem->mSubItems)
+	for (auto& i : pItem.mSubItems)
 		EXPECTED_BOOL(saveItem(itemElement, i));
 
 	return true;
@@ -714,14 +719,14 @@ const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInvento
 	Profile p("DataStore::saveInventory");
 	EXPECTED_BOOL(pElement);
 
-	for (auto i : pInventory.mItems)
+	for (auto& i : pInventory.mItems)
 		EXPECTED_BOOL(saveItem(pElement, i));
 
 	return true;
 }
 
 const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
-	//Profile p("DataStore::saveCharacter");
+	Profile p("DataStore::saveCharacter");
 	using namespace CharacterXML;
 
 	EXPECTED_BOOL(pCharacter);

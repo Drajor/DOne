@@ -177,10 +177,16 @@ public:
 	Item* getAugment(const u8 pSlot) const;
 
 	Item* getContents(const u8 pSlot) const;
+
+	// Returns a copy of this Item's contents.
 	void getContents(std::list<Item*>& pItems) const;
+
 	const bool clearContents(const u32 pSubIndex);
 	const bool setContents(Item* pItem, const u32 pSubIndex);
 	void updateContentsSlots();
+
+	// Returns a copy of this Item's augmentations.
+	void getAugmentations(std::list<Item*>& pAugmentations) const;
 
 	const u32 getDataSize(const u32 pCopyType) const;
 	const unsigned char* copyData(u32& pSize, const u32 pCopyType);

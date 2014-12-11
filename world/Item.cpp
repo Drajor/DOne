@@ -591,3 +591,9 @@ const u32 Item::findEmptySlot() {
 
 	return SlotID::None;
 }
+
+void Item::getAugmentations(std::list<Item*>& pAugmentations) const {
+	for (auto i : mAugments) {
+		if (i) { pAugmentations.push_back(i); }
+	}
+}

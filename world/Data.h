@@ -68,11 +68,11 @@ namespace Data {
 		u32 mCharges = 0;
 		u32 mAttuned = 0;
 		u32 mLastCastTime = 0;
-		std::list<Item*> mSubItems;
+		std::list<Item> mSubItems;
 	};
 
 	struct Inventory {
-		std::list<Item*> mItems;
+		std::list<Item> mItems;
 	};
 
 	struct Character {

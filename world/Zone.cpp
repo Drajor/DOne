@@ -256,6 +256,7 @@ void Zone::_updateConnections() {
 				mScene->remove(character);
 
 				// Save
+				// TODO: How to handle failure here.
 				character->_updateForSave();
 				requestSave(character);
 
