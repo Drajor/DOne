@@ -1410,6 +1410,87 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class RaceCommand : public Command {
+public:
+	RaceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #race <id>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u32 race = 0;
+		if (!convertParameter(0, race)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->setRace(race);
+		target->getZone()->handleAppearanceChange(target);
+	}
+};
+
+/*****************************************************************************************************************************/
+class SizeCommand : public Command {
+public:
+	SizeCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #size <value>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		float size = 0.0f;
+		if (!convertParameter(0, size)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->setSize(size);
+		target->getZone()->handleAppearanceChange(target);
+	}
+};
+
+/*****************************************************************************************************************************/
+class GenderCommand : public Command {
+public:
+	GenderCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #gender <id>");
+		mHelpMessages.push_back("Genders: 0 = male, 1 = female, 2 = monster");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u8 gender = 0;
+		if (!convertParameter(0, gender)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->setGender(gender);
+		target->getZone()->handleAppearanceChange(target);
+	}
+};
+
+/*****************************************************************************************************************************/
+class TextureCommand : public Command {
+public:
+	TextureCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #texture <id>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u8 texture = 0;
+		if (!convertParameter(0, texture)) { return false; }
+
+		auto target = mInvoker->getTarget();
+		target->setTexture(texture);
+		target->getZone()->handleAppearanceChange(target);
+	}
+};
+
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1481,6 +1562,11 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new SpawnNPCCommand(100, { "npc" }));
 	mCommands.push_back(new SpawnObject(100, { "object" }));
+
+	mCommands.push_back(new RaceCommand(100, { "race" }));
+	mCommands.push_back(new SizeCommand(100, { "size" }));
+	mCommands.push_back(new GenderCommand(100, { "gender" }));
+	mCommands.push_back(new TextureCommand(100, { "texture" }));
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -1808,42 +1894,6 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	else if(pCommandName == "xx"){
 		pCharacter->setCurrentMana(0);
 		pCharacter->getConnection()->sendManaUpdate();
-	}
-	else if (pCommandName == "race") {
-		auto target = pCharacter->getTarget();
-		if (!target) { return; }
-
-		u16 race = 0;
-		if (!Utility::stoSafe(race, pParameters[0])) { return; }
-		target->setRace(race);
-		target->getZone()->handleAppearanceChange(target);
-	}
-	else if (pCommandName == "gender") {
-		auto target = pCharacter->getTarget();
-		if (!target) { return; }
-
-		u8 gender = 0;
-		if (!Utility::stoSafe(gender, pParameters[0])) { return; }
-		target->setGender(gender);
-		target->getZone()->handleAppearanceChange(target);
-	}
-	else if (pCommandName == "size") {
-		auto target = pCharacter->getTarget();
-		if (!target) { return; }
-
-		float size = 1.0f;
-		if (!Utility::stoSafe(size, pParameters[0])) { return; }
-		target->setSize(size);
-		target->getZone()->handleAppearanceChange(target);
-	}
-	else if (pCommandName == "texture") {
-		auto target = pCharacter->getTarget();
-		if (!target) { return; }
-
-		u8 texture = 0;
-		if (!Utility::stoSafe(texture, pParameters[0])) { return; }
-		target->setTexture(texture);
-		target->getZone()->handleAppearanceChange(target);
 	}
 	else if (pCommandName == "helmtexture") {
 		auto target = pCharacter->getTarget();
