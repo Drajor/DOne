@@ -1105,3 +1105,40 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 
 	return true;
 }
+
+Item* loadItem(Data::Item& pItem) {
+	auto item = ItemFactory::make(pItem.mItemID, pItem.mStacks);
+	EXPECTED_PTR(item);
+	item->setIsAttuned(pItem.mAttuned);
+	item->setLastCastTime(pItem.mLastCastTime);
+	item->setCharges(pItem.mCharges);
+
+	// Container contents.
+	if (item->isContainer()) {
+		for (auto& i : pItem.mSubItems) {
+			auto subItem = loadItem(i);
+			EXPECTED_PTR(subItem);
+			EXPECTED_PTR(item->setContents(subItem, i.mSlot));
+		}
+	}
+	// Augmentations.
+	else if (pItem.mSubItems.size() > 0) {
+		for (auto& i : pItem.mSubItems) {
+			auto subItem = loadItem(i);
+			EXPECTED_PTR(subItem);
+			item->setAugmentation(i.mSlot, subItem);
+		}
+	}
+
+	return item;
+}
+
+const bool Inventoryy::loadFromSave(Data::Inventory& pInventoryData) {
+	for (auto i : pInventoryData.mItems) {
+		auto item = loadItem(i);
+		EXPECTED_BOOL(item);
+		EXPECTED_BOOL(put(item, i.mSlot));
+	}
+
+	return true;
+}

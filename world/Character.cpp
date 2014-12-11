@@ -180,6 +180,9 @@ bool Character::initialise() {
 		}
 	}
 
+	// Inventory.
+	EXPECTED_BOOL(mInventory->loadFromSave(mData->mInventory));
+
 	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 	mInitialised = true;
 	return true;

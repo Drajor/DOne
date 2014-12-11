@@ -13,6 +13,7 @@ class Inventoryy : public Bonuses { // We get an extra y for now.
 public:
 	Inventoryy();
 	const bool updateForSave(Data::Inventory& pInventoryData);
+	const bool loadFromSave(Data::Inventory& pInventoryData);
 	// Items
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
