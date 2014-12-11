@@ -20,7 +20,9 @@ public:
 
 	inline const u32 getAccountID() const { return mAccountID; }
 	void _sendChatServer(const String& pCharacterName);
-	void _sendZoneServerInfo(const u16 pPort);
+	void sendZoneServerInfo(const String& pIP, const u16 pPort);
+
+	void sendPacket(const EQApplicationPacket* pPacket);
 private:
 
 	inline void setAccountID(const u32 pAccountID) { mAccountID = pAccountID; }

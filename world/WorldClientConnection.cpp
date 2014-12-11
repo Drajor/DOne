@@ -133,13 +133,10 @@ void WorldClientConnection::_sendEnterWorld(String pCharacterName) {
 
 void WorldClientConnection::_sendExpansionInfo() {
 	using namespace Payload::World;
-	
-	auto outPacket = new EQApplicationPacket(OP_ExpansionInfo, ExpansionInfo::size());
-	auto payload = ExpansionInfo::convert(outPacket->pBuffer);
-	payload->mExpansions = 16383; // TODO: Magic.
-	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+
+	auto packet = ExpansionInfo::construct(16383); // TODO: Magic.
+	sendPacket(packet);
+	delete packet;
 }
 
 void WorldClientConnection::_sendCharacterSelectInfo() {
@@ -333,11 +330,10 @@ bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationP
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 
-	String name = Utility::getRandomName();
-	auto payload = NameGeneration::convert(pPacket->pBuffer);
-	strcpy(payload->mName, name.c_str());
+	auto packet = NameGeneration::construct(0, 0, Utility::getRandomName());
+	sendPacket(packet);
+	delete packet;
 
-	mStreamInterface->QueuePacket(pPacket);
 	return true;
 }
 
@@ -509,28 +505,21 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	return false;
 }
 
-void WorldClientConnection::_sendZoneServerInfo(const u16 pPort) {
+void WorldClientConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
 	using namespace Payload::World;
-	
-	auto outPacket = new EQApplicationPacket(OP_ZoneServerInfo, ZoneServerInfo::size());
-	auto payload = ZoneServerInfo::convert(outPacket->pBuffer);
-	payload->mPort = pPort;
-	strcpy(payload->mIP, "127.0.0.1");
-	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+
+	auto packet = ZoneServerInfo::construct(pIP, pPort);
+	sendPacket(packet);
+	delete packet;
 }
 
 
 void WorldClientConnection::_sendZoneUnavailable() {
 	using namespace Payload::World;
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneUnavail, ZoneUnavailable::size());
-	auto payload = ZoneUnavailable::convert(outPacket->pBuffer);
-	strcpy(payload->mZoneName, "NONE"); // NOTE: Zone name appears to have no effect.
-	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = ZoneUnavailable::construct("NONE"); // NOTE: Zone name appears to have no effect.
+	sendPacket(packet);
+	delete packet;
 }
 
 void WorldClientConnection::_sendGuildList() {
@@ -588,4 +577,8 @@ void WorldClientConnection::_sendApproveWorld() {
 	memcpy(payload->mUnknown0, foo, sizeof(foo));
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
+}
+
+void WorldClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
+	mStreamInterface->QueuePacket(pPacket);
 }

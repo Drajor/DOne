@@ -234,7 +234,7 @@ bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCha
 
 	// Send the client off to the Zone.
 	pConnection->_sendChatServer(pCharacterName);
-	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(zoneID, instanceID));
+	pConnection->sendZoneServerInfo("127.0.0.1", ZoneManager::getInstance().getZonePort(zoneID, instanceID));
 
 	return true;
 }
@@ -271,8 +271,8 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
-	pConnection->_sendChatServer(pCharacterName);;
-	pConnection->_sendZoneServerInfo(ZoneManager::getInstance().getZonePort(zoneID, instanceID));
+	pConnection->_sendChatServer(pCharacterName);
+	pConnection->sendZoneServerInfo("127.0.0.1", ZoneManager::getInstance().getZonePort(zoneID, instanceID));
 
 	return true;
 }

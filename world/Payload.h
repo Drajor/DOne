@@ -1458,8 +1458,14 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: ExpansionInfo_Struct
-		struct ExpansionInfo : public Fixed<ExpansionInfo> {
+		struct ExpansionInfo : public FixedT<ExpansionInfo, OP_ExpansionInfo> {
+			static EQApplicationPacket* construct(const u32 pExpansions) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mExpansions = pExpansions;
+
+				return packet;
+			}
 			u32 mExpansions = 0;
 		};
 
@@ -1493,30 +1499,52 @@ namespace Payload {
 			u8 mLevels[18];
 		};
 
-		// S->C
-		// Based on: NameGeneration_Struct
-		struct NameGeneration : public Fixed<NameGeneration> {
+		// S<->C
+		struct NameGeneration : public FixedT<NameGeneration, OP_RandomNameGenerator> {
+			NameGeneration() { memset(mName, 0, sizeof(mName)); }
+			static EQApplicationPacket* construct(const u32 pRace, const u32 pGender, const String& pName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mRace = pRace;
+				payload->mGender = pGender;
+				strcpy(payload->mName, pName.c_str());
+
+				return packet;
+			}
 			u32 mRace = 0;
 			u32 mGender = 0;
 			char mName[64];
 		};
 
 		// S->C
-		// Based on: ZoneServerInfo_Struct
-		struct ZoneServerInfo : public Fixed<ZoneServerInfo> {
+		struct ZoneServerInfo : public FixedT<ZoneServerInfo, OP_ZoneServerInfo> {
+			static EQApplicationPacket* construct(const String& pIP, const u16 pPort) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mIP, pIP.c_str());
+				payload->mPort = pPort;
+
+				return packet;
+			}
 			char mIP[128];
 			u16 mPort = 0;
 		};
 
 		// S->C
-		// Based on: ZoneUnavail_Struct
-		struct ZoneUnavailable : public Fixed<ZoneUnavailable> {
+		struct ZoneUnavailable : public FixedT<ZoneUnavailable, OP_ZoneUnavail> {
+			ZoneUnavailable() { memset(mZoneName, 0, sizeof(mZoneName)); }
+			static EQApplicationPacket* construct(const String& pZoneName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mZoneName, pZoneName.c_str());
+
+				return packet;
+			}
 			char mZoneName[16];
-			i16 mUnknown0[4];
+			i32 mUnknown = 0;
 		};
 
 		// S->C
-		// Based on: ApproveWorld_Struct
 		struct ApproveWorld : public Fixed<ApproveWorld> {
 			u8 mUnknown0[544];
 		};

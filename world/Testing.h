@@ -57,6 +57,18 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(17, Payload::LoginServer::ConnectResponse::size());
 	EXPECT_EQ(653, Payload::LoginServer::WorldInformation::size());
 	//EXPECT_EQ(20, Payload::LoginServer::ClientAuthentication::size());
+
+	// World
+
+	EXPECT_EQ(464, Payload::World::Connect::size());
+	EXPECT_EQ(72, Payload::World::EnterWorld::size());
+	EXPECT_EQ(88, Payload::World::CreateCharacter::size());
+	// LogServer
+	EXPECT_EQ(4, Payload::World::ExpansionInfo::size());
+	// CharacterSelect
+	EXPECT_EQ(72, Payload::World::NameGeneration::size());
+	EXPECT_EQ(544, Payload::World::ApproveWorld::size());
+	
 }
 
 // 

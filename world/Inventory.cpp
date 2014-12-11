@@ -1109,7 +1109,7 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 Item* loadItem(Data::Item& pItem) {
 	auto item = ItemFactory::make(pItem.mItemID, pItem.mStacks);
 	EXPECTED_PTR(item);
-	item->setIsAttuned(pItem.mAttuned);
+	item->setIsAttuned(pItem.mAttuned == 1 ? true : false);
 	item->setLastCastTime(pItem.mLastCastTime);
 	item->setCharges(pItem.mCharges);
 

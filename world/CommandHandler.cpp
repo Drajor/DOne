@@ -1427,6 +1427,8 @@ public:
 		auto target = mInvoker->getTarget();
 		target->setRace(race);
 		target->getZone()->handleAppearanceChange(target);
+
+		return true;
 	}
 };
 
@@ -1447,6 +1449,8 @@ public:
 		auto target = mInvoker->getTarget();
 		target->setSize(size);
 		target->getZone()->handleAppearanceChange(target);
+
+		return true;
 	}
 };
 
@@ -1468,6 +1472,8 @@ public:
 		auto target = mInvoker->getTarget();
 		target->setGender(gender);
 		target->getZone()->handleAppearanceChange(target);
+
+		return true;
 	}
 };
 
@@ -1488,6 +1494,8 @@ public:
 		auto target = mInvoker->getTarget();
 		target->setTexture(texture);
 		target->getZone()->handleAppearanceChange(target);
+
+		return true;
 	}
 };
 
