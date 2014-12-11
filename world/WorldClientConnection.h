@@ -38,9 +38,9 @@ private:
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	bool _handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket);
 	bool _handleCharacterCreatePacket(const EQApplicationPacket* pPacket);
-	bool _handleEnterWorldPacket(const EQApplicationPacket* pPacket);
+	bool _handleEnterWorld(const EQApplicationPacket* pPacket);
 	bool _handleDeleteCharacterPacket(const EQApplicationPacket* pPacket);
-	bool _handleSendLoginInfoPacket(const EQApplicationPacket* packet);
+	bool _handleConnect(const EQApplicationPacket* packet);
 	bool _handleCharacterCreateRequestPacket(const EQApplicationPacket* packet);
 	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);
 

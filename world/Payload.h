@@ -1382,7 +1382,7 @@ namespace Payload {
 	namespace World {
 
 		// C->S
-		struct LoginInformation : public Fixed<LoginInformation> {
+		struct Connect : public Fixed<Connect> {
 			char mInformation[64]; // Account ID and Account Key
 			u8 mUnknown0[124];
 			u8 mZoning;

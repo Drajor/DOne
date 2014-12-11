@@ -586,11 +586,6 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// Clear ZoneChange
 	mCharacter->clearZoneChange();
 
-	// If character is not initialised yet they are loading from the Character Selection Screen.
-	if (mCharacter->isInitialised() == false) {
-		EXPECTED(mCharacter->initialise());
-	}
-
 	mCharacter->setZone(mZone);
 	mCharacter->setSpawnID(mZone->getNextSpawnID());
 	mCharacter->setConnection(this);

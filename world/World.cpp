@@ -259,11 +259,14 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 		return false;
 	}
 
-	// Create Character
+	// Create and initialise Character.
 	Character* character = new Character(pConnection->getAccountID(), characterData);
+	if (!character->initialise()) {
+		delete character;
+		return false;
+	}
 
 	// Register Zone Change
-	//ZoneManager::getInstance().registerZoneChange(character, zoneID, instanceID);
 	ZoneManager::getInstance().addZoningCharacter(character);
 	character->setZoneAuthentication(zoneID, instanceID);
 

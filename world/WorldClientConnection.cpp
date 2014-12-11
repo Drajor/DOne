@@ -69,7 +69,7 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_SendLoginInfo:
 		// NOTE: Sent when Client initially connects (Moving from Server Selection to Character Selection).
 		// NOTE: Sent when Client is moving from one zone to another.
-		return _handleSendLoginInfoPacket(pPacket);
+		return _handleConnect(pPacket);
 	case OP_ApproveName:
 		// NOTE: This occurs when the user clicks the 'Create Character' button.
 		return _handleNameApprovalPacket(pPacket);
@@ -83,7 +83,7 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the client receives OP_ApproveName.
 		return _handleCharacterCreatePacket(pPacket);
 	case OP_EnterWorld:
-		return _handleEnterWorldPacket(pPacket);
+		return _handleEnterWorld(pPacket);
 	case OP_DeleteCharacter:
 		// NOTE: This occurs when the user clicks the 'Delete Character' button.
 		return _handleDeleteCharacterPacket(pPacket);
@@ -197,12 +197,12 @@ void WorldClientConnection::_sendPostEnterWorld() {
 	safe_delete(outPacket);
 }
 
-bool WorldClientConnection::_handleSendLoginInfoPacket(const EQApplicationPacket* pPacket) {
+bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(LoginInformation::sizeCheck(pPacket));
+	EXPECTED_BOOL(Connect::sizeCheck(pPacket));
 
-	auto payload = LoginInformation::convert(pPacket);
+	auto payload = Connect::convert(pPacket);
 
 	String accountIDStr = Utility::safeString(payload->mInformation, 19);
 	String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
@@ -445,7 +445,7 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 	return true;
 }
 
-bool WorldClientConnection::_handleEnterWorldPacket(const EQApplicationPacket* pPacket) {
+bool WorldClientConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket->size));
