@@ -13,6 +13,9 @@ public:
 	void start();
 	const bool update();
 
+	// Resetting will cause the respawn timer to be zero.
+	void reset();
+
 	// Sets the position of the SpawnPoint.
 	inline void setPosition(const Vector3& pPosition) { mPosition = pPosition; }
 
@@ -46,7 +49,7 @@ public:
 private:
 
 	SpawnGroup* mSpawnGroupID = nullptr;
-	u32 mRespawnTime = 5000;
+	u32 mRespawnTime = 200;
 	NPC* mNPC = nullptr;
 	Vector3 mPosition;
 	float mHeading = 0.0f;

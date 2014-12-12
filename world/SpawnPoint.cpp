@@ -12,3 +12,7 @@ const bool SpawnPoint::update() {
 	}
 	return true;
 }
+
+void SpawnPoint::reset() {
+	mRespawnTimer.Start(0);
+}

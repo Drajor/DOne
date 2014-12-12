@@ -74,6 +74,9 @@ void SpawnPointManager::onDeath(NPC* pNPC) {
 
 	// Add to respawn list.
 	_addRespawn(spawnPoint);
+
+	// Start spawn timer.
+	spawnPoint->start();
 }
 
 void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
@@ -106,6 +109,10 @@ SpawnGroup* SpawnPointManager::findSpawnGroup(const u32 pID) const {
 
 const bool SpawnPointManager::populate() {
 	EXPECTED_BOOL(mPopulated == false);
+
+	for (auto i : mRespawnSpawnPoints) {
+		i->reset();
+	}
 
 	mPopulated = true;
 	return true;
