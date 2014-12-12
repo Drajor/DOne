@@ -30,6 +30,12 @@ private:
 public:
 
 	const bool initialise();
+	
+	const bool load(const u16 pZoneID);
+	const bool unload(const u16 pZoneID);
+	const bool reload(const u16 pZoneID);
+	const bool save(const u16 pZoneID);
+
 	const bool getLongName(const u16 pZoneID, String& pLongName);
 	const bool getShortName(const u16 pZoneID, String& pShortName);
 	const bool getLongNameStringID(const u16 pZoneID, u32& pStringID);

@@ -27,7 +27,19 @@ public:
 	bool initialise();
 	void update();
 
+	// Returns whether or not the specified Zone is running.
+	const bool isZoneRunning(const uint16 pZoneID, const uint16 pInstanceID) const;
+
 	const bool isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID);
+
+	const bool canZoneShutdown(const u16 pZoneID, const u16 pInstanceID) const;
+	const bool canZoneShutdown(Zone* pZone) const;
+
+	// Attempt to boot a Zone.
+	const bool requestZoneBoot(const u16 pZoneID, const u16 pInstanceID);
+
+	// Attempt to shutdown a Zone.
+	const bool requestZoneShutdown(const u16 pZoneID, const u16 pInstanceID);
 
 	ZoneSearchResult getAllZones();
 	
@@ -46,8 +58,8 @@ public:
 	Character* getZoningCharacter(const String& pCharacterName);
 	String getZoningCharacterName(const uint32 pAccountID);
 private:
-	Zone* _search(const uint16 pZoneID, const uint16 pInstanceID);
-	const bool _makeZone(const uint16 pZoneID, const uint16 pInstanceID);
+	Zone* _search(const uint16 pZoneID, const uint16 pInstanceID) const;
+	const bool _makeZone(const u16 pZoneID, const u16 pInstanceID);
 	const uint32 _getNextZonePort();
 	std::list<uint32> mAvailableZonePorts;
 	std::list<Zone*> mZones;

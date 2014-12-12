@@ -1,4 +1,5 @@
 #include "ZoneManager.h"
+#include "ZoneData.h"
 #include "Zone.h"
 #include "GroupManager.h"
 #include "GuildManager.h"
@@ -16,8 +17,16 @@ ZoneManager::~ZoneManager() {
 
 
 void ZoneManager::update() {
-	for (auto& i : mZones) {
-		i->update();
+	for (auto i = mZones.begin(); i != mZones.end();) {
+		auto zone = *i;
+		if (zone->update()) {
+			i++;
+			continue;
+		}
+		Log::status("[Zone Manager] Deleting Zone." + Utility::zoneLogDetails(zone));
+		mAvailableZonePorts.push_back(zone->getPort());
+		delete zone;
+		i = mZones.erase(i);
 	}
 }
 
@@ -37,22 +46,65 @@ const uint16 ZoneManager::getZonePort(const uint16 pZoneID, const uint16 pInstan
 bool ZoneManager::initialise() {
 	Log::status("[Zone Manager] Initialising.");
 
-	for (int i = 0; i < 200; i++)
+	for (int i = 0; i < 4; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
 
 	return true;
 }
 
+const bool ZoneManager::isZoneRunning(const uint16 pZoneID, const uint16 pInstanceID) const {
+	return _search(pZoneID, pInstanceID) != nullptr;
+}
 
 const bool ZoneManager::isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID) {
 	Zone* zone = _search(pZoneID, pInstanceID);
-	if (zone)
-		return true;
+	if (zone) {
+		// Where Zone is shutting down, do not allow entry.
+		return !zone->isShuttingDown();
+	}
 
 	return _makeZone(pZoneID, pInstanceID);
 }
 
+const bool ZoneManager::canZoneShutdown(const u16 pZoneID, const u16 pInstanceID) const {
+	// Check: Zone exists.
+	Zone* zone = _search(pZoneID, pInstanceID);
+	if (!zone) return false;
+
+	return canZoneShutdown(zone);
+}
+
+const bool ZoneManager::canZoneShutdown(Zone* pZone) const {
+	EXPECTED_BOOL(pZone);
+
+	// Check: Are any Characters currently zoning into Zone.
+	for (auto i : mZoningCharacters) {
+		auto zoneChange = i->getZoneChange();
+		if (zoneChange.mZoneID == pZone->getID() && zoneChange.mInstanceID == pZone->getInstanceID())
+			return false;
+	}
+
+	// Finally check with Zone.
+	return pZone->canShutdown();
+}
+
+const bool ZoneManager::requestZoneBoot(const u16 pZoneID, const u16 pInstanceID) {
+	// Check: Zone already running.
+	if (isZoneRunning(pZoneID, pInstanceID)) return false;
+
+	return _makeZone(pZoneID, pInstanceID);
+}
+
+const bool ZoneManager::requestZoneShutdown(const u16 pZoneID, const u16 pInstanceID) {
+	// Check: Zone exists.
+	Zone* zone = _search(pZoneID, pInstanceID);
+	if (!zone) return false;
+
+	if (!canZoneShutdown(zone)) return false;
+
+	return zone->shutdown();
+}
 
 const uint32 ZoneManager::_getNextZonePort() {
 	uint32 port = *mAvailableZonePorts.begin();
@@ -61,14 +113,18 @@ const uint32 ZoneManager::_getNextZonePort() {
 	// TODO: Error check this ;)
 }
 
-const bool ZoneManager::_makeZone(const uint16 pZoneID, const uint16 pInstanceID) {
+const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	const uint32 zonePort = _getNextZonePort();
 	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
-	Zone* zone = new Zone(zonePort, pZoneID, pInstanceID);
+	
 	
 	// Check: Zone initialises correctly.
-	if (!zone->initialise()) {
+	auto zoneData = ZoneDataManager::getInstance().getZoneData(pZoneID);
+	EXPECTED_BOOL(zoneData);
+
+	Zone* zone = new Zone(zonePort, pZoneID, pInstanceID);
+	if (!zone->initialise(zoneData)) {
 		mAvailableZonePorts.push_front(zonePort);
 		delete zone;
 		return false;
@@ -194,7 +250,7 @@ ZoneSearchResult ZoneManager::getAllZones() {
 	return result;
 }
 
-Zone* ZoneManager::_search(const uint16 pZoneID, const uint16 pInstanceID) {
+Zone* ZoneManager::_search(const uint16 pZoneID, const uint16 pInstanceID) const {
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID)
 			return i;

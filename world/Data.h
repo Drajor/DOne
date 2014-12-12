@@ -299,6 +299,10 @@ namespace Data {
 	};
 
 	struct SpawnGroup {
+		~SpawnGroup() {
+			for (auto i : mEntries) delete i;
+			mEntries.clear();
+		}
 		struct Entry {
 			u32 mNPCType = 0;
 			u32 mChance = 0;
@@ -327,6 +331,22 @@ namespace Data {
 	};
 
 	struct Zone {
+		~Zone() {
+			for (auto i : mZonePoints) delete i;
+			mZonePoints.clear();
+
+			for (auto i : mObjects) delete i;
+			mObjects.clear();
+
+			for (auto i : mDoors) delete i;
+			mDoors.clear();
+
+			for (auto i : mSpawnGroups) delete i;
+			mSpawnGroups.clear();
+
+			for (auto i : mSpawnPoints) delete i;
+			mSpawnPoints.clear();
+		}
 		u16 mID = 0;
 		u32 mLongNameStringID = 0;
 		String mLongName = "";

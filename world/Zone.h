@@ -30,10 +30,17 @@ class Object;
 class Door;
 
 namespace Data {
+	struct Zone;
+	struct SpawnGroup;
+	struct SpawnPoint;
+	struct ZonePoint;
 	struct Object;
 	struct Door;
 	typedef std::list<Data::Object*>& ObjectList;
 	typedef std::list<Data::Door*>& DoorList;
+	typedef std::list<Data::SpawnGroup*>& SpawnGroupList;
+	typedef std::list<Data::SpawnPoint*>& SpawnPointList;
+	typedef std::list<Data::ZonePoint*>& ZonePointList;
 }
 
 typedef std::list<ZonePoint*> ZonePointList;
@@ -56,9 +63,15 @@ public:
 	Zone(const u32 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise();
-	void shutdown();
-	void update();
+	const bool initialise(Data::Zone* pZoneData);
+
+	const bool canShutdown() const;
+	const bool shutdown();
+	
+	// Returns whether this Zone is currently shutting down.
+	inline const bool isShuttingDown() const { return mShuttingDown; }
+
+	const bool update();
 
 	const bool populate();
 	const bool depopulate();
@@ -183,8 +196,9 @@ public:
 	void handleAppearanceChange(Actor* pActor);
 private:
 
-	const bool loadZonePoints();
-	
+	const bool loadZonePoints(Data::ZonePointList pZonePoints);
+	const bool loadObjects(Data::ObjectList pObjects);
+	const bool loadDoors(Data::DoorList pDoors);
 
 	// Performs a global Character search.
 	Character* _findCharacter(const String& pCharacterName, bool pIncludeZoning = false);
@@ -207,9 +221,6 @@ private:
 	void _onCamp(Character* pCharacter);
 	void _onLinkdead(Character* pCharacter);
 
-	const bool loadObjects(Data::ObjectList pObjects);
-	const bool loadDoors(Data::DoorList pDoors);
-
 	u8 mZoneType = 0;
 	u8 mTimeType = 0;
 	u8 mSkyType = 0;
@@ -227,6 +238,7 @@ private:
 	const u32 mPort;
 
 	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
+	bool mShuttingDown = false;
 	bool mPopulated = false;
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;

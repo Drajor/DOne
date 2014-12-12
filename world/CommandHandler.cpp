@@ -1499,6 +1499,83 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class ZoneBootCommand : public Command {
+public:
+	ZoneBootCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #zboot <id> <instance=0>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 2;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u16 zoneID = 0;
+		if (!convertParameter(0, zoneID)) { return false; }
+
+		u16 instanceID = 0;
+		if (pParameters.size() == 2) {
+			if (!convertParameter(1, instanceID)) { return false; }
+		}
+
+		// Check: Is the target Zone currently running?
+		if (ZoneManager::getInstance().isZoneRunning(zoneID, instanceID)) {
+			mInvoker->notify("Zone is already running.");
+			return true;
+		}
+
+		const bool success = ZoneManager::getInstance().requestZoneBoot(zoneID, instanceID);
+		if (success) {
+			mInvoker->notify("Zone booted.");
+		}
+		else {
+			mInvoker->notify("Unable to boot Zone.");
+		}
+
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class ZoneShutdownCommand : public Command {
+public:
+	ZoneShutdownCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #zshutdown <id> <instance=0>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 2;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u16 zoneID = 0;
+		if (!convertParameter(0, zoneID)) { return false; }
+
+		u16 instanceID = 0;
+		if (pParameters.size() == 2) {
+			if (!convertParameter(1, instanceID)) { return false; }
+		}
+
+		// Check: Is the target Zone currently running?
+		if (!ZoneManager::getInstance().isZoneRunning(zoneID, instanceID)) {
+			mInvoker->notify("Zone is not running.");
+			return true;
+		}
+
+		// Check: Is the target Zone able to shut down?
+		if (!ZoneManager::getInstance().canZoneShutdown(zoneID, instanceID)) {
+			mInvoker->notify("Zone not able to shutdown yet.");
+			return true;
+		}
+
+		const bool success = ZoneManager::getInstance().requestZoneShutdown(zoneID, instanceID);
+		if (success) {
+			mInvoker->notify("Zone shutting down.");
+		}
+		else {
+			mInvoker->notify("Unable to shutdown Zone.");
+		}
+
+		return true;
+	}
+};
 
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
@@ -1548,6 +1625,9 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new PopulateCommand(100, { "pop" }));
 	mCommands.push_back(new DepopulateCommand(100, { "depop" }));
 	mCommands.push_back(new RepopulateCommand(100, { "repop" }));
+
+	mCommands.push_back(new ZoneBootCommand(100, { "zboot" }));
+	mCommands.push_back(new ZoneShutdownCommand(100, { "zshutdown" }));
 
 	mCommands.push_back(new KillCommand(100, { "kill" }));
 

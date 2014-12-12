@@ -243,14 +243,43 @@ const bool ZoneDataManager::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
 	Log::status("[Zone Data] Initialising.");
-	EXPECTED_BOOL(DataStore::getInstance().loadZones(mZoneData));
+	EXPECTED_BOOL(load(0));
 	Log::info("[Zone Data] Loaded data for " + std::to_string(mZoneData.size()) + " Zones.");
 	
-	EXPECTED_BOOL(DataStore::getInstance().saveZones(mZoneData));
-
 	mInitialised = true;
 	return true;
 }
+
+const bool ZoneDataManager::save(const u16 pZoneID) {
+	// TODO: Make this zone specific.
+	EXPECTED_BOOL(DataStore::getInstance().saveZones(mZoneData));
+	return true;
+}
+
+const bool ZoneDataManager::load(const u16 pZoneID) {
+	EXPECTED_BOOL(mZoneData.empty());
+	EXPECTED_BOOL(DataStore::getInstance().loadZones(mZoneData));
+
+	return true;
+}
+
+const bool ZoneDataManager::unload(const u16 pZoneID) {
+	for (auto i : mZoneData) {
+		delete i;
+	}
+	mZoneData.clear();
+
+	return true;
+}
+
+const bool ZoneDataManager::reload(const u16 pZoneID) {
+	EXPECTED_BOOL(save(pZoneID));
+	EXPECTED_BOOL(unload(pZoneID));
+	EXPECTED_BOOL(load(pZoneID));
+
+	return true;
+}
+
 
 Data::Zone* ZoneDataManager::getZoneData(const u16 pZoneID) const {
 	for (auto i : mZoneData) {

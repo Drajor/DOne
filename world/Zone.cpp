@@ -1,5 +1,4 @@
 #include "Zone.h"
-#include "ZoneData.h"
 #include "World.h"
 #include "AccountManager.h"
 #include "ZoneManager.h"
@@ -47,10 +46,20 @@ Zone::~Zone() {
 	safe_delete(mScene);
 	safe_delete(mLootAllocator);
 	safe_delete(mSpawnPointManager);
+
+	for (auto i : mObjects) delete i;
+	mObjects.clear();
+
+	//for (auto i : mDoors) delete i;
+	//mDoors.clear();
+
+	for (auto i : mZonePoints) delete i;
+	mZonePoints.clear();
 }
 
-const bool Zone::initialise() {
+const bool Zone::initialise(Data::Zone* pZoneData) {
 	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pZoneData);
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
@@ -63,49 +72,52 @@ const bool Zone::initialise() {
 
 	mLootAllocator = new LootAllocator();
 
-	auto zoneData = ZoneDataManager::getInstance().getZoneData(mID);
-	EXPECTED_BOOL(zoneData);
+	mZoneType = pZoneData->mZoneType;
+	mTimeType = pZoneData->mTimeType;
+	mSkyType = pZoneData->mSkyType;
+	mFogDensity = pZoneData->mFogDensity;
 
-	mZoneType = zoneData->mZoneType;
-	mTimeType = zoneData->mTimeType;
-	mSkyType = zoneData->mSkyType;
-	mFogDensity = zoneData->mFogDensity;
+	mLongName = pZoneData->mLongName;
+	mShortName = pZoneData->mShortName;
+	mLongNameStringID = pZoneData->mLongNameStringID;
+	mSafePoint = pZoneData->mSafePosition;
 
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongNameStringID(mID, mLongNameStringID));
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getLongName(mID, mLongName));
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getShortName(mID, mShortName));
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getSafePoint(mID, mSafePoint));
+	EXPECTED_BOOL(loadZonePoints(pZoneData->mZonePoints));
 
-	EXPECTED_BOOL(loadZonePoints());
-
-	// Load SpawnPoint Data for Zone.
-	std::list<Data::SpawnPoint*> spawnPointData;
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnPoints(getID(), spawnPointData));
-
-	// Load SpawnGroup Data for Zone.
-	std::list<Data::SpawnGroup*> spawnGroupData;
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getSpawnGroups(getID(), spawnGroupData));
-	
 	// Pass to SpawnPointManager.
 	mSpawnPointManager = new SpawnPointManager();
-	EXPECTED_BOOL(mSpawnPointManager->initialise(this, spawnGroupData, spawnPointData));
+	EXPECTED_BOOL(mSpawnPointManager->initialise(this, pZoneData->mSpawnGroups, pZoneData->mSpawnPoints));
 
 	// Objects.
-	EXPECTED_BOOL(loadObjects(zoneData->mObjects));
+	EXPECTED_BOOL(loadObjects(pZoneData->mObjects));
 
 	// Doors.
-	EXPECTED_BOOL(loadDoors(zoneData->mDoors));
+	EXPECTED_BOOL(loadDoors(pZoneData->mDoors));
 
 	mInitialised = true;
 	return true;
 }
 
-const bool Zone::loadZonePoints() {
-	std::list<Data::ZonePoint*> zonePointData;
-	EXPECTED_BOOL(ZoneDataManager::getInstance().getZonePoints(getID(), zonePointData));
+const bool Zone::canShutdown() const {
+	// Can not shut down while there are still active connections to the Zone.
+	return mCharacters.empty() && mLinkDeadCharacters.empty();
+}
+
+const bool Zone::shutdown() {
+	EXPECTED_BOOL(mShuttingDown == false);
+
+	// TODO: Save any temp data.
+	
+	mShuttingDown = true;
+
+	return true;
+}
+
+const bool Zone::loadZonePoints(Data::ZonePointList pZonePoints) {
+	EXPECTED_BOOL(mZonePoints.empty());
 
 	// Create ZonePoints.
-	for (auto i : zonePointData) {
+	for (auto i : pZonePoints) {
 		auto zonePoint = new ZonePoint();
 		mZonePoints.push_back(zonePoint);
 
@@ -128,7 +140,9 @@ const bool Zone::depopulate() {
 	return mSpawnPointManager->depopulate();
 }
 
-void Zone::update() {
+const bool Zone::update() {
+	if (isShuttingDown()) { return false; }
+
 	// Check if any new clients are connecting to this Zone.
 	_handleIncomingConnections();
 
@@ -160,6 +174,8 @@ void Zone::update() {
 		}
 		i++;
 	}
+
+	return true;
 }
 
 void Zone::_updatePreConnections() {
@@ -296,11 +312,6 @@ void Zone::_updateNPCs() {
 		removeActor(npc);
 		delete npc;
 	}
-}
-
-void Zone::shutdown()
-{
-
 }
 
 void Zone::_handleIncomingConnections() {
@@ -1686,6 +1697,8 @@ void Zone::handleDropItem(Character* pCharacter) {
 }
 
 const bool Zone::loadObjects(Data::ObjectList pObjects) {
+	EXPECTED_BOOL(mObjects.empty());
+
 	for (auto i : pObjects) {
 		auto o = new Object();
 		mObjects.push_back(o);
