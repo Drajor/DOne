@@ -17,6 +17,10 @@ class SpawnPointManager {
 public:
 	const bool initialise(Zone* pZone, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData);
 	void update();
+
+	const bool populate();
+	const bool depopulate();
+
 	void onDeath(NPC* pNPC);
 
 	// Finds a SpawnGroup by ID.
@@ -25,8 +29,11 @@ public:
 private:
 
 	void _spawn(SpawnPoint* pSpawnPoint);
-
+	void _associate(SpawnPoint* pSpawnPoint, NPC* pNPC);
+	void _disassociate(SpawnPoint* pSpawnPoint, NPC* pNPC);
+	inline void _addRespawn(SpawnPoint* pSpawnPoint) { mRespawnSpawnPoints.push_back(pSpawnPoint); }
 	bool mInitialised = false;
+	bool mPopulated = false;
 	Zone* mZone = nullptr;
 
 	std::list<SpawnGroup*> mSpawnGroups;

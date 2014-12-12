@@ -59,6 +59,10 @@ public:
 	const bool initialise();
 	void shutdown();
 	void update();
+
+	const bool populate();
+	const bool depopulate();
+
 	const bool checkAuthentication(Character* pCharacter);
 
 	inline const String& getLongName() const { return mLongName; }
@@ -144,9 +148,6 @@ public:
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 	void sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket);
-
-	const bool populate();
-	const bool depopulate();
 
 	void handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID);
 	void handleEndLootRequest(Character* pCharacter);

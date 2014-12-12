@@ -42,11 +42,15 @@ const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnGroup
 	}
 
 	Log::info("[SpawnPointManager] Finished initialising. " + std::to_string(pSpawnPointData.size()) + " Spawn Points.");
+	mPopulated = true;
 	mInitialised = true;
 	return true;
 }
 
 void SpawnPointManager::update() {
+	// Do not check for respawn while depopulated.
+	if (mPopulated == false) { return; }
+
 	// Check each despawned SpawnPoint 
 	for (auto i = mRespawnSpawnPoints.begin(); i != mRespawnSpawnPoints.end();) {
 		SpawnPoint* spawnPoint = *i;
@@ -66,11 +70,10 @@ void SpawnPointManager::onDeath(NPC* pNPC) {
 	if (!spawnPoint) return;
 	
 	// Disassociate NPC and SpawnPoint.
-	pNPC->setSpawnPoint(nullptr);
-	spawnPoint->setNPC(nullptr);
+	_disassociate(spawnPoint, pNPC);
 
 	// Add to respawn list.
-	mRespawnSpawnPoints.push_back(spawnPoint);
+	_addRespawn(spawnPoint);
 }
 
 void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
@@ -87,8 +90,7 @@ void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
 	npc->setHeading(pSpawnPoint->getHeading());
 
 	// Associate NPC and SpawnPoint.
-	pSpawnPoint->setNPC(npc);
-	npc->setSpawnPoint(pSpawnPoint);
+	_associate(pSpawnPoint, npc);
 
 	// Add NPC to Zone.
 	mZone->addActor(npc);
@@ -100,4 +102,42 @@ SpawnGroup* SpawnPointManager::findSpawnGroup(const u32 pID) const {
 			return i;
 	}
 	return nullptr;
+}
+
+const bool SpawnPointManager::populate() {
+	EXPECTED_BOOL(mPopulated == false);
+
+	mPopulated = true;
+	return true;
+}
+
+const bool SpawnPointManager::depopulate() {
+	EXPECTED_BOOL(mPopulated == true);
+
+	// Despawn all currently populated SpawnPoints.
+	for (auto i : mActiveSpawnPoints) {
+		auto npc = i->getNPC();
+		// Flag NPC as being destroyed.
+		npc->destroy();
+
+		// Disassociate NPC and SpawnPoint.
+		_disassociate(i, npc);
+
+		// Add to the respawn list.
+		_addRespawn(i);
+	}
+
+	mActiveSpawnPoints.clear();
+	mPopulated = false;
+	return true;
+}
+
+void SpawnPointManager::_associate(SpawnPoint* pSpawnPoint, NPC* pNPC) {
+	pNPC->setSpawnPoint(pSpawnPoint);
+	pSpawnPoint->setNPC(pNPC);
+}
+
+void SpawnPointManager::_disassociate(SpawnPoint* pSpawnPoint, NPC* pNPC) {
+	pNPC->setSpawnPoint(nullptr);
+	pSpawnPoint->setNPC(nullptr);
 }

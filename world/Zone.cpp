@@ -77,7 +77,6 @@ const bool Zone::initialise() {
 	EXPECTED_BOOL(ZoneDataManager::getInstance().getSafePoint(mID, mSafePoint));
 
 	EXPECTED_BOOL(loadZonePoints());
-	EXPECTED_BOOL(populate());
 
 	// Load SpawnPoint Data for Zone.
 	std::list<Data::SpawnPoint*> spawnPointData;
@@ -122,32 +121,11 @@ const bool Zone::loadZonePoints() {
 }
 
 const bool Zone::populate() {
-	//EXPECTED_BOOL(mPopulated == false);
-
-	//for (auto i : mSpawnPoints)
-	//	_populate(i);
-
-	//mPopulated = true;
-	return true;
+	return mSpawnPointManager->populate();
 }
 
 const bool Zone::depopulate() {
-	//EXPECTED_BOOL(mPopulated);
-
-	//for (auto i : mSpawnPoints) {
-	//	auto npc = i->getNPC();
-	//	if (npc) {
-	//		// Unlink NPC and SpawnPoint
-	//		i->setNPC(nullptr);
-	//		npc->setSpawnPoint(nullptr);
-
-	//		// Flag for destruction next update.
-	//		npc->destroy();
-	//	}
-	//}
-
-	//mPopulated = false;
-	return true;
+	return mSpawnPointManager->depopulate();
 }
 
 void Zone::update() {

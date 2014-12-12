@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Constants.h"
-#include "ClientAuthentication.h"
+#include "Types.h"
 
 class EQApplicationPacket;
 class EQStreamInterface;

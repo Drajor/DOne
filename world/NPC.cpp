@@ -78,6 +78,8 @@ void NPC::onLootBegin() {
 const bool NPC::isShopOpen() const {
 	EXPECTED_BOOL(isMerchant());
 
+	if (getDestroy()) return false; // NPC will be destroyed this update or next update.
+
 	// TODO: Fighting or other conditions which would affect this.
 
 	return true;
