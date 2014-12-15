@@ -27,51 +27,56 @@
 	#include <netinet/in.h>
 #endif
 
-void EncryptProfilePacket(EQApplicationPacket* app) {
-	//EncryptProfilePacket(app->pBuffer, app->size);
-}
+uint32 roll(uint32 in, uint8 bits);
+uint64 roll(uint64 in, uint8 bits);
+uint32 rorl(uint32 in, uint8 bits);
+uint64 rorl(uint64 in, uint8 bits);
 
-void EncryptProfilePacket(uchar* pBuffer, uint32 size) {
-	uint64* data=(uint64*)pBuffer;
-	uint64 crypt = 0x659365E7;
-	uint64 next_crypt;
-	uint32 len = size >> 3;
+//void EncryptProfilePacket(EQApplicationPacket* app) {
+//	//EncryptProfilePacket(app->pBuffer, app->size);
+//}
+//
+//void EncryptProfilePacket(uchar* pBuffer, uint32 size) {
+//	uint64* data=(uint64*)pBuffer;
+//	uint64 crypt = 0x659365E7;
+//	uint64 next_crypt;
+//	uint32 len = size >> 3;
+//
+//	uint64 swap = data[0];
+//	data[0] = data[len/2];
+//	data[len/2] = swap;
+//
+//	for(uint32 i=0; i<len;i++) {
+//		next_crypt = crypt+data[i]-0x422437A9;
+//		data[i] = ((data[i]>>0x19)|(data[i]<<0x27))+0x422437A9;
+//		data[i] = (data[i]<<0x07)|(data[i]>>0x39);
+//		data[i] = data[i] - crypt;
+//		crypt = next_crypt;
+//	}
+//}
 
-	uint64 swap = data[0];
-	data[0] = data[len/2];
-	data[len/2] = swap;
+//void EncryptZoneSpawnPacket(EQApplicationPacket* app) {
+//	//EncryptZoneSpawnPacket(app->pBuffer, app->size);
+//}
 
-	for(uint32 i=0; i<len;i++) {
-		next_crypt = crypt+data[i]-0x422437A9;
-		data[i] = ((data[i]>>0x19)|(data[i]<<0x27))+0x422437A9;
-		data[i] = (data[i]<<0x07)|(data[i]>>0x39);
-		data[i] = data[i] - crypt;
-		crypt = next_crypt;
-	}
-}
-
-void EncryptZoneSpawnPacket(EQApplicationPacket* app) {
-	//EncryptZoneSpawnPacket(app->pBuffer, app->size);
-}
-
-void EncryptZoneSpawnPacket(uchar* pBuffer, uint32 size) {
-	uint64* data=(uint64*)pBuffer;
-	uint64 crypt = 0x0000;
-	uint64 next_crypt;
-	uint32 len = size >> 3;
-
-	uint64 swap = data[0];
-	data[0] = data[len/2];
-	data[len/2] = swap;
-
-	for(uint32 i=0; i<len;i++) {
-		next_crypt = crypt+data[i]-0x659365E7;
-		data[i] = ((data[i]<<0x1d)|(data[i]>>0x23))+0x659365E7;
-		data[i] = (data[i]<<0x0e)|(data[i]>>0x32);
-		data[i] = data[i] - crypt;
-		crypt = next_crypt;
-	}
-}
+//void EncryptZoneSpawnPacket(uchar* pBuffer, uint32 size) {
+//	uint64* data=(uint64*)pBuffer;
+//	uint64 crypt = 0x0000;
+//	uint64 next_crypt;
+//	uint32 len = size >> 3;
+//
+//	uint64 swap = data[0];
+//	data[0] = data[len/2];
+//	data[len/2] = swap;
+//
+//	for(uint32 i=0; i<len;i++) {
+//		next_crypt = crypt+data[i]-0x659365E7;
+//		data[i] = ((data[i]<<0x1d)|(data[i]>>0x23))+0x659365E7;
+//		data[i] = (data[i]<<0x0e)|(data[i]>>0x32);
+//		data[i] = data[i] - crypt;
+//		crypt = next_crypt;
+//	}
+//}
 
 #define MEMORY_DEBUG
 

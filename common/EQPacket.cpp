@@ -56,11 +56,11 @@ void EQPacket::build_header_dump(char *buffer) const {
 
 void EQPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
-	if (src_ip) {
+	if (mSourceIP) {
 		std::string sIP,dIP;;
-		sIP=long2ip(src_ip);
-		dIP=long2ip(dst_ip);
-		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
+		sIP=long2ip(mSourceIP);
+		dIP=long2ip(mDestinationIP);
+		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),mSourcePort,dIP.c_str(),mDestinationPort);
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
@@ -90,11 +90,11 @@ void EQProtocolPacket::build_header_dump(char *buffer) const
 
 void EQProtocolPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
-	if (src_ip) {
+	if (mSourceIP) {
 		std::string sIP,dIP;;
-		sIP=long2ip(src_ip);
-		dIP=long2ip(dst_ip);
-		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
+		sIP=long2ip(mSourceIP);
+		dIP=long2ip(mDestinationIP);
+		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),mSourcePort,dIP.c_str(),mDestinationPort);
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
@@ -122,11 +122,11 @@ void EQApplicationPacket::build_header_dump(char *buffer) const {
 
 void EQApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
-	if (src_ip) {
+	if (mSourceIP) {
 		std::string sIP,dIP;;
-		sIP=long2ip(src_ip);
-		dIP=long2ip(dst_ip);
-		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
+		sIP=long2ip(mSourceIP);
+		dIP=long2ip(mDestinationIP);
+		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),mSourcePort,dIP.c_str(),mDestinationPort);
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
@@ -154,11 +154,11 @@ void EQRawApplicationPacket::build_header_dump(char *buffer) const {
 
 void EQRawApplicationPacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 {
-	if (src_ip) {
+	if (mSourceIP) {
 		std::string sIP,dIP;;
-		sIP=long2ip(src_ip);
-		dIP=long2ip(dst_ip);
-		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),src_port,dIP.c_str(),dst_port);
+		sIP=long2ip(mSourceIP);
+		dIP=long2ip(mDestinationIP);
+		fprintf(to, "[%s:%d->%s:%d] ",sIP.c_str(),mSourcePort,dIP.c_str(),mDestinationPort);
 	}
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);

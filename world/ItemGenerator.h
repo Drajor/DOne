@@ -60,6 +60,8 @@ private:
 	Item* _makeRandom(const uint8 pLevel);
 	Item* _makeBaseItem();
 
+	void _addAffixes(Item* pItem, const u8 pLevel, const Rarity pRarity);
+
 	static const String _getContainerName();
 	static const uint8 _getContainerSlots(const Rarity pRarity);
 	static const uint32 _getContainerIcon(const Rarity pRarity);

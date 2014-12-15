@@ -364,7 +364,7 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			// Kinda kludgy, but trie for now
 			if (StreamType==UnknownStream) {
 				if (compressed) {
-					if (remote_port==9000 || (remote_port==0 && p->src_port==9000)) {
+					if (remote_port==9000 || (remote_port==0 && p->mSourcePort==9000)) {
 						SetStreamType(WorldStream);
 					} else {
 						SetStreamType(ZoneStream);

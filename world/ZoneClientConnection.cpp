@@ -802,7 +802,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
 	payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
 
-	packet->priority = 6;
+	//packet->priority = 6;
 	sendPacket(packet);
 	delete packet;
 }

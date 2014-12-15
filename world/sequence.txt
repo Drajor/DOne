@@ -7,3 +7,20 @@ LoginServerConnection
 - ClientAuthentication
 	- Sent after Login Server receives ConnectResponse
 	- Login Server sends authentication details for the Login Server Account.
+	
+BasePacket
+	- EQPacket
+		- EQApplicationPacket
+			- EQRawApplicationPacket
+	- EQProtocolPacket
+
+- EQStreamInterface
+	- EQStream
+	- EQStreamProxy
+	
+
+OP_KeepAlive
+OP_AppCombined
+OP_Combined
+OP_Ack
+OP_SessionDisconnect

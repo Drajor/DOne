@@ -6,7 +6,7 @@
 #include "ItemFactory.h"
 
 namespace RandomItemType {
-	enum : uint32 {
+	enum : u32 {
 		OneHandSlash,
 		TwoHandSlash,
 		OneHandPierce,
@@ -39,6 +39,8 @@ namespace RandomItemType {
 	};
 };
 
+//namespace Affix
+
 Item* ItemGenerator::_makeBaseItem() {
 	return ItemFactory::make();
 }
@@ -51,6 +53,12 @@ Item* ItemGenerator::_makeBaseArmorItem() {
 	data->mAugmentationSlots[2].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[3].mType = AugmentationSlotType::MultipleStat;
 	data->mAugmentationSlots[4].mType = AugmentationSlotType::MultipleStat;
+
+	// Armor always gets some AC.
+
+	// Determine number of affixes.
+
+	// Apply affixes
 
 	return item;
 }
@@ -646,6 +654,7 @@ Item* ItemGenerator::makeWaist(const uint8 pLevel, const Rarity pRarity) {
 	
 	item->setName("Waist");
 
+	ItemGenerator::getInstance()._addAffixes(item, pLevel, pRarity);
 	return item;
 }
 
@@ -677,4 +686,18 @@ Item* ItemGenerator::makeDice(String pCharacterName) {
 	item->setIsNoDrop(true);
 
 	return item;
+}
+
+void ItemGenerator::_addAffixes(Item* pItem, const u8 pLevel, const Rarity pRarity) {
+	// TODO: Data-driven.
+	static std::vector<std::pair<u8, u8>> affixRange = {
+		{ 1, 2 }, // Common
+		{ 2, 4 }, // Magic
+		{ 4, 7}, // Rare
+	};
+
+	// Determine number of affixes to roll.
+	auto affixes = Random::make<u32>(affixRange[pRarity].first, affixRange[pRarity].second);
+
+
 }
