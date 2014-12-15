@@ -1,5 +1,23 @@
 #include "LootController.h"
+#include "CombatData.h"
 #include "Utility.h"
+#include "Character.h"
+
+void LootController::configure(DefenderCombatData* pData) {
+	EXPECTED(pData);
+
+	auto attackers = pData->getAttackers();
+
+	// TEMP 
+	for (auto i : attackers) {
+		auto actor = i.first;
+		if (actor->isCharacter()) {
+			addLooter(Actor::cast<Character*>(actor));
+		}
+	}
+
+	// TODO: Group / Raid / Individual + pets.
+}
 
 void LootController::addLooter(Character* pLooter) {
 	EXPECTED(pLooter);
@@ -25,10 +43,6 @@ const bool LootController::isLooter(Character* pCharacter) const {
 			return true;
 	}
 	return false;
-}
-
-void LootController::configure(DefenderCombatData* pData) {
-
 }
 
 const bool LootController::canLoot(Character* pLooter) const {

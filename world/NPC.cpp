@@ -44,6 +44,10 @@ const bool NPC::onDeath() {
 	mOpenTimer.setStep(DEFAULT_CORPSE_OPEN_TIME * 1000);
 	mOpenTimer.start();
 
+	// Configure the LootController.
+	auto lootController = getLootController();
+	lootController->configure(getDefenderCombatData());
+
 	clearCombatData();
 
 	return true;
