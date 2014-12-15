@@ -36,6 +36,7 @@ static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypa
 
 static const uint32 DEFAULT_RESPAWN_TIME = 5000; // In seconds, 5 minutes.
 static const uint32 DEFAULT_CORPSE_ROT_TIME = 120; // In seconds.
+static const u32 DEFAULT_CORPSE_OPEN_TIME = 15;
 
 #pragma pack(1)
 struct Colour {
@@ -452,6 +453,8 @@ namespace SlotID {
 	static const bool isContainerSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isBank(pSlot) || isSharedBank(pSlot); }
 
 	static const bool isValidShopSellSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isMainContents(pSlot) || isWorn(pSlot); }
+
+	static const bool isCorpseSlot(const u32 pSlot) { return true; } // TODO:
 
 	// Returns the parent SlotID of pSlot
 	static const uint32 getParentSlot(const uint32 pSlot) {

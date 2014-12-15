@@ -6,6 +6,7 @@
 #include "Item.h"
 #include "ItemFactory.h"
 #include "CombatData.h"
+#include "LootController.h"
 
 NPC::NPC() {
 	setRunSpeed(0.7f);
@@ -36,8 +37,12 @@ const bool NPC::onDeath() {
 	setHPPercent(0);
 	setActorType(AT_NPC_CORPSE);
 	setName(getName() + "'s corpse");
+
 	mDecayTimer.setStep(DEFAULT_CORPSE_ROT_TIME * 1000);
 	mDecayTimer.start();
+
+	mOpenTimer.setStep(DEFAULT_CORPSE_OPEN_TIME * 1000);
+	mOpenTimer.start();
 
 	clearCombatData();
 
@@ -63,11 +68,12 @@ void NPC::onDestroy() {
 	// Remove target references.
 	clearTargeters();
 
-	// Remove looting reference.
-	Character* looter = getLooter();
-	if (looter) {
+	// Check: NPC currently being looted.
+	auto lootController = getLootController();
+	if (lootController->hasLooter()) {
+		auto looter = lootController->getLooter();
+		lootController->clearLooter();
 		looter->setLootingCorpse(nullptr);
-		setLooter(nullptr);
 	}
 
 	// TODO: Clean up any Character shopping

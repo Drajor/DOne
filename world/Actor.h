@@ -38,6 +38,7 @@ class Zone;
 class AttackerCombatData;
 class DefenderCombatData;
 struct AttackerData;
+class LootController;
 
 class Actor {
 public:
@@ -61,6 +62,8 @@ public:
 	// Returns a list of Actors which have attacked this Actor.
 	std::map<Actor*, AttackerData> getAttackers();
 	const bool hasAttackers() const;
+
+	inline LootController* getLootController() { return mLootController; }
 
 	// Returns whether this Actor is a Character or not.
 	inline virtual const bool isCharacter() const { return false; }
@@ -417,10 +420,10 @@ public:
 		mActorData.mColours[pSlotID] = pColour;
 	}
 
-	// Looting
-	inline const bool hasLooter() const { return mLooter != nullptr; }
-	inline Character* getLooter() const { return mLooter; }
-	inline void setLooter(Character* pCharacter) { mLooter = pCharacter; }
+	//// Looting
+	//inline const bool hasLooter() const { return mLootController->hasLooter(); }
+	//inline Character* getLooter() const { return mLooter; }
+	//inline void setLooter(Character* pCharacter) { mLooter = pCharacter; }
 
 	virtual const bool hasItems() const { return false; } // TODO: Items
 
@@ -474,6 +477,7 @@ public:
 	void damage(const int32 pAmount);
 
 	const TTimer& getDecayTimer() const { return mDecayTimer; }
+	TTimer& getOpenTimer() { return mOpenTimer; }
 
 	inline void addNimbus(const uint32 pNimbusID) { mNimbuses.push_back(pNimbusID); }
 	inline void removeNimbus(const uint32 pNimbusID) { mNimbuses.remove(pNimbusID); }
@@ -494,8 +498,9 @@ protected:
 	float mHeadingDelta = 0.0f;
 	int32 mAnimation = 0;
 
-	Character* mLooter = nullptr;
-	TTimer mDecayTimer;
+	TTimer mDecayTimer; // Time until corpse rots.
+	TTimer mOpenTimer; // Time until corpse becomes open, i.e. anyone can loot.
+
 	Payload::ActorData mActorData;
 	Zone* mZone = nullptr;
 
@@ -581,6 +586,8 @@ private:
 
 	AttackerCombatData* mAttackerCombatData = nullptr;
 	DefenderCombatData* mDefenderCombatData = nullptr;
+
+	LootController* mLootController = nullptr;
 
 	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }

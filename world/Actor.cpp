@@ -1,16 +1,18 @@
 #include "Actor.h"
 #include "Utility.h"
 #include "CombatData.h"
+#include "LootController.h"
 
 Actor::Actor() {
 	mAttackerCombatData = new AttackerCombatData();
 	mDefenderCombatData = new DefenderCombatData();
+	mLootController = new LootController();
 }
 
 Actor::~Actor() {
 	// Check: Actor has been cleaned up correctly before delete.
 	if (mTarget != nullptr) { Log::error("[Actor] Target not null on destruction."); }
-	if (mLooter != nullptr) { Log::error("[Actor] Looter not null on destruction."); }
+	if (mLootController->getLooter() != nullptr) { Log::error("[Actor] Looter not null on destruction."); }
 	if (mVisibleTo.empty() == false) { Log::error("[Actor] VisibleTo not empty on destruction."); }
 	if (mTargeters.empty() == false) { Log::error("[Actor] Targeters not empty on destruction."); }
 
@@ -20,6 +22,7 @@ Actor::~Actor() {
 	delete mAttackerCombatData;
 	delete mDefenderCombatData;
 	
+	delete mLootController;
 }
 
 void Actor::setTarget(Actor* pActor) {

@@ -31,6 +31,7 @@
 #include "Inventory.h"
 #include "EventDispatcher.h"
 #include "Object.h"
+#include "LootController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -657,7 +658,9 @@ void Zone::_onLeaveZone(Character* pCharacter) {
 	// (UNTESTED)
 	if (pCharacter->isLooting()) {
 		Actor* corpse = pCharacter->getLootingCorpse();
-		corpse->setLooter(nullptr);
+		// Clear Character reference from corpse.
+		corpse->getLootController()->clearLooter();
+		// Clear corpse reference from Character.
 		pCharacter->setLootingCorpse(nullptr);
 	}
 
@@ -707,7 +710,9 @@ void Zone::_onLinkdead(Character* pCharacter) {
 	// (UNTESTED)
 	if (pCharacter->isLooting()) {
 		Actor* corpse = pCharacter->getLootingCorpse();
-		corpse->setLooter(nullptr);
+		// Clear Character reference from corpse.
+		corpse->getLootController()->clearLooter();
+		// Clear corpse reference from Character.
 		pCharacter->setLootingCorpse(nullptr);
 	}
 
@@ -1014,25 +1019,36 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 
 	// Handle: Looting an NPC corpse.
 	if (actor->isNPCCorpse()) {
-		NPC* npcCorpse = Actor::cast<NPC*>(actor);
+		auto lootController = actor->getLootController();
+		auto npcCorpse = Actor::cast<NPC*>(actor);
 		// Check: Is pCharacter close enough to loot.
 		if (pLooter->squareDistanceTo(npcCorpse) > 625) { // TODO: Magic.
 			pLooter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
 			return;
 		}
-		// Check: Is pCharacter allowed to loot this corpse?
-		if (false) {
+		// Check: Is corpse currently closed?
+		if (lootController->isOpen() == false) {
+			// Check: Is it time to open the corpse?
+			// TODO: This is probably the most efficient place to check this however it is odd!
+			if (npcCorpse->getOpenTimer().check()) {
+				// Open corpse.
+				lootController->setOpen(true);
+			}
+		}
+		// Check: Is Character allowed to loot this corpse?
+		if (lootController->canLoot(pLooter) == false) {
 			pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
 			return;
 		}
 		// Check: Is someone already looting this corpse?
-		if (actor->hasLooter()) {
+		if (lootController->hasLooter()) {
 			pLooter->getConnection()->sendLootResponse(LootResponse::ALREADY);
 			return;
 		}
 
+		// Associate Character and Corpse.
 		pLooter->setLootingCorpse(npcCorpse);
-		npcCorpse->setLooter(pLooter);
+		lootController->setLooter(pLooter);
 
 		int32 platinum = 0;
 		int32 gold = 0;
@@ -1087,10 +1103,13 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 	EXPECTED(pCharacter->isLooting());
 	Actor* corpse = pCharacter->getLootingCorpse();
 	EXPECTED(corpse);
-	EXPECTED(corpse->getLooter() == pCharacter);
+	auto lootController = corpse->getLootController();
+	EXPECTED(lootController->getLooter() == pCharacter);
 
-	corpse->setLooter(nullptr);
+	// Disassociate Character and corpse.
+	lootController->clearLooter();
 	pCharacter->setLootingCorpse(nullptr);
+
 	pCharacter->getConnection()->sendLootComplete();
 
 	// Finished looting an NPC corpse.
@@ -1114,13 +1133,16 @@ void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pS
 	EXPECTED(pCorpse);
 	EXPECTED(pCharacter->isLooting());
 	EXPECTED(pCharacter->getLootingCorpse() == pCorpse);
-	EXPECTED(pCorpse->getLooter() == pCharacter);
-	//EXPECTED(Limits::Corpse::slotIsValid(pSlotID)); // TODO!
+	auto lootController = pCorpse->getLootController();
+	EXPECTED(lootController->getLooter() == pCharacter);
+	EXPECTED(SlotID::isCorpseSlot(pSlotID));
 
 	// Looting Item from NPC corpse.
 	if (pCorpse->isNPCCorpse()) {
 		NPC* npcCorpse = Actor::cast<NPC*>(pCorpse);
 		Item* item = npcCorpse->getLootItem(pSlotID - 23);
+
+		// TODO: Cursor empty check.
 
 		// Update Character Inventory.
 		pCharacter->getInventory()->pushCursor(item);
@@ -1128,12 +1150,7 @@ void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pS
 		// Update NPC loot items.
 		npcCorpse->removeLootItem(pSlotID - 23);
 
-		uint32 payloadSize = 0;
-		const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketTrade);
-
-		auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-		pCharacter->getConnection()->sendPacket(outPacket);
-		safe_delete(outPacket);
+		pCharacter->getConnection()->sendItemTrade(item);
 	}
 	
 }

@@ -148,6 +148,10 @@ TEST(CombatData, AttackerCombatData) {
 	delete n;
 }
 
+TEST(CombatData, DefenderCombatData) {
+
+}
+
 class convertCurrencyTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
