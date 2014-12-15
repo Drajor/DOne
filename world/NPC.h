@@ -80,6 +80,7 @@ public:
 	std::vector<Item*>& getLootItems() { return mLootItems; }
 	inline const bool hasItems() const { return !mLootItems.empty(); }
 	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
+	void clearCombatData();
 private:
 	float mSellRate = 2.457f;
 	int32 mCopper = 0;

@@ -11,6 +11,7 @@
 #include "Inventory.h"
 #include "AccountManager.h"
 #include "CombatSystem.h"
+#include "CombatData.h"
 #include "Item.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
@@ -199,6 +200,13 @@ bool Character::onZoneOut() {
 	setZone(nullptr);
 	setSpawnID(0);
 	setConnection(nullptr);
+
+	// Clean up references to other Actors that this Character has attacked.
+	auto defenders = getDefenders();
+	for (auto i : defenders) {
+		i->getDefenderCombatData()->remove(this);
+	}
+	getAttackerCombatData()->clear();
 
 	return true;
 }

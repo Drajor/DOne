@@ -1,15 +1,24 @@
 #include "Actor.h"
 #include "Utility.h"
+#include "CombatData.h"
 
 Actor::Actor() {
+	mAttackerCombatData = new AttackerCombatData();
+	mDefenderCombatData = new DefenderCombatData();
 }
 
 Actor::~Actor() {
 	// Check: Actor has been cleaned up correctly before delete.
-	if (mTarget != nullptr) {}
-	if (mLooter != nullptr) {}
-	if (mVisibleTo.empty() == false) {}
-	if (mTargeters.empty() == false) {}
+	if (mTarget != nullptr) { Log::error("[Actor] Target not null on destruction."); }
+	if (mLooter != nullptr) { Log::error("[Actor] Looter not null on destruction."); }
+	if (mVisibleTo.empty() == false) { Log::error("[Actor] VisibleTo not empty on destruction."); }
+	if (mTargeters.empty() == false) { Log::error("[Actor] Targeters not empty on destruction."); }
+
+	if (mAttackerCombatData->getDefenders().empty() == false) { Log::error("[Actor] Defenders not empty on destruction."); }
+	if (mDefenderCombatData->getAttackers().empty() == false) { Log::error("[Actor] Attackers not empty on destruction."); }
+
+	delete mAttackerCombatData;
+	delete mDefenderCombatData;
 	
 }
 
@@ -167,3 +176,10 @@ void Actor::_clearPrimary() {
 
 	setPrimaryAttackAnimation(Animation::ANIM_HAND2HAND);
 }
+
+std::list<Actor*> Actor::getDefenders() { return mAttackerCombatData->getDefenders(); }
+
+std::map<Actor*, AttackerData> Actor::getAttackers() { return mDefenderCombatData->getAttackers(); }
+
+const bool Actor::hasAttackers() const { return mDefenderCombatData->hasAttackers(); }
+const bool Actor::hasDefenders() const { return mAttackerCombatData->hasDefenders(); }

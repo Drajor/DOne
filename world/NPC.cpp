@@ -5,6 +5,7 @@
 #include "ItemGenerator.h"
 #include "Item.h"
 #include "ItemFactory.h"
+#include "CombatData.h"
 
 NPC::NPC() {
 	setRunSpeed(0.7f);
@@ -16,7 +17,10 @@ NPC::NPC() {
 }
 
 NPC::~NPC() {
-	if (mShoppers.empty() == false) {}
+	// Check: NPC has been cleaned up correctly before delete.
+	if (mShoppers.empty() == false) { Log::error("[NPC] Shoppers not empty on destruction."); }
+	if (mShopItems.empty() == false) { Log::error("[NPC] Shop Items not empty on destruction."); }
+	if (mLootItems.empty() == false) { Log::error("[NPC] Loot Items not empty on destruction."); }
 }
 
 const bool NPC::initialise() {
@@ -34,6 +38,9 @@ const bool NPC::onDeath() {
 	setName(getName() + "'s corpse");
 	mDecayTimer.setStep(DEFAULT_CORPSE_ROT_TIME * 1000);
 	mDecayTimer.start();
+
+	clearCombatData();
+
 	return true;
 }
 
@@ -67,6 +74,8 @@ void NPC::onDestroy() {
 	if (isMerchant()) {
 
 	}
+
+	clearCombatData();
 }
 
 void NPC::onLootBegin() {
@@ -79,8 +88,9 @@ const bool NPC::isShopOpen() const {
 	EXPECTED_BOOL(isMerchant());
 
 	if (getDestroy()) return false; // NPC will be destroyed this update or next update.
+	if (hasAttackers() || hasDefenders()) return false; // NPC in combat.
 
-	// TODO: Fighting or other conditions which would affect this.
+	// TODO: Other conditions which would affect this.
 
 	return true;
 }
@@ -109,4 +119,20 @@ Item* NPC::getShopItem(const uint32 pInstanceID) {
 	}
 
 	return nullptr;
+}
+
+void NPC::clearCombatData() {
+	// Disassociate this NPC from any Actor that has attacked it.
+	auto attackers =  getAttackers();
+	for (auto i : attackers) {
+		i.first->getAttackerCombatData()->remove(this);
+	}
+	getDefenderCombatData()->clear();
+
+	// Disassociate this NPC from any Actor that it has attacked.
+	auto defenders = getDefenders();
+	for (auto i : defenders) {
+		i->getDefenderCombatData()->remove(this);
+	}
+	getAttackerCombatData()->clear();
 }

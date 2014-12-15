@@ -1,4 +1,6 @@
 #include "CombatSystem.h"
+#include "CombatData.h"
+
 #include "Utility.h"
 #include "Actor.h"
 #include "Character.h"
@@ -12,8 +14,10 @@ static const int32 Invulnerable = -5;
 
 void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	EXPECTED(pAttacker);
+	auto attackerCombatData = pAttacker->getAttackerCombatData();
 	EXPECTED(pDefender);
-	Zone* zone = pAttacker->getZone();
+	auto defenderCombatData = pDefender->getDefenderCombatData();
+	auto zone = pAttacker->getZone();
 	EXPECTED(zone);
 
 	// Check: Defender is already dead. This may have occurred earlier in the update.
@@ -45,6 +49,10 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	if (criticalHit) {
 		damage *= 2;
 	}
+
+	// Add hate and damage.
+	attackerCombatData->add(pDefender);
+	defenderCombatData->add(pAttacker, 1, damage);
 	
 	// Attacker successfully hit Defender.
 	if (damage > 0) {

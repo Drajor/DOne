@@ -35,6 +35,10 @@ namespace FUCK {
 
 class Character;
 class Zone;
+class AttackerCombatData;
+class DefenderCombatData;
+struct AttackerData;
+
 class Actor {
 public:
 	Actor();
@@ -45,6 +49,18 @@ public:
 
 	// Returns the Zone this Actor is in.
 	Zone* getZone() const { return mZone; }
+
+	inline AttackerCombatData* getAttackerCombatData() { return mAttackerCombatData; }
+	
+	// Returns a list of Actors which this Actor has attacked.
+	std::list<Actor*> getDefenders();
+	const bool hasDefenders() const;
+
+	inline DefenderCombatData* getDefenderCombatData() { return mDefenderCombatData; }
+
+	// Returns a list of Actors which have attacked this Actor.
+	std::map<Actor*, AttackerData> getAttackers();
+	const bool hasAttackers() const;
 
 	// Returns whether this Actor is a Character or not.
 	inline virtual const bool isCharacter() const { return false; }
@@ -562,6 +578,9 @@ private:
 
 	Actor* mTarget = nullptr; // Current target.
 	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.
+
+	AttackerCombatData* mAttackerCombatData = nullptr;
+	DefenderCombatData* mDefenderCombatData = nullptr;
 
 	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
 	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
