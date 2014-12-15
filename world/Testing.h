@@ -5,6 +5,7 @@
 #include "Limits.h"
 #include "Inventory.h"
 #include "CombatData.h"
+#include "LootController.h"
 #include "Payload.h"
 #include "NPC.h"
 
@@ -150,6 +151,33 @@ TEST(CombatData, AttackerCombatData) {
 
 TEST(CombatData, DefenderCombatData) {
 
+}
+
+class LootControllerTest : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mLootController = new LootController();
+	}
+	virtual void TearDown() {
+		delete mLootController;
+		mLootController = nullptr;
+	}
+
+	LootController* mLootController;
+};
+
+TEST_F(LootControllerTest, Defaults) {
+	EXPECT_EQ(false, mLootController->hasLooter());
+	EXPECT_EQ(nullptr, mLootController->getLooter());
+	EXPECT_EQ(false, mLootController->isOpen());
+}
+
+TEST_F(LootControllerTest, Nulls) {
+	mLootController->addLooter(nullptr);
+	mLootController->removeLooter(nullptr);
+	EXPECT_EQ(false,  mLootController->canLoot(nullptr));
+	EXPECT_EQ(false, mLootController->isLooter(nullptr));
+	mLootController->configure(nullptr);
 }
 
 class convertCurrencyTest : public ::testing::Test {
