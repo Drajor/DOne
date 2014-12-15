@@ -31,6 +31,8 @@ AttackerData* DefenderCombatData::find(Actor* pActor) {
 }
 
 void AttackerCombatData::add(Actor* pActor) {
+	EXPECTED(pActor);
+	
 	if (!search(pActor)) {
 		Log::info("[AttackerCombatData] Adding " + pActor->getName());
 		mDefenders.push_back(pActor);
@@ -38,6 +40,8 @@ void AttackerCombatData::add(Actor* pActor) {
 }
 
 const bool AttackerCombatData::search(Actor* pActor) const {
+	EXPECTED_BOOL(pActor);
+
 	for (auto i : mDefenders) {
 		if (i == pActor)
 			return true;
@@ -47,6 +51,7 @@ const bool AttackerCombatData::search(Actor* pActor) const {
 }
 
 void AttackerCombatData::remove(Actor* pActor) {
+	EXPECTED(pActor);
 	Log::info("[AttackerCombatData] Removing " + pActor->getName());
 	mDefenders.remove(pActor);
 }
