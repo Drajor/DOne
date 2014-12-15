@@ -47,8 +47,6 @@ bool World::initialise() {
 	mStreamIdentifier = new EQStreamIdentifier;
 	Underfoot::Register(*mStreamIdentifier);
 
-	EXPECTED_BOOL(ZoneManager::getInstance().initialise());
-
 	mInitialised = true;
 	mLog.status("Initialised.");
 	return true;

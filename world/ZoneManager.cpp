@@ -30,26 +30,22 @@ void ZoneManager::update() {
 	}
 }
 
-const uint16 ZoneManager::getZonePort(const uint16 pZoneID, const uint16 pInstanceID) {
-	// Search existing zones
-	for (auto i : mZones) {
-		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID) {
-			return i->getPort();
-		}
-	}
-
-	// NOTE: If this occurs then something is happening out of order.
-	Log::error("Returning Zero Port!");
-	return 0;
+const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) const {
+	auto zone = _search(pZoneID, pInstanceID);
+	EXPECTED_VAR(zone, 0); // NOTE: If this occurs then something is happening out of order.
+	return zone->getPort();
 }
 
 bool ZoneManager::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
+	
 	Log::status("[Zone Manager] Initialising.");
 
 	for (int i = 0; i < 4; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
 
+	mInitialised = true;
 	return true;
 }
 
@@ -106,16 +102,19 @@ const bool ZoneManager::requestZoneShutdown(const u16 pZoneID, const u16 pInstan
 	return zone->shutdown();
 }
 
-const uint32 ZoneManager::_getNextZonePort() {
-	uint32 port = *mAvailableZonePorts.begin();
+const u16 ZoneManager::_getNextZonePort() {
+	EXPECTED_VAR(mAvailableZonePorts.empty() == false, 0);
+
+	auto port = *mAvailableZonePorts.begin();
 	mAvailableZonePorts.pop_front();
 	return port;
-	// TODO: Error check this ;)
 }
 
 const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
-	const uint32 zonePort = _getNextZonePort();
-	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << zonePort << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
+	auto port = _getNextZonePort();
+	EXPECTED_BOOL(port != 0);
+
+	StringStream ss; ss << "[Zone Manager] Starting new Zone on port " << port << ", ZoneID: " << pZoneID << " InstanceID: " << pInstanceID;
 	Log::info(ss.str());
 	
 	
@@ -123,9 +122,10 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	auto zoneData = ZoneDataManager::getInstance().getZoneData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 
-	Zone* zone = new Zone(zonePort, pZoneID, pInstanceID);
+	Zone* zone = new Zone(port, pZoneID, pInstanceID);
 	if (!zone->initialise(zoneData)) {
-		mAvailableZonePorts.push_front(zonePort);
+		// Restore port to available list.
+		mAvailableZonePorts.push_front(port);
 		delete zone;
 		return false;
 	}

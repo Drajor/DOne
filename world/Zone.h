@@ -60,7 +60,7 @@ struct ZonePoint {
 
 class Zone {
 public:
-	Zone(const u32 pPort, const u16 pZoneID, const u16 pInstanceID);
+	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
 	const bool initialise(Data::Zone* pZoneData);
@@ -94,7 +94,7 @@ public:
 	inline const u32 getNumCharacters() const { return mCharacters.size(); }
 	inline const u16 getID() const { return mID; }
 	inline const u16 getInstanceID() const { return mInstanceID; }
-	inline const u32 getPort() const { return mPort; }
+	inline const u16 getPort() const { return mPort; }
 
 	Character* findCharacter(const String pCharacterName);
 
@@ -235,7 +235,7 @@ private:
 	uint16 mNextSpawnID = 1;
 	const u16 mID;
 	const u16 mInstanceID;
-	const u32 mPort;
+	const u16 mPort;
 
 	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
 	bool mShuttingDown = false;

@@ -32,7 +32,7 @@
 #include "EventDispatcher.h"
 #include "Object.h"
 
-Zone::Zone(const u32 pPort, const u16 pZoneID, const u16 pInstanceID) :
+Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
