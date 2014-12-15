@@ -11,7 +11,7 @@ class Guild;
 class Raid;
 class EQApplicationPacket;
 class ZoneClientConnection;
-
+class ExtendedTargetController;
 class Inventoryy;
 class Item;
 
@@ -64,11 +64,10 @@ public:
 	inline void setZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) { mAuthenticatedZoneID = pZoneID; mAuthicatedInstanceID = pInstanceID; }
 	inline const bool checkZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) const { return mAuthenticatedZoneID == pZoneID && mAuthicatedInstanceID == pInstanceID; }
 
-	ClientAuthentication getAuthentication() { return mAuthentication; }
-
 	bool initialise();
 
 	inline Inventoryy* getInventory() const { return mInventory; }
+	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	
 	bool onEnterZone();
 	bool onZoneOut();
@@ -358,4 +357,6 @@ private:
 	const std::vector<uint32> getSpellBarData() const;
 	// Inventory
 	Inventoryy* mInventory = nullptr;
+
+	ExtendedTargetController* mXTargetController = nullptr;
 };

@@ -298,6 +298,8 @@ private:
 	void _handleRandomRequest(const EQApplicationPacket* pPacket);
 	void _handleDropItem(const EQApplicationPacket* pPacket);
 
+	void _handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
+
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;
 	Timer mForceSendPositionTimer;

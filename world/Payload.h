@@ -1377,6 +1377,12 @@ namespace Payload {
 			u8 unknown0084[8]; // mostly 0s, the last 3 bytes are something tho
 		};
 
+		namespace ExtendedTarget {
+			struct AutoAddHaters : public Fixed<AutoAddHaters> {
+				u8 mAction = 0;
+			};
+		}
+		
 	}
 
 	namespace World {

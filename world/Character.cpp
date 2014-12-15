@@ -13,6 +13,7 @@
 #include "CombatSystem.h"
 #include "CombatData.h"
 #include "Item.h"
+#include "ExtendedTargetController.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -31,9 +32,11 @@ Character::Character(const uint32 pAccountID, Data::Character* pCharacterData) :
 	mLanguages.fill(0);
 
 	mInventory = new Inventoryy();
+	mXTargetController = new ExtendedTargetController();
 }
 
 Character::~Character() {
+	delete mXTargetController;
 }
 
 void Character::update() {

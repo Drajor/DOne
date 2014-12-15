@@ -26,6 +26,7 @@
 #include "Random.h"
 #include "AlternateCurrencyManager.h"
 #include "Object.h"
+#include "ExtendedTargetController.h"
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
@@ -207,7 +208,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("[UNHANDLED OP_XTargetRequest]");
 		break;
 	case OP_XTargetAutoAddHaters:
-		Utility::print("[UNHANDLED OP_XTargetAutoAddHaters]");
+		// NOTE: This occurs when the user clicks the 'Auto Add Hater Targets' from the 'Extended Target' window.
+		_handleXTargetAutoAddHaters(pPacket);
 		break;
 	case OP_GetGuildsList:
 		Utility::print("[UNHANDLED OP_GetGuildsList]");
@@ -3981,6 +3983,15 @@ void ZoneClientConnection::sendEnduranceUpdate() {
 	auto packet = EnduranceUpdate::construct(mCharacter->getSpawnID(), mCharacter->getCurrentEndurance(), mCharacter->getMaximumEndurance());
 	sendPacket(packet);
 	delete packet;
+}
+
+void ZoneClientConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone::ExtendedTarget;
+	EXPECTED(pPacket);
+	EXPECTED(AutoAddHaters::sizeCheck(pPacket));
+
+	auto payload = AutoAddHaters::convert(pPacket);
+	mCharacter->getXTargetController()->setAutoAddHaters(payload->mAction == 1 ? true : false);
 }
 
 //
