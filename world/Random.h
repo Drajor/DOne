@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Constants.h"
 #include <random>
-#include <chrono>
 
 namespace Random {
-	static std::minstd_rand mRandom;
+	static std::mt19937 mRandom;
+
 	static void initialise(const unsigned int pSeed = 0) {
 		// Seed provided
 		if (pSeed != 0) {
@@ -13,25 +12,26 @@ namespace Random {
 			return;
 		}
 
-		auto seed = std::chrono::system_clock::now().time_since_epoch().count();
-		mRandom.seed(static_cast<unsigned int>(seed));
+		std::random_device rd{};
+		mRandom.seed(rd());
 	}
 	
 	template <typename T>
 	inline const T make(const T pLow, const T pHigh) {
-		return std::uniform_int_distribution<T>(pLow, pHigh)(mRandom);
+		static std::uniform_int_distribution<T> distribution;
+		return distribution(mRandom, { pLow, pHigh });
 	}
 
-	template <typename T, typename D>
-	inline const T _make(const T pLow, const T pHigh, D& pDistribution) {
-		return D<T>(pLow, pHigh);
-	}
+	//template <typename T, typename D>
+	//inline const T _make(const T pLow, const T pHigh, D& pDistribution) {
+	//	return D<T>(pLow, pHigh);
+	//}
 
-	template <typename T>
-	inline const T makeIntegral(const T pLow, const T pHigh) { return _make<T, std::uniform_int_distribution>(pLow, pHigh); }
+	//template <typename T>
+	//inline const T makeIntegral(const T pLow, const T pHigh) { return _make<T, std::uniform_int_distribution>(pLow, pHigh); }
 
-	template <typename T>
-	inline const T makeFloating(const T pLow, const T pHigh) { return _make<T, std::uniform_real_distribution>(pLow, pHigh); }
+	//template <typename T>
+	//inline const T makeFloating(const T pLow, const T pHigh) { return _make<T, std::uniform_real_distribution>(pLow, pHigh); }
 
 	// Returns a random value between 0 and pHigh
 	template <typename T>
