@@ -433,4 +433,15 @@ namespace Data {
 		u32 mIcon = 0;
 		u32 mMaxStacks = 0;
 	};
+
+	struct ItemAppearanceType {
+
+	};
+
+	struct ItemAppearance {
+		u16 mIcon = 0;
+		String IDFile = "IT63";
+		u32 mMaterial = 0;
+		String mNames;
+	};
 }
