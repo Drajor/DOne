@@ -7,6 +7,9 @@
 #include "Item.h"
 #include "ItemFactory.h"
 
+#include "HateControllerFactory.h"
+#include "HateController.h"
+
 const bool NPCFactory::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
@@ -18,6 +21,13 @@ const bool NPCFactory::initialise() {
 	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypes));
 	EXPECTED_BOOL(validateNPCTypeData());
 	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCTypes.size()) + " Types.");
+
+	// HateControllerFactory.
+	mHateControllerFactory = new HateControllerFactory();
+	mHateControllerFactory->set("null", []() { return new NullHateController(); });
+	mHateControllerFactory->set("proximity", []() { return new ProximityHateController(); });
+	mHateControllerFactory->set("first", []() { return new FirstHateController(); });
+	mHateControllerFactory->set("last", []() { return new LastHateController(); });
 
 	mInitialised = true;
 	return true;
@@ -118,7 +128,12 @@ NPC* NPCFactory::create(const u32 pTypeID) {
 	auto appearance = findAppearance(type->mAppearanceID);
 	EXPECTED_PTR(appearance);
 
-	NPC* npc = new NPC();
+	
+	auto hateController = mHateControllerFactory->make("proximity");
+
+	NPC* npc = new NPC(hateController);
+	
+
 	npc->setName(type->mName);
 	npc->setLastName(type->mLastName);
 	npc->setClass(type->mClass);
@@ -156,7 +171,10 @@ NPC* NPCFactory::create(const u32 pTypeID) {
 }
 
 NPC* NPCFactory::createInvisibleMan() {
-	NPC* npc = new NPC();
+	auto hateController = mHateControllerFactory->make("null");
+	EXPECTED_PTR(hateController);
+
+	NPC* npc = new NPC(hateController);
 	npc->setRace(127);
 	npc->setBodyType(66);
 	npc->setTargetable(false);

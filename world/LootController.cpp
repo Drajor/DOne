@@ -1,16 +1,16 @@
 #include "LootController.h"
-#include "CombatData.h"
 #include "Utility.h"
 #include "Character.h"
+#include "HateController.h"
 
-void LootController::configure(DefenderCombatData* pData) {
-	EXPECTED(pData);
+void LootController::configure(HateController* pHateController) {
+	EXPECTED(pHateController);
 
-	auto attackers = pData->getAttackers();
+	auto attackers = pHateController->getAttackers();
 
 	// TEMP 
 	for (auto i : attackers) {
-		auto actor = i.first;
+		auto actor = i.mActor;
 		if (actor->isCharacter()) {
 			addLooter(Actor::cast<Character*>(actor));
 		}

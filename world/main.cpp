@@ -25,6 +25,7 @@
 #include "AlternateCurrencyManager.h"
 #include "ShopDataStore.h"
 #include "Settings.h"
+#include "HateControllerFactory.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"

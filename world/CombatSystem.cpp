@@ -1,24 +1,25 @@
 #include "CombatSystem.h"
-#include "CombatData.h"
 
 #include "Utility.h"
 #include "Actor.h"
 #include "Character.h"
 #include "NPC.h"
 #include "Zone.h"
+#include "HateController.h"
 
 #include "Random.h"
 
+// These are special damage values that the client uses to print combat messages.
 static const int32 AttackMiss = 0;
 static const int32 Invulnerable = -5;
 
 void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	EXPECTED(pAttacker);
-	auto attackerCombatData = pAttacker->getAttackerCombatData();
 	EXPECTED(pDefender);
-	auto defenderCombatData = pDefender->getDefenderCombatData();
 	auto zone = pAttacker->getZone();
 	EXPECTED(zone);
+	auto hateController = pDefender->getHateController();
+	EXPECTED(hateController);
 
 	// Check: Defender is already dead. This may have occurred earlier in the update.
 	if (pDefender->isDead()) return;
@@ -50,9 +51,8 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 		damage *= 2;
 	}
 
-	// Add hate and damage.
-	attackerCombatData->add(pDefender);
-	defenderCombatData->add(pAttacker, 1, damage);
+	// Add hate.
+	hateController->add(pAttacker, damage);
 	
 	// Attacker successfully hit Defender.
 	if (damage > 0) {

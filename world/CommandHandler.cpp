@@ -1759,22 +1759,6 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 			}
 		}
 	}
-	else if (pCommandName == "npc") {
-		NPC* npc = new NPC();
-		//uint8 at = 0;
-		//Utility::stoSafe(at, pParameters[0]);
-		//uint8 c = 0;
-		//Utility::stoSafe(c, pParameters[0]);
-		npc->setZone(pCharacter->getZone());
-		npc->initialise();
-		npc->setPosition(pCharacter->getPosition());
-		//npc->setClass(c);
-		//npc->setActorType(static_cast<ActorType>(at));
-		//npc->setAATitle(static_cast<AATitle>(aa));
-		//npc->setis
-		pCharacter->getZone()->addActor(npc);
-		pCharacter->notify(std::to_string(npc->getSpawnID()));
-	}
 	else if (pCommandName == "sn") {
 		using namespace Payload::Zone;
 		auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());

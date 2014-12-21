@@ -9,6 +9,7 @@ namespace Data {
 	struct NPCType;
 }
 class NPC;
+class HateControllerFactory;
 
 class NPCFactory : public Singleton<NPCFactory> {
 private:
@@ -31,6 +32,9 @@ public:
 	inline std::list<Data::NPCAppearance*> getNPCAppearances() { return mNPCAppearances; }
 private:
 	bool mInitialised = false;
+	//Factory<String, HateController, Actor> mHateControllerFactory;
+	HateControllerFactory* mHateControllerFactory = nullptr;
+
 	// NPC Appearances
 	const bool calculateAppearanceData();
 	const bool _resolveAppearanceData(Data::NPCAppearance* pAppearance);

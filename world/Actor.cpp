@@ -1,11 +1,8 @@
 #include "Actor.h"
 #include "Utility.h"
-#include "CombatData.h"
 #include "LootController.h"
 
 Actor::Actor() {
-	mAttackerCombatData = new AttackerCombatData();
-	mDefenderCombatData = new DefenderCombatData();
 	mLootController = new LootController();
 }
 
@@ -16,11 +13,7 @@ Actor::~Actor() {
 	if (mVisibleTo.empty() == false) { Log::error("[Actor] VisibleTo not empty on destruction."); }
 	if (mTargeters.empty() == false) { Log::error("[Actor] Targeters not empty on destruction."); }
 
-	if (mAttackerCombatData->getDefenders().empty() == false) { Log::error("[Actor] Defenders not empty on destruction."); }
-	if (mDefenderCombatData->getAttackers().empty() == false) { Log::error("[Actor] Attackers not empty on destruction."); }
-
-	delete mAttackerCombatData;
-	delete mDefenderCombatData;
+	if (mHaters.empty() == false) { Log::error("[Actor] Haters not empty on destruction."); }
 	
 	delete mLootController;
 }
@@ -179,10 +172,3 @@ void Actor::_clearPrimary() {
 
 	setPrimaryAttackAnimation(Animation::ANIM_HAND2HAND);
 }
-
-std::list<Actor*> Actor::getDefenders() { return mAttackerCombatData->getDefenders(); }
-
-std::map<Actor*, AttackerData> Actor::getAttackers() { return mDefenderCombatData->getAttackers(); }
-
-const bool Actor::hasAttackers() const { return mDefenderCombatData->hasAttackers(); }
-const bool Actor::hasDefenders() const { return mAttackerCombatData->hasDefenders(); }

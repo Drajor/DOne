@@ -4,7 +4,6 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "Inventory.h"
-#include "CombatData.h"
 #include "LootController.h"
 #include "Payload.h"
 #include "NPC.h"
@@ -108,49 +107,6 @@ TEST(LimitsTest, ShopQuantityValid) {
 	EXPECT_FALSE(Limits::Shop::quantityValid(0));
 	EXPECT_TRUE(Limits::Shop::quantityValid(1));
 	EXPECT_TRUE(Limits::Shop::quantityValid(487422));
-}
-
-// CombatData
-TEST(CombatData, AttackerCombatData) {
-	AttackerCombatData data;
-
-	EXPECT_EQ(false, data.hasDefenders());
-	EXPECT_EQ(0, data.getDefenders().size());
-
-	data.add(nullptr);
-	EXPECT_EQ(false, data.hasDefenders());
-
-	auto n = new NPC();
-	data.add(n);
-	EXPECT_EQ(true, data.hasDefenders());
-	EXPECT_EQ(1, data.getDefenders().size());
-	
-	// Double add does not add twice.
-	data.add(n);
-	EXPECT_EQ(1, data.getDefenders().size());
-
-	// Remove null, number of defenders remains the same + no crash.
-	data.remove(nullptr);
-	EXPECT_EQ(1, data.getDefenders().size());
-
-	// Remove valid.
-	data.remove(n);
-	EXPECT_EQ(0, data.getDefenders().size());
-
-	// Re-add
-	data.add(n);
-	EXPECT_EQ(1, data.getDefenders().size());
-	// Search n.
-	EXPECT_EQ(true, data.search(n));
-	// Search null + no crash.
-	EXPECT_EQ(false, data.search(nullptr));
-
-
-	delete n;
-}
-
-TEST(CombatData, DefenderCombatData) {
-
 }
 
 class LootControllerTest : public ::testing::Test {

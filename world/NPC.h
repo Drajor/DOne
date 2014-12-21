@@ -5,10 +5,11 @@
 class Character;
 class SpawnPoint;
 class Item;
+class HateController;
 
 class NPC : public Actor {
 public:
-	NPC();
+	NPC(HateController* pHateController);
 	~NPC();
 	inline const bool isNPC() const { return true; }
 	const bool isNPCCorpse() const { return getActorType() == AT_NPC_CORPSE; }
@@ -80,7 +81,7 @@ public:
 	std::vector<Item*>& getLootItems() { return mLootItems; }
 	inline const bool hasItems() const { return !mLootItems.empty(); }
 	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
-	void clearCombatData();
+	void clearHate();
 private:
 	float mSellRate = 2.457f;
 	int32 mCopper = 0;

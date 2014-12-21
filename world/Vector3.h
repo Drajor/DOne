@@ -28,7 +28,7 @@ struct Vector3 {
 	float y = 0.0f;
 	float z = 0.0f;
 
-	inline const float distance(const Vector3& pVector) {
+	inline const float distance(const Vector3& pVector) const {
 		return sqrt(squareDistance(pVector));
 	}
 	inline const float squareDistance(const Vector3& pVector) const {

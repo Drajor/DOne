@@ -35,8 +35,7 @@ namespace FUCK {
 
 class Character;
 class Zone;
-class AttackerCombatData;
-class DefenderCombatData;
+class HateController;
 struct AttackerData;
 class LootController;
 
@@ -51,19 +50,17 @@ public:
 	// Returns the Zone this Actor is in.
 	Zone* getZone() const { return mZone; }
 
-	inline AttackerCombatData* getAttackerCombatData() { return mAttackerCombatData; }
+	inline HateController* getHateController() const { return mHateController; }
 	
-	// Returns a list of Actors which this Actor has attacked.
-	std::list<Actor*> getDefenders();
-	const bool hasDefenders() const;
-
-	inline DefenderCombatData* getDefenderCombatData() { return mDefenderCombatData; }
-
-	// Returns a list of Actors which have attacked this Actor.
-	std::map<Actor*, AttackerData> getAttackers();
-	const bool hasAttackers() const;
+	// Returns a copy of the hate list.
+	inline std::list<Actor*> getHaters() { return mHaters; }
+	inline const bool hasHaters() const { return !mHaters.empty(); }
+	inline void addHater(Actor* pHater) { mHaters.push_back(pHater); }
+	inline void removeHater(Actor* pHater) { mHaters.remove(pHater); }
+	inline void clearHaters() { mHaters.clear(); }
 
 	inline LootController* getLootController() { return mLootController; }
+
 
 	// Returns whether this Actor is a Character or not.
 	inline virtual const bool isCharacter() const { return false; }
@@ -110,10 +107,10 @@ public:
 	inline static T cast(Actor* pActor) {
 		return static_cast<T>(pActor);
 	}
-	inline const float distanceTo(const Actor* pActor) {
+	inline const float distanceTo(const Actor* pActor) const {
 		return mPosition.distance(pActor->mPosition);
 	}
-	inline const float squareDistanceTo(const Actor* pActor) {
+	inline const float squareDistanceTo(const Actor* pActor) const {
 		return mPosition.squareDistance(pActor->mPosition);
 	}
 
@@ -492,6 +489,9 @@ protected:
 		return static_cast<T>(std::floor((static_cast<float>(mCurrentHP) / static_cast<float>(mMaximumHP)) * 100));
 	}
 
+	HateController* mHateController = nullptr;
+	std::list<Actor*> mHaters; // List of Actors who currently hate this Actor.
+
 	Vector3 mPosition;
 	float mHeading = 0.0f;
 	Vector3 mPositionDelta;
@@ -583,9 +583,6 @@ private:
 
 	Actor* mTarget = nullptr; // Current target.
 	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.
-
-	AttackerCombatData* mAttackerCombatData = nullptr;
-	DefenderCombatData* mDefenderCombatData = nullptr;
 
 	LootController* mLootController = nullptr;
 

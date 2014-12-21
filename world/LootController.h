@@ -4,12 +4,12 @@
 #include <list>
 
 class Character;
-class DefenderCombatData;
+class HateController;
 
 class LootController {
 public:
 
-	void configure(DefenderCombatData* pData);
+	void configure(HateController* pHateController);
 
 	// Adds a looter to the 'allowed' list.
 	void addLooter(Character* pLooter);

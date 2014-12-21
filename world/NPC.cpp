@@ -5,10 +5,19 @@
 #include "ItemGenerator.h"
 #include "Item.h"
 #include "ItemFactory.h"
-#include "CombatData.h"
 #include "LootController.h"
+#include "HateController.h"
 
-NPC::NPC() {
+NPC::NPC(HateController* pHateController) {
+	
+	mHateController = pHateController;
+	if (!mHateController) {
+		Log::error("Got null HateController in NPC constructor!");
+	}
+	else {
+		mHateController->setOwner(this);
+	}
+
 	setRunSpeed(0.7f);
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
@@ -22,6 +31,7 @@ NPC::~NPC() {
 	if (mShoppers.empty() == false) { Log::error("[NPC] Shoppers not empty on destruction."); }
 	if (mShopItems.empty() == false) { Log::error("[NPC] Shop Items not empty on destruction."); }
 	if (mLootItems.empty() == false) { Log::error("[NPC] Loot Items not empty on destruction."); }
+	if (mHateController->hasAttackers()) { Log::error("[NPC] HaterController not empty on destruction."); }
 }
 
 const bool NPC::initialise() {
@@ -46,9 +56,9 @@ const bool NPC::onDeath() {
 
 	// Configure the LootController.
 	auto lootController = getLootController();
-	lootController->configure(getDefenderCombatData());
+	lootController->configure(mHateController);
 
-	clearCombatData();
+	clearHate();
 
 	return true;
 }
@@ -84,8 +94,7 @@ void NPC::onDestroy() {
 	if (isMerchant()) {
 
 	}
-
-	clearCombatData();
+	clearHate();
 }
 
 void NPC::onLootBegin() {
@@ -98,7 +107,7 @@ const bool NPC::isShopOpen() const {
 	EXPECTED_BOOL(isMerchant());
 
 	if (getDestroy()) return false; // NPC will be destroyed this update or next update.
-	if (hasAttackers() || hasDefenders()) return false; // NPC in combat.
+	if (hasHaters()) return false; // NPC in combat.
 
 	// TODO: Other conditions which would affect this.
 
@@ -131,18 +140,12 @@ Item* NPC::getShopItem(const uint32 pInstanceID) {
 	return nullptr;
 }
 
-void NPC::clearCombatData() {
-	// Disassociate this NPC from any Actor that has attacked it.
-	auto attackers =  getAttackers();
-	for (auto i : attackers) {
-		i.first->getAttackerCombatData()->remove(this);
-	}
-	getDefenderCombatData()->clear();
+void NPC::clearHate() {
 
-	// Disassociate this NPC from any Actor that it has attacked.
-	auto defenders = getDefenders();
-	for (auto i : defenders) {
-		i->getDefenderCombatData()->remove(this);
+	auto attackers = mHateController->getAttackers();
+	for (auto i : attackers) {
+		i.mActor->removeHater(this);
 	}
-	getAttackerCombatData()->clear();
+	mHateController->clear();
+	clearHaters();
 }

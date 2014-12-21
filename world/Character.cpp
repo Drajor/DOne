@@ -11,9 +11,9 @@
 #include "Inventory.h"
 #include "AccountManager.h"
 #include "CombatSystem.h"
-#include "CombatData.h"
 #include "Item.h"
 #include "ExtendedTargetController.h"
+#include "HateController.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -205,11 +205,11 @@ bool Character::onZoneOut() {
 	setConnection(nullptr);
 
 	// Clean up references to other Actors that this Character has attacked.
-	auto defenders = getDefenders();
-	for (auto i : defenders) {
-		i->getDefenderCombatData()->remove(this);
+	auto haters = getHaters();
+	for (auto i : haters) {
+		i->getHateController()->remove(this);
 	}
-	getAttackerCombatData()->clear();
+	clearHaters();
 
 	return true;
 }
