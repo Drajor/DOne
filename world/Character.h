@@ -4,6 +4,7 @@
 #include "Utility.h"
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
+#include "BindLocation.h"
 
 class NPC;
 class Group;
@@ -38,6 +39,9 @@ public:
 	inline void setZoning(const bool pZoning) { mIsZoning = pZoning; }
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
+
+	// Returns a reference to a specified BindLocation.
+	inline const BindLocation& getBindLocation(const i32 pIndex) const { return mBindLocations[pIndex]; }
 
 	// Returns the Actor this Character is trading with.
 	inline Actor* getTradingWith() const { return mTradingWith; }
@@ -251,6 +255,7 @@ public:
 	const bool canShop() const;
 private:
 	ZoneChange mZoneChange;
+	BindLocation mBindLocations[5];
 
 	const uint32 mAccountID;
 	bool mInitialised = false;

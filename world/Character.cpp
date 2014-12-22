@@ -205,6 +205,13 @@ bool Character::initialise() {
 	// Inventory.
 	EXPECTED_BOOL(mInventory->loadFromSave(mData->mInventory));
 
+	// Bind Locations.
+	for (auto i = 0; i < 5; i++) {
+		mBindLocations[i].setZoneID(mData->mBindLocations[i].mZoneID);
+		mBindLocations[i].setPosition(mData->mBindLocations[i].mPosition);
+		mBindLocations[i].setHeading(mData->mBindLocations[i].mHeading);
+	}
+
 	mAutoSave.Start(AUTO_SAVE_FREQUENCY);
 	mInitialised = true;
 	return true;
@@ -494,6 +501,14 @@ const bool Character::_updateForSave() {
 	// Inventory.
 	mData->mInventory.mItems.clear(); // TODO: Need to copy before clearing. Otherwise failure will wipe inventory.
 	EXPECTED_BOOL(mInventory->updateForSave(mData->mInventory));
+
+	// Bind Locations
+	for (auto i = 0; i < 5; i++) {
+		auto bindLocation = getBindLocation(i);
+		mData->mBindLocations[i].mZoneID = bindLocation.getZoneID();
+		mData->mBindLocations[i].mPosition = bindLocation.getPosition();
+		mData->mBindLocations[i].mHeading = bindLocation.getHeading();
+	}
 
 	return true;
 }

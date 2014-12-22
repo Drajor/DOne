@@ -649,7 +649,17 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->race = mCharacter->getRace();
 	payload->class_ = mCharacter->getClass();
 	payload->level = mCharacter->getLevel();
-	//payload->binds[5];
+
+	// Bind Locations.
+	for (auto i = 0; i < 5; i++) {
+		auto bindLocation = mCharacter->getBindLocation(i);
+		payload->binds[i].zoneId = bindLocation.getZoneID();
+		payload->binds[i].x = bindLocation.getPosition().x;
+		payload->binds[i].y = bindLocation.getPosition().y;
+		payload->binds[i].z = bindLocation.getPosition().z;
+		payload->binds[i].heading = bindLocation.getHeading();
+	}
+
 	payload->deity = mCharacter->getDeity();
 	payload->guild_id = mCharacter->getGuildID();
 	//payload->birthday;			// characters bday
@@ -809,7 +819,6 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
 	payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
 
-	//packet->priority = 6;
 	sendPacket(packet);
 	delete packet;
 }

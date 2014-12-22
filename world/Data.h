@@ -75,6 +75,12 @@ namespace Data {
 		std::list<Item> mItems;
 	};
 
+	struct BindLocation {
+		u16 mZoneID = 0;
+		Vector3 mPosition;
+		float mHeading = 0.0f;
+	};
+
 	struct Character {
 		Character() {
 			mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
@@ -144,6 +150,8 @@ namespace Data {
 		u32 mIntelligence = 0;
 		u32 mAgility = 0;
 		u32 mWisdom = 0;
+
+		BindLocation mBindLocations[5];
 
 		bool mAutoConsentGroup = false;
 		bool mAutoConsentRaid = false;

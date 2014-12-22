@@ -86,7 +86,7 @@ inline bool readVector3(TiXmlElement* pElement, Vector3& pVector) {
 	return true;
 }
 
-inline void writeVector3(TiXmlElement* pElement, Vector3& pVector) {
+inline void writeVector3(TiXmlElement* pElement, const Vector3& pVector) {
 	EXPECTED(pElement);
 	pElement->SetDoubleAttribute("x", pVector.x);
 	pElement->SetDoubleAttribute("y", pVector.y);
@@ -336,6 +336,8 @@ namespace CharacterXML {
 		SCA Character = "character";
 		SCA Stats = "stats";
 		SCA Visual = "visual";
+		SCA BindLocations = "bind_locations";
+		SCA BindLocation = "bind_location";
 		SCA Dyes = "dyes";
 		SCA Dye = "dye";
 		SCA Guild = "guild";
@@ -395,6 +397,14 @@ namespace CharacterXML {
 		SCA DrakkinHeritage = "drakkin_heritage";
 		SCA DrakkinTattoo = "drakkin_tattoo";
 		SCA DrakkinDetails = "drakkin_Details";
+		// Tag::BindLocation
+		namespace BindLocation {
+			SCA ZoneID = "zone_id";
+			SCA X = "x";
+			SCA Y = "y";
+			SCA Z = "z";
+			SCA Heading = "heading";
+		}
 		// Tag::Dye
 		SCA Colour = "colour";
 		// Tag::Guild
@@ -546,6 +556,21 @@ const bool DataStore::loadCharacter(const String& pCharacterName, Data::Characte
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::EyeColour2, pCharacter->mEyeColourRight));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinHeritage, pCharacter->mDrakkinHeritage));
 	EXPECTED_BOOL(readAttribute(visualElement, Attribute::DrakkinTattoo, pCharacter->mDrakkinTattoo));
+
+	// Tag::BindLocations
+	auto bindLocationsElement = characterElement->FirstChildElement(Tag::BindLocations);
+	EXPECTED_BOOL(bindLocationsElement);
+	auto bindLocationElement = bindLocationsElement->FirstChildElement(Tag::BindLocation);
+	u32 bindLocationCount = 0;
+	while (bindLocationElement) {
+		EXPECTED_BOOL(readAttribute(bindLocationElement, Attribute::BindLocation::ZoneID, pCharacter->mBindLocations[bindLocationCount].mZoneID));
+		EXPECTED_BOOL(readVector3(bindLocationElement, pCharacter->mBindLocations[bindLocationCount].mPosition));
+		EXPECTED_BOOL(readAttribute(bindLocationElement, Attribute::BindLocation::Heading, pCharacter->mBindLocations[bindLocationCount].mHeading));
+
+		bindLocationElement = bindLocationElement->NextSiblingElement(Tag::BindLocation);
+		bindLocationCount++;
+	}
+	EXPECTED_BOOL(bindLocationCount == 5);
 
 	// Tag::Dyes
 	auto dyesElement = characterElement->FirstChildElement(Tag::Dyes);
@@ -774,6 +799,16 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Ch
 	visualElement->SetAttribute(Attribute::EyeColour2, pCharacter->mEyeColourRight);
 	visualElement->SetAttribute(Attribute::DrakkinHeritage, pCharacter->mDrakkinHeritage);
 	visualElement->SetAttribute(Attribute::DrakkinTattoo, pCharacter->mDrakkinTattoo);
+
+	// Tag::BindLocations
+	auto bindLocationsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::BindLocations)));
+	for (int i = 0; i < 5; i++) {
+		// Tag::BindLocation
+		auto bindLocationElement = static_cast<TiXmlElement*>(bindLocationsElement->LinkEndChild(new TiXmlElement(Tag::BindLocation)));
+		bindLocationElement->SetAttribute(Attribute::BindLocation::ZoneID, pCharacter->mBindLocations[i].mZoneID);
+		writeVector3(bindLocationElement, pCharacter->mBindLocations[i].mPosition);
+		bindLocationElement->SetDoubleAttribute(Attribute::BindLocation::Heading, pCharacter->mBindLocations[i].mHeading);
+	}
 
 	// Tag::Dyes
 	auto dyesElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Dyes)));
