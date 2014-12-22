@@ -1377,6 +1377,18 @@ namespace Payload {
 			u8 unknown0084[8]; // mostly 0s, the last 3 bytes are something tho
 		};
 
+		// C->S
+		struct RespawnWindowSelect : Fixed<RespawnWindowSelect> {
+			u32 mSelection = 0;
+			
+			String _debug() const {
+				StringStream ss;
+				ss << "{RespawnWindowSelect} ";
+				PRINT_MEMBER(mSelection);
+				return ss.str();
+			}
+		};
+
 		namespace ExtendedTarget {
 			struct AutoAddHaters : public Fixed<AutoAddHaters> {
 				u8 mAction = 0;

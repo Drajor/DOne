@@ -7,6 +7,7 @@
 #include "ItemFactory.h"
 #include "LootController.h"
 #include "HateController.h"
+#include "CombatSystem.h"
 
 NPC::NPC(HateController* pHateController) {
 	
@@ -75,6 +76,32 @@ const bool NPC::update() {
 		}
 		return true;
 	}
+
+	// Check: Is NPC in combat?
+	//if (hasHaters()) {
+	if (mHateController->hasAttackers()) {
+		// Check: 
+		if (!mAttacking) {
+			onCombatBegin();
+		}
+		if (!hasTarget()) {
+			setTarget(mHateController->select());
+		}
+		if (hasTarget() && mPrimaryAttackTimer.check()) {
+			// Attacking an NPC.
+			if (getTarget()->isNPC())
+				CombatSystem::primaryMeleeAttack(this, Actor::cast<NPC*>(getTarget()));
+			// Attacking a Character.
+			else if (getTarget()->isCharacter())
+				CombatSystem::primaryMeleeAttack(this, Actor::cast<Character*>(getTarget()));
+		}
+	}
+
+	// Check: Is NPC out of combat?
+	if (!mHateController->hasAttackers() && mAttacking) {
+		onCombatEnd();
+	}
+
 	return true;
 }
 
@@ -148,4 +175,14 @@ void NPC::clearHate() {
 	}
 	mHateController->clear();
 	clearHaters();
+}
+
+void NPC::onCombatBegin() {
+	mAttacking = true;
+	mPrimaryAttackTimer.setStep(300);
+	mPrimaryAttackTimer.start();
+}
+
+void NPC::onCombatEnd() {
+	mAttacking = false;
 }

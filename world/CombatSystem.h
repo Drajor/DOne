@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Types.h"
+
 class Actor;
 class Character;
 class NPC;
@@ -20,5 +22,14 @@ public:
 	static void primaryMeleeAttack(NPC* pAttacker, Character* pDefender);
 	static void seconaryMeleeAttack(NPC* pAttacker, Character* pDefender);
 	static void rangedAttack(NPC* pAttacker, Character* pDefender);
+
+	// NPC vs NPC
+	static void primaryMeleeAttack(NPC* pAttacker, NPC* pDefender);
+	static void seconaryMeleeAttack(NPC* pAttacker, NPC* pDefender);
+	static void rangedAttack(NPC* pAttacker, NPC* pDefender);
+
 private:
+
+	static const bool preAttack(Actor* pAttacker, Actor* pDefender);
+	static const void postAttack(Actor* pAttacker, Actor* pDefender, const i32 pDamage, const bool pCritical);
 };

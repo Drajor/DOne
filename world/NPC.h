@@ -82,6 +82,9 @@ public:
 	inline const bool hasItems() const { return !mLootItems.empty(); }
 	void removeLootItem(const uint32 pSlot) { mLootItems[pSlot] = nullptr; }
 	void clearHate();
+
+	void onCombatBegin();
+	void onCombatEnd();
 private:
 	float mSellRate = 2.457f;
 	int32 mCopper = 0;
@@ -91,6 +94,7 @@ private:
 	std::vector<Item*> mLootItems;
 	std::list<Item*> mShopItems;
 	bool mAcceptTrade = true;
+	bool mAttacking = false;
 
 	SpawnPoint* mSpawnPoint = nullptr;
 

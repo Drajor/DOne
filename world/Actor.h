@@ -470,6 +470,7 @@ public:
 
 	inline const bool isDead() const { return mIsDead; }
 	inline void setIsDead(const bool pValue) { mIsDead = pValue; }
+	inline const bool isAlive() const { return !isDead(); }
 
 	void damage(const int32 pAmount);
 
@@ -569,8 +570,8 @@ private:
 	bool mIsStunned = false;
 	bool mIsDead = false;
 
-	int32 mCurrentHP = 100;
-	int32 mMaximumHP = 100;
+	int32 mCurrentHP = 50;
+	int32 mMaximumHP = 50;
 	int32 mCurrentMana = 100;
 	int32 mMaximumMana = 100;
 	int32 mCurrentEndurance = 100;

@@ -14,6 +14,7 @@ class ZoneClientConnection;
 class ExtendedTargetController;
 class Inventoryy;
 class Item;
+class RespawnOptions;
 
 namespace Data {
 	struct Character;
@@ -68,10 +69,12 @@ public:
 
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
+	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
 	
 	bool onEnterZone();
 	bool onZoneOut();
-	const bool onDeath() { return true; };
+	const bool onDeath();
+
 	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
 
 	// Group
@@ -359,4 +362,5 @@ private:
 	Inventoryy* mInventory = nullptr;
 
 	ExtendedTargetController* mXTargetController = nullptr;
+	RespawnOptions* mRespawnOptions = nullptr;
 };

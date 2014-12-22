@@ -32,6 +32,7 @@
 #include "EventDispatcher.h"
 #include "Object.h"
 #include "LootController.h"
+#include "RespawnOptions.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -965,8 +966,12 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 	EXPECTED(pActor);
 
 	auto packet = Death::construct(pActor->getSpawnID(), pKiller ? pKiller->getSpawnID() : 0, pDamage, pSkill);
-	sendToVisible(pActor, packet);
-	safe_delete(packet);
+	if (pActor->isCharacter())
+		sendToVisible(Actor::cast<Character*>(pActor), packet, true);
+	else
+		sendToVisible(pActor, packet);
+
+	delete packet;
 
 	// NPC Dead.
 	if (pActor->isNPC()) {
@@ -995,6 +1000,14 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 	}
 
 	pActor->onDeath();
+
+	// Send 'Respawn Window' to Character.
+	if (pActor->isCharacter()) {
+		Character* character = pActor->cast<Character*>(pActor);
+		character->getRespawnOptions()->setActive(true);
+		Actor::cast<Character*>(pActor)->getConnection()->sendRespawnWindow();
+	}
+		
 }
 
 void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnID) {
@@ -1243,12 +1256,26 @@ void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount,
 
 	uint32 sequence = Random::make(0, 20304843);
 	auto packet = Damage::construct(pDefender->getSpawnID(), pAttacker->getSpawnID(), pAmount, pType, sequence, pSpellID);
-	sendToVisible(pDefender, packet);
-	safe_delete(packet);
+
+	if (pDefender->isCharacter())
+		sendToVisible(Actor::cast<Character*>(pDefender), packet, true);
+	else
+		sendToVisible(pDefender, packet);
+
+	delete packet;
 }
 
-void Zone::handleCriticalHit(Character* pCharacter, int32 pDamage) {
-	pCharacter->getConnection()->sendSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pCharacter->getName(), std::to_string(pDamage));
+void Zone::handleCriticalHit(Actor* pActor, const int32 pDamage) {
+	EXPECTED(pActor);
+
+	auto packet = ZoneClientConnection::makeSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pActor->getName(), std::to_string(pDamage));
+
+	if (pActor->isCharacter())
+		sendToVisible(Actor::cast<Character*>(pActor), packet, true);
+	else
+		sendToVisible(pActor, packet);
+
+	delete packet;
 }
 
 void Zone::handleHPChange(Actor* pActor) {
@@ -1770,4 +1797,17 @@ void Zone::_sendAppearanceUpdate(Actor* pActor) {
 
 void Zone::handleAppearanceChange(Actor* pActor) {
 	_sendAppearanceUpdate(pActor);
+}
+
+void Zone::handleRespawnSelection(Character* pCharacter, const u32 pSelection) {
+	EXPECTED(pCharacter);
+	auto respawnOptions = pCharacter->getRespawnOptions();
+	EXPECTED(respawnOptions);
+	EXPECTED(respawnOptions->isActive()); // Sanity.
+
+	respawnOptions->setActive(false);
+
+	// Find option.
+
+	// TODO!
 }

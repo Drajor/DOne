@@ -14,6 +14,7 @@
 #include "Item.h"
 #include "ExtendedTargetController.h"
 #include "HateController.h"
+#include "RespawnOptions.h"
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
@@ -25,18 +26,35 @@ Character::Character(const uint32 pAccountID, Data::Character* pCharacterData) :
 	setWalkSpeed(0.35f);
 	setBodyType(BT_Humanoid);
 	setActorType(AT_PLAYER);
-	//setIsNPC(false);
-
+	
 	mFilters.fill(0);
 	mSkills.fill(0);
 	mLanguages.fill(0);
 
 	mInventory = new Inventoryy();
 	mXTargetController = new ExtendedTargetController();
+	mRespawnOptions = new RespawnOptions();
+
+	RespawnOption option;
+	option.mID = 0;
+	option.mZoneID = 2;
+	option.mName = "Tits";
+	mRespawnOptions->add(option);
+
+	option.mID = 1;
+	option.mZoneID = 13;
+	option.mName = "Boobs";
+	mRespawnOptions->add(option);
+
+	option.mID = 2;
+	option.mZoneID = 52;
+	option.mName = "Jugs";
+	mRespawnOptions->add(option);
 }
 
 Character::~Character() {
 	delete mXTargetController;
+	delete mRespawnOptions;
 }
 
 void Character::update() {
@@ -807,7 +825,7 @@ void Character::setAutoAttack(const bool pAttacking) {
 	mAutoAttacking = pAttacking;
 
 	if (mAutoAttacking) {
-		mPrimaryAttackTimer.setStep(1500);
+		mPrimaryAttackTimer.setStep(400);
 		mPrimaryAttackTimer.start();
 	}
 }
@@ -959,6 +977,18 @@ const u16 Character::getSpellBookSlot(const u32 pSpellID) const {
 	EXPECTED_BOOL(mSpellBook);
 
 	return mSpellBook->getSlot(pSpellID);
+}
+
+const bool Character::onDeath() {
+	setHPPercent(0);
+	setActorType(AT_PLAYER_CORPSE);
+	setName(getName() + "'s corpse");
+
+	setAutoAttack(false);
+	clearTarget(true);
+	clearHaters();
+
+	return true;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

@@ -27,6 +27,7 @@
 #include "AlternateCurrencyManager.h"
 #include "Object.h"
 #include "ExtendedTargetController.h"
+#include "RespawnOptions.h"
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
@@ -555,6 +556,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player drops an Item on the ground.
 		_handleDropItem(pPacket);
 		break;
+	case OP_RespawnWindow:
+		// NOTE: This occurs when a player selects a respawn option from the 'Respawn Window'.
+		_handleRespawnWindowSelect(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -598,7 +603,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	_sendPlayerProfile();
 	mZoneConnectionStatus = ZoneConnectionStatus::PlayerProfileSent;
 	// OP_ZoneEntry
-	_sendZoneEntry();
+	sendZoneEntry();
 	// Bulk Spawns
 	_sendZoneSpawns();
 	// Corpses Bulk
@@ -809,7 +814,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendZoneEntry() {
+void ZoneClientConnection::sendZoneEntry() {
 	EXPECTED(mConnected);
 
 	mCharacter->_syncPosition();
@@ -1418,12 +1423,15 @@ void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringI
 	delete packet;
 }
 
-void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
-	EXPECTED(mConnected);
-
+EQApplicationPacket* ZoneClientConnection::makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
 	int packetSize = 0;
+	packetSize += 4; // Unknown.
+	packetSize += 4; // String ID.
+	packetSize += 4; // Type.
+
 	String message;
 
+	// Adjust payload size for variable length strings.
 	if (pParameter0.length() != 0) packetSize += pParameter0.length() + 1;
 	if (pParameter1.length() != 0) packetSize += pParameter1.length() + 1;
 	if (pParameter2.length() != 0) packetSize += pParameter2.length() + 1;
@@ -1435,15 +1443,16 @@ void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringI
 	if (pParameter8.length() != 0) packetSize += pParameter8.length() + 1;
 	if (pParameter9.length() != 0) packetSize += pParameter9.length() + 1;
 
-	packetSize += sizeof(FormattedMessage_Struct);
 	auto packet = new EQApplicationPacket(OP_FormattedMessage, packetSize);
-	auto payload = reinterpret_cast<FormattedMessage_Struct*>(packet->pBuffer);
-	payload->type = pType;
-	payload->string_id = pStringID;
 
 	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
-	ds.movePointer(sizeof(FormattedMessage_Struct));
 
+	// Write header.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(pStringID); // String ID.
+	ds.write<u32>(pType); // Type.
+
+	// Write variable length strings.
 	if (pParameter0.length() != 0) ds.writeString(pParameter0);
 	if (pParameter1.length() != 0) ds.writeString(pParameter1);
 	if (pParameter2.length() != 0) ds.writeString(pParameter2);
@@ -1455,10 +1464,16 @@ void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringI
 	if (pParameter8.length() != 0) ds.writeString(pParameter8);
 	if (pParameter9.length() != 0) ds.writeString(pParameter9);
 
+	EXPECTED_PTR(ds.check());
+	return packet;
+}
 
+void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+	EXPECTED(mConnected);
+
+	auto packet = makeSimpleMessage(pType, pStringID, pParameter0, pParameter1, pParameter2, pParameter3, pParameter4, pParameter5, pParameter6, pParameter7, pParameter8, pParameter9);
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
 }
 
 void ZoneClientConnection::sendHealthUpdate() {
@@ -3992,6 +4007,59 @@ void ZoneClientConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket
 
 	auto payload = AutoAddHaters::convert(pPacket);
 	mCharacter->getXTargetController()->setAutoAddHaters(payload->mAction == 1 ? true : false);
+}
+
+void ZoneClientConnection::sendRespawnWindow() {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	const auto respawnOptions = mCharacter->getRespawnOptions();
+	EXPECTED(respawnOptions);
+	const auto options = respawnOptions->getOptions();
+
+	// Calculate payload size.
+	u32 payloadSize = 16; // Fixed header size.
+	payloadSize += 26 * respawnOptions->getNumOptions(); // Fixed option size.
+	for (auto i : options)
+		payloadSize += i.mName.length() + 1; // Variable option name size.
+	
+	auto packet = new EQApplicationPacket(OP_RespawnWindow, payloadSize);
+	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+
+	// Write header.
+	ds.write<u32>(0); // Default selection.
+	ds.write<u32>(30000); // Timer.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(respawnOptions->getNumOptions());
+
+	// Write options.
+	for (auto i : options) {
+		ds.write<u32>(i.mID);
+		ds.write<u16>(i.mZoneID);
+		ds.write<u16>(i.mInstanceID);
+		ds.write<float>(i.mPosition.x);
+		ds.write<float>(i.mPosition.y);
+		ds.write<float>(i.mPosition.z);
+		ds.write<float>(i.mHeading);
+		ds.writeString(i.mName);
+		ds.write<u8>(i.mType);
+	}
+
+	sendPacket(packet);
+	delete packet;
+	EXPECTED(ds.check());
+}
+
+void ZoneClientConnection::_handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(RespawnWindowSelect::sizeCheck(pPacket));
+	EXPECTED(mCharacter->getRespawnOptions()->isActive()); // Sanity.
+
+	auto payload = RespawnWindowSelect::convert(pPacket);
+	Log::info(payload->_debug());
+
+	mZone->handleRespawnSelection(mCharacter, payload->mSelection);
 }
 
 //

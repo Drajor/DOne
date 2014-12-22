@@ -51,6 +51,7 @@ public:
 	void sendPosition();
 	void sendMessage(const u32 pType, String pMessage);
 	void sendSimpleMessage(const u32 pType, const u32 pStringID);
+	static EQApplicationPacket* makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
 	void sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
 	void sendAppearance(uint16 pType, uint32 pParameter);
 	void sendHealthUpdate();
@@ -165,14 +166,17 @@ public:
 
 	void sendObject(Object* pObject);
 
+	void sendRespawnWindow();
+
 	void sendPacket(const EQApplicationPacket* pPacket);
 
+	void sendZoneEntry();
 private:
 	void _handleUnknown(const EQApplicationPacket* pPacket);
 	void _sendTimeOfDay();
 
 	void _sendPlayerProfile();
-	void _sendZoneEntry();
+	
 	void _sendZoneSpawns();
 	void _sendTributeUpdate();
 	void _sendInventory();
@@ -299,6 +303,7 @@ private:
 	void _handleDropItem(const EQApplicationPacket* pPacket);
 
 	void _handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
+	void _handleRespawnWindowSelect(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

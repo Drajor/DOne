@@ -732,13 +732,8 @@ public:
 
 	const bool handleCommand(CommandParameters pParameters) {
 		Actor* target = mInvoker->getTarget();
-
-		if (target->isNPC()) {
-			mInvoker->getZone()->handleDeath(target, mInvoker, 1, 0);
-			return true;
-		}
-
-		return false;
+		mInvoker->getZone()->handleDeath(target, mInvoker, 1, 0);
+		return true;
 	}
 };
 
@@ -1991,6 +1986,20 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		pCharacter->_updateForSave();
 		pCharacter->getZone()->requestSave(pCharacter);
 	}
+	// Respawn
+	else if (pCommandName == "respawn") {
+		pCharacter->getConnection()->sendRespawnWindow();
+	}
+	// Does not work!
+	//// Speed
+	//else if (pCommandName == "speed" && pParameters.size() == 1) {
+	//	float speed = 0.0f;
+	//	if (Utility::stofSafe(speed, pParameters[0])) {
+	//		pCharacter->setRunSpeed(speed);
+	//		pCharacter->setWalkSpeed(speed * 0.5f);
+	//		pCharacter->getConnection()->sendZoneEntry();
+	//	}
+	//}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

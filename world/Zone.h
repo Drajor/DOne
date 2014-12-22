@@ -185,7 +185,7 @@ public:
 	const bool canBank(Character* pCharacter);
 	const bool canShop(Character* pCharacter, NPC* pMerchant);
 
-	void handleCriticalHit(Character* pCharacter, int32 pDamage);
+	void handleCriticalHit(Actor* pActor, const int32 pDamage);
 	void handleHPChange(Actor* pActor);
 
 	void handleNimbusAdded(Actor * pActor, const uint32 pNimbusID);
@@ -194,6 +194,7 @@ public:
 	void handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh);
 	void handleDropItem(Character* pCharacter);
 	void handleAppearanceChange(Actor* pActor);
+	void handleRespawnSelection(Character* pCharacter, const u32 pSelection);
 private:
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
