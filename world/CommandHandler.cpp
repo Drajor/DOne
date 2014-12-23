@@ -130,18 +130,16 @@ class GMCommand : public Command {
 public:
 	GMCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #gm on / #gm off");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
-		}
-
 		bool gm = pParameters[0] == "on";
 		mInvoker->setIsGM(gm);
 		mInvoker->getZone()->notifyCharacterGM(mInvoker);
+		if (gm) mInvoker->notify("You are now a GM!");
+		else mInvoker->notify("You are no longer a GM!");
 		return true;
 	}
 };

@@ -66,7 +66,7 @@ public:
 	void sendLevelAppearance();
 	void sendLevelUpdate();
 	void sendStats();
-	void sendWhoResults(std::list<Character*>& pMatches);
+	void sendWhoResponse(const u32 pWhoType, std::list<Character*>& pMatches);
 
 	void sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage);
 	void sendTell(const String& pSenderName, const String& pMessage);
@@ -210,7 +210,7 @@ private:
 	void _handleTGB(const EQApplicationPacket* pPacket);
 	void _handleEmote(const EQApplicationPacket* pPacket);
 	void _handleAnimation(const EQApplicationPacket* pPacket);
-	void _handleWhoAllRequest(const EQApplicationPacket* pPacket);
+	void _handleWhoRequest(const EQApplicationPacket* pPacket);
 	void _handleGroupInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupFollow(const EQApplicationPacket* pPacket);
 	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);

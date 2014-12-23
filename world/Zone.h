@@ -144,8 +144,7 @@ public:
 
 	bool trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage);
 	void processCharacterQueuedTells(Character* );
-	void whoRequest(Character* pCharacter, WhoFilter& pFilter);
-	void getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter);
+	void getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter);
 	void requestSave(Character* pCharacter);
 
 	
@@ -195,6 +194,8 @@ public:
 	void handleDropItem(Character* pCharacter);
 	void handleAppearanceChange(Actor* pActor);
 	void handleRespawnSelection(Character* pCharacter, const u32 pSelection);
+
+	void handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 private:
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
@@ -216,7 +217,6 @@ private:
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
 	void _sendCharacterLevel(Character* pCharacter);
-	void _handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);

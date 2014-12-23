@@ -1394,7 +1394,34 @@ namespace Payload {
 				u8 mAction = 0;
 			};
 		}
-		
+
+		// C->S
+		struct WhoRequest : public Fixed<WhoRequest> {
+			char mCharacterName[64];
+			i32 mRace = -1; // -1 = Not set.
+			i32 mClass = -1; // -1 = Not set.
+			i32 mLevelMinimum = -1; // -1 = Not set.
+			i32 mLevelMaximum = -1;	// -1 = Not set.
+			i32 mGM = -1; // -1 = Not set, 1 = /who (all) gm
+			i32 mFlag = 0;	// -3 = LFG, -4 = Trader, -5 = Buyer
+			u8 mUnknown[64];
+			u32 mType;		// 0 = /who 3 = /who all
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{WhoRequest} ";
+				PRINT_MEMBER(mCharacterName);
+				PRINT_MEMBER(mRace);
+				PRINT_MEMBER(mClass);
+				PRINT_MEMBER(mLevelMinimum);
+				PRINT_MEMBER(mLevelMaximum);
+				PRINT_MEMBER(mGM);
+				PRINT_MEMBER(mFlag);
+				PRINT_MEMBER(mUnknown);
+				PRINT_MEMBER(mType);
+				return ss.str();
+			}
+		};
 	}
 
 	namespace World {

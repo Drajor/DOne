@@ -41,7 +41,7 @@ bool ZoneManager::initialise() {
 	
 	Log::status("[Zone Manager] Initialising.");
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
 
@@ -134,12 +134,9 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	return true;
 }
 
-void ZoneManager::whoAllRequest(Character* pCharacter, WhoFilter& pFilter) {
-	std::list<Character*> matches;
-	for (auto i : mZones) {
-		i->getWhoMatches(matches, pFilter);
-	}
-	pCharacter->getConnection()->sendWhoResults(matches);
+void ZoneManager::handleWhoRequest(Character* pCharacter, const WhoFilter& pFilter, std::list<Character*>& pResults) {
+	for (auto i : mZones)
+		i->getWhoMatches(pResults, pFilter);
 }
 
 void ZoneManager::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {

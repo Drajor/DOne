@@ -234,11 +234,11 @@ public:
 		case AnonType::None:
 			mActorData.mFlags.mAnonymous = 0;
 			return;
-		case AnonType::Roleplay:
+		case AnonType::Anonymous:
 			mActorData.mFlags.mAnonymous = 1;
 			return;
-		case AnonType::Anonymous:
-			mActorData.mFlags.mAnonymous = 0;
+		case AnonType::Roleplay:
+			mActorData.mFlags.mAnonymous = 2;
 			return;
 		default:
 			Log::error("[Actor] Invalid anontype value in setAnonymous");

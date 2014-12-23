@@ -48,7 +48,7 @@ public:
 
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 
-	void whoAllRequest(Character* pCharacter, WhoFilter& pFilter);
+	void handleWhoRequest(Character* pCharacter, const WhoFilter& pFilter, std::list<Character*>& pResults);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
 
 	// Character Zoning.

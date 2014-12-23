@@ -1097,8 +1097,8 @@ enum AATitle : uint8 {
 namespace AnonType {
 	enum : uint8 {
 		None = 0,
-		Roleplay = 1,
-		Anonymous = 2
+		Anonymous = 1,
+		Roleplay = 2,
 	};
 }
 
@@ -1861,30 +1861,37 @@ ready, roar, salute, shiver, shrug, sigh, smirk, snarl, snicker, stare,
 tap, tease, thank, thirsty, veto, welcome, whine, whistle, yawn.
 */
 
-enum WhoType {
-	WHO_ZONE,
-	WHO_WORLD
-};
+
+namespace WhoType {
+	enum : u32 {
+		Zone = 0,
+		All = 3,
+	};
+}
+namespace WhoFlag {
+	enum : i32 {
+		None = -1,
+		LFG = -3,
+		Trader = -4,
+		Buyer = -5,
+	};
+}
 struct WhoFilter {
-	WhoFilter() : mType(WHO_ZONE), mName(""), mRace(0), mClass(0), mMinLevel(0), mMaxLevel(0) {};
-	WhoType mType;
-	String mName;
-	uint32 mRace;
-	uint8 mClass;
-	uint8 mMinLevel;
-	uint8 mMaxLevel;
+	u32 mType = WhoType::Zone;
+	String mCharacterName;
+	inline const bool checkCharacterName() const { return !mCharacterName.empty(); }
+	i32 mRace = -1;
+	inline const bool checkRace() const { return mRace != -1; }
+	i32 mClass = -1;
+	inline const bool checkClass() const { return mClass != -1; }
+	i32 mLevelMinimum = -1;
+	inline const bool checkMinimumLevel() const { return mLevelMinimum != -1; }
+	i32 mLevelMaximum = -1;
+	inline const bool checkMaximumLevel() const { return mLevelMaximum != -1; }
+	i32 mGM = -1; 
+	i32 mFlag = WhoFlag::None;
+	inline const bool checkFlag() const { return mFlag != -1; }
 };
-//struct Who_All_Struct { // 76 length total
-//	/*000*/	char	whom[64];
-//	/*064*/	uint32	wrace;		// FF FF = no race
-//
-//	/*068*/	uint32	wclass;		// FF FF = no class
-//	/*072*/	uint32	lvllow;		// FF FF = no numbers
-//	/*076*/	uint32	lvlhigh;	// FF FF = no numbers
-//	/*080*/	uint32	gmlookup;	// FF FF = not doing /who all gm
-//	/*084*/	uint32	guildid;
-//	/*088*/	uint8	unknown076[64];
-//	/*152*/	uint32	type;		// New for SoF. 0 = /who 3 = /who
 
 enum Event : uint32 {
 	EnterZone,

@@ -34,7 +34,7 @@ TEST(ZonePayload, FixedSizes) {
 	//TODO: More.
 
 	EXPECT_EQ(256, Payload::Zone::AppearanceUpdate::size());
-
+	
 	// AugmentInformation
 	EXPECT_EQ(8212, Payload::Zone::BookRequest::size());
 	EXPECT_EQ(4, Payload::Zone::Combine::size());
@@ -51,6 +51,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
 	EXPECT_EQ(1028, Payload::Zone::Emote::size());
 
+	EXPECT_EQ(156, Payload::Zone::WhoRequest::size());
 
 	// Login Server Connection
 	

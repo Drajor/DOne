@@ -40,6 +40,9 @@ public:
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
 
+	inline const bool isHidden() const { return mHidden; }
+	inline void setHidden(const bool pValue) { mHidden = pValue; }
+
 	// Returns a reference to a specified BindLocation.
 	inline const BindLocation& getBindLocation(const i32 pIndex) const { return mBindLocations[pIndex]; }
 
@@ -287,6 +290,7 @@ private:
 	std::array<uint32, Limits::Skills::MAX_ID> mSkills;
 	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 
+	bool mHidden = false;
 	bool mAutoAttacking = false;
 	bool mStanding = true;
 	bool mIsZoningOut = false;

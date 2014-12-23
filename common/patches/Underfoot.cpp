@@ -2060,68 +2060,68 @@ ENCODE(OP_VetRewardsAvaliable)
 	delete inapp;
 }
 
-ENCODE(OP_WhoAllResponse)
-{
-	EQApplicationPacket *in = *p;
-	*p = nullptr;
-
-	char *InBuffer = (char *)in->pBuffer;
-
-	WhoAllReturnStruct *wars = (WhoAllReturnStruct*)InBuffer;
-
-	int Count = wars->playercount;
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_WhoAllResponse, in->size + (Count * 4));
-
-	char *OutBuffer = (char *)outapp->pBuffer;
-
-	memcpy(OutBuffer, InBuffer, sizeof(WhoAllReturnStruct));
-
-	OutBuffer += sizeof(WhoAllReturnStruct);
-	InBuffer += sizeof(WhoAllReturnStruct);
-
-	for(int i = 0; i < Count; ++i)
-	{
-		uint32 x;
-
-		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
-
-		InBuffer += 4;
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0xffffffff);
-
-		char Name[64];
-
-
-		VARSTRUCT_DECODE_STRING(Name, InBuffer);	// Char Name
-		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
-
-		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
-
-		VARSTRUCT_DECODE_STRING(Name, InBuffer);	// Guild Name
-		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
-
-		for(int j = 0; j < 7; ++j)
-		{
-			x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
-		}
-
-		VARSTRUCT_DECODE_STRING(Name, InBuffer);		// Account
-		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
-
-		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
-	}
-
-	//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
-	dest->FastQueuePacket(&outapp);
-
-	delete in;
-}
+//ENCODE(OP_WhoAllResponse)
+//{
+//	EQApplicationPacket *in = *p;
+//	*p = nullptr;
+//
+//	char *InBuffer = (char *)in->pBuffer;
+//
+//	WhoAllReturnStruct *wars = (WhoAllReturnStruct*)InBuffer;
+//
+//	int Count = wars->playercount;
+//
+//	EQApplicationPacket *outapp = new EQApplicationPacket(OP_WhoAllResponse, in->size + (Count * 4));
+//
+//	char *OutBuffer = (char *)outapp->pBuffer;
+//
+//	memcpy(OutBuffer, InBuffer, sizeof(WhoAllReturnStruct));
+//
+//	OutBuffer += sizeof(WhoAllReturnStruct);
+//	InBuffer += sizeof(WhoAllReturnStruct);
+//
+//	for(int i = 0; i < Count; ++i)
+//	{
+//		uint32 x;
+//
+//		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//
+//		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
+//
+//		InBuffer += 4;
+//		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
+//		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0xffffffff);
+//
+//		char Name[64];
+//
+//
+//		VARSTRUCT_DECODE_STRING(Name, InBuffer);	// Char Name
+//		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
+//
+//		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
+//
+//		VARSTRUCT_DECODE_STRING(Name, InBuffer);	// Guild Name
+//		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
+//
+//		for(int j = 0; j < 7; ++j)
+//		{
+//			x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//			VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
+//		}
+//
+//		VARSTRUCT_DECODE_STRING(Name, InBuffer);		// Account
+//		VARSTRUCT_ENCODE_STRING(OutBuffer, Name);
+//
+//		x = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, x);
+//	}
+//
+//	//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+//	dest->FastQueuePacket(&outapp);
+//
+//	delete in;
+//}
 
 ENCODE(OP_GroupInvite) {
 	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
@@ -2886,21 +2886,21 @@ DECODE(OP_CharacterCreate) {
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_WhoAllRequest) {
-	DECODE_LENGTH_EXACT(structs::Who_All_Struct);
-	SETUP_DIRECT_DECODE(Who_All_Struct, structs::Who_All_Struct);
-
-	memcpy(emu->whom, eq->whom, sizeof(emu->whom));
-	IN(wrace);
-	IN(wclass);
-	IN(lvllow);
-	IN(lvlhigh);
-	IN(gmlookup);
-	IN(guildid);
-	IN(type);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_WhoAllRequest) {
+//	DECODE_LENGTH_EXACT(structs::Who_All_Struct);
+//	SETUP_DIRECT_DECODE(Who_All_Struct, structs::Who_All_Struct);
+//
+//	memcpy(emu->whom, eq->whom, sizeof(emu->whom));
+//	IN(wrace);
+//	IN(wclass);
+//	IN(lvllow);
+//	IN(lvlhigh);
+//	IN(gmlookup);
+//	IN(guildid);
+//	IN(type);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_GroupInvite2)
 {

@@ -275,7 +275,8 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleFaceChange(pPacket);
 		break;
 	case OP_WhoAllRequest:
-		_handleWhoAllRequest(pPacket);
+		_handleWhoRequest(pPacket);
+		break;
 	case OP_GroupInvite:
 		// NOTE: This occurs when the player presses 'Invite' on the group window.
 		// NOTE: This also occurs when the player uses the /invite command.
@@ -1576,159 +1577,168 @@ void ZoneClientConnection::sendStats() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleWhoAllRequest(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(Who_All_Struct);
-
+void ZoneClientConnection::_handleWhoRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	EXPECTED(WhoRequest::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<Who_All_Struct*>(pPacket->pBuffer);
-	if (payload->type != 0 && payload->type != 3) return;
+	auto payload = WhoRequest::convert(pPacket);
+	Log::info(payload->_debug());
+	EXPECTED(payload->mType == 0 || payload->mType == 3); // who or who all.
 
 	WhoFilter filter;
-	filter.mType = payload->type == 0 ? WHO_ZONE : WHO_WORLD;
-	filter.mName = Utility::safeString(payload->whom, 64);
+	filter.mType = payload->mType == 0 ? WhoType::Zone : WhoType::All;
+	filter.mCharacterName = Utility::safeString(payload->mCharacterName, 64);
+	filter.mRace = payload->mRace;
+	filter.mClass = payload->mClass;
+	filter.mLevelMinimum = payload->mLevelMinimum;
+	filter.mLevelMaximum = payload->mLevelMaximum;
+	filter.mFlag = payload->mFlag;
+	// TODO: GM.
 
-	if (payload->lvllow != 0xFFFFFFFF) filter.mMinLevel = payload->lvllow;
-	if (payload->lvlhigh != 0xFFFFFFFF) filter.mMaxLevel = payload->lvlhigh;
-	if (payload->wrace != 0xFFFFFFFF) filter.mRace = payload->wrace;
-	if (payload->wclass != 0xFFFFFFFF) filter.mClass = payload->wclass;
-
-	mZone->whoRequest(mCharacter, filter);
+	mZone->handleWhoRequest(mCharacter, filter);
 }
 
-void ZoneClientConnection::sendWhoResults(std::list<Character*>& pMatches) {
+void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& pResults) {
 	EXPECTED(mConnected);
 
-	static const String LINE("---------------------------");
-	int packetSize = 0;
-	int numResults = pMatches.size();
+	static const u32 MaxResults = 20;
+	static const String whoLine("--------------------------");
 
-	String FakeGuild = "WooHoo";
-	String FakeAccount = "WHAT IS THIS?";
-	
-	// The first loop over pMatches is required to calculate the space needed for Character name / guild name.
-	for (auto i : pMatches) {
-		packetSize += i->getName().length() + 1; // + 1 is for the null terminator (String::length includes only characters).
-		if (i->getGuildID() != 0xFFFFFFFF) { // TODO: Remove this hex
-			// TODO: When Guilds.
-		}
+	const u32 numResults = pResults.size();
+	const bool toGM = mCharacter->isGM();
 
-		packetSize += FakeGuild.length() + 1;
-		packetSize += FakeAccount.length() + 1;
+	static const String guildName = "<Monster Bash>";
+	static const String accountName = "Boobs";
+
+	enum WhoStartStringID {
+		WSS_PlayersLFG = 5000, // Players looking for a group :
+		WSS_Players = 5001, // Players in EverQuest :
+		WSS_Zones = 5002, // Zones in EverQuest :
+	};
+	// Determine which start String ID to use.
+	u32 startStringID = WSS_Players;
+	// TODO: LFG.
+
+	//5030 There are % 1 players in EverQuest.Count % 2, no Active Char % 3
+	//5031 There are % 1 players in EverQuest.Count % 2, filtered % 3
+	//5032 There are % 1 players in EverQuest.Count % 2, no Active Char % 3, filtered % 4
+	//5034 There is % 1 zone server up.
+	//5035 There are % 1 zone servers up.
+
+	enum WhoEndStringID {
+		WES_Player = 5028, // There is % 1 player in EverQuest.
+		WES_None = 5029, // There are no players in EverQuest that match those who filters.
+		WES_TooMany = 5033, // Your who request was cut short..too many players.
+		WES_Players = 5036, // There are % 1 players in EverQuest.
+	};
+	// Determine which end String ID to use.
+	u32 endStringID = WES_Players;
+	// No results.
+	if (numResults == 0) endStringID = WES_None;
+	// Single result.
+	else if (numResults == 1) endStringID = WES_Player;
+	// Too many results.
+	else if (numResults > MaxResults) endStringID = WES_TooMany;
+
+	//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
+	// T1=String[2=Level 3=Class]  4=Name (5=Race) 6=GuildName, String + ZoneString.
+
+	// Calculate payload size.
+	u32 payloadSize = 0;
+	// Fixed header size.
+	payloadSize += 64;
+	// Fixed results size.
+	payloadSize += 48 * pResults.size();
+	// Variable result size.
+	for (auto i : pResults) {
+		payloadSize += i->getName().size() + 1;
+		payloadSize += guildName.size() + 1;
+		payloadSize += accountName.size() + 1;
 	}
 
-	packetSize += sizeof(WhoAllReturnStruct) + (numResults * sizeof(WhoAllPlayer));
-	auto packet = new EQApplicationPacket(OP_WhoAllResponse, packetSize);
-	auto payload = reinterpret_cast<WhoAllReturnStruct*>(packet->pBuffer);
-	payload->id = 0;
-	payload->playerineqstring = 5001; // TODO: Magic.
-	strcpy(payload->line, LINE.c_str());
-	payload->unknown35 = 0x0a;
-	payload->unknown36 = 0;
-	payload->playersinzonestring = 5029;
-	payload->unknown44[0] = 0;
-	payload->unknown44[1] = 0;
-	payload->unknown52 = numResults;
-	payload->unknown56 = numResults;
-	payload->playercount = numResults;
+	auto packet = new EQApplicationPacket(OP_WhoAllResponse, payloadSize);
+	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
 
-	StringStream ss;
-	ss << "Size WhoAllReturnStruct= " << sizeof(WhoAllReturnStruct);
-	Log::error(ss.str());
-	ss.str("");
-	ss << "Size WhoAllPlayer= " << sizeof(WhoAllPlayer);
-	Log::error(ss.str());
+	// Write header.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(startStringID); // String ID.
+	ds.writeString(whoLine);
+	ds.write<u8>(0x0a); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(endStringID); // String ID.
+	ds.write<u32>(0); // Filtered.
+	ds.write<u32>(0); // No Active Characters.
+	ds.write<u32>(numResults); // Count.
+	ds.write<u32>(numResults); // Players.
+	ds.write<u32>(numResults); // Number of results.
 
-	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
-	ds.movePointer(sizeof(WhoAllReturnStruct)); // Move the pointer to where WhoAllPlayer begin.
-
-	ss << "Written 1: " << ds.getBytesWritten();
-	Log::error(ss.str());
-
-	enum RankMessageID {
-		RM_STEWARD = 5007,				// * Steward *
-		RM_APPRENTICE_GUIDE = 5008,		// * Apprentice Guide *
-		RM_GUIDE = 5009,				// * Guide *
-		RM_QUESTTROUPE = 5010,			// * QuestTroupe *
-		RM_SENIOR_GUIDE = 5011,			// * Senior Guide *
-		RM_GM_TESTER = 5012,			// * GM - Tester *
-		RM_EQ_SUPPORT = 5013,			// * EQ Support *
-		RM_GM_STAFF = 5014,				// * GM - Staff *
-		RM_GM_ADMIN = 5015,				// * GM - Admin *
-		RM_GM_LEAD_ADMIN = 5016,		// * GM - Lead Admin *
-		RM_QUESTMASTER = 5017,			// * QuestMaster *
-		RM_GM_AREAS = 5018,				// * GM - Areas *
-		RM_GM_CODER = 5019,				// * GM - Coder *
-		RM_GM_MGMT = 5020,				// * GM - Mgmt *
-		RM_GM_IMPOSSIBLE = 5021,		// * GM - Impossible *
-		RM_AFK = 12311,
-		RM_GM = 12312,
-		RM_LD = 12313,
-		RM_LFG = 12314,
-		RM_TRADER = 12315
-	};
-
-	enum FormatStringID {
-		FS_GM_ANONYMOUS = 5022,		// % T1[ANON(% 2 % 3)] % 4 (% 5) % 6 % 7 % 8
-		FS_ROLEPLAY = 5023,		// % T1[ANONYMOUS] % 2 % 3 % 4
-		FS_ANONYMOUS = 5024,		//% T1[ANONYMOUS] % 2 % 3
-		FS_DEFAULT = 5025		//% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
-	};
-	const bool receiverIsGM = mCharacter->isGM() == 1 ? true : false;
-	for (auto i : pMatches) {
-		// NOTE: The write methods below *MUST* stay in order.
-
-		// Determine Format String ID.
-		uint32 formatString = FS_DEFAULT;
-		if (i->getAnonymous() != AnonType::None) {
-			// Player is /roleplay
-			if (i->isRoleplaying()) 
-				formatString = FS_ROLEPLAY;
-			// Player is /anonymous
-			if (i->isAnonymous())
-				formatString = FS_ANONYMOUS;
-
-			// Allows GM to see through anonymous.
-			if (receiverIsGM)
-				formatString = FS_GM_ANONYMOUS;
+	// Write results.
+	for (auto i : pResults) {
+		enum FormatStringID {
+			FS_GM_ANONYMOUS = 5022, // % T1[ANON(% 2 % 3)] % 4 (% 5) % 6 % 7 % 8
+			FS_ROLEPLAY = 5023, // % T1[ANONYMOUS] % 2 % 3 % 4
+			FS_ANONYMOUS = 5024, //% T1[ANONYMOUS] % 2 % 3
+			FS_DEFAULT = 5025, //% T1[% 2 % 3] % 4 (% 5) % 6 % 7 % 8 % 9
+		};
+		// Determine which format String ID to use.
+		u32 formatString = FS_DEFAULT;
+		// Character is anonymous.
+		if (i->isAnonymous()) {
+			formatString = FS_ANONYMOUS;
+			// GM override.
+			if (toGM) formatString = FS_GM_ANONYMOUS;
 		}
-		ds.write<uint32>(formatString); // formatstring
+		// Character is roleplaying.
+		if (i->isRoleplaying()) {
+			formatString = FS_ROLEPLAY;
+			// GM override.
+			if (toGM) formatString = FS_GM_ANONYMOUS;
+		}
 
-		ds.write<uint32>(0xFFFFFFFF); // pidstring (Not sure what this does).
-
-		ds.writeString(i->getName()); // name
+		enum WhoFlags {
+			WF_None = 0,
+			WF_AFK = 1,
+			WF_LD = 2 << 2,
+			WF_Trader = 2 << 3,
+			WF_Buyer = 2 << 4,
+			WF_RIP = 2 << 5,
+		};
+		// Determine Character flags.
+		u32 flags = WF_None;
+		if (i->isAFK()) flags |= WF_AFK;
+		if (i->isLinkDead()) flags |= WF_LD;
+		if (i->isTrader()) flags |= WF_Trader;
+		if (i->isBuyer()) flags |= WF_Buyer;
+		if (i->isDead()) flags |= WF_RIP;
 		
-		// Determine Rank String ID.
-		uint32 rankStringID = 0xFFFFFFFF;
-		if (i->getStatus() > 0) {
-			// TODO: Can break these up further and use more rank IDs.
-			if (i->getStatus() == 255) {
-				rankStringID = RM_GM_IMPOSSIBLE;
-			}
-			else {
-				rankStringID = RM_GM;
-			}
-		}
-		ds.write<uint32>(rankStringID); // rankstring
-		//dynamicStructure.write<uint32>(1509); // rankstring
+		u32 zoneStringID = 0xFFFFFFFF;
+		if (pWhoType == WhoType::All) zoneStringID = 5006; // 5006 = "ZONE: %1"
 
-		ds.writeString(FakeGuild); // guild
-		//dynamicStructure.write<uint32>(0); // guild
-		ds.write<uint32>(0xFFFFFFFF); // unknown80[0]
-		ds.write<uint32>(0xFFFFFFFF); // unknown80[1]
-		//dynamicStructure.write<uint32>(0xFFFFFFFF); // zonestring
-		ds.write<uint32>(i->getZone()->getLongNameStringID()); // zonestring // This is StringID 
-		ds.write<uint32>(4); // zone (Not sure what this does).
-		ds.write<uint32>(i->getClass()); // class_
-		ds.write<uint32>(i->getLevel()); // level
-		ds.write<uint32>(i->getRace()); // race
-		ds.writeString(FakeAccount); // account
-		//dynamicStructure.write<uint32>(0); // account
-		ds.write<uint32>(0); // unknown100
-		//ss << "Written 4: " << dynamicStructure.getBytesWritten();
-		//Log::error(ss.str());
-		//ss.str("");
+		// Determine Zone ID.
+		u16 zoneID = 0;
+		if (pWhoType == WhoType::All) {
+			// Character is not currently zoning.
+			if (i->isZoning() == false)
+				zoneID = i->getZone()->getID();
+		}
+
+		ds.write<u32>(formatString); // String ID.
+		ds.write<u32>(flags); // Flags.
+		ds.write<u32>(0xFFFFFFFF); // Unknown.
+		ds.writeString(i->getName()); // Character Name.
+		ds.write<u32>(0xFFFFFFFF); // String ID. (Rank String ID) *GM Impossible* etc.
+		ds.writeString(guildName); // Guild Name
+		ds.write<u32>(0); // Unknown.
+		ds.write<u32>(0xFFFFFFFF); // String ID.
+		ds.write<u32>(zoneStringID); // String ID.
+		ds.write<u16>(zoneID); // Zone ID. Parameter for zoneStringID String.
+		ds.write<u16>(0); // Unknown (Tested, not part of Zone ID.)
+		ds.write<u32>(i->getClass()); // Class.
+		ds.write<u32>(i->getLevel()); // Level.
+		ds.write<u32>(i->getRace()); // Race.
+		ds.writeString(accountName); // Account Name
+		ds.write<u32>(0); // Unknown.
 	}
 
 	sendPacket(packet);

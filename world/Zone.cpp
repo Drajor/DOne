@@ -556,26 +556,29 @@ void Zone::requestSave(Character*pCharacter) {
 	AccountManager::getInstance().updateCharacter(pCharacter->getAccountID(), pCharacter);
 }
 
-void Zone::whoRequest(Character* pCharacter, WhoFilter& pFilter) {
-	// /who all
-	if (pFilter.mType == WHO_WORLD) {
-		ZoneManager::getInstance().whoAllRequest(pCharacter, pFilter);
-	}
-	// /who
-	else if (pFilter.mType == WHO_ZONE) {
-		_handleWhoRequest(pCharacter, pFilter);
-	}
-}
+void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter) {
+	for (auto i : mCharacters) {
+		if (i->isHidden()) continue;
+		if (pFilter.checkRace() && i->getRace() != pFilter.mRace) continue;
+		if (pFilter.checkClass() && i->getClass() != pFilter.mClass) continue;
+		if (pFilter.checkMinimumLevel() && i->getLevel() < pFilter.mLevelMinimum) continue;
+		if (pFilter.checkMaximumLevel() && i->getLevel() > pFilter.mLevelMaximum) continue;
 
-void Zone::_handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
-	std::list<Character*> matches;
-	getWhoMatches(matches, pFilter);
-	pCharacter->getConnection()->sendWhoResults(matches);
-}
+		// Check: Flags
+		if (pFilter.checkFlag()) {
+			if (pFilter.mFlag == WhoFlag::LFG && !i->isLFG()) continue;
+			if (pFilter.mFlag == WhoFlag::Trader && !i->isTrader()) continue;
+			if (pFilter.mFlag == WhoFlag::Buyer && !i->isBuyer()) continue;
 
-void Zone::getWhoMatches(std::list<Character*>& pMatches, WhoFilter& pFilter) {
-	// Search zone for matches to pFilter.
-	pMatches.insert(pMatches.begin(), mCharacters.begin(), mCharacters.end());
+			// Check: Guild ID.
+			if (pFilter.mFlag != i->getGuildID()) continue;
+		}
+
+		// Check: Character Name.
+		if (pFilter.checkCharacterName() && !Utility::compareCI(pFilter.mCharacterName, i->getName())) continue;
+
+		pResults.push_back(i);
+	}
 }
 
 Character* Zone::findCharacter(const String pCharacterName) {
@@ -658,12 +661,28 @@ void Zone::_onLeaveZone(Character* pCharacter) {
 	// Handle: Character leaving zone while looting.
 	// (UNTESTED)
 	if (pCharacter->isLooting()) {
-		Actor* corpse = pCharacter->getLootingCorpse();
+		auto corpse = pCharacter->getLootingCorpse();
 		// Clear Character reference from corpse.
 		corpse->getLootController()->clearLooter();
 		// Clear corpse reference from Character.
 		pCharacter->setLootingCorpse(nullptr);
 	}
+
+	// Handle: Character leaving zone while shopping.
+	// (UNTESTED)
+	if (pCharacter->isShopping()) {
+		auto npc = pCharacter->getShoppingWith();
+		EXPECTED(npc);
+		// Disassociate Character and NPC.
+		EXPECTED(npc->removeShopper(pCharacter));
+		pCharacter->setShoppingWith(nullptr);
+	}
+
+	// Targetters.
+
+	// Trading.
+
+	// Aggro.
 
 	// Store Character during zoning.
 	ZoneManager::getInstance().addZoningCharacter(pCharacter);
@@ -1810,4 +1829,19 @@ void Zone::handleRespawnSelection(Character* pCharacter, const u32 pSelection) {
 	// Find option.
 
 	// TODO!
+}
+
+void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
+	std::list<Character*> results;
+
+	// /who all
+	if (pFilter.mType == WhoType::All) {
+		ZoneManager::getInstance().handleWhoRequest(pCharacter, pFilter, results);
+	}
+	// /who
+	else if (pFilter.mType == WhoType::Zone) {
+		getWhoMatches(results, pFilter);
+	}
+
+	pCharacter->getConnection()->sendWhoResponse(pFilter.mType, results);
 }
