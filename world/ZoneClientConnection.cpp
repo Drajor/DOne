@@ -1603,13 +1603,14 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	EXPECTED(mConnected);
 
 	static const u32 MaxResults = 20;
-	static const String whoLine("--------------------------");
+	//static const String whoLine("-+-+-+-+----------+-+-+-+-");
+	static const String whoLine("8===o- - - - - - - - - - -");
 
 	const u32 numResults = pResults.size();
 	const bool toGM = mCharacter->isGM();
 
-	static const String guildName = "<Monster Bash>";
-	static const String accountName = "Boobs";
+	static const String guildName = "<TODO: Finish what you started!>";
+	static const String accountName = "account";
 
 	enum WhoStartStringID {
 		WSS_PlayersLFG = 5000, // Players looking for a group :
@@ -1726,7 +1727,7 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 		ds.write<u32>(formatString); // String ID.
 		ds.write<u32>(flags); // Flags.
 		ds.write<u32>(0xFFFFFFFF); // Unknown.
-		ds.writeString(i->getName()); // Character Name.
+		ds.writeString(i->getName()); // Character Name. // TODO: This is going to come up as X's corpse if the Character is dead.
 		ds.write<u32>(0xFFFFFFFF); // String ID. (Rank String ID) *GM Impossible* etc.
 		ds.writeString(guildName); // Guild Name
 		ds.write<u32>(0); // Unknown.
@@ -1737,7 +1738,7 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 		ds.write<u32>(i->getClass()); // Class.
 		ds.write<u32>(i->getLevel()); // Level.
 		ds.write<u32>(i->getRace()); // Race.
-		ds.writeString(accountName); // Account Name
+		ds.writeString(accountName); // Account Name // TODO: This does not work.
 		ds.write<u32>(0); // Unknown.
 	}
 
