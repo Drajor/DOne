@@ -1588,7 +1588,7 @@ void ZoneClientConnection::_handleWhoRequest(const EQApplicationPacket* pPacket)
 
 	WhoFilter filter;
 	filter.mType = payload->mType == 0 ? WhoType::Zone : WhoType::All;
-	filter.mCharacterName = Utility::safeString(payload->mCharacterName, 64);
+	filter.mText = Utility::safeString(payload->mCharacterName, 64);
 	filter.mRace = payload->mRace;
 	filter.mClass = payload->mClass;
 	filter.mLevelMinimum = payload->mLevelMinimum;

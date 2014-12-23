@@ -1878,8 +1878,8 @@ namespace WhoFlag {
 }
 struct WhoFilter {
 	u32 mType = WhoType::Zone;
-	String mCharacterName;
-	inline const bool checkCharacterName() const { return !mCharacterName.empty(); }
+	String mText;
+	inline const bool checkText() const { return !mText.empty(); }
 	i32 mRace = -1;
 	inline const bool checkRace() const { return mRace != -1; }
 	i32 mClass = -1;

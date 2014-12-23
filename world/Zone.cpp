@@ -574,8 +574,12 @@ void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilt
 			if (pFilter.mFlag != i->getGuildID()) continue;
 		}
 
-		// Check: Character Name.
-		if (pFilter.checkCharacterName() && !Utility::compareCI(pFilter.mCharacterName, i->getName())) continue;
+		// Check: Text.
+		if (pFilter.checkText()) {
+			const bool characterName = Utility::findCI(i->getName(), pFilter.mText);
+			const bool zoneName = Utility::findCI(getShortName(), pFilter.mText);
+			if (!characterName && !zoneName) continue;
+		}
 
 		pResults.push_back(i);
 	}
