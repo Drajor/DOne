@@ -605,7 +605,7 @@ void Character::_processMessageQueue() {
 	mMessageQueue.clear();
 }
 
-void Character::addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage) {
+void Character::addQueuedMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
 	mMessageQueue.push_back({ pChannel, pSenderName, pMessage });
 }
 

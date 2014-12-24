@@ -57,7 +57,7 @@ void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessa
 	for (auto i : pGroup->mMembers) {
 		// Check: Where a group member is zoning, queue the message.
 		if (i->isZoning()) {
-			i->addQueuedMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
+			i->addQueuedMessage(ChannelID::Group, pSenderName, pMessage);
 			continue;
 		}
 		i->getConnection()->sendGroupMessage(pSenderName, pMessage);

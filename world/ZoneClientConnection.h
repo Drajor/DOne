@@ -68,7 +68,7 @@ public:
 	void sendStats();
 	void sendWhoResponse(const u32 pWhoType, std::list<Character*>& pMatches);
 
-	void sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage);
+	void sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
 	void sendTell(const String& pSenderName, const String& pMessage);
 	void sendGroupMessage(const String& pSenderName, const String& pMessage);
 	void sendGuildMessage(const String& pSenderName, const String& pMessage);

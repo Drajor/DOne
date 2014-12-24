@@ -528,7 +528,7 @@ void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const 
 
 		// Check: Where a guild member is zoning, queue the message.
 		if (i->isZoning()) {
-			i->addQueuedMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
+			i->addQueuedMessage(ChannelID::Guild, pSenderName, pMessage);
 			continue;
 		}
 		i->getConnection()->sendGuildMessage(pSenderName, pMessage);

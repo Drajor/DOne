@@ -407,7 +407,7 @@ void Zone::handleSay(Character* pCharacter, const String pMessage) {
 	EXPECTED(pCharacter);
 
 	// Send to other Characters.
-	_sendChat(pCharacter, ChannelID::CH_SAY, pMessage);
+	_sendChat(pCharacter, ChannelID::Say, pMessage);
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Say, pCharacter);
@@ -417,20 +417,20 @@ void Zone::handleShout(Character* pCharacter, const String pMessage) {
 	EXPECTED(pCharacter);
 
 	// Send to other Characters.
-	_sendChat(pCharacter, ChannelID::CH_SHOUT, pMessage);
+	_sendChat(pCharacter, ChannelID::Shout, pMessage);
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Shout, pCharacter);
 }
 
 void Zone::handleAuction(Character* pCharacter, const String pMessage) {
-	_sendChat(pCharacter, ChannelID::CH_AUCTION, pMessage);
+	_sendChat(pCharacter, ChannelID::Auction, pMessage);
 
 	// TODO: Server Auction
 }
 
 void Zone::handleOOC(Character* pCharacter, const String pMessage) {
-	_sendChat(pCharacter, ChannelID::CH_OOC, pMessage);
+	_sendChat(pCharacter, ChannelID::OOC, pMessage);
 	
 	// TODO: Server OOC
 }
@@ -457,7 +457,7 @@ void Zone::_sendDespawn(const uint16 pSpawnID, const bool pDecay) {
 	safe_delete(outPacket);
 }
 
-void Zone::_sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage) {
+void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMessage) {
 	const ZoneClientConnection* sender = pCharacter->getConnection();
 	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
 	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;

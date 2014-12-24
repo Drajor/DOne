@@ -211,7 +211,7 @@ private:
 	void _updatePreConnections();
 
 	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
-	void _sendChat(Character* pCharacter, ChannelID pChannel, const String pMessage);
+	void _sendChat(Character* pCharacter, const u32 pChannel, const String pMessage);
 	void _sendSpawnAppearance(Actor* pActor, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);

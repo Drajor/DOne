@@ -155,7 +155,7 @@ void ZoneManager::handleTell(Character* pCharacter, const String& pTargetName, c
 			// Send queued echo "You told Player, '[queued] Message'
 			pCharacter->getConnection()->sendSimpleMessage(MessageType::TellEcho, StringID::TELL_QUEUED, pTargetName, Utility::StringIDString(StringID::QUEUED), pMessage);
 			// Store queued message.
-			i->addQueuedMessage(ChannelID::CH_TELL, pCharacter->getName(), pMessage);
+			i->addQueuedMessage(ChannelID::Tell, pCharacter->getName(), pMessage);
 		}
 	}
 

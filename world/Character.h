@@ -82,7 +82,7 @@ public:
 	bool onZoneOut();
 	const bool onDeath();
 
-	void addQueuedMessage(ChannelID pChannel, const String& pSenderName, const String& pMessage);
+	void addQueuedMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
 
 	// Group
 	inline bool hasGroup() { return mGroup != nullptr; }
@@ -321,7 +321,7 @@ private:
 	std::list<NPC*> mVisibleNPCs; // NPCs that are visible to this Character
 
 	struct QueuedChannelMessage {
-		const ChannelID mChannelID;
+		const u32 mChannelID;
 		const String mSenderName;
 		const String mMessage;
 	};

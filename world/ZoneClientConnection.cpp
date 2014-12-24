@@ -1184,32 +1184,32 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	const uint32 channel = payload->chan_num;
 	
 	switch (channel) {
-	case ChannelID::CH_GUILD:
+	case ChannelID::Guild:
 		EXPECTED(mCharacter->hasGuild());
 		GuildManager::getInstance().handleMessage(mCharacter, message);
 		break;
-	case ChannelID::CH_GROUP:
+	case ChannelID::Group:
 		GroupManager::getInstance().handleMessage(mCharacter, message);
 		break;
-	case ChannelID::CH_SHOUT:
+	case ChannelID::Shout:
 		mZone->handleShout(mCharacter, message);
 		break;
-	case ChannelID::CH_AUCTION:
+	case ChannelID::Auction:
 		mZone->handleAuction(mCharacter, message);
 		break;
-	case ChannelID::CH_OOC:
+	case ChannelID::OOC:
 		mZone->handleOOC(mCharacter, message);
 		break;
-	case ChannelID::CH_GMSAY:
-	case ChannelID::CH_BROADCAST:
+	case ChannelID::GMSay:
+	case ChannelID::Broadcast:
 		// GM_SAY / CH_BROADAST are unused as far as I know.
 		break;
-	case ChannelID::CH_TELL:
+	case ChannelID::Tell:
 		if (senderName.length() > 0 && targetName.length() > 0) {
 			mZone->handleTell(mCharacter, targetName, message);
 		}
 		break;
-	case ChannelID::CH_SAY:
+	case ChannelID::Say:
 		// Check whether user has entered a command.
 		if (message[0] == COMMAND_TOKEN) {
 			mCommandHandler->command(mCharacter, message);
@@ -1217,12 +1217,12 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 		}
 		mZone->handleSay(mCharacter, message);
 		break;
-	case ChannelID::CH_RAID:
+	case ChannelID::Raid:
 		break;
-	case ChannelID::CH_UCS:
+	case ChannelID::UCS:
 		break;
 		// /emote dances around wildly!
-	case ChannelID::CH_EMOTE:
+	case ChannelID::Emote:
 		mZone->handleEmote(mCharacter, message);
 		break;
 	default:
@@ -1752,7 +1752,7 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const String& pSenderName, const String& pMessage) {
+void ZoneClientConnection::sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
@@ -1769,17 +1769,17 @@ void ZoneClientConnection::sendChannelMessage(const ChannelID pChannel, const St
 
 void ZoneClientConnection::sendTell(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
-	sendChannelMessage(ChannelID::CH_TELL, pSenderName, pMessage);
+	sendChannelMessage(ChannelID::Tell, pSenderName, pMessage);
 }
 
 void ZoneClientConnection::sendGroupMessage(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
-	sendChannelMessage(ChannelID::CH_GROUP, pSenderName, pMessage);
+	sendChannelMessage(ChannelID::Group, pSenderName, pMessage);
 }
 
 void ZoneClientConnection::sendGuildMessage(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
-	sendChannelMessage(ChannelID::CH_GUILD, pSenderName, pMessage);
+	sendChannelMessage(ChannelID::Guild, pSenderName, pMessage);
 }
 
 // NOTE: This occurs when the player presses 'Invite' on the group window.

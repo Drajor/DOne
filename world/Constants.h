@@ -1220,21 +1220,22 @@ enum BodyType : uint8 {
 	BT_Special = 67
 };
 
-enum class ChannelID : uint32 {
-	CH_GUILD = 0, // /gu
-	CH_GROUP = 2, // /g
-	CH_SHOUT = 3, // /shou
-	CH_AUCTION = 4, // /auc
-	CH_OOC = 5, // /ooc
-	CH_BROADCAST = 6, // ??
-	CH_TELL = 7, // /t
-	CH_SAY = 8, // /say
-	CH_GMSAY = 11, // ??
-	CH_RAID = 15, // /rs
-	CH_UCS = 20, // Not sure yet.
-	CH_EMOTE = 22 // UF+
-
-};
+namespace ChannelID {
+	enum : u32 {
+		Guild = 0, // /gu
+		Group = 2, // /g
+		Shout = 3, // /shou
+		Auction = 4, // /auc
+		OOC = 5, // /ooc
+		Broadcast = 6, // ??
+		Tell = 7, // /t
+		Say = 8, // /say
+		GMSay = 11, // ??
+		Raid = 15, // /rs
+		UCS = 20, // Not sure yet.
+		Emote = 22 // UF+
+	};
+}
 
 namespace MessageType {
 	enum : u32 {
