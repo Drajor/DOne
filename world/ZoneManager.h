@@ -10,9 +10,9 @@ struct WhoFilter;
 
 struct ZoneSearchEntry {
 	String mName = "";
-	ZoneID mID = ZoneIDs::NoZone;
-	uint16 mInstanceID = 0;
-	uint32 mNumCharacters = 0;
+	u16 mID = ZoneIDs::NoZone;
+	u16 mInstanceID = 0;
+	u32 mNumCharacters = 0;
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;
 
@@ -28,9 +28,9 @@ public:
 	void update();
 
 	// Returns whether or not the specified Zone is running.
-	const bool isZoneRunning(const uint16 pZoneID, const uint16 pInstanceID) const;
+	const bool isZoneRunning(const u16 pZoneID, const u16 pInstanceID) const;
 
-	const bool isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID);
+	const bool isZoneAvailable(const u16 pZoneID, const u16 pInstanceID);
 
 	const bool canZoneShutdown(const u16 pZoneID, const u16 pInstanceID) const;
 	const bool canZoneShutdown(Zone* pZone) const;
@@ -49,18 +49,18 @@ public:
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 
 	void handleWhoRequest(Character* pCharacter, const WhoFilter& pFilter, std::list<Character*>& pResults);
-	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr);
+	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr) const;
 
 	// Character Zoning.
 	void addZoningCharacter(Character* pCharacter);
 	const bool removeZoningCharacter(const String& pCharacterName);
-	const bool hasZoningCharacter(const uint32 pAccountID);
+	const bool hasZoningCharacter(const u32 pAccountID) const;
 	Character* getZoningCharacter(const String& pCharacterName);
-	String getZoningCharacterName(const uint32 pAccountID);
+	String getZoningCharacterName(const u32 pAccountID);
 private:
 
 	bool mInitialised = false;
-	Zone* _search(const uint16 pZoneID, const uint16 pInstanceID) const;
+	Zone* _search(const u16 pZoneID, const u16 pInstanceID) const;
 	const bool _makeZone(const u16 pZoneID, const u16 pInstanceID);
 	const u16 _getNextZonePort();
 	std::list<u16> mAvailableZonePorts;

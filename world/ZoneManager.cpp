@@ -1,11 +1,7 @@
 #include "ZoneManager.h"
 #include "ZoneData.h"
 #include "Zone.h"
-#include "GroupManager.h"
-#include "GuildManager.h"
-#include "RaidManager.h"
 #include "World.h"
-#include "DataStore.h"
 #include "Character.h"
 #include "ZoneClientConnection.h"
 #include "LogSystem.h"
@@ -49,12 +45,12 @@ bool ZoneManager::initialise() {
 	return true;
 }
 
-const bool ZoneManager::isZoneRunning(const uint16 pZoneID, const uint16 pInstanceID) const {
+const bool ZoneManager::isZoneRunning(const u16 pZoneID, const u16 pInstanceID) const {
 	return _search(pZoneID, pInstanceID) != nullptr;
 }
 
-const bool ZoneManager::isZoneAvailable(const uint16 pZoneID, const uint16 pInstanceID) {
-	Zone* zone = _search(pZoneID, pInstanceID);
+const bool ZoneManager::isZoneAvailable(const u16 pZoneID, const u16 pInstanceID) {
+	auto zone = _search(pZoneID, pInstanceID);
 	if (zone) {
 		// Where Zone is shutting down, do not allow entry.
 		return !zone->isShuttingDown();
@@ -65,7 +61,7 @@ const bool ZoneManager::isZoneAvailable(const uint16 pZoneID, const uint16 pInst
 
 const bool ZoneManager::canZoneShutdown(const u16 pZoneID, const u16 pInstanceID) const {
 	// Check: Zone exists.
-	Zone* zone = _search(pZoneID, pInstanceID);
+	auto zone = _search(pZoneID, pInstanceID);
 	if (!zone) return false;
 
 	return canZoneShutdown(zone);
@@ -94,7 +90,7 @@ const bool ZoneManager::requestZoneBoot(const u16 pZoneID, const u16 pInstanceID
 
 const bool ZoneManager::requestZoneShutdown(const u16 pZoneID, const u16 pInstanceID) {
 	// Check: Zone exists.
-	Zone* zone = _search(pZoneID, pInstanceID);
+	auto zone = _search(pZoneID, pInstanceID);
 	if (!zone) return false;
 
 	if (!canZoneShutdown(zone)) return false;
@@ -122,7 +118,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	auto zoneData = ZoneDataManager::getInstance().getZoneData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 
-	Zone* zone = new Zone(port, pZoneID, pInstanceID);
+	auto zone = new Zone(port, pZoneID, pInstanceID);
 	if (!zone->initialise(zoneData)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
@@ -163,7 +159,7 @@ void ZoneManager::handleTell(Character* pCharacter, const String& pTargetName, c
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::White, StringID::PLAYER_NOT_ONLINE, pTargetName);
 }
 
-Character* ZoneManager::findCharacter(const String pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) {
+Character* ZoneManager::findCharacter(const String pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) const {
 	Character* character = nullptr;
 
 	// Search Zones.
@@ -205,7 +201,7 @@ const bool ZoneManager::removeZoningCharacter(const String& pCharacterName) {
 	return false;
 }
 
-const bool ZoneManager::hasZoningCharacter(const uint32 pAccountID) {
+const bool ZoneManager::hasZoningCharacter(const u32 pAccountID) const {
 	for (auto i : mZoningCharacters) {
 		if (i->getAccountID() == pAccountID) {
 			return true;
@@ -214,7 +210,7 @@ const bool ZoneManager::hasZoningCharacter(const uint32 pAccountID) {
 	return false;
 }
 
-String ZoneManager::getZoningCharacterName(const uint32 pAccountID) {
+String ZoneManager::getZoningCharacterName(const u32 pAccountID) {
 	for (auto i : mZoningCharacters) {
 		if (i->getAccountID() == pAccountID) {
 			return i->getName();
@@ -247,7 +243,7 @@ ZoneSearchResult ZoneManager::getAllZones() {
 	return result;
 }
 
-Zone* ZoneManager::_search(const uint16 pZoneID, const uint16 pInstanceID) const {
+Zone* ZoneManager::_search(const u16 pZoneID, const u16 pInstanceID) const {
 	for (auto i : mZones) {
 		if (i->getID() == pZoneID && i->getInstanceID() == pInstanceID)
 			return i;

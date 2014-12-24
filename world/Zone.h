@@ -96,7 +96,7 @@ public:
 	inline const u16 getInstanceID() const { return mInstanceID; }
 	inline const u16 getPort() const { return mPort; }
 
-	Character* findCharacter(const String pCharacterName);
+	Character* findCharacter(const String pCharacterName) const;
 
 	// Search for an Actor by Spawn ID.
 	Actor* findActor(const uint32 pSpawnID) const;

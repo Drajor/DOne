@@ -585,7 +585,7 @@ void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilt
 	}
 }
 
-Character* Zone::findCharacter(const String pCharacterName) {
+Character* Zone::findCharacter(const String pCharacterName) const {
 	for (auto i : mCharacters) {
 		if (i->getName() == pCharacterName)
 			return i;
