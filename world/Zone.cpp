@@ -458,20 +458,16 @@ void Zone::_sendDespawn(const uint16 pSpawnID, const bool pDecay) {
 }
 
 void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMessage) {
-	const ZoneClientConnection* sender = pCharacter->getConnection();
-	EQApplicationPacket* outPacket = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
-	ChannelMessage_Struct* payload = (ChannelMessage_Struct*)outPacket->pBuffer;
-	payload->language = Languages::COMMON_TONGUE_LANG;
-	payload->skill_in_language = 0;
-	payload->chan_num = static_cast<uint32>(pChannel);
-	strcpy(payload->message, pMessage.c_str());
-	strcpy(payload->sender, pCharacter->getName().c_str());
+	EXPECTED(pCharacter);
+
+	const auto sender = pCharacter->getConnection();
+	auto packet = ZoneClientConnection::makeChannelMessage(pChannel, pCharacter->getName(), pMessage);
 
 	for (auto i : mConnections) {
 		if (i != sender)
-			i->sendPacket(outPacket);
+			i->sendPacket(packet);
 	}
-	safe_delete(outPacket);
+	delete packet;
 }
 
 void Zone::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {

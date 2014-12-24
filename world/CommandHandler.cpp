@@ -1988,6 +1988,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	else if (pCommandName == "respawn") {
 		pCharacter->getConnection()->sendRespawnWindow();
 	}
+	else if (pCommandName == "msg" && pParameters.size() == 2) {
+		u32 channelID = 0;
+		if (!Utility::stoSafe(channelID, pParameters[0])) { return; }
+
+		pCharacter->getConnection()->sendChannelMessage(channelID, "tits", pParameters[1]);
+	}
 	// Does not work!
 	//// Speed
 	//else if (pCommandName == "speed" && pParameters.size() == 1) {

@@ -2,7 +2,6 @@
 
 #include "Constants.h"
 #include "Singleton.h"
-#include "ClientAuthentication.h"
 
 class Zone;
 class Character;

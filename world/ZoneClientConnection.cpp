@@ -1752,17 +1752,38 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	EXPECTED(ds.check());
 }
 
+EQApplicationPacket* ZoneClientConnection::makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
+	u32 payloadSize = 0;
+	payloadSize += 36; // Fixed.
+	payloadSize += pSenderName.size() + 1;
+	payloadSize += pMessage.size() + 1;
+	payloadSize += 1; // target null term
+
+	auto packet = new EQApplicationPacket(OP_ChannelMessage, payloadSize);
+	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+
+	ds.writeString(pSenderName); // Sender Name.
+	ds.write<u8>(0); // Target Name.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(0); // Language ID.
+	ds.write<u32>(pChannel); // Channel ID.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u8>(0); // Unknown.
+	ds.write<u32>(0); // Language Skill.
+	ds.writeString(pMessage); // Message.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u32>(0); // Unknown.
+	ds.write<u16>(0); // Unknown.
+	ds.write<u8>(0); // Unknown.
+
+	return packet;
+}
+
 void ZoneClientConnection::sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+pMessage.length() + 1);
-	auto payload = reinterpret_cast<ChannelMessage_Struct*>(packet->pBuffer);
-	payload->language = Languages::COMMON_TONGUE_LANG;
-	payload->skill_in_language = 0;
-	payload->chan_num = static_cast<uint32>(pChannel);
-	strcpy(payload->message, pMessage.c_str());
-	strcpy(payload->sender, pSenderName.c_str());
-
+	auto packet = makeChannelMessage(pChannel, pSenderName, pMessage);
 	sendPacket(packet);
 	delete packet;
 }
