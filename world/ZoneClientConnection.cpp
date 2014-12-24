@@ -1603,13 +1603,11 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	EXPECTED(mConnected);
 
 	static const u32 MaxResults = 20;
-	//static const String whoLine("-+-+-+-+----------+-+-+-+-");
-	static const String whoLine("8===o- - - - - - - - - - -");
+	static const String whoLine("-+-+-+-+----------+-+-+-+-");
 
 	const u32 numResults = pResults.size();
 	const bool toGM = mCharacter->isGM();
 
-	static const String guildName = "<TODO: Finish what you started!>";
 	static const String accountName = "account";
 
 	enum WhoStartStringID {
@@ -1654,8 +1652,12 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	// Variable result size.
 	for (auto i : pResults) {
 		payloadSize += i->getName().size() + 1;
-		payloadSize += guildName.size() + 1;
 		payloadSize += accountName.size() + 1;
+
+		if (i->hasGuild())
+			payloadSize += i->getGuildName().size() + 3; // +1 for null terminator and + 2 for brackets.
+		else
+			payloadSize += 1; // null terminator.
 	}
 
 	auto packet = new EQApplicationPacket(OP_WhoAllResponse, payloadSize);
@@ -1723,6 +1725,9 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 			if (i->isZoning() == false)
 				zoneID = i->getZone()->getID();
 		}
+		String guildName = "";
+		if (i->hasGuild())
+			guildName = "<" + i->getGuildName() + ">";
 
 		ds.write<u32>(formatString); // String ID.
 		ds.write<u32>(flags); // Flags.

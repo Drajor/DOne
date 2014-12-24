@@ -93,8 +93,9 @@ public:
 	inline bool hasGuild() { return mGuild != nullptr; }
 	inline Guild* getGuild() { return mGuild; }
 	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
-	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); }
-	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None); }
+	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank, const String pGuildName) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); mGuildName = pGuildName; }
+	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None, ""); }
+	const String& getGuildName() const { return mGuildName; }
 
 	// Pending Guild Invite
 	bool hasPendingGuildInvite() { return mPendingGuildInviteID != NO_GUILD; }
@@ -309,6 +310,7 @@ private:
 	Raid* mRaid = nullptr;
 
 	Guild* mGuild = nullptr;
+	String mGuildName;
 	GuildID mPendingGuildInviteID = NO_GUILD;
 	String mPendingGuildInviteName = "";
 

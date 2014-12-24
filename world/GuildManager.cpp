@@ -123,7 +123,7 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
-	pCharacter->setGuild(guild, guild->mID, GuildRanks::Leader);
+	pCharacter->setGuild(guild, guild->mID, GuildRanks::Leader, guild->mName);
 
 	// Notify the Zone of the Character joining.
 	pCharacter->getZone()->notifyCharacterGuildChange(pCharacter);
@@ -257,7 +257,7 @@ void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInvi
 	guild->mMembers.push_back(member);
 	guild->mOnlineMembers.push_back(pCharacter);
 
-	pCharacter->setGuild(guild, guild->mID, GuildRanks::Member);
+	pCharacter->setGuild(guild, guild->mID, GuildRanks::Member, guild->mName);
 	pCharacter->clearPendingGuildInvite();
 
 	// Notify the inviter (Zoning characters are ignored for now.)
@@ -389,7 +389,7 @@ void GuildManager::onConnect(Character* pCharacter, uint32 pGuildID) {
 	for (auto i : guild->mMembers) {
 		if (i->mName == pCharacter->getName()) {
 			
-			pCharacter->setGuild(guild, guild->mID, i->mRank);
+			pCharacter->setGuild(guild, guild->mID, i->mRank, guild->mName);
 			_sendMessage(guild, SYS_NAME, pCharacter->getName() + " has come online!");
 			guild->mOnlineMembers.push_back(pCharacter);
 
