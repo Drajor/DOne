@@ -17,6 +17,7 @@
 #include "AlternateCurrencyManager.h"
 #include "NPCFactory.h"
 #include "Random.h"
+#include "ExperienceController.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -1048,6 +1049,47 @@ public:
 };
 
 /*****************************************************************************************************************************/
+class InformationCommand : public Command {
+public:
+	InformationCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #info");
+		mMinimumParameters = 0;
+		mMaximumParameters = 0;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		auto target = mInvoker->getTarget();
+
+		mInvoker->notify("-- Information -- ");
+		mInvoker->notify("Spawn ID: " + std::to_string(target->getSpawnID()));
+		
+
+		if (mInvoker->targetIsCharacter()) { return informationCharacter(Actor::cast<Character*>(target)); }
+		if (mInvoker->targetIsNPC()) { return informationNPC(Actor::cast<NPC*>(target)); }
+		return true;
+	}
+
+	const bool informationCharacter(Character* pCharacter) {
+		auto experienceController = pCharacter->getExperienceController();
+
+		mInvoker->notify("-- Experience -- ");
+		mInvoker->notify("Level: " + std::to_string(experienceController->getLevel()) + " / " + std::to_string(experienceController->getMaximumLevel()));
+		mInvoker->notify("Experience: " + std::to_string(experienceController->getExperience()) + " / " + std::to_string(experienceController->getExperienceForNextLevel()));
+		mInvoker->notify("AA Experience: " + std::to_string(experienceController->getAAExperience()) + " / " + std::to_string(experienceController->getAAExperienceForNextPoint()));
+		mInvoker->notify("Unspent AA: " + std::to_string(experienceController->getUnspentAAPoints()));
+		mInvoker->notify("Spent AA: " + std::to_string(experienceController->getSpentAAPoints()));
+		return true;
+	}
+
+	const bool informationNPC(NPC* pNPC) {
+		mInvoker->notify("Level: " + std::to_string(pNPC->getLevel()));
+
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
 class InspectCommand : public Command {
 public:
 	InspectCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
@@ -1632,6 +1674,7 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new SummonCommand(100, { "summon" }));
 	mCommands.push_back(new KickCommand(100, { "kick" }));
 	mCommands.push_back(new InvulnerableCommand(100, { "invul" }));
+	mCommands.push_back(new InformationCommand(100, { "info" }));
 	mCommands.push_back(new InspectCommand(100, { "inspect" }));
 	mCommands.push_back(new WeatherCommand(100, { "weather" }));
 
@@ -1899,12 +1942,12 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 
 
 	}
-	else if (pCommandName == "info") {
-		auto target = pCharacter->getTarget();
-		if (target) {
-			pCharacter->notify(target->getName() + " ActorID = " + std::to_string(target->getSpawnID()));
-		}
-	}
+	//else if (pCommandName == "info") {
+	//	auto target = pCharacter->getTarget();
+	//	if (target) {
+	//		pCharacter->notify(target->getName() + " ActorID = " + std::to_string(target->getSpawnID()));
+	//	}
+	//}
 
 	else if (pCommandName == "del") {
 		uint32 stacks = 0;

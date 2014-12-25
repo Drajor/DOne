@@ -103,7 +103,8 @@ bool Character::initialise() {
 	setStatus(mData->mStatus);
 
 	// Experience
-	EXPECTED_BOOL(mExperienceController->initalise(mData->mExperience.mLevel, 20, mData->mExperience.mExperience, mData->mExperience.mUnspentAAPoints, 100, mData->mExperience.mSpentAAPoints, 9000, mData->mExperience.mAAExperience));
+	static const u8 maxLevel = 100; // temp.
+	EXPECTED_BOOL(mExperienceController->initalise(mData->mExperience.mLevel, maxLevel, mData->mExperience.mExperience, mData->mExperience.mUnspentAAPoints, 100, mData->mExperience.mSpentAAPoints, 9000, mData->mExperience.mAAExperience));
 
 	mPosition = mData->mPosition;
 	mHeading = mData->mHeading;

@@ -69,7 +69,7 @@ public:
 	// Returns the amount of experience required for a specific Level.
 	static const u32 getExperienceForLevel(const u8 pLevel);
 	inline const u32 getExperienceForNextLevel() const { return getExperienceForLevel(getLevel() + 1); };
-	inline const u32 getExperienceCap() const { return getExperienceForLevel(getMaximumLevel()) - 1; }
+	inline const u32 getExperienceCap() const { return getExperienceForLevel(getMaximumLevel() + 1) - 1; }
 
 	// Returns the amount of AA experience required for a specific AA point.
 	static const u32 getAAExperienceForPoint(const u32 pTotalPoints);

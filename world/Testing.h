@@ -234,7 +234,7 @@ TEST_F(ExperienceControllerTestAddExperience, Adding) {
 
 	mController->addExperience(998374623); // Really big hit, max level.
 	EXPECT_EQ(mController->getMaximumLevel(), mController->getLevel());
-	EXPECT_EQ(ExperienceController::getExperienceForLevel(mController->getMaximumLevel()) - 1, mController->getExperience()); // Experience is capped.
+	EXPECT_EQ(mController->getExperienceCap(), mController->getExperience()); // Experience is capped.
 	EXPECT_EQ(false, mController->canGainExperience()); // Can no longer gain experience.
 
 
