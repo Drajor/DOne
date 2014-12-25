@@ -1532,11 +1532,11 @@ void ZoneClientConnection::sendExperienceUpdate(const u32 pExperience,  const u3
 	delete packet;
 }
 
-void ZoneClientConnection::sendLevelUpdate(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperienceRatio) {
+void ZoneClientConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = LevelUpdate::construct(pLevel, pPreviousLevel, pExperienceRatio);
+	auto packet = LevelUpdate::construct(pPreviousLevel, pCurrentLevel, pExperienceRatio);
 	sendPacket(packet);
 	delete packet;
 }

@@ -241,7 +241,8 @@ public:
 		u8 level = 0;
 		if (!convertParameter(0, level)) { return false; }
 
-		//Actor::cast<Character*>(mInvoker->getTarget())->setCharacterLevel(level);
+		auto character = Actor::cast<Character*>(mInvoker->getTarget());
+		character->getZone()->handleSetLevel(character, level);
 		return true;
 	}
 };

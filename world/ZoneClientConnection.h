@@ -67,7 +67,7 @@ public:
 	void sendLevelLostMessage();
 
 	void sendLevelAppearance(const u32 pParameter1);
-	void sendLevelUpdate(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperienceRatio);
+	void sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio);
 	void sendStats();
 	void sendWhoResponse(const u32 pWhoType, std::list<Character*>& pMatches);
 

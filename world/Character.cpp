@@ -61,12 +61,6 @@ Character::~Character() {
 
 void Character::update() {
 
-	if (isGM()) {
-		if (mSuperGMPower.Check()) {
-			mZone->handleLevelIncrease(this);
-		}
-	}
-
 	if (isCasting()) {
 		if (mCastingTimer.Check()) {
 			finishCasting();

@@ -57,7 +57,7 @@ const bool ExperienceController::canGainAAExperience() const {
 }
 
 void ExperienceController::setLevel(const u8 pLevel) {
-	mLevel = pLevel;
+	mLevel = Utility::clamp<u8>(pLevel, 1, mMaximumLevel);
 	mExperience = 0;
 }
 

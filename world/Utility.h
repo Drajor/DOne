@@ -23,6 +23,11 @@ namespace Utility {
 	void print(String pMessage);
 	String getRandomName();
 
+	template<typename T>
+	T clamp(const T& pValue, const T& pMinimum, const T& pMaximum) {
+		return std::max(pMinimum, std::min(pMaximum, pValue));
+	}
+
 	// Searches pStringA for pStringB case insensitively.
 	static bool findCI(const String& pStringA, const String& pStringB) {
 		String a = pStringA;

@@ -236,6 +236,21 @@ TEST_F(ExperienceControllerTestAddExperience, Adding) {
 	EXPECT_EQ(mController->getMaximumLevel(), mController->getLevel());
 	EXPECT_EQ(ExperienceController::getExperienceForLevel(mController->getMaximumLevel()) - 1, mController->getExperience()); // Experience is capped.
 	EXPECT_EQ(false, mController->canGainExperience()); // Can no longer gain experience.
+
+
+	mController->setLevel(1);
+	EXPECT_EQ(1, mController->getLevel()); // Back to level 1.
+	EXPECT_EQ(0, mController->getExperience()); // Experience wiped.
+	
+	// Try setting to zero.
+	mController->setLevel(0);
+	EXPECT_EQ(1, mController->getLevel()); // Still level 1.
+	EXPECT_EQ(0, mController->getExperience()); // Experience wiped.
+
+	// Try setting to over max.
+	mController->setLevel(mController->getMaximumLevel() + 1);
+	EXPECT_EQ(mController->getMaximumLevel(), mController->getLevel()); // At max level.
+	EXPECT_EQ(0, mController->getExperience()); // Experience wiped.
 }
 
 class LootControllerTest : public ::testing::Test {

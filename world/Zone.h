@@ -198,6 +198,8 @@ public:
 
 	void handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 
+	void handleSetLevel(Character* pCharacter, const u8 pLevel);
+	void _handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel);
 	void handleAddExperience(Character* pCharacter, const u32 pExperience);
 private:
 

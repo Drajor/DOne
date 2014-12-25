@@ -1303,10 +1303,10 @@ namespace Payload {
 
 		// S->C
 		struct LevelUpdate : public FixedT<LevelUpdate, OP_LevelUpdate> {
-			static EQApplicationPacket* construct(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperience) {
+			static EQApplicationPacket* construct(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperience) {
 				auto packet = create();
 				auto payload = convert(packet);
-				payload->mLevel = pLevel;
+				payload->mLevel = pCurrentLevel;
 				payload->mPreviousLevel = pPreviousLevel;
 				payload->mExperience = pExperience;
 

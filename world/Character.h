@@ -292,7 +292,6 @@ private:
 	uint8 mStatus = 0;
 	Timer mCampTimer; // 30 seconds.
 
-	Timer mSuperGMPower;
 	Timer mAutoSave;
 
 	Group* mGroup = nullptr;

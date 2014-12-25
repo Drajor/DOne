@@ -552,6 +552,7 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 	auto packet = LevelAppearance::create();
 	auto payload = LevelAppearance::convert(packet);
 	payload->mSpawnID = pCharacter->getSpawnID();
+	payload->mParameter1 = 0x4D;
 
 	sendToVisible(pCharacter, packet, true);
 	delete packet;
@@ -1866,6 +1867,53 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 	pCharacter->getConnection()->sendWhoResponse(pFilter.mType, results);
 }
 
+void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
+	EXPECTED(pCharacter);
+	if (pCharacter->getLevel() == pLevel) return;
+
+	auto controller = pCharacter->getExperienceController();
+	auto connection = pCharacter->getConnection();
+
+	EXPECTED(controller && connection);
+
+	const auto preLevel = controller->getLevel();
+
+	// Add experience to controller.
+	controller->setLevel(pLevel);
+
+	const auto postLevel = controller->getLevel();
+
+	_handleLevelChange(pCharacter, preLevel, postLevel);
+}
+
+void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel) {
+	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	auto connection = pCharacter->getConnection();
+
+	EXPECTED(controller && connection);
+
+	// Update experience bar and level.
+	connection->sendLevelUpdate(pPreviousLevel, pCurrentLevel, controller->getExperienceRatio());
+
+	// Gaining.
+	if (pCurrentLevel > pPreviousLevel) {
+		// "You gained a level! Welcome to level X!"
+		connection->sendLevelGainMessage();
+
+		// Update zone.
+		handleLevelIncrease(pCharacter);
+	}
+	// Losing.
+	else if (pCurrentLevel < pPreviousLevel) {
+		// NOTE: [UF] Handle the level loss message by itself.
+
+		// Update zone.
+		handleLevelDecrease(pCharacter);
+	}
+}
+
+
 void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
 	EXPECTED(pCharacter);
 	auto controller = pCharacter->getExperienceController();
@@ -1889,18 +1937,8 @@ void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
 	// "You gain experience!!"
 	connection->sendExperienceGainMessage();
 
-	// Update experience bar.
+	// Update experience bars.
 	connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
 
-	// Check: Did Character gain level(s)?
-	if (postLevel > preLevel) {
-		// Update experience bar and level.
-		connection->sendLevelUpdate(controller->getLevel(), 0, controller->getExperienceRatio());
-
-		// "You gained a level! Welcome to level X!"
-		connection->sendLevelGainMessage();
-
-		// Update zone.
-		handleLevelIncrease(pCharacter);
-	}
+	_handleLevelChange(pCharacter, preLevel, postLevel);
 }
