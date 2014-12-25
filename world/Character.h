@@ -6,6 +6,8 @@
 #include "../common/timer.h"
 #include "BindLocation.h"
 
+#include <memory>
+
 class NPC;
 class Group;
 class Guild;
@@ -44,6 +46,10 @@ public:
 	inline const bool isHidden() const { return mHidden; }
 	inline void setHidden(const bool pValue) { mHidden = pValue; }
 
+	const u8 getLevel() const;
+	
+	void setLevel(const u8 pLevel);
+
 	// Returns a reference to a specified BindLocation.
 	inline const BindLocation& getBindLocation(const i32 pIndex) const { return mBindLocations[pIndex]; }
 
@@ -78,7 +84,7 @@ public:
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
-	inline ExperienceController* getExperienceController() const { return mExperienceController; }
+	inline std::shared_ptr<ExperienceController> getExperienceController() const { return mExperienceController; }
 	
 	bool onEnterZone();
 	bool onZoneOut();
@@ -137,26 +143,7 @@ public:
 	// Healing
 	void healPercentage(int pPercent);
 
-	//// Damage
-	//void damage(uint32 pAmount);
-
 	void doAnimation(uint8 pAnimationID);
-
-	const u8 getLevel() const;
-	void setLevel(const u8 pLevel);
-
-	// Experience
-	//inline const uint32 getExperience() const { return mExperience; }
-	//inline void setExperience(const uint32 pExperience) { mExperience = pExperience; }
-	//const uint32 getExperienceRatio() const;
-	//void addExperience(uint32 pExperience);
-	//void removeExperience(uint32 pExperience);
-	//inline const uint32 getExperienceForNextLevel() const { return Character::getExperienceForLevel(getLevel() + 1); }
-	
-	//void setCharacterLevel(uint8 pLevel);
-
-	//static const uint32 getExperienceForLevel(const uint8 pLevel);
-	//static inline const uint8 getMaxCharacterLevel() { return 60; }
 
 	static float getDefaultSize(uint32 pRace);
 
@@ -277,9 +264,6 @@ private:
 
 	Filters mFilters;
 
-	//uint32 mExperience = 0;
-	//void _checkForLevelIncrease();
-
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;
 	uint32 mBaseCharisma = 0;
@@ -379,5 +363,5 @@ private:
 
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
-	ExperienceController* mExperienceController = nullptr;
+	std::shared_ptr<ExperienceController> mExperienceController = nullptr;
 };
