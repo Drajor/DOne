@@ -1541,23 +1541,28 @@ void ZoneClientConnection::sendLevelUpdate(const u32 pLevel, const u32 pPrevious
 	delete packet;
 }
 
-void ZoneClientConnection::sendExperienceGain() {
+void ZoneClientConnection::sendExperienceGainMessage() {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::Experience, StringID::GainExperience);
 }
 
-void ZoneClientConnection::sendExperienceLoss() {
+void ZoneClientConnection::sendGroupExperienceGainMessage() {
+	EXPECTED(mConnected);
+	sendSimpleMessage(MessageType::Experience, StringID::GainGroupExperience);
+}
+
+void ZoneClientConnection::sendExperienceLossMessage() {
 	EXPECTED(mConnected);
 	// There is no StringID for this message apparently.
 	sendMessage(MessageType::Yellow, "You have lost experience.");
 }
 
-void ZoneClientConnection::sendLevelGain(const u8 pLevel) {
+void ZoneClientConnection::sendLevelGainMessage() {
 	EXPECTED(mConnected);
-	sendSimpleMessage(MessageType::Experience, StringID::GainLevel, std::to_string(pLevel));
+	sendSimpleMessage(MessageType::Experience, StringID::GainLevel, std::to_string(mCharacter->getLevel()));
 }
 
-void ZoneClientConnection::sendLevelLost() {
+void ZoneClientConnection::sendLevelLostMessage() {
 	// NOTE: UF Handles this message itself, no need to send.
 	//StringStream ss;
 	//ss << mCharacter->getLevel();

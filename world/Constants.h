@@ -1477,8 +1477,8 @@ namespace StringID {
 		PET_TAUNTING = 438,		//Taunting attacker, Master.
 		INTERRUPT_SPELL = 439,		//Your spell is interrupted.
 		LOSE_LEVEL = 442,		//You LOST a level! You are now level %1!
-		GainGroupExperience = 444,		//You gain experience!!
-		GainExperience = 445,		//You gain experience!!
+		GainGroupExperience = 444,		// You gain party experience!!
+		GainExperience = 445,		// You gain experience!!
 		GAIN_ABILITY_POINT = 446,		//You have gained an ability point! You now have %1 ability point%2.
 		GainLevel = 447,		//You have gained a level! Welcome to level %1!
 		LANG_SKILL_IMPROVED = 449,		//Your language skills have improved.

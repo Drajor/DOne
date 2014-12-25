@@ -1874,26 +1874,33 @@ void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
 	EXPECTED(controller && connection);
 
 	// Check: Character can still gain experience.
-	if (controller->canGainExperience() == false) return;
+	if (controller->canGainExperience() == false) {
+		// TODO: Message about not gaining experience?
+		return;
+	}
 
 	const auto preLevel = controller->getLevel();
 
-	// Add experience to Character.
+	// Add experience to controller.
 	controller->addExperience(pExperience);
 
 	const auto postLevel = controller->getLevel();
 
 	// "You gain experience!!"
-	connection->sendExperienceGain();
+	connection->sendExperienceGainMessage();
+
 	// Update experience bar.
 	connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
 
 	// Check: Did Character gain level(s)?
 	if (postLevel > preLevel) {
-		connection->sendLevelGain(postLevel);
+		// Update experience bar and level.
+		connection->sendLevelUpdate(controller->getLevel(), 0, controller->getExperienceRatio());
+
+		// "You gained a level! Welcome to level X!"
+		connection->sendLevelGainMessage();
 
 		// Update zone.
 		handleLevelIncrease(pCharacter);
 	}
-		
 }
