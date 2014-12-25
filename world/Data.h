@@ -34,9 +34,9 @@ namespace Data {
 			String mName = "<none>";
 			u32 mLevel = 0;
 			u8 mClass = 0;
-			RaceID mRace = 0;
-			GenderID mGender = 0;
-			DeityID mDeity = 0;
+			u32 mRace = 0;
+			u8 mGender = 0;
+			u16 mDeity = 0;
 			u16 mZoneID = 0;
 			u8 mFaceStyle = 0;
 			u8 mHairStyle = 0;
@@ -81,6 +81,14 @@ namespace Data {
 		float mHeading = 0.0f;
 	};
 
+	struct Experience {
+		u8 mLevel = 0;
+		u32 mExperience = 0;
+		u32 mAAExperience = 0;
+		u32 mUnspentAAPoints = 0;
+		u32 mSpentAAPoints = 0;
+	};
+
 	struct Character {
 		Character() {
 			mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
@@ -88,11 +96,11 @@ namespace Data {
 
 			for (auto& i : mSkills) i = 0;
 			for (auto& i : mLanguages) i = 0;
+			for (auto& i : mDyes) i = 0;
 		}
 		String mName = "";
-		u32 mLevel = 1;
+		Experience mExperience;
 		u8 mClass = ClassID::Warrior;
-		u32 mExperience = 0;
 		String mLastName = "";
 		String mTitle = "";
 		String mSuffix = "";
@@ -101,9 +109,7 @@ namespace Data {
 
 		u16 mZoneID = 0; // TODO: Choose a good default.
 		u16 mInstanceID = 0;
-		float mX = 0.0f;
-		float mY = 0.0f;
-		float mZ = 0.0f;
+		Vector3 mPosition;
 		float mHeading = 0.0f;
 
 		u32 mSkills[Limits::Skills::MAX_ID];
@@ -115,8 +121,8 @@ namespace Data {
 		u32 mDyes[MAX_ARMOR_DYE_SLOTS];
 
 		u16 mDeity = 0;
-		RaceID mRace = 0;
-		GenderID mGender = 0;
+		u32 mRace = 0;
+		u8 mGender = 0;
 		u8 mFaceStyle = 0;
 		u8 mHairStyle = 0;
 		u8 mHairColour = 0;

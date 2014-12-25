@@ -2,6 +2,7 @@
 
 #include "Types.h"
 
+#include <memory>
 #include <string>
 #include <sstream>
 #include <list>
@@ -15,12 +16,6 @@
 #include <safeint.h>
 #include <bitset>
 #include <cmath>
-
-typedef uint16 DeityID;
-typedef uint8_t GenderID;
-typedef uint32_t RaceID;
-typedef uint32_t ZoneID; // PP=uint16, CharSelect=uint32
-typedef uint8_t FaceID; // PP=uint8 CharSelect=uint8
 
 typedef uint32_t GuildID;
 typedef uint8_t GuildRank;
@@ -1109,7 +1104,7 @@ enum GuildRanks : GuildRank {
 	GR_None = 9
 };
 
-enum ZoneIDs : ZoneID {
+enum ZoneIDs : u16 {
 	NoZone = 0,
 	SouthQeynos = 1,
 	NorthQeynos = 2,
@@ -1129,35 +1124,37 @@ enum class Statistic : uint32 {
 	Wisdom
 };
 
-enum SpawnAppearanceType : int16 {
-	Die = 0,
-	WhoLevel = 1,
-	SAT_UNKNOWN0 = 2, // V=0 hp drops to 0%, V=1 hp goes to 100%
-	SA_Invisible = 3,
-	SA_PVP = 4,
-	SA_Light = 5,
-	SA_Animation = 14,
-	SA_Sneak = 15,
-	SA_SpawnID = 16,
-	HP = 17,
-	LinkDead = 18,
-	Levitate = 19,
-	GM = 20,
-	Anonymous = 21,
-	SA_GuildID = 22,
-	SA_GuildRank = 23,
-	AFK = 24,
-	Pet = 25,
-	Split = 28,
-	Size = 29,
-	NPCName = 31, // 1 = Trader <PlayerName>
-	AutoConsentGroup = 40,
-	AutoConsentRaid = 41,
-	AutoConsentGuild = 42,
-	ShowHelm = 43,
-	DamageState = 44,
-	EQPlayersAutoUpdate = 45,
-};
+namespace SpawnAppearanceTypeID {
+	enum : u16 {
+		Die = 0,
+		WhoLevel = 1,
+		UNKNOWN0 = 2, // V=0 hp drops to 0%, V=1 hp goes to 100%
+		Invisible = 3,
+		PVP = 4,
+		Light = 5,
+		Animation = 14,
+		Sneak = 15,
+		SpawnID = 16,
+		HP = 17,
+		LinkDead = 18,
+		Levitate = 19,
+		GM = 20,
+		Anonymous = 21,
+		GuildID = 22,
+		GuildRank = 23,
+		AFK = 24,
+		Pet = 25,
+		Split = 28,
+		Size = 29,
+		NPCName = 31, // 1 = Trader <PlayerName>
+		AutoConsentGroup = 40,
+		AutoConsentRaid = 41,
+		AutoConsentGuild = 42,
+		ShowHelm = 43,
+		DamageState = 44,
+		EQPlayersAutoUpdate = 45,
+	};
+}
 
 namespace SpawnAppearanceAnimation {
 	enum : int16 {
@@ -1171,7 +1168,7 @@ namespace SpawnAppearanceAnimation {
 }
 
 namespace Gender {
-	enum : GenderID {
+	enum : u8 {
 		Male,
 		Female,
 		Monster
@@ -1363,8 +1360,6 @@ namespace StringID {
 		DOORS_INSUFFICIENT_SKILL = 132,		//You are not sufficiently skilled to pick this lock.
 		DOORS_GM = 133,		//You opened the locked door with your magic GM key.
 		ITEMS_INSUFFICIENT_LEVEL = 136,		//You are not sufficient level to use this item.
-		GAIN_XP = 138,		//You gain experience!!
-		GAIN_GROUPXP = 139,		//You gain party experience!!
 		BOW_DOUBLE_DAMAGE = 143,		//Your bow shot did double dmg.
 		FORAGE_GRUBS = 150,		//You have scrounged up some fishing grubs.
 		FORAGE_WATER = 151,		//You have scrounged up some water.
@@ -1482,8 +1477,10 @@ namespace StringID {
 		PET_TAUNTING = 438,		//Taunting attacker, Master.
 		INTERRUPT_SPELL = 439,		//Your spell is interrupted.
 		LOSE_LEVEL = 442,		//You LOST a level! You are now level %1!
+		GainGroupExperience = 444,		//You gain experience!!
+		GainExperience = 445,		//You gain experience!!
 		GAIN_ABILITY_POINT = 446,		//You have gained an ability point! You now have %1 ability point%2.
-		GAIN_LEVEL = 447,		//You have gained a level! Welcome to level %1!
+		GainLevel = 447,		//You have gained a level! Welcome to level %1!
 		LANG_SKILL_IMPROVED = 449,		//Your language skills have improved.
 		OTHER_LOOTED_MESSAGE = 466,		//--%1 has looted a %2--
 		LOOTED_MESSAGE = 467,		//--You have looted a %1--
@@ -1728,37 +1725,40 @@ namespace StringID {
 	};
 }
 
-enum Languages : uint32 {
-	COMMON_TONGUE_LANG = 0,
-	BARBARIAN_LANG = 1,
-	ERUDIAN_LANG = 2,
-	ELVISH_LANG = 3,
-	DARK_ELVISH_LANG = 4,
-	DWARVISH_LANG = 5,
-	TROLL_LANG = 6,
-	OGRE_LANG = 7,
-	GNOMISH_LANG = 8,
-	HALFLING_LANG = 9,
-	THIEVES_CANT_LANG = 10,
-	OLD_ERUDIAN_LANG = 11,
-	ELDER_ELVISH_LANG = 12,
-	FROGLOK_LANG = 13,
-	GOBLIN_LANG = 14,
-	GNOLL_LANG = 15,
-	COMBINE_TONGUE_LANG = 16,
-	ELDER_TEIRDAL_LANG = 17,
-	LIZARDMAN_LANG = 18,
-	ORCISH_LANG = 19,
-	FAERIE_LANG = 20,
-	DRAGON_LANG = 21,
-	ELDER_DRAGON_LANG = 22,
-	DARK_SPEECH_LANG = 23,
-	VAH_SHIR_LANG = 24
-};
+namespace LanguageID {
+	enum : u32 {
+		CommonTongue = 0,
+		Barbarian = 1,
+		Erudian = 2,
+		Elvish = 3,
+		DarkElvish = 4,
+		Dwarvish = 5,
+		Troll = 6,
+		Ogre = 7,
+		Gnomish = 8,
+		Halfling = 9,
+		ThievesCant = 10,
+		OldErudian = 11,
+		ElderElvish = 12,
+		Froglok = 13,
+		Goblin = 14,
+		Gnoll = 15,
+		CombineTongue = 16,
+		ElderTeirdal = 17,
+		Lizardman = 18,
+		Orcish = 19,
+		Faerie = 20,
+		Dragon = 21,
+		ElderDragon = 22,
+		DarkSpeech = 23,
+		VahShir = 24,
+	};
+}
+
 namespace Limits {
 	namespace Languages {
 		static const auto MIN_ID = 0;
-		static const auto MAX_ID = ::Languages::VAH_SHIR_LANG + 1;
+		static const auto MAX_ID = LanguageID::VahShir + 1;
 	}
 }
 

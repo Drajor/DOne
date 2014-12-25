@@ -334,6 +334,7 @@ namespace CharacterXML {
 #define SCA static const auto
 	namespace Tag {
 		SCA Character = "character";
+		SCA Experience = "experience";
 		SCA Stats = "stats";
 		SCA Visual = "visual";
 		SCA BindLocations = "bind_locations";
@@ -362,14 +363,20 @@ namespace CharacterXML {
 		SCA Name = "name";
 		SCA GM = "gm";
 		SCA Status = "status";
-		SCA Level = "level";
+		// Tag::Experience
+		namespace Experience {
+			SCA Level = "level";
+			SCA Experience = "experience";
+			SCA AAExperience = "aa_experience";
+			SCA UnspentAAPoints = "unspent_aa_points";
+			SCA SpentAAPoints = "spent_aa_points";
+		}
 		SCA Class = "class";
 		SCA Zone = "zone";
 		SCA X = "x";
 		SCA Y = "y";
 		SCA Z = "z";
 		SCA Heading = "heading";
-		SCA Experience = "experience";
 		SCA LastName = "last_name";
 		SCA Title = "title";
 		SCA Suffix = "suffix";
@@ -504,6 +511,19 @@ const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
 	return true;
 }
 
+const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience) {
+	using namespace CharacterXML;
+	EXPECTED_BOOL(pElement);
+
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::Level, pExperience.mLevel));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::Experience, pExperience.mExperience));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::AAExperience, pExperience.mAAExperience));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::UnspentAAPoints, pExperience.mUnspentAAPoints));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::SpentAAPoints, pExperience.mSpentAAPoints));
+
+	return true;
+}
+
 const bool DataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
 	Profile p("DataStore::loadCharacter");
 	using namespace CharacterXML;
@@ -517,20 +537,20 @@ const bool DataStore::loadCharacter(const String& pCharacterName, Data::Characte
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacter->mName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacter->mGM));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Status, pCharacter->mStatus));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, pCharacter->mLevel));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacter->mClass));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacter->mZoneID));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::X, pCharacter->mX));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Y, pCharacter->mY));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Z, pCharacter->mZ));
+	EXPECTED_BOOL(readVector3(characterElement, pCharacter->mPosition));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Heading, pCharacter->mHeading));
-	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Experience, pCharacter->mExperience));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacter->mLastName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacter->mTitle));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacter->mSuffix));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild));
+
+	// Tag::Experience
+	auto experienceElement = characterElement->FirstChildElement(Tag::Experience);
+	EXPECTED_BOOL(readExperience(experienceElement, pCharacter->mExperience));
 
 	// Tag::Stats
 	auto statsElement = characterElement->FirstChildElement(Tag::Stats);
@@ -750,6 +770,19 @@ const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInvento
 	return true;
 }
 
+const bool writeExperience(TiXmlElement* pElement, const Data::Experience& pExperience) {
+	using namespace CharacterXML;
+	EXPECTED_BOOL(pElement);
+
+	pElement->SetAttribute(Attribute::Experience::Level, pExperience.mLevel);
+	pElement->SetAttribute(Attribute::Experience::Experience, pExperience.mExperience);
+	pElement->SetAttribute(Attribute::Experience::AAExperience, pExperience.mAAExperience);
+	pElement->SetAttribute(Attribute::Experience::UnspentAAPoints, pExperience.mUnspentAAPoints);
+	pElement->SetAttribute(Attribute::Experience::SpentAAPoints, pExperience.mSpentAAPoints);
+
+	return true;
+}
+
 const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
 	Profile p("DataStore::saveCharacter");
 	using namespace CharacterXML;
@@ -762,20 +795,20 @@ const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Ch
 	characterElement->SetAttribute(Attribute::Name, pCharacter->mName.c_str());
 	characterElement->SetAttribute(Attribute::GM, pCharacter->mGM);
 	characterElement->SetAttribute(Attribute::Status, pCharacter->mStatus);
-	characterElement->SetAttribute(Attribute::Level, pCharacter->mLevel);
 	characterElement->SetAttribute(Attribute::Class, pCharacter->mClass);
 	characterElement->SetAttribute(Attribute::Zone, pCharacter->mZoneID);
-	characterElement->SetDoubleAttribute(Attribute::X, pCharacter->mX);
-	characterElement->SetDoubleAttribute(Attribute::Y, pCharacter->mY);
-	characterElement->SetDoubleAttribute(Attribute::Z, pCharacter->mZ);
+	writeVector3(characterElement, pCharacter->mPosition);
 	characterElement->SetDoubleAttribute(Attribute::Heading, pCharacter->mHeading);
-	characterElement->SetAttribute(Attribute::Experience, pCharacter->mExperience);
 	characterElement->SetAttribute(Attribute::LastName, pCharacter->mLastName.c_str());
 	characterElement->SetAttribute(Attribute::Title, pCharacter->mTitle.c_str());
 	characterElement->SetAttribute(Attribute::Suffix, pCharacter->mSuffix.c_str());
 	characterElement->SetAttribute(Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup);
 	characterElement->SetAttribute(Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid);
 	characterElement->SetAttribute(Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild);
+
+	// Tag::Experience
+	auto experienceElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Experience)));
+	EXPECTED_BOOL(writeExperience(experienceElement, pCharacter->mExperience));
 
 	// Tag::Stats
 	auto statsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Stats)));

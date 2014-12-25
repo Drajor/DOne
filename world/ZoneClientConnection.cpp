@@ -28,6 +28,7 @@
 #include "Object.h"
 #include "ExtendedTargetController.h"
 #include "RespawnOptions.h"
+#include "ExperienceController.h"
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
@@ -697,7 +698,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
 	strncpy(payload->suffix, mCharacter->getSuffix().c_str(), Limits::Character::MAX_SUFFIX_LENGTH);
 	//payload->guildid2;
-	payload->exp = mCharacter->getExperience();
+	payload->exp = mCharacter->getExperienceController()->getExperience();
 	payload->points = 0;
 	payload->mana = mCharacter->getCurrentMana();
 	payload->cur_hp = mCharacter->getHPPercent();
@@ -714,8 +715,8 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	mCharacter->setSkill(Skills::SenseHeading, 1000);
 	mCharacter->setSkill(Skills::Swimming, 1000);
 
-	mCharacter->setLanguage(Languages::COMMON_TONGUE_LANG, 100);
-	mCharacter->setLanguage(Languages::BARBARIAN_LANG, 100);
+	mCharacter->setLanguage(LanguageID::CommonTongue, 100);
+	mCharacter->setLanguage(LanguageID::Barbarian, 100);
 
 	// Copy skills into profile.
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
@@ -1052,7 +1053,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 
 	switch (actionType) {
 		// Handle animation.
-	case SpawnAppearanceType::SA_Animation:
+	case SpawnAppearanceTypeID::Animation:
 		switch (actionParameter) {
 		case SpawnAppearanceAnimation::Standing:
 			mCharacter->setStanding(true);
@@ -1085,7 +1086,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 			break;
 		}
 		// Handle anonymous / roleplay
-	case SpawnAppearanceType::Anonymous:
+	case SpawnAppearanceTypeID::Anonymous:
 		// 0 = Normal, 1 = Anonymous, 2 = Roleplay
 		if (actionParameter >= 0 && actionParameter <= 2) {
 			// Update character and notify zone.
@@ -1095,7 +1096,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		// Anything else is ignored.
 		break;
 		// Handle AFK
-	case SpawnAppearanceType::AFK:
+	case SpawnAppearanceTypeID::AFK:
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setIsAFK(false);
@@ -1108,7 +1109,7 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		}
 		// Anything else is ignored.
 		break;
-	case SpawnAppearanceType::ShowHelm:
+	case SpawnAppearanceTypeID::ShowHelm:
 		if (actionParameter == 0) {
 			// Update character and notify zone.
 			mCharacter->setShowHelm(false);
@@ -1122,33 +1123,33 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 		// Anything else is ignored.
 		break;
 		// Ignore!
-	case SpawnAppearanceType::HP:
+	case SpawnAppearanceTypeID::HP:
 		break;
-	case SpawnAppearanceType::Split:
+	case SpawnAppearanceTypeID::Split:
 		break;
-	case SpawnAppearanceType::Die:
+	case SpawnAppearanceTypeID::Die:
 		break;
-	case SpawnAppearanceType::DamageState:
+	case SpawnAppearanceTypeID::DamageState:
 		break;
-	case SpawnAppearanceType::SA_Sneak:
+	case SpawnAppearanceTypeID::Sneak:
 		break;
-	case SpawnAppearanceType::SA_Invisible:
+	case SpawnAppearanceTypeID::Invisible:
 		break;
-	case SpawnAppearanceType::Size:
+	case SpawnAppearanceTypeID::Size:
 		break;
-	case SpawnAppearanceType::SA_Light:
+	case SpawnAppearanceTypeID::Light:
 		break;
-	case SpawnAppearanceType::SA_PVP:
+	case SpawnAppearanceTypeID::PVP:
 		Log::info("Got PVP");
 		// NOTE: Not sure if this even possible.
 		break;
-	case SpawnAppearanceType::AutoConsentGroup:
+	case SpawnAppearanceTypeID::AutoConsentGroup:
 		mCharacter->setAutoConsentGroup(actionParameter == 1);
 		break;
-	case SpawnAppearanceType::AutoConsentGuild:
+	case SpawnAppearanceTypeID::AutoConsentGuild:
 		mCharacter->setAutoConsentGuild(actionParameter == 1);
 		break;
-	case SpawnAppearanceType::AutoConsentRaid:
+	case SpawnAppearanceTypeID::AutoConsentRaid:
 		mCharacter->setAutoConsentRaid(actionParameter == 1);
 		break;
 	default:
@@ -1522,27 +1523,27 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
 }
 
-void ZoneClientConnection::sendExperienceUpdate() {
+void ZoneClientConnection::sendExperienceUpdate(const u32 pExperience,  const u32 pAAExperience) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = ExperienceUpdate::construct(mCharacter->getExperienceRatio(), 0);
+	auto packet = ExperienceUpdate::construct(pExperience, pAAExperience);
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneClientConnection::sendLevelUpdate() {
+void ZoneClientConnection::sendLevelUpdate(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperienceRatio) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = LevelUpdate::construct(mCharacter->getLevel(), 0, mCharacter->getExperienceRatio());
+	auto packet = LevelUpdate::construct(pLevel, pPreviousLevel, pExperienceRatio);
 	sendPacket(packet);
 	delete packet;
 }
 
 void ZoneClientConnection::sendExperienceGain() {
 	EXPECTED(mConnected);
-	sendSimpleMessage(MessageType::Experience, StringID::GAIN_XP);
+	sendSimpleMessage(MessageType::Experience, StringID::GainExperience);
 }
 
 void ZoneClientConnection::sendExperienceLoss() {
@@ -1551,9 +1552,9 @@ void ZoneClientConnection::sendExperienceLoss() {
 	sendMessage(MessageType::Yellow, "You have lost experience.");
 }
 
-void ZoneClientConnection::sendLevelGain() {
+void ZoneClientConnection::sendLevelGain(const u8 pLevel) {
 	EXPECTED(mConnected);
-	sendSimpleMessage(MessageType::Experience, StringID::GAIN_LEVEL, std::to_string(mCharacter->getLevel()));
+	sendSimpleMessage(MessageType::Experience, StringID::GainLevel, std::to_string(pLevel));
 }
 
 void ZoneClientConnection::sendLevelLost() {
@@ -1563,8 +1564,18 @@ void ZoneClientConnection::sendLevelLost() {
 	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
 }
 
-void ZoneClientConnection::sendLevelAppearance() {
+void ZoneClientConnection::sendLevelAppearance(const u32 pParameter1) {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
+
+	auto packet = LevelAppearance::create();
+	auto payload = LevelAppearance::convert(packet);
+	payload->mSpawnID = mCharacter->getSpawnID();
+
+	payload->mParameter1 = pParameter1;
+
+	sendPacket(packet);
+	delete packet;
 }
 
 void ZoneClientConnection::sendStats() {

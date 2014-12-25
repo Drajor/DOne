@@ -58,13 +58,13 @@ public:
 
 	void sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID);
 
-	void sendExperienceUpdate();
+	void sendExperienceUpdate(const u32 pExperience, const u32 pAAExperience);
 	void sendExperienceGain();
 	void sendExperienceLoss();
-	void sendLevelGain();
+	void sendLevelGain(const u8 pLevel);
 	void sendLevelLost();
-	void sendLevelAppearance();
-	void sendLevelUpdate();
+	void sendLevelAppearance(const u32 pParameter1);
+	void sendLevelUpdate(const u32 pLevel, const u32 pPreviousLevel, const u32 pExperienceRatio);
 	void sendStats();
 	void sendWhoResponse(const u32 pWhoType, std::list<Character*>& pMatches);
 

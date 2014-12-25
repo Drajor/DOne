@@ -345,10 +345,10 @@ public:
 	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
 
 	// Returns the level of this Actor.
-	inline const uint8 getLevel() const { return mActorData.mLevel; }
+	virtual const u8 getLevel() const { return mActorData.mLevel; }
 
 	// Sets the level of this Actor.
-	inline void setLevel(const uint8 pLevel) { mActorData.mLevel = pLevel; }
+	virtual void setLevel(const u8 pLevel) { mActorData.mLevel = pLevel; }
 
 	// Returns the spawn ID of the owner of this Actor.
 	inline const uint32 getOwnerSpawnID() const { return mActorData.mOwnerSpawnID; }

@@ -33,12 +33,14 @@
 #include "Object.h"
 #include "LootController.h"
 #include "RespawnOptions.h"
+#include "ExperienceController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
 {
+	mGuildManager = &GuildManager::getInstance();
 }
 
 Zone::~Zone() {
@@ -373,16 +375,16 @@ void Zone::handleActorPositionChange(Actor* pActor) {
 }
 
 
-void Zone::handleAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::AFK, pCharacter->isAFK()); }
-void Zone::handleShowHelm(Actor* pActor) { _sendSpawnAppearance(pActor, SpawnAppearanceType::ShowHelm, pActor->getShowHelm()); }
-void Zone::handleAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::Anonymous, pCharacter->getAnonymous()); }
-void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Standing); }
-void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Sitting); }
-void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_Animation, SpawnAppearanceAnimation::Crouch); }
-void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceType::GM, pCharacter->isGM() ? 1 : 0, true); }
-void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceType::LinkDead, 1, false); }
+void Zone::handleAFK(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::AFK, pCharacter->isAFK()); }
+void Zone::handleShowHelm(Actor* pActor) { _sendSpawnAppearance(pActor, SpawnAppearanceTypeID::ShowHelm, pActor->getShowHelm()); }
+void Zone::handleAnonymous(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Anonymous, pCharacter->getAnonymous()); }
+void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Standing); }
+void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Sitting); }
+void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Crouch); }
+void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GM, pCharacter->isGM() ? 1 : 0, true); }
+void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::LinkDead, 1, false); }
 
-void Zone::_sendSpawnAppearance(Actor* pActor, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender) {
+void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -504,41 +506,59 @@ void Zone::handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pS
 }
 
 void Zone::handleLevelIncrease(Character* pCharacter) {
-	// Notify user client.
+	EXPECTED(pCharacter);
+
+	// Notify other clients.
 	_sendCharacterLevel(pCharacter);
+	// Send particle effects.
 	_sendLevelAppearance(pCharacter);
+
+	// Notify GuildManager.
+	if (pCharacter->hasGuild())
+		mGuildManager->onLevelChange(pCharacter);
 }
 
 void Zone::handleLevelDecrease(Character* pCharacter) {
+	EXPECTED(pCharacter);
+
 	// Notify user client.
 	_sendCharacterLevel(pCharacter);
+
+	// Notify GuildManager.
+	if (pCharacter->hasGuild())
+		mGuildManager->onLevelChange(pCharacter);
 }
 
 void Zone::_sendLevelAppearance(Character* pCharacter) {
+	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
-	auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
-	payload->parm1 = 0x4D;
-	payload->parm2 = payload->parm1 + 1;
-	payload->parm3 = payload->parm2 + 1;
-	payload->parm4 = payload->parm3 + 1;
-	payload->parm5 = payload->parm4 + 1;
-	payload->spawn_id = pCharacter->getSpawnID();
-	payload->value1a = 1;
-	payload->value2a = 2;
-	payload->value3a = 1;
-	payload->value3b = 1;
-	payload->value4a = 1;
-	payload->value4b = 1;
-	payload->value5a = 2;
+	//auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
+	//auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
+	//payload->parm1 = 0x4D;
+	//payload->parm2 = payload->parm1 + 1;
+	//payload->parm3 = payload->parm2 + 1;
+	//payload->parm4 = payload->parm3 + 1;
+	//payload->parm5 = payload->parm4 + 1;
+	//payload->spawn_id = pCharacter->getSpawnID();
+	//payload->value1a = 1;
+	//payload->value2a = 2;
+	//payload->value3a = 1;
+	//payload->value3b = 1;
+	//payload->value4a = 1;
+	//payload->value4b = 1;
+	//payload->value5a = 2;
 
-	sendToVisible(pCharacter, outPacket, true);
-	safe_delete(outPacket);
+	auto packet = LevelAppearance::create();
+	auto payload = LevelAppearance::convert(packet);
+	payload->mSpawnID = pCharacter->getSpawnID();
+
+	sendToVisible(pCharacter, packet, true);
+	delete packet;
 }
 
 void Zone::_sendCharacterLevel(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::WhoLevel, pCharacter->getLevel());
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::WhoLevel, pCharacter->getLevel());
 }
 
 void Zone::requestSave(Character*pCharacter) {
@@ -651,8 +671,8 @@ void Zone::notifyGuildsChanged() {
 void Zone::notifyCharacterGuildChange(Character* pCharacter) {
 	EXPECTED(pCharacter);
 
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildID, pCharacter->getGuildID(), true);
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceType::SA_GuildRank, pCharacter->getGuildRank(), true);
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildID, pCharacter->getGuildID(), true);
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildRank, pCharacter->getGuildRank(), true);
 }
 
 void Zone::_onLeaveZone(Character* pCharacter) {
@@ -1844,4 +1864,36 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 	}
 
 	pCharacter->getConnection()->sendWhoResponse(pFilter.mType, results);
+}
+
+void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
+	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	auto connection = pCharacter->getConnection();
+
+	EXPECTED(controller && connection);
+
+	// Check: Character can still gain experience.
+	if (controller->canGainExperience() == false) return;
+
+	const auto preLevel = controller->getLevel();
+
+	// Add experience to Character.
+	controller->addExperience(pExperience);
+
+	const auto postLevel = controller->getLevel();
+
+	// "You gain experience!!"
+	connection->sendExperienceGain();
+	// Update experience bar.
+	connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
+
+	// Check: Did Character gain level(s)?
+	if (postLevel > preLevel) {
+		connection->sendLevelGain(postLevel);
+
+		// Update zone.
+		handleLevelIncrease(pCharacter);
+	}
+		
 }

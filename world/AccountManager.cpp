@@ -223,7 +223,7 @@ bool AccountManager::handleCharacterCreate(const u32 pAccountID, const String& p
 	
 	auto accountCharacterData = new Data::Account::CharacterData();
 	accountCharacterData->mName = pCharacterName;
-	accountCharacterData->mLevel = characterData->mLevel;
+	accountCharacterData->mLevel = characterData->mExperience.mLevel;
 	accountCharacterData->mRace = characterData->mRace;
 	accountCharacterData->mClass = characterData->mClass;
 	accountCharacterData->mDeity = characterData->mDeity;

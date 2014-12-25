@@ -23,6 +23,7 @@ class Actor;
 class NPC;
 class Scene;
 class SpawnPointManager;
+class GuildManager;
 struct ZonePoint;
 class LootAllocator;
 class Item;
@@ -196,6 +197,8 @@ public:
 	void handleRespawnSelection(Character* pCharacter, const u32 pSelection);
 
 	void handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
+
+	void handleAddExperience(Character* pCharacter, const u32 pExperience);
 private:
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
@@ -212,7 +215,7 @@ private:
 
 	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
 	void _sendChat(Character* pCharacter, const u32 pChannel, const String pMessage);
-	void _sendSpawnAppearance(Actor* pActor, SpawnAppearanceType pType, uint32 pParameter, bool pIncludeSender = false);
+	void _sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender = false);
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
@@ -248,6 +251,7 @@ private:
 	ZonePointList mZonePoints;
 
 	SpawnPointManager* mSpawnPointManager = nullptr;
+	GuildManager* mGuildManager = nullptr;
 	
 	LootAllocator* mLootAllocator = nullptr;
 

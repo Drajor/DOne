@@ -16,6 +16,7 @@ class ExtendedTargetController;
 class Inventoryy;
 class Item;
 class RespawnOptions;
+class ExperienceController;
 
 namespace Data {
 	struct Character;
@@ -77,6 +78,7 @@ public:
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
+	inline ExperienceController* getExperienceController() const { return mExperienceController; }
 	
 	bool onEnterZone();
 	bool onZoneOut();
@@ -140,18 +142,21 @@ public:
 
 	void doAnimation(uint8 pAnimationID);
 
-	// Experience
-	inline const uint32 getExperience() const { return mExperience; }
-	inline void setExperience(const uint32 pExperience) { mExperience = pExperience; }
-	const uint32 getExperienceRatio() const;
-	void addExperience(uint32 pExperience);
-	void removeExperience(uint32 pExperience);
-	inline const uint32 getExperienceForNextLevel() const { return Character::getExperienceForLevel(getLevel() + 1); }
-	
-	void setCharacterLevel(uint8 pLevel);
+	const u8 getLevel() const;
+	void setLevel(const u8 pLevel);
 
-	static const uint32 getExperienceForLevel(const uint8 pLevel);
-	static inline const uint8 getMaxCharacterLevel() { return 60; }
+	// Experience
+	//inline const uint32 getExperience() const { return mExperience; }
+	//inline void setExperience(const uint32 pExperience) { mExperience = pExperience; }
+	//const uint32 getExperienceRatio() const;
+	//void addExperience(uint32 pExperience);
+	//void removeExperience(uint32 pExperience);
+	//inline const uint32 getExperienceForNextLevel() const { return Character::getExperienceForLevel(getLevel() + 1); }
+	
+	//void setCharacterLevel(uint8 pLevel);
+
+	//static const uint32 getExperienceForLevel(const uint8 pLevel);
+	//static inline const uint8 getMaxCharacterLevel() { return 60; }
 
 	static float getDefaultSize(uint32 pRace);
 
@@ -272,8 +277,8 @@ private:
 
 	Filters mFilters;
 
-	uint32 mExperience = 0;
-	void _checkForLevelIncrease();
+	//uint32 mExperience = 0;
+	//void _checkForLevelIncrease();
 
 	uint32 mBaseStrength = 0;
 	uint32 mBaseStamina = 0;
@@ -374,4 +379,5 @@ private:
 
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
+	ExperienceController* mExperienceController = nullptr;
 };

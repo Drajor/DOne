@@ -7,6 +7,7 @@
 #include "LootController.h"
 #include "Payload.h"
 #include "NPC.h"
+#include "ExperienceController.h"
 
 #include "gtest/gtest.h"
 
@@ -49,6 +50,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(76, Payload::Zone::RandomReply::size());
 	EXPECT_EQ(8, Payload::Zone::ExperienceUpdate::size());
 	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
+	EXPECT_EQ(64, Payload::Zone::LevelAppearance::size());
 	EXPECT_EQ(1028, Payload::Zone::Emote::size());
 
 	EXPECT_EQ(156, Payload::Zone::WhoRequest::size());
@@ -109,6 +111,87 @@ TEST(LimitsTest, ShopQuantityValid) {
 	EXPECT_TRUE(Limits::Shop::quantityValid(1));
 	EXPECT_TRUE(Limits::Shop::quantityValid(487422));
 }
+
+class ExperienceControllerTest : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mController = new ExperienceController();
+	}
+	virtual void TearDown() {
+		delete mController;
+		mController = nullptr;
+
+		ExperienceController::setRequiredAAExperienceFunction(nullptr);
+		ExperienceController::setRequiredExperienceFunction(nullptr);
+	}
+
+	void setExpFunction() {
+		std::function<u32(u8)> expF = [](u8) { return 1; };
+		ExperienceController::setRequiredExperienceFunction(&expF);
+	}
+
+	void setAAExpFunction() {
+		std::function<u32(u32)> expAAF = [](u32) { return 1; };
+		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
+	}
+
+	ExperienceController* mController = 0;
+};
+
+TEST_F(ExperienceControllerTest, InitialiseFunctions) {
+	// Make it fail!
+	ExperienceController::setRequiredAAExperienceFunction(nullptr);
+	ExperienceController::setRequiredExperienceFunction(nullptr);
+	EXPECT_EQ(false, mController->initalise(1, 10, 2, 3, 4, 4, 5, 6));
+
+	// Set the experience function.
+	std::function<u32(u8)> expF = [](u8) { return 1; };
+	ExperienceController::setRequiredExperienceFunction(&expF);
+	EXPECT_EQ(false, mController->initalise(1, 10, 2, 3, 4, 4, 5, 6));
+
+	// Set the AA experience function. (expect initalise to succeed).
+	std::function<u32(u32)> expAAF = [](u32) { return 1; };
+	ExperienceController::setRequiredAAExperienceFunction(&expAAF);
+	EXPECT_EQ(true, mController->initalise(1, 10, 2, 3, 4, 4, 5, 6));
+}
+
+TEST_F(ExperienceControllerTest, InitialiseParameterChecks) {
+	setExpFunction();
+	setAAExpFunction();
+
+	// Fail: Zero level.
+	EXPECT_EQ(false, mController->initalise(0, 10, 2, 3, 4, 4, 5, 6));
+	// Fail: Level greater than max level.
+	EXPECT_EQ(false, mController->initalise(10, 8, 2, 3, 4, 4, 5, 6));
+	// Fail: Unspent AA greater than max.
+	EXPECT_EQ(false, mController->initalise(1, 10, 2, 4, 3, 4, 5, 6));
+	// Fail: Spent AA greater than max.
+	EXPECT_EQ(false, mController->initalise(1, 10, 2, 3, 4, 5, 4, 6));
+}
+
+TEST_F(ExperienceControllerTest, DoubleInitialise) {
+	setExpFunction();
+	setAAExpFunction();
+
+	EXPECT_EQ(true, mController->initalise(1, 10, 2, 3, 4, 4, 5, 6));
+	EXPECT_EQ(false, mController->initalise(1, 10, 2, 3, 4, 4, 5, 6));
+}
+
+TEST_F(ExperienceControllerTest, InitalisedValues) {
+	setExpFunction();
+	setAAExpFunction();
+
+	EXPECT_EQ(true, mController->initalise(1, 10, 2, 3, 4, 5, 6, 7));
+	EXPECT_EQ(1, mController->getLevel());
+	EXPECT_EQ(10, mController->getMaximumLevel());
+	EXPECT_EQ(2, mController->getExperience());
+	EXPECT_EQ(3, mController->getUnspentAAPoints());
+	EXPECT_EQ(4, mController->getMaximumUnspentAAPoints());
+	EXPECT_EQ(5, mController->getSpentAAPoints());
+	EXPECT_EQ(6, mController->getMaximumSpentAAPoints());
+	EXPECT_EQ(7, mController->getAAExperience());
+}
+
 
 class LootControllerTest : public ::testing::Test {
 protected:

@@ -1317,6 +1317,26 @@ namespace Payload {
 			u32 mExperience = 0;
 		};
 
+		// S->C
+		struct LevelAppearance : public FixedT<LevelAppearance, OP_LevelAppearance> {
+			u32 mSpawnID = 0;
+			u32 mParameter1 = 0;
+			u32 mValue1A = 0;
+			u32 mValue1B = 0;
+			u32 mParameter2 = 0;
+			u32 mValue2A = 0;
+			u32 mValue2B = 0;
+			u32 mParameter3 = 0;
+			u32 mValue3A = 0;
+			u32 mValue3B = 0;
+			u32 mParameter4 = 0;
+			u32 mValue4A = 0;
+			u32 mValue4B = 0;
+			u32 mParameter5 = 0;
+			u32 mValue5A = 0;
+			u32 mValue5B = 0;
+		};
+
 		// C->S
 		namespace EmoteLimits { static const auto MAX_MESSAGE = 1024; }
 		struct Emote : public FixedT <Emote, OP_Emote> {
@@ -1333,7 +1353,7 @@ namespace Payload {
 		
 		// S->C
 		struct SimpleMessage : FixedT<SimpleMessage, OP_SimpleMessage> {
-			static EQApplicationPacket* construct(const u32 pStringID, const u32 pType) {
+			static EQApplicationPacket* construct(const u32 pType, const u32 pStringID) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mStringID = pStringID;
@@ -1717,7 +1737,7 @@ namespace Payload {
 		struct MemberUpdate {
 			GuildID mGuildID;
 			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
-			ZoneID mZoneID;
+			u32 mZoneID;
 			u16 mInstanceID;
 			u32 mLastSeen;
 		};

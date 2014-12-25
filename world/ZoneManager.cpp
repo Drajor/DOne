@@ -6,6 +6,7 @@
 #include "ZoneClientConnection.h"
 #include "LogSystem.h"
 #include "Utility.h"
+#include "ExperienceController.h"
 
 ZoneManager::~ZoneManager() {
 	ZoneClientConnection::deinitialise();
@@ -40,6 +41,7 @@ bool ZoneManager::initialise() {
 	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
+	ExperienceController::_initialise();
 
 	mInitialised = true;
 	return true;

@@ -179,7 +179,8 @@ public:
 		u32 experience = 0;
 		if (!convertParameter(0, experience)) { return false; }
 
-		Actor::cast<Character*>(mInvoker->getTarget())->addExperience(experience);
+		auto character = Actor::cast<Character*>(mInvoker->getTarget());
+		character->getZone()->handleAddExperience(character, experience);
 		return true;
 	}
 };
@@ -201,7 +202,7 @@ public:
 		u32 experience = 0;
 		if (!convertParameter(0, experience)) { return false; }
 
-		Actor::cast<Character*>(mInvoker->getTarget())->removeExperience(experience);
+		//Actor::cast<Character*>(mInvoker->getTarget())->removeExperience(experience);
 		return true;
 	}
 };
@@ -240,7 +241,7 @@ public:
 		u8 level = 0;
 		if (!convertParameter(0, level)) { return false; }
 
-		Actor::cast<Character*>(mInvoker->getTarget())->setCharacterLevel(level);
+		//Actor::cast<Character*>(mInvoker->getTarget())->setCharacterLevel(level);
 		return true;
 	}
 };
@@ -1993,6 +1994,11 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		if (!Utility::stoSafe(channelID, pParameters[0])) { return; }
 
 		pCharacter->getConnection()->sendChannelMessage(channelID, "tits", pParameters[1]);
+	}
+	else if (pCommandName == "lvl" && pParameters.size() == 1) {
+		u32 p1 = 0;
+		if (!Utility::stoSafe(p1, pParameters[0])) { return; }
+		pCharacter->getConnection()->sendLevelAppearance(p1);
 	}
 	// Does not work!
 	//// Speed
