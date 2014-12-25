@@ -64,6 +64,7 @@ public:
 	void sendGroupExperienceGainMessage();
 	void sendExperienceLossMessage();
 	void sendLevelGainMessage();
+	void sendLevelsGainMessage(const u8 pLevels);
 	void sendLevelLostMessage();
 
 	void sendLevelAppearance(const u32 pParameter1);

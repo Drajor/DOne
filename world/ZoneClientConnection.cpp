@@ -1562,6 +1562,11 @@ void ZoneClientConnection::sendLevelGainMessage() {
 	sendSimpleMessage(MessageType::Experience, StringID::GainLevel, std::to_string(mCharacter->getLevel()));
 }
 
+void ZoneClientConnection::sendLevelsGainMessage(const u8 pLevels) {
+	EXPECTED(mConnected);
+	sendSimpleMessage(MessageType::Experience, StringID::GainLevels, std::to_string(pLevels), std::to_string(mCharacter->getLevel()));
+}
+
 void ZoneClientConnection::sendLevelLostMessage() {
 	// NOTE: UF Handles this message itself, no need to send.
 	//StringStream ss;

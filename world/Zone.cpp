@@ -1898,15 +1898,23 @@ void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, co
 
 	// Gaining.
 	if (pCurrentLevel > pPreviousLevel) {
-		// "You gained a level! Welcome to level X!"
-		connection->sendLevelGainMessage();
+		// Send correct message for level gain.
+		const u8 numLevels = pCurrentLevel - pPreviousLevel;
+		if (numLevels > 1) {
+			// You have gained X levels! Welcome to level Y!
+			connection->sendLevelsGainMessage(numLevels);
+		}
+		else {
+			// "You gained a level! Welcome to level X!"
+			connection->sendLevelGainMessage();
+		}
 
 		// Update zone.
 		handleLevelIncrease(pCharacter);
 	}
 	// Losing.
 	else if (pCurrentLevel < pPreviousLevel) {
-		// NOTE: [UF] Handle the level loss message by itself.
+		// NOTE: [UF] Handles the level loss message by itself.
 
 		// Update zone.
 		handleLevelDecrease(pCharacter);

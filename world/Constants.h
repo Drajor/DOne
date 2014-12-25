@@ -1481,6 +1481,7 @@ namespace StringID {
 		GainExperience = 445,		// You gain experience!!
 		GAIN_ABILITY_POINT = 446,		//You have gained an ability point! You now have %1 ability point%2.
 		GainLevel = 447,		//You have gained a level! Welcome to level %1!
+		GainLevels = 448, // You have gained %1 levels! Welcome to level %2!
 		LANG_SKILL_IMPROVED = 449,		//Your language skills have improved.
 		OTHER_LOOTED_MESSAGE = 466,		//--%1 has looted a %2--
 		LOOTED_MESSAGE = 467,		//--You have looted a %1--
