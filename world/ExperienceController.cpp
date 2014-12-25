@@ -47,7 +47,7 @@ const bool ExperienceController::initalise(const u8 pLevel, const u8 pMaximumLev
 
 const bool ExperienceController::canGainExperience() const {
 	if (mLevel < mMaximumLevel) return true;
-	return mExperience == getExperienceCap();
+	return mExperience < getExperienceCap();
 }
 
 const bool ExperienceController::canGainAAExperience() const {
@@ -79,12 +79,19 @@ void ExperienceController::addExperience(const u32 pExperience) {
 		return;
 	}
 	
+	// Add level(s)
 	mExperience += pExperience;
 	while (canGainExperience() && mExperience >= getExperienceForNextLevel()) {
 		mExperience -= getExperienceForNextLevel();
 		mLevel++;
 	}
-	// TODO: How to handle wrapping over cap?
+	
+	// Special case: Experience cap reached.
+	if (canGainExperience() == false) {
+		// Set experience to cap.
+		mExperience = getExperienceCap();
+		return;
+	}
 }
 
 const u8 ExperienceController::removeExperience(const u32 pExperience) {

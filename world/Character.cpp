@@ -258,106 +258,9 @@ void Character::healPercentage(int pPercent) {
 	mConnection->sendHealthUpdate();
 }
 
-//void Character::damage(uint32 pAmount) {
-//	mCurrentHP -= pAmount;
-//	mConnection->sendHPUpdate();
-//}
-
 void Character::doAnimation(uint8 pAnimationID) {
 	mZone->handleAnimation(this, 10, pAnimationID, true);
 }
-
-//void Character::addExperience(uint32 pExperience) {
-//	// Handle special case where Character is max level / experience.
-//	if (getLevel() == Character::getMaxCharacterLevel()) {
-//		// Character is already at max exp - 1
-//		if (mExperience == getExperienceForNextLevel() - 1) {
-//			message(MessageType::LightBlue, "You can no longer gain experience.");
-//			return;
-//		}
-//		// This experience will take the Character over the limit.
-//		else if (mExperience + pExperience > getExperienceForNextLevel() - 1) {
-//			// Modify pExeperience so that pExperience + mExperience = getExperienceForNextLevel - 1 (Capped).
-//			pExperience = (getExperienceForNextLevel() - 1 - mExperience);
-//		}
-//	}
-//
-//
-//	mExperience += pExperience;
-//	mConnection->sendExperienceGain();
-//	_checkForLevelIncrease();
-//	// Update user experience bar.
-//	mConnection->sendExperienceUpdate();
-//}
-
-//void Character::removeExperience(uint32 pExperience) {
-//	// No loss of level at this stage.
-//	if (mExperience == 0) return;
-//
-//	// Prevent experience value wrapping.
-//	if (pExperience > mExperience) {
-//		pExperience = mExperience;
-//	}
-//
-//	mExperience -= pExperience;
-//
-//	// Send user a message.
-//	mConnection->sendExperienceLoss();
-//	// Update user experience bar.
-//	mConnection->sendExperienceUpdate();
-//}
-
-//void Character::_checkForLevelIncrease() {
-//	while (mExperience >= getExperienceForNextLevel()) {
-//		mExperience -= getExperienceForNextLevel();
-//		setLevel(getLevel() + 1);
-//
-//		if (hasGuild())
-//			GuildManager::getInstance().onLevelChange(this);
-//	}
-//}
-
-//void Character::setCharacterLevel(uint8 pLevel) {
-//	// Ensure not going above maximum level.
-//	if (pLevel > Character::getMaxCharacterLevel()){
-//		pLevel = Character::getMaxCharacterLevel();
-//	}
-//	
-//	// Increasing.
-//	if (pLevel > getLevel()) {
-//		setLevel(pLevel);
-//		// Notify user.
-//		mConnection->sendLevelUpdate();
-//		mConnection->sendLevelGain();
-//		// Notify zone.
-//		mZone->handleLevelIncrease(this);
-//	}
-//	else if (pLevel < getLevel()) {
-//		mExperience = 0; // to be safe.
-//		setLevel(pLevel);
-//		// Notify user.
-//		mConnection->sendLevelUpdate();
-//		mConnection->sendLevelLost();
-//		// Notify zone.
-//		mZone->handleLevelDecrease(this);
-//	}
-//	
-//}
-
-//const uint32 Character::getExperienceRatio() const {
-//	// Protect against division by zero.
-//	uint32 next = getExperienceForNextLevel();
-//	if (next == 0) {
-//		Log::error("[Character] Prevented division by zero in getExperienceRatio");
-//		return 0;
-//	}
-//
-//	return static_cast<uint32>(330.0f * (mExperience / static_cast<float>(next)));
-//}
-
-//const uint32 Character::getExperienceForLevel(const uint8 pLevel) {
-//	return (pLevel * pLevel) * 20;
-//}
 
 float Character::getDefaultSize(uint32 pRace) {
 	switch (pRace) {
@@ -1016,7 +919,7 @@ const u8 Character::getLevel() const {
 
 void Character::setLevel(const u8 pLevel) {
 	mExperienceController->setLevel(pLevel);
-	mActorData.mLevel = pLevel;
+	Actor::setLevel(pLevel);
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

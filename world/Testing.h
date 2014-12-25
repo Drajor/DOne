@@ -192,6 +192,51 @@ TEST_F(ExperienceControllerTest, InitalisedValues) {
 	EXPECT_EQ(7, mController->getAAExperience());
 }
 
+class ExperienceControllerTestAddExperience : public ::testing::Test {
+protected:
+	virtual void SetUp() {
+		mController = std::make_shared<ExperienceController>();
+		ExperienceController::setRequiredExperienceFunction(&expF);
+		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
+		mController->initalise(1, 20, 0, 0, 0, 0, 0, 0);
+	}
+	virtual void TearDown() {
+		mController = nullptr;
+
+		ExperienceController::setRequiredAAExperienceFunction(nullptr);
+		ExperienceController::setRequiredExperienceFunction(nullptr);
+	}
+
+	std::function<u32(u8)> expF = [](u8 pLevel) { return pLevel * 5; };
+	std::function<u32(u32)> expAAF = [](u32 pPoints) { return 1; };
+	std::shared_ptr<ExperienceController> mController = 0;
+};
+
+TEST_F(ExperienceControllerTestAddExperience, Adding) {
+	EXPECT_EQ(1, mController->getLevel()); // Start at level 1.
+	EXPECT_EQ(0, mController->getExperience()); // Start with 0 experience.
+
+	mController->addExperience(4);
+	EXPECT_EQ(1, mController->getLevel()); // Still level 1.
+	EXPECT_EQ(4, mController->getExperience()); // Gained 4 experience.
+
+	mController->addExperience(5);
+	EXPECT_EQ(1, mController->getLevel()); // Still level 1.
+	EXPECT_EQ(9, mController->getExperience()); // Gained 9 experience.
+
+	mController->addExperience(7);
+	EXPECT_EQ(2, mController->getLevel()); // Now level 2.
+	EXPECT_EQ(6, mController->getExperience()); // After experience wrap, we should be 6 experience into level 2.
+
+	mController->addExperience(70); // Big exp hit.
+	EXPECT_EQ(5, mController->getLevel()); // Now level 5.
+	EXPECT_EQ(16, mController->getExperience()); // After experience wrap, we should be 6 experience into level 5.
+
+	mController->addExperience(998374623); // Really big hit, max level.
+	EXPECT_EQ(mController->getMaximumLevel(), mController->getLevel());
+	EXPECT_EQ(ExperienceController::getExperienceForLevel(mController->getMaximumLevel()) - 1, mController->getExperience()); // Experience is capped.
+	EXPECT_EQ(false, mController->canGainExperience()); // Can no longer gain experience.
+}
 
 class LootControllerTest : public ::testing::Test {
 protected:
