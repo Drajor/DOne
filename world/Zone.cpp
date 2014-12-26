@@ -1948,5 +1948,38 @@ void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
 	// Update experience bars.
 	connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
 
-	_handleLevelChange(pCharacter, preLevel, postLevel);
+	if (preLevel != postLevel)
+		_handleLevelChange(pCharacter, preLevel, postLevel);
+}
+
+void Zone::handleAddAAExperience(Character* pCharacter, const u32 pExperience) {
+	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	auto connection = pCharacter->getConnection();
+
+	EXPECTED(controller && connection);
+
+	// Check: Character can still AA gain experience.
+	if (controller->canGainAAExperience() == false) {
+		// TODO: Message about not gaining AA experience?
+		return;
+	}
+
+	const auto prePoints = controller->getUnspentAAPoints();
+
+	// Add AA experience to controller.
+	controller->addAAExperience(pExperience);
+
+	const auto postPoints = controller->getUnspentAAPoints();
+
+	// "You gain experience!!"
+	connection->sendExperienceGainMessage();
+
+	// Update experience bars.
+	connection->sendAAExperienceUpdate(controller->getAAExperienceRatio(), controller->getUnspentAAPoints(), controller->getExperienceToAA());
+
+	if (prePoints != postPoints){
+		// "You have gained an ability point!  You now have %1 ability points."
+		connection->sendAAPointGainMessage(controller->getUnspentAAPoints());
+	}
 }

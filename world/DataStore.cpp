@@ -366,10 +366,14 @@ namespace CharacterXML {
 		// Tag::Experience
 		namespace Experience {
 			SCA Level = "level";
-			SCA Experience = "experience";
-			SCA AAExperience = "aa_experience";
-			SCA UnspentAAPoints = "unspent_aa_points";
-			SCA SpentAAPoints = "spent_aa_points";
+			SCA MaximumLevel = "max_level";
+			SCA Experience = "xp";
+			SCA ExperienceToAA = "xp_to_aa";
+			SCA AAExperience = "aa_xp";
+			SCA UnspentAA = "unspent_aa";
+			SCA MaximumUnspentAA = "max_unspent_aa";
+			SCA SpentAA = "spent_aa";
+			SCA MaximumSpentAA = "max_spent_aa";
 		}
 		SCA Class = "class";
 		SCA Zone = "zone";
@@ -516,10 +520,14 @@ const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience)
 	EXPECTED_BOOL(pElement);
 
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::Level, pExperience.mLevel));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::MaximumLevel, pExperience.mMaximumLevel));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::Experience, pExperience.mExperience));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::ExperienceToAA, pExperience.mExperienceToAA));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::AAExperience, pExperience.mAAExperience));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::UnspentAAPoints, pExperience.mUnspentAAPoints));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::SpentAAPoints, pExperience.mSpentAAPoints));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::UnspentAA, pExperience.mUnspentAAPoints));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::MaximumUnspentAA, pExperience.mMaximumUnspentAA));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::SpentAA, pExperience.mSpentAAPoints));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::MaximumSpentAA, pExperience.mMaximumSpentAA));
 
 	return true;
 }
@@ -775,10 +783,14 @@ const bool writeExperience(TiXmlElement* pElement, const Data::Experience& pExpe
 	EXPECTED_BOOL(pElement);
 
 	pElement->SetAttribute(Attribute::Experience::Level, pExperience.mLevel);
+	pElement->SetAttribute(Attribute::Experience::MaximumLevel, pExperience.mMaximumLevel);
 	pElement->SetAttribute(Attribute::Experience::Experience, pExperience.mExperience);
+	pElement->SetAttribute(Attribute::Experience::ExperienceToAA, pExperience.mExperienceToAA);
 	pElement->SetAttribute(Attribute::Experience::AAExperience, pExperience.mAAExperience);
-	pElement->SetAttribute(Attribute::Experience::UnspentAAPoints, pExperience.mUnspentAAPoints);
-	pElement->SetAttribute(Attribute::Experience::SpentAAPoints, pExperience.mSpentAAPoints);
+	pElement->SetAttribute(Attribute::Experience::UnspentAA, pExperience.mUnspentAAPoints);
+	pElement->SetAttribute(Attribute::Experience::MaximumUnspentAA, pExperience.mMaximumUnspentAA);
+	pElement->SetAttribute(Attribute::Experience::SpentAA, pExperience.mSpentAAPoints);
+	pElement->SetAttribute(Attribute::Experience::MaximumSpentAA, pExperience.mMaximumSpentAA);
 
 	return true;
 }

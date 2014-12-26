@@ -59,6 +59,7 @@ public:
 	void sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID);
 
 	void sendExperienceUpdate(const u32 pExperience, const u32 pAAExperience);
+	void sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA);
 	
 	void sendExperienceGainMessage();
 	void sendGroupExperienceGainMessage();
@@ -66,6 +67,10 @@ public:
 	void sendLevelGainMessage();
 	void sendLevelsGainMessage(const u8 pLevels);
 	void sendLevelLostMessage();
+
+	void sendAAExperienceOnMessage();
+	void sendAAExperienceOffMessage();
+	void sendAAPointGainMessage(const u32 pUnspentAAPoints);
 
 	void sendLevelAppearance(const u32 pParameter1);
 	void sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio);
@@ -309,6 +314,8 @@ private:
 
 	void _handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
 	void _handleRespawnWindowSelect(const EQApplicationPacket* pPacket);
+
+	void _handleAAAction(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

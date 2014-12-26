@@ -83,10 +83,14 @@ namespace Data {
 
 	struct Experience {
 		u8 mLevel = 0;
+		u8 mMaximumLevel = 0;
 		u32 mExperience = 0;
+		u32 mExperienceToAA = 0;
 		u32 mAAExperience = 0;
 		u32 mUnspentAAPoints = 0;
+		u32 mMaximumUnspentAA = 0;
 		u32 mSpentAAPoints = 0;
+		u32 mMaximumSpentAA = 0;
 	};
 
 	struct Character {

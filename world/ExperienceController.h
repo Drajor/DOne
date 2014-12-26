@@ -8,7 +8,7 @@ public:
 	static void _initialise();
 
 	// Initialises the ExperienceController.
-	const bool initalise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience);
+	const bool initalise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience);
 
 	// Returns whether experience gain is possible.
 	const bool canGainExperience() const;
@@ -37,8 +37,20 @@ public:
 	const u32 getExperienceRatio() const;
 	const u32 getAAExperienceRatio() const;
 
+	// Returns the percentage of experience that will go to AA.
+	inline const u32 getExperienceToAA() const { return mExperienceToAA; }
+
+	// Sets the percentage of experience that will go to AA.
+	void setExperienceToAA(const u32 pToAA);
+
+	// Returns whether AA experience is on.
+	inline const bool isAAOn() const { return getExperienceToAA() > 0; }
+
 	// Returns the unspent AA points.
 	inline const u32 getUnspentAAPoints() const { return mUnspentAAPoints; }
+
+	// Sets the current unspent AA points.
+	void setUnspentAAPoints(const u32 pPoints);
 
 	// Returns the maximum number of unspent AA points.
 	inline const u32 getMaximumUnspentAAPoints() const { return mMaximumUnspentAAPoints; }
@@ -61,8 +73,8 @@ public:
 	// Returns the current AA experience.
 	inline const u32 getAAExperience() const { return mAAExperience; }
 
-	// Adds AA experience and returns the number of AA points gained.
-	const u8 addAAExperience(const u32 pAAExperience);
+	// Adds AA experience.
+	void addAAExperience(const u32 pAAExperience);
 
 	// TODO: Remove AA?
 
@@ -74,6 +86,7 @@ public:
 	// Returns the amount of AA experience required for a specific AA point.
 	static const u32 getAAExperienceForPoint(const u32 pTotalPoints);
 	inline const u32 getAAExperienceForNextPoint() const { return getAAExperienceForPoint(getTotalAAPoints() + 1); }
+	//inline const u32 getAAExperienceCap() const { return get }
 
 	// Sets the function which determine how much experience is required for a specific level.
 	inline static void setRequiredExperienceFunction(std::function<u32(u8)>* pFunction) { mRequiredExperienceFunction = pFunction; }
@@ -90,6 +103,7 @@ private:
 
 	u8 mLevel = 1;
 	u32 mExperience = 0;
+	u32 mExperienceToAA = 0;
 
 	u32 mSpentAAPoints = 0;
 	u32 mUnspentAAPoints = 0;

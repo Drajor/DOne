@@ -103,8 +103,7 @@ bool Character::initialise() {
 	setStatus(mData->mStatus);
 
 	// Experience
-	static const u8 maxLevel = 100; // temp.
-	EXPECTED_BOOL(mExperienceController->initalise(mData->mExperience.mLevel, maxLevel, mData->mExperience.mExperience, mData->mExperience.mUnspentAAPoints, 100, mData->mExperience.mSpentAAPoints, 9000, mData->mExperience.mAAExperience));
+	EXPECTED_BOOL(mExperienceController->initalise(mData->mExperience.mLevel, mData->mExperience.mMaximumLevel, mData->mExperience.mExperience, mData->mExperience.mExperienceToAA, mData->mExperience.mUnspentAAPoints, mData->mExperience.mMaximumUnspentAA, mData->mExperience.mSpentAAPoints, mData->mExperience.mMaximumSpentAA, mData->mExperience.mAAExperience));
 
 	mPosition = mData->mPosition;
 	mHeading = mData->mHeading;
@@ -302,10 +301,14 @@ const bool Character::_updateForSave() {
 	// Experience.
 	auto experienceController = getExperienceController();
 	mData->mExperience.mLevel = experienceController->getLevel();
+	mData->mExperience.mMaximumLevel = experienceController->getMaximumLevel();
 	mData->mExperience.mExperience = experienceController->getExperience();
+	mData->mExperience.mExperienceToAA = experienceController->getExperienceToAA();
 	mData->mExperience.mAAExperience = experienceController->getAAExperience();
 	mData->mExperience.mUnspentAAPoints = experienceController->getUnspentAAPoints();
+	mData->mExperience.mMaximumUnspentAA = experienceController->getMaximumUnspentAAPoints();
 	mData->mExperience.mSpentAAPoints = experienceController->getSpentAAPoints();
+	mData->mExperience.mMaximumSpentAA = experienceController->getMaximumSpentAAPoints();
 
 	mData->mRace = getRace();
 	mData->mClass = getClass();

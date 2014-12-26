@@ -167,7 +167,7 @@ public:
 class AddExperienceCommand : public Command {
 public:
 	AddExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #+exp <number>");
+		mHelpMessages.push_back("Usage: #+xp <number>");
 		mMinimumParameters = 1;
 		mMaximumParameters = 1;
 		mRequiresTarget = true;
@@ -182,6 +182,29 @@ public:
 
 		auto character = Actor::cast<Character*>(mInvoker->getTarget());
 		character->getZone()->handleAddExperience(character, experience);
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class AddAAExperienceCommand : public Command {
+public:
+	AddAAExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+aaxp <number>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is a Character.
+		if (!mInvoker->targetIsCharacter()) { return false; }
+
+		u32 experience = 0;
+		if (!convertParameter(0, experience)) { return false; }
+
+		auto character = Actor::cast<Character*>(mInvoker->getTarget());
+		character->getZone()->handleAddAAExperience(character, experience);
 		return true;
 	}
 };
@@ -1076,9 +1099,10 @@ public:
 		mInvoker->notify("-- Experience -- ");
 		mInvoker->notify("Level: " + std::to_string(experienceController->getLevel()) + " / " + std::to_string(experienceController->getMaximumLevel()));
 		mInvoker->notify("Experience: " + std::to_string(experienceController->getExperience()) + " / " + std::to_string(experienceController->getExperienceForNextLevel()));
+		mInvoker->notify("Experience to AA: " + std::to_string(experienceController->getExperienceToAA()) + " / 100");
 		mInvoker->notify("AA Experience: " + std::to_string(experienceController->getAAExperience()) + " / " + std::to_string(experienceController->getAAExperienceForNextPoint()));
-		mInvoker->notify("Unspent AA: " + std::to_string(experienceController->getUnspentAAPoints()));
-		mInvoker->notify("Spent AA: " + std::to_string(experienceController->getSpentAAPoints()));
+		mInvoker->notify("Unspent AA: " + std::to_string(experienceController->getUnspentAAPoints()) + " / " + std::to_string(experienceController->getMaximumUnspentAAPoints()));
+		mInvoker->notify("Spent AA: " + std::to_string(experienceController->getSpentAAPoints()) + " / " + std::to_string(experienceController->getMaximumSpentAAPoints()));
 		return true;
 	}
 
@@ -1641,6 +1665,7 @@ void CommandHandler::initialise() {
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));
+	mCommands.push_back(new AddAAExperienceCommand(100, { "+aaxp", "+aaexp" "addaaexp" }));
 	mCommands.push_back(new LevelCommand(100, { "level", "setlevel" "lvl" }));
 	mCommands.push_back(new StatsCommand(100, { "setstat" }));
 

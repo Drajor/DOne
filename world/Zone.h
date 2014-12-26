@@ -201,6 +201,7 @@ public:
 	void handleSetLevel(Character* pCharacter, const u8 pLevel);
 	void _handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel);
 	void handleAddExperience(Character* pCharacter, const u32 pExperience);
+	void handleAddAAExperience(Character* pCharacter, const u32 pExperience);
 private:
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);

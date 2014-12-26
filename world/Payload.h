@@ -1302,6 +1302,22 @@ namespace Payload {
 		};
 
 		// S->C
+		struct AAExperienceUpdate : public FixedT<AAExperienceUpdate, OP_AAExpUpdate> {
+			static EQApplicationPacket* construct(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mExperienceRatio = pAAExperience;
+				payload->mUnspentAA = pUnspentAA;
+				payload->mExperienceToAA = pExperienceToAA;
+
+				return packet;
+			}
+			u32 mExperienceRatio = 0;
+			u32 mUnspentAA = 0;
+			u32 mExperienceToAA = 0;
+		};
+
+		// S->C
 		struct LevelUpdate : public FixedT<LevelUpdate, OP_LevelUpdate> {
 			static EQApplicationPacket* construct(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperience) {
 				auto packet = create();
@@ -1439,6 +1455,24 @@ namespace Payload {
 				PRINT_MEMBER(mFlag);
 				PRINT_MEMBER(mUnknown);
 				PRINT_MEMBER(mType);
+				return ss.str();
+			}
+		};
+
+		// C->S
+		struct AAAction : public Fixed<AAAction> {
+			u32 mAction = 0;
+			u32 mAbility = 0;
+			u32 mUnknown = 0;
+			u32 mExperienceToAA = 0;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{AAAction} ";
+				PRINT_MEMBER(mAction);
+				PRINT_MEMBER(mAbility);
+				PRINT_MEMBER(mUnknown);
+				PRINT_MEMBER(mExperienceToAA);
 				return ss.str();
 			}
 		};

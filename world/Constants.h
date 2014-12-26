@@ -1349,8 +1349,8 @@ namespace StringID {
 		MGB_STRING = 113,		//The next group buff you cast will hit all targets in range.
 		ABILITY_FAILED = 116,		//Your ability failed. Timer has been reset.
 		ESCAPE = 114,		//You escape from combat, hiding yourself from view.
-		AA_OFF = 119,		//Alternate Experience is *OFF*.
-		AA_ON = 121,		//Alternate Experience is *ON*.
+		AAOff = 119, // Alternate Experience is *OFF*.
+		AAOn = 121, // Alternate Experience is *ON*.
 		TARGET_TOO_FAR = 124,		//Your target is too far away, get closer!
 		PROC_TOOLOW = 126,		//Your will is not sufficient to command this weapon.
 		PROC_PETTOOLOW = 127,		//Your pet's will is not sufficient to command its weapon.
@@ -1479,7 +1479,7 @@ namespace StringID {
 		LOSE_LEVEL = 442,		//You LOST a level! You are now level %1!
 		GainGroupExperience = 444,		// You gain party experience!!
 		GainExperience = 445,		// You gain experience!!
-		GAIN_ABILITY_POINT = 446,		//You have gained an ability point! You now have %1 ability point%2.
+		GainAAPoint = 446, // You have gained an ability point!  You now have %1 ability points.
 		GainLevel = 447,		//You have gained a level! Welcome to level %1!
 		GainLevels = 448, // You have gained %1 levels! Welcome to level %2!
 		LANG_SKILL_IMPROVED = 449,		//Your language skills have improved.

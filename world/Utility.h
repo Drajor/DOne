@@ -28,6 +28,11 @@ namespace Utility {
 		return std::max(pMinimum, std::min(pMaximum, pValue));
 	}
 
+	template<typename T>
+	const bool inRange(const T& pValue, const T& pMinimum, const T& pMaximum) {
+		return pValue >= pMinimum && pValue <= pMaximum;
+	}
+
 	// Searches pStringA for pStringB case insensitively.
 	static bool findCI(const String& pStringA, const String& pStringB) {
 		String a = pStringA;

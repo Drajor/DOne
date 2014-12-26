@@ -562,6 +562,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player selects a respawn option from the 'Respawn Window'.
 		_handleRespawnWindowSelect(pPacket);
 		break;
+	case OP_AAAction:
+		// NOTE: This occurs when a player adjusts the 'Exp to AA' setting in the 'Alternate Advancement Window'.
+		_handleAAAction(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -662,6 +666,11 @@ void ZoneClientConnection::_sendPlayerProfile() {
 		payload->binds[i].heading = bindLocation.getHeading();
 	}
 
+	auto expController = mCharacter->getExperienceController();
+
+	payload->aapoints = expController->getUnspentAAPoints();
+	payload->aapoints_spent = expController->getSpentAAPoints(); // not working.
+	
 	payload->deity = mCharacter->getDeity();
 	payload->guild_id = mCharacter->getGuildID();
 	//payload->birthday;			// characters bday
@@ -1532,6 +1541,15 @@ void ZoneClientConnection::sendExperienceUpdate(const u32 pExperience,  const u3
 	delete packet;
 }
 
+void ZoneClientConnection::sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = AAExperienceUpdate::construct(pAAExperience, pUnspentAA, pExperienceToAA);
+	sendPacket(packet);
+	delete packet;
+}
+
 void ZoneClientConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
@@ -1572,6 +1590,21 @@ void ZoneClientConnection::sendLevelLostMessage() {
 	//StringStream ss;
 	//ss << mCharacter->getLevel();
 	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
+}
+
+void ZoneClientConnection::sendAAPointGainMessage(const u32 pUnspentAAPoints) {
+	EXPECTED(mConnected);
+	sendSimpleMessage(MessageType::Experience, StringID::GainAAPoint, std::to_string(pUnspentAAPoints));
+}
+
+void ZoneClientConnection::sendAAExperienceOnMessage() {
+	EXPECTED(mConnected);
+	sendSimpleMessage(MessageType::White, StringID::AAOn);
+}
+
+void ZoneClientConnection::sendAAExperienceOffMessage() {
+	EXPECTED(mConnected);
+	sendSimpleMessage(MessageType::White, StringID::AAOff);
 }
 
 void ZoneClientConnection::sendLevelAppearance(const u32 pParameter1) {
@@ -4127,6 +4160,34 @@ void ZoneClientConnection::_handleRespawnWindowSelect(const EQApplicationPacket*
 	Log::info(payload->_debug());
 
 	mZone->handleRespawnSelection(mCharacter, payload->mSelection);
+}
+
+void ZoneClientConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(AAAction::sizeCheck(pPacket));
+
+	auto payload = AAAction::convert(pPacket);
+	Log::info(payload->_debug());
+
+	EXPECTED(Utility::inRange<u32>(payload->mExperienceToAA, 0, 100)); // Sanity.
+
+	auto controller = mCharacter->getExperienceController();
+
+	// TODO: The client blocks this until 51 iirc.
+	if (payload->mAction == 1) {
+		if (controller->isAAOn() == false)
+			// " Alternate Experience is *ON*."
+			sendAAExperienceOnMessage();
+
+		controller->setExperienceToAA(payload->mExperienceToAA);
+		mCharacter->notify("Experience to AA set to " + std::to_string(controller->getExperienceToAA()) + "%");
+	}
+	else if (payload->mAction == 2) {
+		// " Alternate Experience is *OFF*."
+		sendAAExperienceOffMessage();
+		mCharacter->getExperienceController()->setExperienceToAA(0);
+	}
 }
 
 //
