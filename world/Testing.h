@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Data.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Inventory.h"
@@ -127,18 +128,50 @@ protected:
 
 		ExperienceController::setRequiredAAExperienceFunction(nullptr);
 		ExperienceController::setRequiredExperienceFunction(nullptr);
+		ExperienceController::setRequiredGroupExperienceFunction(nullptr);
+		ExperienceController::setRequiredRaidExperienceFunction(nullptr);
 	}
 
 	void setExpFunction() {
-		std::function<u32(u8)> expF = [](u8) { return 1; };
+		static std::function<u32(u8)> expF = [](u8) { return 1; };
 		ExperienceController::setRequiredExperienceFunction(&expF);
 	}
 
 	void setAAExpFunction() {
-		std::function<u32(u32)> expAAF = [](u32) { return 1; };
+		static std::function<u32(u32)> expAAF = [](u32) { return 1; };
 		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
 	}
 
+	void setGroupExpFunction() {
+		static std::function<u32(u32)> expGLF = [](u32) { return 1; };
+		ExperienceController::setRequiredGroupExperienceFunction(&expGLF);
+	}
+
+	void setRaidExpFunction() {
+		static std::function<u32(u32)> expRLF = [](u32) { return 1; };
+		ExperienceController::setRequiredRaidExperienceFunction(&expRLF);
+	}
+
+	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
+		mData.mLevel = pLevel;
+		mData.mMaximumLevel = pMaximumLevel;
+		mData.mExperience = pExperience;
+
+		mData.mExperienceToAA = pExperienceToAA;
+		mData.mUnspentAAPoints = pUnspentAAPoints;
+		mData.mMaximumUnspentAA = pMaximumUnspentAAPoints;
+		mData.mSpentAAPoints = pSpentAAPoints;
+		mData.mMaximumSpentAA = pMaximumSpentAAPoints;
+		mData.mAAExperience = pAAExperience;
+
+		mData.mGroupExperience = pGroupExperience;
+		mData.mGroupPoints = pGroupPoints;
+
+		mData.mRaidExperience = pRaidExperience;
+		mData.mRaidPoints = pRaidPoints;
+	}
+
+	Data::Experience mData;
 	ExperienceController* mController = 0;
 };
 
@@ -146,46 +179,75 @@ TEST_F(ExperienceControllerTest, InitialiseFunctions) {
 	// Make it fail!
 	ExperienceController::setRequiredAAExperienceFunction(nullptr);
 	ExperienceController::setRequiredExperienceFunction(nullptr);
-	EXPECT_EQ(false, mController->initalise(1, 10, 2, 20, 3, 4, 4, 5, 6));
+	ExperienceController::setRequiredGroupExperienceFunction(nullptr);
+	ExperienceController::setRequiredRaidExperienceFunction(nullptr);
+	setData(1, 10, 2, 20, 3, 4, 4, 5, 6, 7, 1, 6, 2);
+	
+	EXPECT_EQ(false, mController->initalise(mData));
 
 	// Set the experience function.
 	std::function<u32(u8)> expF = [](u8) { return 1; };
 	ExperienceController::setRequiredExperienceFunction(&expF);
-	EXPECT_EQ(false, mController->initalise(1, 10, 2, 20, 3, 4, 4, 5, 6));
+	EXPECT_EQ(false, mController->initalise(mData));
 
-	// Set the AA experience function. (expect initalise to succeed).
+	// Set the AA experience function.
 	std::function<u32(u32)> expAAF = [](u32) { return 1; };
 	ExperienceController::setRequiredAAExperienceFunction(&expAAF);
-	EXPECT_EQ(true, mController->initalise(1, 10, 2, 20, 3, 4, 4, 5, 6));
+	EXPECT_EQ(false, mController->initalise(mData));
+
+	// Set the Group Leadership experience function.
+	std::function<u32(u32)> expGLF = [](u32) { return 1; };
+	ExperienceController::setRequiredGroupExperienceFunction(&expGLF);
+	EXPECT_EQ(false, mController->initalise(mData));
+
+	// Set the Raid Leadership experience function. (should succeed)
+	std::function<u32(u32)> expRLF = [](u32) { return 1; };
+	ExperienceController::setRequiredRaidExperienceFunction(&expRLF);
+	EXPECT_EQ(true, mController->initalise(mData));
 }
 
 TEST_F(ExperienceControllerTest, InitialiseParameterChecks) {
 	setExpFunction();
 	setAAExpFunction();
+	setGroupExpFunction();
+	setRaidExpFunction();
 
 	// Fail: Zero level.
-	EXPECT_EQ(false, mController->initalise(0, 10, 2, 20, 3, 4, 4, 5, 6));
+	setData(0, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	EXPECT_EQ(false, mController->initalise(mData));
+
 	// Fail: Level greater than max level.
-	EXPECT_EQ(false, mController->initalise(10, 8, 2, 20, 3, 4, 4, 5, 6));
+	setData(3, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	EXPECT_EQ(false, mController->initalise(mData));
+
 	// Fail: Unspent AA greater than max.
-	EXPECT_EQ(false, mController->initalise(1, 10, 2, 20, 4, 3, 4, 5, 6));
+	setData(1, 2, 3, 70, 5, 4, 6, 7, 8, 9, 10, 11, 12);
+	EXPECT_EQ(false, mController->initalise(mData));
+
 	// Fail: Spent AA greater than max.
-	EXPECT_EQ(false, mController->initalise(1, 10, 2, 20, 3, 4, 5, 4, 6));
+	setData(1, 2, 3, 70, 4, 5, 7, 6, 8, 9, 10, 11, 12);
+	EXPECT_EQ(false, mController->initalise(mData));
 }
 
 TEST_F(ExperienceControllerTest, DoubleInitialise) {
 	setExpFunction();
 	setAAExpFunction();
+	setGroupExpFunction();
+	setRaidExpFunction();
 
-	EXPECT_EQ(true, mController->initalise(1, 10, 2, 20, 3, 4, 4, 5, 6));
-	EXPECT_EQ(false, mController->initalise(1, 10, 2, 20, 3, 4, 4, 5, 6));
+	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+	EXPECT_EQ(true, mController->initalise(mData));
+	EXPECT_EQ(false, mController->initalise(mData));
 }
 
 TEST_F(ExperienceControllerTest, InitalisedValues) {
 	setExpFunction();
 	setAAExpFunction();
+	setGroupExpFunction();
+	setRaidExpFunction();
 
-	EXPECT_EQ(true, mController->initalise(1, 10, 2, 20, 3, 4, 5, 6, 7));
+	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+	EXPECT_EQ(true, mController->initalise(mData));
 	EXPECT_EQ(1, mController->getLevel());
 	EXPECT_EQ(10, mController->getMaximumLevel());
 	EXPECT_EQ(2, mController->getExperience());
@@ -195,6 +257,10 @@ TEST_F(ExperienceControllerTest, InitalisedValues) {
 	EXPECT_EQ(5, mController->getSpentAAPoints());
 	EXPECT_EQ(6, mController->getMaximumSpentAAPoints());
 	EXPECT_EQ(7, mController->getAAExperience());
+	EXPECT_EQ(8, mController->getGroupExperience());
+	EXPECT_EQ(9, mController->getGroupPoints());
+	EXPECT_EQ(10, mController->getRaidExperience());
+	EXPECT_EQ(11, mController->getRaidPoints());
 }
 
 class ExperienceControllerTestAddExperience : public ::testing::Test {
@@ -203,7 +269,11 @@ protected:
 		mController = std::make_shared<ExperienceController>();
 		ExperienceController::setRequiredExperienceFunction(&expF);
 		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
-		mController->initalise(1, 20, 0, 0, 0, 3, 0, 0, 0);
+		ExperienceController::setRequiredGroupExperienceFunction(&expGF);
+		ExperienceController::setRequiredRaidExperienceFunction(&expRF);
+
+		setData(1, 20, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0);
+		mController->initalise(mData);
 	}
 	virtual void TearDown() {
 		mController = nullptr;
@@ -212,8 +282,31 @@ protected:
 		ExperienceController::setRequiredExperienceFunction(nullptr);
 	}
 
+	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
+		mData.mLevel = pLevel;
+		mData.mMaximumLevel = pMaximumLevel;
+		mData.mExperience = pExperience;
+
+		mData.mExperienceToAA = pExperienceToAA;
+		mData.mUnspentAAPoints = pUnspentAAPoints;
+		mData.mMaximumUnspentAA = pMaximumUnspentAAPoints;
+		mData.mSpentAAPoints = pSpentAAPoints;
+		mData.mMaximumSpentAA = pMaximumSpentAAPoints;
+		mData.mAAExperience = pAAExperience;
+
+		mData.mGroupExperience = pGroupExperience;
+		mData.mGroupPoints = pGroupPoints;
+
+		mData.mRaidExperience = pRaidExperience;
+		mData.mRaidPoints = pRaidPoints;
+	}
+
+	Data::Experience mData;
+
 	std::function<u32(u8)> expF = [](u8 pLevel) { return pLevel * 5; };
 	std::function<u32(u32)> expAAF = [](u32 pPoints) { return 10; };
+	std::function<u32(u32)> expGF = [](u32 pPoints) { return 1000; };
+	std::function<u32(u32)> expRF = [](u32 pPoints) { return 1000; };
 	std::shared_ptr<ExperienceController> mController = 0;
 };
 

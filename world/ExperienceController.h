@@ -3,12 +3,16 @@
 #include "Types.h"
 #include <functional>
 
+namespace Data {
+	struct Experience;
+}
+
 class ExperienceController {
 public:
 	static void _initialise();
 
 	// Initialises the ExperienceController.
-	const bool initalise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience);
+	const bool initalise(Data::Experience& pData);
 
 	void add(const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience);
 

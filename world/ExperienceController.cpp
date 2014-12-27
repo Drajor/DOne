@@ -1,4 +1,5 @@
 #include "ExperienceController.h"
+#include "Data.h"
 #include "Utility.h"
 
 std::function<u32(u8)>* ExperienceController::mRequiredExperienceFunction = nullptr;
@@ -38,28 +39,39 @@ const u32 ExperienceController::getRaidExperienceForPoint(const u32 pTotalPoints
 	return (*mRequiredRaidExperienceFunction)(pTotalPoints);
 }
 
-const bool ExperienceController::initalise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience) {
+const bool ExperienceController::initalise(Data::Experience& pData) {
 	EXPECTED_BOOL(!mInitialised);
 	EXPECTED_BOOL(mRequiredExperienceFunction);
 	EXPECTED_BOOL(mRequiredAAExperienceFunction);
 	EXPECTED_BOOL(mRequiredGroupExperienceFunction);
 	EXPECTED_BOOL(mRequiredRaidExperienceFunction);
-	EXPECTED_BOOL(pLevel > 0);
-	EXPECTED_BOOL(pLevel <= pMaximumLevel);
-	EXPECTED_BOOL(pExperienceToAA <= 100);
-	EXPECTED_BOOL(pUnspentAAPoints <= pMaximumUnspentAAPoints);
-	EXPECTED_BOOL(pSpentAAPoints <= pMaximumSpentAAPoints);
+	EXPECTED_BOOL(pData.mLevel > 0);
+	EXPECTED_BOOL(pData.mLevel <= pData.mMaximumLevel);
+	EXPECTED_BOOL(pData.mExperienceToAA <= 100);
+	EXPECTED_BOOL(pData.mUnspentAAPoints <= pData.mMaximumUnspentAA);
+	EXPECTED_BOOL(pData.mSpentAAPoints <= pData.mMaximumSpentAA);
 
-	mLevel = pLevel;
-	mMaximumLevel = pMaximumLevel;
-	mExperience = pExperience;
-	mExperienceToAA = pExperienceToAA;
+	// Normal experience.
+	mLevel = pData.mLevel;
+	mMaximumLevel = pData.mMaximumLevel;
+	mExperience = pData.mExperience;
 
-	mUnspentAAPoints = pUnspentAAPoints;
-	mMaximumUnspentAAPoints = pMaximumUnspentAAPoints;
-	mSpentAAPoints = pSpentAAPoints;
-	mMaximumSpentAAPoints = pMaximumSpentAAPoints;
-	mAAExperience = pAAExperience;
+	// Alternate Advanced experience.
+	mExperienceToAA = pData.mExperienceToAA;
+	mAAExperience = pData.mAAExperience;
+	mUnspentAAPoints = pData.mUnspentAAPoints;
+	mMaximumUnspentAAPoints = pData.mMaximumUnspentAA;
+	mSpentAAPoints = pData.mSpentAAPoints;
+	mMaximumSpentAAPoints = pData.mMaximumSpentAA;
+
+	// Leadership experience.
+	mLeadershipExperienceOn = pData.mLeadershipExperienceOn;
+	
+	mGroupExperience = pData.mGroupExperience;
+	mGroupPoints = pData.mGroupPoints;
+
+	mRaidExperience = pData.mRaidExperience;
+	mRaidPoints = pData.mRaidPoints;
 
 	mInitialised = true;
 	return true;
