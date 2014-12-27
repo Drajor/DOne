@@ -121,40 +121,78 @@ public:
 	// Sets whether leadership experience is on or off.
 	void setLeadershipExperience(const bool pValue) { mLeadershipExperienceOn = pValue; }
 
-	// Returns whether group leadership experience is possible.
+	// 0.0f to 1000.0f
+	const double getGroupRatio() const;
+
+	// 0.0f to 2000.0f
+	const double getRaidRatio() const;
+
+	/////////////////////////////////////////////////////////////////////
+	// Group Leadership Experience.
+	/////////////////////////////////////////////////////////////////////
+
+	// Returns whether gaining group leadership experience is possible.
 	const bool canGainGroupExperience() const;
 
 	// Sets the function which calculates how much Group Leadership experience is required for a specific point.
 	inline static void setRequiredGroupExperienceFunction(std::function<u32(u32)>* pFunction) { mRequiredGroupExperienceFunction = pFunction; }
 
-	// 0.0f to 1000.0f
-	const double getGroupRatio() const;
-
+	// Adds group leadership experience.
 	void addGroupExperience(const u32 pExperience);
+
+	// Returns the current amount of group leadership experience.
 	inline const u32 getGroupExperience() const { return mGroupExperience; }
+
+	// Returns the current number of unspent group leadership points.
 	inline const u32 getGroupPoints() const { return mGroupPoints; }
+
+	// Returns the current number of spent group leadership points.
 	inline const u32 getSpentGroupPoints() const { return mSpentGroupPoints; }
+
+	// Returns the total number of group leadership points accumulated.
 	inline const u32 getTotalGroupPoints() const { return getGroupPoints() + getSpentGroupPoints(); }
-	inline const u32 getMaxGroupPoints() const { return mMaxGroupPoints; }
+
+	// Returns the maximum number of unspent group points that can be accumulated.
+	const u32 getMaxGroupPoints() const;
+
+	// Returns the amount of group leadership experience required for a specific point.
 	static const u32 getGroupExperienceForPoint(const u32 pTotalPoints);
+
+	// Returns the amount of group leadership experience required for the next point.
 	inline const u32 getGroupExperienceForNextPoint() const { return getGroupExperienceForPoint(getTotalGroupPoints() + 1); }
 
-	// Returns whether raid leadership experience is possible.
+	/////////////////////////////////////////////////////////////////////
+	// Raid Leadership Experience.
+	/////////////////////////////////////////////////////////////////////
+
+	// Returns whether gaining raid leadership experience is possible.
 	const bool canGainRaidExperience() const;
 
 	// Sets the function which calculates how much Raid Leadership experience is required for a specific point.
 	inline static void setRequiredRaidExperienceFunction(std::function<u32(u32)>* pFunction) { mRequiredRaidExperienceFunction = pFunction; }
 
-	// 0.0f to 2000.0f
-	const double getRaidRatio() const;
-
+	// Adds raid leadership experience.
 	void addRaidExperience(const u32 pExperience);
+	
+	// Returns the current amount of raid leadership experience.
 	inline const u32 getRaidExperience() const { return mRaidExperience; }
+
+	// Returns the current number unspent of raid leadership points.
 	inline const u32 getRaidPoints() const { return mRaidPoints; }
+
+	// Returns the total number of spent raid leadership points.
 	inline const u32 getSpentRaidPoints() const { return mSpentRaidPoints; }
+	
+	// Returns the total number of raid leadership points accumulated.
 	inline const u32 getTotalRaidPoints() const { return getRaidPoints() + getSpentRaidPoints(); }
-	inline const u32 getMaxRaidPoints() const { return mMaxRaidLeadershipPoints; }
+
+	// Returns the maximum number of unspent raid points that can be accumulated.
+	const u32 getMaxRaidPoints() const;
+
+	// Returns the amount of raid leadership experience required for a specific point.
 	static const u32 getRaidExperienceForPoint(const u32 pTotalPoints);
+
+	// Returns the amount of raid leadership experience required for the next point.
 	inline const u32 getRaidExperienceForNextPoint() const { return getRaidExperienceForPoint(getTotalRaidPoints() + 1); }
 
 private:
@@ -183,10 +221,8 @@ private:
 	u32 mGroupExperience = 0;
 	u32 mGroupPoints = 0;
 	u32 mSpentGroupPoints = 0;
-	u32 mMaxGroupPoints = 8; // Client defined. Changes by level.
 	
 	u32 mRaidExperience = 0;
 	u32 mRaidPoints = 0;
 	u32 mSpentRaidPoints = 0;
-	u32 mMaxRaidLeadershipPoints = 10; // Client defined. Changes by level.
 };

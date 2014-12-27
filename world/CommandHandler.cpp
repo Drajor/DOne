@@ -1090,15 +1090,28 @@ public:
 	}
 
 	const bool informationCharacter(Character* pCharacter) {
-		auto experienceController = pCharacter->getExperienceController();
+		auto controller = pCharacter->getExperienceController();
 
 		mInvoker->notify("-- Experience -- ");
-		mInvoker->notify("Level: " + std::to_string(experienceController->getLevel()) + " / " + std::to_string(experienceController->getMaximumLevel()));
-		mInvoker->notify("Experience: " + std::to_string(experienceController->getExperience()) + " / " + std::to_string(experienceController->getExperienceForNextLevel()));
-		mInvoker->notify("Experience to AA: " + std::to_string(experienceController->getExperienceToAA()) + " / 100");
-		mInvoker->notify("AA Experience: " + std::to_string(experienceController->getAAExperience()) + " / " + std::to_string(experienceController->getAAExperienceForNextPoint()));
-		mInvoker->notify("Unspent AA: " + std::to_string(experienceController->getUnspentAAPoints()) + " / " + std::to_string(experienceController->getMaximumUnspentAAPoints()));
-		mInvoker->notify("Spent AA: " + std::to_string(experienceController->getSpentAAPoints()) + " / " + std::to_string(experienceController->getMaximumSpentAAPoints()));
+		mInvoker->notify("Level: " + std::to_string(controller->getLevel()) + " / " + std::to_string(controller->getMaximumLevel()));
+		mInvoker->notify("Experience: " + std::to_string(controller->getExperience()) + " / " + std::to_string(controller->getExperienceForNextLevel()));
+		mInvoker->notify("Experience to AA: " + std::to_string(controller->getExperienceToAA()) + " / 100");
+		mInvoker->notify("AA Experience: " + std::to_string(controller->getAAExperience()) + " / " + std::to_string(controller->getAAExperienceForNextPoint()));
+		mInvoker->notify("Unspent AA: " + std::to_string(controller->getUnspentAAPoints()) + " / " + std::to_string(controller->getMaximumUnspentAAPoints()));
+		mInvoker->notify("Spent AA: " + std::to_string(controller->getSpentAAPoints()) + " / " + std::to_string(controller->getMaximumSpentAAPoints()));
+		
+		String leadershipExp = controller->isLeadershipOn() ? "On" : "Off";
+		mInvoker->notify("Leadership Experience: " + leadershipExp);
+
+		mInvoker->notify("Group Experience: " + std::to_string(controller->getGroupExperience()) + " / " + std::to_string(controller->getGroupExperienceForNextPoint()));
+		mInvoker->notify("Group Points: " + std::to_string(controller->getGroupPoints()) + " / " + std::to_string(controller->getMaxGroupPoints()));
+		mInvoker->notify("Group Points Spent: " + std::to_string(controller->getSpentGroupPoints()));
+		mInvoker->notify("Group Points Total: " + std::to_string(controller->getTotalGroupPoints()));
+
+		mInvoker->notify("Raid Experience: " + std::to_string(controller->getRaidExperience()) + " / " + std::to_string(controller->getRaidExperienceForNextPoint()));
+		mInvoker->notify("Raid Points: " + std::to_string(controller->getRaidPoints()) + " / " + std::to_string(controller->getMaxRaidPoints()));
+		mInvoker->notify("Raid Points Spent: " + std::to_string(controller->getSpentRaidPoints()));
+		mInvoker->notify("Raid Points Total: " + std::to_string(controller->getTotalRaidPoints()));
 		return true;
 	}
 

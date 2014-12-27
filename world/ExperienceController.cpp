@@ -215,3 +215,17 @@ void ExperienceController::addRaidExperience(const u32 pExperience) {
 		return;
 	}
 }
+
+const u32 ExperienceController::getMaxRaidPoints() const {
+	// [Client Limitation]
+	if (mLevel < 45) return 6;
+	if (mLevel < 55) return 8;
+	return 10;
+}
+
+const u32 ExperienceController::getMaxGroupPoints() const {
+	// [Client Limitation]
+	if (mLevel < 35) return 4;
+	if (mLevel < 51) return 6;
+	return 8;
+}
