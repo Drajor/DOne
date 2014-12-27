@@ -79,7 +79,7 @@ void CombatSystem::primaryMeleeAttack(Character* pAttacker, NPC* pDefender) {
 	EXPECTED(hateController);
 
 	int32 damage = 0;
-	uint32 hitChance = 0;
+	uint32 hitChance = 90;
 
 	bool hit = Random::make<uint32>(1, 100) <= hitChance;
 	if (!hit) {

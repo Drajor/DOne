@@ -1318,6 +1318,25 @@ namespace Payload {
 		};
 
 		// S->C
+		struct LeadershipExperienceUpdate : public FixedT<LeadershipExperienceUpdate, OP_LeadershipExpUpdate> {
+			static EQApplicationPacket* construct(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mGroupExperience = pGroupExperience;
+				payload->mGroupPoints = pGroupPoints;
+				payload->mRaidExperience = pRaidExperience;
+				payload->mRaidPoints = pRaidPoints;
+
+				return packet;
+			}
+			double mGroupExperience = 0.0f; // 0 - 1000
+			u32 mGroupPoints = 0;
+			u32 mUnknown = 0;
+			double mRaidExperience = 0.0f; // 0 - 2000
+			u32 mRaidPoints = 0;
+		};
+
+		// S->C
 		struct LevelUpdate : public FixedT<LevelUpdate, OP_LevelUpdate> {
 			static EQApplicationPacket* construct(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperience) {
 				auto packet = create();
@@ -1473,6 +1492,18 @@ namespace Payload {
 				PRINT_MEMBER(mAbility);
 				PRINT_MEMBER(mUnknown);
 				PRINT_MEMBER(mExperienceToAA);
+				return ss.str();
+			}
+		};
+
+		// C->S
+		struct LeadershipExperienceToggle : public FixedT<LeadershipExperienceToggle, OP_LeadershipExpToggle> {
+			u8 mValue = 0; // 0 = OFF, 1 = ON
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{LeadershipExperienceToggle} ";
+				PRINT_MEMBER((int)mValue);
 				return ss.str();
 			}
 		};

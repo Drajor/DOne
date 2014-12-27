@@ -91,6 +91,11 @@ namespace Data {
 		u32 mMaximumUnspentAA = 0;
 		u32 mSpentAAPoints = 0;
 		u32 mMaximumSpentAA = 0;
+		bool mLeadershipExperienceOn = false;
+		u32 mGroupLeadershipPoints = 0;
+		u32 mGroupLeadershipExperience = 0;
+		u32 mRaidLeadershipPoints = 0;
+		u32 mRaidLeadershipExperience = 0;
 	};
 
 	struct Character {

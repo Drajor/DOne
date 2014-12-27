@@ -50,12 +50,14 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(76, Payload::Zone::RandomReply::size());
 	EXPECT_EQ(8, Payload::Zone::ExperienceUpdate::size());
 	EXPECT_EQ(12, Payload::Zone::AAExperienceUpdate::size());
+	EXPECT_EQ(28, Payload::Zone::LeadershipExperienceUpdate::size());
 	EXPECT_EQ(12, Payload::Zone::LevelUpdate::size());
 	EXPECT_EQ(64, Payload::Zone::LevelAppearance::size());
 	EXPECT_EQ(1028, Payload::Zone::Emote::size());
 
 	EXPECT_EQ(156, Payload::Zone::WhoRequest::size());
 	EXPECT_EQ(16, Payload::Zone::AAAction::size());
+	EXPECT_EQ(1, Payload::Zone::LeadershipExperienceToggle::size());
 
 	// Login Server Connection
 	

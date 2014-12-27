@@ -60,6 +60,7 @@ public:
 
 	void sendExperienceUpdate(const u32 pExperience, const u32 pAAExperience);
 	void sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA);
+	void sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints);
 	
 	void sendExperienceGainMessage();
 	void sendGroupExperienceGainMessage();
@@ -316,6 +317,7 @@ private:
 	void _handleRespawnWindowSelect(const EQApplicationPacket* pPacket);
 
 	void _handleAAAction(const EQApplicationPacket* pPacket);
+	void _handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket);
 
 	ConnectionOrigin mConnectionOrigin;
 	bool mConnected;

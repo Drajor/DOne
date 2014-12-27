@@ -34,6 +34,7 @@
 #include "LootController.h"
 #include "RespawnOptions.h"
 #include "ExperienceController.h"
+#include "HateController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -509,7 +510,7 @@ void Zone::handleLevelIncrease(Character* pCharacter) {
 	EXPECTED(pCharacter);
 
 	// Notify other clients.
-	_sendCharacterLevel(pCharacter);
+	_sendActorLevel(pCharacter);
 	// Send particle effects.
 	_sendLevelAppearance(pCharacter);
 
@@ -522,7 +523,7 @@ void Zone::handleLevelDecrease(Character* pCharacter) {
 	EXPECTED(pCharacter);
 
 	// Notify user client.
-	_sendCharacterLevel(pCharacter);
+	_sendActorLevel(pCharacter);
 
 	// Notify GuildManager.
 	if (pCharacter->hasGuild())
@@ -558,8 +559,8 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 	delete packet;
 }
 
-void Zone::_sendCharacterLevel(Character* pCharacter) {
-	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::WhoLevel, pCharacter->getLevel());
+void Zone::_sendActorLevel(Actor* pActor) {
+	_sendSpawnAppearance(pActor, SpawnAppearanceTypeID::WhoLevel, pActor->getLevel());
 }
 
 void Zone::requestSave(Character*pCharacter) {
@@ -1014,40 +1015,56 @@ void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, cons
 	delete packet;
 
 	// NPC Dead.
-	if (pActor->isNPC()) {
-		NPC* npc = pActor->cast<NPC*>(pActor);
-		
-		// Check: Associated with a SpawnPoint.
-		if (npc->hasSpawnPoint()) {
-			// Notify SpawnPointManager
-			mSpawnPointManager->onDeath(npc);
+	if (pActor->isNPC())
+		_handleDeath(pActor->cast<NPC*>(pActor), pKiller);
+	else
+		_handleDeath(pActor->cast<Character*>(pActor), pKiller);		
+}
+
+u32 getExperienceForKill(const u8 pKillerLevel, const u8 pNPCLevel, const float pZoneModifier, const float pNPCModifier) {
+	return 3;
+}
+
+void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
+	EXPECTED(pNPC);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Dead, pNPC);
+
+	// Check: Associated with a SpawnPoint.
+	if (pNPC->hasSpawnPoint()) {
+		// Notify SpawnPointManager
+		mSpawnPointManager->onDeath(pNPC);
+	}
+
+	auto controller = pNPC->getHateController();
+	auto firstAttacker = controller->first();
+	if (firstAttacker) {
+		if (firstAttacker->isCharacter()) {
+			auto character = Actor::cast<Character*>(firstAttacker);
+			handleAddExperience(character, 3);
 		}
-
-		// Dispatch Event.
-		EventDispatcher::getInstance().event(Event::Dead, npc);
-
-		// Check: Empty corpse.
-		if (!npc->hasCurrency() && !npc->hasItems()) {
-			pActor->destroy();
-			return;
-		}
-	}
-	// Character Dead.
-	else {
-		Character* character = pActor->cast<Character*>(pActor);
-		// Dispatch Event.
-		EventDispatcher::getInstance().event(Event::Dead, character);
 	}
 
-	pActor->onDeath();
-
-	// Send 'Respawn Window' to Character.
-	if (pActor->isCharacter()) {
-		Character* character = pActor->cast<Character*>(pActor);
-		character->getRespawnOptions()->setActive(true);
-		Actor::cast<Character*>(pActor)->getConnection()->sendRespawnWindow();
+	// Check: Empty corpse.
+	if (!pNPC->hasCurrency() && !pNPC->hasItems()) {
+		pNPC->destroy();
+		return;
 	}
-		
+
+	pNPC->onDeath();
+}
+
+void Zone::_handleDeath(Character* pCharacter, Actor* pKiller) {
+	EXPECTED(pCharacter);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Dead, pCharacter);
+
+	pCharacter->getRespawnOptions()->setActive(true);
+	pCharacter->getConnection()->sendRespawnWindow();
+
+	pCharacter->onDeath();
 }
 
 void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnID) {
@@ -1867,6 +1884,23 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 	pCharacter->getConnection()->sendWhoResponse(pFilter.mType, results);
 }
 
+void Zone::handleSetLevel(Actor* pActor, const u8 pLevel) {
+	EXPECTED(pActor);
+
+	switch (pActor->getActorType()) {
+	case ActorType::AT_NPC:
+		handleSetLevel(Actor::cast<NPC*>(pActor), pLevel);
+		break;
+	case ActorType::AT_PLAYER:
+		handleSetLevel(Actor::cast<Character*>(pActor), pLevel);
+		break;
+	default:
+		Log::error("Unknown ActorType in " + String(__FUNCTION__));
+		break;
+	}
+}
+
+
 void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
 	EXPECTED(pCharacter);
 	if (pCharacter->getLevel() == pLevel) return;
@@ -1884,6 +1918,15 @@ void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
 	const auto postLevel = controller->getLevel();
 
 	_handleLevelChange(pCharacter, preLevel, postLevel);
+}
+
+void Zone::handleSetLevel(NPC* pNPC, const u8 pLevel) {
+	EXPECTED(pNPC);
+
+	pNPC->setLevel(pLevel);
+
+	// Notify other clients.
+	_sendActorLevel(pNPC);
 }
 
 void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel) {

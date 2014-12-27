@@ -10,11 +10,14 @@ public:
 	// Initialises the ExperienceController.
 	const bool initalise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience);
 
+	void add(const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience);
+
+	/////////////////////////////////////////////////////////////////////
+	// Normal Experience.
+	/////////////////////////////////////////////////////////////////////
+
 	// Returns whether experience gain is possible.
 	const bool canGainExperience() const;
-
-	// Returns whether AA experience gain is possible.
-	const bool canGainAAExperience() const;
 
 	// Returns the current level.
 	inline const u8 getLevel() const { return mLevel; }
@@ -34,7 +37,10 @@ public:
 	// Removes experience and returns the number of level lost.
 	inline const u8 removeExperience(const u32 pExperience);
 
+	// 0 to 330
 	const u32 getExperienceRatio() const;
+
+	// 0 to 330
 	const u32 getAAExperienceRatio() const;
 
 	// Returns the percentage of experience that will go to AA.
@@ -45,6 +51,13 @@ public:
 
 	// Returns whether AA experience is on.
 	inline const bool isAAOn() const { return getExperienceToAA() > 0; }
+
+	/////////////////////////////////////////////////////////////////////
+	// Alternate Advancement Experience.
+	/////////////////////////////////////////////////////////////////////
+
+	// Returns whether AA experience gain is possible.
+	const bool canGainAAExperience() const;
 
 	// Returns the unspent AA points.
 	inline const u32 getUnspentAAPoints() const { return mUnspentAAPoints; }
@@ -93,19 +106,83 @@ public:
 
 	// Sets the function which calculates how much AA experience is required for a specific point.
 	inline static void setRequiredAAExperienceFunction(std::function<u32(u32)>* pFunction) { mRequiredAAExperienceFunction = pFunction; }
+
+	/////////////////////////////////////////////////////////////////////
+	// Leadership Experience.
+	/////////////////////////////////////////////////////////////////////
+
+	// Returns whether leadership experience is on.
+	inline const bool isLeadershipOn() const { return mLeadershipExperienceOn; }
+
+	// Sets whether leadership experience is on or off.
+	void setLeadershipExperience(const bool pValue) { mLeadershipExperienceOn = pValue; }
+
+	// Returns whether group leadership experience is possible.
+	const bool canGainGroupExperience() const;
+
+	// Sets the function which calculates how much Group Leadership experience is required for a specific point.
+	inline static void setRequiredGroupExperienceFunction(std::function<u32(u32)>* pFunction) { mRequiredGroupExperienceFunction = pFunction; }
+
+	// 0.0f to 1000.0f
+	const double getGroupRatio() const;
+
+	void addGroupExperience(const u32 pExperience);
+	inline const u32 getGroupExperience() const { return mGroupExperience; }
+	inline const u32 getGroupPoints() const { return mGroupPoints; }
+	inline const u32 getSpentGroupPoints() const { return mSpentGroupPoints; }
+	inline const u32 getTotalGroupPoints() const { return getGroupPoints() + getSpentGroupPoints(); }
+	inline const u32 getMaxGroupPoints() const { return mMaxGroupPoints; }
+	static const u32 getGroupExperienceForPoint(const u32 pTotalPoints);
+	inline const u32 getGroupExperienceForNextPoint() const { return getGroupExperienceForPoint(getTotalGroupPoints() + 1); }
+
+	// Returns whether raid leadership experience is possible.
+	const bool canGainRaidExperience() const;
+
+	// Sets the function which calculates how much Raid Leadership experience is required for a specific point.
+	inline static void setRequiredRaidExperienceFunction(std::function<u32(u32)>* pFunction) { mRequiredRaidExperienceFunction = pFunction; }
+
+	// 0.0f to 2000.0f
+	const double getRaidRatio() const;
+
+	void addRaidExperience(const u32 pExperience);
+	inline const u32 getRaidExperience() const { return mRaidExperience; }
+	inline const u32 getRaidPoints() const { return mRaidPoints; }
+	inline const u32 getSpentRaidPoints() const { return mSpentRaidPoints; }
+	inline const u32 getTotalRaidPoints() const { return getRaidPoints() + getSpentRaidPoints(); }
+	inline const u32 getMaxRaidPoints() const { return mMaxRaidLeadershipPoints; }
+	static const u32 getRaidExperienceForPoint(const u32 pTotalPoints);
+	inline const u32 getRaidExperienceForNextPoint() const { return getRaidExperienceForPoint(getTotalRaidPoints() + 1); }
+
 private:
 	bool mInitialised = false;
 	static std::function<u32(u8)>* mRequiredExperienceFunction;
 	static std::function<u32(u32)>* mRequiredAAExperienceFunction;
-	u8 mMaximumLevel = 20;
-	u32 mMaximumUnspentAAPoints = 100;
-	u32 mMaximumSpentAAPoints = 9000;
+	static std::function<u32(u32)>* mRequiredGroupExperienceFunction;
+	static std::function<u32(u32)>* mRequiredRaidExperienceFunction;
 
+	// Normal Experience.
 	u8 mLevel = 1;
+	u8 mMaximumLevel = 1;
 	u32 mExperience = 0;
-	u32 mExperienceToAA = 0;
-
+	
+	// Alternate Advancement Experience.
+	u32 mExperienceToAA = 0; // 0 - 100
 	u32 mSpentAAPoints = 0;
 	u32 mUnspentAAPoints = 0;
 	u32 mAAExperience = 0;
+	u32 mMaximumUnspentAAPoints = 0;
+	u32 mMaximumSpentAAPoints = 0;
+
+	// Leadership Experience.
+	bool mLeadershipExperienceOn = false;
+	
+	u32 mGroupExperience = 0;
+	u32 mGroupPoints = 0;
+	u32 mSpentGroupPoints = 0;
+	u32 mMaxGroupPoints = 8; // Client defined. Changes by level.
+	
+	u32 mRaidExperience = 0;
+	u32 mRaidPoints = 0;
+	u32 mSpentRaidPoints = 0;
+	u32 mMaxRaidLeadershipPoints = 10; // Client defined. Changes by level.
 };

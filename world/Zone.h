@@ -131,6 +131,12 @@ public:
 
 	void handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill);
 
+	// Handles specifics of NPC death.
+	void _handleDeath(NPC* pNPC, Actor* pKiller);
+
+	// Handles specifics of Character death.
+	void _handleDeath(Character* pCharacter, Actor* pKiller);
+
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
 
 	// Guild
@@ -198,7 +204,10 @@ public:
 
 	void handleWhoRequest(Character* pCharacter, WhoFilter& pFilter);
 
+	void handleSetLevel(Actor* pActor, const u8 pLevel);
 	void handleSetLevel(Character* pCharacter, const u8 pLevel);
+	void handleSetLevel(NPC* pNPC, const u8 pLevel);
+
 	void _handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel);
 	void handleAddExperience(Character* pCharacter, const u32 pExperience);
 	void handleAddAAExperience(Character* pCharacter, const u32 pExperience);
@@ -222,7 +231,7 @@ private:
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _handleIncomingConnections();
-	void _sendCharacterLevel(Character* pCharacter);
+	void _sendActorLevel(Actor* pActor);
 
 	void _onLeaveZone(Character* pCharacter);
 	void _onCamp(Character* pCharacter);

@@ -28,7 +28,7 @@ public:
 	inline const std::list<Actor*>::size_type getNumAttackers() { return mAttackers.size(); }
 	inline const bool hasAttackers() const { return !mAttackers.empty(); }
 	inline void clear(){ mAttackers.clear(); }
-
+	Actor* first() const { return mAttackers.size() ? mAttackers.begin()->mActor : nullptr; }
 	// Returns a copy.
 	inline std::list<Hate> getAttackers() { return mAttackers; }
 protected:

@@ -259,14 +259,10 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Target is a Character.
-		if (!mInvoker->targetIsCharacter()) { return false; }
-
 		u8 level = 0;
 		if (!convertParameter(0, level)) { return false; }
 
-		auto character = Actor::cast<Character*>(mInvoker->getTarget());
-		character->getZone()->handleSetLevel(character, level);
+		mInvoker->getZone()->handleSetLevel(mInvoker->getTarget(), level);
 		return true;
 	}
 };

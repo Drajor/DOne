@@ -41,6 +41,9 @@ const bool NPC::initialise() {
 	setSpawnID(mZone->getNextSpawnID());
 	addNimbus(405);
 
+	setMaximumHP(getLevel() * 10);
+	setCurrentHP(getMaximumHP());
+
 	return true;
 }
 
@@ -179,7 +182,7 @@ void NPC::clearHate() {
 
 void NPC::onCombatBegin() {
 	mAttacking = true;
-	mPrimaryAttackTimer.setStep(300);
+	mPrimaryAttackTimer.setStep(3000);
 	mPrimaryAttackTimer.start();
 }
 

@@ -420,14 +420,14 @@ ENCODE(OP_SendAATable) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_LeadershipExpUpdate) {
-	SETUP_DIRECT_ENCODE(LeadershipExpUpdate_Struct, structs::LeadershipExpUpdate_Struct);
-	OUT(group_leadership_exp);
-	OUT(group_leadership_points);
-	OUT(raid_leadership_exp);
-	OUT(raid_leadership_points);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_LeadershipExpUpdate) {
+//	SETUP_DIRECT_ENCODE(LeadershipExpUpdate_Struct, structs::LeadershipExpUpdate_Struct);
+//	OUT(group_leadership_exp);
+//	OUT(group_leadership_points);
+//	OUT(raid_leadership_exp);
+//	OUT(raid_leadership_points);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_GuildMemberLevelUpdate) {
 	SETUP_DIRECT_ENCODE(GuildMemberLevelUpdate_Struct, structs::GuildMemberLevelUpdate_Struct);

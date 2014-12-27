@@ -566,6 +566,10 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player adjusts the 'Exp to AA' setting in the 'Alternate Advancement Window'.
 		_handleAAAction(pPacket);
 		break;
+	case OP_LeadershipExpToggle:
+		// NOTE: This occurs when a player uses the 'Leadership Exp' toggle in the 'Leadership Window'
+		_handleLeadershipExperienceToggle(pPacket);
+		break;
 	default:
 		StringStream ss;
 		ss << "Unknown Packet: " << opcode;
@@ -1546,6 +1550,15 @@ void ZoneClientConnection::sendAAExperienceUpdate(const u32 pAAExperience, const
 	EXPECTED(mConnected);
 
 	auto packet = AAExperienceUpdate::construct(pAAExperience, pUnspentAA, pExperienceToAA);
+	sendPacket(packet);
+	delete packet;
+}
+
+void ZoneClientConnection::sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints) {
+	using namespace Payload::Zone;
+	EXPECTED(mConnected);
+
+	auto packet = LeadershipExperienceUpdate::construct(pGroupExperience, pGroupPoints, pGroupExperience, pRaidPoints);
 	sendPacket(packet);
 	delete packet;
 }
@@ -4188,6 +4201,30 @@ void ZoneClientConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
 		sendAAExperienceOffMessage();
 		mCharacter->getExperienceController()->setExperienceToAA(0);
 	}
+}
+
+void ZoneClientConnection::_handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	EXPECTED(pPacket);
+	EXPECTED(LeadershipExperienceToggle::sizeCheck(pPacket));
+
+	auto payload = LeadershipExperienceToggle::convert(pPacket);
+	Log::info(payload->_debug());
+
+	EXPECTED(payload->mValue == 1 || payload->mValue == 0); // Sanity.
+
+	auto controller = mCharacter->getExperienceController();
+
+	// Turning leadership experience on.
+	if (payload->mValue == 1) {
+		controller->setLeadershipExperience(true);
+		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOn);
+	}
+	// Turning leadership experience off.
+	else {
+		controller->setLeadershipExperience(false);
+		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOff);
+	}	
 }
 
 //

@@ -1637,8 +1637,10 @@ namespace StringID {
 		GAIN_RAID_LEADERSHIP_POINT = 8589,	//
 		MAX_GROUP_LEADERSHIP_POINTS = 8584,	//
 		MAX_RAID_LEADERSHIP_POINTS = 8591,	//
-		LEADERSHIP_EXP_ON = 8653,	//
-		LEADERSHIP_EXP_OFF = 8654,	//
+
+		LeadershipOn = 8653, // "You will now receive leadership experience when leading a group or raid.  Your normal experience will be reduced by 20%."
+		LeadershipOff = 8654, // "You will no longer receive leadership experience when leading a group or raid."
+
 		CURRENT_SPELL_EFFECTS = 8757,	//%1's current spell effects:
 		GAIN_GROUP_LEADERSHIP_EXP = 8788,	//
 		GAIN_RAID_LEADERSHIP_EXP = 8789,	//
