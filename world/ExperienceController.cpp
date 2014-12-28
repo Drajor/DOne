@@ -146,11 +146,11 @@ const u32 ExperienceController::getAAExperienceRatio() const {
 }
 
 const double ExperienceController::getGroupRatio() const {
-	return 0.0f;
+	return static_cast<double>(1000.0f * (getGroupExperience() / static_cast<double>(getGroupExperienceForNextPoint())));
 }
 
 const double ExperienceController::getRaidRatio() const {
-	return 0.0f;
+	return static_cast<double>(2000.0f * (getRaidExperience() / static_cast<double>(getRaidExperienceForNextPoint())));
 }
 
 void ExperienceController::addAAExperience(const u32 pAAExperience) {

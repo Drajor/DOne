@@ -305,8 +305,8 @@ protected:
 
 	std::function<u32(u8)> expF = [](u8 pLevel) { return pLevel * 5; };
 	std::function<u32(u32)> expAAF = [](u32 pPoints) { return 10; };
-	std::function<u32(u32)> expGF = [](u32 pPoints) { return 1000; };
-	std::function<u32(u32)> expRF = [](u32 pPoints) { return 1000; };
+	std::function<u32(u32)> expGF = [](u32 pPoints) { return 5; };
+	std::function<u32(u32)> expRF = [](u32 pPoints) { return 5; };
 	std::shared_ptr<ExperienceController> mController = 0;
 };
 
@@ -366,6 +366,42 @@ TEST_F(ExperienceControllerTestAddExperience, AddingAAExperience) {
 	mController->addAAExperience(998374623); // Really big hit, max unspent points.
 	EXPECT_EQ(3, mController->getUnspentAAPoints());
 	EXPECT_EQ(false, mController->canGainAAExperience()); // Can no longer gain AA experience.
+}
+
+TEST_F(ExperienceControllerTestAddExperience, AddingGroupLeadershipExperience) {
+	EXPECT_EQ(1, mController->getLevel()); // Level 1 (Max group points depends on level).
+	EXPECT_EQ(0, mController->getGroupPoints()); // Start with 0 unspent group points.
+	EXPECT_EQ(0, mController->getGroupExperience()); // Start with 0 group experience.
+
+	mController->addGroupExperience(3);
+	EXPECT_EQ(0, mController->getGroupPoints()); // Still 0 group points.
+	EXPECT_EQ(3, mController->getGroupExperience()); // Now 3 group experience.
+
+	mController->addGroupExperience(4);
+	EXPECT_EQ(1, mController->getGroupPoints()); // Now 1 group points.
+	EXPECT_EQ(2, mController->getGroupExperience()); // Now 2 group experience after wrap.
+
+	mController->addGroupExperience(12312312);
+	EXPECT_EQ(mController->getMaxGroupPoints(), mController->getGroupPoints()); // At max group points.
+	EXPECT_EQ(mController->getGroupExperienceForNextPoint() - 1, mController->getGroupExperience()); // At group experience cap.
+}
+
+TEST_F(ExperienceControllerTestAddExperience, AddingRaidLeadershipExperience) {
+	EXPECT_EQ(1, mController->getLevel()); // Level 1 (Max raid points depends on level).
+	EXPECT_EQ(0, mController->getRaidPoints()); // Start with 0 unspent raid points.
+	EXPECT_EQ(0, mController->getRaidExperience()); // Start with 0 raid experience.
+
+	mController->addRaidExperience(3);
+	EXPECT_EQ(0, mController->getRaidPoints()); // Still 0 raid points.
+	EXPECT_EQ(3, mController->getRaidExperience()); // Now 3 raid experience.
+
+	mController->addRaidExperience(4);
+	EXPECT_EQ(1, mController->getRaidPoints()); // Now 1 raid points.
+	EXPECT_EQ(2, mController->getRaidExperience()); // Now 2 raid experience after wrap.
+
+	mController->addRaidExperience(12312312);
+	EXPECT_EQ(mController->getMaxRaidPoints(), mController->getRaidPoints()); // At max raid points.
+	EXPECT_EQ(mController->getRaidExperienceForNextPoint() - 1, mController->getRaidExperience()); // At raid experience cap.
 }
 
 class LootControllerTest : public ::testing::Test {
