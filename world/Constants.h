@@ -1477,7 +1477,7 @@ namespace StringID {
 		PET_TAUNTING = 438,		//Taunting attacker, Master.
 		INTERRUPT_SPELL = 439,		//Your spell is interrupted.
 		LOSE_LEVEL = 442,		//You LOST a level! You are now level %1!
-		GainGroupExperience = 444,		// You gain party experience!!
+		GainGroupExperience = 444, // You gain party experience!!
 		GainExperience = 445,		// You gain experience!!
 		GainAAPoint = 446, // You have gained an ability point!  You now have %1 ability points.
 		GainLevel = 447,		//You have gained a level! Welcome to level %1!
@@ -1595,7 +1595,7 @@ namespace StringID {
 		PLAYER_NOT_ONLINE = 5046, // % 1 is not online at this time.
 		PETITION_NO_DELETE = 5053,	//You do not have a petition in the queue.
 		PETITION_DELETED = 5054,	//Your petition was successfully deleted.
-		GAIN_RAIDEXP = 5085,	//You gained raid experience!
+		GainRaidExperience = 5085, // You gained raid experience!
 		DUNGEON_SEALED = 5141,	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 		ADVENTURE_COMPLETE = 5147,	//You received %1 points for successfully completing the adventure.
 		SUCCOR_FAIL = 5169,	//The portal collapes before you can escape!
@@ -1633,17 +1633,19 @@ namespace StringID {
 		LDON_NO_LOCKPICK = 7564,	//You must have a lock pick in your inventory to do this.
 		LDON_WAS_NOT_LOCKED = 7565,	//%1 was not locked.
 		LDON_WAS_NOT_TRAPPED = 7566,	//%1 was not trapped
-		GAIN_GROUP_LEADERSHIP_POINT = 8585,	//
-		GAIN_RAID_LEADERSHIP_POINT = 8589,	//
-		MAX_GROUP_LEADERSHIP_POINTS = 8584,	//
-		MAX_RAID_LEADERSHIP_POINTS = 8591,	//
+		GainGroupLeadershipPoint = 8585, // "You have gained a group leadership point!"
+		GainRaidLeadershipPoint = 8589, // "You have gained a raid leadership point!"
+		MaxGroupLeadershipPoints = 8584, // "You have reached the maximum number of unused group leadership points.  You must spend some points before you can receive any more experience."
+		MaxRaidLeadershipPoints = 8591, // "You have reached the maximum number of unused raid leadership points.  You must spend some points before you can receive any more experience."
 
 		LeadershipOn = 8653, // "You will now receive leadership experience when leading a group or raid.  Your normal experience will be reduced by 20%."
 		LeadershipOff = 8654, // "You will no longer receive leadership experience when leading a group or raid."
 
 		CURRENT_SPELL_EFFECTS = 8757,	//%1's current spell effects:
-		GAIN_GROUP_LEADERSHIP_EXP = 8788,	//
-		GAIN_RAID_LEADERSHIP_EXP = 8789,	//
+
+		GainGroupLeadershipExperience = 8788, 
+		GainRaidLeadershipExperience = 8789,
+
 		BUFF_MINUTES_REMAINING = 8799,	//%1 (%2 minutes remaining)
 		FEAR_TOO_HIGH = 9035,	//Your target is too high of a level for your fear spell.
 		SLOW_MOSTLY_SUCCESSFUL = 9029,	//Your spell was mostly successful.

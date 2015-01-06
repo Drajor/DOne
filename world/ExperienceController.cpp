@@ -2,44 +2,46 @@
 #include "Data.h"
 #include "Utility.h"
 
-std::function<u32(u8)>* ExperienceController::mRequiredExperienceFunction = nullptr;
-std::function<u32(u32)>* ExperienceController::mRequiredAAExperienceFunction = nullptr;
-std::function<u32(u32)>* ExperienceController::mRequiredGroupExperienceFunction = nullptr;
-std::function<u32(u32)>* ExperienceController::mRequiredRaidExperienceFunction = nullptr;
+using namespace Experience;
+
+std::function<u32(u8)>* Controller::mRequiredExperienceFunction = nullptr;
+std::function<u32(u32)>* Controller::mRequiredAAExperienceFunction = nullptr;
+std::function<u32(u32)>* Controller::mRequiredGroupExperienceFunction = nullptr;
+std::function<u32(u32)>* Controller::mRequiredRaidExperienceFunction = nullptr;
 
 static std::function<u32(u8)> defaultExperienceFunction = [](u8 pLevel) { return 5; };
 static std::function<u32(u32)> defaultAAExperienceFunction = [](u32 pPoints) { return 100; };
 static std::function<u32(u32)> defaultGroupExperienceFunction = [](u32 pPoints) { return 1000; };
 static std::function<u32(u32)> defaultRaidExperienceFunction = [](u32 pPoints) { return 2000; };
 
-void ExperienceController::_initialise() {
+void Controller::_initialise() {
 	setRequiredExperienceFunction(&defaultExperienceFunction);
 	setRequiredAAExperienceFunction(&defaultAAExperienceFunction);
 	setRequiredGroupExperienceFunction(&defaultGroupExperienceFunction);
 	setRequiredRaidExperienceFunction(&defaultRaidExperienceFunction);
 }
 
-const u32 ExperienceController::getExperienceForLevel(const u8 pLevel) {
+const u32 Controller::getExperienceForLevel(const u8 pLevel) {
 	EXPECTED_VAR(mRequiredExperienceFunction, std::numeric_limits<u32>::max());
 	return (*mRequiredExperienceFunction)(pLevel);
 }
 
-const u32 ExperienceController::getAAExperienceForPoint(const u32 pTotalPoints) {
+const u32 Controller::getAAExperienceForPoint(const u32 pTotalPoints) {
 	EXPECTED_VAR(mRequiredAAExperienceFunction, std::numeric_limits<u32>::max());
 	return (*mRequiredAAExperienceFunction)(pTotalPoints);
 }
 
-const u32 ExperienceController::getGroupExperienceForPoint(const u32 pTotalPoints) {
+const u32 Controller::getGroupExperienceForPoint(const u32 pTotalPoints) {
 	EXPECTED_VAR(mRequiredGroupExperienceFunction, std::numeric_limits<u32>::max());
 	return (*mRequiredGroupExperienceFunction)(pTotalPoints);
 }
 
-const u32 ExperienceController::getRaidExperienceForPoint(const u32 pTotalPoints) {
+const u32 Controller::getRaidExperienceForPoint(const u32 pTotalPoints) {
 	EXPECTED_VAR(mRequiredRaidExperienceFunction, std::numeric_limits<u32>::max());
 	return (*mRequiredRaidExperienceFunction)(pTotalPoints);
 }
 
-const bool ExperienceController::initalise(Data::Experience& pData) {
+const bool Controller::initalise(Data::Experience& pData) {
 	EXPECTED_BOOL(!mInitialised);
 	EXPECTED_BOOL(mRequiredExperienceFunction);
 	EXPECTED_BOOL(mRequiredAAExperienceFunction);
@@ -77,46 +79,62 @@ const bool ExperienceController::initalise(Data::Experience& pData) {
 	return true;
 }
 
-void ExperienceController::add(const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience) {
+void Controller::add(GainResult& pResult, const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience) {
 	// Add normal experience.
-	if (pExperience) addExperience(pExperience);
+	if (pExperience) {
+		const auto preLevel = getLevel();
+		addExperience(pExperience);
+		pResult.mLevels = getLevel() - preLevel;
+	}
 
 	// Add Alternate Advancement experience.
-	if (pAAExperience) addAAExperience(pAAExperience);
+	if (pAAExperience) {
+		const auto prePoints = getUnspentAAPoints();
+		addAAExperience(pAAExperience);
+		pResult.mAAPoints = getUnspentAAPoints() - prePoints;
+	}
 
 	// Add Group Leadership experience.
-	if (pGroupExperience) addGroupExperience(pGroupExperience);
+	if (pGroupExperience) {
+		const auto prePoints = getGroupPoints();
+		addGroupExperience(pGroupExperience);
+		pResult.mGroupPoints = getGroupPoints() - prePoints;
+	}
 
 	// Add Raid Leadership experience.
-	if (pRaidExperience) addRaidExperience(pRaidExperience);
+	if (pRaidExperience) {
+		const auto prePoints = getRaidPoints();
+		addRaidExperience(pRaidExperience);
+		pResult.mRaidPoints = getRaidPoints() - prePoints;
+	}
 }
 
-const bool ExperienceController::canGainExperience() const {
+const bool Controller::canGainExperience() const {
 	if (getLevel() < getMaximumLevel()) return true;
 	return getExperience() < getExperienceCap();
 }
 
-const bool ExperienceController::canGainAAExperience() const {
+const bool Controller::canGainAAExperience() const {
 	if (getUnspentAAPoints() < getMaximumUnspentAAPoints()) return true;
 	return getAAExperience() < getAAExperienceForNextPoint() - 1;
 }
 
-const bool ExperienceController::canGainGroupExperience() const {
+const bool Controller::canGainGroupExperience() const {
 	if (getGroupPoints() < getMaxGroupPoints()) return true;
 	return getGroupExperience() < getGroupExperienceForNextPoint() - 1;
 }
 
-const bool ExperienceController::canGainRaidExperience() const {
+const bool Controller::canGainRaidExperience() const {
 	if (getRaidPoints() < getMaxRaidPoints()) return true;
 	return getRaidExperience() < getRaidExperienceForNextPoint() - 1;
 }
 
-void ExperienceController::setLevel(const u8 pLevel) {
+void Controller::setLevel(const u8 pLevel) {
 	mLevel = Utility::clamp<u8>(pLevel, 1, getMaximumLevel());
 	mExperience = 0;
 }
 
-void ExperienceController::addExperience(const u32 pExperience) {
+void Controller::addExperience(const u32 pExperience) {
 	EXPECTED(canGainExperience());
 	
 	// Add experience and level(s).
@@ -134,26 +152,26 @@ void ExperienceController::addExperience(const u32 pExperience) {
 	}
 }
 
-const u8 ExperienceController::removeExperience(const u32 pExperience) {
+const u8 Controller::removeExperience(const u32 pExperience) {
 	return 0;
 }
 
-const u32 ExperienceController::getExperienceRatio() const {
+const u32 Controller::getExperienceRatio() const {
 	return static_cast<u32>(330.0f * (getExperience() / static_cast<float>(getExperienceForNextLevel())));
 }
-const u32 ExperienceController::getAAExperienceRatio() const {
+const u32 Controller::getAAExperienceRatio() const {
 	return static_cast<u32>(330.0f * (getAAExperience() / static_cast<float>(getAAExperienceForNextPoint())));
 }
 
-const double ExperienceController::getGroupRatio() const {
+const double Controller::getGroupRatio() const {
 	return static_cast<double>(1000.0f * (getGroupExperience() / static_cast<double>(getGroupExperienceForNextPoint())));
 }
 
-const double ExperienceController::getRaidRatio() const {
+const double Controller::getRaidRatio() const {
 	return static_cast<double>(2000.0f * (getRaidExperience() / static_cast<double>(getRaidExperienceForNextPoint())));
 }
 
-void ExperienceController::addAAExperience(const u32 pAAExperience) {
+void Controller::addAAExperience(const u32 pAAExperience) {
 	EXPECTED(canGainAAExperience());
 
 	// Add AA experience and points(s).
@@ -171,16 +189,16 @@ void ExperienceController::addAAExperience(const u32 pAAExperience) {
 	}
 }
 
-void ExperienceController::setExperienceToAA(const u32 pToAA) {
+void Controller::setExperienceToAA(const u32 pToAA) {
 	mExperienceToAA = Utility::clamp<u32>(pToAA, 0, 100);
 }
 
-void ExperienceController::setUnspentAAPoints(const u32 pPoints) {
+void Controller::setUnspentAAPoints(const u32 pPoints) {
 	mUnspentAAPoints = Utility::clamp<u8>(pPoints, 0, getMaximumUnspentAAPoints());
 	mAAExperience = 0;
 }
 
-void ExperienceController::addGroupExperience(const u32 pExperience) {
+void Controller::addGroupExperience(const u32 pExperience) {
 	EXPECTED(canGainGroupExperience());
 
 	// Add experience and points(s).
@@ -198,7 +216,7 @@ void ExperienceController::addGroupExperience(const u32 pExperience) {
 	}
 }
 
-void ExperienceController::addRaidExperience(const u32 pExperience) {
+void Controller::addRaidExperience(const u32 pExperience) {
 	EXPECTED(canGainRaidExperience());
 
 	// Add experience and points(s).
@@ -216,14 +234,14 @@ void ExperienceController::addRaidExperience(const u32 pExperience) {
 	}
 }
 
-const u32 ExperienceController::getMaxRaidPoints() const {
+const u32 Controller::getMaxRaidPoints() const {
 	// [Client Limitation]
 	if (mLevel < 45) return 6;
 	if (mLevel < 55) return 8;
 	return 10;
 }
 
-const u32 ExperienceController::getMaxGroupPoints() const {
+const u32 Controller::getMaxGroupPoints() const {
 	// [Client Limitation]
 	if (mLevel < 35) return 4;
 	if (mLevel < 51) return 6;

@@ -120,36 +120,36 @@ TEST(LimitsTest, ShopQuantityValid) {
 class ExperienceControllerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		mController = new ExperienceController();
+		mController = new Experience::Controller();
 	}
 	virtual void TearDown() {
 		delete mController;
 		mController = nullptr;
 
-		ExperienceController::setRequiredAAExperienceFunction(nullptr);
-		ExperienceController::setRequiredExperienceFunction(nullptr);
-		ExperienceController::setRequiredGroupExperienceFunction(nullptr);
-		ExperienceController::setRequiredRaidExperienceFunction(nullptr);
+		Experience::Controller::setRequiredAAExperienceFunction(nullptr);
+		Experience::Controller::setRequiredExperienceFunction(nullptr);
+		Experience::Controller::setRequiredGroupExperienceFunction(nullptr);
+		Experience::Controller::setRequiredRaidExperienceFunction(nullptr);
 	}
 
 	void setExpFunction() {
 		static std::function<u32(u8)> expF = [](u8) { return 1; };
-		ExperienceController::setRequiredExperienceFunction(&expF);
+		Experience::Controller::setRequiredExperienceFunction(&expF);
 	}
 
 	void setAAExpFunction() {
 		static std::function<u32(u32)> expAAF = [](u32) { return 1; };
-		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
+		Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
 	}
 
 	void setGroupExpFunction() {
 		static std::function<u32(u32)> expGLF = [](u32) { return 1; };
-		ExperienceController::setRequiredGroupExperienceFunction(&expGLF);
+		Experience::Controller::setRequiredGroupExperienceFunction(&expGLF);
 	}
 
 	void setRaidExpFunction() {
 		static std::function<u32(u32)> expRLF = [](u32) { return 1; };
-		ExperienceController::setRequiredRaidExperienceFunction(&expRLF);
+		Experience::Controller::setRequiredRaidExperienceFunction(&expRLF);
 	}
 
 	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
@@ -172,37 +172,37 @@ protected:
 	}
 
 	Data::Experience mData;
-	ExperienceController* mController = 0;
+	Experience::Controller* mController = 0;
 };
 
 TEST_F(ExperienceControllerTest, InitialiseFunctions) {
 	// Make it fail!
-	ExperienceController::setRequiredAAExperienceFunction(nullptr);
-	ExperienceController::setRequiredExperienceFunction(nullptr);
-	ExperienceController::setRequiredGroupExperienceFunction(nullptr);
-	ExperienceController::setRequiredRaidExperienceFunction(nullptr);
+	Experience::Controller::setRequiredAAExperienceFunction(nullptr);
+	Experience::Controller::setRequiredExperienceFunction(nullptr);
+	Experience::Controller::setRequiredGroupExperienceFunction(nullptr);
+	Experience::Controller::setRequiredRaidExperienceFunction(nullptr);
 	setData(1, 10, 2, 20, 3, 4, 4, 5, 6, 7, 1, 6, 2);
 	
 	EXPECT_EQ(false, mController->initalise(mData));
 
 	// Set the experience function.
 	std::function<u32(u8)> expF = [](u8) { return 1; };
-	ExperienceController::setRequiredExperienceFunction(&expF);
+	Experience::Controller::setRequiredExperienceFunction(&expF);
 	EXPECT_EQ(false, mController->initalise(mData));
 
 	// Set the AA experience function.
 	std::function<u32(u32)> expAAF = [](u32) { return 1; };
-	ExperienceController::setRequiredAAExperienceFunction(&expAAF);
+	Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
 	EXPECT_EQ(false, mController->initalise(mData));
 
 	// Set the Group Leadership experience function.
 	std::function<u32(u32)> expGLF = [](u32) { return 1; };
-	ExperienceController::setRequiredGroupExperienceFunction(&expGLF);
+	Experience::Controller::setRequiredGroupExperienceFunction(&expGLF);
 	EXPECT_EQ(false, mController->initalise(mData));
 
 	// Set the Raid Leadership experience function. (should succeed)
 	std::function<u32(u32)> expRLF = [](u32) { return 1; };
-	ExperienceController::setRequiredRaidExperienceFunction(&expRLF);
+	Experience::Controller::setRequiredRaidExperienceFunction(&expRLF);
 	EXPECT_EQ(true, mController->initalise(mData));
 }
 
@@ -266,11 +266,11 @@ TEST_F(ExperienceControllerTest, InitalisedValues) {
 class ExperienceControllerTestAddExperience : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		mController = std::make_shared<ExperienceController>();
-		ExperienceController::setRequiredExperienceFunction(&expF);
-		ExperienceController::setRequiredAAExperienceFunction(&expAAF);
-		ExperienceController::setRequiredGroupExperienceFunction(&expGF);
-		ExperienceController::setRequiredRaidExperienceFunction(&expRF);
+		mController = std::make_shared<Experience::Controller>();
+		Experience::Controller::setRequiredExperienceFunction(&expF);
+		Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
+		Experience::Controller::setRequiredGroupExperienceFunction(&expGF);
+		Experience::Controller::setRequiredRaidExperienceFunction(&expRF);
 
 		setData(1, 20, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0);
 		mController->initalise(mData);
@@ -278,8 +278,8 @@ protected:
 	virtual void TearDown() {
 		mController = nullptr;
 
-		ExperienceController::setRequiredAAExperienceFunction(nullptr);
-		ExperienceController::setRequiredExperienceFunction(nullptr);
+		Experience::Controller::setRequiredAAExperienceFunction(nullptr);
+		Experience::Controller::setRequiredExperienceFunction(nullptr);
 	}
 
 	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
@@ -307,7 +307,7 @@ protected:
 	std::function<u32(u32)> expAAF = [](u32 pPoints) { return 10; };
 	std::function<u32(u32)> expGF = [](u32 pPoints) { return 5; };
 	std::function<u32(u32)> expRF = [](u32 pPoints) { return 5; };
-	std::shared_ptr<ExperienceController> mController = 0;
+	std::shared_ptr<Experience::Controller> mController = 0;
 };
 
 TEST_F(ExperienceControllerTestAddExperience, Adding) {
@@ -424,11 +424,7 @@ TEST_F(LootControllerTest, Defaults) {
 }
 
 TEST_F(LootControllerTest, Nulls) {
-	mLootController->addLooter(nullptr);
-	mLootController->removeLooter(nullptr);
 	EXPECT_EQ(false,  mLootController->canLoot(nullptr));
-	EXPECT_EQ(false, mLootController->isLooter(nullptr));
-	mLootController->configure(nullptr);
 }
 
 class convertCurrencyTest : public ::testing::Test {

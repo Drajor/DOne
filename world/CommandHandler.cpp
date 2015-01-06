@@ -181,7 +181,7 @@ public:
 		if (!convertParameter(0, experience)) { return false; }
 
 		auto character = Actor::cast<Character*>(mInvoker->getTarget());
-		character->getZone()->handleAddExperience(character, experience);
+		character->getZone()->giveExperience(character, experience);
 		return true;
 	}
 };
@@ -204,7 +204,53 @@ public:
 		if (!convertParameter(0, experience)) { return false; }
 
 		auto character = Actor::cast<Character*>(mInvoker->getTarget());
-		character->getZone()->handleAddAAExperience(character, experience);
+		character->getZone()->giveAAExperience(character, experience);
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class AddGroupLeadershipExperienceCommand : public Command {
+public:
+	AddGroupLeadershipExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+glxp <number>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is a Character.
+		if (!mInvoker->targetIsCharacter()) { return false; }
+
+		u32 experience = 0;
+		if (!convertParameter(0, experience)) { return false; }
+
+		auto character = Actor::cast<Character*>(mInvoker->getTarget());
+		character->getZone()->giveGroupLeadershipExperience(character, experience);
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class AddRaidLeadershipExperienceCommand : public Command {
+public:
+	AddRaidLeadershipExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #+rlxp <number>");
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
+		mRequiresTarget = true;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		// Check: Target is a Character.
+		if (!mInvoker->targetIsCharacter()) { return false; }
+
+		u32 experience = 0;
+		if (!convertParameter(0, experience)) { return false; }
+
+		auto character = Actor::cast<Character*>(mInvoker->getTarget());
+		character->getZone()->giveRaidLeadershipExperience(character, experience);
 		return true;
 	}
 };
@@ -1675,6 +1721,9 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));
 	mCommands.push_back(new AddAAExperienceCommand(100, { "+aaxp", "+aaexp" "addaaexp" }));
+	mCommands.push_back(new AddGroupLeadershipExperienceCommand(100, { "+glxp", "+glexp" "addglexp" }));
+	mCommands.push_back(new AddRaidLeadershipExperienceCommand(100, { "+rlxp", "+rlexp" "addrlexp" }));
+
 	mCommands.push_back(new LevelCommand(100, { "level", "setlevel" "lvl" }));
 	mCommands.push_back(new StatsCommand(100, { "setstat" }));
 

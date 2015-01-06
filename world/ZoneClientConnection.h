@@ -62,8 +62,10 @@ public:
 	void sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA);
 	void sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints);
 	
-	void sendExperienceGainMessage();
-	void sendGroupExperienceGainMessage();
+	void sendExperienceMessage();
+	void sendGroupExperienceMessage();
+	void sendRaidExperienceMessage();
+
 	void sendExperienceLossMessage();
 	void sendLevelGainMessage();
 	void sendLevelsGainMessage(const u8 pLevels);
@@ -72,6 +74,11 @@ public:
 	void sendAAExperienceOnMessage();
 	void sendAAExperienceOffMessage();
 	void sendAAPointGainMessage(const u32 pUnspentAAPoints);
+
+	void sendGainGroupLeadershipExperienceMessage();
+	void sendGainGroupLeadershipPointMessage();
+	void sendGainRaidLeadershipExperienceMessage();
+	void sendGainRaidLeadershipPointMessage();
 
 	void sendLevelAppearance(const u32 pParameter1);
 	void sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio);

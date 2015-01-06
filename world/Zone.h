@@ -5,6 +5,8 @@
 #include "../common/timer.h"
 #include "Vector3.h"
 
+#include <memory>
+
 class EQStreamFactory;
 class EQStreamIdentifier;
 class EQApplicationPacket;
@@ -29,6 +31,14 @@ class LootAllocator;
 class Item;
 class Object;
 class Door;
+
+namespace Experience {
+	class Calculator;
+	struct CalculationResult;
+	struct GainResult;
+	struct Context;
+	struct Modifier;
+}
 
 namespace Data {
 	struct Zone;
@@ -64,7 +74,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(Data::Zone* pZoneData);
+	const bool initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator);
 
 	const bool canShutdown() const;
 	const bool shutdown();
@@ -136,6 +146,13 @@ public:
 
 	// Handles specifics of Character death.
 	void _handleDeath(Character* pCharacter, Actor* pKiller);
+
+	void _giveExperienceForKill(Character* pCharacter, NPC* pNPC);
+
+	void allocateExperience(Character* pCharacter, NPC* pNPC);
+	void allocateExperience(Group* pGroup, NPC* pNPC);
+	void allocateExperience(Raid* pRaid, NPC* pNPC);
+	void processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent);
 
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
 
@@ -209,8 +226,21 @@ public:
 	void handleSetLevel(NPC* pNPC, const u8 pLevel);
 
 	void _handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel);
-	void handleAddExperience(Character* pCharacter, const u32 pExperience);
-	void handleAddAAExperience(Character* pCharacter, const u32 pExperience);
+	
+	// Gives normal experience to a Character.
+	void giveExperience(Character* pCharacter, const u32 pExperience);
+
+	// Gives Alternate Advanced experience to a Character.
+	void giveAAExperience(Character* pCharacter, const u32 pExperience);
+
+	// Gives Group Leadership experience to a Character.
+	void giveGroupLeadershipExperience(Character* pCharacter, const u32 pExperience);
+
+	// Gives Raid Leadership experience to a Character.
+	void giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperience);
+
+	// Returns the experience modifier on this Zone.
+	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifer.get(); }
 private:
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
@@ -266,6 +296,8 @@ private:
 	GuildManager* mGuildManager = nullptr;
 	
 	LootAllocator* mLootAllocator = nullptr;
+	std::shared_ptr<Experience::Calculator> mExperienceCalculator;
+	std::unique_ptr<Experience::Modifier> mExperienceModifer;
 
 	Scene* mScene = nullptr;
 	std::list<Character*> mCharacters;

@@ -34,6 +34,7 @@
 #include "LootController.h"
 #include "RespawnOptions.h"
 #include "ExperienceController.h"
+#include "ExperienceCalculator.h"
 #include "HateController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
@@ -60,11 +61,17 @@ Zone::~Zone() {
 
 	for (auto i : mZonePoints) delete i;
 	mZonePoints.clear();
+
+	mExperienceCalculator.reset();
+	mExperienceModifer.reset();
 }
 
-const bool Zone::initialise(Data::Zone* pZoneData) {
+const bool Zone::initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pZoneData);
+	EXPECTED_BOOL(pExperienceCalculator.get());
+
+	mExperienceCalculator = pExperienceCalculator;
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
@@ -76,6 +83,9 @@ const bool Zone::initialise(Data::Zone* pZoneData) {
 	mScene = new Scene(this);
 
 	mLootAllocator = new LootAllocator();
+
+	// Temp.
+	mExperienceModifer = std::make_unique<Experience::Modifier>();
 
 	mZoneType = pZoneData->mZoneType;
 	mTimeType = pZoneData->mTimeType;
@@ -1037,12 +1047,44 @@ void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
 		mSpawnPointManager->onDeath(pNPC);
 	}
 
+	// Determine who gets credit for dying NPC.
+	Character* killer = nullptr;
 	auto controller = pNPC->getHateController();
 	auto firstAttacker = controller->first();
 	if (firstAttacker) {
 		if (firstAttacker->isCharacter()) {
-			auto character = Actor::cast<Character*>(firstAttacker);
-			handleAddExperience(character, 3);
+			killer = Actor::cast<Character*>(firstAttacker);
+		}
+		else if (firstAttacker->isPet()) {
+			// TODO: Get owner.
+		}
+	}
+
+	// Allocate experience / looting rights for kill.
+	if (killer) {
+		// Solo Character Kill.
+		if (killer->isSolo()) {
+			// Set looting rights.
+			pNPC->getLootController()->set(killer);
+
+			// Award experience.
+			allocateExperience(killer, pNPC);
+		}
+		// Raid Kill.
+		else if (killer->hasRaid()) {
+			// Set looting rights.
+			pNPC->getLootController()->set(killer->getRaid());
+
+			// Award raid experience.
+			allocateExperience(killer->getRaid(), pNPC);
+		}
+		// Group Kill
+		else if (killer->hasGroup()) {
+			// Set looting rights.
+			pNPC->getLootController()->set(killer->getGroup());
+
+			// Award group experience.
+			allocateExperience(killer->getGroup(), pNPC);
 		}
 	}
 
@@ -1965,64 +2007,215 @@ void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, co
 }
 
 
-void Zone::handleAddExperience(Character* pCharacter, const u32 pExperience) {
+void Zone::giveExperience(Character* pCharacter, const u32 pExperience) {
 	EXPECTED(pCharacter);
 	auto controller = pCharacter->getExperienceController();
-	auto connection = pCharacter->getConnection();
+	EXPECTED(controller);
+	if (controller->canGainExperience() == false) return;
 
-	EXPECTED(controller && connection);
+	Experience::CalculationResult result;
+	Experience::Context context;
 
-	// Check: Character can still gain experience.
-	if (controller->canGainExperience() == false) {
-		// TODO: Message about not gaining experience?
-		return;
-	}
+	// Configure context.
+	context.mSoloKill = true;
 
-	const auto preLevel = controller->getLevel();
+	// Set normal experience.
+	result.mNormal = pExperience;
 
-	// Add experience to controller.
-	controller->addExperience(pExperience);
-
-	const auto postLevel = controller->getLevel();
-
-	// "You gain experience!!"
-	connection->sendExperienceGainMessage();
-
-	// Update experience bars.
-	connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
-
-	if (preLevel != postLevel)
-		_handleLevelChange(pCharacter, preLevel, postLevel);
+	// Process result.
+	processExperienceResult(pCharacter, result, context);
 }
 
-void Zone::handleAddAAExperience(Character* pCharacter, const u32 pExperience) {
+void Zone::giveAAExperience(Character* pCharacter, const u32 pExperience) {
 	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	EXPECTED(controller);
+	if (controller->canGainAAExperience() == false) return;
+
+	Experience::CalculationResult result;
+	Experience::Context context;
+
+	// Configure context.
+	context.mSoloKill = true;
+
+	// Set AA experience.
+	result.mAA = pExperience;
+
+	// Process result.
+	processExperienceResult(pCharacter, result, context);
+}
+
+void Zone::giveGroupLeadershipExperience(Character* pCharacter, const u32 pExperience) {
+	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	EXPECTED(controller);
+	if (controller->canGainGroupExperience() == false) return;
+
+	Experience::CalculationResult result;
+	Experience::Context context;
+
+	// Set Group Leadership experience.
+	result.mGroupLeadership = pExperience;
+
+	// Process result.
+	processExperienceResult(pCharacter, result, context);
+}
+
+void Zone::giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperience) {
+	EXPECTED(pCharacter);
+	auto controller = pCharacter->getExperienceController();
+	EXPECTED(controller);
+	if (controller->canGainRaidExperience() == false) return;
+
+	Experience::CalculationResult result;
+	Experience::Context context;
+
+	// Set Raid Leadership experience.
+	result.mRaidLeadership = pExperience;
+
+	// Process result.
+	processExperienceResult(pCharacter, result, context);
+}
+
+void Zone::allocateExperience(Character* pCharacter, NPC* pNPC) {
+	EXPECTED(pCharacter);
+	EXPECTED(pNPC);
+
+	static Experience::CalculationResult result;
+	result.reset();
+	static Experience::Context context;
+	context.reset();
+
+	// Configure context.
+	context.mSoloKill = true;
+	context.mNPCLevel = pNPC->getLevel();
+	context.mNPCMod = pNPC->getExperienceModifier();
+	context.mController = pCharacter->getExperienceController().get();
+	context.mZoneMod = getExperienceModifier();
+
+	// Calculate solo experience for kill.
+	mExperienceCalculator->calculate(result, context);
+
+	// Process result.
+	processExperienceResult(pCharacter, result, context);
+}
+
+void Zone::allocateExperience(Group* pGroup, NPC* pNPC) {
+	EXPECTED(pGroup);
+	EXPECTED(pNPC);
+
+	static Experience::CalculationResult result;
+	result.reset();
+	static Experience::Context context;
+	context.reset();
+
+	// Configure context.
+	context.mGroupKill = true;
+	context.mNPCLevel = pNPC->getLevel();
+	context.mNPCMod = pNPC->getExperienceModifier();
+	context.mZoneMod = getExperienceModifier();
+	// TODO: Group level.
+	// TODO: Group members in Zone.
+
+	std::list<Character*> members;
+	for (auto i : members) {
+		context.mController = i->getExperienceController().get();
+
+		// Calculate group experience for kill.
+		mExperienceCalculator->calculate(result, context);
+
+		// Process result.
+		processExperienceResult(i, result, context);
+	}
+}
+
+void Zone::allocateExperience(Raid* pRaid, NPC* pNPC)
+{
+
+}
+
+void Zone::processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent) {
+	static Experience::GainResult gainResult;
+	gainResult.reset();
+
 	auto controller = pCharacter->getExperienceController();
 	auto connection = pCharacter->getConnection();
 
-	EXPECTED(controller && connection);
+	// Apply result.
+	controller->add(gainResult, pCalculationResult.mNormal, pCalculationResult.mAA, pCalculationResult.mGroupLeadership, pCalculationResult.mRaidLeadership);
 
-	// Check: Character can still AA gain experience.
-	if (controller->canGainAAExperience() == false) {
-		// TODO: Message about not gaining AA experience?
-		return;
+	// Notify Client.
+
+	// Gain normal experience.
+	if (pCalculationResult.mNormal > 0) {
+		// Update experience bars.
+		connection->sendExperienceUpdate(controller->getExperienceRatio(), controller->getAAExperienceRatio());
+
+		if (pContent.mSoloKill) {
+			// "You gain experience!!"
+			connection->sendExperienceMessage();
+		}
+		else if (pContent.mGroupKill) {
+			// "You gain party experience!!"
+			connection->sendGroupExperienceMessage();
+		}
+		else if (pContent.mRaidKill) {
+			// "You gained raid experience!"
+			connection->sendRaidExperienceMessage();
+		}
+
+		// Gain level(s).
+		if (gainResult.mLevels > 0) {
+			// "You gained a level! Welcome to level X!"
+			if (gainResult.mLevels == 1) connection->sendLevelGainMessage();
+			// You have gained X levels! Welcome to level Y!
+			else connection->sendLevelsGainMessage(gainResult.mLevels);
+
+			// Update Zone.
+			handleLevelIncrease(pCharacter);
+		}
+	}
+	// Gain Alternate Advanced experience.
+	if (pCalculationResult.mAA > 0) {
+		// Update experience bars.
+		connection->sendAAExperienceUpdate(controller->getAAExperienceRatio(), controller->getUnspentAAPoints(), controller->getExperienceToAA());
+
+		// Gain AA point(s).
+		if (gainResult.mAAPoints > 0) {
+			// "You have gained an ability point!  You now have %1 ability points."
+			connection->sendAAPointGainMessage(controller->getUnspentAAPoints());
+		}
+	}
+	// Gain Group Leadership experience.
+	if (pCalculationResult.mGroupLeadership > 0) {
+		// Update experience bars.
+		connection->sendLeadershipExperienceUpdate(controller->getGroupRatio(), controller->getGroupPoints(), controller->getRaidRatio(), controller->getRaidPoints());
+
+		// "You gain group leadership experience! (% 1)"
+		connection->sendGainGroupLeadershipExperienceMessage();
+
+		// Gain Leadership point(s).
+		if (gainResult.mGroupPoints > 0) {
+			// "You have gained a group leadership point!"
+			connection->sendGainGroupLeadershipPointMessage();
+		}
+
+	}
+	// Gain Raid Leadership experience.
+	if (pCalculationResult.mRaidLeadership > 0) {
+		// Update experience bars.
+		connection->sendLeadershipExperienceUpdate(controller->getGroupRatio(), controller->getGroupPoints(), controller->getRaidRatio(), controller->getRaidPoints());
+
+		// "You gain raid leadership experience! (% 1)"
+		connection->sendGainRaidLeadershipExperienceMessage();
+
+		// Gain Raid Leadership point(s).
+		if (gainResult.mRaidPoints > 0) {
+			// "You have gained a raid leadership point!"
+			connection->sendGainRaidLeadershipPointMessage();
+		}
 	}
 
-	const auto prePoints = controller->getUnspentAAPoints();
-
-	// Add AA experience to controller.
-	controller->addAAExperience(pExperience);
-
-	const auto postPoints = controller->getUnspentAAPoints();
-
-	// "You gain experience!!"
-	connection->sendExperienceGainMessage();
-
-	// Update experience bars.
-	connection->sendAAExperienceUpdate(controller->getAAExperienceRatio(), controller->getUnspentAAPoints(), controller->getExperienceToAA());
-
-	if (prePoints != postPoints){
-		// "You have gained an ability point!  You now have %1 ability points."
-		connection->sendAAPointGainMessage(controller->getUnspentAAPoints());
-	}
+	// 8584 You have reached the maximum number of unused group leadership points.  You must spend some points before you can receive any more experience.
+	// 8591 You have reached the maximum number of unused raid leadership points.  You must spend some points before you can receive any more experience.
 }

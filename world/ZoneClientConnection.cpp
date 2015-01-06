@@ -1558,7 +1558,7 @@ void ZoneClientConnection::sendLeadershipExperienceUpdate(const double pGroupExp
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = LeadershipExperienceUpdate::construct(pGroupExperience, pGroupPoints, pGroupExperience, pRaidPoints);
+	auto packet = LeadershipExperienceUpdate::construct(pGroupExperience, pGroupPoints, pRaidExperience, pRaidPoints);
 	sendPacket(packet);
 	delete packet;
 }
@@ -1572,15 +1572,9 @@ void ZoneClientConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 p
 	delete packet;
 }
 
-void ZoneClientConnection::sendExperienceGainMessage() {
-	EXPECTED(mConnected);
-	sendSimpleMessage(MessageType::Experience, StringID::GainExperience);
-}
-
-void ZoneClientConnection::sendGroupExperienceGainMessage() {
-	EXPECTED(mConnected);
-	sendSimpleMessage(MessageType::Experience, StringID::GainGroupExperience);
-}
+void ZoneClientConnection::sendExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainExperience); }
+void ZoneClientConnection::sendGroupExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupExperience); }
+void ZoneClientConnection::sendRaidExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidExperience); }
 
 void ZoneClientConnection::sendExperienceLossMessage() {
 	EXPECTED(mConnected);
@@ -1604,6 +1598,11 @@ void ZoneClientConnection::sendLevelLostMessage() {
 	//ss << mCharacter->getLevel();
 	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
 }
+
+void ZoneClientConnection::sendGainGroupLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipExperience); }
+void ZoneClientConnection::sendGainGroupLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipPoint); }
+void ZoneClientConnection::sendGainRaidLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipExperience); }
+void ZoneClientConnection::sendGainRaidLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipPoint); }
 
 void ZoneClientConnection::sendAAPointGainMessage(const u32 pUnspentAAPoints) {
 	EXPECTED(mConnected);

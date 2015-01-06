@@ -8,6 +8,7 @@
 #include "LootController.h"
 #include "HateController.h"
 #include "CombatSystem.h"
+#include "ExperienceCalculator.h"
 
 NPC::NPC(HateController* pHateController) {
 	
@@ -25,6 +26,9 @@ NPC::NPC(HateController* pHateController) {
 	setActorType(AT_NPC);
 
 	setCurrency(4, 5, 6, 7);
+
+	// Temp.
+	mExperienceModifier = std::make_unique<Experience::Modifier>();
 }
 
 NPC::~NPC() {
@@ -33,6 +37,8 @@ NPC::~NPC() {
 	if (mShopItems.empty() == false) { Log::error("[NPC] Shop Items not empty on destruction."); }
 	if (mLootItems.empty() == false) { Log::error("[NPC] Loot Items not empty on destruction."); }
 	if (mHateController->hasAttackers()) { Log::error("[NPC] HaterController not empty on destruction."); }
+	
+	mExperienceModifier = nullptr;
 }
 
 const bool NPC::initialise() {
@@ -58,9 +64,9 @@ const bool NPC::onDeath() {
 	mOpenTimer.setStep(DEFAULT_CORPSE_OPEN_TIME * 1000);
 	mOpenTimer.start();
 
-	// Configure the LootController.
-	auto lootController = getLootController();
-	lootController->configure(mHateController);
+	//// Configure the LootController.
+	//auto lootController = getLootController();
+	//lootController->configure(mHateController);
 
 	clearHate();
 

@@ -35,7 +35,7 @@ Character::Character(const uint32 pAccountID, Data::Character* pCharacterData) :
 	mInventory = new Inventoryy();
 	mXTargetController = new ExtendedTargetController();
 	mRespawnOptions = new RespawnOptions();
-	mExperienceController = std::make_shared<ExperienceController>();
+	mExperienceController = std::make_shared<Experience::Controller>();
 
 	RespawnOption option;
 	option.mID = 0;

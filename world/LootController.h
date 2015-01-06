@@ -4,25 +4,13 @@
 #include <list>
 
 class Character;
+class Group;
+class Raid;
 class HateController;
 
 class LootController {
 public:
 
-	void configure(HateController* pHateController);
-
-	// Adds a looter to the 'allowed' list.
-	void addLooter(Character* pLooter);
-
-	// Removes a looter from the 'allowed' list.
-	void removeLooter(Character* pLooter);
-
-	// Clears the 'allowed' list.
-	void clear();
-
-	// Returns whether a Character is on the 'allowed' list.
-	const bool isLooter(Character* pCharacter) const;
-	
 	// Returns whether loot is open.
 	const bool isOpen() const { return mOpen; }
 
@@ -43,14 +31,29 @@ public:
 
 	// Returns whether a Character is allowed to loot.
 	const bool canLoot(Character* pLooter) const;
+
+	void set(Character* pCharacter) { mCharacter = pCharacter; }
+	void set(Group* pGroup) { mGroup = pGroup; }
+	void set(Raid* pRaid) { mRaid = pRaid; }
+
+	void clearCharacter() { mCharacter = nullptr; }
+	void clearGroup() { mGroup = nullptr; }
+	void clearRaid() { mRaid = nullptr; }
+
 private:
+
 	// Flag indicating whether loot is 'open', i.e. Anyone can loot.
 	bool mOpen = false;
-	// TODO: Locked?
 
-	// List of Characters that are allowed to loot.
-	std::list<Character*> mLooters;
-
-	// Character currently looting.
+	// Character that is currently looting.
 	Character* mLooter = nullptr;
+
+	// Specific Character that is allowed to loot.
+	Character* mCharacter = nullptr;
+
+	// Specific Group that is allowed to loot.
+	Group* mGroup = nullptr;
+
+	// Specific Raid that is allowed to loot.
+	Raid* mRaid = nullptr;
 };

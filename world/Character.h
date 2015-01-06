@@ -18,7 +18,10 @@ class ExtendedTargetController;
 class Inventoryy;
 class Item;
 class RespawnOptions;
-class ExperienceController;
+
+namespace Experience {
+	class Controller;
+}
 
 namespace Data {
 	struct Character;
@@ -84,7 +87,7 @@ public:
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
-	inline std::shared_ptr<ExperienceController> getExperienceController() const { return mExperienceController; }
+	inline std::shared_ptr<Experience::Controller> getExperienceController() const { return mExperienceController; }
 	
 	bool onEnterZone();
 	bool onZoneOut();
@@ -92,13 +95,17 @@ public:
 
 	void addQueuedMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
 
+	// Returns whether this Character has neither a Group nor a Raid.
+	const bool isSolo() const { return !hasGroup() && !hasRaid(); }
+
 	// Group
-	inline bool hasGroup() { return mGroup != nullptr; }
+	inline bool hasGroup() const { return mGroup != nullptr; }
 	inline Group* getGroup() { return mGroup; }
 	inline void setGroup(Group* pGroup) { mGroup = pGroup; }
+	inline const bool isGroupLeader() { return false; } // TODO
 
 	// Guild
-	inline bool hasGuild() { return mGuild != nullptr; }
+	inline bool hasGuild() const { return mGuild != nullptr; }
 	inline Guild* getGuild() { return mGuild; }
 	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
 	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank, const String pGuildName) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); mGuildName = pGuildName; }
@@ -114,9 +121,10 @@ public:
 	void clearPendingGuildInvite() { mPendingGuildInviteID = NO_GUILD; mPendingGuildInviteName = ""; }
 
 	// Raid
-	inline bool hasRaid() { return mRaid != nullptr; }
+	inline bool hasRaid() const { return mRaid != nullptr; }
 	inline Raid* getRaid() { return mRaid; }
 	inline void setRaid(Raid* pRaid) { mRaid = pRaid; }
+	inline const bool isRaidLeader() { return false; } // TODO
 
 	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
 	ZoneClientConnection* getConnection() { return mConnection; }
@@ -362,5 +370,5 @@ private:
 
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
-	std::shared_ptr<ExperienceController> mExperienceController = nullptr;
+	std::shared_ptr<Experience::Controller> mExperienceController = nullptr;
 };

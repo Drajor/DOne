@@ -2,10 +2,15 @@
 
 #include "Constants.h"
 #include "Singleton.h"
+#include <memory>
 
 class Zone;
 class Character;
 struct WhoFilter;
+
+namespace Experience {
+	class Calculator;
+}
 
 struct ZoneSearchEntry {
 	String mName = "";
@@ -59,6 +64,7 @@ public:
 private:
 
 	bool mInitialised = false;
+	std::shared_ptr<Experience::Calculator> mExperienceCalculator;
 	Zone* _search(const u16 pZoneID, const u16 pInstanceID) const;
 	const bool _makeZone(const u16 pZoneID, const u16 pInstanceID);
 	const u16 _getNextZonePort();

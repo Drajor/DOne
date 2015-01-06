@@ -1,11 +1,16 @@
 #pragma once
 
 #include "Actor.h"
+#include <memory>
 
 class Character;
 class SpawnPoint;
 class Item;
 class HateController;
+
+namespace Experience {
+	struct Modifier;
+}
 
 class NPC : public Actor {
 public:
@@ -85,6 +90,10 @@ public:
 
 	void onCombatBegin();
 	void onCombatEnd();
+
+	// Returns the experience modifier on this NPC.
+	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifier.get(); }
+
 private:
 	float mSellRate = 2.457f;
 	int32 mCopper = 0;
@@ -97,6 +106,6 @@ private:
 	bool mAttacking = false;
 
 	SpawnPoint* mSpawnPoint = nullptr;
-
+	std::unique_ptr<Experience::Modifier> mExperienceModifier = nullptr;
 	std::list<Character*> mShoppers;
 };

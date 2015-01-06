@@ -7,6 +7,7 @@
 #include "LogSystem.h"
 #include "Utility.h"
 #include "ExperienceController.h"
+#include "ExperienceCalculator.h"
 
 ZoneManager::~ZoneManager() {
 	ZoneClientConnection::deinitialise();
@@ -41,7 +42,9 @@ bool ZoneManager::initialise() {
 	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
 	ZoneClientConnection::initalise();
-	ExperienceController::_initialise();
+	Experience::Controller::_initialise();
+
+	mExperienceCalculator = std::make_shared<Experience::Calculator>();
 
 	mInitialised = true;
 	return true;
@@ -121,7 +124,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);
-	if (!zone->initialise(zoneData)) {
+	if (!zone->initialise(zoneData, mExperienceCalculator)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
 		delete zone;
