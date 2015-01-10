@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+SOURCE_GROUP(Networking FILES ZoneConnection.h ZoneConnection.cpp WorldConnection.h WorldConnection.cpp Payload.h)
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp zone_data.xml)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp SpellDataStore.h SpellDataStore.cpp NPCFactory.h NPCFactory.cpp)
 SOURCE_GROUP(Zone\\Hate FILES HateControllerFactory.h HateControllerFactory.cpp HateController.h HateController.cpp)
@@ -13,7 +14,7 @@ SOURCE_GROUP(HateController FILES HateControllerFactory.h HateControllerFactory.
 
 SET(world_sources
 	CMakeLists.txt
-	WorldClientConnection.cpp
+	WorldConnection.cpp
 	LoginServerConnection.cpp
 	main.cpp
 	Utility.cpp
@@ -26,7 +27,7 @@ SET(world_sources
 	LogSystem.cpp
 	CommandHandler.cpp
 	Profile.cpp
-	ZoneClientConnection.cpp
+	ZoneConnection.cpp
 	ZoneData.cpp
 	GroupManager.cpp
 	GuildManager.cpp
@@ -62,10 +63,11 @@ SET(world_sources
 	ExperienceCalculator.cpp
 	ExperienceController.cpp
 	LootController.cpp
+	ServiceLocator.cpp
 )
 
 SET(world_headers
-	WorldClientConnection.h
+	WorldConnection.h
 	LoginServerConnection.h
 	Utility.h
 	ZoneManager.h
@@ -78,7 +80,7 @@ SET(world_headers
 	LogSystem.h
 	CommandHandler.h
 	Profile.h
-	ZoneClientConnection.h
+	ZoneConnection.h
 	ClientAuthentication.h
 	ZoneData.h
 	Group.h

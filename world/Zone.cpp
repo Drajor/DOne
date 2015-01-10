@@ -8,7 +8,7 @@
 #include "RaidManager.h"
 #include "Character.h"
 #include "NPC.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
 #include "Transmutation.h"

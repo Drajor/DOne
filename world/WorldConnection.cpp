@@ -1,4 +1,4 @@
-#include "WorldClientConnection.h"
+#include "WorldConnection.h"
 #include "ServiceLocator.h"
 #include "GuildManager.h"
 #include "ZoneManager.h"

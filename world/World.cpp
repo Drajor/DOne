@@ -16,7 +16,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/extprofile.h"
 
-#include "WorldClientConnection.h"
+#include "WorldConnection.h"
 #include "Settings.h"
 #include "TimeUtility.h"
 

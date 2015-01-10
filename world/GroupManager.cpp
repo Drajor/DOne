@@ -5,7 +5,7 @@
 #include "Utility.h"
 #include "Character.h"
 #include "Zone.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "LogSystem.h"
 
 #include "../common/EQPacket.h"

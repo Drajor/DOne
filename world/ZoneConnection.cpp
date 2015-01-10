@@ -1,4 +1,4 @@
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "ServiceLocator.h"
 #include "GroupManager.h"
 #include "RaidManager.h"

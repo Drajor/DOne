@@ -3,7 +3,7 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "Character.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "../common/EQPacket.h"
 #include "Payload.h"
 #include "ZoneManager.h"

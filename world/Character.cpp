@@ -6,7 +6,7 @@
 #include "Zone.h"
 #include "Utility.h"
 #include "LogSystem.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "Limits.h"
 #include "NPC.h"
 #include "Inventory.h"

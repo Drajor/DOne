@@ -4,7 +4,7 @@
 #include "Zone.h"
 #include "World.h"
 #include "Character.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "LogSystem.h"
 #include "Utility.h"
 #include "ExperienceController.h"

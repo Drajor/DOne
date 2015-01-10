@@ -9,7 +9,7 @@
 #include "GuildManager.h"
 #include "Utility.h"
 #include "LogSystem.h"
-#include "ZoneClientConnection.h"
+#include "ZoneConnection.h"
 #include "Limits.h"
 #include "ItemGenerator.h"
 #include "ItemDataStore.h"
