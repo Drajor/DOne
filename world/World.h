@@ -14,7 +14,7 @@ class DataStore;
 class LoginServerConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
-class WorldClientConnection;
+class WorldConnection;
 
 class World {
 public:
@@ -62,7 +62,7 @@ public:
 	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
 	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
 
-	const bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
+	const bool handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning);
 
 protected:
 	
@@ -81,10 +81,10 @@ private:
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
-	std::list<WorldClientConnection*> mClientConnections;
+	std::list<WorldConnection*> mClientConnections;
 
-	bool _handleZoning(WorldClientConnection* pConnection, const String& pCharacterName);
-	bool _handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName);
+	bool _handleZoning(WorldConnection* pConnection, const String& pCharacterName);
+	bool _handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName);
 	
 	i32 mStatus = 100;
 	i32 mPlayers = 100;

@@ -17,7 +17,7 @@
 #include "Settings.h"
 
 
-WorldClientConnection::WorldClientConnection(World* pWorld, EQStreamInterface* pStreamInterface) :
+WorldConnection::WorldConnection(World* pWorld, EQStreamInterface* pStreamInterface) :
 	mStreamInterface(pStreamInterface),
 	mWorld(pWorld)
 {
@@ -27,13 +27,13 @@ WorldClientConnection::WorldClientConnection(World* pWorld, EQStreamInterface* p
 	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
 }
 
-WorldClientConnection::~WorldClientConnection() {
+WorldConnection::~WorldConnection() {
 	//let the stream factory know were done with this stream
 	mStreamInterface->Close();
 	mStreamInterface->ReleaseFromUse();
 }
 
-bool WorldClientConnection::update() {
+bool WorldConnection::update() {
 	// Check our connection.
 	if (mConnectionDropped || !mStreamInterface->CheckState(ESTABLISHED)) {
 		Utility::print("WorldClientConnection Lost.");
@@ -52,7 +52,7 @@ bool WorldClientConnection::update() {
 	return ret;
 }
 
-bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(pPacket);
 
 	// Check if unidentified and sending something other than OP_SendLoginInfo
@@ -109,7 +109,7 @@ bool WorldClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-void WorldClientConnection::_sendLogServer() {
+void WorldConnection::_sendLogServer() {
 	using namespace Payload::World;
 	auto outPacket = new EQApplicationPacket(OP_LogServer, LogServer::size());
 	auto payload = LogServer::convert(outPacket->pBuffer);
@@ -125,7 +125,7 @@ void WorldClientConnection::_sendLogServer() {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendEnterWorld(String pCharacterName) {
+void WorldConnection::_sendEnterWorld(String pCharacterName) {
 	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
 	strcpy(reinterpret_cast<char*>(outPacket->pBuffer), pCharacterName.c_str());
 	
@@ -133,7 +133,7 @@ void WorldClientConnection::_sendEnterWorld(String pCharacterName) {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendExpansionInfo() {
+void WorldConnection::_sendExpansionInfo() {
 	using namespace Payload::World;
 
 	auto packet = ExpansionInfo::construct(16383); // TODO: Magic.
@@ -141,7 +141,7 @@ void WorldClientConnection::_sendExpansionInfo() {
 	delete packet;
 }
 
-void WorldClientConnection::_sendCharacterSelectInfo() {
+void WorldConnection::_sendCharacterSelectInfo() {
 	using namespace Payload::World;
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
 	auto payload = CharacterSelect::convert(outPacket->pBuffer);
@@ -189,14 +189,14 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendPostEnterWorld() {
+void WorldConnection::_sendPostEnterWorld() {
 	auto outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outPacket->size = 0;
 	mStreamInterface->QueuePacket(outPacket);
 	safe_delete(outPacket);
 }
 
-bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(Connect::sizeCheck(pPacket));
@@ -271,7 +271,7 @@ bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	*/
 }
 
-bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(pPacket);
 
 	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
@@ -328,7 +328,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	return true;
 }
 
-bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 
@@ -339,7 +339,7 @@ bool WorldClientConnection::_handleGenerateRandomNamePacket(const EQApplicationP
 	return true;
 }
 
-bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicationPacket* packet) {
+bool WorldConnection::_handleCharacterCreateRequestPacket(const EQApplicationPacket* packet) {
 	struct RaceClassAllocation {
 		unsigned int Index;
 		unsigned int BaseStats[7];
@@ -427,7 +427,7 @@ bool WorldClientConnection::_handleCharacterCreateRequestPacket(const EQApplicat
 	return true;
 }
 
-bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(CreateCharacter::sizeCheck(pPacket->size));
@@ -443,7 +443,7 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 	return true;
 }
 
-bool WorldClientConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket->size));
@@ -476,7 +476,7 @@ bool WorldClientConnection::_handleEnterWorld(const EQApplicationPacket* pPacket
 	return success;
 }
 
-void WorldClientConnection::_sendChatServer(const String& pCharacterName) {
+void WorldConnection::_sendChatServer(const String& pCharacterName) {
 	std::stringstream ss;
 	ss << "127.0.0.1" << "," << Settings::getUCSPort() << "," << Settings::getServerShortName() << "." << pCharacterName << ",";
 	ss << "U" << std::hex << std::setfill('0') << std::setw(8) << 34; // TODO: Set up mail key
@@ -489,7 +489,7 @@ void WorldClientConnection::_sendChatServer(const String& pCharacterName) {
 	safe_delete(outPacket2);
 }
 
-bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
@@ -507,7 +507,7 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 	return false;
 }
 
-void WorldClientConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
+void WorldConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
 	using namespace Payload::World;
 
 	auto packet = ZoneServerInfo::construct(pIP, pPort);
@@ -516,7 +516,7 @@ void WorldClientConnection::sendZoneServerInfo(const String& pIP, const u16 pPor
 }
 
 
-void WorldClientConnection::_sendZoneUnavailable() {
+void WorldConnection::_sendZoneUnavailable() {
 	using namespace Payload::World;
 
 	auto packet = ZoneUnavailable::construct("NONE"); // NOTE: Zone name appears to have no effect.
@@ -524,7 +524,7 @@ void WorldClientConnection::_sendZoneUnavailable() {
 	delete packet;
 }
 
-void WorldClientConnection::_sendGuildList() {
+void WorldConnection::_sendGuildList() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
 	outPacket->pBuffer = reinterpret_cast<unsigned char*>(ServiceLocator::getGuildManager()->_getGuildNames());
@@ -534,7 +534,7 @@ void WorldClientConnection::_sendGuildList() {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::_sendApproveWorld() {
+void WorldConnection::_sendApproveWorld() {
 	using namespace Payload::World; 
 
 	auto outPacket = new EQApplicationPacket(OP_ApproveWorld, ApproveWorld::size());
@@ -581,6 +581,6 @@ void WorldClientConnection::_sendApproveWorld() {
 	safe_delete(outPacket);
 }
 
-void WorldClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
+void WorldConnection::sendPacket(const EQApplicationPacket* pPacket) {
 	mStreamInterface->QueuePacket(pPacket);
 }

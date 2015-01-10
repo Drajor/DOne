@@ -116,7 +116,7 @@ void World::_handleIncomingClientConnections() {
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		mLog.error("TODO: Check Bans.");
 		//mLog.info("Connection from " + incomingStreamInterface->GetRemoteIP());
-		mClientConnections.push_back(new WorldClientConnection(this, incomingStreamInterface));
+		mClientConnections.push_back(new WorldConnection(this, incomingStreamInterface));
 	}
 }
 
@@ -211,7 +211,7 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	return true;
 }
 
-const bool World::handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning) {
+const bool World::handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning) {
 	EXPECTED_BOOL(pConnection);
 
 	if (pZoning)
@@ -220,7 +220,7 @@ const bool World::handleEnterWorld(WorldClientConnection* pConnection, const Str
 	return _handleEnterWorld(pConnection, pCharacterName);
 }
 
-bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCharacterName) {
+bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
 	EXPECTED_BOOL(pConnection);
 
 	auto character = mZoneManager->getZoningCharacter(pCharacterName);
@@ -246,7 +246,7 @@ bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCha
 	return true;
 }
 
-bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName) {
+bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName) {
 	EXPECTED_BOOL(pConnection);
 
 	// Check: CharacterData could be loaded.

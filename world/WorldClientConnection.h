@@ -6,10 +6,10 @@ class EQApplicationPacket;
 class EQStreamInterface;
 class World;
 
-class WorldClientConnection {
+class WorldConnection {
 public:
-	WorldClientConnection(World* pWorld, EQStreamInterface* pStreamInterface);
-	~WorldClientConnection();
+	WorldConnection(World* pWorld, EQStreamInterface* pStreamInterface);
+	~WorldConnection();
 
 	bool update();
 
