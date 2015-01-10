@@ -7,7 +7,7 @@ namespace Data {
 	struct AlternateCurrency;
 }
 class LogContext;
-class DataStore;
+class IDataStore;
 
 class AlternateCurrencyManager {
 public:
@@ -15,7 +15,7 @@ public:
 	~AlternateCurrencyManager();
 
 	// Initialises the AlternateCurrencyManager.
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 
 	// Returns the list of alternate currencies.
 	inline std::list<Data::AlternateCurrency*>& getCurrencies() { return mCurrencies; }
@@ -29,7 +29,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	LogContext* mLog = nullptr;
 
 	std::list<Data::AlternateCurrency*> mCurrencies;

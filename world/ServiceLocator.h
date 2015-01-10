@@ -1,6 +1,6 @@
 #pragma once
 
-class DataStore;
+class IDataStore;
 class ItemDataStore;
 class SpellDataStore;
 class ShopDataStore;
@@ -22,8 +22,8 @@ class ServiceLocator {
 public:
 	
 	// DataStore
-	static inline DataStore* getDataStore() { return mDataStore; }
-	static inline void setDataStore(DataStore* pDataStore) { mDataStore = pDataStore; }
+	static inline IDataStore* getDataStore() { return mDataStore; }
+	static inline void setDataStore(IDataStore* pDataStore) { mDataStore = pDataStore; }
 
 	// ItemDataStore
 	static inline ItemDataStore* getItemDataStore() { return mItemDataStore; }
@@ -113,7 +113,7 @@ private:
 	ServiceLocator() { reset(); }
 	~ServiceLocator();
 
-	static DataStore* mDataStore;
+	static IDataStore* mDataStore;
 	static ItemDataStore* mItemDataStore;
 	static SpellDataStore* mSpellDataStore;
 	static ShopDataStore* mShopDataStore;

@@ -93,7 +93,7 @@ inline void writeVector3(TiXmlElement* pElement, const Vector3& pVector) {
 	pElement->SetDoubleAttribute("z", pVector.z);
 }
 
-const bool DataStore::initialise() { return true; }
+const bool XMLDataStore::initialise() { return true; }
 
 namespace AccountXML {
 #define SCA static const auto
@@ -114,7 +114,7 @@ namespace AccountXML {
 #undef SCA
 }
 
-bool DataStore::loadAccounts(Data::AccountList pAccounts) {
+const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 	Profile p("DataStore::loadAccounts");
 	EXPECTED_BOOL(pAccounts.empty());
@@ -147,7 +147,7 @@ bool DataStore::loadAccounts(Data::AccountList pAccounts) {
 	return true;
 }
 
-bool DataStore::saveAccounts(Data::AccountList pAccounts) {
+const bool XMLDataStore::saveAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 	Profile p("DataStore::saveAccounts");
 	TiXmlDocument document(FileLocation);
@@ -210,7 +210,7 @@ namespace AccountCharacterDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadAccountCharacterData(Data::Account* pAccount) {
+const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
@@ -277,7 +277,7 @@ const bool DataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	return true;
 }
 
-const bool DataStore::saveAccountCharacterData(Data::Account* pAccount) {
+const bool XMLDataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	//Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
@@ -529,7 +529,7 @@ const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience)
 	return true;
 }
 
-const bool DataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
+const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
 	Profile p("DataStore::loadCharacter");
 	using namespace CharacterXML;
 	EXPECTED_BOOL(pCharacter);
@@ -792,7 +792,7 @@ const bool writeExperience(TiXmlElement* pElement, const Data::Experience& pExpe
 	return true;
 }
 
-const bool DataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
+const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
 	Profile p("DataStore::saveCharacter");
 	using namespace CharacterXML;
 
@@ -979,7 +979,7 @@ namespace SettingsXML {
 #undef SCA
 }
 
-bool DataStore::loadSettings() {
+const bool XMLDataStore::loadSettings() {
 	using namespace SettingsXML;
 	TiXmlDocument document(SettingsXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1083,7 +1083,7 @@ namespace NPCAppearanceXML {
 #undef SCA
 }
 
-const bool DataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
+const bool XMLDataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
 	using namespace NPCAppearanceXML;
 	Profile p("DataStore::loadNPCAppearanceData");
 	EXPECTED_BOOL(pAppearances.empty());
@@ -1207,7 +1207,7 @@ namespace NPCTypeXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
+const bool XMLDataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
 	using namespace NPCTypeXML;
 	Profile p("DataStore::loadNPCTypeData");
 	EXPECTED_BOOL(pTypes.empty());
@@ -1235,7 +1235,7 @@ const bool DataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
 	return true;
 }
 
-const bool DataStore::deleteCharacter(const String& pCharacterName) {
+const bool XMLDataStore::deleteCharacter(const String& pCharacterName) {
 	const String existingFile = "./data/characters/" + pCharacterName + ".xml";
 	const String newFile = "./data/characters/deleted/" + std::to_string(Utility::Time::now()) + "_" + pCharacterName + ".xml";
 	// Copy the character xml to the deleted directory.
@@ -1261,7 +1261,7 @@ namespace SpellDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
+const bool XMLDataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
 	using namespace SpellDataXML;
 	EXPECTED_BOOL(pSpells);
 	Profile p("DataStore::loadSpells");
@@ -1401,7 +1401,7 @@ namespace ItemDataXML {
 #undef SCA
 }
 
-const bool DataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
+const bool XMLDataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
 	using namespace ItemDataXML;
 	EXPECTED_BOOL(pItemData);
 	Profile p("DataStore::loadItems");
@@ -1497,7 +1497,7 @@ namespace ZoneXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadZones(Data::ZoneList pZones) {
+const bool XMLDataStore::loadZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
 	EXPECTED_BOOL(pZones.empty());
 	Profile p("DataStore::loadZones");
@@ -1672,7 +1672,7 @@ const bool DataStore::loadZones(Data::ZoneList pZones) {
 	return true;
 }
 
-const bool DataStore::saveZones(Data::ZoneList pZones) {
+const bool XMLDataStore::saveZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
 	Profile p("DataStore::saveZones");
 	TiXmlDocument document(ZoneXML::FileLocation);
@@ -1841,7 +1841,7 @@ namespace TransmutationComponentXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) {
+const bool XMLDataStore::loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) {
 	using namespace TransmutationComponentXML;
 	EXPECTED_BOOL(pComponents.empty());
 	Profile p("DataStore::loadTransmutationComponents");
@@ -1885,7 +1885,7 @@ namespace AlternateCurrencyXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) {
+const bool XMLDataStore::loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) {
 	using namespace AlternateCurrencyXML;
 	EXPECTED_BOOL(pCurrencies.empty());
 	Profile p("DataStore::loadAlternateCurrencies");
@@ -1928,7 +1928,7 @@ namespace ShopXML {
 	}
 #undef SCA
 }
-const bool DataStore::loadShops(Data::ShopList pShops) {
+const bool XMLDataStore::loadShops(Data::ShopList pShops) {
 	using namespace ShopXML;
 	EXPECTED_BOOL(pShops.empty());
 	Profile p("DataStore::loadShops");

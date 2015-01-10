@@ -21,7 +21,7 @@ NPCFactory::~NPCFactory() {
 }
 
 
-const bool NPCFactory::initialise(DataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore) {
+const bool NPCFactory::initialise(IDataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore) {
 	mLog->status("Initialising.");
 
 	EXPECTED_BOOLX(mInitialised == false, mLog);

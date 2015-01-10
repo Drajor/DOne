@@ -11,7 +11,7 @@ struct ZoneDataSearchEntry {
 }; // NOTE: No initializer due to PoD rules.
 typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
-class DataStore;
+class IDataStore;
 
 namespace Data {
 	struct Zone;
@@ -23,7 +23,7 @@ struct Vector3;
 
 class ZoneDataManager {
 public:
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	
 	const bool load(const u16 pZoneID);
 	const bool unload(const u16 pZoneID);
@@ -48,6 +48,6 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	std::list<Data::Zone*> mZoneData;
 };

@@ -9,7 +9,7 @@ static const char HELP_TOKEN = '?';
 
 typedef std::vector<String> CommandParameters;
 
-class DataStore;
+class IDataStore;
 class Character;
 
 class Command {
@@ -60,13 +60,13 @@ protected:
 class CommandHandler {
 public:
 	~CommandHandler();
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	void command(Character* pCharacter, String pCommandMessage);
 
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 
 	void _logCommand(Character* pCharacter, String pCommandMessage);
 	Command* findCommand(String pCommandName);

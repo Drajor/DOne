@@ -229,7 +229,6 @@ class EQStream : public EQStreamInterface {
 
 		static SeqOrder CompareSequence(uint16 expected_seq , uint16 seq);
 
-		bool CheckActive() { return GetState()==ESTABLISHED; }
 		bool CheckClosed() { return GetState()==CLOSED; }
 		void SetOpcodeSize(uint8 s) { app_opcode_size = s; }
 		void SetStreamType(EQStreamType t);

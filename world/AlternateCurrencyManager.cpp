@@ -13,7 +13,7 @@ AlternateCurrencyManager::~AlternateCurrencyManager() {
 	mLog = nullptr;
 }
 
-const bool AlternateCurrencyManager::initialise(DataStore* pDataStore) {
+const bool AlternateCurrencyManager::initialise(IDataStore* pDataStore) {
 	mLog->status("Initialising.");
 	EXPECTED_BOOLX(mInitialised == false, mLog);
 	EXPECTED_BOOLX(pDataStore, mLog);

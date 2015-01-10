@@ -1,39 +1,17 @@
 #pragma once
 
-#include "Types.h"
-#include <list>
+#include "IDataStore.h"
 
-struct ItemData;
-struct TransmutationComponent;
-
-namespace Data {
-	struct Account;
-	struct Character;
-	struct Zone;
-	struct NPCType;
-	struct NPCAppearance;
-	struct Shop;
-	struct AlternateCurrency;
-	struct Spell;
-
-	typedef std::list<Data::Account*>& AccountList;
-	typedef std::list<Data::Zone*>& ZoneList;
-	typedef std::list<Data::NPCAppearance*>& NPCAppearanceList;
-	typedef std::list<Data::NPCType*>& NPCTypeList;
-	typedef std::list<Data::Shop*>& ShopList;
-	typedef std::list<Data::AlternateCurrency*>& AlternateCurrencyList;
-}
-
-class DataStore {
+class XMLDataStore : public IDataStore {
 public:
 	const bool initialise();
 	
 	// Settings
-	static bool loadSettings();
+	const bool loadSettings();
 
 	// Account Data
-	bool loadAccounts(Data::AccountList pAccounts);
-	bool saveAccounts(Data::AccountList pAccounts);
+	const bool loadAccounts(Data::AccountList pAccounts);
+	const bool saveAccounts(Data::AccountList pAccounts);
 	const bool loadAccountCharacterData(Data::Account* pAccount);
 	const bool saveAccountCharacterData(Data::Account* pAccount);
 

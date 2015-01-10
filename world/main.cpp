@@ -64,7 +64,7 @@ int main(int argc, char** argv)  {
 
 	ServiceLocator::reset();
 
-	DataStore* dataStore = new DataStore();
+	IDataStore* dataStore = new XMLDataStore();
 	ServiceLocator::setDataStore(dataStore);
 	EXPECTED_MAIN(dataStore->loadSettings());
 	EXPECTED_MAIN(dataStore->initialise());

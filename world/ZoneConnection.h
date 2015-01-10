@@ -11,7 +11,7 @@ class Zone;
 class Character;
 class Object;
 class Door;
-class DataStore;
+class IDataStore;
 class Guild;
 class Item;
 struct GuildMember;

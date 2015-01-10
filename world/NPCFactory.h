@@ -9,7 +9,7 @@ namespace Data {
 }
 
 class LogContext;
-class DataStore;
+class IDataStore;
 class ItemFactory;
 class ShopDataStore;
 class NPC;
@@ -20,7 +20,7 @@ public:
 
 	NPCFactory();
 	~NPCFactory();
-	const bool initialise(DataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
+	const bool initialise(IDataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
 
 	NPC* create(const u32 pTypeID);
 	NPC* createInvisibleMan();
@@ -37,7 +37,7 @@ private:
 
 	bool mInitialised = false;
 	LogContext* mLog = nullptr;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	ItemFactory* mItemFactory = nullptr;
 	ShopDataStore* mShopDataStore = nullptr;
 	HateControllerFactory* mHateControllerFactory = nullptr;

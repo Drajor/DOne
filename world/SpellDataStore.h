@@ -2,7 +2,7 @@
 
 #include "Types.h"
 
-class DataStore;
+class IDataStore;
 class Zone;
 
 namespace Data {
@@ -12,13 +12,13 @@ namespace Data {
 class SpellDataStore {
 public:
 
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	const Data::Spell* getData(const u16 pSpellID);
 
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	Data::Spell* mSpellData = nullptr;
 };
 

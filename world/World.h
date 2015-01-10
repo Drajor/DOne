@@ -9,7 +9,7 @@
 
 class AccountManager;
 class ZoneManager;
-class DataStore;
+class IDataStore;
 
 class LoginServerConnection;
 class EQStreamFactory;
@@ -21,7 +21,7 @@ public:
 	World();
 	~World();
 
-	const bool initialise(DataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager);
+	const bool initialise(IDataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	bool _initialiseLoginServerConnection();
 	void update();
 
@@ -68,7 +68,7 @@ protected:
 	
 	AccountManager* mAccountManager = nullptr;
 	ZoneManager* mZoneManager = nullptr;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 
 private:
 	LogContext mLog;

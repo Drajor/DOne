@@ -10,7 +10,7 @@ TitleManager::~TitleManager() {
 	deinitialise();
 }
 
-const bool TitleManager::initialise(DataStore* pDataStore) {
+const bool TitleManager::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 

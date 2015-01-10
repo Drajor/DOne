@@ -9,7 +9,7 @@ ItemDataStore::ItemDataStore() {
 	mItemData.resize(1000000);
 }
 
-const bool ItemDataStore::initialise(DataStore* pDataStore) {
+const bool ItemDataStore::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 

@@ -1698,7 +1698,7 @@ public:
 //	}
 //};
 
-const bool CommandHandler::initialise(DataStore* pDataStore) {
+const bool CommandHandler::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(pDataStore);
 	mDataStore = pDataStore;
 

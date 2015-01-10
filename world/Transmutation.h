@@ -3,7 +3,7 @@
 #include "Types.h"
 #include <list>
 
-class DataStore;
+class IDataStore;
 class ItemFactory;
 class Item;
 struct TransmutationComponent;
@@ -17,7 +17,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	ItemFactory* mItemFactory = nullptr;
 
 	const int32 _roll(Item* pItem, TransmutationComponent* pComponent);

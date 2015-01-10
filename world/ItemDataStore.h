@@ -5,13 +5,13 @@
 
 #include <vector>
 
-class DataStore;
+class IDataStore;
 
 class ItemDataStore {
 public:
 
 	ItemDataStore();
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	ItemData* getNew();
 	ItemData* get(const u32 pID);
 	const u32 getNextSerial();
@@ -19,7 +19,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 
 	void _bootstrap();
 	const bool _TransmutationComponentTest(const u32 pItemID, const String& pName);

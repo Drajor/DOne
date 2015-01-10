@@ -33,7 +33,7 @@ World::~World() {
 	safe_delete(mStreamIdentifier);
 }
 
-const bool World::initialise(DataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
+const bool World::initialise(IDataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
 	mLog.status("Initialising.");
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);

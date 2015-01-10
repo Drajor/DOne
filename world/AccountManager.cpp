@@ -19,7 +19,7 @@ AccountManager::~AccountManager() {
 	_clear();
 }
 
-const bool AccountManager::initialise(DataStore* pDataStore) {
+const bool AccountManager::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 	Profile p("AccountManager::initialise");

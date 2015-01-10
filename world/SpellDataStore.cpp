@@ -6,7 +6,7 @@
 #include "Data.h"
 #include "Profile.h"
 
-const bool SpellDataStore::initialise(DataStore* pDataStore) {
+const bool SpellDataStore::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 

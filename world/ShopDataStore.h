@@ -7,11 +7,11 @@ namespace Data {
 	struct Shop;
 }
 
-class DataStore;
+class IDataStore;
 
 class ShopDataStore {
 public:
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	Data::Shop* getShopData(const u32 pID) const;
 
 	// Returns the list of shop data.
@@ -20,6 +20,6 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	std::list<Data::Shop*> mShopData;
 };

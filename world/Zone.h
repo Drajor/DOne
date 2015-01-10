@@ -10,7 +10,7 @@
 class EQStreamFactory;
 class EQStreamIdentifier;
 class EQApplicationPacket;
-class DataStore;
+class IDataStore;
 class ZoneConnection;
 
 class World;

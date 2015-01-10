@@ -12,7 +12,7 @@
 
 #include "../common/tinyxml/tinyxml.h"
 
-const bool GuildManager::initialise(DataStore* pDataStore, ZoneManager* pZoneManager) {
+const bool GuildManager::initialise(IDataStore* pDataStore, ZoneManager* pZoneManager) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 	EXPECTED_BOOL(pZoneManager);

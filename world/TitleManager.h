@@ -3,7 +3,7 @@
 #include "Types.h"
 #include <list>
 
-class DataStore;
+class IDataStore;
 class Character;
 
 struct Title {
@@ -16,7 +16,7 @@ class TitleManager {
 public:
 	~TitleManager();
 
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 	const bool deinitialise();
 
 	const std::list<const Title*> getTitles(Character* pCharacter);
@@ -26,7 +26,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 
 	std::list<Title*> mTitles;
 };

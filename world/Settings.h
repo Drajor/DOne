@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 
 class Settings {
-	friend class DataStore;
 public:
 	static inline const String& getServerShortName() { return mServerShortName; }
 	static inline const String& getServerLongName() { return mServerLongName; }
@@ -11,10 +10,9 @@ public:
 	static inline const String& getLSAccountName() { return mLoginServerAccountName; }
 	static inline const String& getLSPassword() { return mLoginServerPassword; }
 	static inline const String& getLSAddress() { return mLoginServerAddress; }
-	static inline const uint16 getLSPort() { return mLoginServerPort; }
-	static inline const uint16 getUCSPort() { return mUCSPort; }
+	static inline const u16 getLSPort() { return mLoginServerPort; }
+	static inline const u16 getUCSPort() { return mUCSPort; }
 	static inline const bool getValidationEnabled() { return mValidationEnabled; }
-private:
 
 	static const bool _setServerShortName(const String& pServerShortName);
 	static const bool _setServerLongName(const String& pServerLongName);
@@ -22,9 +20,11 @@ private:
 	static const bool _setLSAccountName(const String& pLSAccountName);
 	static const bool _setLSPassword(const String& pLSPassword);
 	static inline const bool _setLSAddress(const String& pLSAddress) { mLoginServerAddress = pLSAddress; return true; }
-	static inline const bool _setLSPort(const uint16 pLSPort) { mLoginServerPort = pLSPort; return true; }
-	static inline const bool _setUCSPort(const uint16 pUCSPort) { mUCSPort = pUCSPort; return true; }
+	static inline const bool _setLSPort(const u16 pLSPort) { mLoginServerPort = pLSPort; return true; }
+	static inline const bool _setUCSPort(const u16 pUCSPort) { mUCSPort = pUCSPort; return true; }
 	static inline void _setValidationEnabled(const bool pEnabled) { mValidationEnabled = pEnabled; }
+
+private:
 
 	static String mServerShortName;
 	static String mServerLongName;
@@ -33,9 +33,9 @@ private:
 	static String mLoginServerAccountName;
 	static String mLoginServerPassword;
 	static String mLoginServerAddress;
-	static uint16 mLoginServerPort;
+	static u16 mLoginServerPort;
 
-	static uint16 mUCSPort;
+	static u16 mUCSPort;
 
 	static bool mValidationEnabled;
 };

@@ -6,7 +6,7 @@
 #include "LogSystem.h"
 #include "Vector3.h"
 
-const bool ZoneDataManager::initialise(DataStore* pDataStore) {
+const bool ZoneDataManager::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 

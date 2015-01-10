@@ -1,6 +1,6 @@
 #include "ServiceLocator.h"
 
-DataStore* ServiceLocator::mDataStore = nullptr;
+IDataStore* ServiceLocator::mDataStore = nullptr;
 ItemDataStore* ServiceLocator::mItemDataStore = nullptr;
 SpellDataStore* ServiceLocator::mSpellDataStore = nullptr;
 ShopDataStore* ServiceLocator::mShopDataStore = nullptr;

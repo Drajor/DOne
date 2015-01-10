@@ -10,7 +10,7 @@ struct GuildSearchEntry {
 };
 typedef std::list<GuildSearchEntry> GuildSearchResults;
 
-class DataStore;
+class IDataStore;
 class ZoneManager;
 class Guild;
 
@@ -65,7 +65,7 @@ class Guild {
 class GuildManager {
 public:
 
-	const bool initialise(DataStore* pDataStore, ZoneManager* pZoneManager);
+	const bool initialise(IDataStore* pDataStore, ZoneManager* pZoneManager);
 
 	bool isLeader(Character* pCharacter);
 	bool isOfficer(Character* pCharacter);
@@ -108,7 +108,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 	ZoneManager* mZoneManager = nullptr;
 
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);

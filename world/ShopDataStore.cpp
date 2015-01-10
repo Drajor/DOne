@@ -4,7 +4,7 @@
 #include "DataStore.h"
 #include "Utility.h"
 
-const bool ShopDataStore::initialise(DataStore* pDataStore) {
+const bool ShopDataStore::initialise(IDataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pDataStore);
 	mDataStore = pDataStore;

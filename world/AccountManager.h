@@ -13,14 +13,14 @@ namespace Payload {
 	}
 }
 
-class DataStore;
+class IDataStore;
 class Character;
 
 class AccountManager {
 public:
 	~AccountManager();
 
-	const bool initialise(DataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore);
 
 	// Returns an Account by ID.
 	Data::Account* getAccount(const u32 pID) const;
@@ -52,7 +52,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	DataStore* mDataStore = nullptr;
+	IDataStore* mDataStore = nullptr;
 
 	void _clear();
 	bool _save(Data::Account* pAccountData);
