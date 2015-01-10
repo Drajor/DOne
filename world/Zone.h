@@ -77,7 +77,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler);
+	const bool initialise(Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
 
 	const bool canShutdown() const;
 	const bool shutdown();
@@ -312,9 +312,10 @@ private:
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
 	CommandHandler* mCommandHandler = nullptr;
-	
+	Experience::Calculator* mExperienceCalculator = nullptr;
+
 	LootAllocator* mLootAllocator = nullptr;
-	std::shared_ptr<Experience::Calculator> mExperienceCalculator;
+	
 	std::unique_ptr<Experience::Modifier> mExperienceModifer;
 
 	Scene* mScene = nullptr;

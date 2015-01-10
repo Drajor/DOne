@@ -63,25 +63,24 @@ Zone::~Zone() {
 	for (auto i : mZonePoints) delete i;
 	mZonePoints.clear();
 
-	mExperienceCalculator.reset();
 	mExperienceModifer.reset();
 }
 
-const bool Zone::initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler) {
+const bool Zone::initialise(Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pZoneData);
-	EXPECTED_BOOL(pExperienceCalculator.get());
+	EXPECTED_BOOL(pExperienceCalculator);
 	EXPECTED_BOOL(pGroupManager);
 	EXPECTED_BOOL(pRaidManager);
 	EXPECTED_BOOL(pGuildManager);
 	EXPECTED_BOOL(pCommandHandler);
+	EXPECTED_BOOL(pItemFactory);
 
 	mExperienceCalculator = pExperienceCalculator;
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
-	mItemFactory = ServiceLocator::getItemFactory();
-	EXPECTED_BOOL(mItemFactory);
+	mItemFactory = pItemFactory;
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);

@@ -1,15 +1,16 @@
 #pragma once
 
 #include "Constants.h"
-#include <memory>
 
-#include "CommandHandler.h"
+#include <list>
+#include <memory>
 
 class ZoneDataManager;
 class GroupManager;
 class RaidManager;
 class GuildManager;
 class CommandHandler;
+class ItemFactory;
 class Zone;
 class Character;
 struct WhoFilter;
@@ -30,7 +31,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler);
+	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
 	void update();
 
 	// Returns whether or not the specified Zone is running.
@@ -72,8 +73,8 @@ private:
 	RaidManager* mRaidManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
 	CommandHandler* mCommandHandler = nullptr;
-
-	std::shared_ptr<Experience::Calculator> mExperienceCalculator = nullptr;
+	ItemFactory* mItemFactory = nullptr;
+	Experience::Calculator* mExperienceCalculator = nullptr;
 
 	Zone* _search(const u16 pZoneID, const u16 pInstanceID) const;
 	const bool _makeZone(const u16 pZoneID, const u16 pInstanceID);

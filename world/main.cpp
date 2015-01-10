@@ -30,6 +30,7 @@
 #include "GroupManager.h"
 #include "RaidManager.h"
 #include "ItemFactory.h"
+#include "CommandHandler.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"
@@ -92,6 +93,14 @@ int main(int argc, char** argv)  {
 	ServiceLocator::setAlternateCurrencyManager(alternateCurrencyManager);
 	EXPECTED_MAIN(alternateCurrencyManager->initialise(dataStore));
 
+	ItemDataStore* itemDataStore = new ItemDataStore();
+	ServiceLocator::setItemDataStore(itemDataStore);
+	EXPECTED_MAIN(itemDataStore->initialise(dataStore));
+
+	ItemFactory* itemFactory = new ItemFactory();
+	ServiceLocator::setItemFactory(itemFactory);
+	EXPECTED_MAIN(itemFactory->initialise(itemDataStore));
+
 	ZoneManager* zoneManager = new ZoneManager();
 	ServiceLocator::setZoneManager(zoneManager);
 
@@ -107,7 +116,7 @@ int main(int argc, char** argv)  {
 	CommandHandler* commandHandler = new CommandHandler();
 	EXPECTED_MAIN(commandHandler->initialise(dataStore));
 
-	EXPECTED_MAIN(zoneManager->initialise(zoneDataManager, groupManager, raidManager, guildManager, commandHandler));
+	EXPECTED_MAIN(zoneManager->initialise(zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, zoneManager));
@@ -119,14 +128,6 @@ int main(int argc, char** argv)  {
 	UCS* ucs = new UCS();
 	ServiceLocator::setUCS(ucs);
 	EXPECTED_MAIN(ucs->initialise());
-
-	ItemDataStore* itemDataStore = new ItemDataStore();
-	ServiceLocator::setItemDataStore(itemDataStore);
-	EXPECTED_MAIN(itemDataStore->initialise(dataStore));
-
-	ItemFactory* itemFactory = new ItemFactory();
-	ServiceLocator::setItemFactory(itemFactory);
-	EXPECTED_MAIN(itemFactory->initialise(itemDataStore));
 
 	NPCFactory* npcFactory = new NPCFactory();
 	ServiceLocator::setNPCFactory(npcFactory);

@@ -37,19 +37,21 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler) {
+const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pZoneDataManager);
 	EXPECTED_BOOL(pGroupManager);
 	EXPECTED_BOOL(pRaidManager);
 	EXPECTED_BOOL(pGuildManager);
 	EXPECTED_BOOL(pCommandHandler);
+	EXPECTED_BOOL(pItemFactory);
 
 	mZoneDataManager = pZoneDataManager;
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
 	mCommandHandler = pCommandHandler;
+	mItemFactory = pItemFactory;
 
 	Log::status("[Zone Manager] Initialising.");
 
@@ -58,7 +60,7 @@ const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManag
 	ZoneClientConnection::_initalise();
 	Experience::Controller::_initialise();
 
-	mExperienceCalculator = std::make_shared<Experience::Calculator>();
+	mExperienceCalculator = new Experience::Calculator();
 
 	mInitialised = true;
 	return true;
@@ -138,7 +140,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);
-	if (!zone->initialise(zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler)) {
+	if (!zone->initialise(zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
 		delete zone;

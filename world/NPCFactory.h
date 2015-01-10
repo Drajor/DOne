@@ -17,6 +17,7 @@ class HateControllerFactory;
 
 class NPCFactory {
 public:
+
 	NPCFactory();
 	~NPCFactory();
 	const bool initialise(DataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);

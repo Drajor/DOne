@@ -34,15 +34,6 @@
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
 
-/*
-Known GM Commands
-/goto
-/kill
-/summon
-/emotezone
-*/
-//ZoneClientConnection::mGroupUpdatePacket = nullptr;
-
 EQApplicationPacket* ZoneClientConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupJoinPacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupLeavePacket = nullptr;
@@ -51,6 +42,7 @@ EQApplicationPacket* ZoneClientConnection::mGroupLeaderChangePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupUpdateMembersPacket = nullptr;
 
 ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) :
+mZone(pZone),
 mStreamInterface(pStreamInterface),
 mGroupManager(pGroupManager),
 mRaidManager(pRaidManager),
