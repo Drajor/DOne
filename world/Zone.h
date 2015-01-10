@@ -11,7 +11,7 @@ class EQStreamFactory;
 class EQStreamIdentifier;
 class EQApplicationPacket;
 class DataStore;
-class ZoneClientConnection;
+class ZoneConnection;
 
 class World;
 class ZoneManager;
@@ -325,8 +325,8 @@ private:
 	ObjectList mObjects;
 	DoorList mDoors;
 
-	std::list<ZoneClientConnection*> mPreConnections; // Zoning in or logging in
-	std::list<ZoneClientConnection*> mConnections; // In Zone, running around probably killing rats.
+	std::list<ZoneConnection*> mPreConnections; // Zoning in or logging in
+	std::list<ZoneConnection*> mConnections; // In Zone, running around probably killing rats.
 
 	struct LinkDeadCharacter {
 		Timer* mTimer;

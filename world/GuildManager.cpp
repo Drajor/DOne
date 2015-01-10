@@ -433,7 +433,7 @@ void GuildManager::onEnterZone(Character* pCharacter) {
 	EXPECTED(zone);
 	Guild* guild = pCharacter->getGuild();
 	EXPECTED(guild);
-	ZoneClientConnection* connection = pCharacter->getConnection();
+	ZoneConnection* connection = pCharacter->getConnection();
 	EXPECTED(connection);
 
 	// Update member details.
@@ -622,7 +622,7 @@ void GuildManager::_sendGuildInformation(Character* pCharacter) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->hasGuild());
 
-	ZoneClientConnection* connection = pCharacter->getConnection();
+	ZoneConnection* connection = pCharacter->getConnection();
 	EXPECTED(connection);
 	Guild* guild = pCharacter->getGuild();
 	EXPECTED(guild);
@@ -777,7 +777,7 @@ void GuildManager::handleStatusRequest(Character* pCharacter, const String& pCha
 	EXPECTED(pCharacter);
 	EXPECTED(Limits::Character::nameLength(pCharacterName));
 
-	ZoneClientConnection* connection = pCharacter->getConnection();
+	ZoneConnection* connection = pCharacter->getConnection();
 	EXPECTED(connection);
 
 	// Try to find requested Character.

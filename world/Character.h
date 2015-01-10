@@ -13,7 +13,7 @@ class Group;
 class Guild;
 class Raid;
 class EQApplicationPacket;
-class ZoneClientConnection;
+class ZoneConnection;
 class ExtendedTargetController;
 class Inventoryy;
 class Item;
@@ -29,7 +29,7 @@ namespace Data {
 }
 
 class Character : public Actor {
-	friend ZoneClientConnection;
+	friend ZoneConnection;
 public:
 	struct ZoneChange {
 		uint16 mZoneID = 0;
@@ -126,8 +126,8 @@ public:
 	inline void setRaid(Raid* pRaid) { mRaid = pRaid; }
 	inline const bool isRaidLeader() { return false; } // TODO
 
-	void setConnection(ZoneClientConnection* pConnection) { mConnection = pConnection; }
-	ZoneClientConnection* getConnection() { return mConnection; }
+	void setConnection(ZoneConnection* pConnection) { mConnection = pConnection; }
+	ZoneConnection* getConnection() { return mConnection; }
 	const bool send(EQApplicationPacket* pPacket);
 	
 	void update();
@@ -310,7 +310,7 @@ private:
 	GuildID mPendingGuildInviteID = NO_GUILD;
 	String mPendingGuildInviteName = "";
 
-	ZoneClientConnection* mConnection = nullptr;
+	ZoneConnection* mConnection = nullptr;
 	Data::Character* mData = nullptr;
 	
 

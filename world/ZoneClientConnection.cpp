@@ -34,14 +34,14 @@
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
 
-EQApplicationPacket* ZoneClientConnection::mPlayerProfilePacket = nullptr;
-EQApplicationPacket* ZoneClientConnection::mGroupJoinPacket = nullptr;
-EQApplicationPacket* ZoneClientConnection::mGroupLeavePacket = nullptr;
-EQApplicationPacket* ZoneClientConnection::mGroupDisbandPacket = nullptr;
-EQApplicationPacket* ZoneClientConnection::mGroupLeaderChangePacket = nullptr;
-EQApplicationPacket* ZoneClientConnection::mGroupUpdateMembersPacket = nullptr;
+EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
+EQApplicationPacket* ZoneConnection::mGroupJoinPacket = nullptr;
+EQApplicationPacket* ZoneConnection::mGroupLeavePacket = nullptr;
+EQApplicationPacket* ZoneConnection::mGroupDisbandPacket = nullptr;
+EQApplicationPacket* ZoneConnection::mGroupLeaderChangePacket = nullptr;
+EQApplicationPacket* ZoneConnection::mGroupUpdateMembersPacket = nullptr;
 
-ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) :
+ZoneConnection::ZoneConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) :
 mZone(pZone),
 mStreamInterface(pStreamInterface),
 mGroupManager(pGroupManager),
@@ -52,13 +52,13 @@ mConnected(true)
 	mForceSendPositionTimer.Disable();
 }
 
-ZoneClientConnection::~ZoneClientConnection() {
+ZoneConnection::~ZoneConnection() {
 	dropConnection();
 	mStreamInterface->ReleaseFromUse();
 	// NOTE: mStreamInterface is intentionally not deleted here.
 }
 
-void ZoneClientConnection::_initalise() {
+void ZoneConnection::_initalise() {
 	mPlayerProfilePacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	mGroupJoinPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	mGroupLeavePacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
@@ -67,7 +67,7 @@ void ZoneClientConnection::_initalise() {
 	mGroupUpdateMembersPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 }
 
-void ZoneClientConnection::_deinitialise() {
+void ZoneConnection::_deinitialise() {
 	safe_delete(mPlayerProfilePacket);
 	safe_delete(mGroupJoinPacket);
 	safe_delete(mGroupLeavePacket);
@@ -76,12 +76,12 @@ void ZoneClientConnection::_deinitialise() {
 	safe_delete(mGroupUpdateMembersPacket);
 }
 
-bool ZoneClientConnection::isConnected() {
+bool ZoneConnection::isConnected() {
 	return mConnected && mStreamInterface->CheckState(ESTABLISHED);
 }
 
 
-void ZoneClientConnection::update() {
+void ZoneConnection::update() {
 	if (!mConnected || !mStreamInterface->CheckState(ESTABLISHED)) {
 		if (mCharacter) {
 			//mZone->notifyCharacterLinkDead(mCharacter);
@@ -105,12 +105,12 @@ void ZoneClientConnection::update() {
 	}
 }
 
-void ZoneClientConnection::dropConnection() {
+void ZoneConnection::dropConnection() {
 	mConnected = false;
 	mStreamInterface->Close();
 }
 
-bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(pPacket);
 
 	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
@@ -567,7 +567,7 @@ bool ZoneClientConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
@@ -621,7 +621,7 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneInformationSent;
 }
 
-void ZoneClientConnection::_sendTimeOfDay() {
+void ZoneConnection::_sendTimeOfDay() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
@@ -632,7 +632,7 @@ void ZoneClientConnection::_sendTimeOfDay() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendPlayerProfile() {
+void ZoneConnection::_sendPlayerProfile() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
@@ -826,7 +826,7 @@ void ZoneClientConnection::_sendPlayerProfile() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendZoneEntry() {
+void ZoneConnection::sendZoneEntry() {
 	EXPECTED(mConnected);
 
 	mCharacter->_syncPosition();
@@ -841,7 +841,7 @@ void ZoneClientConnection::sendZoneEntry() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendZoneSpawns() {
+void ZoneConnection::_sendZoneSpawns() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_ZoneSpawns, 0, 0);
@@ -850,7 +850,7 @@ void ZoneClientConnection::_sendZoneSpawns() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendTributeUpdate() {
+void ZoneConnection::_sendTributeUpdate() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
@@ -860,7 +860,7 @@ void ZoneClientConnection::_sendTributeUpdate() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendInventory() {
+void ZoneConnection::_sendInventory() {
 	EXPECTED(mConnected);
 
 	auto inventory = mCharacter->getInventory();
@@ -885,7 +885,7 @@ void ZoneClientConnection::_sendInventory() {
 	}
 }
 
-void ZoneClientConnection::_sendWeather() {
+void ZoneConnection::_sendWeather() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -894,7 +894,7 @@ void ZoneClientConnection::_sendWeather() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
@@ -924,20 +924,20 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	//}
 }
 
-void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
 	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
 	mForceSendPositionTimer.Start(4000);
 }
 
-void ZoneClientConnection::_sendDoors() {
+void ZoneConnection::_sendDoors() {
 	EXPECTED(mConnected);
 	//EQApplicationPacket* outPacket = new EQApplicationPacket(OP_SpawnDoor, 0);
 	//mStreamInterface->QueuePacket(outPacket);
 }
 
-void ZoneClientConnection::_sendObjects() {
+void ZoneConnection::_sendObjects() {
 	EXPECTED(mConnected);
 	
 	const auto objects = mZone->getObjects();
@@ -946,7 +946,7 @@ void ZoneClientConnection::_sendObjects() {
 	}
 }
 
-void ZoneClientConnection::_sendZonePoints() {
+void ZoneConnection::_sendZonePoints() {
 	EXPECTED(mConnected);
 
 	const std::list<ZonePoint*>& zonePoints = mZone->getZonePoints();
@@ -981,7 +981,7 @@ void ZoneClientConnection::_sendZonePoints() {
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::_sendAAStats() {
+void ZoneConnection::_sendAAStats() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_SendAAStats, 0);
@@ -989,7 +989,7 @@ void ZoneClientConnection::_sendAAStats() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendZoneServerReady() {
+void ZoneConnection::_sendZoneServerReady() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_ZoneServerReady, 0);
@@ -997,7 +997,7 @@ void ZoneClientConnection::_sendZoneServerReady() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendExpZoneIn() {
+void ZoneConnection::_sendExpZoneIn() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_SendExpZonein, 0);
@@ -1005,13 +1005,13 @@ void ZoneClientConnection::_sendExpZoneIn() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendWorldObjectsSent() {
+void ZoneConnection::_sendWorldObjectsSent() {
 	auto packet = new EQApplicationPacket(OP_WorldObjectsSent, 0);
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
 	using namespace Payload;
 	EXPECTED(pPacket);
 	EXPECTED(PositionUpdate::sizeCheck(pPacket) || pPacket->size == PositionUpdate::size() + 1); // Payload has an extra byte from time to time.
@@ -1037,7 +1037,7 @@ void ZoneClientConnection::_handleClientUpdate(const EQApplicationPacket* pPacke
 	//}
 }
 
-void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(SpawnAppearance::sizeCheck(pPacket));
@@ -1161,13 +1161,13 @@ void ZoneClientConnection::_handleSpawnAppearance(const EQApplicationPacket* pPa
 	}
 }
 
-void ZoneClientConnection::_handleCamp(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCamp(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
 	mCharacter->startCamp();
 }
 
-void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct); // NOTE: This packet size increases with message size.
 	static const auto MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
 
@@ -1237,7 +1237,7 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	//}
 }
 
-void ZoneClientConnection::sendPosition() {
+void ZoneConnection::sendPosition() {
 	using namespace Payload;
 	EXPECTED(mConnected);
 
@@ -1265,7 +1265,7 @@ header[0]
 header[1]
 */
 
-void ZoneClientConnection::sendMessage(const u32 pType, String pMessage) {
+void ZoneConnection::sendMessage(const u32 pType, String pMessage) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
@@ -1280,7 +1280,7 @@ void ZoneClientConnection::sendMessage(const u32 pType, String pMessage) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
@@ -1301,7 +1301,7 @@ void ZoneClientConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 	dropConnection();
 }
 
-void ZoneClientConnection::_sendLogOutReply() {
+void ZoneConnection::_sendLogOutReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_LogoutReply);
@@ -1309,7 +1309,7 @@ void ZoneClientConnection::_sendLogOutReply() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendPreLogOutReply() {
+void ZoneConnection::_sendPreLogOutReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_PreLogoutReply);
@@ -1317,7 +1317,7 @@ void ZoneClientConnection::_sendPreLogOutReply() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 	_sendLogOutReply();
 	mCharacter->setZoningOut();
 
@@ -1325,12 +1325,12 @@ void ZoneClientConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket
 	dropConnection();
 }
 
-void ZoneClientConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
 	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestZoneData;
 	_sendZoneData();
 }
 
-void ZoneClientConnection::_sendZoneData() {
+void ZoneConnection::_sendZoneData() {
 	EXPECTED(mConnected);
 
 	auto packet = Payload::Zone::ZoneData::create();
@@ -1382,7 +1382,7 @@ void ZoneClientConnection::_sendZoneData() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
+void ZoneConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	EXPECTED(mConnected);
 	
 	auto packet = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
@@ -1395,17 +1395,17 @@ void ZoneClientConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	// TODO:
 }
 
-void ZoneClientConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	// TODO:
 }
 
-void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTarget(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Target::sizeCheck(pPacket->size));
@@ -1414,7 +1414,7 @@ void ZoneClientConnection::_handleTarget(const EQApplicationPacket* pPacket) {
 	mZone->handleTarget(mCharacter, payload->mSpawnID);
 }
 
-void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(uint32);
 
 	EXPECTED(pPacket);
@@ -1428,7 +1428,7 @@ void ZoneClientConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 	// Ignore anything else, including the extra 2 packet UF sends.
 }
 
-void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID) {
+void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1437,7 +1437,7 @@ void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringI
 	delete packet;
 }
 
-EQApplicationPacket* ZoneClientConnection::makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+EQApplicationPacket* ZoneConnection::makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
 	int packetSize = 0;
 	packetSize += 4; // Unknown.
 	packetSize += 4; // String ID.
@@ -1482,7 +1482,7 @@ EQApplicationPacket* ZoneClientConnection::makeSimpleMessage(const u32 pType, co
 	return packet;
 }
 
-void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
 	EXPECTED(mConnected);
 
 	auto packet = makeSimpleMessage(pType, pStringID, pParameter0, pParameter1, pParameter2, pParameter3, pParameter4, pParameter5, pParameter6, pParameter7, pParameter8, pParameter9);
@@ -1490,7 +1490,7 @@ void ZoneClientConnection::sendSimpleMessage(const u32 pType, const u32 pStringI
 	delete packet;
 }
 
-void ZoneClientConnection::sendHealthUpdate() {
+void ZoneConnection::sendHealthUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1499,12 +1499,12 @@ void ZoneClientConnection::sendHealthUpdate() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendPacket(const EQApplicationPacket* pPacket) {
+void ZoneConnection::sendPacket(const EQApplicationPacket* pPacket) {
 	EXPECTED(mConnected);
 	mStreamInterface->QueuePacket(pPacket);
 }
 
-void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Emote::sizeCheck(pPacket));
@@ -1515,7 +1515,7 @@ void ZoneClientConnection::_handleEmote(const EQApplicationPacket* pPacket) {
 	mZone->handleEmote(mCharacter, message);
 }
 
-void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ActorAnimation::sizeCheck(pPacket));
@@ -1526,7 +1526,7 @@ void ZoneClientConnection::_handleAnimation(const EQApplicationPacket* pPacket) 
 	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
 }
 
-void ZoneClientConnection::sendExperienceUpdate(const u32 pExperience,  const u32 pAAExperience) {
+void ZoneConnection::sendExperienceUpdate(const u32 pExperience,  const u32 pAAExperience) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1535,7 +1535,7 @@ void ZoneClientConnection::sendExperienceUpdate(const u32 pExperience,  const u3
 	delete packet;
 }
 
-void ZoneClientConnection::sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA) {
+void ZoneConnection::sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1544,7 +1544,7 @@ void ZoneClientConnection::sendAAExperienceUpdate(const u32 pAAExperience, const
 	delete packet;
 }
 
-void ZoneClientConnection::sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints) {
+void ZoneConnection::sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1553,7 +1553,7 @@ void ZoneClientConnection::sendLeadershipExperienceUpdate(const double pGroupExp
 	delete packet;
 }
 
-void ZoneClientConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio) {
+void ZoneConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1562,54 +1562,54 @@ void ZoneClientConnection::sendLevelUpdate(const u32 pPreviousLevel, const u32 p
 	delete packet;
 }
 
-void ZoneClientConnection::sendExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainExperience); }
-void ZoneClientConnection::sendGroupExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupExperience); }
-void ZoneClientConnection::sendRaidExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidExperience); }
+void ZoneConnection::sendExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainExperience); }
+void ZoneConnection::sendGroupExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupExperience); }
+void ZoneConnection::sendRaidExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidExperience); }
 
-void ZoneClientConnection::sendExperienceLossMessage() {
+void ZoneConnection::sendExperienceLossMessage() {
 	EXPECTED(mConnected);
 	// There is no StringID for this message apparently.
 	sendMessage(MessageType::Yellow, "You have lost experience.");
 }
 
-void ZoneClientConnection::sendLevelGainMessage() {
+void ZoneConnection::sendLevelGainMessage() {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::Experience, StringID::GainLevel, std::to_string(mCharacter->getLevel()));
 }
 
-void ZoneClientConnection::sendLevelsGainMessage(const u8 pLevels) {
+void ZoneConnection::sendLevelsGainMessage(const u8 pLevels) {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::Experience, StringID::GainLevels, std::to_string(pLevels), std::to_string(mCharacter->getLevel()));
 }
 
-void ZoneClientConnection::sendLevelLostMessage() {
+void ZoneConnection::sendLevelLostMessage() {
 	// NOTE: UF Handles this message itself, no need to send.
 	//StringStream ss;
 	//ss << mCharacter->getLevel();
 	//sendSimpleMessage(MT_Experience, LOSE_LEVEL, ss.str());
 }
 
-void ZoneClientConnection::sendGainGroupLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipExperience); }
-void ZoneClientConnection::sendGainGroupLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipPoint); }
-void ZoneClientConnection::sendGainRaidLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipExperience); }
-void ZoneClientConnection::sendGainRaidLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipPoint); }
+void ZoneConnection::sendGainGroupLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipExperience); }
+void ZoneConnection::sendGainGroupLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainGroupLeadershipPoint); }
+void ZoneConnection::sendGainRaidLeadershipExperienceMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipExperience); }
+void ZoneConnection::sendGainRaidLeadershipPointMessage() { EXPECTED(mConnected); sendSimpleMessage(MessageType::Experience, StringID::GainRaidLeadershipPoint); }
 
-void ZoneClientConnection::sendAAPointGainMessage(const u32 pUnspentAAPoints) {
+void ZoneConnection::sendAAPointGainMessage(const u32 pUnspentAAPoints) {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::Experience, StringID::GainAAPoint, std::to_string(pUnspentAAPoints));
 }
 
-void ZoneClientConnection::sendAAExperienceOnMessage() {
+void ZoneConnection::sendAAExperienceOnMessage() {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::White, StringID::AAOn);
 }
 
-void ZoneClientConnection::sendAAExperienceOffMessage() {
+void ZoneConnection::sendAAExperienceOffMessage() {
 	EXPECTED(mConnected);
 	sendSimpleMessage(MessageType::White, StringID::AAOff);
 }
 
-void ZoneClientConnection::sendLevelAppearance(const u32 pParameter1) {
+void ZoneConnection::sendLevelAppearance(const u32 pParameter1) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1623,7 +1623,7 @@ void ZoneClientConnection::sendLevelAppearance(const u32 pParameter1) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendStats() {
+void ZoneConnection::sendStats() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
@@ -1633,7 +1633,7 @@ void ZoneClientConnection::sendStats() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleWhoRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleWhoRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(WhoRequest::sizeCheck(pPacket));
@@ -1655,7 +1655,7 @@ void ZoneClientConnection::_handleWhoRequest(const EQApplicationPacket* pPacket)
 	mZone->handleWhoRequest(mCharacter, filter);
 }
 
-void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& pResults) {
+void ZoneConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& pResults) {
 	EXPECTED(mConnected);
 
 	static const u32 MaxResults = 20;
@@ -1808,7 +1808,7 @@ void ZoneClientConnection::sendWhoResponse(const u32 pWhoType, std::list<Charact
 	EXPECTED(ds.check());
 }
 
-EQApplicationPacket* ZoneClientConnection::makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
+EQApplicationPacket* ZoneConnection::makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
 	u32 payloadSize = 0;
 	payloadSize += 36; // Fixed.
 	payloadSize += pSenderName.size() + 1;
@@ -1836,7 +1836,7 @@ EQApplicationPacket* ZoneClientConnection::makeChannelMessage(const u32 pChannel
 	return packet;
 }
 
-void ZoneClientConnection::sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
+void ZoneConnection::sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 
 	auto packet = makeChannelMessage(pChannel, pSenderName, pMessage);
@@ -1844,23 +1844,23 @@ void ZoneClientConnection::sendChannelMessage(const u32 pChannel, const String& 
 	delete packet;
 }
 
-void ZoneClientConnection::sendTell(const String& pSenderName, const String& pMessage) {
+void ZoneConnection::sendTell(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 	sendChannelMessage(ChannelID::Tell, pSenderName, pMessage);
 }
 
-void ZoneClientConnection::sendGroupMessage(const String& pSenderName, const String& pMessage) {
+void ZoneConnection::sendGroupMessage(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 	sendChannelMessage(ChannelID::Group, pSenderName, pMessage);
 }
 
-void ZoneClientConnection::sendGuildMessage(const String& pSenderName, const String& pMessage) {
+void ZoneConnection::sendGuildMessage(const String& pSenderName, const String& pMessage) {
 	EXPECTED(mConnected);
 	sendChannelMessage(ChannelID::Guild, pSenderName, pMessage);
 }
 
 // NOTE: This occurs when the player presses 'Invite' on the group window.
-void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GroupInvite_Struct));
 
@@ -1876,7 +1876,7 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 	mGroupManager->handleInviteSent(mCharacter, inviteeName);
 }
 
-void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
+void ZoneConnection::sendGroupInvite(const String pFromCharacterName) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -1885,7 +1885,7 @@ void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
 
@@ -1902,7 +1902,7 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 	mGroupManager->handleAcceptInvite(mCharacter, inviterName);
 }
 
-void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GroupCancel_Struct));
 
@@ -1916,7 +1916,7 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 	mGroupManager->handleDeclineInvite(mCharacter, inviterName);
 }
 
-void ZoneClientConnection::sendGroupCreate() {
+void ZoneConnection::sendGroupCreate() {
 	EXPECTED(mConnected);
 
 	int packetSize = 31 + mCharacter->getName().length() + 1; // Magic number due to no packet structure.
@@ -1942,7 +1942,7 @@ void ZoneClientConnection::sendGroupCreate() {
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
+void ZoneConnection::sendGroupLeaderChange(const String pCharacterName) {
 	EXPECTED(mConnected);
 
 	// Configure.
@@ -1953,7 +1953,7 @@ void ZoneClientConnection::sendGroupLeaderChange(const String pCharacterName) {
 	sendPacket(mGroupLeaderChangePacket);
 }
 
-void ZoneClientConnection::sendGroupAcknowledge() {
+void ZoneConnection::sendGroupAcknowledge() {
 	EXPECTED(mConnected);
 
 	static const auto PACKET_SIZE = 4;
@@ -1963,7 +1963,7 @@ void ZoneClientConnection::sendGroupAcknowledge() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName) {
+void ZoneConnection::sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
@@ -1975,7 +1975,7 @@ void ZoneClientConnection::sendGroupFollow(const String& pLeaderCharacterName, c
 	delete packet;
 }
 
-void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
+void ZoneConnection::sendGroupJoin(const String& pCharacterName) {
 	EXPECTED(mConnected);
 
 	// Configure.
@@ -1988,7 +1988,7 @@ void ZoneClientConnection::sendGroupJoin(const String& pCharacterName) {
 	sendPacket(mGroupJoinPacket);
 }
 
-void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
+void ZoneConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
 	EXPECTED(mConnected);
 
 	// Configure.
@@ -2006,7 +2006,7 @@ void ZoneClientConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames)
 	sendPacket(mGroupUpdateMembersPacket);
 }
 
-void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
 	
@@ -2022,7 +2022,7 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 	mGroupManager->handleDisband(mCharacter, removeCharacterName);
 }
 
-void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
+void ZoneConnection::sendGroupLeave(const String& pLeavingCharacterName) {
 	EXPECTED(mConnected);
 
 	auto payload = reinterpret_cast<GroupJoin_Struct*>(mGroupLeavePacket->pBuffer);
@@ -2034,7 +2034,7 @@ void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
 	sendPacket(mGroupLeavePacket);
 }
 
-void ZoneClientConnection::sendGroupDisband() {
+void ZoneConnection::sendGroupDisband() {
 	EXPECTED(mConnected);
 
 	auto payload = reinterpret_cast<GroupUpdate_Struct*>(mGroupDisbandPacket->pBuffer);
@@ -2045,7 +2045,7 @@ void ZoneClientConnection::sendGroupDisband() {
 	sendPacket(mGroupDisbandPacket);
 }
 
-void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GroupMakeLeader_Struct));
 	EXPECTED(mCharacter->hasGroup());
@@ -2061,7 +2061,7 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 	mGroupManager->handleMakeLeader(mCharacter, newLeader);
 }
 
-void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
+void ZoneConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2070,7 +2070,7 @@ void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uin
 	delete packet;
 }
 
-void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
+void ZoneConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2080,7 +2080,7 @@ void ZoneClientConnection::sendZoneChange(const uint16 pZoneID, const uint16 pIn
 	safe_delete(packet);
 }
 
-void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ZoneChange::sizeCheck(pPacket));
@@ -2089,7 +2089,7 @@ void ZoneClientConnection::_handleZoneChange(const EQApplicationPacket* pPacket)
 	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID, Vector3(payload->mX, payload->mY, payload->mZ));
 }
 
-void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild() == false);
 	EXPECTED(pPacket->size == Limits::Guild::MAX_NAME_LENGTH);
@@ -2100,7 +2100,7 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 	mGuildManager->handleCreate(mCharacter, guildName);
 }
 
-void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(mGuildManager->isLeader(mCharacter)); // Check: Permission.
@@ -2108,7 +2108,7 @@ void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket
 	mGuildManager->handleDelete(mCharacter);
 }
 
-void ZoneClientConnection::sendGuildRank() {
+void ZoneConnection::sendGuildRank() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
@@ -2121,7 +2121,7 @@ void ZoneClientConnection::sendGuildRank() {
 	delete packet;
 }
 
-void ZoneClientConnection::_sendGuildNames() {
+void ZoneConnection::_sendGuildNames() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_GuildsList);
@@ -2133,7 +2133,7 @@ void ZoneClientConnection::_sendGuildNames() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
@@ -2158,7 +2158,7 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	// NOTE: UF requires that the character being promoted is targetted we can verify this later.
 }
 
-void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
@@ -2179,7 +2179,7 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 	mGuildManager->handleRemove(mCharacter, toCharacterName);
 }
 
-void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
+void ZoneConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
 	EXPECTED(mConnected);
 	EXPECTED(pGuildID != NO_GUILD);
 	EXPECTED(mCharacter->hasGuild() == false);
@@ -2197,7 +2197,7 @@ void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID
 	delete packet;
 }
 
-void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	if (mCharacter->hasGuild()) { return; } // NOTE: UF sends OP_GuildInvite and OP_GuildInviteAccept(response=2,guildid=0) when using /guildinvite .. not sure why.
@@ -2232,7 +2232,7 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 	mCharacter->clearPendingGuildInvite();
 }
 
-void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
@@ -2248,7 +2248,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 	mGuildManager->handleSetMOTD(mCharacter, motd);
 }
 
-void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
+void ZoneConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
 	EXPECTED(mConnected);
 	//EXPECTED(mCharacter->hasGuild());
 
@@ -2263,7 +2263,7 @@ void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOT
 	delete packet;
 }
 
-void ZoneClientConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName) {
+void ZoneConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName) {
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
 
@@ -2278,14 +2278,14 @@ void ZoneClientConnection::sendGuildMOTDReply(const String& pMOTD, const String&
 	delete packet;
 }
 
-void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 
 	mGuildManager->handleGetMOTD(mCharacter);
 }
 
-void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
+void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
 	EXPECTED(mConnected);
 
 	static const auto HeaderSize = 76; // Member count etc.
@@ -2339,7 +2339,7 @@ void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuil
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::sendGuildURL(const String& pURL) {
+void ZoneConnection::sendGuildURL(const String& pURL) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
@@ -2351,7 +2351,7 @@ void ZoneClientConnection::sendGuildURL(const String& pURL) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
+void ZoneConnection::sendGuildChannel(const String& pChannel) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
@@ -2363,7 +2363,7 @@ void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	EXPECTED(mGuildManager->isLeader(mCharacter)); // Only a Guild leader can perform this operation.
@@ -2384,7 +2384,7 @@ void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket
 	}
 }
 
-void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 	// TODO: Put an upper-limit check on packet size.
@@ -2404,7 +2404,7 @@ void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* 
 	mGuildManager->handleSetPublicNote(mCharacter, targetName, note);
 }
 
-void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(pPacket->size == sizeof(GuildStatus_Struct));
 
@@ -2419,7 +2419,7 @@ void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPac
 	mGuildManager->handleStatusRequest(mCharacter, targetName);
 }
 
-void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
@@ -2444,7 +2444,7 @@ void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket
 	mGuildManager->handleDemote(mCharacter, demoteName);
 }
 
-void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
@@ -2463,7 +2463,7 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 	mGuildManager->handleSetAlt(mCharacter, otherName, alt);
 }
 
-void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
@@ -2481,11 +2481,11 @@ void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPa
 	mGuildManager->handleMakeLeader(mCharacter, leaderName);
 }
 
-void ZoneClientConnection::_unimplementedFeature(String pOpCodeName)
+void ZoneConnection::_unimplementedFeature(String pOpCodeName)
 {
 }
 
-void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleFaceChange(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(FaceChange::sizeCheck(pPacket->size));
@@ -2510,7 +2510,7 @@ void ZoneClientConnection::_handleFaceChange(const EQApplicationPacket* pPacket)
 	mZone->handleFaceChange(mCharacter);
 }
 
-void ZoneClientConnection::sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID) {
+void ZoneConnection::sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID) {
 	EXPECTED(mConnected);
 	using namespace Payload::Zone;
 
@@ -2519,7 +2519,7 @@ void ZoneClientConnection::sendWearChange(const uint16 pSpawnID, const uint32 pM
 	delete packet;
 }
 
-void ZoneClientConnection::_handleAutoAttack(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAutoAttack(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(AutoAttack::sizeCheck(pPacket));
@@ -2528,7 +2528,7 @@ void ZoneClientConnection::_handleAutoAttack(const EQApplicationPacket* pPacket)
 	mCharacter->setAutoAttack(payload->mAttacking);
 }
 
-void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(MemoriseSpell::sizeCheck(pPacket));
@@ -2555,7 +2555,7 @@ void ZoneClientConnection::_handleMemoriseSpell(const EQApplicationPacket* pPack
 	}
 }
 
-void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(DeleteSpell::sizeCheck(pPacket));
@@ -2566,7 +2566,7 @@ void ZoneClientConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket
 	sendDeleteSpellDelete(payload->mSlot, success);
 }
 
-void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(LoadSpellSet::sizeCheck(pPacket));
@@ -2575,7 +2575,7 @@ void ZoneClientConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacke
 	auto payload = LoadSpellSet::convert(pPacket->pBuffer);
 }
 
-void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(SwapSpell::sizeCheck(pPacket));
@@ -2588,7 +2588,7 @@ void ZoneClientConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) 
 	sendPacket(pPacket);
 }
 
-void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(CastSpell::sizeCheck(pPacket));
@@ -2616,7 +2616,7 @@ void ZoneClientConnection::_handleCastSpell(const EQApplicationPacket* pPacket) 
 	mZone->handleCastingBegin(mCharacter, payload->mSlot, payload->mSpellID);
 }
 
-void ZoneClientConnection::_handleCombatAbility(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCombatAbility(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(CombatAbility::sizeCheck(pPacket->size));
@@ -2627,7 +2627,7 @@ void ZoneClientConnection::_handleCombatAbility(const EQApplicationPacket* pPack
 	EXPECTED(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
 }
 
-void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Taunt::sizeCheck(pPacket->size));
@@ -2640,7 +2640,7 @@ void ZoneClientConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
 	EXPECTED(payload->mSpawnID == mCharacter->getTarget()->getSpawnID());
 }
 
-void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Consider::sizeCheck(pPacket));
@@ -2650,7 +2650,7 @@ void ZoneClientConnection::_handleConsider(const EQApplicationPacket* pPacket) {
 	mZone->handleConsider(mCharacter, payload->mTargetSpawnID);
 }
 
-void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Consider::sizeCheck(pPacket));
@@ -2660,7 +2660,7 @@ void ZoneClientConnection::_handleConsiderCorpse(const EQApplicationPacket* pPac
 	mZone->handleConsiderCorpse(mCharacter, payload->mTargetSpawnID);
 }
 
-void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Surname::sizeCheck(pPacket));
@@ -2684,7 +2684,7 @@ void ZoneClientConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	
 }
 
-void ZoneClientConnection::sendSurnameApproval(const bool pSuccess) {
+void ZoneConnection::sendSurnameApproval(const bool pSuccess) {
 	// NOTE: This packet notifies the client that their surname was approved.
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
@@ -2694,11 +2694,11 @@ void ZoneClientConnection::sendSurnameApproval(const bool pSuccess) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleGMLastName(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGMLastName(const EQApplicationPacket* pPacket) {
 	mCharacter->notify("Please use the command system.");
 }
 
-void ZoneClientConnection::_handleClearSurname(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleClearSurname(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
 	// Update Character.
@@ -2707,7 +2707,7 @@ void ZoneClientConnection::_handleClearSurname(const EQApplicationPacket* pPacke
 	mZone->handleSurnameChange(mCharacter);
 }
 
-void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(SetTitle::sizeCheck(pPacket->size));
@@ -2748,7 +2748,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 	
 }
 
-void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
 	auto availableTitles = ServiceLocator::getTitleManager()->getTitles(mCharacter);
@@ -2777,7 +2777,7 @@ void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPack
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess) {
+void ZoneConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2786,7 +2786,7 @@ void ZoneClientConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool 
 	delete packet;
 }
 
-void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction) {
+void ZoneConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2800,19 +2800,19 @@ void ZoneClientConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 p
 	delete packet;
 }
 
-void ZoneClientConnection::sendScribeSpell(const u16 pSlot, const u32 pSpellID) {
+void ZoneConnection::sendScribeSpell(const u16 pSlot, const u32 pSpellID) {
 	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SCRIBE);
 }
 
-void ZoneClientConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
+void ZoneConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
 	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::MEMORISE);
 }
 
-void ZoneClientConnection::sendUnmemoriseSpell(const uint16 pSlot) {
+void ZoneConnection::sendUnmemoriseSpell(const uint16 pSlot) {
 	_sendMemoriseSpell(pSlot, 0, Payload::Zone::MemoriseSpell::UNMEMORISE);
 }
 
-void ZoneClientConnection::sendInterruptCast() {
+void ZoneConnection::sendInterruptCast() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2825,11 +2825,11 @@ void ZoneClientConnection::sendInterruptCast() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID) {
+void ZoneConnection::sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID) {
 	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SPELLBAR_REFRESH);
 }
 
-void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
+void ZoneConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2838,7 +2838,7 @@ void ZoneClientConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) {
+void ZoneConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2851,7 +2851,7 @@ void ZoneClientConnection::sendSkillValue(const uint32 pSkillID, const uint32 pV
 	delete packet;
 }
 
-void ZoneClientConnection::_handleBeginLootRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleBeginLootRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(LootBeginRequest::sizeCheck(pPacket->size));
@@ -2862,14 +2862,14 @@ void ZoneClientConnection::_handleBeginLootRequest(const EQApplicationPacket* pP
 	mZone->handleBeginLootRequest(mCharacter, corpseSpawnID);
 }
 
-void ZoneClientConnection::_handleEndLootRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleEndLootRequest(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->isLooting());
 
 	mZone->handleEndLootRequest(mCharacter);
 }
 
-void ZoneClientConnection::sendLootComplete() {
+void ZoneConnection::sendLootComplete() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_LootComplete, 0);
@@ -2877,7 +2877,7 @@ void ZoneClientConnection::sendLootComplete() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, uint32 pGold, uint32 pSilver, uint32 pCopper) {
+void ZoneConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, uint32 pGold, uint32 pSilver, uint32 pCopper) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2893,7 +2893,7 @@ void ZoneClientConnection::sendLootResponse(uint8 pResponse, uint32 pPlatinum, u
 	delete packet;
 }
 
-void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID, const uint32 pMessage) {
+void ZoneConnection::sendConsiderResponse(const uint32 pSpawnID, const uint32 pMessage) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -2902,7 +2902,7 @@ void ZoneClientConnection::sendConsiderResponse(const uint32 pSpawnID, const uin
 	safe_delete(packet);
 }
 
-void ZoneClientConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->isLooting());
@@ -2920,13 +2920,13 @@ void ZoneClientConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
 	mZone->handleLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
 }
 
-void ZoneClientConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
 	if (!_handleMoveItemImpl(pPacket)) {
 		inventoryError();
 	}
 }
 
-const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(MoveItem::sizeCheck(pPacket));
@@ -2981,7 +2981,7 @@ const bool ZoneClientConnection::_handleMoveItemImpl(const EQApplicationPacket* 
 	return true;
 }
 
-void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleConsume(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Consume::sizeCheck(pPacket->size));
@@ -2996,7 +2996,7 @@ void ZoneClientConnection::_handleConsume(const EQApplicationPacket* pPacket) {
 	sendStamina(0, 0);
 }
 
-void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
+void ZoneConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3009,10 +3009,10 @@ void ZoneClientConnection::sendStamina(const uint32 pHunger, const uint32 pThirs
 	delete packet;
 }
 
-void ZoneClientConnection::_handlePotionBelt(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handlePotionBelt(const EQApplicationPacket* pPacket) {
 }
 
-void ZoneClientConnection::_handleItemRightClick(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleItemRightClick(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ItemRightClick::sizeCheck(pPacket->size));
@@ -3022,7 +3022,7 @@ void ZoneClientConnection::_handleItemRightClick(const EQApplicationPacket* pPac
 	sendItemRightClickResponse(payload->mSlot, payload->mTargetSpawnID);
 }
 
-void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID) {
+void ZoneConnection::sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3036,12 +3036,12 @@ void ZoneClientConnection::sendItemRightClickResponse(const int32 pSlot, const u
 	delete packet;
 }
 
-void ZoneClientConnection::inventoryError(){
+void ZoneConnection::inventoryError(){
 	sendMessage(MessageType::Red, "Inventory Error. Please inform a GM and relog to prevent loss of items!");
 	Log::error("Inventory Error");
 }
 
-void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleOpenContainer(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(OpenContainer::sizeCheck(pPacket->size));
@@ -3050,7 +3050,7 @@ void ZoneClientConnection::_handleOpenContainer(const EQApplicationPacket* pPack
 	Log::info("Open Container: " + std::to_string(payload->mSlot));
 }
 
-void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTradeRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeRequest::sizeCheck(pPacket));
@@ -3066,7 +3066,7 @@ void ZoneClientConnection::_handleTradeRequest(const EQApplicationPacket* pPacke
 	mZone->handleTradeRequest(mCharacter, payload->mToSpawnID);
 }
 
-void ZoneClientConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeRequest::sizeCheck(pPacket));
@@ -3074,7 +3074,7 @@ void ZoneClientConnection::_handleTradeRequestAck(const EQApplicationPacket* pPa
 	auto payload = TradeRequest::convert(pPacket);
 }
 
-void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
+void ZoneConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3087,7 +3087,7 @@ void ZoneClientConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeCancel::sizeCheck(pPacket));
@@ -3107,7 +3107,7 @@ void ZoneClientConnection::_handleCancelTrade(const EQApplicationPacket* pPacket
 	mZone->handleTradeCancel(mCharacter, payload->mToSpawnID);
 }
 
-void ZoneClientConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeAccept::sizeCheck(pPacket->size));
@@ -3125,7 +3125,7 @@ void ZoneClientConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket
 	// TODO: Consume trade items.
 }
 
-void ZoneClientConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(TradeBusy::sizeCheck(pPacket->size));
@@ -3133,7 +3133,7 @@ void ZoneClientConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) 
 	auto payload = TradeBusy::convert(pPacket->pBuffer);
 }
 
-void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleSetServerFiler(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ServerFilter::sizeCheck(pPacket));
@@ -3143,7 +3143,7 @@ void ZoneClientConnection::_handleSetServerFiler(const EQApplicationPacket* pPac
 	mCharacter->setFilters(payload->mFilters);
 }
 
-void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ItemLink::sizeCheck(pPacket));
@@ -3176,18 +3176,18 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 	delete item;
 }
 
-void ZoneClientConnection::_handleItemView(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleItemView(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	Log::info("Got OP_ItemViewUnknown. Size=" + std::to_string(pPacket->size));
 }
 
-void ZoneClientConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
 	if (!_handleMoveCoinImpl(pPacket)) {
 		inventoryError();
 	}
 }
 
-const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::_handleMoveCoinImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(MoveCoin::sizeCheck(pPacket));
@@ -3235,7 +3235,7 @@ const bool ZoneClientConnection::_handleMoveCoinImpl(const EQApplicationPacket* 
 	return true;
 }
 
-void ZoneClientConnection::sendCurrencyUpdate() {
+void ZoneConnection::sendCurrencyUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3249,7 +3249,7 @@ void ZoneClientConnection::sendCurrencyUpdate() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(CrystalCreate::sizeCheck(pPacket));
@@ -3304,7 +3304,7 @@ void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPack
 	sendCrystals();
 }
 
-void ZoneClientConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 
@@ -3343,7 +3343,7 @@ void ZoneClientConnection::_handleCrystalReclaim(const EQApplicationPacket* pPac
 	sendCrystals();
 }
 
-void ZoneClientConnection::sendCrystals() {
+void ZoneConnection::sendCrystals() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3358,19 +3358,19 @@ void ZoneClientConnection::sendCrystals() {
 	safe_delete(packet);
 }
 
-void ZoneClientConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
 	auto raw = static_cast<EQRawApplicationPacket*>(const_cast<EQApplicationPacket*>(pPacket));
 	Log::info("OpCode= " + std::to_string(raw->GetRawOpcode()));
 }
 
-void ZoneClientConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
+void ZoneConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
 {
 	sendHealthUpdate();
 }
 
-void ZoneClientConnection::sendPopup(const String& pTitle, const String& pText) {
+void ZoneConnection::sendPopup(const String& pTitle, const String& pText) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3379,16 +3379,16 @@ void ZoneClientConnection::sendPopup(const String& pTitle, const String& pText) 
 	safe_delete(packet);
 }
 
-void ZoneClientConnection::_handlePopupResponse(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handlePopupResponse(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 }
 
-void ZoneClientConnection::_handleClaimRequest(const EQApplicationPacket* pPacket)
+void ZoneConnection::_handleClaimRequest(const EQApplicationPacket* pPacket)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }
 
-void ZoneClientConnection::sendItemView(Item* pItem) {
+void ZoneConnection::sendItemView(Item* pItem) {
 	EXPECTED(pItem);
 	EXPECTED(mConnected);
 
@@ -3400,7 +3400,7 @@ void ZoneClientConnection::sendItemView(Item* pItem) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendItemSummon(Item* pItem) {
+void ZoneConnection::sendItemSummon(Item* pItem) {
 	EXPECTED(pItem);
 	EXPECTED(mConnected);
 
@@ -3412,7 +3412,7 @@ void ZoneClientConnection::sendItemSummon(Item* pItem) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendItemTrade(Item* pItem) {
+void ZoneConnection::sendItemTrade(Item* pItem) {
 	EXPECTED(pItem);
 	EXPECTED(mConnected);
 
@@ -3424,7 +3424,7 @@ void ZoneClientConnection::sendItemTrade(Item* pItem) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendItemShop(Item* pItem) {
+void ZoneConnection::sendItemShop(Item* pItem) {
 	EXPECTED(pItem);
 	EXPECTED(mConnected);
 
@@ -3437,7 +3437,7 @@ void ZoneClientConnection::sendItemShop(Item* pItem) {
 }
 
 
-void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(AugmentItem::sizeCheck(pPacket));
@@ -3500,7 +3500,7 @@ void ZoneClientConnection::_handleAugmentItem(const EQApplicationPacket* pPacket
 	}
 }
 
-void ZoneClientConnection::sendDeleteItem(const uint32 pSlot, const uint32 pStacks, const uint32 pToSlot) {
+void ZoneConnection::sendDeleteItem(const uint32 pSlot, const uint32 pStacks, const uint32 pToSlot) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3509,7 +3509,7 @@ void ZoneClientConnection::sendDeleteItem(const uint32 pSlot, const uint32 pStac
 	delete packet;
 }
 
-void ZoneClientConnection::sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStacks) {
+void ZoneConnection::sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStacks) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3518,7 +3518,7 @@ void ZoneClientConnection::sendMoveItem(const uint32 pFromSlot, const uint32 pTo
 	delete packet;
 }
 
-void ZoneClientConnection::sendTradeRequestAcknowledge(const uint32 pToSpawnID) {
+void ZoneConnection::sendTradeRequestAcknowledge(const uint32 pToSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3527,7 +3527,7 @@ void ZoneClientConnection::sendTradeRequestAcknowledge(const uint32 pToSpawnID) 
 	delete packet;
 }
 
-void ZoneClientConnection::sendTradeFinished() {
+void ZoneConnection::sendTradeFinished() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_FinishTrade, 0);
@@ -3535,7 +3535,7 @@ void ZoneClientConnection::sendTradeFinished() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendTradeCancel(const uint32 pToSpawnID) {
+void ZoneConnection::sendTradeCancel(const uint32 pToSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3545,7 +3545,7 @@ void ZoneClientConnection::sendTradeCancel(const uint32 pToSpawnID) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendFinishWindow() {
+void ZoneConnection::sendFinishWindow() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_FinishWindow, 0);
@@ -3553,7 +3553,7 @@ void ZoneClientConnection::sendFinishWindow() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendFinishWindow2() {
+void ZoneConnection::sendFinishWindow2() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_FinishWindow, 0);
@@ -3561,7 +3561,7 @@ void ZoneClientConnection::sendFinishWindow2() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(AugmentInformation::sizeCheck(pPacket));
@@ -3572,7 +3572,7 @@ void ZoneClientConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket
 	//sendReadBook(payload->mWindow, 0, 2, "You must use a <c \"#FF0000\">monster cock</c> to remove this augment safely.");
 }
 
-void ZoneClientConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText) {
+void ZoneConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText) {
 	EXPECTED(mConnected);
 
 	uint32 size = 0;
@@ -3602,7 +3602,7 @@ void ZoneClientConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot
 	
 }
 
-void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(BookRequest::sizeCheck(pPacket));
@@ -3651,7 +3651,7 @@ void ZoneClientConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 	}
 }
 
-void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(Combine::sizeCheck(pPacket));
@@ -3662,14 +3662,14 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	mZone->onCombine(mCharacter, payload->mSlot);
 }
 
-void ZoneClientConnection::sendCombineReply() {
+void ZoneConnection::sendCombineReply() {
 	EXPECTED(mConnected);
 	auto packet = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneClientConnection::_handleShopRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleShopRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ShopRequest::sizeCheck(pPacket));
@@ -3685,7 +3685,7 @@ void ZoneClientConnection::_handleShopRequest(const EQApplicationPacket* pPacket
 	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
 }
 
-void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate) {
+void ZoneConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3694,7 +3694,7 @@ void ZoneClientConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const 
 	delete packet;
 }
 
-void ZoneClientConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ShopEnd::sizeCheck(pPacket));
@@ -3705,7 +3705,7 @@ void ZoneClientConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
 	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
 }
 
-void ZoneClientConnection::sendShopEndReply() {
+void ZoneConnection::sendShopEndReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_ShopEndConfirm, 0);
@@ -3713,7 +3713,7 @@ void ZoneClientConnection::sendShopEndReply() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ShopSell::sizeCheck(pPacket));
@@ -3725,7 +3725,7 @@ void ZoneClientConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
 	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
 }
 
-void ZoneClientConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
+void ZoneConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3734,7 +3734,7 @@ void ZoneClientConnection::sendShopSellReply(const uint32 pSpawnID, const uint32
 	delete packet;
 }
 
-void ZoneClientConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(ShopBuy::sizeCheck(pPacket));
@@ -3749,7 +3749,7 @@ void ZoneClientConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
 	mZone->handleShopBuy(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
 }
 
-void ZoneClientConnection::sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse) {
+void ZoneConnection::sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3758,7 +3758,7 @@ void ZoneClientConnection::sendShopBuyReply(const uint32 pSpawnID, const uint32 
 	delete packet;
 }
 
-void ZoneClientConnection::sendShopDeleteItem(const uint32 pSpawnID, const uint32 pItemInstanceID, const int32 pUnknown) {
+void ZoneConnection::sendShopDeleteItem(const uint32 pSpawnID, const uint32 pItemInstanceID, const int32 pUnknown) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3767,7 +3767,7 @@ void ZoneClientConnection::sendShopDeleteItem(const uint32 pSpawnID, const uint3
 	delete packet;
 }
 
-void ZoneClientConnection::sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID) {
+void ZoneConnection::sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3782,7 +3782,7 @@ void ZoneClientConnection::sendAddNimbus(const uint32 pSpawnID, const uint32 pEf
 	delete packet;
 }
 
-void ZoneClientConnection::sendRemoveNimbus(const uint32 pNimbusID) {
+void ZoneConnection::sendRemoveNimbus(const uint32 pNimbusID) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3820,7 +3820,7 @@ struct PopulateAlternateCurrencies {
 
 #pragma pack()
 
-void ZoneClientConnection::sendAlternateCurrencies() {
+void ZoneConnection::sendAlternateCurrencies() {
 	EXPECTED(mConnected);
 
 	auto currencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
@@ -3854,7 +3854,7 @@ void ZoneClientConnection::sendAlternateCurrencies() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendAlternateCurrencyQuantities(const bool pSendZero) {
+void ZoneConnection::sendAlternateCurrencyQuantities(const bool pSendZero) {
 	EXPECTED(mConnected);
 
 	auto currencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
@@ -3865,7 +3865,7 @@ void ZoneClientConnection::sendAlternateCurrencyQuantities(const bool pSendZero)
 	}
 }
 
-void ZoneClientConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) {
+void ZoneConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -3874,12 +3874,12 @@ void ZoneClientConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyI
 	delete packet;
 }
 
-void ZoneClientConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID) {
+void ZoneConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID) {
 	EXPECTED(mConnected);
 	sendAlternateCurrencyQuantity(pCurrencyID, mCharacter->getInventory()->getAlternateCurrencyQuantity(pCurrencyID));
 }
 
-void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(AlternateCurrencyReclaim::sizeCheck(pPacket));
@@ -3967,7 +3967,7 @@ void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPa
 	}
 }
 
-void ZoneClientConnection::sendMOTD(const String& pMOTD) {
+void ZoneConnection::sendMOTD(const String& pMOTD) {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_MOTD, reinterpret_cast<const unsigned char*>(pMOTD.c_str()), pMOTD.size() + 1);
@@ -3975,7 +3975,7 @@ void ZoneClientConnection::sendMOTD(const String& pMOTD) {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleRandomRequest(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleRandomRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(RandomRequest::sizeCheck(pPacket));
@@ -3985,11 +3985,11 @@ void ZoneClientConnection::_handleRandomRequest(const EQApplicationPacket* pPack
 	mZone->handleRandomRequest(mCharacter, payload->mLow, payload->mHigh);
 }
 
-void ZoneClientConnection::_handleDropItem(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleDropItem(const EQApplicationPacket* pPacket) {
 	mZone->handleDropItem(mCharacter);
 }
 
-void ZoneClientConnection::sendObject(Object* pObject) {
+void ZoneConnection::sendObject(Object* pObject) {
 	EXPECTED(mConnected);
 	EXPECTED(pObject);
 
@@ -4027,7 +4027,7 @@ void ZoneClientConnection::sendObject(Object* pObject) {
 	delete packet;
 }
 
-void ZoneClientConnection::sendManaUpdate() {
+void ZoneConnection::sendManaUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -4036,7 +4036,7 @@ void ZoneClientConnection::sendManaUpdate() {
 	delete packet;
 }
 
-void ZoneClientConnection::sendEnduranceUpdate() {
+void ZoneConnection::sendEnduranceUpdate() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -4045,7 +4045,7 @@ void ZoneClientConnection::sendEnduranceUpdate() {
 	delete packet;
 }
 
-void ZoneClientConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone::ExtendedTarget;
 	EXPECTED(pPacket);
 	EXPECTED(AutoAddHaters::sizeCheck(pPacket));
@@ -4054,7 +4054,7 @@ void ZoneClientConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket
 	mCharacter->getXTargetController()->setAutoAddHaters(payload->mAction == 1 ? true : false);
 }
 
-void ZoneClientConnection::sendRespawnWindow() {
+void ZoneConnection::sendRespawnWindow() {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
@@ -4095,7 +4095,7 @@ void ZoneClientConnection::sendRespawnWindow() {
 	EXPECTED(ds.check());
 }
 
-void ZoneClientConnection::_handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(RespawnWindowSelect::sizeCheck(pPacket));
@@ -4107,7 +4107,7 @@ void ZoneClientConnection::_handleRespawnWindowSelect(const EQApplicationPacket*
 	mZone->handleRespawnSelection(mCharacter, payload->mSelection);
 }
 
-void ZoneClientConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(AAAction::sizeCheck(pPacket));
@@ -4135,7 +4135,7 @@ void ZoneClientConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
 	}
 }
 
-void ZoneClientConnection::_handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	EXPECTED(pPacket);
 	EXPECTED(LeadershipExperienceToggle::sizeCheck(pPacket));

@@ -14,7 +14,7 @@
 #include "GuildManager.h"
 
 ZoneManager::~ZoneManager() {
-	ZoneClientConnection::_deinitialise();
+	ZoneConnection::_deinitialise();
 }
 
 void ZoneManager::update() {
@@ -57,7 +57,7 @@ const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManag
 
 	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
-	ZoneClientConnection::_initalise();
+	ZoneConnection::_initalise();
 	Experience::Controller::_initialise();
 
 	mExperienceCalculator = new Experience::Calculator();

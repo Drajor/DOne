@@ -352,7 +352,7 @@ void Zone::_handleIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		Log::info("[Zone] New Zone Client Connection. " + Utility::zoneLogDetails(this));
-		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this, mGroupManager, mRaidManager, mGuildManager));
+		mPreConnections.push_back(new ZoneConnection(incomingStreamInterface, this, mGroupManager, mRaidManager, mGuildManager));
 	}
 }
 
@@ -532,7 +532,7 @@ void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMe
 	EXPECTED(pCharacter);
 
 	const auto sender = pCharacter->getConnection();
-	auto packet = ZoneClientConnection::makeChannelMessage(pChannel, pCharacter->getName(), pMessage);
+	auto packet = ZoneConnection::makeChannelMessage(pChannel, pCharacter->getName(), pMessage);
 
 	for (auto i : mConnections) {
 		if (i != sender)
@@ -1425,7 +1425,7 @@ void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount,
 void Zone::handleCriticalHit(Actor* pActor, const int32 pDamage) {
 	EXPECTED(pActor);
 
-	auto packet = ZoneClientConnection::makeSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pActor->getName(), std::to_string(pDamage));
+	auto packet = ZoneConnection::makeSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pActor->getName(), std::to_string(pDamage));
 
 	if (pActor->isCharacter())
 		sendToVisible(Actor::cast<Character*>(pActor), packet, true);

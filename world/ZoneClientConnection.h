@@ -20,7 +20,7 @@ class GroupManager;
 class RaidManager;
 class GuildManager;
 
-class ZoneClientConnection {
+class ZoneConnection {
 public:
 	enum ZoneConnectionStatus {
 		NONE,
@@ -32,8 +32,8 @@ public:
 		Complete				// On OP_ClientReady
 	};
 public:
-	ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
-	~ZoneClientConnection();
+	ZoneConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
+	~ZoneConnection();
 
 	// Static initialise.
 	static void _initalise();
