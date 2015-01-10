@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 
 namespace Log {
 	bool start(const String& pFileName);
@@ -21,7 +21,7 @@ public:
 private:
 };
 
-class LogContext : public LogInterface{
+class LogContext : public LogInterface {
 public:
 	LogContext(String pContextName) {}
 	void status(const String& pMessage) { Log::status(mContext + " " + pMessage); }

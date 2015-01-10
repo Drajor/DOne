@@ -1,4 +1,5 @@
 #include "Inventory.h"
+#include "ServiceLocator.h"
 #include "Item.h"
 #include "ItemData.h"
 #include "Data.h"
@@ -15,6 +16,8 @@ Inventoryy::Inventoryy() {
 	for (auto& i : mTrade) i = nullptr;
 
 	memset(mCurrency, 0, sizeof(mCurrency));
+
+	mItemFactory = ServiceLocator::getItemFactory();
 
 	//put(ItemGenerator::makeDice("Yera"), SlotID::POWER_SOURCE);
 
@@ -1106,8 +1109,8 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 	return true;
 }
 
-Item* loadItem(Data::Item& pItem) {
-	auto item = ItemFactory::make(pItem.mItemID, pItem.mStacks);
+Item* Inventoryy::loadItem(Data::Item& pItem) {
+	auto item = mItemFactory->make(pItem.mItemID, pItem.mStacks);
 	EXPECTED_PTR(item);
 	item->setIsAttuned(pItem.mAttuned == 1 ? true : false);
 	item->setLastCastTime(pItem.mLastCastTime);

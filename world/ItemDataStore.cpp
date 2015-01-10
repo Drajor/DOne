@@ -1,4 +1,7 @@
 #include "ItemDataStore.h"
+#include "ServiceLocator.h"
+#include "DataStore.h"
+
 #include "Utility.h"
 #include "Item.h"
 
@@ -6,12 +9,16 @@ ItemDataStore::ItemDataStore() {
 	mItemData.resize(1000000);
 }
 
-const bool ItemDataStore::initialise() {
+const bool ItemDataStore::initialise(DataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
+
+	mDataStore = pDataStore;
 
 	_bootstrap();
 
-	return (mInitialised = true);
+	mInitialised = true;
+	return true;
 }
 
 void ItemDataStore::_bootstrap() {

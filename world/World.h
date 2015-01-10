@@ -1,27 +1,27 @@
 #pragma once
 
 #include "Types.h"
-#include "Singleton.h"
 #include "LogSystem.h"
 #include "../common/timer.h"
 
 #include <list>
 #include <map>
 
+class AccountManager;
+class ZoneManager;
+class DataStore;
+
 class LoginServerConnection;
 class EQStreamFactory;
 class EQStreamIdentifier;
 class WorldClientConnection;
 
-class World : public Singleton<World> {
-private:
-	friend class Singleton<World>;
-	World();;
-	~World();
-	World(World const&); // Do not implement.
-	void operator=(World const&); // Do not implement.
+class World {
 public:
-	bool initialise();
+	World();
+	~World();
+
+	const bool initialise(DataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	bool _initialiseLoginServerConnection();
 	void update();
 
@@ -63,6 +63,13 @@ public:
 	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
 
 	const bool handleEnterWorld(WorldClientConnection* pConnection, const String& pCharacterName, const bool pZoning);
+
+protected:
+	
+	AccountManager* mAccountManager = nullptr;
+	ZoneManager* mZoneManager = nullptr;
+	DataStore* mDataStore = nullptr;
+
 private:
 	LogContext mLog;
 	std::map<uint32, String> mReservedCharacterNames;

@@ -1,4 +1,5 @@
 #include "DataValidation.h"
+#include "ServiceLocator.h"
 #include "Data.h"
 #include "Utility.h"
 #include "Limits.h"
@@ -32,11 +33,11 @@ const bool validateData() {
 const bool validateShopData() {
 	Profile p("validateShopData");
 
-	auto shopData = ShopDataStore::getInstance().getShopData();
+	auto shopData = ServiceLocator::getShopDataStore()->getShopData();
 	for (auto i : shopData) {
 		for (auto j : i->mItems) {
 			// Check: Item exists.
-			EXPECTED_BOOL(ItemDataStore::getInstance().get(j.first));
+			EXPECTED_BOOL(ServiceLocator::getItemDataStore()->get(j.first));
 			// Check: Quantity is valid.
 			EXPECTED_BOOL(Limits::Shop::quantityValid(j.second));
 		}
@@ -54,10 +55,10 @@ const bool validateTransmutationData() {
 const bool validateAlternateCurrencies() {
 	Profile p("validateAlternateCurrencies");
 
-	auto alternateCurrencies = AlternateCurrencyManager::getInstance().getCurrencies();
+	auto alternateCurrencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
 	for (auto i : alternateCurrencies) {
 		// Check: Item exists.
-		EXPECTED_BOOL(ItemDataStore::getInstance().get(i->mItemID));
+		EXPECTED_BOOL(ServiceLocator::getItemDataStore()->get(i->mItemID));
 
 		// Do I care about other attributes? Duplicate IDs?
 	}
@@ -68,17 +69,17 @@ const bool validateAlternateCurrencies() {
 const bool validateNPCTypes() {
 	Profile p("validateNPCTypes");
 
-	auto npcTypes = NPCFactory::getInstance().getNPCTypes();
+	auto npcTypes = ServiceLocator::getNPCFactory()->getNPCTypes();
 	for (auto i : npcTypes) {
 		// Check: Appearance exists.
-		EXPECTED_BOOL(NPCFactory::getInstance().findAppearance(i->mAppearanceID));
+		EXPECTED_BOOL(ServiceLocator::getNPCFactory()->findAppearance(i->mAppearanceID));
 
 		// Special checks for merchant type.
 		if (i->mClass == ClassID::Merchant) {
 			// Check: Has shop id set.
 			EXPECTED_BOOL(i->mShopID != 0);
 			// Check: Shop data exists.
-			EXPECTED_BOOL(ShopDataStore::getInstance().getShopData(i->mShopID));
+			EXPECTED_BOOL(ServiceLocator::getShopDataStore()->getShopData(i->mShopID));
 		}
 	}
 
@@ -88,13 +89,13 @@ const bool validateNPCTypes() {
 const bool validateZoneData() {
 	Profile p("validateZoneData");
 
-	auto zoneData = ZoneDataManager::getInstance().getZoneData();
+	auto zoneData = ServiceLocator::getZoneDataManager()->getZoneData();
 	for (auto i : zoneData) {
 		// Spawn Groups.
 		for (auto j : i->mSpawnGroups) {
 			for (auto k : j->mEntries) {
 				// Check: NPCType exists.
-				EXPECTED_BOOL(NPCFactory::getInstance().findType(k->mNPCType));
+				EXPECTED_BOOL(ServiceLocator::getNPCFactory()->findType(k->mNPCType));
 			}
 		}
 

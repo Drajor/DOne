@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "ServiceLocator.h"
 #include "Data.h"
 #include "SpellDataStore.h"
 #include "GuildManager.h"
@@ -139,7 +140,7 @@ bool Character::initialise() {
 	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Copper, mData->mCopperBank);
 
 	// Shared Bank Currency
-	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, AccountManager::getInstance().getSharedPlatinum(mAccountID));
+	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, ServiceLocator::getAccountManager()->getSharedPlatinum(mAccountID));
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -149,9 +150,10 @@ bool Character::initialise() {
 	mBaseAgility = mData->mAgility;
 	mBaseWisdom = mData->mWisdom;
 
-	if (mData->mGuildID != NO_GUILD) {
-		GuildManager::getInstance().onConnect(this, mData->mGuildID);
-	}
+	// TODO: Replace this.
+	//if (mData->mGuildID != NO_GUILD) {
+	//	GuildManager::getInstance().onConnect(this, mData->mGuildID);
+	//}
 
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
@@ -345,7 +347,7 @@ const bool Character::_updateForSave() {
 	mData->mCopperBank = mInventory->getBankCopper();
 
 	// Shared Bank Currency
-	EXPECTED_BOOL(AccountManager::getInstance().setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum()));
+	EXPECTED_BOOL(ServiceLocator::getAccountManager()->setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum()));
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();

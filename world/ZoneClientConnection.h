@@ -12,11 +12,13 @@ class Character;
 class Object;
 class Door;
 class DataStore;
-class CommandHandler;
 class Guild;
 class Item;
 struct GuildMember;
-struct NewSpawn_Struct;
+
+class GroupManager;
+class RaidManager;
+class GuildManager;
 
 class ZoneClientConnection {
 public:
@@ -29,18 +31,19 @@ public:
 		ClientRequestSpawn,		// On OP_ReqClientSpawn
 		Complete				// On OP_ClientReady
 	};
-	enum class ConnectionOrigin {
-		Unknown,
-		Zone,
-		Character_Select
-	};
 public:
-	ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone);
+	ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
 	~ZoneClientConnection();
-	ConnectionOrigin getConnectionOrigin() { return mConnectionOrigin; }
+
+	// Static initialise.
+	static void _initalise();
+
+	// Static deinitialise.
+	static void _deinitialise();
+
 	bool isConnected();
-	bool isReadyForZoneIn() { return mZoneConnectionStatus == Complete; }
-	Character* getCharacter() { return mCharacter; }
+	inline bool isReadyForZoneIn() const { return mZoneConnectionStatus == Complete; }
+	inline Character* getCharacter() { return mCharacter; }
 	void update();
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	void _handleZoneEntry(const EQApplicationPacket* pPacket);
@@ -326,20 +329,17 @@ private:
 	void _handleAAAction(const EQApplicationPacket* pPacket);
 	void _handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket);
 
-	ConnectionOrigin mConnectionOrigin;
-	bool mConnected;
+	bool mConnected = false;
 	Timer mForceSendPositionTimer;
-	EQStreamInterface* mStreamInterface;
-	Zone* mZone;
-	Character* mCharacter;
-	ZoneConnectionStatus mZoneConnectionStatus;
-	CommandHandler* mCommandHandler; // For now every connection has their own.
-
-	public:
-		static void initalise();
-		static void deinitialise();
-	private:
+	EQStreamInterface* mStreamInterface = nullptr;
+	Zone* mZone = nullptr;
+	Character* mCharacter = nullptr;
+	ZoneConnectionStatus mZoneConnectionStatus = ZoneConnectionStatus::NONE;
 	
+	GuildManager* mGuildManager = nullptr;
+	GroupManager* mGroupManager = nullptr;
+	RaidManager* mRaidManager = nullptr;
+
 	static EQApplicationPacket* mPlayerProfilePacket;
 
 	static EQApplicationPacket* mGroupJoinPacket;

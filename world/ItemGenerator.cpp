@@ -1,4 +1,5 @@
 #include "ItemGenerator.h"
+#include "ServiceLocator.h"
 #include "ItemData.h"
 #include "Item.h"
 #include "Random.h"
@@ -64,10 +65,19 @@ const u32 getColour() {
 	return colours[Random::make<u32>(0, colours.size() - 1)];
 }
 
-//namespace Affix
+ItemGenerator::ItemGenerator(ServiceLocator* pServiceLocator) : mServiceLocator(pServiceLocator) { }
+
+const bool ItemGenerator::initialise() {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(mServiceLocator);
+	mItemFactory = mServiceLocator->getItemFactory();
+	EXPECTED_BOOL(mItemFactory);
+
+	return true;
+}
 
 Item* ItemGenerator::_makeBaseItem() {
-	return ItemFactory::make();
+	return mItemFactory->make();
 }
 
 Item* ItemGenerator::_makeBaseArmorItem(const u8 pLevel) {
@@ -152,7 +162,7 @@ Item* ItemGenerator::_makeRandom(const u8 pLevel) {
 }
 
 Item* ItemGenerator::makeFood() {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Food");
 	item->setIcon(537);
@@ -168,7 +178,7 @@ Item* ItemGenerator::makeFood() {
 }
 
 Item* ItemGenerator::makeDrink() {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Drink");
 	item->setIcon(856);
@@ -183,7 +193,7 @@ Item* ItemGenerator::makeDrink() {
 }
 
 Item* ItemGenerator::makePowerSource(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("PowerSource");
 	item->setCharmFile("PS-Air");
@@ -201,7 +211,7 @@ Item* ItemGenerator::makePowerSource(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeShield(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Shield");
 	item->setIcon(676);
@@ -221,7 +231,7 @@ Item* ItemGenerator::makeShield(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeRandomContainer(const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName(_getContainerName());
 	item->setContainerType(ContainerType::Normal);
@@ -320,7 +330,7 @@ const String ItemGenerator::_getContainerName() {
 //}
 
 Item* ItemGenerator::makeOneHandSlash(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("One Hand Slash");
 	item->setIcon(580);
@@ -335,7 +345,7 @@ Item* ItemGenerator::makeOneHandSlash(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeTwoHandSlash(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Two Hand Slash");
 	item->setIcon(519);
@@ -350,7 +360,7 @@ Item* ItemGenerator::makeTwoHandSlash(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeOneHandPierce(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("One Hand Pierce");
 	item->setIcon(592);
@@ -365,7 +375,7 @@ Item* ItemGenerator::makeOneHandPierce(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeTwoHandPierce(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Two Hand Pierce");
 	item->setIcon(776);
@@ -380,7 +390,7 @@ Item* ItemGenerator::makeTwoHandPierce(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeOneHandBlunt(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseOneHandWeapon();
+	Item* item = _makeBaseOneHandWeapon();
 
 	item->setName("One Hand Blunt");
 	item->setIcon(578);
@@ -407,7 +417,7 @@ Item* ItemGenerator::makeOneHandBlunt(const u8 pLevel, const Rarity pRarity) {
 
 
 Item* ItemGenerator::makeTwoHandBlunt(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Two Hand Blunt");
 	item->setIcon(741);
@@ -436,7 +446,7 @@ Item* ItemGenerator::makeTwoHandBlunt(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeHandtoHand(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setSlots(EquipSlots::PrimarySecondary);
 	item->setIsMagic(true);
@@ -449,7 +459,7 @@ Item* ItemGenerator::makeHandtoHand(const u8 pLevel, const Rarity pRarity) {
 
 
 Item* ItemGenerator::makeBow(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setSlots(EquipSlots::Range);
 	item->setIsMagic(true);
@@ -467,7 +477,7 @@ Item* ItemGenerator::makeBow(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeHead(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 
 	item->setName("Head Item");
 	item->setIcon(746);
@@ -494,7 +504,7 @@ Item* ItemGenerator::makeHead(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeChest(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 
 	item->setSlots(EquipSlots::Chest);
 	item->setIsMagic(true);
@@ -509,7 +519,7 @@ Item* ItemGenerator::makeChest(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeArms(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 
 	item->setSlots(EquipSlots::Arms);
 	item->setIsMagic(true);
@@ -525,7 +535,7 @@ Item* ItemGenerator::makeArms(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeWrists(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 
 	item->setSlots(EquipSlots::Wrists);
 	item->setIsMagic(true);
@@ -540,7 +550,7 @@ Item* ItemGenerator::makeWrists(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeLegs(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 
 	item->setSlots(EquipSlots::Legs);
 	item->setIsMagic(true);
@@ -555,7 +565,7 @@ Item* ItemGenerator::makeLegs(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeHands(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 	
 	item->setSlots(EquipSlots::Hands);
 	item->setIsMagic(true);
@@ -570,7 +580,7 @@ Item* ItemGenerator::makeHands(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeFeet(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseArmorItem(pLevel);
+	Item* item = _makeBaseArmorItem(pLevel);
 	
 	item->setSlots(EquipSlots::Feet);
 	item->setIsMagic(true);
@@ -585,7 +595,7 @@ Item* ItemGenerator::makeFeet(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeCharm(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Charm);
 	item->setIsMagic(true);
@@ -596,7 +606,7 @@ Item* ItemGenerator::makeCharm(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeRange(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Range);
 	item->setIsMagic(true);
@@ -607,7 +617,7 @@ Item* ItemGenerator::makeRange(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeEars(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Ears);
 	item->setIsMagic(true);
@@ -618,7 +628,7 @@ Item* ItemGenerator::makeEars(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeRing(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Fingers);
 	item->setIsMagic(true);
@@ -629,7 +639,7 @@ Item* ItemGenerator::makeRing(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeNeck(const u8 pLevel, const Rarity pRarity){
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Neck);
 	item->setIsMagic(true);
@@ -640,7 +650,7 @@ Item* ItemGenerator::makeNeck(const u8 pLevel, const Rarity pRarity){
 }
 
 Item* ItemGenerator::makeFace(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Face);
 	item->setIsMagic(true);
@@ -651,7 +661,7 @@ Item* ItemGenerator::makeFace(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeShoulder(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Shoulders);
 	item->setIsMagic(true);
@@ -662,7 +672,7 @@ Item* ItemGenerator::makeShoulder(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeBack(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Back);
 	item->setIsMagic(true);
@@ -673,19 +683,19 @@ Item* ItemGenerator::makeBack(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeWaist(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 	
 	item->setSlots(EquipSlots::Waist);
 	item->setIsMagic(true);
 	
 	item->setName("Waist");
 
-	ItemGenerator::getInstance()._addAffixes(item, pLevel, pRarity);
+	_addAffixes(item, pLevel, pRarity);
 	return item;
 }
 
 Item* ItemGenerator::makeAugmentation(const u8 pLevel, const Rarity pRarity) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName("Augmentation");
 	item->setIcon(2185);
@@ -700,7 +710,7 @@ Item* ItemGenerator::makeAugmentation(const u8 pLevel, const Rarity pRarity) {
 }
 
 Item* ItemGenerator::makeDice(String pCharacterName) {
-	Item* item = ItemGenerator::getInstance()._makeBaseItem();
+	Item* item = _makeBaseItem();
 
 	item->setName(pCharacterName + "'s Lucky Dice");
 	item->setIcon(2889);

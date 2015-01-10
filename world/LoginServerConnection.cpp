@@ -111,21 +111,6 @@ void LoginServerConnection::_handleClientAuthentication(ServerPacket* pPacket) {
 
 	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket);
 
-	//// Add authentication for the incoming client.
-	//ClientAuthentication authentication;
-	//authentication.mLoginServerAccountID = payload->mAccountID;
-	//authentication.mLoginServerAccountName = Utility::safeString(payload->mAccountName, Limits::LoginServer::MAX_ACCOUNT_NAME_LENGTH);
-	//authentication.mKey = Utility::safeString(payload->mKey, Limits::LoginServer::MAX_KEY_LENGTH);
-	//authentication.mWorldAdmin = payload->mWorldAdmin;
-	//authentication.mIP = payload->mIP;
-	//authentication.mLocal = payload->mLocal;
-	//World::getInstance().addAuthentication(authentication);
-
-	//// Check if client does not yet have an account.
-	//if (!World::getInstance().ensureAccountExists(payload->mAccountID, payload->mAccountName)) {
-	//	Log::error("[Login Server Connection] accountCheck failed.");
-	//}
-
 	// Notify World.
 	mWorld->handleClientAuthentication(payload->mAccountID, payload->mAccountName, payload->mKey, payload->mIP);
 }

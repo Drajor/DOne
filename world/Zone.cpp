@@ -1,4 +1,5 @@
 #include "Zone.h"
+#include "ServiceLocator.h"
 #include "World.h"
 #include "AccountManager.h"
 #include "ZoneManager.h"
@@ -10,6 +11,7 @@
 #include "ZoneClientConnection.h"
 #include "Constants.h"
 #include "DataStore.h"
+#include "Transmutation.h"
 #include "Data.h"
 #include "SpellDataStore.h"
 #include "Utility.h"
@@ -42,7 +44,6 @@ Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
 {
-	mGuildManager = &GuildManager::getInstance();
 }
 
 Zone::~Zone() {
@@ -66,12 +67,21 @@ Zone::~Zone() {
 	mExperienceModifer.reset();
 }
 
-const bool Zone::initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator) {
+const bool Zone::initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler) {
 	EXPECTED_BOOL(mInitialised == false);
 	EXPECTED_BOOL(pZoneData);
 	EXPECTED_BOOL(pExperienceCalculator.get());
+	EXPECTED_BOOL(pGroupManager);
+	EXPECTED_BOOL(pRaidManager);
+	EXPECTED_BOOL(pGuildManager);
+	EXPECTED_BOOL(pCommandHandler);
 
 	mExperienceCalculator = pExperienceCalculator;
+	mGroupManager = pGroupManager;
+	mRaidManager = pRaidManager;
+	mGuildManager = pGuildManager;
+	mItemFactory = ServiceLocator::getItemFactory();
+	EXPECTED_BOOL(mItemFactory);
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
@@ -81,8 +91,8 @@ const bool Zone::initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::C
 	Underfoot::Register(*mStreamIdentifier);
 
 	mScene = new Scene(this);
-
 	mLootAllocator = new LootAllocator();
+	mTransmutation = new Transmutation();
 
 	// Temp.
 	mExperienceModifer = std::make_unique<Experience::Modifier>();
@@ -175,7 +185,7 @@ const bool Zone::update() {
 			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
 
 			// Remove World Authentication - allowing them to log back in.
-			World::getInstance().removeAuthentication(i->mCharacter->getAccountID());
+			ServiceLocator::getWorld()->removeAuthentication(i->mCharacter->getAccountID());
 
 			// Save
 			i->mCharacter->_updateForSave();
@@ -343,7 +353,7 @@ void Zone::_handleIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		Log::info("[Zone] New Zone Client Connection. " + Utility::zoneLogDetails(this));
-		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this));
+		mPreConnections.push_back(new ZoneClientConnection(incomingStreamInterface, this, mGroupManager, mRaidManager, mGuildManager));
 	}
 }
 
@@ -366,6 +376,15 @@ void Zone::onEnterZone(Character* pCharacter) {
 	EventDispatcher::getInstance().event(Event::EnterZone, pCharacter);
 
 	Log::info("Character " + pCharacter->getName() + " entered Zone");
+
+	if (pCharacter->hasGroup())
+		mGroupManager->onEnterZone(pCharacter);
+
+	if (pCharacter->hasRaid())
+		mRaidManager->onEnterZone(pCharacter);
+
+	if (pCharacter->hasGuild())
+		mGuildManager->onEnterZone(pCharacter);
 }
 
 void Zone::handleActorPositionChange(Actor* pActor) {
@@ -414,6 +433,46 @@ void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pPa
 		sendToVisible(pActor, packet);
 	}
 	delete packet;
+}
+
+void Zone::handleChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage) {
+	EXPECTED(pCharacter);
+
+	switch (pChannelID) {
+	case ChannelID::Guild:
+		EXPECTED(pCharacter->hasGuild());
+		mGuildManager->handleMessage(pCharacter, pMessage);
+		break;
+	case ChannelID::Group:
+		EXPECTED(pCharacter->hasGroup());
+		mGroupManager->handleMessage(pCharacter, pMessage);
+		break;
+	case ChannelID::Shout:
+		break;
+	case ChannelID::Auction:
+		break;
+	case ChannelID::OOC:
+		break;
+	case ChannelID::Broadcast:
+		break;
+	case ChannelID::Tell:
+		break;
+	case ChannelID::Say:
+		break;
+	case ChannelID::GMSay:
+		break;
+	case ChannelID::Raid:
+		EXPECTED(pCharacter->hasRaid());
+		//mRaidManager->handleMessage(pCharacter, pMessage);
+		break;
+	case ChannelID::UCS:
+		break;
+	case ChannelID::Emote:
+		handleEmote(pCharacter, pMessage);
+		break;
+	default:
+		break;
+	}
 }
 
 void Zone::handleSay(Character* pCharacter, const String pMessage) {
@@ -484,7 +543,7 @@ void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMe
 }
 
 void Zone::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
-	ZoneManager::getInstance().handleTell(pCharacter, pTargetName, pMessage);
+	ServiceLocator::getZoneManager()->handleTell(pCharacter, pTargetName, pMessage);
 }
 
 bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage) {
@@ -574,14 +633,14 @@ void Zone::_sendActorLevel(Actor* pActor) {
 }
 
 void Zone::requestSave(Character*pCharacter) {
-	if (!DataStore::getInstance().saveCharacter(pCharacter->getName(), pCharacter->getData())) {
+	if (!ServiceLocator::getDataStore()->saveCharacter(pCharacter->getName(), pCharacter->getData())) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
 		Log::error("[Zone] Failed to save character");
 		return;
 	}
 
 	// Update the Account
-	AccountManager::getInstance().updateCharacter(pCharacter->getAccountID(), pCharacter);
+	ServiceLocator::getAccountManager()->updateCharacter(pCharacter->getAccountID(), pCharacter);
 }
 
 void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter) {
@@ -628,7 +687,7 @@ Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZonin
 	if (character) return character;
 
 	// Proceed to global search.
-	return ZoneManager::getInstance().findCharacter(pCharacterName, pIncludeZoning, this);
+	return ServiceLocator::getZoneManager()->findCharacter(pCharacterName, pIncludeZoning, this);
 }
 
 void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
@@ -671,7 +730,7 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 void Zone::notifyGuildsChanged() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+	outPacket->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
 	
 	for (auto i : mConnections) {
 		i->sendPacket(outPacket);
@@ -717,16 +776,16 @@ void Zone::_onLeaveZone(Character* pCharacter) {
 	// Aggro.
 
 	// Store Character during zoning.
-	ZoneManager::getInstance().addZoningCharacter(pCharacter);
+	ServiceLocator::getZoneManager()->addZoningCharacter(pCharacter);
 
 	if (pCharacter->hasGuild())
-		GuildManager::getInstance().onLeaveZone(pCharacter);
+		mGuildManager->onLeaveZone(pCharacter);
 
 	if (pCharacter->hasGroup())
-		GroupManager::getInstance().onLeaveZone(pCharacter);
+		mGroupManager->onLeaveZone(pCharacter);
 
 	if (pCharacter->hasRaid())
-		RaidManager::getInstance().onLeaveZone(pCharacter);
+		mRaidManager->onLeaveZone(pCharacter);
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::LeaveZone, pCharacter);
@@ -736,13 +795,13 @@ void Zone::_onCamp(Character* pCharacter) {
 	EXPECTED(pCharacter);
 
 	if (pCharacter->hasGuild())
-		GuildManager::getInstance().onCamp(pCharacter);
+		mGuildManager->onCamp(pCharacter);
 
 	if (pCharacter->hasGroup())
-		GroupManager::getInstance().onCamp(pCharacter);
+		mGroupManager->onCamp(pCharacter);
 
 	if (pCharacter->hasRaid())
-		RaidManager::getInstance().onCamp(pCharacter);
+		mRaidManager->onCamp(pCharacter);
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Camped, pCharacter);
@@ -774,13 +833,13 @@ void Zone::_onLinkdead(Character* pCharacter) {
 	mLinkDeadCharacters.push_back(linkdeadCharacter);
 
 	if (pCharacter->hasGuild())
-		GuildManager::getInstance().onLinkdead(pCharacter);
+		mGuildManager->onLinkdead(pCharacter);
 
 	if (pCharacter->hasGroup())
-		GroupManager::getInstance().onLinkdead(pCharacter);
+		mGroupManager->onLinkdead(pCharacter);
 
 	if (pCharacter->hasRaid())
-		RaidManager::getInstance().onLinkdead(pCharacter);
+		mRaidManager->onLinkdead(pCharacter);
 
 	handleLinkDead(pCharacter);
 
@@ -935,7 +994,7 @@ void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const u
 	EXPECTED(pCharacter->hasSpell(pSlot, pSpellID)); // Check: pCharacter has the spell on the Spell Bar.
 	EXPECTED(pCharacter->canCast(pSpellID)); // Check: pCharacter can cast the spell.
 
-	auto spellData = Spell::get(pSpellID);
+	auto spellData = ServiceLocator::getSpellDataStore()->getData(pSpellID);
 	EXPECTED(spellData);
 
 	// Check: Pre-Conditions for casting
@@ -1068,7 +1127,7 @@ void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
 			pNPC->getLootController()->set(killer);
 
 			// Award experience.
-			allocateExperience(killer, pNPC);
+			allocateSoloExperience(killer, pNPC);
 		}
 		// Raid Kill.
 		else if (killer->hasRaid()) {
@@ -1076,7 +1135,7 @@ void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
 			pNPC->getLootController()->set(killer->getRaid());
 
 			// Award raid experience.
-			allocateExperience(killer->getRaid(), pNPC);
+			allocateRaidExperience(killer->getRaid(), pNPC);
 		}
 		// Group Kill
 		else if (killer->hasGroup()) {
@@ -1084,7 +1143,7 @@ void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
 			pNPC->getLootController()->set(killer->getGroup());
 
 			// Award group experience.
-			allocateExperience(killer->getGroup(), pNPC);
+			allocateGroupExperience(killer->getGroup(), pNPC);
 		}
 	}
 
@@ -1700,7 +1759,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 			}
 			
 			// Make a copy of the shop Item.
-			Item* purchasedItem = ItemFactory::copy(pItem);
+			Item* purchasedItem = mItemFactory->copy(pItem);
 
 			// Put Item into Inventory.
 			EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
@@ -1916,7 +1975,7 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 
 	// /who all
 	if (pFilter.mType == WhoType::All) {
-		ZoneManager::getInstance().handleWhoRequest(pCharacter, pFilter, results);
+		ServiceLocator::getZoneManager()->handleWhoRequest(pCharacter, pFilter, results);
 	}
 	// /who
 	else if (pFilter.mType == WhoType::Zone) {
@@ -2077,7 +2136,7 @@ void Zone::giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperi
 	processExperienceResult(pCharacter, result, context);
 }
 
-void Zone::allocateExperience(Character* pCharacter, NPC* pNPC) {
+void Zone::allocateSoloExperience(Character* pCharacter, NPC* pNPC) {
 	EXPECTED(pCharacter);
 	EXPECTED(pNPC);
 
@@ -2100,7 +2159,7 @@ void Zone::allocateExperience(Character* pCharacter, NPC* pNPC) {
 	processExperienceResult(pCharacter, result, context);
 }
 
-void Zone::allocateExperience(Group* pGroup, NPC* pNPC) {
+void Zone::allocateGroupExperience(Group* pGroup, NPC* pNPC) {
 	EXPECTED(pGroup);
 	EXPECTED(pNPC);
 
@@ -2129,7 +2188,7 @@ void Zone::allocateExperience(Group* pGroup, NPC* pNPC) {
 	}
 }
 
-void Zone::allocateExperience(Raid* pRaid, NPC* pNPC)
+void Zone::allocateRaidExperience(Raid* pRaid, NPC* pNPC)
 {
 
 }
@@ -2218,4 +2277,68 @@ void Zone::processExperienceResult(Character* pCharacter, Experience::Calculatio
 
 	// 8584 You have reached the maximum number of unused group leadership points.  You must spend some points before you can receive any more experience.
 	// 8591 You have reached the maximum number of unused raid leadership points.  You must spend some points before you can receive any more experience.
+}
+
+void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
+	EXPECTED(pCharacter);
+	auto connection = pCharacter->getConnection();
+
+	// Check: Character is in a state that allows for combining.
+	EXPECTED(pCharacter->canCombine());
+
+	// Check: The combine is occurring from a valid slot id. (UF Client Checked)
+	EXPECTED(SlotID::isMainInventory(pSlot));
+
+	// Check: Cursor is empty. (UF Client Checked)
+	EXPECTED(pCharacter->getInventory()->isCursorEmpty() == true);
+
+	// Check: Valid Item at slot id.
+	auto container = pCharacter->getInventory()->getItem(pSlot);
+	EXPECTED(container);
+
+	// Check: Item is a container.
+	EXPECTED(container->isContainer());
+
+	// Check: Container has 'Combine' option.
+	EXPECTED(container->isCombineContainer());
+
+	// Check: Container is not empty. (UF Client Checked)
+	EXPECTED(container->isEmpty() == false);
+
+	// Check: None of the Items in the container have > 1 stacks. (UF Client Checked)
+	auto f = [](Item* pItem) { return pItem->getStacks() == ((pItem->isStackable()) ? 1 : 0); }; // This is annoying. Non-stackable Items should still have getStacks == 1.
+	EXPECTED(container->forEachContents(f));
+
+	// Test.
+	std::list<Item*> results;
+	std::list<Item*> items;
+	container->getContents(items);
+
+	if (container->getID() == ItemID::TransmuterTen) {
+		Item* item = mTransmutation->transmute(items);
+		if (item) results.push_back(item);
+	}
+
+	// This is what I want.
+	//mCraftingSystem->combine(items, results);
+
+	for (auto i : items) {
+		// Update Client.
+		connection->sendDeleteItem(i->getSlot());
+		// Update Inventory.
+		EXPECTED(container->clearContents(i->getSubIndex()));
+		// Free memory.
+		delete i;
+	}
+	items.clear();
+
+	EXPECTED(container->isEmpty()); // We expect the container to be empty at this point.
+
+	// Note: Underfoot locks the UI until a reply is received.
+	connection->sendCombineReply();
+
+	for (auto i : results) {
+		pCharacter->getInventory()->pushCursor(i);
+		connection->sendItemSummon(i);
+	}
 }

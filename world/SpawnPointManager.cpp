@@ -1,4 +1,6 @@
 #include "SpawnPointManager.h"
+#include "ServiceLocator.h"
+#include "Utility.h"
 #include "SpawnPoint.h"
 #include "SpawnGroup.h"
 #include "Data.h"
@@ -8,8 +10,10 @@
 #include "LogSystem.h"
 
 const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData) {
-	if (mInitialised) { return false; }
-	if (!pZone) { return false; }
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pZone);
+	mNPCFactory = ServiceLocator::getNPCFactory();
+	EXPECTED_BOOL(mNPCFactory);
 
 	Log::status("[SpawnPointManager] Initialising.");
 
@@ -84,7 +88,7 @@ void SpawnPointManager::_spawn(SpawnPoint* pSpawnPoint) {
 	// Determine what NPC to spawn.
 	const u32 NPCTypeID = pSpawnPoint->getSpawnGroup()->roll();
 
-	auto npc = NPCFactory::getInstance().create(NPCTypeID);
+	auto npc = mNPCFactory->create(NPCTypeID);
 	EXPECTED(npc);
 
 	npc->setZone(mZone);

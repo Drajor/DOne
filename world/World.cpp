@@ -1,10 +1,12 @@
 #include "World.h"
+#include "ServiceLocator.h"
 #include "Constants.h"
 #include "Character.h"
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "AccountManager.h"
 #include "DataStore.h"
+#include "Data.h"
 #include "LoginServerConnection.h"
 #include "UCS.h"
 
@@ -31,9 +33,16 @@ World::~World() {
 	safe_delete(mStreamIdentifier);
 }
 
-bool World::initialise() {
+const bool World::initialise(DataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
 	mLog.status("Initialising.");
 	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
+	EXPECTED_BOOL(pZoneManager);
+	EXPECTED_BOOL(pAccountManager);
+
+	mDataStore = pDataStore;
+	mZoneManager = pZoneManager;
+	mAccountManager = pAccountManager;
 
 	mLocked = Settings::getLocked();
 
@@ -64,8 +73,8 @@ bool World::_initialiseLoginServerConnection() {
 
 void World::update() {
 	mLoginServerConnection->update();
-	ZoneManager::getInstance().update();
-	UCS::getInstance().update();
+	mZoneManager->update();
+	//UCS::getInstance().update();
 
 	// Check if any new clients are connecting.
 	_handleIncomingClientConnections();
@@ -149,7 +158,7 @@ void World::setLocked(bool pLocked) {
 
 const u8 World::getConnectResponse(const u32 pAccountID) {
 	// Fetch the Account Status.
-	auto accountStatus = AccountManager::getInstance().getStatus(pAccountID);
+	auto accountStatus = mAccountManager->getStatus(pAccountID);
 
 	// Account Suspended.
 	if (accountStatus == ResponseID::SUSPENDED) return ResponseID::SUSPENDED;
@@ -167,7 +176,7 @@ const u8 World::getConnectResponse(const u32 pAccountID) {
 	return ResponseID::ALLOWED; // Speak friend and enter.
 }
 
-bool World::isCharacterNameUnique(String pCharacterName) { return AccountManager::getInstance().isCharacterNameUnique(pCharacterName); }
+bool World::isCharacterNameUnique(String pCharacterName) { return mAccountManager->isCharacterNameUnique(pCharacterName); }
 
 bool World::isCharacterNameReserved(String pCharacterName) {
 	for (auto i : mReservedCharacterNames)
@@ -184,7 +193,7 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	mLog.info("Delete Character request from Account(" + std::to_string(pAccountID) + ") Name(" + pCharacterName + ")");
 
 	// Check: Character to Account.
-	const bool isOwner = AccountManager::getInstance().checkOwnership(pAccountID, pCharacterName);
+	const bool isOwner = mAccountManager->checkOwnership(pAccountID, pCharacterName);
 	if (!isOwner) {
 		mLog.error("Ownership test failed!");
 		return false;
@@ -192,7 +201,7 @@ bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterNam
 	mLog.info("Ownership test passed!");
 
 	// Check: Delete succeeds.
-	const bool isDeleted = AccountManager::getInstance().deleteCharacter(pAccountID, pCharacterName);
+	const bool isDeleted = mAccountManager->deleteCharacter(pAccountID, pCharacterName);
 	if (!isDeleted) {
 		mLog.error("Delete Failed!");
 		return false;
@@ -214,7 +223,7 @@ const bool World::handleEnterWorld(WorldClientConnection* pConnection, const Str
 bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCharacterName) {
 	EXPECTED_BOOL(pConnection);
 
-	Character* character = ZoneManager::getInstance().getZoningCharacter(pCharacterName);
+	auto character = mZoneManager->getZoningCharacter(pCharacterName);
 	EXPECTED_BOOL(character);
 	EXPECTED_BOOL(character->getName() == pCharacterName);
 
@@ -226,13 +235,13 @@ bool World::_handleZoning(WorldClientConnection* pConnection, const String& pCha
 	EXPECTED_BOOL(character->checkZoneAuthentication(zoneID, instanceID));
 
 	// Check: Destination Zone is available to Character.
-	if (!ZoneManager::getInstance().isZoneAvailable(zoneID, instanceID)) {
+	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
 		return false;
 	}
 
 	// Send the client off to the Zone.
 	pConnection->_sendChatServer(pCharacterName);
-	pConnection->sendZoneServerInfo("127.0.0.1", ZoneManager::getInstance().getZonePort(zoneID, instanceID));
+	pConnection->sendZoneServerInfo("127.0.0.1", mZoneManager->getZonePort(zoneID, instanceID));
 
 	return true;
 }
@@ -242,7 +251,7 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 
 	// Check: CharacterData could be loaded.
 	auto characterData = new Data::Character();
-	if (!DataStore::getInstance().loadCharacter(pCharacterName, characterData)) {
+	if (!mDataStore->loadCharacter(pCharacterName, characterData)) {
 		delete characterData;
 		return false;
 	}
@@ -252,25 +261,25 @@ bool World::_handleEnterWorld(WorldClientConnection* pConnection, const String& 
 	const uint16 instanceID = characterData->mInstanceID;
 
 	// Check: Destination Zone is available to pCharacter.
-	if (!ZoneManager::getInstance().isZoneAvailable(zoneID, instanceID)) {
+	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
 		delete characterData;
 		return false;
 	}
 
 	// Create and initialise Character.
-	Character* character = new Character(pConnection->getAccountID(), characterData);
+	auto character = new Character(pConnection->getAccountID(), characterData);
 	if (!character->initialise()) {
 		delete character;
 		return false;
 	}
 
 	// Register Zone Change
-	ZoneManager::getInstance().addZoningCharacter(character);
+	mZoneManager->addZoningCharacter(character);
 	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
 	pConnection->_sendChatServer(pCharacterName);
-	pConnection->sendZoneServerInfo("127.0.0.1", ZoneManager::getInstance().getZonePort(zoneID, instanceID));
+	pConnection->sendZoneServerInfo("127.0.0.1", mZoneManager->getZonePort(zoneID, instanceID));
 
 	return true;
 }
@@ -281,15 +290,15 @@ void World::_updateLoginServer() const {
 
 void World::handleClientAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP) {
 	// Check: Account exists.
-	const bool accountExists = AccountManager::getInstance().exists(pAccountID);
+	const bool accountExists = mAccountManager->exists(pAccountID);
 
 	// Make a new Account.
 	if (!accountExists) {
-		EXPECTED(AccountManager::getInstance().createAccount(pAccountID, pAccountName));
+		EXPECTED(mAccountManager->createAccount(pAccountID, pAccountName));
 	}
 
 	// Check: Account status.
-	auto accountStatus = AccountManager::getInstance().getStatus(pAccountID);
+	auto accountStatus = mAccountManager->getStatus(pAccountID);
 	if (accountStatus < ResponseID::ALLOWED)
 		return;
 

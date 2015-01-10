@@ -4,16 +4,20 @@
 #include "Bonuses.h"
 
 namespace Data {
+	struct Item;
 	struct Inventory;
 }
 
+class ItemFactory;
 class Item;
+
 class Inventoryy : public Bonuses { // We get an extra y for now.
 
 public:
 	Inventoryy();
 	const bool updateForSave(Data::Inventory& pInventoryData);
 	const bool loadFromSave(Data::Inventory& pInventoryData);
+	Item* loadItem(Data::Item& pItem);
 	// Items
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
@@ -148,6 +152,8 @@ public:
 	inline const bool isAutoDrink(Item* pItem) const { return pItem == mAutoDrink; }
 
 private:
+	ItemFactory* mItemFactory = nullptr;
+
 	Item* _popCursor();
 	Item* _peekCursor() const;
 	const bool _clear(const uint32 pSlot);

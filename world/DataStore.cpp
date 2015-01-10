@@ -93,10 +93,7 @@ inline void writeVector3(TiXmlElement* pElement, const Vector3& pVector) {
 	pElement->SetDoubleAttribute("z", pVector.z);
 }
 
-bool DataStore::initialise() {
-
-	return true;
-}
+const bool DataStore::initialise() { return true; }
 
 namespace AccountXML {
 #define SCA static const auto

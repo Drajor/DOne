@@ -1,4 +1,7 @@
 #include "TitleManager.h"
+#include "ServiceLocator.h"
+#include "DataStore.h"
+
 #include "Utility.h"
 #include "Character.h"
 #include "Profile.h"
@@ -7,11 +10,14 @@ TitleManager::~TitleManager() {
 	deinitialise();
 }
 
-const bool TitleManager::initialise() {
+const bool TitleManager::initialise(DataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
 
 	Profile p("TitleManager::initialise");
 	Log::status("[Title Manager] Initialising.");
+
+	mDataStore = pDataStore;
 
 	Title* a = new Title();
 	a->mID = 1;
@@ -46,7 +52,7 @@ const std::list<const Title*> TitleManager::getTitles(Character* pCharacter) {
 	return availableTitles;
 }
 
-const String& TitleManager::getPrefix(const uint32 pTitleID) const {
+const String& TitleManager::getPrefix(const u32 pTitleID) const {
 	for (auto i : mTitles) {
 		if (i->mID == pTitleID)
 			return i->mPrefix;
@@ -56,7 +62,7 @@ const String& TitleManager::getPrefix(const uint32 pTitleID) const {
 	return EmptyString;
 }
 
-const String& TitleManager::getSuffix(const uint32 pTitleID) const {
+const String& TitleManager::getSuffix(const u32 pTitleID) const {
 	for (auto i : mTitles) {
 		if (i->mID == pTitleID)
 			return i->mSuffix;

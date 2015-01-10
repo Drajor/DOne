@@ -2,6 +2,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp zone_data.xml)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp SpellDataStore.h SpellDataStore.cpp NPCFactory.h NPCFactory.cpp)
+SOURCE_GROUP(Zone\\Hate FILES HateControllerFactory.h HateControllerFactory.cpp HateController.h HateController.cpp)
+SOURCE_GROUP(Zone\\Experience FILES ExperienceCalculator.h ExperienceCalculator.cpp ExperienceController.h ExperienceController.cpp)
+SOURCE_GROUP(Zone\\Group FILES GroupManager.h GroupManager.cpp Group.h)
+SOURCE_GROUP(Zone\\Raid FILES RaidManager.h Raid.h)
+SOURCE_GROUP(Zone\\Guild FILES GuildManager.h GuildManager.cpp)
+SOURCE_GROUP(Zone\\Command FILES CommandHandler.h CommandHandler.cpp)
 SOURCE_GROUP(UCS FILES UCS.h UCS.cpp UCSClientConnection.h UCSClientConnection.cpp)
 SOURCE_GROUP(HateController FILES HateControllerFactory.h HateControllerFactory.cpp)
 
@@ -39,7 +45,6 @@ SET(world_sources
 	Item.cpp
 	Inventory.cpp
 	ItemGenerator.cpp
-	StaticItemData.cpp
 	NPCFactory.cpp
 	CombatSystem.cpp
 	LootAllocator.cpp
@@ -52,6 +57,11 @@ SET(world_sources
 	Random.cpp
 	DataValidation.cpp
 	SpawnGroup.cpp
+	HateControllerFactory.cpp
+	HateController.cpp
+	ExperienceCalculator.cpp
+	ExperienceController.cpp
+	LootController.cpp
 )
 
 SET(world_headers
@@ -71,6 +81,7 @@ SET(world_headers
 	ZoneClientConnection.h
 	ClientAuthentication.h
 	ZoneData.h
+	Group.h
 	GroupManager.h
 	GuildManager.h
 	RaidManager.h
@@ -93,7 +104,6 @@ SET(world_headers
 	Item.h
 	Inventory.h
 	ItemGenerator.h
-	StaticItemData.h
 	NPCFactory.h
 	Timer.h
 	TimeUtility.h
@@ -111,6 +121,13 @@ SET(world_headers
 	DataValidation.h
 	SpawnGroup.h
 	Types.h
+	HateControllerFactory.h
+	HateController.h
+	ExperienceCalculator.h
+	ExperienceController.h
+	LootController.h
+	Raid.h
+	ServiceLocator.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -1507,6 +1507,26 @@ namespace Payload {
 				return ss.str();
 			}
 		};
+
+		// S->C
+		struct GroupInvite : public FixedT<GroupInvite, OP_GroupInvite> {
+			static EQApplicationPacket* construct(const String& pFrom, const String& pTo) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mFrom, pFrom.c_str());
+				strcpy(payload->mTo, pTo.c_str());
+
+				return packet;
+			}
+
+			char mFrom[64];
+			char mTo[64];
+			u32 unknown0128 = 0;
+			u32 unknown0132 = 0;
+			u32 unknown0136 = 0;
+			u32 unknown0140 = 0;
+			u32 unknown0144 = 0;
+		};
 	}
 
 	namespace World {

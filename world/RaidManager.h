@@ -1,19 +1,14 @@
 #pragma once
 
-#include "Constants.h"
-#include "Singleton.h"
+#include <list>
 
+class ZoneManager;
 class Character;
 class Raid;
 
-class RaidManager : public Singleton<RaidManager> {
-private:
-	friend class Singleton<RaidManager>;
-	RaidManager() {};
-	~RaidManager() {};
-	RaidManager(RaidManager const&); // Do not implement.
-	void operator=(RaidManager const&); // Do not implement.
+class RaidManager {
 public:
+	const bool initialise(ZoneManager* pZoneManager);
 
 	void onEnterZone(Character* pCharacter);
 	void onLeaveZone(Character* pCharacter);
@@ -21,8 +16,9 @@ public:
 	void onLinkdead(Character* pCharacter);
 
 private:
-};
 
-class Raid {
+	bool mInitialised = false;
+	ZoneManager* mZoneManager = nullptr;
 
+	std::list<Raid*> mRaids;
 };

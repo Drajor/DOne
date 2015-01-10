@@ -236,6 +236,7 @@ void Controller::addRaidExperience(const u32 pExperience) {
 
 const u32 Controller::getMaxRaidPoints() const {
 	// [Client Limitation]
+	// NOTE: This limitation is cosmetic. Underfoot can go past this number.
 	if (mLevel < 45) return 6;
 	if (mLevel < 55) return 8;
 	return 10;
@@ -243,6 +244,7 @@ const u32 Controller::getMaxRaidPoints() const {
 
 const u32 Controller::getMaxGroupPoints() const {
 	// [Client Limitation]
+	// NOTE: This limitation is cosmetic. Underfoot can go past this number.
 	if (mLevel < 35) return 4;
 	if (mLevel < 51) return 6;
 	return 8;

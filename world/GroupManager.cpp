@@ -1,4 +1,6 @@
 #include "GroupManager.h"
+#include "ServiceLocator.h"
+#include "Group.h"
 #include "ZoneManager.h"
 #include "Utility.h"
 #include "Character.h"
@@ -8,6 +10,15 @@
 
 #include "../common/EQPacket.h"
 #include "../common/eq_packet_structs.h"
+
+const bool GroupManager::initialise(ZoneManager* pZoneManager) {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pZoneManager);
+
+	mZoneManager = pZoneManager;
+	mInitialised = true;
+	return true;
+}
 
 void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
 	EXPECTED(pLeader);
@@ -81,7 +92,7 @@ void GroupManager::handleMakeLeader(Character* pCharacter, const String& pLeader
 	EXPECTED(_isLeader(pCharacter)); // Check: Initiator is group leader.
 
 	// Try to find the Character being invited.
-	auto character = ZoneManager::getInstance().findCharacter(pLeaderName);
+	auto character = mZoneManager->findCharacter(pLeaderName);
 	if (!character) { return; }
 
 	EXPECTED(character->getGroup() == pCharacter->getGroup()); // Check: Both Characters are in the same group.
@@ -111,7 +122,7 @@ void GroupManager::handleInviteSent(Character* pCharacter, String pInviteName) {
 	EXPECTED(pCharacter);
 
 	// Try to find the Character being invited.
-	auto character = ZoneManager::getInstance().findCharacter(pInviteName);
+	auto character = mZoneManager->findCharacter(pInviteName);
 	if (!character) {
 		pCharacter->getConnection()->sendMessage(MessageType::Red, "Player " + pInviteName + " was not found.");
 		return;
@@ -131,7 +142,7 @@ void GroupManager::handleAcceptInvite(Character* pCharacter, String pInviterName
 	EXPECTED(pCharacter);
 
 	// Try to find the Character who invited.
-	auto character = ZoneManager::getInstance().findCharacter(pInviterName);
+	auto character = mZoneManager->findCharacter(pInviterName);
 	if (!character) { return; } // This is really edge case and may never occur.
 
 	// Starting a new group.
@@ -148,7 +159,7 @@ void GroupManager::handleDeclineInvite(Character* pCharacter, String pInviterNam
 	EXPECTED(pCharacter);
 	
 	// Try to find the Character who invited.
-	auto character = ZoneManager::getInstance().findCharacter(pInviterName);
+	auto character = mZoneManager->findCharacter(pInviterName);
 
 	if (!character) { return; } // Ignore.
 	if (character->isZoning()) { return; } // Ignore.

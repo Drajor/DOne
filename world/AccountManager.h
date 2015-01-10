@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Constants.h"
-#include "Singleton.h"
-#include "Data.h"
+#include "Types.h"
+#include <list>
 
 namespace Data {
 	struct Account;
@@ -13,24 +12,22 @@ namespace Payload {
 		struct CreateCharacter;
 	}
 }
+
+class DataStore;
 class Character;
 
-class AccountManager : public Singleton<AccountManager> {
-private:
-	friend class Singleton<AccountManager>;
-	AccountManager() {};
-	~AccountManager();
-	AccountManager(AccountManager const&); // Do not implement.
-	void operator=(AccountManager const&); // Do not implement.
+class AccountManager {
 public:
-	bool initialise();
+	~AccountManager();
+
+	const bool initialise(DataStore* pDataStore);
 
 	// Returns an Account by ID.
 	Data::Account* getAccount(const u32 pID) const;
 	bool checkOwnership(const u32 pAccountID, const String& pCharacterName);
 	bool createAccount(const u32 pAccountID, const String pAccoutName);
 
-	AccountStatus getStatus(const u32 pAccountID);
+	const u8 getStatus(const u32 pAccountID);
 	bool create(const String& pAccountName);
 	bool exists(const u32 pAccountID);
 
@@ -53,6 +50,10 @@ public:
 	const bool setSharedPlatinum(const u32 pAccountID, const i32 pPlatinum);
 
 private:
+
+	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
+
 	void _clear();
 	bool _save(Data::Account* pAccountData);
 	bool _save();

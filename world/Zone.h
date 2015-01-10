@@ -31,6 +31,9 @@ class LootAllocator;
 class Item;
 class Object;
 class Door;
+class CommandHandler;
+class ItemFactory;
+class Transmutation;
 
 namespace Experience {
 	class Calculator;
@@ -74,7 +77,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator);
+	const bool initialise(Data::Zone* pZoneData, std::shared_ptr<Experience::Calculator> pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler);
 
 	const bool canShutdown() const;
 	const bool shutdown();
@@ -125,6 +128,8 @@ public:
 	void handleSitting(Character* pCharacter);
 	void handleCrouching(Character* pCharacter);
 
+	void handleChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
+
 	void handleSay(Character* pCharacter, const String pMessage);
 	void handleShout(Character* pCharacter, const String pMessage);
 	void handleOOC(Character* pCharacter, const String pMessage);
@@ -147,11 +152,15 @@ public:
 	// Handles specifics of Character death.
 	void _handleDeath(Character* pCharacter, Actor* pKiller);
 
-	void _giveExperienceForKill(Character* pCharacter, NPC* pNPC);
+	// Allocate experience for an NPC kill (Solo).
+	void allocateSoloExperience(Character* pCharacter, NPC* pNPC);
 
-	void allocateExperience(Character* pCharacter, NPC* pNPC);
-	void allocateExperience(Group* pGroup, NPC* pNPC);
-	void allocateExperience(Raid* pRaid, NPC* pNPC);
+	// Allocate experience for an NPC kill (Group).
+	void allocateGroupExperience(Group* pGroup, NPC* pNPC);
+
+	// Allocate experience for an NPC kill (Raid).
+	void allocateRaidExperience(Raid* pRaid, NPC* pNPC);
+
 	void processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent);
 
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
@@ -241,7 +250,14 @@ public:
 
 	// Returns the experience modifier on this Zone.
 	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifer.get(); }
+	
+	void onCombine(Character* pCharacter, const u32 pSlot);
+
 private:
+
+	bool mInitialised = false;
+	ItemFactory* mItemFactory = nullptr;
+	Transmutation* mTransmutation = nullptr;
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
 	const bool loadObjects(Data::ObjectList pObjects);
@@ -283,7 +299,6 @@ private:
 	const u16 mInstanceID;
 	const u16 mPort;
 
-	bool mInitialised = false; // Flag indicating whether the Zone has been initialised.
 	bool mShuttingDown = false;
 	bool mPopulated = false;
 	EQStreamFactory* mStreamFactory = nullptr;
@@ -294,6 +309,9 @@ private:
 
 	SpawnPointManager* mSpawnPointManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
+	GroupManager* mGroupManager = nullptr;
+	RaidManager* mRaidManager = nullptr;
+	CommandHandler* mCommandHandler = nullptr;
 	
 	LootAllocator* mLootAllocator = nullptr;
 	std::shared_ptr<Experience::Calculator> mExperienceCalculator;

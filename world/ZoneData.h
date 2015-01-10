@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Types.h"
-#include "Singleton.h"
 #include <list>
 
 // For the #zonesearch command.
@@ -12,6 +11,8 @@ struct ZoneDataSearchEntry {
 }; // NOTE: No initializer due to PoD rules.
 typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
+class DataStore;
+
 namespace Data {
 	struct Zone;
 	struct SpawnGroup;
@@ -20,16 +21,9 @@ namespace Data {
 }
 struct Vector3;
 
-class ZoneDataManager : public Singleton<ZoneDataManager> {
-private:
-	friend class Singleton<ZoneDataManager>;
-	ZoneDataManager() {};
-	~ZoneDataManager();
-	ZoneDataManager(ZoneDataManager const&); // Do not implement.
-	void operator=(ZoneDataManager const&); // Do not implement.
+class ZoneDataManager {
 public:
-
-	const bool initialise();
+	const bool initialise(DataStore* pDataStore);
 	
 	const bool load(const u16 pZoneID);
 	const bool unload(const u16 pZoneID);
@@ -50,8 +44,10 @@ public:
 
 	Data::Zone* getZoneData(const u16 pZoneID) const;
 	inline std::list<Data::Zone*>& getZoneData() { return mZoneData; }
+	
 private:
 
 	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
 	std::list<Data::Zone*> mZoneData;
 };

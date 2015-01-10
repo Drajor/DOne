@@ -1,11 +1,15 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
+#include <vector>
+#include <list>
 
 static const char COMMAND_TOKEN = '#';
 static const char HELP_TOKEN = '?';
 
 typedef std::vector<String> CommandParameters;
+
+class DataStore;
 class Character;
 
 class Command {
@@ -44,21 +48,26 @@ protected:
 	
 	CommandParameters mParameters;
 	std::list<String> mAliases;
-	uint8 mMinimumStatus;
+	u8 mMinimumStatus = UINT8_MAX;
 	std::list<String> mHelpMessages;
 	Character* mInvoker = nullptr;
 	bool mLogged = true;
-	uint8 mMinimumParameters = 0;
-	uint8 mMaximumParameters = UINT8_MAX;
+	u8 mMinimumParameters = 0;
+	u8 mMaximumParameters = UINT8_MAX;
 	bool mRequiresTarget = false;
 };
 
 class CommandHandler {
 public:
 	~CommandHandler();
-	void initialise();
+	const bool initialise(DataStore* pDataStore);
 	void command(Character* pCharacter, String pCommandMessage);
+
 private:
+
+	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
+
 	void _logCommand(Character* pCharacter, String pCommandMessage);
 	Command* findCommand(String pCommandName);
 	void _handleCommand(Character* pCharacter, const String& pCommandName, std::vector<String> pParameters);

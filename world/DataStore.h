@@ -26,11 +26,7 @@ namespace Data {
 
 class DataStore {
 public:
-	static DataStore& getInstance() {
-		static DataStore instance;
-		return instance;
-	}
-	bool initialise();
+	const bool initialise();
 	
 	// Settings
 	static bool loadSettings();
@@ -64,11 +60,4 @@ public:
 	const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies);
 
 	const bool loadShops(Data::ShopList pShops);
-private:
-
-	DataStore() {};
-	~DataStore() {};
-	DataStore(DataStore const&);
-	void operator=(DataStore const&);
-	
 };

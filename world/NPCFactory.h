@@ -1,25 +1,26 @@
 #pragma once
 
 #include "Types.h"
-#include "Singleton.h"
 #include <list>
 
 namespace Data {
 	struct NPCAppearance;
 	struct NPCType;
 }
+
+class LogContext;
+class DataStore;
+class ItemFactory;
+class ShopDataStore;
 class NPC;
 class HateControllerFactory;
 
-class NPCFactory : public Singleton<NPCFactory> {
-private:
-	friend class Singleton<NPCFactory>;
-	NPCFactory() {};
-	~NPCFactory() {};
-	NPCFactory(NPCFactory const&); // Do not implement.
-	void operator=(NPCFactory const&); // Do not implement.
+class NPCFactory {
 public:
-	const bool initialise();
+	NPCFactory();
+	~NPCFactory();
+	const bool initialise(DataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
+
 	NPC* create(const u32 pTypeID);
 	NPC* createInvisibleMan();
 
@@ -30,9 +31,14 @@ public:
 	// Finds an NPCAppearance by ID.
 	Data::NPCAppearance* findAppearance(const u32 pID) const;
 	inline std::list<Data::NPCAppearance*> getNPCAppearances() { return mNPCAppearances; }
+
 private:
+
 	bool mInitialised = false;
-	//Factory<String, HateController, Actor> mHateControllerFactory;
+	LogContext* mLog = nullptr;
+	DataStore* mDataStore = nullptr;
+	ItemFactory* mItemFactory = nullptr;
+	ShopDataStore* mShopDataStore = nullptr;
 	HateControllerFactory* mHateControllerFactory = nullptr;
 
 	// NPC Appearances

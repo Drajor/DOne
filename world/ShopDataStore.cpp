@@ -1,13 +1,16 @@
 #include "ShopDataStore.h"
+#include "ServiceLocator.h"
 #include "Data.h"
 #include "DataStore.h"
 #include "Utility.h"
 
-const bool ShopDataStore::initialise() {
+const bool ShopDataStore::initialise(DataStore* pDataStore) {
 	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
+	mDataStore = pDataStore;
 
 	Log::status("[ShopDataStore] Initialising.");
-	EXPECTED_BOOL(DataStore::getInstance().loadShops(mShopData));
+	EXPECTED_BOOL(mDataStore->loadShops(mShopData));
 	Log::info("[ShopDataStore] Loaded data for " + std::to_string(mShopData.size()) + " Shops.");
 
 	mInitialised = true;

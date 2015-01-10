@@ -1,4 +1,5 @@
 #include "Transmutation.h"
+#include "ServiceLocator.h"
 #include "DataStore.h"
 #include "Data.h"
 #include "Utility.h"
@@ -9,8 +10,13 @@
 const bool Transmutation::initialise() {
 	EXPECTED_BOOL(mInitialised == false);
 
+	mDataStore = ServiceLocator::getDataStore();
+	EXPECTED_BOOL(mDataStore);
+	mItemFactory = ServiceLocator::getItemFactory();
+	EXPECTED_BOOL(mItemFactory);
+
 	Log::status("[Transmutation] Initialising.");
-	EXPECTED_BOOL(DataStore::getInstance().loadTransmutationComponents(mComponents));
+	EXPECTED_BOOL(mDataStore->loadTransmutationComponents(mComponents));
 	Log::info("[Transmutation] Loaded data for " + std::to_string(mComponents.size()) + " Components.");
 
 	mInitialised = true;
@@ -33,7 +39,7 @@ Item* Transmutation::transmute(std::list<Item*> pItems) {
 	// TODO: lots of checks ;)
 
 	// Process components
-	Item* result = ItemFactory::makeAugment();
+	Item* result = mItemFactory->makeAugment();
 	for (auto i : components) {
 		if (i->mAttribute == "str") { result->setStrength(_roll(result, i)); }
 		else if (i->mAttribute == "sta") { result->setStamina(_roll(result, i)); }

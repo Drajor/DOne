@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Constants.h"
-#include "Singleton.h"
 #include "Character.h"
 
 // For the #guildsearch command.
@@ -11,6 +10,8 @@ struct GuildSearchEntry {
 };
 typedef std::list<GuildSearchEntry> GuildSearchResults;
 
+class DataStore;
+class ZoneManager;
 class Guild;
 
 struct GuildMember {
@@ -61,15 +62,10 @@ class Guild {
 	}
 };
 
-class GuildManager : public Singleton<GuildManager> {
-private:
-	friend class Singleton<GuildManager>;
-	GuildManager() {};
-	~GuildManager();
-	GuildManager(GuildManager const&); // Do not implement.
-	void operator=(GuildManager const&); // Do not implement.
+class GuildManager {
 public:
-	bool initialise();
+
+	const bool initialise(DataStore* pDataStore, ZoneManager* pZoneManager);
 
 	bool isLeader(Character* pCharacter);
 	bool isOfficer(Character* pCharacter);
@@ -110,6 +106,11 @@ public:
 	GuildSearchResults getAllGuilds();
 
 private:
+
+	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
+	ZoneManager* mZoneManager = nullptr;
+
 	void _sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
 
 	// Sends the Guild MOTD to all online members.

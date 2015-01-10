@@ -1,4 +1,5 @@
 #include "AccountManager.h"
+#include "ServiceLocator.h"
 #include "DataStore.h"
 #include "Data.h"
 #include "LogSystem.h"
@@ -18,14 +19,19 @@ AccountManager::~AccountManager() {
 	_clear();
 }
 
-bool AccountManager::initialise() {
+const bool AccountManager::initialise(DataStore* pDataStore) {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
 	Profile p("AccountManager::initialise");
 	Log::status("[Account Manager] Initialising.");
 
-	const bool accountsLoaded = DataStore::getInstance().loadAccounts(mAccounts);
+	mDataStore = pDataStore;
+	const bool accountsLoaded = mDataStore->loadAccounts(mAccounts);
 	EXPECTED_BOOL(accountsLoaded);
 
 	Log::info("[Account Manager] Loaded data for " + std::to_string(mAccounts.size()) + " Accounts.");
+
+	mInitialised = true;
 	return true;
 }
 
@@ -49,14 +55,14 @@ void AccountManager::_clear() {
 	mAccounts.remove_if(Utility::containerEntryDelete<Data::Account*>);
 }
 bool AccountManager::_save() {
-	EXPECTED_BOOL(DataStore::getInstance().saveAccounts(mAccounts));
+	EXPECTED_BOOL(mDataStore->saveAccounts(mAccounts));
 
 	return true;
 }
 
 bool AccountManager::_save(Data::Account* pAccountData) {
 	EXPECTED_BOOL(pAccountData);
-	EXPECTED_BOOL(DataStore::getInstance().saveAccountCharacterData(pAccountData));
+	EXPECTED_BOOL(mDataStore->saveAccountCharacterData(pAccountData));
 
 	return true;
 }
@@ -66,7 +72,7 @@ bool AccountManager::exists(const u32 pAccountID){
 	return account ? true : false;
 }
 
-AccountStatus AccountManager::getStatus(const u32 pAccountID) {
+const u8 AccountManager::getStatus(const u32 pAccountID) {
 	auto account = _find(pAccountID);
 	return account ? account->mStatus : ResponseID::ALLOWED;
 }
@@ -74,7 +80,7 @@ AccountStatus AccountManager::getStatus(const u32 pAccountID) {
 bool AccountManager::deleteCharacter(const u32 pAccountID, const String& pCharacterName) {
 	auto account = _find(pAccountID);
 	EXPECTED_BOOL(account);
-	EXPECTED_BOOL(DataStore::getInstance().deleteCharacter(pCharacterName));
+	EXPECTED_BOOL(mDataStore->deleteCharacter(pCharacterName));
 
 	// Remove from AccountData
 	bool removed = false;
@@ -174,7 +180,7 @@ const bool AccountManager::ensureAccountLoaded(const u32 pAccountID) {
 
 	if (accountData->mCharacterDataLoaded) return true;
 
-	EXPECTED_BOOL(DataStore::getInstance().loadAccountCharacterData(accountData));
+	EXPECTED_BOOL(mDataStore->loadAccountCharacterData(accountData));
 	accountData->mCharacterDataLoaded = true;
 	return true;
 }
@@ -217,7 +223,7 @@ bool AccountManager::handleCharacterCreate(const u32 pAccountID, const String& p
 	characterData->mDrakkinDetails = pPayload->mDrakkinDetails;
 	characterData->mDeity = pPayload->mDeity; // TODO: Sanity
 
-	EXPECTED_BOOL(DataStore::getInstance().saveCharacter(pCharacterName, characterData));
+	EXPECTED_BOOL(mDataStore->saveCharacter(pCharacterName, characterData));
 
 	// Create Account::CharacterData for the new Character.
 	

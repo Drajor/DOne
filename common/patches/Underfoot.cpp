@@ -2123,13 +2123,13 @@ ENCODE(OP_VetRewardsAvaliable)
 //	delete in;
 //}
 
-ENCODE(OP_GroupInvite) {
-	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
-	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
-	memcpy(eq->invitee_name, emu->name1, sizeof(eq->invitee_name));
-	memcpy(eq->inviter_name, emu->name2, sizeof(eq->inviter_name));
-	FINISH_ENCODE();
-}
+//ENCODE(OP_GroupInvite) {
+//	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
+//	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
+//	memcpy(eq->invitee_name, emu->name1, sizeof(eq->invitee_name));
+//	memcpy(eq->inviter_name, emu->name2, sizeof(eq->inviter_name));
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_GroupFollow) {
 	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
@@ -2902,22 +2902,22 @@ DECODE(OP_CharacterCreate) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_GroupInvite2)
-{
-	//_log(NET__ERROR, "Received incoming OP_GroupInvite2. Forwarding");
-	DECODE_FORWARD(OP_GroupInvite);
-}
+//DECODE(OP_GroupInvite2)
+//{
+//	//_log(NET__ERROR, "Received incoming OP_GroupInvite2. Forwarding");
+//	DECODE_FORWARD(OP_GroupInvite);
+//}
 
-DECODE(OP_GroupInvite) {
-	//EQApplicationPacket *in = __packet;
-	//_log(NET__ERROR, "Received incoming OP_GroupInvite");
-	//_hex(NET__ERROR, in->pBuffer, in->size);
-	DECODE_LENGTH_EXACT(structs::GroupInvite_Struct);
-	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
-	memcpy(emu->name1, eq->invitee_name, sizeof(emu->name1));
-	memcpy(emu->name2, eq->inviter_name, sizeof(emu->name2));
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_GroupInvite) {
+//	//EQApplicationPacket *in = __packet;
+//	//_log(NET__ERROR, "Received incoming OP_GroupInvite");
+//	//_hex(NET__ERROR, in->pBuffer, in->size);
+//	DECODE_LENGTH_EXACT(structs::GroupInvite_Struct);
+//	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupInvite_Struct);
+//	memcpy(emu->name1, eq->invitee_name, sizeof(emu->name1));
+//	memcpy(emu->name2, eq->inviter_name, sizeof(emu->name2));
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_GroupFollow) {
 	//EQApplicationPacket *in = __packet;

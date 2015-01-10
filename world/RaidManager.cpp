@@ -3,6 +3,15 @@
 #include "Zone.h"
 #include "Utility.h"
 
+const bool RaidManager::initialise(ZoneManager* pZoneManager) {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pZoneManager);
+
+	mZoneManager = pZoneManager;
+	mInitialised = true;
+	return true;
+}
+
 void RaidManager::onEnterZone(Character* pCharacter) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->hasRaid());

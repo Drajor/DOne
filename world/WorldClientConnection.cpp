@@ -1,4 +1,5 @@
 #include "WorldClientConnection.h"
+#include "ServiceLocator.h"
 #include "GuildManager.h"
 #include "ZoneManager.h"
 
@@ -17,7 +18,8 @@
 
 
 WorldClientConnection::WorldClientConnection(World* pWorld, EQStreamInterface* pStreamInterface) :
-mStreamInterface(pStreamInterface), mWorld(pWorld)
+	mStreamInterface(pStreamInterface),
+	mWorld(pWorld)
 {
 	mIP = mStreamInterface->GetRemoteIP();
 	mPort = ntohs(mStreamInterface->GetRemotePort());
@@ -143,7 +145,7 @@ void WorldClientConnection::_sendCharacterSelectInfo() {
 	using namespace Payload::World;
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
 	auto payload = CharacterSelect::convert(outPacket->pBuffer);
-	auto accountData = AccountManager::getInstance().getAccount(mAccountID);
+	auto accountData = ServiceLocator::getAccountManager()->getAccount(mAccountID);
 	EXPECTED(accountData);
 
 	int charSlot = 0;
@@ -225,10 +227,10 @@ bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 
 		// Hack.
 		// TODO: Tidy this up. AccountName needs to accessible in a better way.
-		auto accountData = AccountManager::getInstance().getAccount(accountID);
+		auto accountData = ServiceLocator::getAccountManager()->getAccount(accountID);
 		EXPECTED_BOOL(accountData);
 		mWorld->addAuthentication(accountID, accountData->mAccountName, accountKey, mIP);
-		EXPECTED_BOOL(AccountManager::getInstance().ensureAccountLoaded(accountID));
+		EXPECTED_BOOL(ServiceLocator::getAccountManager()->ensureAccountLoaded(accountID));
 	}
 
 	_setAuthenticated(true);
@@ -239,8 +241,8 @@ bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	// Going to: Another Zone
 	if (mZoning) {
 		// Resolve the name of the Character zoning based on Account ID.
-		EXPECTED_BOOL(ZoneManager::getInstance().hasZoningCharacter(accountID));
-		String characterName = ZoneManager::getInstance().getZoningCharacterName(accountID);
+		EXPECTED_BOOL(ServiceLocator::getZoneManager()->hasZoningCharacter(accountID));
+		String characterName = ServiceLocator::getZoneManager()->getZoningCharacterName(accountID);
 		EXPECTED_BOOL(characterName.length() > 0);
 
 		_sendLogServer();
@@ -250,7 +252,7 @@ bool WorldClientConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	}
 	// Going to: Character Selection Screen.
 	else {
-		EXPECTED_BOOL(AccountManager::getInstance().ensureAccountLoaded(accountID));
+		EXPECTED_BOOL(ServiceLocator::getAccountManager()->ensureAccountLoaded(accountID));
 
 		_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
 		_sendLogServer();
@@ -275,7 +277,7 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
 	// So we check here and just reject the name if the account is at max.
 	// It would be better if I could figure out how the client limits it and duplicate that.
-	if (AccountManager::getInstance().getNumCharacters(mAccountID) >= Limits::Account::MAX_NUM_CHARACTERS) {
+	if (ServiceLocator::getAccountManager()->getNumCharacters(mAccountID) >= Limits::Account::MAX_NUM_CHARACTERS) {
 		auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
 		outPacket->pBuffer[0] = 0;
 		mStreamInterface->QueuePacket(outPacket);
@@ -304,17 +306,17 @@ bool WorldClientConnection::_handleNameApprovalPacket(const EQApplicationPacket*
 		}
 	}
 	// Check if name already in use.
-	if (valid && !World::getInstance().isCharacterNameUnique(characterName)) {
+	if (valid && !mWorld->isCharacterNameUnique(characterName)) {
 		valid = false;
 	}
 	// Check if name is reserved.
-	if (valid && World::getInstance().isCharacterNameReserved(characterName)) {
+	if (valid && mWorld->isCharacterNameReserved(characterName)) {
 		valid = false;
 	}
 	// Reserve character name.
 	if (valid) {
 		// For the rare chance that more than one user tries to create a character with same name.
-		World::getInstance().reserveCharacterName(mAccountID, characterName);
+		mWorld->reserveCharacterName(mAccountID, characterName);
 		mReservedCharacterName = characterName;
 	}
 
@@ -432,7 +434,7 @@ bool WorldClientConnection::_handleCharacterCreatePacket(const EQApplicationPack
 
 	auto payload = CreateCharacter::convert(pPacket->pBuffer);
 
-	if (!AccountManager::getInstance().handleCharacterCreate(mAccountID, mReservedCharacterName, payload)){
+	if (!ServiceLocator::getAccountManager()->handleCharacterCreate(mAccountID, mReservedCharacterName, payload)) {
 		dropConnection();
 		return false;
 	}
@@ -451,9 +453,9 @@ bool WorldClientConnection::_handleEnterWorld(const EQApplicationPacket* pPacket
 	EXPECTED_BOOL(Limits::Character::nameLength(characterName));
 
 	// Check: Account owns the Character.
-	EXPECTED_BOOL(AccountManager::getInstance().checkOwnership(mAccountID, characterName));
+	EXPECTED_BOOL(ServiceLocator::getAccountManager()->checkOwnership(mAccountID, characterName));
 
-	bool success = World::getInstance().handleEnterWorld(this, characterName, mZoning);
+	bool success = mWorld->handleEnterWorld(this, characterName, mZoning);
 
 	// World Entry Failed
 	if (!success) {
@@ -494,7 +496,7 @@ bool WorldClientConnection::_handleDeleteCharacterPacket(const EQApplicationPack
 
 	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Character::MAX_NAME_LENGTH);
 
-	if (World::getInstance().deleteCharacter(mAccountID, characterName)) {
+	if (mWorld->deleteCharacter(mAccountID, characterName)) {
 		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
 		Log::info(ss.str());
 		_sendCharacterSelectInfo();
@@ -525,7 +527,7 @@ void WorldClientConnection::_sendZoneUnavailable() {
 void WorldClientConnection::_sendGuildList() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	outPacket->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+	outPacket->pBuffer = reinterpret_cast<unsigned char*>(ServiceLocator::getGuildManager()->_getGuildNames());
 
 	mStreamInterface->QueuePacket(outPacket);
 	outPacket->pBuffer = nullptr;

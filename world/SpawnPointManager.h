@@ -3,6 +3,7 @@
 #include "Types.h"
 #include <list>
 
+class NPCFactory;
 class Zone;
 class SpawnGroup;
 class SpawnPoint;
@@ -28,11 +29,13 @@ public:
 
 private:
 
+	bool mInitialised = false;
+	NPCFactory* mNPCFactory = nullptr;
+
 	void _spawn(SpawnPoint* pSpawnPoint);
 	void _associate(SpawnPoint* pSpawnPoint, NPC* pNPC);
 	void _disassociate(SpawnPoint* pSpawnPoint, NPC* pNPC);
 	inline void _addRespawn(SpawnPoint* pSpawnPoint) { mRespawnSpawnPoints.push_back(pSpawnPoint); }
-	bool mInitialised = false;
 	bool mPopulated = false;
 	Zone* mZone = nullptr;
 

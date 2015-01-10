@@ -1,7 +1,8 @@
 #include "ZoneClientConnection.h"
-#include "GuildManager.h"
+#include "ServiceLocator.h"
 #include "GroupManager.h"
 #include "RaidManager.h"
+#include "GuildManager.h"
 #include "TitleManager.h"
 #include "Zone.h"
 #include "ZoneManager.h"
@@ -49,17 +50,13 @@ EQApplicationPacket* ZoneClientConnection::mGroupDisbandPacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupLeaderChangePacket = nullptr;
 EQApplicationPacket* ZoneClientConnection::mGroupUpdateMembersPacket = nullptr;
 
-ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone) :
+ZoneClientConnection::ZoneClientConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) :
 mStreamInterface(pStreamInterface),
-mZone(pZone),
-mCharacter(nullptr),
-mCommandHandler(nullptr),
-mZoneConnectionStatus(ZoneConnectionStatus::NONE),
-mConnected(true),
-mConnectionOrigin(ConnectionOrigin::Unknown)
+mGroupManager(pGroupManager),
+mRaidManager(pRaidManager),
+mGuildManager(pGuildManager),
+mConnected(true)
 {
-	mCommandHandler = new CommandHandler();
-	mCommandHandler->initialise();
 	mForceSendPositionTimer.Disable();
 }
 
@@ -67,10 +64,9 @@ ZoneClientConnection::~ZoneClientConnection() {
 	dropConnection();
 	mStreamInterface->ReleaseFromUse();
 	// NOTE: mStreamInterface is intentionally not deleted here.
-	safe_delete(mCommandHandler);
 }
 
-void ZoneClientConnection::initalise() {
+void ZoneClientConnection::_initalise() {
 	mPlayerProfilePacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 	mGroupJoinPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	mGroupLeavePacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
@@ -79,7 +75,7 @@ void ZoneClientConnection::initalise() {
 	mGroupUpdateMembersPacket = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 }
 
-void ZoneClientConnection::deinitialise() {
+void ZoneClientConnection::_deinitialise() {
 	safe_delete(mPlayerProfilePacket);
 	safe_delete(mGroupJoinPacket);
 	safe_delete(mGroupLeavePacket);
@@ -594,9 +590,9 @@ void ZoneClientConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
 
 	// Retrieve Character
-	mCharacter = ZoneManager::getInstance().getZoningCharacter(characterName);
+	mCharacter = ServiceLocator::getZoneManager()->getZoningCharacter(characterName);
 	EXPECTED(mCharacter);
-	EXPECTED(ZoneManager::getInstance().removeZoningCharacter(mCharacter->getName()));
+	EXPECTED(ServiceLocator::getZoneManager()->removeZoningCharacter(mCharacter->getName()));
 
 	// Check: Character authenticated for this Zone.
 	EXPECTED(mZone->checkAuthentication(mCharacter));
@@ -925,15 +921,15 @@ void ZoneClientConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 
 	sendMOTD("Welcome to Fading Light.");
 
-	if (mCharacter->hasGuild()) {
-		GuildManager::getInstance().onEnterZone(mCharacter);
-	}
-	if (mCharacter->hasGroup()) {
-		GroupManager::getInstance().onEnterZone(mCharacter);
-	}
-	if (mCharacter->hasRaid()) {
-		RaidManager::getInstance().onEnterZone(mCharacter);
-	}
+	//if (mCharacter->hasGuild()) {
+	//	mGuildManager->onEnterZone(mCharacter);
+	//}
+	//if (mCharacter->hasGroup()) {
+	//	GroupManager::getInstance().onEnterZone(mCharacter);
+	//}
+	//if (mCharacter->hasRaid()) {
+	//	RaidManager::getInstance().onEnterZone(mCharacter);
+	//}
 }
 
 void ZoneClientConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
@@ -1195,56 +1191,58 @@ void ZoneClientConnection::_handleChannelMessage(const EQApplicationPacket* pPac
 	const String message = Utility::safeString(payload->message, MAX_MESSAGE_SIZE);
 	const String senderName = Utility::safeString(payload->sender, MAX_SENDER_SIZE);
 	const String targetName = Utility::safeString(payload->targetname, MAX_TARGET_SIZE);
-	const uint32 channel = payload->chan_num;
-	
-	switch (channel) {
-	case ChannelID::Guild:
-		EXPECTED(mCharacter->hasGuild());
-		GuildManager::getInstance().handleMessage(mCharacter, message);
-		break;
-	case ChannelID::Group:
-		GroupManager::getInstance().handleMessage(mCharacter, message);
-		break;
-	case ChannelID::Shout:
-		mZone->handleShout(mCharacter, message);
-		break;
-	case ChannelID::Auction:
-		mZone->handleAuction(mCharacter, message);
-		break;
-	case ChannelID::OOC:
-		mZone->handleOOC(mCharacter, message);
-		break;
-	case ChannelID::GMSay:
-	case ChannelID::Broadcast:
-		// GM_SAY / CH_BROADAST are unused as far as I know.
-		break;
-	case ChannelID::Tell:
-		if (senderName.length() > 0 && targetName.length() > 0) {
-			mZone->handleTell(mCharacter, targetName, message);
-		}
-		break;
-	case ChannelID::Say:
-		// Check whether user has entered a command.
-		if (message[0] == COMMAND_TOKEN) {
-			mCommandHandler->command(mCharacter, message);
-			break;
-		}
-		mZone->handleSay(mCharacter, message);
-		break;
-	case ChannelID::Raid:
-		break;
-	case ChannelID::UCS:
-		break;
-		// /emote dances around wildly!
-	case ChannelID::Emote:
-		mZone->handleEmote(mCharacter, message);
-		break;
-	default:
-		StringStream ss;
-		ss << "[Zone Client Connection] " << __FUNCTION__ << " Got unexpected channel number: " << channel;
-		Log::error(ss.str());
-		break;
-	}
+	const u32 channel = payload->chan_num;
+
+	mZone->handleChannelMessage(mCharacter, channel, senderName, targetName, message);
+	//
+	//switch (channel) {
+	//case ChannelID::Guild:
+	//	EXPECTED(mCharacter->hasGuild());
+	//	mGuildManager->handleMessage(mCharacter, message);
+	//	break;
+	//case ChannelID::Group:
+	//	mGroupManager->handleMessage(mCharacter, message);
+	//	break;
+	//case ChannelID::Shout:
+	//	mZone->handleShout(mCharacter, message);
+	//	break;
+	//case ChannelID::Auction:
+	//	mZone->handleAuction(mCharacter, message);
+	//	break;
+	//case ChannelID::OOC:
+	//	mZone->handleOOC(mCharacter, message);
+	//	break;
+	//case ChannelID::GMSay:
+	//case ChannelID::Broadcast:
+	//	// GM_SAY / CH_BROADAST are unused as far as I know.
+	//	break;
+	//case ChannelID::Tell:
+	//	if (senderName.length() > 0 && targetName.length() > 0) {
+	//		mZone->handleTell(mCharacter, targetName, message);
+	//	}
+	//	break;
+	//case ChannelID::Say:
+	//	// Check whether user has entered a command.
+	//	if (message[0] == COMMAND_TOKEN) {
+	//		mCommandHandler->command(mCharacter, message);
+	//		break;
+	//	}
+	//	mZone->handleSay(mCharacter, message);
+	//	break;
+	//case ChannelID::Raid:
+	//	break;
+	//case ChannelID::UCS:
+	//	break;
+	//	// /emote dances around wildly!
+	//case ChannelID::Emote:
+	//	mZone->handleEmote(mCharacter, message);
+	//	break;
+	//default:
+	//	StringStream ss;
+	//	ss << "[Zone Client Connection] " << __FUNCTION__ << " Got unexpected channel number: " << channel;
+	//	Log::error(ss.str());
+	//	break;
+	//}
 }
 
 void ZoneClientConnection::sendPosition() {
@@ -1367,7 +1365,7 @@ void ZoneClientConnection::_sendZoneData() {
 	strcpy(payload->mShortName2, mZone->getShortName().c_str());
 
 	// Temp until I decide how I want to represent fog and weather in Zone.
-	auto zoneData = ZoneDataManager::getInstance().getZoneData(mZone->getID());
+	auto zoneData = ServiceLocator::getZoneDataManager()->getZoneData(mZone->getID());
 	EXPECTED(zoneData);
 
 	// Fog.
@@ -1883,17 +1881,14 @@ void ZoneClientConnection::_handleGroupInvite(const EQApplicationPacket* pPacket
 	EXPECTED(inviterName == mCharacter->getName()); // Check: Spoofing
 	EXPECTED(inviteeName != mCharacter->getName()); // Check: Not inviting ourself
 	
-	GroupManager::getInstance().handleInviteSent(mCharacter, inviteeName);
+	mGroupManager->handleInviteSent(mCharacter, inviteeName);
 }
 
 void ZoneClientConnection::sendGroupInvite(const String pFromCharacterName) {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
-	auto payload = reinterpret_cast<GroupInvite_Struct*>(packet->pBuffer);
-	strcpy(payload->inviter_name, pFromCharacterName.c_str());
-	strcpy(payload->invitee_name, mCharacter->getName().c_str());
-
+	auto packet = GroupInvite::construct(pFromCharacterName, mCharacter->getName());
 	sendPacket(packet);
 	delete packet;
 }
@@ -1912,7 +1907,7 @@ void ZoneClientConnection::_handleGroupFollow(const EQApplicationPacket* pPacket
 
 	// TODO: This can be spoofed to join groups...
 
-	GroupManager::getInstance().handleAcceptInvite(mCharacter, inviterName);
+	mGroupManager->handleAcceptInvite(mCharacter, inviterName);
 }
 
 void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
@@ -1926,7 +1921,7 @@ void ZoneClientConnection::_handleGroupCanelInvite(const EQApplicationPacket* pP
 	EXPECTED(Limits::Character::nameLength(inviteeName));
 	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
 
-	GroupManager::getInstance().handleDeclineInvite(mCharacter, inviterName);
+	mGroupManager->handleDeclineInvite(mCharacter, inviterName);
 }
 
 void ZoneClientConnection::sendGroupCreate() {
@@ -2032,7 +2027,7 @@ void ZoneClientConnection::_handleGroupDisband(const EQApplicationPacket* pPacke
 	EXPECTED(myCharacterName == mCharacter->getName()); // Check: Sanity
 	EXPECTED(mCharacter->hasGroup());
 
-	GroupManager::getInstance().handleDisband(mCharacter, removeCharacterName);
+	mGroupManager->handleDisband(mCharacter, removeCharacterName);
 }
 
 void ZoneClientConnection::sendGroupLeave(const String& pLeavingCharacterName) {
@@ -2071,7 +2066,7 @@ void ZoneClientConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPa
 	EXPECTED(Limits::Character::nameLength(newLeader));
 	EXPECTED(currentLeader == mCharacter->getName());
 
-	GroupManager::getInstance().handleMakeLeader(mCharacter, newLeader);
+	mGroupManager->handleMakeLeader(mCharacter, newLeader);
 }
 
 void ZoneClientConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
@@ -2110,15 +2105,15 @@ void ZoneClientConnection::_handleGuildCreate(const EQApplicationPacket* pPacket
 	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Guild::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Guild::nameLength(guildName));
 
-	GuildManager::getInstance().handleCreate(mCharacter, guildName);
+	mGuildManager->handleCreate(mCharacter, guildName);
 }
 
 void ZoneClientConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Check: Permission.
+	EXPECTED(mGuildManager->isLeader(mCharacter)); // Check: Permission.
 
-	GuildManager::getInstance().handleDelete(mCharacter);
+	mGuildManager->handleDelete(mCharacter);
 }
 
 void ZoneClientConnection::sendGuildRank() {
@@ -2139,7 +2134,7 @@ void ZoneClientConnection::_sendGuildNames() {
 
 	auto packet = new EQApplicationPacket(OP_GuildsList);
 	packet->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	packet->pBuffer = reinterpret_cast<unsigned char*>(GuildManager::getInstance()._getGuildNames());
+	packet->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
 
 	sendPacket(packet);
 	packet->pBuffer = nullptr; // Important: This prevents the payload from being deleted.
@@ -2150,7 +2145,7 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
-	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Check: Permission.
+	EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter)); // Check: Permission.
 	EXPECTED(pPacket->size == sizeof(GuildCommand_Struct));
 
 	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
@@ -2164,9 +2159,9 @@ void ZoneClientConnection::_handleGuildInvite(const EQApplicationPacket* pPacket
 	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
 
 	if (payload->officer == 0)
-		GuildManager::getInstance().handleInviteSent(mCharacter, toCharacterName);
+		mGuildManager->handleInviteSent(mCharacter, toCharacterName);
 	if (payload->officer == 1)
-		GuildManager::getInstance().handlePromote(mCharacter, toCharacterName);
+		mGuildManager->handlePromote(mCharacter, toCharacterName);
 
 	// NOTE: UF requires that the character being promoted is targetted we can verify this later.
 }
@@ -2187,9 +2182,9 @@ void ZoneClientConnection::_handleGuildRemove(const EQApplicationPacket* pPacket
 
 	// Check: Permission
 	if (toCharacterName != fromCharacterName)
-		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter));
+		EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter));
 
-	GuildManager::getInstance().handleRemove(mCharacter, toCharacterName);
+	mGuildManager->handleRemove(mCharacter, toCharacterName);
 }
 
 void ZoneClientConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
@@ -2232,12 +2227,12 @@ void ZoneClientConnection::_handleGuildInviteAccept(const EQApplicationPacket* p
 
 	// Character is accepting the invite.
 	if (payload->response == Accept) {
-		GuildManager::getInstance().handleInviteAccept(mCharacter, inviterName);
+		mGuildManager->handleInviteAccept(mCharacter, inviterName);
 		return;
 	}
 	// Character is declining the invite.
 	if (payload->response == Decline) {
-		GuildManager::getInstance().handleInviteDecline(mCharacter, inviterName);
+		mGuildManager->handleInviteDecline(mCharacter, inviterName);
 		return;
 	}
 
@@ -2249,7 +2244,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter)); // Only leader or officers can set the MOTD.
+	EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter)); // Only leader or officers can set the MOTD.
 	EXPECTED(pPacket->size == sizeof(GuildMOTD_Struct));
 
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
@@ -2258,7 +2253,7 @@ void ZoneClientConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacke
 	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity.
 	String motd = Utility::safeString(payload->motd, Limits::Guild::MAX_MOTD_LENGTH);
 
-	GuildManager::getInstance().handleSetMOTD(mCharacter, motd);
+	mGuildManager->handleSetMOTD(mCharacter, motd);
 }
 
 void ZoneClientConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
@@ -2295,7 +2290,7 @@ void ZoneClientConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacke
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
 
-	GuildManager::getInstance().handleGetMOTD(mCharacter);
+	mGuildManager->handleGetMOTD(mCharacter);
 }
 
 void ZoneClientConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
@@ -2379,17 +2374,17 @@ void ZoneClientConnection::sendGuildChannel(const String& pChannel) {
 void ZoneClientConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(GuildManager::getInstance().isLeader(mCharacter)); // Only a Guild leader can perform this operation.
+	EXPECTED(mGuildManager->isLeader(mCharacter)); // Only a Guild leader can perform this operation.
 	EXPECTED(pPacket->size == sizeof(Payload::Guild::GuildUpdate));
 
 	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(pPacket->pBuffer);
 	if (payload->mAction == GUILD_URL) {
 		String url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
-		GuildManager::getInstance().handleSetURL(mCharacter, url);
+		mGuildManager->handleSetURL(mCharacter, url);
 	}
 	else if (payload->mAction == GUILD_CHANNEL) {
 		String channel = Utility::safeString(payload->mText, Limits::Guild::MAX_CHANNEL_LENGTH);
-		GuildManager::getInstance().handleSetChannel(mCharacter, channel);
+		mGuildManager->handleSetChannel(mCharacter, channel);
 	}
 	else {
 		StringStream ss; ss << "[Zone Client Connection]Got unknown action value(" << payload->mAction << ") in _handleSetGuildURLOrChannel from " << Utility::characterLogDetails(mCharacter);
@@ -2412,9 +2407,9 @@ void ZoneClientConnection::_handleSetGuildPublicNote(const EQApplicationPacket* 
 
 	// Changing the note of someone else, check permission.
 	if (targetName != senderName)
-		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) || GuildManager::getInstance().isOfficer(mCharacter));
+		EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter));
 
-	GuildManager::getInstance().handleSetPublicNote(mCharacter, targetName, note);
+	mGuildManager->handleSetPublicNote(mCharacter, targetName, note);
 }
 
 void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
@@ -2429,7 +2424,7 @@ void ZoneClientConnection::_handleGetGuildStatus(const EQApplicationPacket* pPac
 	if (Limits::Character::nameLength(targetName) == false)
 		return;
 	
-	GuildManager::getInstance().handleStatusRequest(mCharacter, targetName);
+	mGuildManager->handleStatusRequest(mCharacter, targetName);
 }
 
 void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
@@ -2448,13 +2443,13 @@ void ZoneClientConnection::_handleGuildDemote(const EQApplicationPacket* pPacket
 
 	// Check: Permission (Only guild leader can demote others).
 	if (characterName != demoteName)
-		EXPECTED(GuildManager::getInstance().isLeader(mCharacter));
+		EXPECTED(mGuildManager->isLeader(mCharacter));
 
 	// Check: Leader can not self-demote.
 	if (characterName == demoteName)
-		EXPECTED(GuildManager::getInstance().isLeader(mCharacter) == false);
+		EXPECTED(mGuildManager->isLeader(mCharacter) == false);
 
-	GuildManager::getInstance().handleDemote(mCharacter, demoteName);
+	mGuildManager->handleDemote(mCharacter, demoteName);
 }
 
 void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
@@ -2472,15 +2467,15 @@ void ZoneClientConnection::_handleGuildBanker(const EQApplicationPacket* pPacket
 	bool banker = (payload->mStatus & 0x01) > 1;
 	bool alt = (payload->mStatus & 0x02) > 1;
 
-	GuildManager::getInstance().handleSetBanker(mCharacter, otherName, banker);
-	GuildManager::getInstance().handleSetAlt(mCharacter, otherName, alt);
+	mGuildManager->handleSetBanker(mCharacter, otherName, banker);
+	mGuildManager->handleSetAlt(mCharacter, otherName, alt);
 }
 
 void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	EXPECTED(pPacket);
 	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(GuildManager::getInstance().isLeader(mCharacter));
+	EXPECTED(mGuildManager->isLeader(mCharacter));
 	EXPECTED(MakeLeader::sizeCheck(pPacket->size));
 
 	auto payload = MakeLeader::convert(pPacket->pBuffer);
@@ -2491,7 +2486,7 @@ void ZoneClientConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPa
 	String leaderName = Utility::safeString(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(leaderName));
 
-	GuildManager::getInstance().handleMakeLeader(mCharacter, leaderName);
+	mGuildManager->handleMakeLeader(mCharacter, leaderName);
 }
 
 void ZoneClientConnection::_unimplementedFeature(String pOpCodeName)
@@ -2737,7 +2732,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 
 		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
 		if (payload->mTitleID != 0)
-			prefix = TitleManager::getInstance().getPrefix(payload->mTitleID);
+			prefix = ServiceLocator::getTitleManager()->getPrefix(payload->mTitleID);
 
 		// Update Character.
 		mCharacter->setTitle(prefix);
@@ -2749,7 +2744,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 
 		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Suffix' button.
 		if (payload->mTitleID != 0)
-			suffix = TitleManager::getInstance().getSuffix(payload->mTitleID);
+			suffix = ServiceLocator::getTitleManager()->getSuffix(payload->mTitleID);
 
 		// Update Character.
 		mCharacter->setSuffix(suffix);
@@ -2764,7 +2759,7 @@ void ZoneClientConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
 void ZoneClientConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
-	auto availableTitles = TitleManager::getInstance().getTitles(mCharacter);
+	auto availableTitles = ServiceLocator::getTitleManager()->getTitles(mCharacter);
 	if (availableTitles.empty())
 		return;
 
@@ -3164,7 +3159,7 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 	auto payload = ItemLink::convert(pPacket);
 
 	// Retrieve base ItemData
-	auto itemData = ItemDataStore::getInstance().get(payload->mItemID);
+	auto itemData = ServiceLocator::getItemDataStore()->get(payload->mItemID);
 	EXPECTED(itemData);
 
 	Item* item = new Item(itemData);
@@ -3177,7 +3172,7 @@ void ZoneClientConnection::_handleItemLinkClick(const EQApplicationPacket* pPack
 	for (auto i = 0; i < 5; i++) {
 		if (payload->mAugments[i] != 0) {
 			// Retrieve augmentation ItemData.
-			auto augmentationItemData = ItemDataStore::getInstance().get(payload->mAugments[i]);
+			auto augmentationItemData = ServiceLocator::getItemDataStore()->get(payload->mAugments[i]);
 			EXPECTED(augmentationItemData);
 
 			// NOTE: Memory is freed when item is deleted.
@@ -3305,7 +3300,7 @@ void ZoneClientConnection::_handleCrystalCreate(const EQApplicationPacket* pPack
 		
 	}
 
-	auto item = ItemFactory::make(itemID, stacks);
+	auto item = ServiceLocator::getItemFactory()->make(itemID, stacks);
 	EXPECTED(item);
 	mCharacter->getInventory()->pushCursor(item);
 	sendItemSummon(item);
@@ -3672,61 +3667,7 @@ void ZoneClientConnection::_handleCombine(const EQApplicationPacket* pPacket) {
 	auto payload = Combine::convert(pPacket);
 	Log::info(payload->_debug());
 
-	// Check: Character is in a state that allows for combining.
-	EXPECTED(mCharacter->canCombine());
-
-	// Check: The combine is occurring from a valid slot id. (UF Client Checked)
-	EXPECTED(SlotID::isMainInventory(payload->mSlot));
-
-	// Check: Cursor is empty. (UF Client Checked)
-	EXPECTED(mCharacter->getInventory()->isCursorEmpty() == true);
-
-	// Check: Valid Item at slot id.
-	auto container = mCharacter->getInventory()->getItem(payload->mSlot);
-	EXPECTED(container);
-
-	// Check: Item is a container.
-	EXPECTED(container->isContainer());
-	
-	// Check: Container has 'Combine' option.
-	EXPECTED(container->isCombineContainer());
-
-	// Check: Container is not empty. (UF Client Checked)
-	EXPECTED(container->isEmpty() == false);
-
-	// Check: None of the Items in the container have > 1 stacks. (UF Client Checked)
-	auto f = [](Item* pItem) { return pItem->getStacks() == ((pItem->isStackable()) ? 1 : 0); }; // This is annoying. Non-stackable Items should still have getStacks == 1.
-	EXPECTED(container->forEachContents(f));
-
-	// Test.
-	std::list<Item*> results;
-	std::list<Item*> items;
-	container->getContents(items);
-
-	if (container->getID() == ItemID::TransmuterTen) {
-		Item* item = Transmutation::getInstance().transmute(items);
-		if (item) results.push_back(item);
-	}
-
-	for (auto i : items) {
-		// Update Client.
-		sendDeleteItem(i->getSlot());
-		// Update Inventory.
-		EXPECTED(container->clearContents(i->getSubIndex()));
-		// Free memory.
-		delete i;
-	}
-	items.clear();
-
-	EXPECTED(container->isEmpty()); // We expect the container to be empty at this point.
-
-	// Note: Underfoot locks the UI until a reply is received.
-	sendCombineReply();
-
-	for (auto i : results) {
-		mCharacter->getInventory()->pushCursor(i);
-		mCharacter->getConnection()->sendItemSummon(i);
-	}
+	mZone->onCombine(mCharacter, payload->mSlot);
 }
 
 void ZoneClientConnection::sendCombineReply() {
@@ -3890,7 +3831,7 @@ struct PopulateAlternateCurrencies {
 void ZoneClientConnection::sendAlternateCurrencies() {
 	EXPECTED(mConnected);
 
-	auto currencies = AlternateCurrencyManager::getInstance().getCurrencies();
+	auto currencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
 
 	// Calculate payload size.
 	PopulateAlternateCurrencies populate;
@@ -3924,7 +3865,7 @@ void ZoneClientConnection::sendAlternateCurrencies() {
 void ZoneClientConnection::sendAlternateCurrencyQuantities(const bool pSendZero) {
 	EXPECTED(mConnected);
 
-	auto currencies = AlternateCurrencyManager::getInstance().getCurrencies();
+	auto currencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
 	for (auto i : currencies) {
 		const uint32 quantity = mCharacter->getInventory()->getAlternateCurrencyQuantity(i->mCurrencyID);
 		if (quantity > 0 || pSendZero)
@@ -3963,7 +3904,7 @@ void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPa
 		}
 
 		// Check: Currency Type.
-		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(payload->mCurrencyID);
+		const uint32 itemID = ServiceLocator::getAlternateCurrencyManager()->getItemID(payload->mCurrencyID);
 		if (itemID == 0) {
 			// TODO: Logging.
 			return;
@@ -3980,7 +3921,7 @@ void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPa
 		mCharacter->getInventory()->removeAlternateCurrency(payload->mCurrencyID, payload->mStacks);
 
 		// Create Item
-		auto item = ItemFactory::make(itemID, payload->mStacks);
+		auto item = ServiceLocator::getItemFactory()->make(itemID, payload->mStacks);
 		EXPECTED(item);
 
 		// Add to cursor.
@@ -4003,7 +3944,7 @@ void ZoneClientConnection::_handleAlternateCurrencyReclaim(const EQApplicationPa
 		}
 
 		// Check: Item on cursor is alternate currency Item.
-		const uint32 currencyID = AlternateCurrencyManager::getInstance().getCurrencyID(item->getID());
+		const uint32 currencyID = ServiceLocator::getAlternateCurrencyManager()->getCurrencyID(item->getID());
 		if (currencyID == 0) {
 			mCharacter->notify("Please place an alternate currency on your cursor and try again.");
 			return;

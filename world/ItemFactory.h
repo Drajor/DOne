@@ -1,26 +1,21 @@
 #pragma once
 
-#include "Constants.h"
-#include "Singleton.h"
+#include "Types.h"
 
+class ItemDataStore;
 class Item;
 
-class ItemFactory : public Singleton<ItemFactory> {
-private:
-	friend class Singleton<ItemFactory>;
-	ItemFactory() {};
-	~ItemFactory() {};
-	ItemFactory(ItemFactory const&); // Do not implement.
-	void operator=(ItemFactory const&); // Do not implement.
+class ItemFactory {
 public:
-	static Item* make(const uint32 pItemID, const uint32 pStacks = 1);
-	static Item* make();
-	static Item* makeAugment();
+	const bool initialise(ItemDataStore* pItemDataStore);
 
-	static Item* copy(Item* pItem) { return getInstance()._copy(pItem); };
+	Item* make(const u32 pItemID, const u32 pStacks = 1);
+	Item* make();
+	Item* makeAugment();
+	Item* copy(Item* pItem);
+	
 private:
-	Item* _make(const uint32 pItemID, const uint32 pStacks);
-	Item* _make();
 
-	Item* _copy(Item* pItem);
+	bool mInitialised = false;
+	ItemDataStore* mItemDataStore = nullptr;
 };

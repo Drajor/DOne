@@ -1,9 +1,15 @@
 #pragma once
 
 #include "Constants.h"
-#include "Singleton.h"
 #include <memory>
 
+#include "CommandHandler.h"
+
+class ZoneDataManager;
+class GroupManager;
+class RaidManager;
+class GuildManager;
+class CommandHandler;
 class Zone;
 class Character;
 struct WhoFilter;
@@ -20,15 +26,11 @@ struct ZoneSearchEntry {
 };
 typedef std::list<ZoneSearchEntry> ZoneSearchResult;
 
-class ZoneManager : public Singleton<ZoneManager> {
-private:
-	friend class Singleton<ZoneManager>;
-	ZoneManager() {};
-	~ZoneManager();
-	ZoneManager(ZoneManager const&); // Do not implement.
-	void operator=(ZoneManager const&); // Do not implement.
+class ZoneManager {
 public:
-	bool initialise();
+	~ZoneManager();
+
+	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler);
 	void update();
 
 	// Returns whether or not the specified Zone is running.
@@ -61,10 +63,18 @@ public:
 	const bool hasZoningCharacter(const u32 pAccountID) const;
 	Character* getZoningCharacter(const String& pCharacterName);
 	String getZoningCharacterName(const u32 pAccountID);
+
 private:
 
 	bool mInitialised = false;
-	std::shared_ptr<Experience::Calculator> mExperienceCalculator;
+	ZoneDataManager* mZoneDataManager = nullptr;
+	GroupManager* mGroupManager = nullptr;
+	RaidManager* mRaidManager = nullptr;
+	GuildManager* mGuildManager = nullptr;
+	CommandHandler* mCommandHandler = nullptr;
+
+	std::shared_ptr<Experience::Calculator> mExperienceCalculator = nullptr;
+
 	Zone* _search(const u16 pZoneID, const u16 pInstanceID) const;
 	const bool _makeZone(const u16 pZoneID, const u16 pInstanceID);
 	const u16 _getNextZonePort();

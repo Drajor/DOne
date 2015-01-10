@@ -1,5 +1,5 @@
 #include "GuildManager.h"
-
+#include "ServiceLocator.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Character.h"
@@ -12,7 +12,14 @@
 
 #include "../common/tinyxml/tinyxml.h"
 
-bool GuildManager::initialise() {
+const bool GuildManager::initialise(DataStore* pDataStore, ZoneManager* pZoneManager) {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pDataStore);
+	EXPECTED_BOOL(pZoneManager);
+
+	mDataStore = pDataStore;
+	mZoneManager = pZoneManager;
+
 	Profile p("GuildManager::initialise");
 	Log::status("[Guild Manager] Initialising.");
 
@@ -87,6 +94,7 @@ bool GuildManager::initialise() {
 	StringStream ss; ss << "[Guild Manager] Loaded data for " << mGuilds.size() << " Guilds.";
 	Log::info(ss.str());
 
+	mInitialised = true;
 	return true;
 }
 
@@ -186,7 +194,7 @@ void GuildManager::handleRemove(Character* pCharacter, const String& pRemoveChar
 
 	// If the Character being removed is online we need to update.
 	// NOTE: If the character is not online 
-	Character* removeCharacter = removeSelf ? pCharacter : ZoneManager::getInstance().findCharacter(pRemoveCharacterName, true);
+	Character* removeCharacter = removeSelf ? pCharacter : mZoneManager->findCharacter(pRemoveCharacterName, true);
 	if (removeCharacter) {
 		guild->mOnlineMembers.remove(removeCharacter);
 		removeCharacter->clearGuild();
@@ -215,7 +223,7 @@ void GuildManager::handleInviteSent(Character* pCharacter, const String& pInvite
 
 	auto guild = pCharacter->getGuild();
 
-	auto character = ZoneManager::getInstance().findCharacter(pInviteCharacterName);
+	auto character = mZoneManager->findCharacter(pInviteCharacterName);
 
 	// Character to be invited was not found.
 	if (!character) {
@@ -261,7 +269,7 @@ void GuildManager::handleInviteAccept(Character* pCharacter, const String& pInvi
 	pCharacter->clearPendingGuildInvite();
 
 	// Notify the inviter (Zoning characters are ignored for now.)
-	Character* inviter = ZoneManager::getInstance().findCharacter(pInviterName);
+	auto inviter = mZoneManager->findCharacter(pInviterName);
 	if (inviter)
 		inviter->message(MessageType::Yellow, pCharacter->getName() + " has accepted your invitation to join the guild.");
 
@@ -280,7 +288,7 @@ void GuildManager::handleInviteDecline(Character* pCharacter, const String& pInv
 	pCharacter->clearPendingGuildInvite();
 
 	// Notify the inviter (Zoning characters are ignored for now.)
-	Character* inviter = ZoneManager::getInstance().findCharacter(pInviterName);
+	Character* inviter = mZoneManager->findCharacter(pInviterName);
 	if (inviter)
 		inviter->message(MessageType::Yellow, pCharacter->getName() + " has declined your invitation to join the guild.");
 }
@@ -345,11 +353,6 @@ std::list<String> GuildManager::getGuildNames() {
 	}
 
 	return guildNames;
-}
-
-GuildManager::~GuildManager()
-{
-
 }
 
 void GuildManager::_storeGuildName(GuildID pGuildID, String pGuildName) {

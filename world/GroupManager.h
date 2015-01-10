@@ -1,20 +1,16 @@
 #pragma once
 
-#include "Constants.h"
-#include "Singleton.h"
+#include "Types.h"
+#include <list>
 
+class ZoneManager;
 class Character;
 class Zone;
 class Group;
 
-class GroupManager : public Singleton<GroupManager> {
-private:
-	friend class Singleton<GroupManager>;
-	GroupManager() {};
-	~GroupManager() {};
-	GroupManager(GroupManager const&); // Do not implement.
-	void operator=(GroupManager const&); // Do not implement.
+class GroupManager {
 public:
+	const bool initialise(ZoneManager* pZoneManager);
 
 	// Character Packet Events.
 	void handleInviteSent(Character* pCharacter, String pInviteName);
@@ -32,6 +28,10 @@ public:
 	void onDeath(Character* pCharacter);
 
 private:
+
+	bool mInitialised = false;
+	ZoneManager* mZoneManager = nullptr;
+
 	void makeGroup(Character* pLeader, Character* pMember);
 	void joinGroup(Group* pGroup, Character* pCharacter);
 
@@ -43,31 +43,4 @@ private:
 	void _sendZoneMessage(Group* pGroup, Zone* pZone, String pSenderName, String pMessage, Character* pExcludeCharacter = nullptr);
 	
 	std::list<Group*> mGroups;
-};
-
-class Group {
-	friend class GroupManager;
-
-	Group(Character* pLeader, Character* pMember);
-	~Group() {};
-
-	void sendGroupUpdate(Character* pCharacter);
-	void sendGroupUpdate();
-	void sendMemberLeaveMessage(String pLeaverName);
-	void sendGroupLeaderChange();
-
-	// Adds a Character to the Group.
-	void add(Character* pCharacter);
-	// Removes a Character from the group.
-	void remove(Character* pCharacter);
-
-	void getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName);
-	bool isMember(Character* pCharacter);
-	bool hasLeader() { return mLeader != nullptr; }
-	bool needsDisbanding() { return mMembers.size() == 1; }
-
-	Character* getMember(const String& pCharacterName);
-	Character* getLeader() { return mLeader; }
-	Character* mLeader;
-	std::list<Character*> mMembers;
 };

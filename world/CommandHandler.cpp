@@ -1,4 +1,5 @@
 #include "CommandHandler.h"
+#include "ServiceLocator.h"
 #include "World.h"
 #include "Character.h"
 #include "NPC.h"
@@ -39,7 +40,7 @@ public:
 		// Try: Convert zone ID.
 		uint32 zoneID = 0;
 		if (!convertParameter(0, zoneID)) {
-			zoneID = ZoneDataManager::getInstance().findFirstByName(pParameters[0]);
+			zoneID = ServiceLocator::getZoneDataManager()->findFirstByName(pParameters[0]);
 
 			if (zoneID == 0) { return false; }
 		}
@@ -51,7 +52,7 @@ public:
 		}
 
 		Vector3 zoneSafePoint;
-		if (!ZoneDataManager::getInstance().getSafePoint(zoneID, zoneSafePoint)) {
+		if (!ServiceLocator::getZoneDataManager()->getSafePoint(zoneID, zoneSafePoint)) {
 			// TODO:
 			return false;
 		}
@@ -111,7 +112,7 @@ public:
 		// Warp to Character
 		if (pParameters.size() == 1) {
 			const String characterName = pParameters[0];
-			auto character = ZoneManager::getInstance().findCharacter(characterName);
+			auto character = ServiceLocator::getZoneManager()->findCharacter(characterName);
 			if (!character) {
 				mInvoker->notify("Could not find " + characterName);
 				return true;
@@ -153,7 +154,7 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		ZoneSearchResult result = ZoneManager::getInstance().getAllZones();
+		ZoneSearchResult result = ServiceLocator::getZoneManager()->getAllZones();
 		for (auto i : result) {
 			StringStream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
 			mInvoker->getConnection()->sendMessage(MessageType::Aqua, ss.str());
@@ -367,7 +368,7 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		ZoneDataSearchResults results = ZoneDataManager::getInstance().searchByName(pParameters[0]);
+		ZoneDataSearchResults results = ServiceLocator::getZoneDataManager()->searchByName(pParameters[0]);
 		mInvoker->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
 		for (auto i : results){
 			mInvoker->message(MessageType::Yellow, "[Zone " + std::to_string(i.mID) + "] " + i.mShortName + " | " + i.mLongName );
@@ -387,7 +388,7 @@ public:
 	const bool handleCommand(CommandParameters pParameters) {
 		// Get all guilds.
 		if (pParameters.size() == 0) {
-			GuildSearchResults results = GuildManager::getInstance().getAllGuilds();
+			GuildSearchResults results = ServiceLocator::getGuildManager()->getAllGuilds();
 			for (auto i : results){
 				mInvoker->message(MessageType::Yellow, "[Guild " + std::to_string(i.mID) + "] " + i.mName);
 			}
@@ -435,7 +436,7 @@ public:
 	const bool handleCommand(CommandParameters pParameters) {
 		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
 			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
-				GuildManager::getInstance().handlePromote(mInvoker, pParameters[0]);
+				ServiceLocator::getGuildManager()->handlePromote(mInvoker, pParameters[0]);
 			}
 			else {
 				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
@@ -459,7 +460,7 @@ public:
 	const bool handleCommand(CommandParameters pParameters) {
 		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
 			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
-				GuildManager::getInstance().handleDemote(mInvoker, pParameters[0]);
+				ServiceLocator::getGuildManager()->handleDemote(mInvoker, pParameters[0]);
 			}
 			else {
 				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
@@ -503,21 +504,12 @@ class SurnameCommand : public Command {
 public:
 	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #surname <name>");
+		mRequiresTarget = true;
+		mMinimumParameters = 1;
+		mMaximumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
-		}
-		const bool hasTarget = mInvoker->hasTarget();
-
-		// Check: Has a target.
-		if (!hasTarget) {
-			mInvoker->notify("You must target an actor.");
-			return false;
-		}
 		Actor* changeActor = mInvoker->getTarget();
 
 		// Check: Length.
@@ -782,7 +774,7 @@ public:
 			return false;
 		}
 		bool locked = lock == 1 ? true : false;
-		World::getInstance().setLocked(locked);
+		ServiceLocator::getWorld()->setLocked(locked);
 		String s = locked ? "Locked" : "Unlocked";
 		mInvoker->notify("World " + s);
 		return true;
@@ -837,7 +829,7 @@ public:
 			}
 		}
 
-		auto data = ItemDataStore::getInstance().get(itemID);
+		auto data = ServiceLocator::getItemDataStore()->get(itemID);
 		EXPECTED_BOOL(data);
 		for (auto i = 0; i < quantity; i++) {
 			auto item = new Item(data);
@@ -864,6 +856,8 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
+		ItemGenerator* itemGenerator = ServiceLocator::getItemGenerator();
+
 		// Check: Parameter #
 		if (pParameters.size() < 3) {
 			invalidParameters(pParameters);
@@ -901,7 +895,7 @@ public:
 		// Random Head.
 		if (pParameters[0] == "head") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeHead(level, rarity);
+				Item* item = itemGenerator->makeHead(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -912,7 +906,7 @@ public:
 		// Random Chest.
 		if (pParameters[0] == "chest") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeChest(level, rarity);
+				Item* item = itemGenerator->makeChest(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -923,7 +917,7 @@ public:
 		// Random Arms.
 		if (pParameters[0] == "arms") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeArms(level, rarity);
+				Item* item = itemGenerator->makeArms(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -934,7 +928,7 @@ public:
 		// Random Arms.
 		if (pParameters[0] == "wrists") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeWrists(level, rarity);
+				Item* item = itemGenerator->makeWrists(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -945,7 +939,7 @@ public:
 		// Random Legs.
 		if (pParameters[0] == "legs") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeLegs(level, rarity);
+				Item* item = itemGenerator->makeLegs(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -956,7 +950,7 @@ public:
 		// Random Arms.
 		if (pParameters[0] == "hands") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeHands(level, rarity);
+				Item* item = itemGenerator->makeHands(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -967,7 +961,7 @@ public:
 		// Random Feet.
 		if (pParameters[0] == "feet") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeFeet(level, rarity);
+				Item* item = itemGenerator->makeFeet(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -978,7 +972,7 @@ public:
 		// Random Container.
 		if (pParameters[0] == "cont") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeRandomContainer(rarity);
+				Item* item = itemGenerator->makeRandomContainer(rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -989,7 +983,7 @@ public:
 		// Random Shield
 		if (pParameters[0] == "shield") {
 			for (auto i = 0; i < quantity; i++) {
-				Item* item = ItemGenerator::makeShield(level, rarity);
+				Item* item = itemGenerator->makeShield(level, rarity);
 				mInvoker->getInventory()->pushCursor(item);
 				mInvoker->getConnection()->sendItemSummon(item);
 			}
@@ -1028,7 +1022,7 @@ public:
 			Zone* zone = mInvoker->getZone();
 			const String characterName = pParameters[0];
 			// Find Character to summon.
-			Character* character = ZoneManager::getInstance().findCharacter(characterName);
+			auto character = ServiceLocator::getZoneManager()->findCharacter(characterName);
 			if (!character) {
 				mInvoker->notify("Could not find " + characterName);
 				return true;
@@ -1079,7 +1073,7 @@ public:
 		// Kick specified Character.
 		else if (pParameters.size() == 1) {
 			const String characterName = pParameters[0];
-			character = ZoneManager::getInstance().findCharacter(characterName);
+			character = ServiceLocator::getZoneManager()->findCharacter(characterName);
 		}
 
 		if (character) {
@@ -1359,7 +1353,7 @@ public:
 		if (!convertParameter(1, currencyQuantity)) { return false; }
 
 		// Check: Valid currency ID.
-		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(currencyID);
+		const uint32 itemID = ServiceLocator::getAlternateCurrencyManager()->getItemID(currencyID);
 		if (itemID == 0) { return false; }
 
 		auto target = Actor::cast<Character*>(mInvoker->getTarget());
@@ -1391,7 +1385,7 @@ public:
 		if (!convertParameter(1, currencyQuantity)) { return false; }
 
 		// Check: Valid currency ID.
-		const uint32 itemID = AlternateCurrencyManager::getInstance().getItemID(currencyID);
+		const uint32 itemID = ServiceLocator::getAlternateCurrencyManager()->getItemID(currencyID);
 		if (itemID == 0) { return false; }
 
 		auto target = Actor::cast<Character*>(mInvoker->getTarget());
@@ -1415,7 +1409,7 @@ public:
 		uint32 typeID = 0;
 		if (!convertParameter(0, typeID)) { return false; };
 
-		auto npc = NPCFactory::getInstance().create(typeID);
+		auto npc = ServiceLocator::getNPCFactory()->create(typeID);
 		if (!npc) return false;
 
 		npc->setZone(mInvoker->getZone());
@@ -1634,12 +1628,12 @@ public:
 		}
 
 		// Check: Is the target Zone currently running?
-		if (ZoneManager::getInstance().isZoneRunning(zoneID, instanceID)) {
+		if (ServiceLocator::getZoneManager()->isZoneRunning(zoneID, instanceID)) {
 			mInvoker->notify("Zone is already running.");
 			return true;
 		}
 
-		const bool success = ZoneManager::getInstance().requestZoneBoot(zoneID, instanceID);
+		const bool success = ServiceLocator::getZoneManager()->requestZoneBoot(zoneID, instanceID);
 		if (success) {
 			mInvoker->notify("Zone booted.");
 		}
@@ -1670,18 +1664,18 @@ public:
 		}
 
 		// Check: Is the target Zone currently running?
-		if (!ZoneManager::getInstance().isZoneRunning(zoneID, instanceID)) {
+		if (!ServiceLocator::getZoneManager()->isZoneRunning(zoneID, instanceID)) {
 			mInvoker->notify("Zone is not running.");
 			return true;
 		}
 
 		// Check: Is the target Zone able to shut down?
-		if (!ZoneManager::getInstance().canZoneShutdown(zoneID, instanceID)) {
+		if (!ServiceLocator::getZoneManager()->canZoneShutdown(zoneID, instanceID)) {
 			mInvoker->notify("Zone not able to shutdown yet.");
 			return true;
 		}
 
-		const bool success = ZoneManager::getInstance().requestZoneShutdown(zoneID, instanceID);
+		const bool success = ServiceLocator::getZoneManager()->requestZoneShutdown(zoneID, instanceID);
 		if (success) {
 			mInvoker->notify("Zone shutting down.");
 		}
@@ -1704,7 +1698,10 @@ public:
 //	}
 //};
 
-void CommandHandler::initialise() {
+const bool CommandHandler::initialise(DataStore* pDataStore) {
+	EXPECTED_BOOL(pDataStore);
+	mDataStore = pDataStore;
+
 	mCommands.push_back(new WorldLockCommand(255, { "lock" }));
 
 	mCommands.push_back(new ZoneCommand(100, { "zone", "z" }));
@@ -1776,6 +1773,8 @@ void CommandHandler::initialise() {
 	mCommands.push_back(new SizeCommand(100, { "size" }));
 	mCommands.push_back(new GenderCommand(100, { "gender" }));
 	mCommands.push_back(new TextureCommand(100, { "texture" }));
+
+	return true;
 }
 
 void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
@@ -2076,7 +2075,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		u32 material = 0;
 		if (!Utility::stoSafe(material, pParameters[0])) { return; }
 		
-		auto npc = NPCFactory::getInstance().createInvisibleMan();
+		auto npc = ServiceLocator::getNPCFactory()->createInvisibleMan();
 		npc->setMaterial(MaterialSlot::Primary, material);
 		npc->setMaterial(MaterialSlot::Secondary, material);
 		npc->setPosition(pCharacter->getPosition());

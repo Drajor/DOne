@@ -1,4 +1,5 @@
 #include "ZoneManager.h"
+#include "ServiceLocator.h"
 #include "ZoneData.h"
 #include "Zone.h"
 #include "World.h"
@@ -8,11 +9,13 @@
 #include "Utility.h"
 #include "ExperienceController.h"
 #include "ExperienceCalculator.h"
+#include "GroupManager.h"
+#include "RaidManager.h"
+#include "GuildManager.h"
 
 ZoneManager::~ZoneManager() {
-	ZoneClientConnection::deinitialise();
+	ZoneClientConnection::_deinitialise();
 }
-
 
 void ZoneManager::update() {
 	for (auto i = mZones.begin(); i != mZones.end();) {
@@ -34,14 +37,25 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-bool ZoneManager::initialise() {
+const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler) {
 	EXPECTED_BOOL(mInitialised == false);
-	
+	EXPECTED_BOOL(pZoneDataManager);
+	EXPECTED_BOOL(pGroupManager);
+	EXPECTED_BOOL(pRaidManager);
+	EXPECTED_BOOL(pGuildManager);
+	EXPECTED_BOOL(pCommandHandler);
+
+	mZoneDataManager = pZoneDataManager;
+	mGroupManager = pGroupManager;
+	mRaidManager = pRaidManager;
+	mGuildManager = pGuildManager;
+	mCommandHandler = pCommandHandler;
+
 	Log::status("[Zone Manager] Initialising.");
 
 	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
-	ZoneClientConnection::initalise();
+	ZoneClientConnection::_initalise();
 	Experience::Controller::_initialise();
 
 	mExperienceCalculator = std::make_shared<Experience::Calculator>();
@@ -120,11 +134,11 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	
 	
 	// Check: Zone initialises correctly.
-	auto zoneData = ZoneDataManager::getInstance().getZoneData(pZoneID);
+	auto zoneData = mZoneDataManager->getZoneData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);
-	if (!zone->initialise(zoneData, mExperienceCalculator)) {
+	if (!zone->initialise(zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
 		delete zone;

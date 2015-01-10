@@ -1,4 +1,5 @@
 #include "NPCFactory.h"
+#include "ServiceLocator.h"
 #include "Utility.h"
 #include "DataStore.h"
 #include "Data.h"
@@ -10,17 +11,35 @@
 #include "HateControllerFactory.h"
 #include "HateController.h"
 
-const bool NPCFactory::initialise() {
-	EXPECTED_BOOL(mInitialised == false);
+NPCFactory::NPCFactory() {
+	mLog = new LogContext("[NPCFactory]");
+}
 
-	Log::status("[NPCFactory] Initialising.");
-	EXPECTED_BOOL(DataStore::getInstance().loadNPCAppearanceData(mNPCAppearances));
-	EXPECTED_BOOL(calculateAppearanceData());
-	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCAppearances.size()) + " Appearances.");
+NPCFactory::~NPCFactory() {
+	delete mLog;
+	mLog = nullptr;
+}
 
-	EXPECTED_BOOL(DataStore::getInstance().loadNPCTypeData(mNPCTypes));
-	EXPECTED_BOOL(validateNPCTypeData());
-	Log::info("[NPCFactory] Loaded data for " + std::to_string(mNPCTypes.size()) + " Types.");
+
+const bool NPCFactory::initialise(DataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore) {
+	mLog->status("Initialising.");
+
+	EXPECTED_BOOLX(mInitialised == false, mLog);
+	EXPECTED_BOOLX(pDataStore, mLog);
+	EXPECTED_BOOLX(pItemFactory, mLog);
+	EXPECTED_BOOLX(pShopDataStore, mLog);
+
+	mDataStore = pDataStore;
+	mItemFactory = pItemFactory;
+	mShopDataStore = pShopDataStore;
+	
+	EXPECTED_BOOLX(mDataStore->loadNPCAppearanceData(mNPCAppearances), mLog);
+	EXPECTED_BOOLX(calculateAppearanceData(), mLog);
+	mLog->info("Loaded data for " + std::to_string(mNPCAppearances.size()) + " Appearances.");
+
+	EXPECTED_BOOLX(mDataStore->loadNPCTypeData(mNPCTypes), mLog);
+	EXPECTED_BOOLX(validateNPCTypeData(), mLog);
+	mLog->info("Loaded data for " + std::to_string(mNPCTypes.size()) + " Types.");
 
 	// HateControllerFactory.
 	mHateControllerFactory = new HateControllerFactory();
@@ -30,6 +49,7 @@ const bool NPCFactory::initialise() {
 	mHateControllerFactory->set("last", []() { return new LastHateController(); });
 
 	mInitialised = true;
+	mLog->status("Finished initialising.");
 	return true;
 }
 
@@ -187,12 +207,12 @@ const bool NPCFactory::initialiseMerchant(NPC* pNPC, Data::NPCType* pType) {
 	EXPECTED_BOOL(pNPC);
 	EXPECTED_BOOL(pType);
 
-	auto shopData = ShopDataStore::getInstance().getShopData(pType->mShopID);
+	auto shopData = mShopDataStore->getShopData(pType->mShopID);
 	EXPECTED_BOOL(shopData);
 
 	// Add shop Items to NPC.
 	for (auto i : shopData->mItems) {
-		auto item = ItemFactory::make(i.first);
+		auto item = mItemFactory->make(i.first);
 		EXPECTED_BOOL(item);
 
 		item->setShopQuantity(i.second);

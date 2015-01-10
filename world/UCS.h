@@ -1,24 +1,14 @@
 #pragma once
 
-#include "Constants.h"
-#include "Singleton.h"
+#include <list>
 
 class EQStreamFactory;
 class OpcodeManager;
 class UCSClientConnection;
 
-class UCS : public Singleton<UCS> {
-private:
-
-	friend class Singleton<UCS>;
-	UCS() {};
-	~UCS() {};
-	UCS(UCS const&); // Do not implement.
-	void operator=(UCS const&); // Do not implement.
-
+class UCS {
 public:
-
-	bool initialise();
+	const bool initialise();
 	void update();
 
 private:

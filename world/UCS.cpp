@@ -5,7 +5,7 @@
 
 #include "../common/EQStreamFactory.h"
 
-bool UCS::initialise() {
+const bool UCS::initialise() {
 	Log::status("[UCS] Initialising.");
 	EXPECTED_BOOL(mInitialised == false);
 

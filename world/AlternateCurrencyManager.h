@@ -1,24 +1,21 @@
 #pragma once
 
 #include "Types.h"
-#include "Singleton.h"
 #include <list>
 
 namespace Data {
 	struct AlternateCurrency;
 }
+class LogContext;
+class DataStore;
 
-class AlternateCurrencyManager : public Singleton<AlternateCurrencyManager>{
-private:
-	friend class Singleton<AlternateCurrencyManager>;
-	AlternateCurrencyManager() {};
-	~AlternateCurrencyManager() {};
-	AlternateCurrencyManager(AlternateCurrencyManager const&); // Do not implement.
-	void operator=(AlternateCurrencyManager const&); // Do not implement.
+class AlternateCurrencyManager {
 public:
+	AlternateCurrencyManager();
+	~AlternateCurrencyManager();
 
 	// Initialises the AlternateCurrencyManager.
-	const bool initialise();
+	const bool initialise(DataStore* pDataStore);
 
 	// Returns the list of alternate currencies.
 	inline std::list<Data::AlternateCurrency*>& getCurrencies() { return mCurrencies; }
@@ -32,5 +29,8 @@ public:
 private:
 
 	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
+	LogContext* mLog = nullptr;
+
 	std::list<Data::AlternateCurrency*> mCurrencies;
 };

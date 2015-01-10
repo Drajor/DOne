@@ -1,20 +1,23 @@
 #include "ItemFactory.h"
+#include "ServiceLocator.h"
+#include "Utility.h"
 #include "Item.h"
 #include "ItemDataStore.h"
 
-Item* ItemFactory::make(const uint32 pItemID, const uint32 pStacks) {
-	return getInstance()._make(pItemID, pStacks);
+const bool ItemFactory::initialise(ItemDataStore* pItemDataStore) {
+	EXPECTED_BOOL(mInitialised == false);
+	EXPECTED_BOOL(pItemDataStore);
+
+	mItemDataStore = pItemDataStore;
+	mInitialised = true;
+	return true;
 }
 
-Item* ItemFactory::make(){
-	return getInstance()._make();
-}
-
-Item* ItemFactory::_make(const uint32 pItemID, const uint32 pStacks) {
-	auto data = ItemDataStore::getInstance().get(pItemID);
+Item* ItemFactory::make(const u32 pItemID, const u32 pStacks) {
+	auto data = mItemDataStore->get(pItemID);
 	EXPECTED_PTR(data);
 	auto item = new Item(data);
-	item->setInstanceID(ItemDataStore::getInstance().getNextSerial());
+	item->setInstanceID(mItemDataStore->getNextSerial());
 	item->setStacks(pStacks);
 	item->setCharmFile(std::to_string(item->getID()) + "|" + std::to_string(item->getInstanceID()));
 
@@ -25,8 +28,8 @@ Item* ItemFactory::_make(const uint32 pItemID, const uint32 pStacks) {
 	return item;
 }
 
-Item* ItemFactory::_make() {
-	auto data =ItemDataStore::getInstance().getNew();
+Item* ItemFactory::make(){
+	auto data = mItemDataStore->getNew();
 	EXPECTED_PTR(data);
 	auto item = new Item(data);
 	item->setCharmFile(std::to_string(item->getID()) + "|" + std::to_string(item->getInstanceID()));
@@ -37,7 +40,7 @@ Item* ItemFactory::_make() {
 }
 
 Item* ItemFactory::makeAugment() {
-	Item* augment = getInstance()._make();
+	Item* augment = make();
 	EXPECTED_PTR(augment);
 
 	augment->setName("Unnamed Augmentation");
@@ -51,7 +54,7 @@ Item* ItemFactory::makeAugment() {
 	return augment;
 }
 
-Item* ItemFactory::_copy(Item* pItem) {
+Item* ItemFactory::copy(Item* pItem) {
 	auto item = make(pItem->getID(), pItem->getStacks());
 
 	return item;

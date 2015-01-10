@@ -5,12 +5,18 @@
 #include <algorithm>
 
 #define ARG_STR(pARG) #pARG
-#define EXPECTED(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return; }
-#define EXPECTED_VAR(pCondition, pReturn) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return pReturn; }
-//#define EXPECTED_BOOL(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return false; }
+#define EXPECTED(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; Log::error(ss.str()); return; }
+#define EXPECTED_VAR(pCondition, pReturn) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; Log::error(ss.str()); return pReturn; }
 #define EXPECTED_BOOL(pCondition) { EXPECTED_VAR(pCondition, false) }
-#define EXPECTED_PTR(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return nullptr; }
-#define EXPECTED_MAIN(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in" << __FUNCTION__; Log::error(ss.str()); return 1; }
+#define EXPECTED_PTR(pCondition) { EXPECTED_VAR(pCondition, nullptr) }
+#define EXPECTED_MAIN(pCondition) { EXPECTED_VAR(pCondition, 1) }
+//#define EXPECTED_PTR(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; Log::error(ss.str()); return nullptr; }
+//#define EXPECTED_MAIN(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; Log::error(ss.str()); return 1; }
+
+#define EXPECTEDX(pCondition, pLog) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; pLog->error(ss.str()); return; }
+#define EXPECTED_VARX(pCondition, pReturn, pLog) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; pLog->error(ss.str()); return pReturn; }
+#define EXPECTED_BOOLX(pCondition, pLog) { EXPECTED_VARX(pCondition, false, pLog) }
+#define EXPECTED_PTRX(pCondition, pLog) { EXPECTED_VARX(pCondition, nullptr, pLog) }
 
 #define PRINT_MEMBER(pMember) ss << ARG_STR(pMember) << " = " << pMember << " | ";
 

@@ -26,10 +26,16 @@
 #include "ShopDataStore.h"
 #include "Settings.h"
 #include "HateControllerFactory.h"
+#include "ServiceLocator.h"
+#include "GroupManager.h"
+#include "RaidManager.h"
+#include "ItemFactory.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"
 #pragma comment(lib, "../../dependencies/gtest/gtestd.lib")
+
+#include <memory>
 
 /*
 Google Test Notes
@@ -55,22 +61,76 @@ int main(int argc, char** argv)  {
 
 	Random::initialise();
 
-	EXPECTED_MAIN(DataStore::loadSettings());
-	EXPECTED_MAIN(AccountManager::getInstance().initialise());
-	EXPECTED_MAIN(ZoneDataManager::getInstance().initialise());
-	EXPECTED_MAIN(GuildManager::getInstance().initialise());
-	EXPECTED_MAIN(ZoneManager::getInstance().initialise());
-	EXPECTED_MAIN(DataStore::getInstance().initialise());
-	EXPECTED_MAIN(World::getInstance().initialise());
-	EXPECTED_MAIN(UCS::getInstance().initialise());
-	EXPECTED_MAIN(TitleManager::getInstance().initialise());
-	EXPECTED_MAIN(SpellDataStore::getInstance().initialise());
-	EXPECTED_MAIN(StaticItemData::getInstance().initialise());
-	EXPECTED_MAIN(ItemDataStore::getInstance().initialise());
-	EXPECTED_MAIN(NPCFactory::getInstance().initialise());
-	EXPECTED_MAIN(Transmutation::getInstance().initialise());
-	EXPECTED_MAIN(AlternateCurrencyManager::getInstance().initialise());
-	EXPECTED_MAIN(ShopDataStore::getInstance().initialise());
+	ServiceLocator::reset();
+
+	DataStore* dataStore = new DataStore();
+	ServiceLocator::setDataStore(dataStore);
+	EXPECTED_MAIN(dataStore->loadSettings());
+	EXPECTED_MAIN(dataStore->initialise());
+
+	ShopDataStore* shopDataStore = new ShopDataStore();
+	ServiceLocator::setShopDataStore(shopDataStore);
+	EXPECTED_MAIN(shopDataStore->initialise(dataStore));
+
+	AccountManager* accountManager = new AccountManager();
+	ServiceLocator::setAccountManager(accountManager);
+	EXPECTED_MAIN(accountManager->initialise(dataStore));
+
+	ZoneDataManager* zoneDataManager = new ZoneDataManager();
+	ServiceLocator::setZoneDataManager(zoneDataManager);
+	EXPECTED_MAIN(zoneDataManager->initialise(dataStore));
+
+	TitleManager* titleManager = new TitleManager();
+	ServiceLocator::setTitleManager(titleManager);
+	EXPECTED_MAIN(titleManager->initialise(dataStore));
+
+	SpellDataStore* spellDataStore = new SpellDataStore();
+	ServiceLocator::setSpellDataStore(spellDataStore);
+	EXPECTED_MAIN(spellDataStore->initialise(dataStore));
+
+	AlternateCurrencyManager* alternateCurrencyManager = new AlternateCurrencyManager();
+	ServiceLocator::setAlternateCurrencyManager(alternateCurrencyManager);
+	EXPECTED_MAIN(alternateCurrencyManager->initialise(dataStore));
+
+	ZoneManager* zoneManager = new ZoneManager();
+	ServiceLocator::setZoneManager(zoneManager);
+
+	GroupManager* groupManager = new GroupManager();
+	ServiceLocator::setGroupManager(groupManager);
+	
+	RaidManager* raidManager = new RaidManager();
+	ServiceLocator::setRaidManager(raidManager);
+
+	GuildManager* guildManager = new GuildManager();
+	ServiceLocator::setGuildManager(guildManager);
+
+	CommandHandler* commandHandler = new CommandHandler();
+	EXPECTED_MAIN(commandHandler->initialise(dataStore));
+
+	EXPECTED_MAIN(zoneManager->initialise(zoneDataManager, groupManager, raidManager, guildManager, commandHandler));
+	EXPECTED_MAIN(groupManager->initialise(zoneManager));
+	EXPECTED_MAIN(raidManager->initialise(zoneManager));
+	EXPECTED_MAIN(guildManager->initialise(dataStore, zoneManager));
+
+	World* world = new World();
+	ServiceLocator::setWorld(world);
+	EXPECTED_MAIN(world->initialise(dataStore, zoneManager, accountManager));
+
+	UCS* ucs = new UCS();
+	ServiceLocator::setUCS(ucs);
+	EXPECTED_MAIN(ucs->initialise());
+
+	ItemDataStore* itemDataStore = new ItemDataStore();
+	ServiceLocator::setItemDataStore(itemDataStore);
+	EXPECTED_MAIN(itemDataStore->initialise(dataStore));
+
+	ItemFactory* itemFactory = new ItemFactory();
+	ServiceLocator::setItemFactory(itemFactory);
+	EXPECTED_MAIN(itemFactory->initialise(itemDataStore));
+
+	NPCFactory* npcFactory = new NPCFactory();
+	ServiceLocator::setNPCFactory(npcFactory);
+	EXPECTED_MAIN(npcFactory->initialise(dataStore, itemFactory, shopDataStore));
 
 	// Validate Data
 	if (Settings::getValidationEnabled()) {
@@ -84,7 +144,7 @@ int main(int argc, char** argv)  {
 	while(true) {
 		Timer::SetCurrentTime();
 		TTimer::setCurrentTime(Time::nowMilliseconds());
-		World::getInstance().update();
+		world->update();
 
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();

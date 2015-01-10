@@ -1,30 +1,28 @@
 #pragma once
 
 #include "Types.h"
-#include "Singleton.h"
 
+class DataStore;
 class Zone;
 
 namespace Data {
 	struct Spell;
 }
 
-class SpellDataStore : public Singleton<SpellDataStore> {
-private:
-	friend class Singleton<SpellDataStore>;
-	SpellDataStore() {};
-	~SpellDataStore() {};
-	SpellDataStore(SpellDataStore const&); // Do not implement.
-	void operator=(SpellDataStore const&); // Do not implement.
+class SpellDataStore {
 public:
-	const bool initialise();
-	const Data::Spell* getData(const uint16 pSpellID);
+
+	const bool initialise(DataStore* pDataStore);
+	const Data::Spell* getData(const u16 pSpellID);
+
 private:
+
+	bool mInitialised = false;
+	DataStore* mDataStore = nullptr;
 	Data::Spell* mSpellData = nullptr;
 };
 
 namespace Spell {
-	const Data::Spell* get(const uint16 pSpellID);
-	const bool canClassUse(const Data::Spell* pSpell, const uint8 pClassID, const uint8 pLevel);
+	const bool canClassUse(const Data::Spell* pSpell, const u8 pClassID, const u8 pLevel);
 	const bool zoneAllowed(const Data::Spell* pSpell, const Zone* pZone);
 }
