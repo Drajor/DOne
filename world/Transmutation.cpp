@@ -1,6 +1,6 @@
 #include "Transmutation.h"
 #include "ServiceLocator.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Data.h"
 #include "Utility.h"
 #include "Item.h"

@@ -1,6 +1,6 @@
 #include "AlternateCurrencyManager.h"
 #include "ServiceLocator.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Utility.h"
 #include "Data.h"
 

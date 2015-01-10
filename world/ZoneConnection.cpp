@@ -10,7 +10,7 @@
 #include "Character.h"
 #include "Inventory.h"
 #include "LogSystem.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Data.h"
 #include "CommandHandler.h"
 #include "../common/EQStreamIntf.h"

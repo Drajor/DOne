@@ -1,7 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SOURCE_GROUP(Networking FILES ZoneConnection.h ZoneConnection.cpp WorldConnection.h WorldConnection.cpp Payload.h)
-SOURCE_GROUP(Data FILES Data.h DataStore.h DataStore.cpp zone_data.xml)
+SOURCE_GROUP(Data FILES Data.h IDataStore.h XMLDataStore.h XMLDataStore.cpp)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp SpellDataStore.h SpellDataStore.cpp NPCFactory.h NPCFactory.cpp)
 SOURCE_GROUP(Zone\\Hate FILES HateControllerFactory.h HateControllerFactory.cpp HateController.h HateController.cpp)
 SOURCE_GROUP(Zone\\Experience FILES ExperienceCalculator.h ExperienceCalculator.cpp ExperienceController.h ExperienceController.cpp)
@@ -22,7 +21,7 @@ SET(world_sources
 	Zone.cpp
 	Character.cpp
 	World.cpp
-	DataStore.cpp
+	XMLDataStore.cpp
 	AccountManager.cpp
 	LogSystem.cpp
 	CommandHandler.cpp
@@ -74,7 +73,8 @@ SET(world_headers
 	Zone.h
 	Character.h
 	World.h
-	DataStore.h
+	IDataStore.h
+	XMLDataStore.h
 	AccountManager.h
 	Constants.h
 	LogSystem.h

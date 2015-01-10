@@ -5,7 +5,7 @@
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "AccountManager.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Data.h"
 #include "LoginServerConnection.h"
 #include "UCS.h"

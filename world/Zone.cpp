@@ -10,7 +10,7 @@
 #include "NPC.h"
 #include "ZoneConnection.h"
 #include "Constants.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Transmutation.h"
 #include "Data.h"
 #include "SpellDataStore.h"

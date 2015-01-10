@@ -11,7 +11,7 @@
 #include "AccountManager.h"
 #include "ZoneManager.h"
 #include "TitleManager.h"
-#include "DataStore.h"
+#include "XMLDataStore.h"
 #include "SpellDataStore.h"
 #include "StaticItemData.h"
 #include "ItemDataStore.h"

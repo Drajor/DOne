@@ -1,6 +1,6 @@
 #include "SpellDataStore.h"
 #include "ServiceLocator.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Data.h"

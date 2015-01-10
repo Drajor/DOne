@@ -1,7 +1,7 @@
 #include "ShopDataStore.h"
 #include "ServiceLocator.h"
 #include "Data.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Utility.h"
 
 const bool ShopDataStore::initialise(IDataStore* pDataStore) {

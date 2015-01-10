@@ -1,7 +1,7 @@
 #include "NPCFactory.h"
 #include "ServiceLocator.h"
 #include "Utility.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 #include "Data.h"
 #include "NPC.h"
 #include "ShopDataStore.h"

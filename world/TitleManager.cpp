@@ -1,6 +1,6 @@
 #include "TitleManager.h"
 #include "ServiceLocator.h"
-#include "DataStore.h"
+#include "IDataStore.h"
 
 #include "Utility.h"
 #include "Character.h"
