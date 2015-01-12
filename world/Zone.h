@@ -7,14 +7,11 @@
 
 #include <memory>
 
-class EQStreamFactory;
-class EQStreamIdentifier;
 class EQApplicationPacket;
 class IDataStore;
 class ILog;
 class ILogFactory;
-class ZoneConnection;
-
+class ZoneConnectionManager;
 class World;
 class ZoneManager;
 class Character;
@@ -36,6 +33,7 @@ class Door;
 class CommandHandler;
 class ItemFactory;
 class Transmutation;
+class AccountManager;
 
 namespace Experience {
 	class Calculator;
@@ -81,6 +79,12 @@ public:
 
 	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
 
+	void onEnterZone(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
+	void onCampComplete(Character* pCharacter);
+	void onLinkdeadBegin(Character* pCharacter);
+	void onLinkdeadEnd(Character* pCharacter);
+
 	const bool canShutdown() const;
 	const bool shutdown();
 	
@@ -120,7 +124,6 @@ public:
 	void addActor(Actor* pActor);
 	void removeActor(Actor* pActor);
 
-	void onEnterZone(Character* pCharacter);
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
 	void handleAFK(Character* pCharacter);
@@ -168,7 +171,7 @@ public:
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
 
 	// Guild
-	void notifyGuildsChanged();
+	void onGuildsChanged();
 	void notifyCharacterGuildChange(Character* pCharacter);
 
 	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
@@ -251,7 +254,7 @@ public:
 	void giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperience);
 
 	// Returns the experience modifier on this Zone.
-	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifer.get(); }
+	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifer; }
 	
 	void onCombine(Character* pCharacter, const u32 pSlot);
 
@@ -270,20 +273,12 @@ private:
 
 	void _updateCharacters();
 	void _updateNPCs();
-	void _updateConnections();
-	void _updatePreConnections();
 
-	void _sendDespawn(const uint16 pSpawnID, const bool pDecay = false);
 	void _sendChat(Character* pCharacter, const u32 pChannel, const String pMessage);
 	void _sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender = false);
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);
-	void _handleIncomingConnections();
 	void _sendActorLevel(Actor* pActor);
-
-	void _onLeaveZone(Character* pCharacter);
-	void _onCamp(Character* pCharacter);
-	void _onLinkdead(Character* pCharacter);
 
 	u8 mZoneType = 0;
 	u8 mTimeType = 0;
@@ -303,12 +298,11 @@ private:
 
 	bool mShuttingDown = false;
 	bool mPopulated = false;
-	EQStreamFactory* mStreamFactory = nullptr;
-	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	ZonePointList mZonePoints;
 
+	ZoneConnectionManager* mZoneConnectionManager = nullptr;
 	ZoneManager* mZoneManager = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
@@ -319,24 +313,13 @@ private:
 	RaidManager* mRaidManager = nullptr;
 	CommandHandler* mCommandHandler = nullptr;
 	Experience::Calculator* mExperienceCalculator = nullptr;
-
+	Experience::Modifier* mExperienceModifer = nullptr;
 	LootAllocator* mLootAllocator = nullptr;
-	
-	std::unique_ptr<Experience::Modifier> mExperienceModifer;
-
 	Scene* mScene = nullptr;
+
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
 	std::list<Actor*> mActors;
 	ObjectList mObjects;
 	DoorList mDoors;
-
-	std::list<ZoneConnection*> mPreConnections; // Zoning in or logging in
-	std::list<ZoneConnection*> mConnections; // In Zone, running around probably killing rats.
-
-	struct LinkDeadCharacter {
-		Timer* mTimer;
-		Character* mCharacter;
-	};
-	std::list<LinkDeadCharacter> mLinkDeadCharacters;
 };

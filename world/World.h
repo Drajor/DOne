@@ -13,6 +13,7 @@ namespace Payload {
 	}
 }
 
+class Character;
 class AccountManager;
 class ZoneManager;
 class IDataStore;
@@ -53,6 +54,7 @@ public:
 	const bool onDeleteCharacter(WorldConnection* pConnection, const String& pCharacterName);
 	const bool onEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning);
 
+	void onLeaveWorld(Character* pCharacter);
 protected:
 	
 	AccountManager* mAccountManager = nullptr;

@@ -12,6 +12,8 @@
 static bool AttributeFound = true;
 static bool AttributeNotFound = false;
 
+//#define PROFILE_XML_DS
+
 template <typename T>
 inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
 	if (!pElement) {
@@ -117,7 +119,9 @@ namespace AccountXML {
 
 const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadAccounts");
+#endif
 	EXPECTED_BOOL(pAccounts.empty());
 	TiXmlDocument document(AccountXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -151,7 +155,9 @@ const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 
 const bool XMLDataStore::saveAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::saveAccounts");
+#endif
 	TiXmlDocument document(FileLocation);
 
 	auto accountsElement = new TiXmlElement(Tag::Accounts);
@@ -215,7 +221,9 @@ namespace AccountCharacterDataXML {
 
 const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadAccountCharacterData");
+#endif
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
@@ -282,7 +290,9 @@ const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 
 const bool XMLDataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
-	//Profile p("DataStore::saveAccountCharacterData");
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::saveAccountCharacterData");
+#endif
 	EXPECTED_BOOL(pAccount);
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
 
@@ -500,7 +510,9 @@ const bool loadItem(TiXmlElement* pElement, Data::Item& pItem) {
 
 const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
 	using namespace InventoryXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadInventory");
+#endif
 	EXPECTED_BOOL(pElement);
 
 	auto itemElement = pElement->FirstChildElement(Tag::Item);
@@ -533,8 +545,10 @@ const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience)
 }
 
 const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
-	Profile p("DataStore::loadCharacter");
 	using namespace CharacterXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::loadCharacter");
+#endif
 	EXPECTED_BOOL(pCharacter);
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
@@ -769,7 +783,9 @@ const bool saveItem(TiXmlElement* pParent, const Data::Item& pItem) {
 
 const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInventory) {
 	using namespace InventoryXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::saveInventory");
+#endif
 	EXPECTED_BOOL(pElement);
 
 	for (auto& i : pInventory.mItems)
@@ -796,9 +812,10 @@ const bool writeExperience(TiXmlElement* pElement, const Data::Experience& pExpe
 }
 
 const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
-	Profile p("DataStore::saveCharacter");
 	using namespace CharacterXML;
-
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::saveCharacter");
+#endif
 	EXPECTED_BOOL(pCharacter);
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
 
@@ -1088,7 +1105,9 @@ namespace NPCAppearanceXML {
 
 const bool XMLDataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
 	using namespace NPCAppearanceXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadNPCAppearanceData");
+#endif
 	EXPECTED_BOOL(pAppearances.empty());
 	TiXmlDocument document(NPCAppearanceXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1212,7 +1231,9 @@ namespace NPCTypeXML {
 }
 const bool XMLDataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
 	using namespace NPCTypeXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadNPCTypeData");
+#endif
 	EXPECTED_BOOL(pTypes.empty());
 	TiXmlDocument document(NPCTypeXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1266,8 +1287,10 @@ namespace SpellDataXML {
 
 const bool XMLDataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
 	using namespace SpellDataXML;
-	EXPECTED_BOOL(pSpells);
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadSpells");
+#endif
+	EXPECTED_BOOL(pSpells);
 
 	pNumSpellsLoaded = 0;
 	TiXmlDocument document(SpellDataXML::FileLocation);
@@ -1406,8 +1429,10 @@ namespace ItemDataXML {
 
 const bool XMLDataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
 	using namespace ItemDataXML;
-	EXPECTED_BOOL(pItemData);
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadItems");
+#endif
+	EXPECTED_BOOL(pItemData);
 
 	pNumItemsLoaded = 0;
 	TiXmlDocument document(ItemDataXML::FileLocation);
@@ -1502,8 +1527,10 @@ namespace ZoneXML {
 }
 const bool XMLDataStore::loadZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
-	EXPECTED_BOOL(pZones.empty());
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadZones");
+#endif
+	EXPECTED_BOOL(pZones.empty());
 
 	TiXmlDocument document(ZoneXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1677,7 +1704,9 @@ const bool XMLDataStore::loadZones(Data::ZoneList pZones) {
 
 const bool XMLDataStore::saveZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::saveZones");
+#endif
 	TiXmlDocument document(ZoneXML::FileLocation);
 
 	auto zonesElement = new TiXmlElement(Tag::Zones);
@@ -1846,8 +1875,10 @@ namespace TransmutationComponentXML {
 }
 const bool XMLDataStore::loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) {
 	using namespace TransmutationComponentXML;
-	EXPECTED_BOOL(pComponents.empty());
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadTransmutationComponents");
+#endif
+	EXPECTED_BOOL(pComponents.empty());
 
 	TiXmlDocument document(TransmutationComponentXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1890,8 +1921,10 @@ namespace AlternateCurrencyXML {
 }
 const bool XMLDataStore::loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) {
 	using namespace AlternateCurrencyXML;
-	EXPECTED_BOOL(pCurrencies.empty());
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadAlternateCurrencies");
+#endif
+	EXPECTED_BOOL(pCurrencies.empty());
 
 	TiXmlDocument document(AlternateCurrencyXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());
@@ -1933,8 +1966,10 @@ namespace ShopXML {
 }
 const bool XMLDataStore::loadShops(Data::ShopList pShops) {
 	using namespace ShopXML;
-	EXPECTED_BOOL(pShops.empty());
+#ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadShops");
+#endif
+	EXPECTED_BOOL(pShops.empty());
 
 	TiXmlDocument document(ShopXML::FileLocation);
 	EXPECTED_BOOL(document.LoadFile());

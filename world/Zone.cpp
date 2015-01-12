@@ -1,4 +1,5 @@
 #include "Zone.h"
+#include "ZoneConnectionManager.h"
 #include "ServiceLocator.h"
 #include "World.h"
 #include "AccountManager.h"
@@ -17,9 +18,7 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "../common/types.h"
-#include "../common/EQStreamFactory.h"
-#include "../common/EQStreamIdent.h"
-#include "../common/patches/Underfoot.h"
+
 #include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 #include "Scene.h"
@@ -47,9 +46,7 @@ Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 }
 
 Zone::~Zone() {
-	if (mStreamFactory) mStreamFactory->Close();
-	// NOTE: mStreamFactory is intentionally not deleted here.
-	safe_delete(mStreamIdentifier);
+
 	safe_delete(mScene);
 	safe_delete(mLootAllocator);
 	safe_delete(mSpawnPointManager);
@@ -62,8 +59,6 @@ Zone::~Zone() {
 
 	for (auto i : mZonePoints) delete i;
 	mZonePoints.clear();
-
-	mExperienceModifer.reset();
 }
 
 const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
@@ -94,19 +89,16 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mLog->setContext(ss.str());
 	mLog->status("Initialising");
 
-	// Create and initialise EQStreamFactory.
-	mStreamFactory = new EQStreamFactory(ZoneStream);
-	EXPECTED_BOOL(mStreamFactory->Open(mPort));
-
-	mStreamIdentifier = new EQStreamIdentifier;
-	Underfoot::Register(*mStreamIdentifier);
+	mZoneConnectionManager = new ZoneConnectionManager();
+	if (!mZoneConnectionManager->initialise(mPort, this, mLogFactory, mZoneManager, mGroupManager, mRaidManager, mGuildManager)) {
+		mLog->error("Failure: ZoneConnectionManager failed to initialise.");
+		return false;
+	}
 
 	mScene = new Scene(this);
 	mLootAllocator = new LootAllocator();
 	mTransmutation = new Transmutation();
-
-	// Temp.
-	mExperienceModifer = std::make_unique<Experience::Modifier>();
+	mExperienceModifer = new Experience::Modifier();
 
 	mZoneType = pZoneData->mZoneType;
 	mTimeType = pZoneData->mTimeType;
@@ -137,7 +129,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 
 const bool Zone::canShutdown() const {
 	// Can not shut down while there are still active connections to the Zone.
-	return mCharacters.empty() && mLinkDeadCharacters.empty();
+	return mZoneConnectionManager->numConnections() == 0;
 }
 
 const bool Zone::shutdown() {
@@ -180,160 +172,13 @@ const bool Zone::depopulate() {
 const bool Zone::update() {
 	if (isShuttingDown()) { return false; }
 
-	// Check if any new clients are connecting to this Zone.
-	_handleIncomingConnections();
-
-	_updatePreConnections();
-	_updateConnections();
+	mZoneConnectionManager->update();
 	_updateCharacters();
 	_updateNPCs();
 
 	mSpawnPointManager->update();
 
-	// Check: LD Characters for removal.
-	for (auto i = mLinkDeadCharacters.begin(); i != mLinkDeadCharacters.end();) {
-		// Check: LD timer has finished.
-		if (i->mTimer->Check()) {
-			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
-
-			//// Remove World Authentication - allowing them to log back in.
-			//ServiceLocator::getWorld()->removeAuthentication(i->mCharacter->getAccountID());
-			// TODO:
-
-			// Save
-			i->mCharacter->_updateForSave();
-			requestSave(i->mCharacter);
-
-			mScene->remove(i->mCharacter);
-			delete i->mTimer;
-			delete i->mCharacter;
-			i = mLinkDeadCharacters.erase(i);
-			continue;
-		}
-		i++;
-	}
-
 	return true;
-}
-
-void Zone::_updatePreConnections() {
-	// Update our pre-connections (zoning in or coming from character select).
-	for (auto i = mPreConnections.begin(); i != mPreConnections.end();) {
-		auto connection = *i;
-		const bool isConnected = connection->isConnected();
-		// Connection is fine, proceed as normal.
-		if (isConnected) {
-			connection->update();
-			// 
-			if (connection->isReadyForZoneIn()) {
-				auto character = connection->getCharacter();
-
-				// Remove from pre-connection list.
-				i = mPreConnections.erase(i);
-				// Add to the main connection list.
-				mConnections.push_back(connection);
-				// Add Character to zone.
-				mCharacters.push_back(character);
-				mActors.push_back(character);
-
-				// Tell everyone else.
-				onEnterZone(character);
-				// Let Character do what it needs to.
-				character->onEnterZone();
-
-				continue;
-			}
-			i++;
-			continue;
-		}
-		// Connection has been lost.
-		else {
-			Log::info("[Zone] Connection lost while zoning in.");
-			// Disconnect while zoning or logging in.
-			Character* character = connection->getCharacter();
-			if (character) {
-
-				if (character->hasGroup())
-					mGroupManager->onCamp(character);
-
-				if (character->hasRaid())
-					mRaidManager->onCamp(character);
-
-				if (character->hasGuild())
-					mGuildManager->onCamp(character);
-
-				mAccountManager->onCamp(character);
-				delete character;
-			}
-
-			delete connection;
-			i = mPreConnections.erase(i);
-		}
-	}
-}
-
-void Zone::_updateConnections() {
-	// Update our connections.
-	for (auto i = mConnections.begin(); i != mConnections.end();) {
-		auto connection = *i;
-		// Connection is fine, proceed as normal.
-		if (connection->isConnected()) {
-			connection->update();
-			i++;
-			continue;
-		}
-		// Connection has been lost.
-		else {
-			Character* character = connection->getCharacter();
-
-			// Check: Character camped out.
-			if (character->getCampComplete()) {
-				Log::info("[Zone] Character camped. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
-
-				mScene->remove(character);
-
-				// Save
-				// TODO: How to handle failure here.
-				character->_updateForSave();
-				requestSave(character);
-
-				i = mConnections.erase(i); // Correct iterator.
-				mCharacters.remove(character);
-				mActors.remove(character);
-
-				_onCamp(character);
-				delete connection;
-				delete character;
-				continue;
-			}
-			// Expected: Player zoning out.
-			else if (character->isZoningOut()) {
-				Log::info("[Zone] Character zoning out. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
-
-				mScene->remove(character);
-
-				// TODO: Save .. not sure yet how to handle this.
-				i = mConnections.erase(i); // Correct iterator.
-				character->onZoneOut();
-				mCharacters.remove(character);
-				mActors.remove(character);
-				
-				_onLeaveZone(character);
-				delete connection;
-				continue;
-			}
-			// Unexpected: Link Dead.
-			else {
-				Log::info("[Zone] Character LD. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
-				delete connection; // Free.
-				i = mConnections.erase(i); // Correct iterator.
-
-				_onLinkdead(character);
-				continue;
-			}
-		}
-
-	}
 }
 
 void Zone::_updateCharacters() {
@@ -357,31 +202,6 @@ void Zone::_updateNPCs() {
 	}
 }
 
-void Zone::_handleIncomingConnections() {
-	// Check for incoming connections.
-	EQStream* incomingStream = nullptr;
-	while (incomingStream = mStreamFactory->Pop()) {
-		// Hand over to the EQStreamIdentifier. (Determine which client to user has)
-		mStreamIdentifier->AddStream(incomingStream);
-	}
-
-	mStreamIdentifier->Process();
-
-	// Check for identified streams.
-	EQStreamInterface* incomingStreamInterface = nullptr;
-	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		auto connection = new ZoneConnection();
-		if (!connection->initialise(incomingStreamInterface, mLogFactory->make(), this, mZoneManager, mGroupManager, mRaidManager, mGuildManager)){
-			mLog->error("Failure: ZoneConnection::initialise");
-			delete connection;
-			continue;
-		}
-
-		mLog->info("New ZoneConnection.");
-		mPreConnections.push_back(connection);
-	}
-}
-
 void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 	pCharacter->setPosition(Vector3(pX, pY, pZ));
 	handleActorPositionChange(pCharacter);
@@ -391,16 +211,15 @@ void Zone::moveCharacter(Character* pCharacter, float pX, float pY, float pZ) {
 }
 
 void Zone::onEnterZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(mScene);
+	if (!pCharacter) return;
 
-	// Add Character to Scene.
+	mLog->info("Character (" + pCharacter->getName() + ") entering zone.");
+	pCharacter->onEnterZone();
+
+	// Add Character.
 	mScene->add(pCharacter);
-
-	// Dispatch Event.
-	EventDispatcher::getInstance().event(Event::EnterZone, pCharacter);
-
-	mLog->info("Character " + pCharacter->getName() + " entered Zone");
+	mCharacters.push_back(pCharacter);
+	mActors.push_back(pCharacter);
 
 	if (pCharacter->hasGroup())
 		mGroupManager->onEnterZone(pCharacter);
@@ -410,6 +229,132 @@ void Zone::onEnterZone(Character* pCharacter) {
 
 	if (pCharacter->hasGuild())
 		mGuildManager->onEnterZone(pCharacter);
+
+	// Notify ZoneManager.
+	mZoneManager->onEnterZone(pCharacter);
+}
+
+void Zone::onLeaveZone(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	mLog->info("Character (" + pCharacter->getName() + ") leaving zone.");
+	pCharacter->onLeaveZone();
+
+	// Remove Character.
+	mScene->remove(pCharacter);
+	mCharacters.remove(pCharacter);
+	mActors.remove(pCharacter);
+
+	// Handle: Character leaving zone while looting.
+	// (UNTESTED)
+	if (pCharacter->isLooting()) {
+		auto corpse = pCharacter->getLootingCorpse();
+		// Clear Character reference from corpse.
+		corpse->getLootController()->clearLooter();
+		// Clear corpse reference from Character.
+		pCharacter->setLootingCorpse(nullptr);
+	}
+
+	// Handle: Character leaving zone while shopping.
+	// (UNTESTED)
+	if (pCharacter->isShopping()) {
+		auto npc = pCharacter->getShoppingWith();
+		EXPECTED(npc);
+		// Disassociate Character and NPC.
+		EXPECTED(npc->removeShopper(pCharacter));
+		pCharacter->setShoppingWith(nullptr);
+	}
+
+	// Targetters.
+
+	// Trading.
+
+	// Aggro.
+
+	if (pCharacter->hasGuild())
+		mGuildManager->onLeaveZone(pCharacter);
+
+	if (pCharacter->hasGroup())
+		mGroupManager->onLeaveZone(pCharacter);
+
+	if (pCharacter->hasRaid())
+		mRaidManager->onLeaveZone(pCharacter);
+
+	// Notify ZoneManager.
+	mZoneManager->onLeaveZone(pCharacter);
+}
+
+void Zone::onCampComplete(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	mLog->info("Character (" + pCharacter->getName() + ") camped.");
+
+	// Save
+	pCharacter->_updateForSave();
+	requestSave(pCharacter);
+
+	// Clean up.
+	mScene->remove(pCharacter);
+	mCharacters.remove(pCharacter);
+	mActors.remove(pCharacter);
+
+	if (pCharacter->hasGuild())
+		mGuildManager->onCamp(pCharacter);
+
+	if (pCharacter->hasGroup())
+		mGroupManager->onCamp(pCharacter);
+
+	if (pCharacter->hasRaid())
+		mRaidManager->onCamp(pCharacter);
+
+	// Notify ZoneManager.
+	mZoneManager->onLeaveWorld(pCharacter);
+}
+
+void Zone::onLinkdeadBegin(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	mLog->info("Character (" + pCharacter->getName() + ") LD begin.");
+	pCharacter->setLinkDead();
+	handleLinkDead(pCharacter);
+
+	// Handle: Character going LD while looting.
+	// (UNTESTED)
+	if (pCharacter->isLooting()) {
+		Actor* corpse = pCharacter->getLootingCorpse();
+		// Clear Character reference from corpse.
+		corpse->getLootController()->clearLooter();
+		// Clear corpse reference from Character.
+		pCharacter->setLootingCorpse(nullptr);
+	}
+
+	if (pCharacter->hasGuild())
+		mGuildManager->onLinkdead(pCharacter);
+
+	if (pCharacter->hasGroup())
+		mGroupManager->onLinkdead(pCharacter);
+
+	if (pCharacter->hasRaid())
+		mRaidManager->onLinkdead(pCharacter);
+
+	// Notify ZoneManager.
+	mZoneManager->onLeaveWorld(pCharacter);
+}
+
+
+void Zone::onLinkdeadEnd(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	mLog->info("Character (" + pCharacter->getName() + ") LD end.");
+	
+	// Save
+	pCharacter->_updateForSave();
+	requestSave(pCharacter);
+
+	// Clean up.
+	mScene->remove(pCharacter);
+	mCharacters.remove(pCharacter);
+	mActors.remove(pCharacter);
 }
 
 void Zone::handleActorPositionChange(Actor* pActor) {
@@ -542,28 +487,17 @@ void Zone::handleEmote(Character* pCharacter, const String pMessage) {
 	delete packet;
 }
 
-void Zone::_sendDespawn(const uint16 pSpawnID, const bool pDecay) {
-	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
-	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
-	payload->spawn_id = pSpawnID;
-	payload->Decay = pDecay ? 1 : 0;
-
-	for (auto i : mConnections) {
-			i->sendPacket(outPacket);
-	}
-	safe_delete(outPacket);
-}
-
 void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMessage) {
 	EXPECTED(pCharacter);
 
 	const auto sender = pCharacter->getConnection();
 	auto packet = ZoneConnection::makeChannelMessage(pChannel, pCharacter->getName(), pMessage);
 
-	for (auto i : mConnections) {
-		if (i != sender)
-			i->sendPacket(packet);
+	for (auto i : mCharacters) {
+		if (i != pCharacter)
+			i->getConnection()->sendPacket(packet);
 	}
+
 	delete packet;
 }
 
@@ -752,16 +686,17 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 	pCharacter->getConnection()->sendZoneChange(pZoneID, mInstanceID,  pCharacter->getPosition(), 0);
 }
 
-void Zone::notifyGuildsChanged() {
-	auto outPacket = new EQApplicationPacket(OP_GuildsList);
-	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	outPacket->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
+void Zone::onGuildsChanged() {
+	auto packet = new EQApplicationPacket(OP_GuildsList);
+	packet->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
+	packet->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
 	
-	for (auto i : mConnections) {
-		i->sendPacket(outPacket);
+	for (auto i : mCharacters) {
+		i->getConnection()->sendPacket(packet);
 	}
-	outPacket->pBuffer = nullptr;
-	safe_delete(outPacket);
+
+	packet->pBuffer = nullptr;
+	delete packet;
 }
 
 void Zone::notifyCharacterGuildChange(Character* pCharacter) {
@@ -769,107 +704,6 @@ void Zone::notifyCharacterGuildChange(Character* pCharacter) {
 
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildID, pCharacter->getGuildID(), true);
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildRank, pCharacter->getGuildRank(), true);
-}
-
-void Zone::_onLeaveZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
-
-	// Handle: Character leaving zone while looting.
-	// (UNTESTED)
-	if (pCharacter->isLooting()) {
-		auto corpse = pCharacter->getLootingCorpse();
-		// Clear Character reference from corpse.
-		corpse->getLootController()->clearLooter();
-		// Clear corpse reference from Character.
-		pCharacter->setLootingCorpse(nullptr);
-	}
-
-	// Handle: Character leaving zone while shopping.
-	// (UNTESTED)
-	if (pCharacter->isShopping()) {
-		auto npc = pCharacter->getShoppingWith();
-		EXPECTED(npc);
-		// Disassociate Character and NPC.
-		EXPECTED(npc->removeShopper(pCharacter));
-		pCharacter->setShoppingWith(nullptr);
-	}
-
-	// Targetters.
-
-	// Trading.
-
-	// Aggro.
-
-	// Store Character during zoning.
-	ServiceLocator::getZoneManager()->addZoningCharacter(pCharacter);
-
-	if (pCharacter->hasGuild())
-		mGuildManager->onLeaveZone(pCharacter);
-
-	if (pCharacter->hasGroup())
-		mGroupManager->onLeaveZone(pCharacter);
-
-	if (pCharacter->hasRaid())
-		mRaidManager->onLeaveZone(pCharacter);
-
-	// Dispatch Event.
-	EventDispatcher::getInstance().event(Event::LeaveZone, pCharacter);
-}
-
-void Zone::_onCamp(Character* pCharacter) {
-	EXPECTED(pCharacter);
-
-	if (pCharacter->hasGuild())
-		mGuildManager->onCamp(pCharacter);
-
-	if (pCharacter->hasGroup())
-		mGroupManager->onCamp(pCharacter);
-
-	if (pCharacter->hasRaid())
-		mRaidManager->onCamp(pCharacter);
-
-	// Dispatch Event.
-	EventDispatcher::getInstance().event(Event::Camped, pCharacter);
-}
-
-void Zone::_onLinkdead(Character* pCharacter) {
-	EXPECTED(pCharacter);
-
-	pCharacter->setLinkDead();
-
-	// Tidy up Character
-	mCharacters.remove(pCharacter); // Remove from active Character list.
-	mActors.remove(pCharacter);
-	pCharacter->setConnection(nullptr); // Update Character(ZCC) pointer.
-
-	// Handle: Character going LD while looting.
-	// (UNTESTED)
-	if (pCharacter->isLooting()) {
-		Actor* corpse = pCharacter->getLootingCorpse();
-		// Clear Character reference from corpse.
-		corpse->getLootController()->clearLooter();
-		// Clear corpse reference from Character.
-		pCharacter->setLootingCorpse(nullptr);
-	}
-
-	LinkDeadCharacter linkdeadCharacter;
-	linkdeadCharacter.mTimer = new Timer(5000);
-	linkdeadCharacter.mCharacter = pCharacter;
-	mLinkDeadCharacters.push_back(linkdeadCharacter);
-
-	if (pCharacter->hasGuild())
-		mGuildManager->onLinkdead(pCharacter);
-
-	if (pCharacter->hasGroup())
-		mGroupManager->onLinkdead(pCharacter);
-
-	if (pCharacter->hasRaid())
-		mRaidManager->onLinkdead(pCharacter);
-
-	handleLinkDead(pCharacter);
-
-	// Dispatch Event.
-	EventDispatcher::getInstance().event(Event::ELinkDead, pCharacter);
 }
 
 void Zone::handleTarget(Character* pCharacter, const uint16 pSpawnID) {
@@ -1390,7 +1224,7 @@ void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
 }
 
 const bool Zone::checkAuthentication(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
+	if (!pCharacter) return false;
 	return pCharacter->checkZoneAuthentication(mID, mInstanceID);
 }
 

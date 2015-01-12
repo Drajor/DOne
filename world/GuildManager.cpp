@@ -117,7 +117,7 @@ void GuildManager::handleCreate(Character* pCharacter, const String pGuildName) 
 
 	// Tell Zone that something has changed.
 	// TODO: This needs to be sent globally
-	pCharacter->getZone()->notifyGuildsChanged();
+	pCharacter->getZone()->onGuildsChanged();
 
 	GuildMember* member = new GuildMember();
 	member->mRank = GuildRanks::Leader;

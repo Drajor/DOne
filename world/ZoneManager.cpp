@@ -37,8 +37,9 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory) {
+const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory) {
 	if (mInitialised) return false;
+	if (!pWorld) return false;
 	if (!pZoneDataManager) return false;
 	if (!pGroupManager) return false;
 	if (!pRaidManager) return false;
@@ -47,6 +48,7 @@ const bool ZoneManager::initialise(ZoneDataManager* pZoneDataManager, GroupManag
 	if (!pItemFactory) return false;
 	if (!pLogFactory) return false;
 
+	mWorld = pWorld;
 	mZoneDataManager = pZoneDataManager;
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
@@ -209,42 +211,23 @@ Character* ZoneManager::findCharacter(const String pCharacterName, bool pInclude
 	return nullptr;
 }
 
-void ZoneManager::addZoningCharacter(Character* pCharacter) {
-	EXPECTED(pCharacter);
+void ZoneManager::onEnterZone(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	for (auto i : mZoningCharacters) {
+		if (i == pCharacter) {
+			mZoningCharacters.remove(i);
+			return;
+		}
+	}
+
+	mLog->error("Failure: Could not find Character in onEnterZone");
+}
+
+void ZoneManager::onLeaveZone(Character* pCharacter) {
+	if (!pCharacter) return;
 
 	mZoningCharacters.push_back(pCharacter);
-}
-
-const bool ZoneManager::removeZoningCharacter(const String& pCharacterName) {
-	for (auto i : mZoningCharacters) {
-		if (i->getName() == pCharacterName) {
-			mZoningCharacters.remove(i);
-			return true;
-		}
-	}
-
-	// NOTE: This should only occur if there is a bug.
-	Log::error("[Zone Manager] removeZoningCharacter failed for " + pCharacterName);
-	return false;
-}
-
-const bool ZoneManager::hasZoningCharacter(const u32 pAccountID) const {
-	for (auto i : mZoningCharacters) {
-		if (i->getAccountID() == pAccountID) {
-			return true;
-		}
-	}
-	return false;
-}
-
-String ZoneManager::getZoningCharacterName(const u32 pAccountID) {
-	for (auto i : mZoningCharacters) {
-		if (i->getAccountID() == pAccountID) {
-			return i->getName();
-		}
-	}
-
-	return "";
 }
 
 Character* ZoneManager::getZoningCharacter(const String& pCharacterName) {
@@ -277,4 +260,11 @@ Zone* ZoneManager::_search(const u16 pZoneID, const u16 pInstanceID) const {
 	}
 
 	return nullptr;
+}
+
+void ZoneManager::onLeaveWorld(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	// Notify World.
+	mWorld->onLeaveWorld(pCharacter);
 }

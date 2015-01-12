@@ -15,6 +15,7 @@ class CommandHandler;
 class ItemFactory;
 class Zone;
 class Character;
+class World;
 struct WhoFilter;
 
 namespace Experience {
@@ -33,7 +34,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory);
+	const bool initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory);
 	void update();
 
 	// Returns whether or not the specified Zone is running.
@@ -60,18 +61,18 @@ public:
 	void handleWhoRequest(Character* pCharacter, const WhoFilter& pFilter, std::list<Character*>& pResults);
 	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr) const;
 
-	// Character Zoning.
-	void addZoningCharacter(Character* pCharacter);
-	const bool removeZoningCharacter(const String& pCharacterName);
-	const bool hasZoningCharacter(const u32 pAccountID) const;
+	void onEnterZone(Character* pCharacter);
+	void onLeaveZone(Character* pCharacter);
+	void onLeaveWorld(Character* pCharacter);
+
 	Character* getZoningCharacter(const String& pCharacterName);
-	String getZoningCharacterName(const u32 pAccountID);
 
 private:
 
 	bool mInitialised = false;
 	ILog* mLog = nullptr;
 	ILogFactory* mLogFactory = nullptr;
+	World* mWorld = nullptr;
 	ZoneDataManager* mZoneDataManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;

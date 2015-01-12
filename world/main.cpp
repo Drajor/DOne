@@ -118,13 +118,15 @@ int main(int argc, char** argv)  {
 	CommandHandler* commandHandler = new CommandHandler();
 	EXPECTED_MAIN(commandHandler->initialise(dataStore));
 
-	EXPECTED_MAIN(zoneManager->initialise(zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory));
+	World* world = new World();
+	ServiceLocator::setWorld(world);
+
+	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, zoneManager));
 
-	World* world = new World();
-	ServiceLocator::setWorld(world);
+
 	EXPECTED_MAIN(world->initialise(dataStore, logFactory, zoneManager, accountManager));
 
 	UCS* ucs = new UCS();

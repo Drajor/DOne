@@ -267,7 +267,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	}
 
 	// Register Zone Change
-	mZoneManager->addZoningCharacter(character);
+	mZoneManager->onLeaveZone(character);
 	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
@@ -483,4 +483,14 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 	}
 
 	return success;
+}
+
+void World::onLeaveWorld(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	mLog->info("Character (" + pCharacter->getName() + ") leaving world.");
+
+	auto account = pCharacter->getAccount();
+	account->clearActiveCharacter();
+	delete pCharacter;
 }

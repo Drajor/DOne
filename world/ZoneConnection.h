@@ -22,10 +22,9 @@ class GroupManager;
 class RaidManager;
 class GuildManager;
 
-class ZoneConnection {
-public:
-	enum ZoneConnectionStatus {
-		NONE,
+namespace ZCStatus{
+	enum : u32 {
+		None,
 		ZoneEntryReceived,		// On OP_ZoneEntry
 		PlayerProfileSent,
 		ClientRequestZoneData,	// On OP_ReqNewZone
@@ -33,7 +32,10 @@ public:
 		ClientRequestSpawn,		// On OP_ReqClientSpawn
 		Complete				// On OP_ClientReady
 	};
+}
 
+class ZoneConnection {
+public:
 	// Static initialise.
 	static void _initalise();
 
@@ -48,7 +50,7 @@ public:
 	inline const i64& getConnectTime() const { return mConnectTime; }
 
 	bool isConnected();
-	inline bool isReadyForZoneIn() const { return mConnectingStatus == Complete; }
+	inline bool isConnectComplete() const { return mConnectingStatus == ZCStatus::Complete; }
 	inline Character* getCharacter() { return mCharacter; }
 	void update();
 	bool _handlePacket(const EQApplicationPacket* pPacket);
@@ -343,7 +345,7 @@ private:
 	EQStreamInterface* mStreamInterface = nullptr;
 	Zone* mZone = nullptr;
 	Character* mCharacter = nullptr;
-	ZoneConnectionStatus mConnectingStatus = ZoneConnectionStatus::NONE;
+	u32 mConnectingStatus = ZCStatus::None;
 	
 	ILog* mLog = nullptr;
 	ZoneManager* mZoneManager = nullptr;

@@ -95,7 +95,7 @@ public:
 	inline std::shared_ptr<Experience::Controller> getExperienceController() const { return mExperienceController; }
 	
 	bool onEnterZone();
-	bool onZoneOut();
+	void onLeaveZone();
 	const bool onDeath();
 
 	void addQueuedMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);

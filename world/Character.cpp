@@ -224,7 +224,7 @@ bool Character::onEnterZone() {
 	return true;
 }
 
-bool Character::onZoneOut() {
+void Character::onLeaveZone() {
 	setZoning(true);
 	setZone(nullptr);
 	setSpawnID(0);
@@ -236,8 +236,6 @@ bool Character::onZoneOut() {
 		i->getHateController()->remove(this);
 	}
 	clearHaters();
-
-	return true;
 }
 
 void Character::setStanding(bool pStanding) {
