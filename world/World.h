@@ -75,7 +75,7 @@ private:
 
 	bool _initialiseLoginServerConnection();
 
-	bool _handleZoning(WorldConnection* pConnection, const String& pCharacterName);
+	const bool _handleZoning(WorldConnection* pConnection, const String& pCharacterName);
 	bool _handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName);
 	
 	i32 mStatus = 100;

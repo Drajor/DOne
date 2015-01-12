@@ -569,17 +569,34 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 
 void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-	EXPECTED(mZoneConnectionStatus == ZoneConnectionStatus::NONE);
-	EXPECTED(ZoneEntry::sizeCheck(pPacket->size));
+	if (!mConnected) return;
+	if (!pPacket) return;
 
-	auto payload = ZoneEntry::convert(pPacket->pBuffer);
+	// Check: Connecting packet sequence.
+	if (mConnectingStatus != ZoneConnectionStatus::NONE) {
+		mLog->error("Got unexpected OP_ZoneEntry, dropping connection.");
+		dropConnection();
+		return;
+	}
+	// Update connecting status.
+	mConnectingStatus = ZoneConnectionStatus::ZoneEntryReceived;
+
+	EXPECTED(ZoneEntry::sizeCheck(pPacket));
+
+	auto payload = ZoneEntry::convert(pPacket);
+
+	// Check: String is safe.
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(characterName));
-	Log::info("Got ZoneEntry from " + characterName);
 
-	mZoneConnectionStatus = ZoneConnectionStatus::ZoneEntryReceived;
+	// Check: Name is of valid length.
+	if (!Limits::Character::nameLength(characterName)) {
+		mLog->error("Invalid name length.");
+		dropConnection();
+		return;
+	}
+
+	mLog->info("Got OP_ZoneEntry from " + characterName);
+	
 
 	// Retrieve Character
 	mCharacter = ServiceLocator::getZoneManager()->getZoningCharacter(characterName);
@@ -599,7 +616,7 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	_sendGuildNames();
 	// OP_PlayerProfile
 	_sendPlayerProfile();
-	mZoneConnectionStatus = ZoneConnectionStatus::PlayerProfileSent;
+	mConnectingStatus = ZoneConnectionStatus::PlayerProfileSent;
 	// OP_ZoneEntry
 	sendZoneEntry();
 	// Bulk Spawns
@@ -618,7 +635,7 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	// Weather
 	
 	_sendWeather();
-	mZoneConnectionStatus = ZoneConnectionStatus::ZoneInformationSent;
+	mConnectingStatus = ZoneConnectionStatus::ZoneInformationSent;
 }
 
 void ZoneConnection::_sendTimeOfDay() {
@@ -898,7 +915,7 @@ void ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacke
 	EXPECTED(pPacket);
 	EXPECTED(mConnected);
 
-	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestSpawn;
+	mConnectingStatus = ZoneConnectionStatus::ClientRequestSpawn;
 	_sendDoors();
 	_sendObjects();
 	_sendAAStats();
@@ -927,7 +944,7 @@ void ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacke
 void ZoneConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
 
-	mZoneConnectionStatus = ZoneConnectionStatus::Complete;
+	mConnectingStatus = ZoneConnectionStatus::Complete;
 	mForceSendPositionTimer.Start(4000);
 }
 
@@ -1326,7 +1343,7 @@ void ZoneConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
-	mZoneConnectionStatus = ZoneConnectionStatus::ClientRequestZoneData;
+	mConnectingStatus = ZoneConnectionStatus::ClientRequestZoneData;
 	_sendZoneData();
 }
 

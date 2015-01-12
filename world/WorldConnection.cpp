@@ -161,8 +161,8 @@ void WorldConnection::sendExpansionInfo() {
 
 void WorldConnection::sendCharacterSelectInfo() {
 	using namespace Payload::World;
-	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
-	auto payload = CharacterSelect::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
+	auto payload = CharacterSelect::convert(packet->pBuffer);
 	auto accountData = mAccount->getData();
 	EXPECTED(accountData);
 
@@ -203,8 +203,8 @@ void WorldConnection::sendCharacterSelectInfo() {
 		charSlot++;
 	}
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void WorldConnection::sendPostEnterWorld() {

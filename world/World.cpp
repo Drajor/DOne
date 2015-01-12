@@ -206,8 +206,9 @@ void World::setLocked(bool pLocked) {
 	_updateLoginServer();
 }
 
-bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
-	EXPECTED_BOOL(pConnection);
+const bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
 
 	auto character = mZoneManager->getZoningCharacter(pCharacterName);
 	EXPECTED_BOOL(character);
@@ -440,6 +441,7 @@ const bool World::onCreateCharacter(WorldConnection* pConnection, Payload::World
 	// Create the Character.
 	if (mAccountManager->createCharacter(account, pPayload)) {
 		mLog->info("Success: Character created.");
+		pConnection->sendCharacterSelectInfo();
 		return true;
 	}
 

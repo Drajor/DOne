@@ -1575,6 +1575,7 @@ namespace Payload {
 			u32 mFaceStyle = 0;
 			u32 mEyeColour1 = 0;
 			u32 mEyeColour2 = 0;
+			u32 mTutorial = 0;
 			u32 mDrakkinHeritage = 0;
 			u32 mDrakkinTattoo = 0;
 			u32 mDrakkinDetails = 0;

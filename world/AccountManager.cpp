@@ -152,6 +152,9 @@ const bool AccountManager::createCharacter(Account* pAccount, Payload::World::Cr
 	c->mClass = pPayload->mClass;
 	c->mZoneID = 1; // TODO:
 
+	c->mExperience.mLevel = 1;
+	c->mExperience.mMaximumLevel = 10;
+
 	// Appearance Data
 	c->mRace = pPayload->mRace;
 	c->mGender = pPayload->mGender;

@@ -12,6 +12,7 @@ class Character;
 class Object;
 class Door;
 class IDataStore;
+class ILog;
 class Guild;
 class Item;
 struct GuildMember;
@@ -42,7 +43,7 @@ public:
 	static void _deinitialise();
 
 	bool isConnected();
-	inline bool isReadyForZoneIn() const { return mZoneConnectionStatus == Complete; }
+	inline bool isReadyForZoneIn() const { return mConnectingStatus == Complete; }
 	inline Character* getCharacter() { return mCharacter; }
 	void update();
 	bool _handlePacket(const EQApplicationPacket* pPacket);
@@ -334,8 +335,9 @@ private:
 	EQStreamInterface* mStreamInterface = nullptr;
 	Zone* mZone = nullptr;
 	Character* mCharacter = nullptr;
-	ZoneConnectionStatus mZoneConnectionStatus = ZoneConnectionStatus::NONE;
+	ZoneConnectionStatus mConnectingStatus = ZoneConnectionStatus::NONE;
 	
+	ILog* mLog = nullptr;
 	GuildManager* mGuildManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
