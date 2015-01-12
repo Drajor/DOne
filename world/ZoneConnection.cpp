@@ -30,6 +30,7 @@
 #include "ExtendedTargetController.h"
 #include "RespawnOptions.h"
 #include "ExperienceController.h"
+#include "Account.h"
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
@@ -40,23 +41,6 @@ EQApplicationPacket* ZoneConnection::mGroupLeavePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupDisbandPacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupLeaderChangePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupUpdateMembersPacket = nullptr;
-
-ZoneConnection::ZoneConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) :
-mZone(pZone),
-mStreamInterface(pStreamInterface),
-mGroupManager(pGroupManager),
-mRaidManager(pRaidManager),
-mGuildManager(pGuildManager),
-mConnected(true)
-{
-	mForceSendPositionTimer.Disable();
-}
-
-ZoneConnection::~ZoneConnection() {
-	dropConnection();
-	mStreamInterface->ReleaseFromUse();
-	// NOTE: mStreamInterface is intentionally not deleted here.
-}
 
 void ZoneConnection::_initalise() {
 	mPlayerProfilePacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
@@ -74,6 +58,61 @@ void ZoneConnection::_deinitialise() {
 	safe_delete(mGroupDisbandPacket);
 	safe_delete(mGroupLeaderChangePacket);
 	safe_delete(mGroupUpdateMembersPacket);
+}
+
+ZoneConnection::ZoneConnection() {
+	mForceSendPositionTimer.Disable();
+}
+
+ZoneConnection::~ZoneConnection() {
+	dropConnection();
+	if (mStreamInterface)
+		mStreamInterface->ReleaseFromUse();
+	// NOTE: mStreamInterface is intentionally not deleted here.
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
+
+const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) {
+	if (mInitialised) return false;
+	if (!pStreamInterface) return false;
+	if (!pLog) return false;
+	if (!pZone) return false;
+	if (!pZoneManager) return false;
+	if (!pGroupManager) return false;
+	if (!pRaidManager) return false;
+	if (!pGuildManager) return false;
+
+	mStreamInterface = pStreamInterface;
+	mLog = pLog;
+	mZone = pZone;
+	mZoneManager = pZoneManager;
+	mGroupManager = pGroupManager;
+	mRaidManager = pRaidManager;
+	mGuildManager = pGuildManager;
+	mConnected = true;
+
+	updateLogContext();
+
+	mLog->status("Finished initialising.");
+	mInitialised = true;
+	return true;
+}
+
+void ZoneConnection::updateLogContext() {
+	StringStream context;
+	context << "[ZoneConnection (IP: " << mStreamInterface->GetRemoteIP() << " Port: " << mStreamInterface->GetRemotePort();
+
+	if (mCharacter) {
+		auto account = mCharacter->getAccount();
+		context << " LSID: " << account->getLoginServerID() << " LSAID:" << account->getLoginAccountID() << " LSAN: " << account->getLoginAccountName();
+	}
+
+	context << ")]";
+	mLog->setContext(context.str());
 }
 
 bool ZoneConnection::isConnected() {
@@ -107,7 +146,8 @@ void ZoneConnection::update() {
 
 void ZoneConnection::dropConnection() {
 	mConnected = false;
-	mStreamInterface->Close();
+	if (mStreamInterface)
+		mStreamInterface->Close();
 }
 
 bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
@@ -596,12 +636,14 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	}
 
 	mLog->info("Got OP_ZoneEntry from " + characterName);
-	
 
 	// Retrieve Character
 	mCharacter = ServiceLocator::getZoneManager()->getZoningCharacter(characterName);
 	EXPECTED(mCharacter);
 	EXPECTED(ServiceLocator::getZoneManager()->removeZoningCharacter(mCharacter->getName()));
+
+	updateLogContext();
+	mLog->info("Identified.");
 
 	// Check: Character authenticated for this Zone.
 	EXPECTED(mZone->checkAuthentication(mCharacter));

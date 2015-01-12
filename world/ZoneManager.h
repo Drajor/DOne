@@ -5,6 +5,8 @@
 #include <list>
 #include <memory>
 
+class ILog;
+class ILogFactory;
 class ZoneDataManager;
 class GroupManager;
 class RaidManager;
@@ -31,7 +33,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
+	const bool initialise(ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory);
 	void update();
 
 	// Returns whether or not the specified Zone is running.
@@ -68,6 +70,8 @@ public:
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
+	ILogFactory* mLogFactory = nullptr;
 	ZoneDataManager* mZoneDataManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;

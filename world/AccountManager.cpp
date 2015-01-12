@@ -26,11 +26,11 @@ const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogF
 	if (!pLogFactory) return false;
 	if (!pDataStore) return false;
 
+	// Create and configure AccountManager log.
 	mLogFactory = pLogFactory;
 	mLog = mLogFactory->make();
 	mDataStore = pDataStore;
 	mLog->setContext("[AccountManager]");
-
 	mLog->status("Initialising.");
 
 	// Load Account Data.
@@ -49,7 +49,7 @@ const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogF
 
 	mLog->info("Loaded data for " + toString(numAccounts()) + " Accounts.");
 
-	mLog->status("Initialisation complete.");
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }

@@ -49,10 +49,10 @@ const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, Z
 	mZoneManager = pZoneManager;
 	mAccountManager = pAccountManager;
 
+	// Create and configure World log.
 	mLog = mLogFactory->make();
 	mLog->setContext("[World]");
 	mLog->status("Initialising.");
-
 
 	mLocked = Settings::getLocked();
 
@@ -67,7 +67,7 @@ const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, Z
 	Underfoot::Register(*mStreamIdentifier);
 
 	mInitialised = true;
-	mLog->status("Initialised.");
+	mLog->status("Finished initialising.");
 	return true;
 }
 

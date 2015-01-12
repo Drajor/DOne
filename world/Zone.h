@@ -11,6 +11,8 @@ class EQStreamFactory;
 class EQStreamIdentifier;
 class EQApplicationPacket;
 class IDataStore;
+class ILog;
+class ILogFactory;
 class ZoneConnection;
 
 class World;
@@ -77,7 +79,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
+	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
 
 	const bool canShutdown() const;
 	const bool shutdown();
@@ -307,6 +309,9 @@ private:
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	ZonePointList mZonePoints;
 
+	ZoneManager* mZoneManager = nullptr;
+	ILogFactory* mLogFactory = nullptr;
+	ILog* mLog = nullptr;
 	SpawnPointManager* mSpawnPointManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
 	GroupManager* mGroupManager = nullptr;

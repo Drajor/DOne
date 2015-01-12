@@ -66,21 +66,33 @@ Zone::~Zone() {
 	mExperienceModifer.reset();
 }
 
-const bool Zone::initialise(Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pZoneData);
-	EXPECTED_BOOL(pExperienceCalculator);
-	EXPECTED_BOOL(pGroupManager);
-	EXPECTED_BOOL(pRaidManager);
-	EXPECTED_BOOL(pGuildManager);
-	EXPECTED_BOOL(pCommandHandler);
-	EXPECTED_BOOL(pItemFactory);
+const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
+	if (mInitialised) return false;
+	if (!pZoneManager) return false;
+	if (!pLogFactory) return false;
+	if (!pZoneData) return false;
+	if (!pExperienceCalculator) return false;
+	if (!pGroupManager) return false;
+	if (!pRaidManager) return false;
+	if (!pGuildManager) return false;
+	if (!pCommandHandler) return false;
+	if (!pItemFactory) return false;
 
+	mZoneManager = pZoneManager;
+	mLogFactory = pLogFactory;
 	mExperienceCalculator = pExperienceCalculator;
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
+	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
+
+	// Create and configure Zone log.
+	mLog = mLogFactory->make();
+	StringStream ss;
+	ss << "[Zone (ID: " << getID() << " Instance: " << getInstanceID() << ")]";
+	mLog->setContext(ss.str());
+	mLog->status("Initialising");
 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(ZoneStream);
@@ -118,6 +130,7 @@ const bool Zone::initialise(Data::Zone* pZoneData, Experience::Calculator* pExpe
 	// Doors.
 	EXPECTED_BOOL(loadDoors(pZoneData->mDoors));
 
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
@@ -352,8 +365,15 @@ void Zone::_handleIncomingConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		Log::info("[Zone] New Zone Client Connection. " + Utility::zoneLogDetails(this));
-		mPreConnections.push_back(new ZoneConnection(incomingStreamInterface, this, mGroupManager, mRaidManager, mGuildManager));
+		auto connection = new ZoneConnection();
+		if (!connection->initialise(incomingStreamInterface, mLogFactory->make(), this, mZoneManager, mGroupManager, mRaidManager, mGuildManager)){
+			mLog->error("Failure: ZoneConnection::initialise");
+			delete connection;
+			continue;
+		}
+
+		mLog->info("New ZoneConnection.");
+		mPreConnections.push_back(connection);
 	}
 }
 

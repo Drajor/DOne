@@ -17,6 +17,7 @@ class Guild;
 class Item;
 struct GuildMember;
 
+class ZoneManager;
 class GroupManager;
 class RaidManager;
 class GuildManager;
@@ -32,15 +33,18 @@ public:
 		ClientRequestSpawn,		// On OP_ReqClientSpawn
 		Complete				// On OP_ClientReady
 	};
-public:
-	ZoneConnection(EQStreamInterface* pStreamInterface, Zone* pZone, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
-	~ZoneConnection();
 
 	// Static initialise.
 	static void _initalise();
 
 	// Static deinitialise.
 	static void _deinitialise();
+
+public:
+	ZoneConnection();
+	~ZoneConnection();
+
+	const bool initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
 
 	bool isConnected();
 	inline bool isReadyForZoneIn() const { return mConnectingStatus == Complete; }
@@ -330,6 +334,8 @@ private:
 	void _handleAAAction(const EQApplicationPacket* pPacket);
 	void _handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket);
 
+	void updateLogContext();
+	bool mInitialised = false;
 	bool mConnected = false;
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface = nullptr;
@@ -338,6 +344,7 @@ private:
 	ZoneConnectionStatus mConnectingStatus = ZoneConnectionStatus::NONE;
 	
 	ILog* mLog = nullptr;
+	ZoneManager* mZoneManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
