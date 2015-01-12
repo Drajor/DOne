@@ -94,6 +94,7 @@ const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILog*
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
 	mConnected = true;
+	mConnectTime = Utility::Time::now();
 
 	updateLogContext();
 

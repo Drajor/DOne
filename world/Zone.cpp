@@ -220,37 +220,31 @@ void Zone::_updatePreConnections() {
 	// Update our pre-connections (zoning in or coming from character select).
 	for (auto i = mPreConnections.begin(); i != mPreConnections.end();) {
 		auto connection = *i;
+		const bool isConnected = connection->isConnected();
 		// Connection is fine, proceed as normal.
-		if (connection->isConnected()) {
+		if (isConnected) {
 			connection->update();
 			// 
 			if (connection->isReadyForZoneIn()) {
-				Character* character = connection->getCharacter();
-				if (character) {
-					Log::info("[Zone] Adding new Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(character));
+				auto character = connection->getCharacter();
 
-					// Remove from pre-connection list.
-					i = mPreConnections.erase(i);
-					// Add to the main connection list.
-					mConnections.push_back(connection);
-					// Add Character to zone.
-					mCharacters.push_back(character);
-					mActors.push_back(character);
+				// Remove from pre-connection list.
+				i = mPreConnections.erase(i);
+				// Add to the main connection list.
+				mConnections.push_back(connection);
+				// Add Character to zone.
+				mCharacters.push_back(character);
+				mActors.push_back(character);
 
-					// Tell everyone else.
-					onEnterZone(character);
-					// Let Character do what it needs to.
-					character->onEnterZone();
-				}
-				else {
-					// This should never occur.
-					Log::info("[Zone] Connection was ready for zone in but no Character.");
-					delete connection;
-					i = mPreConnections.erase(i);
-				}
+				// Tell everyone else.
+				onEnterZone(character);
+				// Let Character do what it needs to.
+				character->onEnterZone();
+
 				continue;
 			}
 			i++;
+			continue;
 		}
 		// Connection has been lost.
 		else {
@@ -258,9 +252,20 @@ void Zone::_updatePreConnections() {
 			// Disconnect while zoning or logging in.
 			Character* character = connection->getCharacter();
 			if (character) {
-				// TODO: Group/Raid + anything else that could be interested IF this was a dc during zoning.
+
+				if (character->hasGroup())
+					mGroupManager->onCamp(character);
+
+				if (character->hasRaid())
+					mRaidManager->onCamp(character);
+
+				if (character->hasGuild())
+					mGuildManager->onCamp(character);
+
+				mAccountManager->onCamp(character);
 				delete character;
 			}
+
 			delete connection;
 			i = mPreConnections.erase(i);
 		}
@@ -395,7 +400,7 @@ void Zone::onEnterZone(Character* pCharacter) {
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::EnterZone, pCharacter);
 
-	Log::info("Character " + pCharacter->getName() + " entered Zone");
+	mLog->info("Character " + pCharacter->getName() + " entered Zone");
 
 	if (pCharacter->hasGroup())
 		mGroupManager->onEnterZone(pCharacter);

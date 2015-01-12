@@ -312,6 +312,7 @@ private:
 	ZoneManager* mZoneManager = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
+	AccountManager* mAccountManager = nullptr;
 	SpawnPointManager* mSpawnPointManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
 	GroupManager* mGroupManager = nullptr;

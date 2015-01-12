@@ -45,6 +45,7 @@ public:
 	~ZoneConnection();
 
 	const bool initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
+	inline const i64& getConnectTime() const { return mConnectTime; }
 
 	bool isConnected();
 	inline bool isReadyForZoneIn() const { return mConnectingStatus == Complete; }
@@ -337,6 +338,7 @@ private:
 	void updateLogContext();
 	bool mInitialised = false;
 	bool mConnected = false;
+	i64 mConnectTime = 0; // Time of initialise.
 	Timer mForceSendPositionTimer;
 	EQStreamInterface* mStreamInterface = nullptr;
 	Zone* mZone = nullptr;
