@@ -234,7 +234,7 @@ const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	// Iterate over each "account" element.
 	auto characterSlot = 0;
 	while (characterElement && characterSlot < Limits::Account::MAX_NUM_CHARACTERS) {
-		auto characterData = new Data::CharacterData();
+		auto characterData = new Data::AccountCharacter();
 		pAccount->mCharacterData.push_back(characterData);
 
 		// Read the basic/visual information about each character.

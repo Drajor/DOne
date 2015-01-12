@@ -4,7 +4,7 @@
 
 namespace Data {
 	struct Account;
-	struct CharacterData;
+	struct AccountCharacter;
 }
 
 class ILog;
@@ -14,7 +14,7 @@ class Account {
 public:
 	Account(Data::Account* pData, ILog* pLog);
 	Data::Account* getData() { return mData; }
-	Data::CharacterData* getData(const String& pCharacterName);
+	Data::AccountCharacter* getData(const String& pCharacterName);
 
 	inline bool isLoaded() { return mLoaded; }
 	inline void setLoaded(const bool pValue) { mLoaded = pValue; }
@@ -36,8 +36,8 @@ public:
 	const i8 getStatus() const;
 	void setStatus(const i8 pStatus);
 
-	const u32 getSuspensionTime() const;
-	void setSuspensionTime(const u32 pTime);
+	const i64 getSuspensionTime() const;
+	void setSuspensionTime(const i64 pTime);
 
 	const u32 numCharacters() const;
 	const bool ownsCharacter(const String& pCharacterName) const;
@@ -52,7 +52,9 @@ public:
 	inline const u32 getIP() const { return mIP; }
 
 	inline const String& getReservedCharacterName() const { return mReservedCharacterName; }
+	inline const bool hasReservedCharacterName() const { return mReservedCharacterName.size() > 0; }
 	inline void setReservedCharacterName(const String& pCharacterName) { mReservedCharacterName = pCharacterName; }
+	inline void clearReservedCharacterName() { mReservedCharacterName = ""; }
 private:
 
 	ILog* mLog = nullptr;

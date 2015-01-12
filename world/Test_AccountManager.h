@@ -172,6 +172,86 @@ TEST_F(AccountManagerTest, CharacterNames) {
 	}
 }
 
-TEST_F(AccountManagerTest, CreateCharacter) {
+TEST_F(AccountManagerTest, CreateCharacterA) {
+	// Pass.
+	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
 
+	// Create an Account.
+	auto accountA = mAccountManager->createAccount(12, "test", 1);
+	ASSERT_TRUE(accountA != nullptr);
+
+	// Fail: Null payload.
+	ASSERT_FALSE(mAccountManager->createCharacter(accountA, nullptr));
+
+	auto p = new Payload::World::CreateCharacter();
+	p->mClass = ClassID::Warrior;
+	p->mRace = PlayableRaceIDs::Human;
+	p->mGender = Gender::Female;
+	p->mDeity = PlayerDeityIDs::Agnostic;
+
+	// Fail: Null Account.
+	ASSERT_FALSE(mAccountManager->createCharacter(nullptr, p));
+
+	// Fail: Account not loaded.
+	ASSERT_FALSE(mAccountManager->createCharacter(accountA, p));
+
+	// Trigger Account to be loaded.
+	ASSERT_TRUE(mAccountManager->onConnect(accountA));
+
+	// Fail: Account has no reserved Character name.
+	ASSERT_FALSE(mAccountManager->createCharacter(accountA, p));
+
+	// Set the reserved Character name.
+	accountA->setReservedCharacterName("Drajor");
+
+	// Pass
+	ASSERT_TRUE(mAccountManager->createCharacter(accountA, p));
+	
+	// Check: The reserved Character name on the Account has been wiped.
+	ASSERT_FALSE(accountA->hasReservedCharacterName());
+	
+	// Check: Account now has a single Character.
+	EXPECT_EQ(1, accountA->numCharacters());
+
+	delete p;
+}
+
+TEST_F(AccountManagerTest, DeleteCharacterA) {
+	// Pass.
+	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+
+	// Create an Account.
+	auto accountA = mAccountManager->createAccount(12, "test", 1);
+	ASSERT_TRUE(accountA != nullptr);
+
+	// Trigger Account to be loaded.
+	ASSERT_TRUE(mAccountManager->onConnect(accountA));
+
+	// Set the reserved Character name.
+	accountA->setReservedCharacterName("Drajor");
+
+	auto p = new Payload::World::CreateCharacter();
+	p->mClass = ClassID::Warrior;
+	p->mRace = PlayableRaceIDs::Human;
+	p->mGender = Gender::Female;
+	p->mDeity = PlayerDeityIDs::Agnostic;
+
+	// Pass
+	ASSERT_TRUE(mAccountManager->createCharacter(accountA, p));
+
+	// Check: Account now has a single Character.
+	EXPECT_EQ(1, accountA->numCharacters());
+
+	// Null Account.
+	EXPECT_FALSE(mAccountManager->deleteCharacter(nullptr, "Soandso"));
+
+	// Try deleting a Character that does not belong to the account.
+	EXPECT_FALSE(mAccountManager->deleteCharacter(accountA, "Soandso"));
+
+	EXPECT_TRUE(mAccountManager->deleteCharacter(accountA, "Drajor"));
+
+	// Check: Account now has no Characters.
+	EXPECT_EQ(0, accountA->numCharacters());
+
+	delete p;
 }

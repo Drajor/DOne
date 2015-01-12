@@ -10,9 +10,9 @@ const i8 Account::getStatus() const { return mData->mStatus; }
 
 void Account::setStatus(const i8 pStatus) { mData->mStatus = pStatus; }
 
-const u32 Account::getSuspensionTime() const { return mData->mSuspendedUntil; }
+const i64 Account::getSuspensionTime() const { return mData->mSuspendedUntil; }
 
-void Account::setSuspensionTime(const u32 pTime) { mData->mSuspendedUntil = pTime; }
+void Account::setSuspensionTime(const i64 pTime) { mData->mSuspendedUntil = pTime; }
 
 const u32 Account::numCharacters() const {
 	return mData->mCharacterData.size();
@@ -27,7 +27,7 @@ const bool Account::ownsCharacter(const String& pCharacterName) const {
 	return false;
 }
 
-Data::CharacterData* Account::getData(const String& pCharacterName) {
+Data::AccountCharacter* Account::getData(const String& pCharacterName) {
 	for (auto i : mData->mCharacterData) {
 		if (i->mName == pCharacterName)
 			return i;

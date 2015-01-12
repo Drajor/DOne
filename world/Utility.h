@@ -24,7 +24,7 @@ class Character;
 class Zone;
 namespace Utility {
 	namespace Time {
-		int32 now();
+		i64 now();
 	}
 	void print(String pMessage);
 	String getRandomName();
@@ -328,12 +328,16 @@ namespace Utility {
 		}
 	}
 
-	inline bool stoSafe(int32_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
-	inline bool stoSafe(int16_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
-	inline bool stoSafe(int8_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
-	inline bool stoSafe(uint32_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
-	inline bool stoSafe(uint16_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
-	inline bool stoSafe(uint8_t& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(i64& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(i32& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(i16& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+	inline bool stoSafe(i8& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stoi); }
+
+	inline bool stoSafe(u64& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(u32& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(u16& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+	inline bool stoSafe(u8& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stou); }
+
 	inline bool stoSafe(float& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stof); }
 	inline bool stoSafe(double& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stod); }
 

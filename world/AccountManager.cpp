@@ -124,97 +124,103 @@ const i8 AccountManager::getStatus(const u32 pLoginAccountID, const u32 pLoginSe
 }
 
 const bool AccountManager::createCharacter(Account* pAccount, Payload::World::CreateCharacter* pPayload) {
-	//EXPECTED_BOOL(pPayload);
+	if (!pAccount) return false;
+	if (!pPayload) return false;
+	if (!pAccount->isLoaded()) return false;
+	if (!pAccount->hasReservedCharacterName()) return false;
 
-	//// Check: Class ID
-	//EXPECTED_BOOL(Limits::Character::classID(pPayload->mClass));
+	// Check: Class ID is valid.
+	if (!Limits::Character::classID(pPayload->mClass)) return false;
 
-	//// Check: Race ID
-	//EXPECTED_BOOL(Limits::Character::raceID(pPayload->mRace));
+	// Check: Race ID is valid.
+	if (!Limits::Character::raceID(pPayload->mRace)) return false;
 
-	//// TODO: Check Race is unlocked for the account.
+	// Check: Gender ID is valid.
+	if (!Limits::Character::genderID(pPayload->mGender)) return false;
 
-	//// Find Account that is creating the Character.
-	//auto accountData = _find(pAccountID);
-	//EXPECTED_BOOL(accountData);
-	//EXPECTED_BOOL(isCharacterNameUnique(pCharacterName));
+	// Check: Deity ID is valid.
+	if (!Limits::Character::deityID(pPayload->mDeity)) return false;
 
-	//// Create CharacterData for the new Character.
+	// TODO: Check Race is unlocked for the account.
 
-	//auto characterData = new Data::Character();
-	//characterData->mName = pCharacterName;
-	//characterData->mClass = pPayload->mClass;
-	//characterData->mZoneID = 1; // TODO:
+	// Retrieve and clear reserved Character name.
+	String characterName = pAccount->getReservedCharacterName();
+	pAccount->clearReservedCharacterName();
 
-	//// Appearance Data
-	//characterData->mRace = pPayload->mRace; // TODO: Sanity
-	//characterData->mGender = pPayload->mGender; // Sanity 0/1
-	//characterData->mFaceStyle = pPayload->mFaceStyle;
-	//characterData->mHairStyle = pPayload->mHairStyle;
-	//characterData->mBeardStyle = pPayload->mBeardStyle;
-	//characterData->mHairColour = pPayload->mHairColour;
-	//characterData->mBeardColour = pPayload->mBeardColour;
-	//characterData->mEyeColourLeft = pPayload->mEyeColour1;
-	//characterData->mEyeColourRight = pPayload->mEyeColour2;
-	//characterData->mDrakkinHeritage = pPayload->mDrakkinHeritage;
-	//characterData->mDrakkinTattoo = pPayload->mDrakkinTattoo;
-	//characterData->mDrakkinDetails = pPayload->mDrakkinDetails;
-	//characterData->mDeity = pPayload->mDeity; // TODO: Sanity
+	auto c = new Data::Character();
+	c->mName = characterName;
+	c->mClass = pPayload->mClass;
+	c->mZoneID = 1; // TODO:
 
-	//EXPECTED_BOOL(mDataStore->saveCharacter(pCharacterName, characterData));
+	// Appearance Data
+	c->mRace = pPayload->mRace;
+	c->mGender = pPayload->mGender;
+	c->mFaceStyle = pPayload->mFaceStyle;
+	c->mHairStyle = pPayload->mHairStyle;
+	c->mBeardStyle = pPayload->mBeardStyle;
+	c->mHairColour = pPayload->mHairColour;
+	c->mBeardColour = pPayload->mBeardColour;
+	c->mEyeColourLeft = pPayload->mEyeColour1;
+	c->mEyeColourRight = pPayload->mEyeColour2;
+	c->mDrakkinHeritage = pPayload->mDrakkinHeritage;
+	c->mDrakkinTattoo = pPayload->mDrakkinTattoo;
+	c->mDrakkinDetails = pPayload->mDrakkinDetails;
+	c->mDeity = pPayload->mDeity;
 
-	//// Create Account::CharacterData for the new Character.
-	//
-	//auto accountCharacterData = new Data::Account::CharacterData();
-	//accountCharacterData->mName = pCharacterName;
-	//accountCharacterData->mLevel = characterData->mExperience.mLevel;
-	//accountCharacterData->mRace = characterData->mRace;
-	//accountCharacterData->mClass = characterData->mClass;
-	//accountCharacterData->mDeity = characterData->mDeity;
-	//accountCharacterData->mZoneID = characterData->mZoneID;
-	//accountCharacterData->mGender = characterData->mGender;
-	//accountCharacterData->mFaceStyle = characterData->mFaceStyle;
-	//accountCharacterData->mHairStyle = characterData->mHairStyle;
-	//accountCharacterData->mHairColour = characterData->mHairColour;
-	//accountCharacterData->mBeardStyle = characterData->mBeardStyle;
-	//accountCharacterData->mBeardColour = characterData->mBeardColour;
-	//accountCharacterData->mEyeColourLeft = characterData->mEyeColourLeft;
-	//accountCharacterData->mEyeColourRight = characterData->mEyeColourRight;
-	//accountCharacterData->mDrakkinHeritage = characterData->mDrakkinHeritage;
-	//accountCharacterData->mDrakkinTattoo = characterData->mDrakkinTattoo;
-	//accountCharacterData->mDrakkinDetails = characterData->mDrakkinDetails;
-	//accountCharacterData->mPrimary = 0; // TODO: Items
-	//accountCharacterData->mSecondary = 0; // TODO: Items
+	// Save Character.
+	if (!mDataStore->saveCharacter(characterName, c)) {
+		mLog->error("Failure: Creating Character.");
+		delete c;
+		return false;
+	}
 
-	//// TODO: Materials
+	// Create Data::AccountCharacter for the new Character.
+	
+	auto accountCharacterData = new Data::AccountCharacter();
+	accountCharacterData->mName = characterName;
+	accountCharacterData->mLevel = c->mExperience.mLevel;
+	accountCharacterData->mRace = c->mRace;
+	accountCharacterData->mClass = c->mClass;
+	accountCharacterData->mDeity = c->mDeity;
+	accountCharacterData->mZoneID = c->mZoneID;
+	accountCharacterData->mGender = c->mGender;
+	accountCharacterData->mFaceStyle = c->mFaceStyle;
+	accountCharacterData->mHairStyle = c->mHairStyle;
+	accountCharacterData->mHairColour = c->mHairColour;
+	accountCharacterData->mBeardStyle = c->mBeardStyle;
+	accountCharacterData->mBeardColour = c->mBeardColour;
+	accountCharacterData->mEyeColourLeft = c->mEyeColourLeft;
+	accountCharacterData->mEyeColourRight = c->mEyeColourRight;
+	accountCharacterData->mDrakkinHeritage = c->mDrakkinHeritage;
+	accountCharacterData->mDrakkinTattoo = c->mDrakkinTattoo;
+	accountCharacterData->mDrakkinDetails = c->mDrakkinDetails;
+	accountCharacterData->mPrimary = 0;
+	accountCharacterData->mSecondary = 0;
 
-	//accountData->mCharacterData.push_back(accountCharacterData);
-	//EXPECTED_BOOL(_save(accountData));
-	return true;
+	// Add to Account.
+	auto data = pAccount->getData();
+	data->mCharacterData.push_back(accountCharacterData);
+
+	// Save.
+	return _save(data);
 }
 
 const bool AccountManager::deleteCharacter(Account* pAccount, const String& pCharacterName) {
 	if (!pAccount) return false;
+	if (!pAccount->isLoaded()) return false;
 	if (!pAccount->ownsCharacter(pCharacterName)) return false;
 
-	//auto account = _find(pAccountID, 0); // TODO
-	//EXPECTED_BOOL(account);
-	//EXPECTED_BOOL(mDataStore->deleteCharacter(pCharacterName));
+	// Remove from Account.
+	auto data = pAccount->getData();
+	for (auto i : data->mCharacterData) {
+		if (i->mName == pCharacterName) {
+			delete i;
+			data->mCharacterData.remove(i);
+			break;
+		}
+	}
 
-	//// Remove from AccountData
-	//bool removed = false;
-	//for (auto i : account->mCharacterData) {
-	//	if (i->mName == pCharacterName) {
-	//		delete i;
-	//		account->mCharacterData.remove(i);
-	//		removed = true;
-	//		break;
-	//	}
-	//}
-	//EXPECTED_BOOL(removed); // Check: Sanity.
-	//EXPECTED_BOOL(_save(account)); // Save.
-
-	return true;
+	return _save(data);
 }
 
 const bool AccountManager::updateCharacter(Account* pAccount, const Character* pCharacter) {

@@ -121,8 +121,8 @@ String Utility::getRandomName() {
 	return String(rndname);
 }
 
-int32 Utility::Time::now() {
-	return static_cast<int32>(std::time(nullptr));
+i64 Utility::Time::now() {
+	return std::time(nullptr);
 }
 
 const String& Utility::Skills::fromID(const uint32 pSkillID) {

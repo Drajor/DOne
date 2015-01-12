@@ -48,6 +48,14 @@ const bool Limits::Character::raceID(const uint32 pRaceID) {
 	return true;
 }
 
+const bool Limits::Character::genderID(const u8 pGenderID) {
+	return pGenderID == Gender::Male || pGenderID == Gender::Female;
+}
+
+const bool Limits::Character::deityID(const u32 pDeityID) {
+	return true;
+}
+
 bool Limits::Guild::nameLength(const String& pGuildName) {
 	return stringLength(pGuildName) >= Limits::Guild::MIN_NAME_LENGTH && stringLength(pGuildName) <= Limits::Guild::MAX_NAME_LENGTH;
 }

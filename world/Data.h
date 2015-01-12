@@ -4,7 +4,7 @@
 #include "Vector3.h"
 
 namespace Data {
-	struct CharacterData {
+	struct AccountCharacter {
 		String mName = "<none>";
 		u32 mLevel = 0;
 		u8 mClass = 0;
@@ -56,10 +56,10 @@ namespace Data {
 		u32 mLoginServerID = 1;
 		u32 mAccountID = 0; // Internal identifier.
 		i8 mStatus = 0;
-		u32 mSuspendedUntil = 0;
-		u32 mCreated = 0;
+		i64 mSuspendedUntil = 0;
+		i64 mCreated = 0;
 		i32 mPlatinumSharedBank = 0;
-		std::list<CharacterData*> mCharacterData;
+		std::list<AccountCharacter*> mCharacterData;
 		std::list<std::pair<u32, bool>> mRacesUnlocked;
 		bool mCharacterDataLoaded = false;
 	};

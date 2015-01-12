@@ -25,11 +25,17 @@ namespace Limits {
 		bool surnameLengthPayload(const String& pSurname);
 		bool surnameLengthClient(const String& pSurname);
 
-		// Checks whether pClassID is valid for Character Creation.
+		// Checks whether pClassID is valid for Character creation.
 		const bool classID(const uint8 pClassID);
 
-		// Checks whether pRaceID is valid for Character Creation.
+		// Checks whether pRaceID is valid for Character creation.
 		const bool raceID(const uint32 pRaceID);
+
+		// Checks whether pGenderID is valid for Character creation.
+		const bool genderID(const u8 pGenderID);
+
+		// Checks whether pDeityID is valid for Character creation.
+		const bool deityID(const u32 pDeityID);
 	}
 	namespace SpellBook {
 		const bool slotValid(const uint16 pSlot);
