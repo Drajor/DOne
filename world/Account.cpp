@@ -37,3 +37,6 @@ Data::CharacterData* Account::getData(const String& pCharacterName) {
 
 const i32 Account::getSharedPlatinum() const { return mData->mPlatinumSharedBank; }
 void Account::setSharedPlatinum(const i32 pSharedPlatinum) { mData->mPlatinumSharedBank = pSharedPlatinum; }
+
+const bool Account::isBanned() const { return getStatus() == AccountStatus::Banned; }
+const bool Account::isSuspended() const { return getStatus() == AccountStatus::Suspended; }

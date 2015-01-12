@@ -108,8 +108,69 @@ void World::update() {
 }
 
 void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID) {
-	const auto response = getConnectResponse(pLoginAccountID, pConnection->getID());
-	pConnection->sendConnectResponse(pLoginAccountID, response);
+	if (!pConnection) return;
+
+	const auto loginServerID = pConnection->getID();
+	auto account = mAccountManager->getAccount(pLoginAccountID, loginServerID);
+
+	// Account does not exist yet.
+	if (!account) {
+		// Server is currently locked, do not let them in.
+		if (isLocked()) {
+			mLog->info("Unknown Account attempted connection to locked server.");
+			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Denied);
+			return;
+		}
+
+		// Server is not locked, let them in.
+		mLog->info("Unknown Account connecting to server.");
+		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
+		return;
+	}
+
+	// Check: Account is already logged in.
+	if (account->hasAuthentication()) {
+		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Full);
+		return;
+	}
+
+	// Check: Suspended Account time may have expired.
+	if (account->isSuspended()) {
+		mAccountManager->checkSuspension(account);
+	}
+	
+	// Account is banned.
+	if (account->isBanned()) {
+		mLog->info("Banned Account attempted connection.");
+		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Banned);
+		return;
+	}
+
+	// Account is suspended.
+	if (account->isSuspended()) {
+		mLog->info("Suspended Account attempted connection.");
+		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Suspended);
+		return;
+	}
+
+	// Server is currently locked.
+	if (isLocked()) {
+		// Account has enough status to bypass lock.
+		if (account->getStatus() >= AccountStatus::BypassLock) {
+			mLog->info("Lock bypass allowed for Account.");
+			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
+			return;
+		}
+		// Account does not have enough status to bypass lock.
+		else {
+			mLog->info("Lock bypass denied for Account.");
+			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Denied);
+		}
+	}
+
+	// Speak friend and enter.
+	mLog->info("Known Account connecting.");
+	pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
 }
 
 void World::_handleIncomingClientConnections() {
@@ -143,26 +204,6 @@ void World::setLocked(bool pLocked) {
 
 	// Notify Login Server.
 	_updateLoginServer();
-}
-
-const u8 World::getConnectResponse(const u32 pLoginAccountID, const u32 pLoginServerID) {
-	// Fetch the Account Status.
-	auto accountStatus = mAccountManager->getStatus(pLoginAccountID, pLoginServerID);
-
-	// Account Suspended.
-	if (accountStatus == ResponseID::SUSPENDED) return ResponseID::SUSPENDED;
-	// Account Banned.
-	if (accountStatus == ResponseID::BANNED) return ResponseID::BANNED;
-
-	// Check for existing authentication, this prevents same account sign in.
-	//if (authenticationExists(pAccountID)) return ResponseID::FULL;
-
-	// Server is Locked (Only GM/Admin may enter)
-	if (mLocked && accountStatus >= LOCK_BYPASS_STATUS) return ResponseID::ALLOWED;
-	// Server is Locked and user is not a GM/Admin.
-	else if (mLocked && accountStatus < LOCK_BYPASS_STATUS) return ResponseID::DENIED;
-
-	return ResponseID::ALLOWED; // Speak friend and enter.
 }
 
 bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
@@ -236,7 +277,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 }
 
 void World::_updateLoginServer() const {
-	mLoginServerConnection->sendWorldStatus(getStatus(), getPlayers(), getZones());
+	mLoginServerConnection->sendWorldStatus(getStatus(), numPlayers(), numZones());
 }
 
 void World::onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP) {

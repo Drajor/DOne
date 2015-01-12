@@ -32,25 +32,21 @@ public:
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	void update();
 
-	// General
+	inline const i32 getStatus() const { return mStatus; }
+	inline const i32 numPlayers() const { return mPlayers; }
+	inline const i32 numZones() const { return mZones; }
 
-	const i32 getStatus() const { return mStatus; }
-	const i32 getPlayers() const { return mPlayers; }
-	const i32 getZones() const { return mZones; }
-
-	const bool isLocked() const { return mLocked; }
+	// Returns whether the World is currently locked or not.
+	inline const bool isLocked() const { return mLocked; }
+	
+	// Sets whether the World is locked.
 	void setLocked(bool pLocked);
 
 	// LoginServerConnection
-
-	// Login Server requests response for Client who would like to join the World.
-	const u8 getConnectResponse(const u32 pLoginAccountID, const u32 pLoginServerID);
-
 	void onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID);
 	void onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP);
 
 	// WorldConnection.
-
 	const bool onConnect(WorldConnection* pConnection, const u32 pLoginAccountID, const String& pKey, const bool pZoning);
 	const bool onApproveName(WorldConnection* pConnection, const String& pCharacterName);
 	const bool onCreateCharacter(WorldConnection* pConnection, Payload::World::CreateCharacter* pPayload);

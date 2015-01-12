@@ -63,7 +63,10 @@ public:
 	const bool suspend(Account* pAccount, const u32 pExpiry);
 
 	// Removes the suspension on the specified Account.
-	const bool removeSuspend(Account* pAccount);
+	const bool removeSuspension(Account* pAccount);
+
+	// Checks whether the suspension on the specified Account.
+	void checkSuspension(Account * pAccount);
 
 	// Returns whether a Character name is allowed to be used.
 	const bool isCharacterNameAllowed(const String& pCharacterName) const;
@@ -93,7 +96,6 @@ private:
 	
 	Account* _find(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const;
 	Account* _find(const u32 pLoginAccountID, const u32 pLoginServerID) const;
-
 	std::list<String> mCharacterNames;
 
 	std::list<Account*> mAccounts;

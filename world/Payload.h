@@ -1724,7 +1724,7 @@ namespace Payload {
 		struct ConnectResponse : public Fixed<ConnectResponse> {
 			u32 mAccountID = 0;
 			u32 mWorldID = 0;
-			u8 mResponse = ResponseID::ALLOWED;
+			u8 mResponse = ResponseID::Allowed;
 			u32 mFromID = 0; // Ignored in LS.
 			u32 mToID = 0; // Ignored in LS.
 		};

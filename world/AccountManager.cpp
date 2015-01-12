@@ -312,7 +312,7 @@ const bool AccountManager::suspend(Account* pAccount, const u32 pExpiry) {
 	return _save();
 }
 
-const bool AccountManager::removeSuspend(Account* pAccount) {
+const bool AccountManager::removeSuspension(Account* pAccount) {
 	if (!pAccount) return false;
 
 	// Change Account status.
@@ -321,6 +321,15 @@ const bool AccountManager::removeSuspend(Account* pAccount) {
 
 	// Save.
 	return _save();
+}
+
+void AccountManager::checkSuspension(Account * pAccount) {
+	if (!pAccount) return;
+	if (!pAccount->isSuspended()) return;
+
+	// Check: Has the suspension expired?
+	if (Utility::Time::now() >= pAccount->getSuspensionTime())
+		removeSuspension(pAccount);
 }
 
 Account* AccountManager::getAuthenticatedAccount(const u32 pLoginAccountID, const String& pKey, const u32 pIP) {

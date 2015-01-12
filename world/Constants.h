@@ -33,7 +33,15 @@ namespace AccountStatus {
 	};
 }
 
-enum ResponseID : i8 { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNED = -2, FULL = -3 };
+namespace ResponseID {
+	enum : i8 {
+		Allowed = 1,
+		Denied = 0,
+		Suspended = -1,
+		Banned = -2,
+		Full = -3,
+	};
+}
 
 static i8 LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
 

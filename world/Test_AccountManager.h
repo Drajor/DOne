@@ -142,7 +142,7 @@ TEST_F(AccountManagerTest, BanAndSuspend) {
 	EXPECT_TRUE(mAccountManager->getStatus(65, 207) == AccountStatus::Suspended);
 
 	// Remove suspension
-	EXPECT_TRUE(mAccountManager->removeSuspend(accountA));
+	EXPECT_TRUE(mAccountManager->removeSuspension(accountA));
 	EXPECT_TRUE(accountA->getStatus() == AccountStatus::Default);
 	EXPECT_TRUE(accountA->getSuspensionTime() == 0);
 	EXPECT_TRUE(mAccountManager->getStatus(65, 207) == AccountStatus::Default);
@@ -170,4 +170,8 @@ TEST_F(AccountManagerTest, CharacterNames) {
 	for (auto i : names) {
 		EXPECT_EQ(i.first, mAccountManager->isCharacterNameAllowed(i.second));
 	}
+}
+
+TEST_F(AccountManagerTest, CreateCharacter) {
+
 }
