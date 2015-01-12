@@ -71,7 +71,7 @@ void LoginServerConnection::update() {
 			// NOTE: This occurs when a client clicks 'X' at the Server Selection Screen.
 			_handleConnectRequest(packet);
 		}
-		else if (packet->opcode == OpCode::ClientAuthentication) {
+		else if (packet->opcode == OpCode::Authentication) {
 			// NOTE: This occurs when the Login Server receives a positive ConnectResponse.
 			_handleClientAuthentication(packet);
 		}
@@ -89,7 +89,7 @@ void LoginServerConnection::_handleConnectRequest(ServerPacket* pPacket) {
 	auto payload = ConnectRequest::convert(pPacket);
 
 	// Notify World.
-	mWorld->handleConnectRequest(payload->mAccountID);
+	mWorld->onConnectRequest(this, payload->mAccountID);
 }
 
 void LoginServerConnection::sendConnectResponse(const u32 pAccountID, const u8 pResponse) {
@@ -107,12 +107,12 @@ void LoginServerConnection::sendConnectResponse(const u32 pAccountID, const u8 p
 
 void LoginServerConnection::_handleClientAuthentication(ServerPacket* pPacket) {
 	//using namespace Payload::LoginServer;
-	EXPECTED(Payload::LoginServer::ClientAuthentication::sizeCheck(pPacket));
+	EXPECTED(Payload::LoginServer::Authentication::sizeCheck(pPacket));
 
-	auto payload = Payload::LoginServer::ClientAuthentication::convert(pPacket);
+	auto payload = Payload::LoginServer::Authentication::convert(pPacket);
 
 	// Notify World.
-	mWorld->handleClientAuthentication(payload->mAccountID, payload->mAccountName, payload->mKey, payload->mIP);
+	mWorld->onAuthentication(this, payload->mLoginAccountID, payload->mLoginAccountName, payload->mLoginKey, payload->mIP);
 }
 
 void LoginServerConnection::sendWorldInformation(const String& pAccount, const String& pPassword, const String& pLongName, const String& pShortName) {

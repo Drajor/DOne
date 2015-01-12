@@ -183,8 +183,9 @@ const bool Zone::update() {
 		if (i->mTimer->Check()) {
 			Log::info("[Zone] Removing LD Character. " + Utility::zoneLogDetails(this) + Utility::characterLogDetails(i->mCharacter));
 
-			// Remove World Authentication - allowing them to log back in.
-			ServiceLocator::getWorld()->removeAuthentication(i->mCharacter->getAccountID());
+			//// Remove World Authentication - allowing them to log back in.
+			//ServiceLocator::getWorld()->removeAuthentication(i->mCharacter->getAccountID());
+			// TODO:
 
 			// Save
 			i->mCharacter->_updateForSave();
@@ -639,7 +640,7 @@ void Zone::requestSave(Character*pCharacter) {
 	}
 
 	// Update the Account
-	ServiceLocator::getAccountManager()->updateCharacter(pCharacter->getAccountID(), pCharacter);
+	ServiceLocator::getAccountManager()->updateCharacter(pCharacter->getAccount(), pCharacter);
 }
 
 void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter) {

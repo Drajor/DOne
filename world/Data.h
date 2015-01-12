@@ -4,6 +4,33 @@
 #include "Vector3.h"
 
 namespace Data {
+	struct CharacterData {
+		String mName = "<none>";
+		u32 mLevel = 0;
+		u8 mClass = 0;
+		u32 mRace = 0;
+		u8 mGender = 0;
+		u16 mDeity = 0;
+		u16 mZoneID = 0;
+		u8 mFaceStyle = 0;
+		u8 mHairStyle = 0;
+		u8 mHairColour = 0;
+		u8 mBeardStyle = 0;
+		u8 mBeardColour = 0;
+		u8 mEyeColourLeft = 0;
+		u8 mEyeColourRight = 0;
+		u32 mDrakkinHeritage = 0;
+		u32 mDrakkinTattoo = 0;
+		u32 mDrakkinDetails = 0;
+		u32 mPrimary = 0;
+		u32 mSecondary = 0;
+		struct Equipment {
+			u32 mMaterial = 0;
+			u32 mColour = 0;
+		};
+		Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
+	};
+
 	struct Account {
 		Account() {
 			setRaceUnlocked(PlayableRaceIDs::Human, true);
@@ -24,38 +51,14 @@ namespace Data {
 		}
 		void setRaceUnlocked(const u32 pRaceID, const bool pLocked) { mRacesUnlocked.push_back(std::make_pair(pRaceID, pLocked)); }
 
-		u32 mAccountID = 0;		// Provided by Login Server
-		String mAccountName = "";	// Provided by Login Server
-		AccountStatus mStatus = 0;
+		u32 mLoginAccountID = 0;		// Provided by Login Server
+		String mLoginAccountName = "";	// Provided by Login Server
+		u32 mLoginServerID = 1;
+		u32 mAccountID = 0; // Internal identifier.
+		i8 mStatus = 0;
 		u32 mSuspendedUntil = 0;
 		u32 mCreated = 0;
 		i32 mPlatinumSharedBank = 0;
-		struct CharacterData {
-			String mName = "<none>";
-			u32 mLevel = 0;
-			u8 mClass = 0;
-			u32 mRace = 0;
-			u8 mGender = 0;
-			u16 mDeity = 0;
-			u16 mZoneID = 0;
-			u8 mFaceStyle = 0;
-			u8 mHairStyle = 0;
-			u8 mHairColour = 0;
-			u8 mBeardStyle = 0;
-			u8 mBeardColour = 0;
-			u8 mEyeColourLeft = 0;
-			u8 mEyeColourRight = 0;
-			u32 mDrakkinHeritage = 0;
-			u32 mDrakkinTattoo = 0;
-			u32 mDrakkinDetails = 0;
-			u32 mPrimary = 0;
-			u32 mSecondary = 0;
-			struct Equipment {
-				u32 mMaterial = 0;
-				u32 mColour = 0;
-			};
-			Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
-		};
 		std::list<CharacterData*> mCharacterData;
 		std::list<std::pair<u32, bool>> mRacesUnlocked;
 		bool mCharacterDataLoaded = false;

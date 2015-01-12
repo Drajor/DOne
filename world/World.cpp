@@ -1,14 +1,18 @@
 #include "World.h"
 #include "ServiceLocator.h"
+#include "EventDispatcher.h"
 #include "Constants.h"
 #include "Character.h"
 #include "Utility.h"
 #include "ZoneManager.h"
 #include "AccountManager.h"
+#include "Account.h"
 #include "IDataStore.h"
 #include "Data.h"
 #include "LoginServerConnection.h"
 #include "UCS.h"
+#include "Limits.h"
+#include "Payload.h"
 
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -22,7 +26,7 @@
 
 static const int StatusUpdateInterval = 15000;
 
-World::World() : mLog("[World]"), mStatusUpdateTimer(StatusUpdateInterval) { }
+World::World() : mStatusUpdateTimer(StatusUpdateInterval) { }
 
 World::~World() {
 	if (mStreamFactory) mStreamFactory->Close();
@@ -33,16 +37,22 @@ World::~World() {
 	safe_delete(mStreamIdentifier);
 }
 
-const bool World::initialise(IDataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
-	mLog.status("Initialising.");
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
-	EXPECTED_BOOL(pZoneManager);
-	EXPECTED_BOOL(pAccountManager);
+const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
+	if (!pZoneManager) return false;
+	if (!pAccountManager) return false;
 
 	mDataStore = pDataStore;
+	mLogFactory = pLogFactory;
 	mZoneManager = pZoneManager;
 	mAccountManager = pAccountManager;
+
+	mLog = mLogFactory->make();
+	mLog->setContext("[World]");
+	mLog->status("Initialising.");
+
 
 	mLocked = Settings::getLocked();
 
@@ -51,13 +61,13 @@ const bool World::initialise(IDataStore* pDataStore, ZoneManager* pZoneManager, 
 	// Create and initialise EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::Port);
 	EXPECTED_BOOL(mStreamFactory->Open());
-	mLog.info("Listening on port " + std::to_string(Limits::World::Port));
+	mLog->info("Listening on port " + std::to_string(Limits::World::Port));
 
 	mStreamIdentifier = new EQStreamIdentifier;
 	Underfoot::Register(*mStreamIdentifier);
 
 	mInitialised = true;
-	mLog.status("Initialised.");
+	mLog->status("Initialised.");
 	return true;
 }
 
@@ -80,13 +90,13 @@ void World::update() {
 	_handleIncomingClientConnections();
 
 	// Update World Clients.
-	for (auto i = mClientConnections.begin(); i != mClientConnections.end();) {
+	for (auto i = mWorldConnections.begin(); i != mWorldConnections.end();) {
 		if ((*i)->update()){
 			i++;
 		}
 		else {
 			delete *i;
-			i = mClientConnections.erase(i);
+			i = mWorldConnections.erase(i);
 		}
 	}
 
@@ -97,8 +107,9 @@ void World::update() {
 	}
 }
 
-void World::handleConnectRequest(const u32 pAccountID) {
-	mLoginServerConnection->sendConnectResponse(pAccountID, getConnectResponse(pAccountID));
+void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID) {
+	const auto response = getConnectResponse(pLoginAccountID, pConnection->getID());
+	pConnection->sendConnectResponse(pLoginAccountID, response);
 }
 
 void World::_handleIncomingClientConnections() {
@@ -114,39 +125,17 @@ void World::_handleIncomingClientConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		mLog.error("TODO: Check Bans.");
-		//mLog.info("Connection from " + incomingStreamInterface->GetRemoteIP());
-		mClientConnections.push_back(new WorldConnection(this, incomingStreamInterface));
-	}
-}
-
-bool World::isLoginServerConnected() {
-	return mLoginServerConnection->isConnected();
-}
-
-void World::removeAuthentication(const u32 pAccountID) {
-	for (auto i = mAuthentations.begin(); i != mAuthentations.end(); i++) {
-		if ((*i)->mAccountID == pAccountID) {
-			mAuthentations.erase(i);
-			return;
+		auto log = mLogFactory->make();
+		auto connection = new WorldConnection();
+		if (!connection->initialise(this, log, incomingStreamInterface)) {
+			mLog->error("Failure: Initialising WorldConnection");
+			delete log;
+			delete connection;
+			continue;
 		}
-	}
-}
 
-const bool World::checkAuthentication(const u32 pAccountID, const String& pKey) const {
-	for (auto i : mAuthentations) {
-		if (i->mAccountID == pAccountID && i->mKey == pKey)
-			return true;
+		mWorldConnections.push_back(connection);
 	}
-	return false;
-}
-
-const bool World::authenticationExists(const u32 pAccountID) const {
-	for (auto i : mAuthentations) {
-		if (i->mAccountID == pAccountID)
-			return true;
-	}
-	return false;
 }
 
 void World::setLocked(bool pLocked) {
@@ -156,9 +145,9 @@ void World::setLocked(bool pLocked) {
 	_updateLoginServer();
 }
 
-const u8 World::getConnectResponse(const u32 pAccountID) {
+const u8 World::getConnectResponse(const u32 pLoginAccountID, const u32 pLoginServerID) {
 	// Fetch the Account Status.
-	auto accountStatus = mAccountManager->getStatus(pAccountID);
+	auto accountStatus = mAccountManager->getStatus(pLoginAccountID, pLoginServerID);
 
 	// Account Suspended.
 	if (accountStatus == ResponseID::SUSPENDED) return ResponseID::SUSPENDED;
@@ -166,7 +155,7 @@ const u8 World::getConnectResponse(const u32 pAccountID) {
 	if (accountStatus == ResponseID::BANNED) return ResponseID::BANNED;
 
 	// Check for existing authentication, this prevents same account sign in.
-	if (authenticationExists(pAccountID)) return ResponseID::FULL;
+	//if (authenticationExists(pAccountID)) return ResponseID::FULL;
 
 	// Server is Locked (Only GM/Admin may enter)
 	if (mLocked && accountStatus >= LOCK_BYPASS_STATUS) return ResponseID::ALLOWED;
@@ -174,50 +163,6 @@ const u8 World::getConnectResponse(const u32 pAccountID) {
 	else if (mLocked && accountStatus < LOCK_BYPASS_STATUS) return ResponseID::DENIED;
 
 	return ResponseID::ALLOWED; // Speak friend and enter.
-}
-
-bool World::isCharacterNameUnique(String pCharacterName) { return mAccountManager->isCharacterNameUnique(pCharacterName); }
-
-bool World::isCharacterNameReserved(String pCharacterName) {
-	for (auto i : mReservedCharacterNames)
-		if (i.second == pCharacterName)
-			return true;
-	return false;
-}
-
-void World::reserveCharacterName(const uint32 pWorldAccountID, const String pCharacterName) {
-	mReservedCharacterNames.insert(std::make_pair(pWorldAccountID, pCharacterName));
-}
-
-bool World::deleteCharacter(const uint32 pAccountID, const String& pCharacterName) {
-	mLog.info("Delete Character request from Account(" + std::to_string(pAccountID) + ") Name(" + pCharacterName + ")");
-
-	// Check: Character to Account.
-	const bool isOwner = mAccountManager->checkOwnership(pAccountID, pCharacterName);
-	if (!isOwner) {
-		mLog.error("Ownership test failed!");
-		return false;
-	}
-	mLog.info("Ownership test passed!");
-
-	// Check: Delete succeeds.
-	const bool isDeleted = mAccountManager->deleteCharacter(pAccountID, pCharacterName);
-	if (!isDeleted) {
-		mLog.error("Delete Failed!");
-		return false;
-	}
-
-	mLog.info("Delete Success!");
-	return true;
-}
-
-const bool World::handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning) {
-	EXPECTED_BOOL(pConnection);
-
-	if (pZoning)
-		return _handleZoning(pConnection, pCharacterName);
-
-	return _handleEnterWorld(pConnection, pCharacterName);
 }
 
 bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
@@ -240,16 +185,22 @@ bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacter
 	}
 
 	// Send the client off to the Zone.
-	pConnection->_sendChatServer(pCharacterName);
+	pConnection->sendChatServer(pCharacterName);
 	pConnection->sendZoneServerInfo("127.0.0.1", mZoneManager->getZonePort(zoneID, instanceID));
 
 	return true;
 }
 
 bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName) {
-	EXPECTED_BOOL(pConnection);
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
 
-	// Check: CharacterData could be loaded.
+	auto account = pConnection->getAccount();
+
+	// Check: Account owns Character.
+	if (!account->ownsCharacter(pCharacterName)) return false;
+
+	// Check: Data::Character loaded.
 	auto characterData = new Data::Character();
 	if (!mDataStore->loadCharacter(pCharacterName, characterData)) {
 		delete characterData;
@@ -257,8 +208,8 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	}
 
 	// Character Destination.
-	const uint16 zoneID = characterData->mZoneID;
-	const uint16 instanceID = characterData->mInstanceID;
+	const u16 zoneID = characterData->mZoneID;
+	const u16 instanceID = characterData->mInstanceID;
 
 	// Check: Destination Zone is available to pCharacter.
 	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
@@ -268,7 +219,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 
 	// Create and initialise Character.
 	auto character = new Character(pConnection->getAccountID(), characterData);
-	if (!character->initialise()) {
+	if (!character->initialise(account)) {
 		delete character;
 		return false;
 	}
@@ -278,7 +229,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
-	pConnection->_sendChatServer(pCharacterName);
+	pConnection->sendChatServer(pCharacterName);
 	pConnection->sendZoneServerInfo("127.0.0.1", mZoneManager->getZonePort(zoneID, instanceID));
 
 	return true;
@@ -288,30 +239,205 @@ void World::_updateLoginServer() const {
 	mLoginServerConnection->sendWorldStatus(getStatus(), getPlayers(), getZones());
 }
 
-void World::handleClientAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP) {
-	// Check: Account exists.
-	const bool accountExists = mAccountManager->exists(pAccountID);
+void World::onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP) {
+	const auto loginServerID = pConnection->getID();
+	
+	// Find existing Account.
+	auto account = mAccountManager->getAccount(pLoginAccountID, loginServerID);
 
-	// Make a new Account.
-	if (!accountExists) {
-		EXPECTED(mAccountManager->createAccount(pAccountID, pAccountName));
+	// Account does not exist, make one.
+	if (!account) {
+		account = mAccountManager->createAccount(pLoginAccountID, pLoginAccountName, loginServerID);
+
+		// Account creation failed.
+		if (!account) {
+			// LOG
+			return;
+		}
 	}
 
-	// Check: Account status.
-	auto accountStatus = mAccountManager->getStatus(pAccountID);
-	if (accountStatus < ResponseID::ALLOWED)
+	// Check: Account status is allowed.
+	if (account->getStatus() < AccountStatus::Default) {
+		// LOG
 		return;
+	}
 
-	addAuthentication(pAccountID, pAccountName, pKey, pIP);
+	account->setAuthentication(pLoginKey, pIP);
 }
 
-void World::addAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP) {
-	// Add Authentication.
-	auto a = new Authentication();
-	a->mAccountID = pAccountID;
-	a->mAccountName = pAccountName;
-	a->mKey = pKey;
-	a->mIP = pIP;
-	a->mExpiryTime = Time::nowSeconds() + 10000;
-	mAuthentations.push_back(a);
+
+const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccountID, const String& pKey, const bool pZoning) {
+	if (!pConnection) return false;
+	if (pConnection->hasAccount()) return false;
+
+	auto account = mAccountManager->getAuthenticatedAccount(pLoginAccountID, pKey, pConnection->getIP());
+
+	if (!account) {
+		struct Bypass {
+			u32 mLoginAccountID;
+			u32 mLoginServerID;
+			String mKey;
+		};
+		std::list<Bypass> bypasses;
+		bypasses.push_back({ 2, 1, "passwords" });
+		bypasses.push_back({ 3, 1, "passwords" });
+
+		// Find bypass.
+		bool bypassFound = false;
+		for (auto i : bypasses) {
+			if (i.mLoginAccountID == pLoginAccountID && i.mKey == pKey) {
+				bypassFound = true;
+				account = mAccountManager->getAccount(i.mLoginAccountID, i.mLoginServerID);
+				if (!account) {
+					// LOG
+					return false;
+				}
+			}
+		}
+
+		// No authenticated Account and no bypass found.
+		if (!bypassFound) {
+			return false;
+		}
+	}
+
+	account->setAuthentication(pKey, pConnection->getIP());
+	pConnection->setAccount(account);
+	pConnection->setAccountID(pLoginAccountID);
+
+	// Going to: Another Zone
+	if (pZoning) {
+		auto character = account->getActiveCharacter();
+		if (!character) {
+			// LOG. This is really bad.
+			return false;
+		}
+
+		pConnection->sendLogServer();
+		pConnection->sendApproveWorld();
+		pConnection->sendEnterWorld(character->getName());
+		pConnection->sendPostEnterWorld();
+	}
+	// Going to: Character Selection Screen.
+	else {
+		if (!account->isLoaded()) {
+			if (!mAccountManager->onConnect(account)){
+				// LOG/ This is really bad.
+				return false;
+			}
+		}
+
+		pConnection->sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
+		pConnection->sendLogServer();
+		pConnection->sendApproveWorld();
+		pConnection->sendEnterWorld(""); // Empty character name when coming from Server Select. 
+		pConnection->sendPostEnterWorld(); // Required.
+		pConnection->sendExpansionInfo(); // Required.
+		pConnection->sendCharacterSelectInfo(); // Required.
+	}
+
+	/*
+	OP_GuildsList, OP_LogServer, OP_ApproveWorld
+	All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
+	*/
+
+	return true;
+}
+
+const bool World::onApproveName(WorldConnection* pConnection, const String& pCharacterName) {
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
+
+	auto account = pConnection->getAccount();
+
+	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
+	// So we check here and just reject the name if the account is at max.
+	// It would be better if I could figure out how the client limits it and duplicate that.
+	if (account->numCharacters() >= Limits::Account::MAX_NUM_CHARACTERS) {
+		pConnection->sendApproveNameResponse(false);
+		return true;
+	}
+
+	const bool nameAllowed = mAccountManager->isCharacterNameAllowed(pCharacterName);
+
+	// Reserve name for Account.
+	if (nameAllowed) {
+		account->setReservedCharacterName(pCharacterName);
+	}
+
+	pConnection->sendApproveNameResponse(nameAllowed);
+	return true;
+}
+
+const bool World::onDeleteCharacter(WorldConnection* pConnection, const String& pCharacterName) {
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
+
+	auto account = pConnection->getAccount();
+
+	// Check: Account owns Character.
+	if (!account->ownsCharacter(pCharacterName)) return false;
+
+	// Delete the Character.
+	if (mAccountManager->deleteCharacter(account, pCharacterName)) {
+		mLog->info("Success: Character deleted.");
+		pConnection->sendCharacterSelectInfo();
+		return true;
+	}
+
+	mLog->error("Failure: Character failed to be deleted.");
+	return false;
+}
+
+const bool World::onCreateCharacter(WorldConnection* pConnection, Payload::World::CreateCharacter* pPayload) {
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
+	if (!pPayload) return false;
+
+	auto account = pConnection->getAccount();
+
+	// Create the Character.
+	if (mAccountManager->createCharacter(account, pPayload)) {
+		mLog->info("Success: Character created.");
+		return true;
+	}
+
+	mLog->error("Failure: Character failed to be created.");
+	return false;
+}
+
+const bool World::onEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning) {
+	if (!pConnection) return false;
+	if (!pConnection->hasAccount()) return false;
+
+	auto account = pConnection->getAccount();
+
+	// Check: Account owns the Character.
+	if (!account->ownsCharacter(pCharacterName)) return false;
+
+	bool success = false;
+	if (pZoning) {
+		success = _handleZoning(pConnection, pCharacterName);
+	}
+	else {
+		success = _handleEnterWorld(pConnection, pCharacterName);
+	}
+
+	// World Entry Failed
+	if (!success) {
+		// Character Select to World -OR- Character Create to World.
+		if (!pZoning) {
+			pConnection->sendZoneUnavailable();
+			pConnection->sendCharacterSelectInfo();
+			// NOTE: This just bumps the client to Character Select screen.
+			return true;
+		}
+		// Zoning
+		else {
+			// TODO:
+		}
+		return true;
+	}
+
+	return success;
 }

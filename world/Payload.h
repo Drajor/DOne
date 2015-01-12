@@ -1554,11 +1554,12 @@ namespace Payload {
 			}
 		};
 
+		// C->S
 		struct CreateCharacter : public Fixed<CreateCharacter> {
 			u32 mClass = 0;
 			u32 mHairColour = 0;
-			u32 mBeardColour = 0;
 			u32 mBeardStyle = 0;
+			u32 mBeardColour = 0;
 			u32 mGender = 0;
 			u32 mRace = 0;
 			u32 mStartZoneID = 0;
@@ -1707,7 +1708,7 @@ namespace Payload {
 				WorldStatus = 0x1001,
 				ConnectRequest = 0xAB00,
 				ConnectResponse = 0xAB01,
-				ClientAuthentication = 0x1002,
+				Authentication = 0x1002,
 			};
 		}
 
@@ -1733,10 +1734,10 @@ namespace Payload {
 			static const auto MAX_ACCOUNT = 30;
 			static const auto MAX_KEY = 30;
 		}
-		struct ClientAuthentication : public Fixed<ClientAuthentication> {
-			u32 mAccountID = 0;
-			char mAccountName[ClientAuthenticationLimits::MAX_ACCOUNT];
-			char mKey[ClientAuthenticationLimits::MAX_KEY];
+		struct Authentication : public Fixed<Authentication> {
+			u32 mLoginAccountID = 0;
+			char mLoginAccountName[ClientAuthenticationLimits::MAX_ACCOUNT];
+			char mLoginKey[ClientAuthenticationLimits::MAX_KEY];
 			u8 mLoginServerAdmin = 0; // Ignored.
 			i16 mWorldAdmin = 0; // Ignored.
 			u32 mIP = 0;

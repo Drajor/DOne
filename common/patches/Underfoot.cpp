@@ -2852,39 +2852,39 @@ DECODE(OP_ApplyPoison) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_CharacterCreate) {
-	DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
-	SETUP_DIRECT_DECODE(CharCreate_Struct, structs::CharCreate_Struct);
-	IN(class_);
-	IN(beardcolor);
-	IN(beard);
-	IN(hairstyle);
-	IN(gender);
-	IN(race);
-
-	if(RuleB(World, EnableTutorialButton) && eq->tutorial)
-		emu->start_zone = RuleI(World, TutorialZoneID);
-	else
-		emu->start_zone = eq->start_zone;
-
-	IN(haircolor);
-	IN(deity);
-	IN(STR);
-	IN(STA);
-	IN(AGI);
-	IN(DEX);
-	IN(WIS);
-	IN(INT);
-	IN(CHA);
-	IN(face);
-	IN(eyecolor1);
-	IN(eyecolor2);
-	IN(drakkin_heritage);
-	IN(drakkin_tattoo);
-	IN(drakkin_details);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_CharacterCreate) {
+//	DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
+//	SETUP_DIRECT_DECODE(CharCreate_Struct, structs::CharCreate_Struct);
+//	IN(class_);
+//	IN(beardcolor);
+//	IN(beard);
+//	IN(hairstyle);
+//	IN(gender);
+//	IN(race);
+//
+//	if(RuleB(World, EnableTutorialButton) && eq->tutorial)
+//		emu->start_zone = RuleI(World, TutorialZoneID);
+//	else
+//		emu->start_zone = eq->start_zone;
+//
+//	IN(haircolor);
+//	IN(deity);
+//	IN(STR);
+//	IN(STA);
+//	IN(AGI);
+//	IN(DEX);
+//	IN(WIS);
+//	IN(INT);
+//	IN(CHA);
+//	IN(face);
+//	IN(eyecolor1);
+//	IN(eyecolor2);
+//	IN(drakkin_heritage);
+//	IN(drakkin_tattoo);
+//	IN(drakkin_details);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_WhoAllRequest) {
 //	DECODE_LENGTH_EXACT(structs::Who_All_Struct);

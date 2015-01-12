@@ -7,9 +7,17 @@
 #include <list>
 #include <map>
 
+namespace Payload {
+	namespace World {
+		struct CreateCharacter;
+	}
+}
+
 class AccountManager;
 class ZoneManager;
 class IDataStore;
+class ILogFactory;
+class EventDispatcher;
 
 class LoginServerConnection;
 class EQStreamFactory;
@@ -21,8 +29,7 @@ public:
 	World();
 	~World();
 
-	const bool initialise(IDataStore* pDataStore, ZoneManager* pZoneManager, AccountManager* pAccountManager);
-	bool _initialiseLoginServerConnection();
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	void update();
 
 	// General
@@ -31,48 +38,35 @@ public:
 	const i32 getPlayers() const { return mPlayers; }
 	const i32 getZones() const { return mZones; }
 
-	// Removes authentication by Account ID.
-	void removeAuthentication(const u32 pAccountID);
-
-	// Returns whether there is an existing authentication that matches both pAccountID and pKey.
-	const bool checkAuthentication(const u32 pAccountID, const String& pKey) const;
-
-	// Returns whether there is an existing authentication for pAccountID
-	const bool authenticationExists(const u32 pAccountID) const;
-
-	// Login Server Connection
-
-	void handleConnectRequest(const u32 pAccountID);
-	void handleClientAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP);
-
-	void addAuthentication(const u32 pAccountID, const String& pAccountName, const String& pKey, const u32 pIP);
-
-	// Return whether World is connected to the Login Server.
-	bool isLoginServerConnected();
-
-	bool getLocked() { return mLocked; }
+	const bool isLocked() const { return mLocked; }
 	void setLocked(bool pLocked);
 
+	// LoginServerConnection
+
 	// Login Server requests response for Client who would like to join the World.
-	const u8 getConnectResponse(const u32 pAccountID);
+	const u8 getConnectResponse(const u32 pLoginAccountID, const u32 pLoginServerID);
 
-	// Character Select Screen
-	bool isCharacterNameUnique(String pCharacterName);
-	bool isCharacterNameReserved(String pCharacterName);
-	void reserveCharacterName(uint32 pWorldAccountID, String pCharacterName);
-	bool deleteCharacter(const uint32 pAccountID, const String& pCharacterName);
+	void onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID);
+	void onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP);
 
-	const bool handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning);
+	// WorldConnection.
+
+	const bool onConnect(WorldConnection* pConnection, const u32 pLoginAccountID, const String& pKey, const bool pZoning);
+	const bool onApproveName(WorldConnection* pConnection, const String& pCharacterName);
+	const bool onCreateCharacter(WorldConnection* pConnection, Payload::World::CreateCharacter* pPayload);
+	const bool onDeleteCharacter(WorldConnection* pConnection, const String& pCharacterName);
+	const bool onEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning);
 
 protected:
 	
 	AccountManager* mAccountManager = nullptr;
 	ZoneManager* mZoneManager = nullptr;
 	IDataStore* mDataStore = nullptr;
+	ILogFactory* mLogFactory = nullptr;
+	ILog* mLog = nullptr;
+	EventDispatcher* mEventDispatcher = nullptr;
 
 private:
-	LogContext mLog;
-	std::map<uint32, String> mReservedCharacterNames;
 	void _handleIncomingClientConnections();
 
 	bool mInitialised = false;
@@ -81,7 +75,9 @@ private:
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
 
-	std::list<WorldConnection*> mClientConnections;
+	std::list<WorldConnection*> mWorldConnections;
+
+	bool _initialiseLoginServerConnection();
 
 	bool _handleZoning(WorldConnection* pConnection, const String& pCharacterName);
 	bool _handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName);
@@ -93,13 +89,4 @@ private:
 	void _updateLoginServer() const;
 	// Login Server status timer.
 	Timer mStatusUpdateTimer;
-
-	struct Authentication {
-		u32 mAccountID = 0;
-		String mAccountName;
-		String mKey;
-		u32 mIP = 0;
-		u32 mExpiryTime = 0;
-	};
-	std::list<Authentication*> mAuthentations;
 };

@@ -31,6 +31,8 @@ public:
 
 	inline void subscribe(const Event pEvent, EventListener* pListener) { mListeners[pEvent].push_back(pListener); }
 	inline void unsubscribe(const Event pEvent, EventListener* pListener) { mListeners[pEvent].remove(pListener); }
+
+	void onCharacterDelete(const u32 pAccountID, const String& pCharacterName) {};
 private:
 	EventListenerList mListeners[Event::EventMax];
 };

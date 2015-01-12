@@ -20,6 +20,9 @@ public:
 	void sendWorldInformation(const String& pAccount, const String& pPassword, const String& pLongName, const String& pShortName);
 	void sendWorldStatus(const i32 pStatus, const i32 pPlayers, const i32 pZones);
 	void sendConnectResponse(const u32 pAccountID, const u8 pResponse);
+
+	// Login Server ID
+	inline const u32 getID() { return 1; }
 	
 private:
 	bool _isConnectReady();

@@ -11,27 +11,46 @@
 #include "Limits.h"
 
 #include "LogSystem.h"
-#include "AccountManager.h"
 #include "Data.h"
 #include "Payload.h"
 #include "Settings.h"
-
-
-WorldConnection::WorldConnection(World* pWorld, EQStreamInterface* pStreamInterface) :
-	mStreamInterface(pStreamInterface),
-	mWorld(pWorld)
-{
-	mIP = mStreamInterface->GetRemoteIP();
-	mPort = ntohs(mStreamInterface->GetRemotePort());
-
-	ClientVersionBit = 1 << (mStreamInterface->ClientVersion() - 1);
-}
+#include "Account.h"
 
 WorldConnection::~WorldConnection() {
-	//let the stream factory know were done with this stream
-	mStreamInterface->Close();
-	mStreamInterface->ReleaseFromUse();
+	if (!mInitialised) return;
+
+	if (mStreamInterface) {
+		// NOTE: StreamFactory will free this memory.
+		mStreamInterface->Close();
+		mStreamInterface->ReleaseFromUse();
+		mStreamInterface = nullptr;
+	}
+
+	mWorld = nullptr;
+	
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
 }
+
+const bool WorldConnection::initialise(World* pWorld, ILog* pLog, EQStreamInterface* pStreamInterface) {
+	if (mInitialised) return false;
+	if (!pLog) return false;
+	if (!pWorld) return false;
+	if (!pStreamInterface) return false;
+
+	mLog = pLog;
+	mWorld = pWorld;
+	mStreamInterface = pStreamInterface;
+	mIP = pStreamInterface->GetRemoteIP();
+
+	mLog->setContext("[WorldConnection]");
+
+	mInitialised = true;
+	return true;
+}
+
 
 bool WorldConnection::update() {
 	// Check our connection.
@@ -53,12 +72,11 @@ bool WorldConnection::update() {
 }
 
 bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	EXPECTED_BOOL(pPacket);
+	if (!pPacket) return false;
 
-	// Check if unidentified and sending something other than OP_SendLoginInfo
-	// NOTE: Many functions called below assume getAuthenticated is checked here so do not remove it.
-	if (!getAuthenticated() && pPacket->GetOpcode() != OP_SendLoginInfo) {
-		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo"); //OpcodeNames[opcode]
+	// WorldConnection must receive OP_SendLoginInfo and have a valid Account before anything else can occur.
+	if (!hasAccount() && pPacket->GetOpcode() != OP_SendLoginInfo) {
+		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo");
 		return false;
 	}
 
@@ -74,21 +92,21 @@ bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		return _handleConnect(pPacket);
 	case OP_ApproveName:
 		// NOTE: This occurs when the user clicks the 'Create Character' button.
-		return _handleNameApprovalPacket(pPacket);
+		return _handleApproveName(pPacket);
 	case OP_RandomNameGenerator:
 		// NOTE: This occurs when the user clicks the 'Get Name' button.
-		return _handleGenerateRandomNamePacket(pPacket);
+		return _handleGenerateRandomName(pPacket);
 	case OP_CharacterCreateRequest:
 		// NOTE: This occurs when the user clicks the 'New a New Character' button.
-		return _handleCharacterCreateRequestPacket(pPacket);
+		return _handleCharacterCreateRequest(pPacket);
 	case OP_CharacterCreate:
 		// NOTE: This occurs when the client receives OP_ApproveName.
-		return _handleCharacterCreatePacket(pPacket);
+		return _handleCharacterCreate(pPacket);
 	case OP_EnterWorld:
 		return _handleEnterWorld(pPacket);
 	case OP_DeleteCharacter:
 		// NOTE: This occurs when the user clicks the 'Delete Character' button.
-		return _handleDeleteCharacterPacket(pPacket);
+		return _handleDeleteCharacter(pPacket);
 	case OP_WorldComplete:
 		// NOTE: This occurs after OP_EnterWorld is replied to.
 		mStreamInterface->Close();
@@ -109,10 +127,10 @@ bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-void WorldConnection::_sendLogServer() {
+void WorldConnection::sendLogServer() {
 	using namespace Payload::World;
-	auto outPacket = new EQApplicationPacket(OP_LogServer, LogServer::size());
-	auto payload = LogServer::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_LogServer, LogServer::size());
+	auto payload = LogServer::convert(packet->pBuffer);
 
 	strcpy(payload->mWorldShortName, Settings::getServerShortName().c_str());	
 	payload->mEnableEmail = 0;
@@ -121,19 +139,19 @@ void WorldConnection::_sendLogServer() {
 	payload->mEnablePetitionWindow = 1;
 	payload->mFVEnabled = 0;
 
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
-void WorldConnection::_sendEnterWorld(String pCharacterName) {
-	auto outPacket = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
-	strcpy(reinterpret_cast<char*>(outPacket->pBuffer), pCharacterName.c_str());
-	
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+void WorldConnection::sendEnterWorld(const String& pCharacterName) {
+	auto packet = new EQApplicationPacket(OP_EnterWorld, pCharacterName.length() + 1);
+	strcpy(reinterpret_cast<char*>(packet->pBuffer), pCharacterName.c_str());
+
+	sendPacket(packet);
+	delete packet;
 }
 
-void WorldConnection::_sendExpansionInfo() {
+void WorldConnection::sendExpansionInfo() {
 	using namespace Payload::World;
 
 	auto packet = ExpansionInfo::construct(16383); // TODO: Magic.
@@ -141,11 +159,11 @@ void WorldConnection::_sendExpansionInfo() {
 	delete packet;
 }
 
-void WorldConnection::_sendCharacterSelectInfo() {
+void WorldConnection::sendCharacterSelectInfo() {
 	using namespace Payload::World;
 	auto outPacket = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
 	auto payload = CharacterSelect::convert(outPacket->pBuffer);
-	auto accountData = ServiceLocator::getAccountManager()->getAccount(mAccountID);
+	auto accountData = mAccount->getData();
 	EXPECTED(accountData);
 
 	int charSlot = 0;
@@ -189,7 +207,7 @@ void WorldConnection::_sendCharacterSelectInfo() {
 	safe_delete(outPacket);
 }
 
-void WorldConnection::_sendPostEnterWorld() {
+void WorldConnection::sendPostEnterWorld() {
 	auto outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outPacket->size = 0;
 	mStreamInterface->QueuePacket(outPacket);
@@ -208,127 +226,28 @@ bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	
 	u32 accountID = 0;
 	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
-	
-	// Check: World is expecting this connection.
-	const bool authenticated = mWorld->checkAuthentication(accountID, accountKey);
-	if (!authenticated) {
-		// Check: Login Server Bypass.
-		static const std::map<u32, String> bypass = {
-			{ 2, "passwords" },
-			{ 3, "passwords" },
-		};
-		auto bypassSearch = bypass.find(accountID);
-		const bool bypassFound = bypassSearch != bypass.end() ? bypassSearch->second == accountKey : false;
-
-		// Not authenticated and no bypass found.
-		if (!bypassFound) {
-			return false;
-		}
-
-		// Hack.
-		// TODO: Tidy this up. AccountName needs to accessible in a better way.
-		auto accountData = ServiceLocator::getAccountManager()->getAccount(accountID);
-		EXPECTED_BOOL(accountData);
-		mWorld->addAuthentication(accountID, accountData->mAccountName, accountKey, mIP);
-		EXPECTED_BOOL(ServiceLocator::getAccountManager()->ensureAccountLoaded(accountID));
-	}
-
-	_setAuthenticated(true);
-	setAccountID(accountID);
 
 	mZoning = (payload->mZoning == 1);
 
-	// Going to: Another Zone
-	if (mZoning) {
-		// Resolve the name of the Character zoning based on Account ID.
-		EXPECTED_BOOL(ServiceLocator::getZoneManager()->hasZoningCharacter(accountID));
-		String characterName = ServiceLocator::getZoneManager()->getZoningCharacterName(accountID);
-		EXPECTED_BOOL(characterName.length() > 0);
-
-		_sendLogServer();
-		_sendApproveWorld();
-		_sendEnterWorld(characterName);
-		_sendPostEnterWorld();
-	}
-	// Going to: Character Selection Screen.
-	else {
-		EXPECTED_BOOL(ServiceLocator::getAccountManager()->ensureAccountLoaded(accountID));
-
-		_sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
-		_sendLogServer();
-		_sendApproveWorld();
-		_sendEnterWorld(""); // Empty character name when coming from Server Select. 
-		_sendPostEnterWorld(); // Required.
-		_sendExpansionInfo(); // Required.
-		_sendCharacterSelectInfo(); // Required.
-	}
-
-	return true;
-
-	/*
-	OP_GuildsList, OP_LogServer, OP_ApproveWorld
-	All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
-	*/
+	return mWorld->onConnect(this, accountID, accountKey, mZoning);
 }
 
-bool WorldConnection::_handleNameApprovalPacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleApproveName(const EQApplicationPacket* pPacket) {
 	EXPECTED_BOOL(pPacket);
 
-	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
-	// So we check here and just reject the name if the account is at max.
-	// It would be better if I could figure out how the client limits it and duplicate that.
-	if (ServiceLocator::getAccountManager()->getNumCharacters(mAccountID) >= Limits::Account::MAX_NUM_CHARACTERS) {
-		auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
-		outPacket->pBuffer[0] = 0;
-		mStreamInterface->QueuePacket(outPacket);
-		return true;
-	}
-	
-	bool valid = true;
+	// TODO: Size check. Is this fixed?
 
 	// Check: Name Length.
 	String characterName = Utility::safeString((char*)pPacket->pBuffer, Limits::Character::MAX_INPUT_LENGTH);
-	valid = Limits::Character::nameInputLength(characterName);
-
+	
 	// TODO: Consider why race and class are sent here?
 	uchar race = pPacket->pBuffer[64];
 	uchar clas = pPacket->pBuffer[68];
 
-	// Check case of first character (must be uppercase)
-	if (characterName[0] < 'A' || characterName[0] > 'Z') {
-		valid = false;
-	}
-	// Check each character is alpha.
-	for (String::size_type i = 0; i < characterName.length(); i++) {
-		if (!isalpha(characterName[i])) {
-			valid = false;
-			break;
-		}
-	}
-	// Check if name already in use.
-	if (valid && !mWorld->isCharacterNameUnique(characterName)) {
-		valid = false;
-	}
-	// Check if name is reserved.
-	if (valid && mWorld->isCharacterNameReserved(characterName)) {
-		valid = false;
-	}
-	// Reserve character name.
-	if (valid) {
-		// For the rare chance that more than one user tries to create a character with same name.
-		mWorld->reserveCharacterName(mAccountID, characterName);
-		mReservedCharacterName = characterName;
-	}
-
-	auto outPacket = new EQApplicationPacket(OP_ApproveName, 1);
-	outPacket->pBuffer[0] = valid? 1 : 0;
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
-
-	return true;
+	return mWorld->onApproveName(this, characterName);
 }
 
-bool WorldConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleGenerateRandomName(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 
@@ -339,7 +258,7 @@ bool WorldConnection::_handleGenerateRandomNamePacket(const EQApplicationPacket*
 	return true;
 }
 
-bool WorldConnection::_handleCharacterCreateRequestPacket(const EQApplicationPacket* packet) {
+bool WorldConnection::_handleCharacterCreateRequest(const EQApplicationPacket* packet) {
 	struct RaceClassAllocation {
 		unsigned int Index;
 		unsigned int BaseStats[7];
@@ -427,56 +346,29 @@ bool WorldConnection::_handleCharacterCreateRequestPacket(const EQApplicationPac
 	return true;
 }
 
-bool WorldConnection::_handleCharacterCreatePacket(const EQApplicationPacket* pPacket) {
+bool WorldConnection::_handleCharacterCreate(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(CreateCharacter::sizeCheck(pPacket->size));
 
 	auto payload = CreateCharacter::convert(pPacket->pBuffer);
 
-	if (!ServiceLocator::getAccountManager()->handleCharacterCreate(mAccountID, mReservedCharacterName, payload)) {
-		dropConnection();
-		return false;
-	}
-
-	mReservedCharacterName = "";
-	return true;
+	return mWorld->onCreateCharacter(this, payload);
 }
 
 bool WorldConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket->size));
+	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket));
 
 	auto payload = EnterWorld::convert(pPacket->pBuffer);
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED_BOOL(Limits::Character::nameLength(characterName));
 
-	// Check: Account owns the Character.
-	EXPECTED_BOOL(ServiceLocator::getAccountManager()->checkOwnership(mAccountID, characterName));
-
-	bool success = mWorld->handleEnterWorld(this, characterName, mZoning);
-
-	// World Entry Failed
-	if (!success) {
-		// Character Select to World -OR- Character Create to World.
-		if (!mZoning) {
-			_sendZoneUnavailable();
-			_sendCharacterSelectInfo();
-			// NOTE: This just bumps the client to Character Select screen.
-			return true;
-		}
-		// Zoning
-		else {
-			// TODO:
-		}
-		return true;
-	}
-
-	return success;
+	return mWorld->onEnterWorld(this, characterName, mZoning);
 }
 
-void WorldConnection::_sendChatServer(const String& pCharacterName) {
+void WorldConnection::sendChatServer(const String& pCharacterName) {
 	std::stringstream ss;
 	ss << "127.0.0.1" << "," << Settings::getUCSPort() << "," << Settings::getServerShortName() << "." << pCharacterName << ",";
 	ss << "U" << std::hex << std::setfill('0') << std::setw(8) << 34; // TODO: Set up mail key
@@ -489,22 +381,22 @@ void WorldConnection::_sendChatServer(const String& pCharacterName) {
 	safe_delete(outPacket2);
 }
 
-bool WorldConnection::_handleDeleteCharacterPacket(const EQApplicationPacket* pPacket) {
+void WorldConnection::sendApproveNameResponse(const bool pResponse) {
+	auto packet = new EQApplicationPacket(OP_ApproveName, 1);
+	packet->pBuffer[0] = pResponse ? 1 : 0;
+
+	sendPacket(packet);
+	delete packet;
+}
+
+bool WorldConnection::_handleDeleteCharacter(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	EXPECTED_BOOL(pPacket);
 	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
 
 	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Character::MAX_NAME_LENGTH);
 
-	if (mWorld->deleteCharacter(mAccountID, characterName)) {
-		StringStream ss; ss << "[World Client Connection] Character: " << characterName << " deleted.";
-		Log::info(ss.str());
-		_sendCharacterSelectInfo();
-		return true;
-	}
-
-	Log::error("[World Client Connection] Failed to delete character.");
-	return false;
+	return mWorld->onDeleteCharacter(this, characterName);
 }
 
 void WorldConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
@@ -516,7 +408,7 @@ void WorldConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
 }
 
 
-void WorldConnection::_sendZoneUnavailable() {
+void WorldConnection::sendZoneUnavailable() {
 	using namespace Payload::World;
 
 	auto packet = ZoneUnavailable::construct("NONE"); // NOTE: Zone name appears to have no effect.
@@ -524,7 +416,7 @@ void WorldConnection::_sendZoneUnavailable() {
 	delete packet;
 }
 
-void WorldConnection::_sendGuildList() {
+void WorldConnection::sendGuildList() {
 	auto outPacket = new EQApplicationPacket(OP_GuildsList);
 	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
 	outPacket->pBuffer = reinterpret_cast<unsigned char*>(ServiceLocator::getGuildManager()->_getGuildNames());
@@ -534,11 +426,11 @@ void WorldConnection::_sendGuildList() {
 	safe_delete(outPacket);
 }
 
-void WorldConnection::_sendApproveWorld() {
+void WorldConnection::sendApproveWorld() {
 	using namespace Payload::World; 
 
-	auto outPacket = new EQApplicationPacket(OP_ApproveWorld, ApproveWorld::size());
-	auto payload = ApproveWorld::convert(outPacket->pBuffer);
+	auto packet = new EQApplicationPacket(OP_ApproveWorld, ApproveWorld::size());
+	auto payload = ApproveWorld::convert(packet->pBuffer);
 	uchar foo[] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x37, 0x87, 0x13, 0xbe, 0xc8, 0xa7, 0x77, 0xcb,
 		0x27, 0xed, 0xe1, 0xe6, 0x5d, 0x1c, 0xaa, 0xd3, 0x3c, 0x26, 0x3b, 0x6d, 0x8c, 0xdb, 0x36, 0x8d,
@@ -577,8 +469,8 @@ void WorldConnection::_sendApproveWorld() {
 	};
 
 	memcpy(payload->mUnknown0, foo, sizeof(foo));
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	sendPacket(packet);
+	delete packet;
 }
 
 void WorldConnection::sendPacket(const EQApplicationPacket* pPacket) {

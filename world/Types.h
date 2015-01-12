@@ -26,6 +26,9 @@ typedef int64_t i64;
 typedef std::string String;
 typedef std::stringstream StringStream;
 
+template<typename T>
+String toString(T pValue) { return std::to_string(pValue); }
+
 struct Colour3 {
 	u8 mRed = 0;
 	u8 mGreen = 0;

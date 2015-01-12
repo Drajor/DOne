@@ -1,6 +1,7 @@
 #include "AccountManager.h"
 #include "ServiceLocator.h"
 #include "IDataStore.h"
+#include "Account.h"
 #include "Data.h"
 #include "LogSystem.h"
 #include "Utility.h"
@@ -13,313 +14,414 @@
 
 #include "Shlwapi.h"
 
-static bool deleteAll(Data::Account* pValue) { delete pValue; return true; };
 AccountManager::~AccountManager() {
+	if (mInitialised == false) return;
+
 	_save();
 	_clear();
 }
 
-const bool AccountManager::initialise(IDataStore* pDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
-	Profile p("AccountManager::initialise");
-	Log::status("[Account Manager] Initialising.");
+const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pLogFactory) return false;
+	if (!pDataStore) return false;
 
+	mLogFactory = pLogFactory;
+	mLog = mLogFactory->make();
 	mDataStore = pDataStore;
-	const bool accountsLoaded = mDataStore->loadAccounts(mAccounts);
-	EXPECTED_BOOL(accountsLoaded);
+	mLog->setContext("[AccountManager]");
 
-	Log::info("[Account Manager] Loaded data for " + std::to_string(mAccounts.size()) + " Accounts.");
+	mLog->status("Initialising.");
 
+	// Load Account Data.
+	std::list<Data::Account*> accountData;
+	if (!mDataStore->loadAccounts(accountData)) {
+		mLog->error("Failed to load accounts!");
+		_clear();
+		return false;
+	}
+	
+	// Create Accounts.
+	for (auto i : accountData) {
+		auto account = new Account(i, mLogFactory->make());
+		mAccounts.push_back(account);
+	}
+
+	mLog->info("Loaded data for " + toString(numAccounts()) + " Accounts.");
+
+	mLog->status("Initialisation complete.");
 	mInitialised = true;
 	return true;
 }
 
-bool AccountManager::createAccount(const u32 pAccountID, const String pAccoutName){
-	EXPECTED_BOOL(exists(pAccountID) == false);
+Account* AccountManager::createAccount(const u32 pLoginAccountID, const String pLoginAccountName, const u32 pLoginServerID) {
+	// Check: Account does not already exist.
+	if (exists(pLoginAccountID, pLoginAccountName, pLoginServerID)) {
+		mLog->error("Attempting to create Account that already exists.");
+		return nullptr;
+	}
 
-	auto accountData = new Data::Account();
-	accountData->mAccountID = pAccountID;
-	accountData->mAccountName = pAccoutName;
-	accountData->mCreated = Utility::Time::now();
-	accountData->mStatus = ResponseID::ALLOWED;
-
-	mAccounts.push_back(accountData);
+	auto data = new Data::Account();
+	data->mLoginAccountID = pLoginAccountID;
+	data->mLoginAccountName = pLoginAccountName;
+	data->mLoginServerID = pLoginServerID;
+	data->mCreated = Utility::Time::now();
+	data->mStatus = AccountStatus::Default;
+	
 	EXPECTED_BOOL(_save());
-	EXPECTED_BOOL(_save(accountData));
+	EXPECTED_BOOL(_save(data));
 
-	return true;
+	Account* account = new Account(data, mLogFactory->make());
+	mAccounts.push_back(account);
+
+	return account;
+}
+
+Account* AccountManager::getAccount(const u32 pLoginAccountID, const u32 pLoginServerID) {
+	return _find(pLoginAccountID, pLoginServerID);
 }
 
 void AccountManager::_clear() {
-	mAccounts.remove_if(Utility::containerEntryDelete<Data::Account*>);
+	for (auto i : mAccounts)
+		delete i;
+	mAccounts.clear();
 }
+
 bool AccountManager::_save() {
-	EXPECTED_BOOL(mDataStore->saveAccounts(mAccounts));
+	// This a a kludge for now :(
+	std::list<Data::Account*> accounts;
+	for (auto i : mAccounts) {
+		accounts.push_back(i->getData());
+	}
+
+	if (!mDataStore->saveAccounts(accounts)) {
+		mLog->error("Failed to save Account Data");
+		return false;
+	}
 
 	return true;
 }
 
 bool AccountManager::_save(Data::Account* pAccountData) {
-	EXPECTED_BOOL(pAccountData);
-	EXPECTED_BOOL(mDataStore->saveAccountCharacterData(pAccountData));
+	if (!pAccountData) return false;
+	
+	if (!mDataStore->saveAccountCharacterData(pAccountData)) {
+		mLog->error("Failed to save Account Character Data.");
+		return false;
+	}
 
 	return true;
 }
 
-bool AccountManager::exists(const u32 pAccountID){
-	auto account = _find(pAccountID);
+const bool AccountManager::exists(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const {
+	auto account = _find(pLoginAccountID, pLoginAccountName, pLoginServerID);
 	return account ? true : false;
 }
 
-const u8 AccountManager::getStatus(const u32 pAccountID) {
-	auto account = _find(pAccountID);
-	return account ? account->mStatus : ResponseID::ALLOWED;
+const i8 AccountManager::getStatus(const u32 pLoginAccountID, const u32 pLoginServerID) {
+	auto account = _find(pLoginAccountID, pLoginServerID);
+	return account ? account->getStatus() : AccountStatus::Default;
 }
 
-bool AccountManager::deleteCharacter(const u32 pAccountID, const String& pCharacterName) {
-	auto account = _find(pAccountID);
-	EXPECTED_BOOL(account);
-	EXPECTED_BOOL(mDataStore->deleteCharacter(pCharacterName));
+const bool AccountManager::createCharacter(Account* pAccount, Payload::World::CreateCharacter* pPayload) {
+	//EXPECTED_BOOL(pPayload);
 
-	// Remove from AccountData
-	bool removed = false;
-	for (auto i : account->mCharacterData) {
-		if (i->mName == pCharacterName) {
-			delete i;
-			account->mCharacterData.remove(i);
-			removed = true;
-			break;
+	//// Check: Class ID
+	//EXPECTED_BOOL(Limits::Character::classID(pPayload->mClass));
+
+	//// Check: Race ID
+	//EXPECTED_BOOL(Limits::Character::raceID(pPayload->mRace));
+
+	//// TODO: Check Race is unlocked for the account.
+
+	//// Find Account that is creating the Character.
+	//auto accountData = _find(pAccountID);
+	//EXPECTED_BOOL(accountData);
+	//EXPECTED_BOOL(isCharacterNameUnique(pCharacterName));
+
+	//// Create CharacterData for the new Character.
+
+	//auto characterData = new Data::Character();
+	//characterData->mName = pCharacterName;
+	//characterData->mClass = pPayload->mClass;
+	//characterData->mZoneID = 1; // TODO:
+
+	//// Appearance Data
+	//characterData->mRace = pPayload->mRace; // TODO: Sanity
+	//characterData->mGender = pPayload->mGender; // Sanity 0/1
+	//characterData->mFaceStyle = pPayload->mFaceStyle;
+	//characterData->mHairStyle = pPayload->mHairStyle;
+	//characterData->mBeardStyle = pPayload->mBeardStyle;
+	//characterData->mHairColour = pPayload->mHairColour;
+	//characterData->mBeardColour = pPayload->mBeardColour;
+	//characterData->mEyeColourLeft = pPayload->mEyeColour1;
+	//characterData->mEyeColourRight = pPayload->mEyeColour2;
+	//characterData->mDrakkinHeritage = pPayload->mDrakkinHeritage;
+	//characterData->mDrakkinTattoo = pPayload->mDrakkinTattoo;
+	//characterData->mDrakkinDetails = pPayload->mDrakkinDetails;
+	//characterData->mDeity = pPayload->mDeity; // TODO: Sanity
+
+	//EXPECTED_BOOL(mDataStore->saveCharacter(pCharacterName, characterData));
+
+	//// Create Account::CharacterData for the new Character.
+	//
+	//auto accountCharacterData = new Data::Account::CharacterData();
+	//accountCharacterData->mName = pCharacterName;
+	//accountCharacterData->mLevel = characterData->mExperience.mLevel;
+	//accountCharacterData->mRace = characterData->mRace;
+	//accountCharacterData->mClass = characterData->mClass;
+	//accountCharacterData->mDeity = characterData->mDeity;
+	//accountCharacterData->mZoneID = characterData->mZoneID;
+	//accountCharacterData->mGender = characterData->mGender;
+	//accountCharacterData->mFaceStyle = characterData->mFaceStyle;
+	//accountCharacterData->mHairStyle = characterData->mHairStyle;
+	//accountCharacterData->mHairColour = characterData->mHairColour;
+	//accountCharacterData->mBeardStyle = characterData->mBeardStyle;
+	//accountCharacterData->mBeardColour = characterData->mBeardColour;
+	//accountCharacterData->mEyeColourLeft = characterData->mEyeColourLeft;
+	//accountCharacterData->mEyeColourRight = characterData->mEyeColourRight;
+	//accountCharacterData->mDrakkinHeritage = characterData->mDrakkinHeritage;
+	//accountCharacterData->mDrakkinTattoo = characterData->mDrakkinTattoo;
+	//accountCharacterData->mDrakkinDetails = characterData->mDrakkinDetails;
+	//accountCharacterData->mPrimary = 0; // TODO: Items
+	//accountCharacterData->mSecondary = 0; // TODO: Items
+
+	//// TODO: Materials
+
+	//accountData->mCharacterData.push_back(accountCharacterData);
+	//EXPECTED_BOOL(_save(accountData));
+	return true;
+}
+
+const bool AccountManager::deleteCharacter(Account* pAccount, const String& pCharacterName) {
+	if (!pAccount) return false;
+	if (!pAccount->ownsCharacter(pCharacterName)) return false;
+
+	//auto account = _find(pAccountID, 0); // TODO
+	//EXPECTED_BOOL(account);
+	//EXPECTED_BOOL(mDataStore->deleteCharacter(pCharacterName));
+
+	//// Remove from AccountData
+	//bool removed = false;
+	//for (auto i : account->mCharacterData) {
+	//	if (i->mName == pCharacterName) {
+	//		delete i;
+	//		account->mCharacterData.remove(i);
+	//		removed = true;
+	//		break;
+	//	}
+	//}
+	//EXPECTED_BOOL(removed); // Check: Sanity.
+	//EXPECTED_BOOL(_save(account)); // Save.
+
+	return true;
+}
+
+const bool AccountManager::updateCharacter(Account* pAccount, const Character* pCharacter) {
+	if (!pAccount) return false;
+	if (!pAccount->isLoaded()) return false;
+	if (!pCharacter) return false;
+	if (!pAccount->ownsCharacter(pCharacter->getName())) return false;
+
+	// Check: Data exists.
+	auto data = pAccount->getData(pCharacter->getName());
+	if (!data) {
+		mLog->error("Failure: Failed to find Data::CharacterData when updating Character");
+		return false;
+	}
+
+	// Check: Character is in a Zone.
+	auto zone = pCharacter->getZone();
+	if (!zone) {
+		// TODO: When this happens we need to continue with the save and either save a destination zone (if they are zoning) or bind if neither.
+		return false;
+	}
+
+	data->mName = pCharacter->getName();
+	data->mLevel = pCharacter->getLevel();
+	data->mClass = pCharacter->getClass();
+	data->mRace = pCharacter->getRace();
+	data->mGender = pCharacter->getGender();
+	data->mDeity = pCharacter->getDeity();
+	data->mZoneID = pCharacter->getZone()->getID();
+	data->mFaceStyle = pCharacter->getFaceStyle();
+	data->mHairStyle = pCharacter->getHairStyle();
+	data->mHairColour = pCharacter->getHairColour();
+	data->mBeardStyle = pCharacter->getBeardStyle();
+	data->mBeardColour = pCharacter->getBeardColour();
+	data->mEyeColourLeft = pCharacter->getLeftEyeColour();
+	data->mEyeColourRight = pCharacter->getRightEyeColour();
+	data->mDrakkinHeritage = pCharacter->getDrakkinHeritage();
+	data->mDrakkinTattoo = pCharacter->getDrakkinTattoo();
+	data->mDrakkinDetails = pCharacter->getDrakkinDetails();
+	data->mPrimary = 0; // TODO: Items
+	data->mSecondary = 0; // TODO: Items
+
+	// TODO: Materials
+
+	// Save the Account.
+	return _save(pAccount->getData());
+}
+
+Account* AccountManager::_find(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const {
+	for (auto i : mAccounts) {
+		if (i->getLoginAccountID() == pLoginAccountID && i->getLoginAccountName() == pLoginAccountName && i->getLoginServerID() == pLoginServerID)
+			return i;
+	}
+
+	return nullptr;
+}
+
+Account* AccountManager::_find(const u32 pLoginAccountID, const u32 pLoginServerID) const {
+	for (auto i : mAccounts) {
+		if (i->getLoginAccountID() == pLoginAccountID && i->getLoginServerID() == pLoginServerID)
+			return i;
+	}
+
+	return nullptr;
+}
+
+const bool AccountManager::ban(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Change Account status.
+	pAccount->setStatus(AccountStatus::Banned);
+
+	// Save.
+	return _save();
+}
+
+const bool AccountManager::removeBan(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Change Account status.
+	pAccount->setStatus(AccountStatus::Default);
+
+	// Save.
+	return _save();
+}
+
+const bool AccountManager::suspend(Account* pAccount, const u32 pExpiry) {
+	if (!pAccount) return false;
+
+	// Change Account status.
+	pAccount->setStatus(AccountStatus::Suspended);
+	pAccount->setSuspensionTime(pExpiry);
+
+	// Save.
+	return _save();
+}
+
+const bool AccountManager::removeSuspend(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Change Account status.
+	pAccount->setStatus(AccountStatus::Default);
+	pAccount->setSuspensionTime(0);
+
+	// Save.
+	return _save();
+}
+
+Account* AccountManager::getAuthenticatedAccount(const u32 pLoginAccountID, const String& pKey, const u32 pIP) {
+	auto f = [pLoginAccountID, pKey, pIP](const Account* pAccount) {
+		return pAccount->getLoginAccountID() == pLoginAccountID && pAccount->getKey() == pKey && pAccount->getIP() == pIP;
+	};
+	auto i = std::find_if(mAccounts.begin(), mAccounts.end(), f);
+	return i == mAccounts.end() ? nullptr : *i;
+}
+
+const bool AccountManager::isCharacterNameAllowed(const String& pCharacterName) const {
+	// Check: Length
+	if (!Limits::Character::nameInputLength(pCharacterName)) return false;
+
+	// Check: Case of first character (must be uppercase)
+	if (pCharacterName[0] < 'A' || pCharacterName[0] > 'Z') return false;
+
+	// Check: Each character is alpha.
+	for (String::size_type i = 0; i < pCharacterName.length(); i++) {
+		if (!isalpha(pCharacterName[i])) {
+			return false;
 		}
 	}
-	EXPECTED_BOOL(removed); // Check: Sanity.
-	EXPECTED_BOOL(_save(account)); // Save.
+
+	// Check: Name already in use.
+	if (_isCharacterNameInUse(pCharacterName)) return false;
+
+	// Check: Name is reserved.
+	if (_isCharacterNameReserved(pCharacterName)) return false;
 
 	return true;
 }
 
-bool AccountManager::isCharacterNameUnique(const String& pCharacterName)
-{
-	return true;
+const bool AccountManager::_isCharacterNameInUse(const String& pCharacterName) const {
+	return false;
 }
 
-Data::Account* AccountManager::_find(const u32 pAccountID) const {
+const bool AccountManager::_isCharacterNameReserved(const String& pCharacterName) const {
 	for (auto i : mAccounts) {
-		if (i->mAccountID == pAccountID)
-			return i;
-	}
-	return nullptr;
-}
-
-Data::Account* AccountManager::_find(const String& pAccountName) const {
-	for (auto i : mAccounts) {
-		if (i->mAccountName == pAccountName)
-			return i;
-	}
-	return nullptr;
-}
-
-bool AccountManager::ban(const String& pAccountName) {
-	auto accountData = _find(pAccountName);
-	EXPECTED_BOOL(accountData);
-	accountData->mStatus = ResponseID::BANNED;
-
-	EXPECTED_BOOL(_save());
-	return true;
-}
-
-bool AccountManager::removeBan(const String& pAccountName) {
-	auto accountData = _find(pAccountName);
-	EXPECTED_BOOL(accountData);
-	accountData->mStatus = ResponseID::ALLOWED;
-
-	EXPECTED_BOOL(_save());
-	return true;
-}
-
-bool AccountManager::suspend(const String& pAccountName, const u32 pSuspendUntil) {
-	auto accountData = _find(pAccountName);
-	EXPECTED_BOOL(accountData);
-	accountData->mStatus = ResponseID::SUSPENDED;
-	accountData->mSuspendedUntil = pSuspendUntil;
-
-	EXPECTED_BOOL(_save());
-	return true;
-}
-
-bool AccountManager::removeSuspend(const String& pAccountName) {
-	auto accountData = _find(pAccountName);
-	EXPECTED_BOOL(accountData);
-	accountData->mStatus = ResponseID::ALLOWED;
-	accountData->mSuspendedUntil = 0;
-
-	EXPECTED_BOOL(_save());
-	return true;
-}
-
-Data::Account* AccountManager::getAccount(const u32 pAccountID) const {
-	auto accountData = _find(pAccountID);
-	EXPECTED_PTR(accountData);
-	return accountData;
-}
-
-bool AccountManager::checkOwnership(const u32 pAccountID, const String& pCharacterName) {
-	auto accountData = _find(pAccountID);
-	EXPECTED_BOOL(accountData);
-	for (auto i : accountData->mCharacterData) {
-		if (i->mName == pCharacterName)
+		if (i->getReservedCharacterName() == pCharacterName)
 			return true;
 	}
 
 	return false;
 }
 
-const bool AccountManager::ensureAccountLoaded(const u32 pAccountID) {
-	auto accountData = _find(pAccountID);
-	EXPECTED_BOOL(accountData);
+const bool AccountManager::onConnect(Account* pAccount) {
+	if (!pAccount) return false;
+	if (pAccount->isLoaded()) return false; // Already loaded.
 
-	if (accountData->mCharacterDataLoaded) return true;
-
-	EXPECTED_BOOL(mDataStore->loadAccountCharacterData(accountData));
-	accountData->mCharacterDataLoaded = true;
-	return true;
+	return _loadAccount(pAccount);
 }
 
-bool AccountManager::handleCharacterCreate(const u32 pAccountID, const String& pCharacterName, Payload::World::CreateCharacter* pPayload) {
-	EXPECTED_BOOL(pPayload);
+const bool AccountManager::onDisconnect(Account* pAccount) {
+	if (!pAccount) return false;
+	if (!pAccount->isLoaded()) return true;
 
-	// Check: Class ID
-	EXPECTED_BOOL(Limits::Character::classID(pPayload->mClass));
+	auto character = pAccount->getActiveCharacter();
+	if (character) {
+		updateCharacter(pAccount, character);
+		pAccount->clearActiveCharacter();
+	}
 
-	// Check: Race ID
-	EXPECTED_BOOL(Limits::Character::raceID(pPayload->mRace));
+	_unloadAccount(pAccount);
 
-	// TODO: Check Race is unlocked for the account.
+	pAccount->clearAuthentication();
 
-	// Find Account that is creating the Character.
-	auto accountData = _find(pAccountID);
-	EXPECTED_BOOL(accountData);
-	EXPECTED_BOOL(isCharacterNameUnique(pCharacterName));
+	return _save();
+}
 
-	// Create CharacterData for the new Character.
+const bool AccountManager::_loadAccount(Account* pAccount) {
+	if (!pAccount) return false;
 
-	auto characterData = new Data::Character();
-	characterData->mName = pCharacterName;
-	characterData->mClass = pPayload->mClass;
-	characterData->mZoneID = 1; // TODO:
-
-	// Appearance Data
-	characterData->mRace = pPayload->mRace; // TODO: Sanity
-	characterData->mGender = pPayload->mGender; // Sanity 0/1
-	characterData->mFaceStyle = pPayload->mFaceStyle;
-	characterData->mHairStyle = pPayload->mHairStyle;
-	characterData->mBeardStyle = pPayload->mBeardStyle;
-	characterData->mHairColour = pPayload->mHairColour;
-	characterData->mBeardColour = pPayload->mBeardColour;
-	characterData->mEyeColourLeft = pPayload->mEyeColour1;
-	characterData->mEyeColourRight = pPayload->mEyeColour2;
-	characterData->mDrakkinHeritage = pPayload->mDrakkinHeritage;
-	characterData->mDrakkinTattoo = pPayload->mDrakkinTattoo;
-	characterData->mDrakkinDetails = pPayload->mDrakkinDetails;
-	characterData->mDeity = pPayload->mDeity; // TODO: Sanity
-
-	EXPECTED_BOOL(mDataStore->saveCharacter(pCharacterName, characterData));
-
-	// Create Account::CharacterData for the new Character.
+	if (pAccount->isLoaded()) {
+		mLog->error("Failure: Attempt to load Account that is already loaded.");
+		return false;
+	}
 	
-	auto accountCharacterData = new Data::Account::CharacterData();
-	accountCharacterData->mName = pCharacterName;
-	accountCharacterData->mLevel = characterData->mExperience.mLevel;
-	accountCharacterData->mRace = characterData->mRace;
-	accountCharacterData->mClass = characterData->mClass;
-	accountCharacterData->mDeity = characterData->mDeity;
-	accountCharacterData->mZoneID = characterData->mZoneID;
-	accountCharacterData->mGender = characterData->mGender;
-	accountCharacterData->mFaceStyle = characterData->mFaceStyle;
-	accountCharacterData->mHairStyle = characterData->mHairStyle;
-	accountCharacterData->mHairColour = characterData->mHairColour;
-	accountCharacterData->mBeardStyle = characterData->mBeardStyle;
-	accountCharacterData->mBeardColour = characterData->mBeardColour;
-	accountCharacterData->mEyeColourLeft = characterData->mEyeColourLeft;
-	accountCharacterData->mEyeColourRight = characterData->mEyeColourRight;
-	accountCharacterData->mDrakkinHeritage = characterData->mDrakkinHeritage;
-	accountCharacterData->mDrakkinTattoo = characterData->mDrakkinTattoo;
-	accountCharacterData->mDrakkinDetails = characterData->mDrakkinDetails;
-	accountCharacterData->mPrimary = 0; // TODO: Items
-	accountCharacterData->mSecondary = 0; // TODO: Items
+	if (!mDataStore->loadAccountCharacterData(pAccount->getData())) {
+		mLog->error("Failure: Unable to load Account Character Data.");
+		return false;
+	}
 
-	// TODO: Materials
-
-	accountData->mCharacterData.push_back(accountCharacterData);
-	EXPECTED_BOOL(_save(accountData));
+	pAccount->setLoaded(true);
 	return true;
 }
 
-const bool AccountManager::updateCharacter(const u32 pAccountID, const Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
-	auto accountData = _find(pAccountID);
-	EXPECTED_BOOL(accountData);
-	EXPECTED_BOOL(accountData->mCharacterDataLoaded);
-
-	Data::Account::CharacterData* accountCharacterData = nullptr;
-	for (auto i : accountData->mCharacterData) {
-		if (i->mName == pCharacter->getName()) {
-			accountCharacterData = i;
-			break;
-		}
+const bool AccountManager::_unloadAccount(Account* pAccount) {
+	if (!pAccount) return false;
+	
+	if (!pAccount->isLoaded()) {
+		mLog->error("Failure: Attempt to unload Account that is not loaded.");
+		return false;
 	}
-	EXPECTED_BOOL(accountCharacterData);
-	EXPECTED_BOOL(pCharacter->getZone());
 
-	accountCharacterData->mName = pCharacter->getName();
-	accountCharacterData->mLevel = pCharacter->getLevel();
-	accountCharacterData->mClass = pCharacter->getClass();
-	accountCharacterData->mRace = pCharacter->getRace();
-	accountCharacterData->mGender = pCharacter->getGender();
-	accountCharacterData->mDeity = pCharacter->getDeity();
-	accountCharacterData->mZoneID = pCharacter->getZone()->getID();
-	accountCharacterData->mFaceStyle = pCharacter->getFaceStyle();
-	accountCharacterData->mHairStyle = pCharacter->getHairStyle();
-	accountCharacterData->mHairColour = pCharacter->getHairColour();
-	accountCharacterData->mBeardStyle = pCharacter->getBeardStyle();
-	accountCharacterData->mBeardColour = pCharacter->getBeardColour();
-	accountCharacterData->mEyeColourLeft = pCharacter->getLeftEyeColour();
-	accountCharacterData->mEyeColourRight = pCharacter->getRightEyeColour();
-	accountCharacterData->mDrakkinHeritage = pCharacter->getDrakkinHeritage();
-	accountCharacterData->mDrakkinTattoo = pCharacter->getDrakkinTattoo();
-	accountCharacterData->mDrakkinDetails = pCharacter->getDrakkinDetails();
-	accountCharacterData->mPrimary = 0; // TODO: Items
-	accountCharacterData->mSecondary = 0; // TODO: Items
-
-	// TODO: Materials
-
-	EXPECTED_BOOL(_save(accountData));
-
-	return true;
-}
-
-const u32 AccountManager::getNumCharacters(const u32 pAccountID) const {
-	auto account = _find(pAccountID);
-	if (!account) {
-		Log::error("Failed to find account with id " + std::to_string(pAccountID));
-		return 0;
+	auto characterData = pAccount->getData()->mCharacterData;
+	for (auto i : characterData) {
+		delete i;
 	}
-	return account->mCharacterData.size();
-}
+	characterData.clear();
 
-const i32 AccountManager::getSharedPlatinum(const u32 pAccountID) const {
-	auto account = _find(pAccountID);
-	if (!account) {
-		Log::error("Failed to find account with id " + std::to_string(pAccountID));
-		return 0;
-	}
-	return account->mPlatinumSharedBank;
-}
-
-const bool AccountManager::setSharedPlatinum(const u32 pAccountID, const i32 pPlatinum) {
-	auto account = _find(pAccountID);
-	EXPECTED_BOOL(account);
-	account->mPlatinumSharedBank = pPlatinum;
-
+	pAccount->setLoaded(false);
 	return true;
 }

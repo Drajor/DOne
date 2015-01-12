@@ -19,15 +19,23 @@
 
 typedef uint32_t GuildID;
 typedef uint8_t GuildRank;
-typedef int8_t AccountStatus;
 
 static const String EmptyString = String("");
 
 static const GuildID NO_GUILD = 0xFFFFFFFF;
 
-enum ResponseID : AccountStatus { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNED = -2, FULL = -3 };
+namespace AccountStatus {
+	enum : i8 {
+		Banned = -2,
+		Suspended = -1,
+		Default = 0,
+		BypassLock = 20,
+	};
+}
 
-static AccountStatus LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
+enum ResponseID : i8 { ALLOWED = 1, DENIED = 0, SUSPENDED = -1, BANNED = -2, FULL = -3 };
+
+static i8 LOCK_BYPASS_STATUS = 20; // Account status required to bypass login when server is locked.
 
 static const uint32 DEFAULT_RESPAWN_TIME = 5000; // In seconds, 5 minutes.
 static const uint32 DEFAULT_CORPSE_ROT_TIME = 120; // In seconds.

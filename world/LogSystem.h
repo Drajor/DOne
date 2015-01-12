@@ -12,21 +12,35 @@ namespace Log {
 	void commonlog(String pMessage);
 }
 
-class LogInterface {
+class ILog {
 public:
-	virtual ~LogInterface() {};
+	virtual ~ILog() {};
 	virtual void status(const String& pMessage) = 0;
 	virtual void info(const String& pMessage) = 0;
 	virtual void error(const String& pMessage) = 0;
-private:
+	virtual void setContext(String pContext) { mContext = pContext; }
+protected:
+	String mContext = "[Unknown]";
 };
 
-class LogContext : public LogInterface {
+class LogContext : public ILog {
 public:
-	LogContext(String pContextName) {}
+	LogContext() {}
+	LogContext(String pContext) { setContext(pContext); }
 	void status(const String& pMessage) { Log::status(mContext + " " + pMessage); }
 	void info(const String& pMessage) { Log::info(mContext + " " + pMessage); }
 	void error(const String& pMessage) { Log::error(mContext + " " + pMessage); }
 private:
-	String mContext = "Unknown";
+};
+
+class ILogFactory {
+public:
+	virtual ILog* make() = 0;
+private:
+};
+
+class DefaultLogFactory : public ILogFactory {
+public:
+	ILog* make() { return new LogContext(); }
+private:
 };

@@ -104,7 +104,8 @@ namespace AccountXML {
 	}
 	namespace Attribute {
 		// Tag::Account
-		SCA ID = "id";
+		SCA LSServerID = "ls_id";
+		SCA LSAccountID = "ls_account_id";
 		SCA Name = "name";
 		SCA Status = "status";
 		SCA SuspendedUntil = "suspend_until";
@@ -134,9 +135,10 @@ const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 		auto accountData = new Data::Account();
 		pAccounts.push_back(accountData);
 
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::ID, accountData->mAccountID));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Name, accountData->mAccountName));
-		EXPECTED_BOOL(Limits::LoginServer::accountNameLength(accountData->mAccountName));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::LSServerID, accountData->mLoginServerID));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::LSAccountID, accountData->mLoginAccountID));
+		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Name, accountData->mLoginAccountName));
+		EXPECTED_BOOL(Limits::LoginServer::accountNameLength(accountData->mLoginAccountName));
 		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Status, accountData->mStatus));
 		EXPECTED_BOOL(readAttribute(accountElement, Attribute::SuspendedUntil, accountData->mSuspendedUntil));
 		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Created, accountData->mCreated));
@@ -159,8 +161,9 @@ const bool XMLDataStore::saveAccounts(Data::AccountList pAccounts) {
 		auto accountElement = new TiXmlElement(Tag::Account);
 		accountsElement->LinkEndChild(accountElement);
 
-		accountElement->SetAttribute(Attribute::ID, std::to_string(i->mAccountID).c_str());
-		accountElement->SetAttribute(Attribute::Name, i->mAccountName.c_str());
+		accountElement->SetAttribute(Attribute::LSServerID, std::to_string(i->mLoginServerID).c_str());
+		accountElement->SetAttribute(Attribute::LSAccountID, std::to_string(i->mLoginAccountID).c_str());
+		accountElement->SetAttribute(Attribute::Name, i->mLoginAccountName.c_str());
 		accountElement->SetAttribute(Attribute::Status, i->mStatus);
 		accountElement->SetAttribute(Attribute::SuspendedUntil, std::to_string(i->mSuspendedUntil).c_str());
 		accountElement->SetAttribute(Attribute::Created, std::to_string(i->mCreated).c_str());
@@ -214,7 +217,7 @@ const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	Profile p("DataStore::loadAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
-	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
+	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
 	EXPECTED_BOOL(document.LoadFile());
 
 	auto accountElement = document.FirstChildElement(Tag::Account);
@@ -231,7 +234,7 @@ const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	// Iterate over each "account" element.
 	auto characterSlot = 0;
 	while (characterElement && characterSlot < Limits::Account::MAX_NUM_CHARACTERS) {
-		auto characterData = new Data::Account::CharacterData();
+		auto characterData = new Data::CharacterData();
 		pAccount->mCharacterData.push_back(characterData);
 
 		// Read the basic/visual information about each character.
@@ -281,7 +284,7 @@ const bool XMLDataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 	//Profile p("DataStore::saveAccountCharacterData");
 	EXPECTED_BOOL(pAccount);
-	TiXmlDocument document(String("./data/accounts/" + pAccount->mAccountName + ".xml").c_str());
+	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
 
 	auto accountElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Account)));
 	accountElement->SetAttribute(Attribute::SharedPlatinum, pAccount->mPlatinumSharedBank);

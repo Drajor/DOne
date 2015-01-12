@@ -66,7 +66,7 @@ E(OP_AltCurrencySell)
 E(OP_MercenaryDataResponse)
 E(OP_MercenaryDataUpdate)
 //list of packets we need to decode on the way in:
-D(OP_CharacterCreate)
+//D(OP_CharacterCreate)
 //D(OP_ItemLinkClick)
 //D(OP_ConsiderCorpse)
 //D(OP_Consider)

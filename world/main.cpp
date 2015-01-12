@@ -50,7 +50,7 @@ uint64 TTimer::mCurrentTime = 0;
 TimeoutManager timeout_manager;
 
 int main(int argc, char** argv)  {
-	//system("pause");
+	system("pause");
 	::testing::InitGoogleTest(&argc, argv);
 	RUN_ALL_TESTS();
 
@@ -64,6 +64,8 @@ int main(int argc, char** argv)  {
 
 	ServiceLocator::reset();
 
+	ILogFactory* logFactory = new DefaultLogFactory();
+
 	IDataStore* dataStore = new XMLDataStore();
 	ServiceLocator::setDataStore(dataStore);
 	EXPECTED_MAIN(dataStore->loadSettings());
@@ -75,7 +77,7 @@ int main(int argc, char** argv)  {
 
 	AccountManager* accountManager = new AccountManager();
 	ServiceLocator::setAccountManager(accountManager);
-	EXPECTED_MAIN(accountManager->initialise(dataStore));
+	EXPECTED_MAIN(accountManager->initialise(dataStore, logFactory));
 
 	ZoneDataManager* zoneDataManager = new ZoneDataManager();
 	ServiceLocator::setZoneDataManager(zoneDataManager);
@@ -123,7 +125,7 @@ int main(int argc, char** argv)  {
 
 	World* world = new World();
 	ServiceLocator::setWorld(world);
-	EXPECTED_MAIN(world->initialise(dataStore, zoneManager, accountManager));
+	EXPECTED_MAIN(world->initialise(dataStore, logFactory, zoneManager, accountManager));
 
 	UCS* ucs = new UCS();
 	ServiceLocator::setUCS(ucs);

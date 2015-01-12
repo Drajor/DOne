@@ -8,6 +8,7 @@
 
 #include <memory>
 
+class Account;
 class NPC;
 class Group;
 class Guild;
@@ -38,6 +39,12 @@ public:
 public:
 	Character(const uint32 pAccountID, Data::Character* pCharacterData);
 	~Character();
+
+	const bool initialise(Account* pAccount);
+	
+	// Returns the Account this Character belongs to.
+	inline Account* getAccount() const { return mAccount; }
+
 	inline const uint32 getAccountID() const { return mAccountID; }
 	inline const bool isCharacter() const { return true; }
 	inline const bool isInitialised() const { return mInitialised; }
@@ -81,8 +88,6 @@ public:
 	inline const uint16 getAuthenticatedInstanceID() const { return mAuthicatedInstanceID; }
 	inline void setZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) { mAuthenticatedZoneID = pZoneID; mAuthicatedInstanceID = pInstanceID; }
 	inline const bool checkZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) const { return mAuthenticatedZoneID == pZoneID && mAuthicatedInstanceID == pInstanceID; }
-
-	bool initialise();
 
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
@@ -257,7 +262,11 @@ public:
 
 	const bool canCombine() const;
 	const bool canShop() const;
+
 private:
+
+	Account* mAccount = nullptr;
+
 	ZoneChange mZoneChange;
 	BindLocation mBindLocations[5];
 

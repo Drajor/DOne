@@ -5,57 +5,61 @@
 class EQApplicationPacket;
 class EQStreamInterface;
 class World;
+class Account;
+class ILog;
 
 class WorldConnection {
 public:
-	WorldConnection(World* pWorld, EQStreamInterface* pStreamInterface);
 	~WorldConnection();
 
+	const bool initialise(World* pWorld, ILog* pLog, EQStreamInterface* pStreamInterface);
 	bool update();
 
-	inline const bool getAuthenticated() const { return mAuthenticated; }
+	inline Account* getAccount() const { return mAccount; }
+	inline void setAccount(Account* pAccount) { mAccount = pAccount; }
+	inline const bool hasAccount() const { return mAccount != nullptr; }
+
 	inline const u32 getIP() const { return mIP; }
-	inline const u16 getPort() const { return mPort; }
 
 	inline const u32 getAccountID() const { return mAccountID; }
-	void _sendChatServer(const String& pCharacterName);
-	void sendZoneServerInfo(const String& pIP, const u16 pPort);
+	inline void setAccountID(const u32 pAccountID) { mAccountID = pAccountID; }
 
 	void sendPacket(const EQApplicationPacket* pPacket);
+
+	void sendCharacterSelectInfo();
+	void sendGuildList();
+	void sendEnterWorld(const String& pCharacterName);
+	void sendExpansionInfo();
+	void sendLogServer();
+	void sendApproveWorld();
+	void sendPostEnterWorld();
+	void sendZoneUnavailable();
+	void sendZoneServerInfo(const String& pIP, const u16 pPort);
+	void sendChatServer(const String& pCharacterName);
+	void sendApproveNameResponse(const bool pResponse);
+
 private:
 
-	inline void setAccountID(const u32 pAccountID) { mAccountID = pAccountID; }
-	void _setAuthenticated(const bool pAuthenticated) { mAuthenticated = pAuthenticated; }
-
-	void _sendCharacterSelectInfo();
-	void _sendGuildList();
-	void _sendEnterWorld(String pCharacterName);
-	void _sendExpansionInfo();
-	void _sendLogServer();
-	void _sendApproveWorld();
-	void _sendPostEnterWorld();
-	void _sendZoneUnavailable();
+	bool mInitialised = false;
+	ILog* mLog = nullptr;
+	Account* mAccount = nullptr;
+	EQStreamInterface* mStreamInterface = nullptr;
+	World* mWorld = nullptr;
 
 	bool _handlePacket(const EQApplicationPacket* pPacket);
-	bool _handleGenerateRandomNamePacket(const EQApplicationPacket* pPacket);
-	bool _handleCharacterCreatePacket(const EQApplicationPacket* pPacket);
+	bool _handleGenerateRandomName(const EQApplicationPacket* pPacket);
+	bool _handleCharacterCreate(const EQApplicationPacket* pPacket);
 	bool _handleEnterWorld(const EQApplicationPacket* pPacket);
-	bool _handleDeleteCharacterPacket(const EQApplicationPacket* pPacket);
+	bool _handleDeleteCharacter(const EQApplicationPacket* pPacket);
 	bool _handleConnect(const EQApplicationPacket* packet);
-	bool _handleCharacterCreateRequestPacket(const EQApplicationPacket* packet);
-	bool _handleNameApprovalPacket(const EQApplicationPacket* packet);
+	bool _handleCharacterCreateRequest(const EQApplicationPacket* packet);
+	bool _handleApproveName(const EQApplicationPacket* packet);
 
 	inline void dropConnection() { mConnectionDropped = true; }
 
 	bool mConnectionDropped = false;
 	bool mZoning = false;
-	bool mAuthenticated = false;
-	u16 mPort = 0;
 	u32 mIP = 0;
 	u32 mAccountID = 0;
-	String mReservedCharacterName = "";
-	u32 ClientVersionBit = 0;
 
-	EQStreamInterface* const mStreamInterface;
-	World* mWorld = nullptr;
 };

@@ -1,4 +1,5 @@
 #include "Character.h"
+#include "Account.h"
 #include "ServiceLocator.h"
 #include "Data.h"
 #include "SpellDataStore.h"
@@ -90,8 +91,11 @@ void Character::update() {
 	}
 }
 
-bool Character::initialise() {
-	EXPECTED_BOOL(mInitialised == false);
+const bool Character::initialise(Account* pAccount) {
+	if (mInitialised) return false;
+	if (!pAccount) return false;
+
+	mAccount = pAccount;
 
 	setLastName(mData->mLastName);
 	setTitle(mData->mTitle);
@@ -140,7 +144,7 @@ bool Character::initialise() {
 	mInventory->setCurrency(CurrencySlot::Bank, CurrencyType::Copper, mData->mCopperBank);
 
 	// Shared Bank Currency
-	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, ServiceLocator::getAccountManager()->getSharedPlatinum(mAccountID));
+	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, mAccount->getSharedPlatinum());
 
 	mBaseStrength = mData->mStrength;
 	mBaseStamina = mData->mStamina;
@@ -347,7 +351,7 @@ const bool Character::_updateForSave() {
 	mData->mCopperBank = mInventory->getBankCopper();
 
 	// Shared Bank Currency
-	EXPECTED_BOOL(ServiceLocator::getAccountManager()->setSharedPlatinum(mAccountID, mInventory->getSharedBankPlatinum()));
+	mAccount->setSharedPlatinum(mInventory->getSharedBankPlatinum());
 
 	mData->mZoneID = mZone->getID();
 	mData->mInstanceID = mZone->getInstanceID();
