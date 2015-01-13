@@ -37,7 +37,7 @@ public:
 		uint16 mInstanceID = 0;
 	};
 public:
-	Character(const uint32 pAccountID, Data::Character* pCharacterData);
+	Character(Data::Character* pCharacterData);
 	~Character();
 
 	const bool initialise(Account* pAccount);
@@ -45,7 +45,6 @@ public:
 	// Returns the Account this Character belongs to.
 	inline Account* getAccount() const { return mAccount; }
 
-	inline const uint32 getAccountID() const { return mAccountID; }
 	inline const bool isCharacter() const { return true; }
 	inline const bool isInitialised() const { return mInitialised; }
 	inline const bool isZoning() const { return mIsZoning; }
@@ -270,7 +269,6 @@ private:
 	ZoneChange mZoneChange;
 	BindLocation mBindLocations[5];
 
-	const uint32 mAccountID;
 	bool mInitialised = false;
 	ClientAuthentication mAuthentication;
 	bool mIsZoning = false;

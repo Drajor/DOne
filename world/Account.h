@@ -46,7 +46,7 @@ public:
 	inline void clearActiveCharacter() { mActiveCharacter = nullptr; }
 
 	inline void setAuthentication(const String& pKey, const u32 pIP) { mKey = pKey; mIP = pIP; };
-	inline const bool hasAuthentication() const { return mKey.empty() && mIP == 0; }
+	inline const bool hasAuthentication() const { return !(mKey.empty() && mIP == 0); }
 	inline void clearAuthentication() { mKey = ""; mIP = 0; }
 	inline const String& getKey() const { return mKey; }
 	inline const u32 getIP() const { return mIP; }

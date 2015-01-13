@@ -56,11 +56,21 @@ const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, Z
 
 	mLocked = Settings::getLocked();
 
-	EXPECTED_BOOL(_initialiseLoginServerConnection());
+	// Create LoginServerConnection.
+	mLoginServerConnection = new LoginServerConnection();
+	if (!mLoginServerConnection->initialise(this,  mLogFactory->make(), Settings::getLSAddress(), Settings::getLSPort())) {
+		mLog->error("LoginServerConnection failed to initialise.");
+		return false;
+	}
+	mLoginServerConnection->sendWorldInformation(Settings::getLSAccountName(), Settings::getLSPassword(), Settings::getServerLongName(), Settings::getServerShortName());
+	updateLoginServer();
 
-	// Create and initialise EQStreamFactory.
+	// Create EQStreamFactory.
 	mStreamFactory = new EQStreamFactory(WorldStream, Limits::World::Port);
-	EXPECTED_BOOL(mStreamFactory->Open());
+	if (!mStreamFactory->Open()) {
+		mLog->error("Failed to start EQStreamFactory.");
+		return false;
+	}
 	mLog->info("Listening on port " + std::to_string(Limits::World::Port));
 
 	mStreamIdentifier = new EQStreamIdentifier;
@@ -71,23 +81,13 @@ const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, Z
 	return true;
 }
 
-bool World::_initialiseLoginServerConnection() {
-	// Create our connection to the Login Server
-	mLoginServerConnection = new LoginServerConnection(this);
-	EXPECTED_BOOL(mLoginServerConnection->initialise(Settings::getLSAddress(), Settings::getLSPort()));
-	mLoginServerConnection->sendWorldInformation(Settings::getLSAccountName(), Settings::getLSPassword(), Settings::getServerLongName(), Settings::getServerShortName());
-	_updateLoginServer();
-
-	return true;
-}
-
 void World::update() {
 	mLoginServerConnection->update();
 	mZoneManager->update();
 	//UCS::getInstance().update();
 
 	// Check if any new clients are connecting.
-	_handleIncomingClientConnections();
+	checkIncomingConnections();
 
 	// Update World Clients.
 	for (auto i = mWorldConnections.begin(); i != mWorldConnections.end();) {
@@ -102,7 +102,7 @@ void World::update() {
 
 	// Check: Time to update the Login Server with new numbers.
 	if (mStatusUpdateTimer.Check()) {
-		_updateLoginServer();
+		updateLoginServer();
 		mStatusUpdateTimer.Start();
 	}
 }
@@ -130,6 +130,7 @@ void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLogi
 
 	// Check: Account is already logged in.
 	if (account->hasAuthentication()) {
+		mLog->info("Account is already logged in, denying connection.");
 		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Full);
 		return;
 	}
@@ -157,23 +158,23 @@ void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLogi
 	if (isLocked()) {
 		// Account has enough status to bypass lock.
 		if (account->getStatus() >= AccountStatus::BypassLock) {
-			mLog->info("Lock bypass allowed for Account.");
+			mLog->info("Server Locked: connection allowed.");
 			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
 			return;
 		}
 		// Account does not have enough status to bypass lock.
 		else {
-			mLog->info("Lock bypass denied for Account.");
+			mLog->info("Server Locked: connection denied.");
 			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Denied);
 		}
 	}
 
 	// Speak friend and enter.
-	mLog->info("Known Account connecting.");
+	mLog->info("Connection allowed.");
 	pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
 }
 
-void World::_handleIncomingClientConnections() {
+void World::checkIncomingConnections() {
 	// Check for incoming connections.
 	EQStream* incomingStream = nullptr;
 	while (incomingStream = mStreamFactory->Pop()) {
@@ -195,6 +196,7 @@ void World::_handleIncomingClientConnections() {
 			continue;
 		}
 
+		mLog->info("Added new ZoneConnection.");
 		mWorldConnections.push_back(connection);
 	}
 }
@@ -203,7 +205,7 @@ void World::setLocked(bool pLocked) {
 	mLocked = pLocked;
 
 	// Notify Login Server.
-	_updateLoginServer();
+	updateLoginServer();
 }
 
 const bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
@@ -260,7 +262,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	}
 
 	// Create and initialise Character.
-	auto character = new Character(pConnection->getAccountID(), characterData);
+	auto character = new Character(characterData);
 	if (!character->initialise(account)) {
 		delete character;
 		return false;
@@ -277,7 +279,7 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	return true;
 }
 
-void World::_updateLoginServer() const {
+void World::updateLoginServer() const {
 	mLoginServerConnection->sendWorldStatus(getStatus(), numPlayers(), numZones());
 }
 
@@ -345,7 +347,6 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccoun
 
 	account->setAuthentication(pKey, pConnection->getIP());
 	pConnection->setAccount(account);
-	pConnection->setAccountID(pLoginAccountID);
 
 	// Going to: Another Zone
 	if (pZoning) {

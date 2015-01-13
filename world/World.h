@@ -55,36 +55,32 @@ public:
 	const bool onEnterWorld(WorldConnection* pConnection, const String& pCharacterName, const bool pZoning);
 
 	void onLeaveWorld(Character* pCharacter);
-protected:
-	
+
+private:
+
+	bool mInitialised = false;
+	bool mLocked = false;
 	AccountManager* mAccountManager = nullptr;
 	ZoneManager* mZoneManager = nullptr;
 	IDataStore* mDataStore = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
 	EventDispatcher* mEventDispatcher = nullptr;
-
-private:
-	void _handleIncomingClientConnections();
-
-	bool mInitialised = false;
-	bool mLocked = false;
 	LoginServerConnection* mLoginServerConnection = nullptr;
 	EQStreamFactory* mStreamFactory = nullptr;
 	EQStreamIdentifier* mStreamIdentifier = nullptr;
-
 	std::list<WorldConnection*> mWorldConnections;
-
-	bool _initialiseLoginServerConnection();
 
 	const bool _handleZoning(WorldConnection* pConnection, const String& pCharacterName);
 	bool _handleEnterWorld(WorldConnection* pConnection, const String& pCharacterName);
+
+	void updateLoginServer() const;
+	void checkIncomingConnections();
 	
 	i32 mStatus = 100;
 	i32 mPlayers = 100;
 	i32 mZones = 100;
 
-	void _updateLoginServer() const;
 	// Login Server status timer.
 	Timer mStatusUpdateTimer;
 };

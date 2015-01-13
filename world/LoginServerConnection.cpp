@@ -13,59 +13,65 @@
 #include "LogSystem.h"
 #include "Payload.h"
 
-LoginServerConnection::LoginServerConnection(World* pWorld) :
-	mWorld(pWorld)
-{
-	mTCPConnection = new EmuTCPConnection(true);
-	mTCPConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
-}
-
 LoginServerConnection::~LoginServerConnection() {
-	delete mTCPConnection;
+	if (mConnection) {
+		delete mConnection;
+		mConnection = nullptr;
+	}
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+	
 }
 
-bool LoginServerConnection::initialise(const String& pAddress, const u16 pPort) {
-	Log::status("[Login Server Connection] Initialising.");
-	if (isConnected()) return true;
+const bool LoginServerConnection::initialise(World* pWorld, ILog* pLog, const String& pAddress, const u16 pPort) {
+	if (mInitialised) return false;
+	if (!pWorld) return false;
+	if (!pLog) return false;
 
-	if (_isConnectReady()) {
-		Log::status("[Login Server Connection] Connecting");
-		connect(pAddress, pPort);
-	}
-	else {
-		Log::error("[Login Server Connection] Not ready to connect.");
+	mWorld = pWorld;
+	mLog = pLog;
+	mLog->setContext("[LoginServerConnection ID: " + toString(getID()) + "]");
+	mLog->status("Initialising.");
+
+	mConnection = new EmuTCPConnection(true);
+	mConnection->SetPacketMode(EmuTCPConnection::packetModeLogin);
+
+	if (!connect(pAddress, pPort)) {
+		mLog->error("Failed to connect.");
 		return false;
 	}
-
-	Log::status("[Login Server Connection] Initialised.");
+	mLog->status("Connected.");
+	
+	mInitialised = true;
+	mLog->status("Finished initialising.");
 	return true;
 }
 
-bool LoginServerConnection::connect(const String& pAddress, const u16 pPort) {
-	EXPECTED_BOOL(pPort != 0);
+const bool LoginServerConnection::connect(const String& pAddress, const u16 pPort) {
+	char errbuf[1024];
 
-	char errbuf[TCPConnection_ErrorBufferSize];
-
+	// Resolve IP.
 	mLoginServerIP = ResolveIP(pAddress.c_str(), errbuf);
 	if (mLoginServerIP == 0) {
-		Log::error("[Login Server Connection] Unable to resolve Login Server IP");
+		mLog->error("Unable to resolve IP");
 		return false;
 	}
 
-	if (mTCPConnection->ConnectIP(mLoginServerIP, pPort, errbuf)) {
-		Log::status("[Login Server Connection] Connected to Login Server");
-		return true;
+	if (!mConnection->ConnectIP(mLoginServerIP, pPort, errbuf)) {
+		return false;
 	}
 
-	Log::error("[Login Server Connection] Failed to connect.");
-	return false;
+	return true;
 }
 
 void LoginServerConnection::update() {
 	using namespace Payload::LoginServer;
 
 	// Process any incoming packets.
-	auto packet = mTCPConnection->PopPacket();
+	auto packet = mConnection->PopPacket();
 	while(packet) {
 		if (packet->opcode == OpCode::ConnectRequest) {
 			// NOTE: This occurs when a client clicks 'X' at the Server Selection Screen.
@@ -77,16 +83,18 @@ void LoginServerConnection::update() {
 		}
 
 		delete packet;
-		packet = mTCPConnection->PopPacket();
+		packet = mConnection->PopPacket();
 	}
 }
 
 void LoginServerConnection::_handleConnectRequest(ServerPacket* pPacket) {
 	using namespace Payload::LoginServer;
-	EXPECTED(pPacket);
+	if (!pPacket) return;
 	EXPECTED(ConnectRequest::sizeCheck(pPacket));
 
 	auto payload = ConnectRequest::convert(pPacket);
+
+	mLog->info("Connect request from AccountID: " + toString(payload->mAccountID));
 
 	// Notify World.
 	mWorld->onConnectRequest(this, payload->mAccountID);
@@ -101,15 +109,15 @@ void LoginServerConnection::sendConnectResponse(const u32 pAccountID, const u8 p
 	payload->mAccountID = pAccountID;
 	payload->mResponse = pResponse;
 	
-	_sendPacket(packet);
+	sendPacket(packet);
 	delete packet;
 }
 
 void LoginServerConnection::_handleClientAuthentication(ServerPacket* pPacket) {
-	//using namespace Payload::LoginServer;
-	EXPECTED(Payload::LoginServer::Authentication::sizeCheck(pPacket));
+	using namespace Payload::LoginServer;
+	EXPECTED(Authentication::sizeCheck(pPacket));
 
-	auto payload = Payload::LoginServer::Authentication::convert(pPacket);
+	auto payload = Authentication::convert(pPacket);
 
 	// Notify World.
 	mWorld->onAuthentication(this, payload->mLoginAccountID, payload->mLoginAccountName, payload->mLoginKey, payload->mIP);
@@ -128,7 +136,7 @@ void LoginServerConnection::sendWorldInformation(const String& pAccount, const S
 	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
 	strcpy(payload->serverversion, LOGIN_VERSION);
 
-	_sendPacket(packet);
+	sendPacket(packet);
 	delete packet;
 }
 
@@ -142,10 +150,8 @@ void LoginServerConnection::sendWorldStatus(const i32 pStatus, const i32 pPlayer
 	payload->mPlayers = pPlayers;
 	payload->mZones = pZones;
 
-	_sendPacket(packet);
+	sendPacket(packet);
 	delete packet;
 }
 
-void LoginServerConnection::_sendPacket(ServerPacket* pPacket) { mTCPConnection->SendPacket(pPacket); }
-bool LoginServerConnection::_isConnectReady() { return mTCPConnection->ConnectReady(); }
-bool LoginServerConnection::isConnected() { return mTCPConnection->Connected(); }
+void LoginServerConnection::sendPacket(ServerPacket* pPacket) { mConnection->SendPacket(pPacket); }

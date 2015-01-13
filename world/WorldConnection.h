@@ -19,10 +19,7 @@ public:
 	inline void setAccount(Account* pAccount) { mAccount = pAccount; }
 	inline const bool hasAccount() const { return mAccount != nullptr; }
 
-	inline const u32 getIP() const { return mIP; }
-
-	inline const u32 getAccountID() const { return mAccountID; }
-	inline void setAccountID(const u32 pAccountID) { mAccountID = pAccountID; }
+	const u32 getIP() const;
 
 	void sendPacket(const EQApplicationPacket* pPacket);
 
@@ -46,6 +43,8 @@ private:
 	EQStreamInterface* mStreamInterface = nullptr;
 	World* mWorld = nullptr;
 
+	void updateLogContext();
+
 	bool _handlePacket(const EQApplicationPacket* pPacket);
 	bool _handleGenerateRandomName(const EQApplicationPacket* pPacket);
 	bool _handleCharacterCreate(const EQApplicationPacket* pPacket);
@@ -59,7 +58,4 @@ private:
 
 	bool mConnectionDropped = false;
 	bool mZoning = false;
-	u32 mIP = 0;
-	u32 mAccountID = 0;
-
 };

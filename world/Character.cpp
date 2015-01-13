@@ -21,7 +21,7 @@
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
-Character::Character(const uint32 pAccountID, Data::Character* pCharacterData) : mAccountID(pAccountID), mData(pCharacterData) {
+Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
 	EXPECTED(mData);
 	setName(pCharacterData->mName); // NOTE: This is required for ID before initialise has been called.
 

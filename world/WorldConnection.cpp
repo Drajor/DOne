@@ -43,10 +43,10 @@ const bool WorldConnection::initialise(World* pWorld, ILog* pLog, EQStreamInterf
 	mLog = pLog;
 	mWorld = pWorld;
 	mStreamInterface = pStreamInterface;
-	mIP = pStreamInterface->GetRemoteIP();
 
-	mLog->setContext("[WorldConnection]");
+	updateLogContext();
 
+	mLog->info("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
@@ -55,7 +55,7 @@ const bool WorldConnection::initialise(World* pWorld, ILog* pLog, EQStreamInterf
 bool WorldConnection::update() {
 	// Check our connection.
 	if (mConnectionDropped || !mStreamInterface->CheckState(ESTABLISHED)) {
-		Utility::print("WorldClientConnection Lost.");
+		mLog->info("Connection lost.");
 		return false;
 	}
 
@@ -76,7 +76,7 @@ bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 
 	// WorldConnection must receive OP_SendLoginInfo and have a valid Account before anything else can occur.
 	if (!hasAccount() && pPacket->GetOpcode() != OP_SendLoginInfo) {
-		Log::error("Unidentified Client sent %s, expected OP_SendLoginInfo");
+		mLog->error("Expected OP_SendLoginInfo.");
 		return false;
 	}
 
@@ -164,7 +164,6 @@ void WorldConnection::sendCharacterSelectInfo() {
 	auto packet = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
 	auto payload = CharacterSelect::convert(packet->pBuffer);
 	auto accountData = mAccount->getData();
-	EXPECTED(accountData);
 
 	int charSlot = 0;
 	for (auto i : accountData->mCharacterData) {
@@ -216,9 +215,9 @@ void WorldConnection::sendPostEnterWorld() {
 
 bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(Connect::sizeCheck(pPacket));
+	if (!pPacket) return false;
 
+	EXPECTED_BOOL(Connect::sizeCheck(pPacket));
 	auto payload = Connect::convert(pPacket);
 
 	String accountIDStr = Utility::safeString(payload->mInformation, 19);
@@ -229,11 +228,19 @@ bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 
 	mZoning = (payload->mZoning == 1);
 
-	return mWorld->onConnect(this, accountID, accountKey, mZoning);
+	const bool success = mWorld->onConnect(this, accountID, accountKey, mZoning);
+
+	if (success) {
+		updateLogContext();
+		mLog->info("Identified.");
+		return true;
+	}
+
+	return false;
 }
 
 bool WorldConnection::_handleApproveName(const EQApplicationPacket* pPacket) {
-	EXPECTED_BOOL(pPacket);
+	if (!pPacket) return false;
 
 	// TODO: Size check. Is this fixed?
 
@@ -476,3 +483,17 @@ void WorldConnection::sendApproveWorld() {
 void WorldConnection::sendPacket(const EQApplicationPacket* pPacket) {
 	mStreamInterface->QueuePacket(pPacket);
 }
+
+void WorldConnection::updateLogContext() {
+	StringStream context;
+	context << "[WorldConnection (IP: " << mStreamInterface->GetRemoteIP() << " Port: " << mStreamInterface->GetRemotePort();
+
+	if (mAccount) {
+		context << " LSID: " << mAccount->getLoginServerID() << " LSAID: " << mAccount->getLoginAccountID() << " LSAN: " << mAccount->getLoginAccountName();
+	}
+
+	context << ")]";
+	mLog->setContext(context.str());
+}
+
+const u32 WorldConnection::getIP() const { return mStreamInterface->GetRemoteIP(); }
