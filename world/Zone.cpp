@@ -50,6 +50,8 @@ Zone::~Zone() {
 	safe_delete(mScene);
 	safe_delete(mLootAllocator);
 	safe_delete(mSpawnPointManager);
+	safe_delete(mZoneConnectionManager);
+	safe_delete(mTransmutation);
 
 	for (auto i : mObjects) delete i;
 	mObjects.clear();
@@ -59,9 +61,11 @@ Zone::~Zone() {
 
 	for (auto i : mZonePoints) delete i;
 	mZonePoints.clear();
+
+	safe_delete(mLog);
 }
 
-const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory) {
+const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory) {
 	if (mInitialised) return false;
 	if (!pZoneManager) return false;
 	if (!pLogFactory) return false;
@@ -72,6 +76,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	if (!pGuildManager) return false;
 	if (!pCommandHandler) return false;
 	if (!pItemFactory) return false;
+	if (!pNPCFactory) return false;
 
 	mZoneManager = pZoneManager;
 	mLogFactory = pLogFactory;
@@ -81,6 +86,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mGuildManager = pGuildManager;
 	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
+	mNPCFactory = pNPCFactory;
 
 	// Create and configure Zone log.
 	mLog = mLogFactory->make();
@@ -103,6 +109,13 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 		return false;
 	}
 
+	// Create SpawnPointManager.
+	mSpawnPointManager = new SpawnPointManager();
+	if (!mSpawnPointManager->initialise(this, mNPCFactory, mLogFactory->make(), pZoneData->mSpawnGroups, pZoneData->mSpawnPoints)) {
+		mLog->error("SpawnPointManager failed to initialise.");
+		return false;
+	}
+
 	mLootAllocator = new LootAllocator();
 	mTransmutation = new Transmutation();
 	mExperienceModifer = new Experience::Modifier();
@@ -118,10 +131,6 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mSafePoint = pZoneData->mSafePosition;
 
 	EXPECTED_BOOL(loadZonePoints(pZoneData->mZonePoints));
-
-	// Pass to SpawnPointManager.
-	mSpawnPointManager = new SpawnPointManager();
-	EXPECTED_BOOL(mSpawnPointManager->initialise(this, pZoneData->mSpawnGroups, pZoneData->mSpawnPoints));
 
 	// Objects.
 	EXPECTED_BOOL(loadObjects(pZoneData->mObjects));
@@ -343,9 +352,6 @@ void Zone::onLinkdeadBegin(Character* pCharacter) {
 
 	if (pCharacter->hasRaid())
 		mRaidManager->onLinkdead(pCharacter);
-
-	// Notify ZoneManager.
-	mZoneManager->onLeaveWorld(pCharacter);
 }
 
 
@@ -362,6 +368,9 @@ void Zone::onLinkdeadEnd(Character* pCharacter) {
 	mScene->remove(pCharacter);
 	mCharacters.remove(pCharacter);
 	mActors.remove(pCharacter);
+
+	// Notify ZoneManager.
+	mZoneManager->onLeaveWorld(pCharacter);
 }
 
 void Zone::handleActorPositionChange(Actor* pActor) {

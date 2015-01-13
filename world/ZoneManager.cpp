@@ -37,7 +37,7 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory) {
+const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory) {
 	if (mInitialised) return false;
 	if (!pWorld) return false;
 	if (!pZoneDataManager) return false;
@@ -47,6 +47,7 @@ const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataMana
 	if (!pCommandHandler) return false;
 	if (!pItemFactory) return false;
 	if (!pLogFactory) return false;
+	if (!pNPCFactory) return false;
 
 	mWorld = pWorld;
 	mZoneDataManager = pZoneDataManager;
@@ -56,6 +57,7 @@ const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataMana
 	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
 	mLogFactory = pLogFactory;
+	mNPCFactory = pNPCFactory;
 
 	// Create and configure ZoneManager log.
 	mLog = pLogFactory->make();
@@ -148,7 +150,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);
-	if (!zone->initialise(this, mLogFactory, zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory)) {
+	if (!zone->initialise(this, mLogFactory, zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory, mNPCFactory)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
 		delete zone;

@@ -8,6 +8,7 @@ class Zone;
 class SpawnGroup;
 class SpawnPoint;
 class NPC;
+class ILog;
 
 namespace Data {
 	struct SpawnGroup;
@@ -16,7 +17,7 @@ namespace Data {
 
 class SpawnPointManager {
 public:
-	const bool initialise(Zone* pZone, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData);
+	const bool initialise(Zone* pZone, NPCFactory* pNPCFactory, ILog* pLog, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData);
 	void update();
 
 	const bool populate();
@@ -30,6 +31,7 @@ public:
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
 	NPCFactory* mNPCFactory = nullptr;
 
 	void _spawn(SpawnPoint* pSpawnPoint);

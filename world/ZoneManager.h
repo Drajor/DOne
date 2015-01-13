@@ -7,6 +7,7 @@
 
 class ILog;
 class ILogFactory;
+class NPCFactory;
 class ZoneDataManager;
 class GroupManager;
 class RaidManager;
@@ -34,7 +35,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory);
+	const bool initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
 	void update();
 
 	// Returns whether or not the specified Zone is running.
@@ -79,6 +80,7 @@ private:
 	GuildManager* mGuildManager = nullptr;
 	CommandHandler* mCommandHandler = nullptr;
 	ItemFactory* mItemFactory = nullptr;
+	NPCFactory* mNPCFactory = nullptr;
 	Experience::Calculator* mExperienceCalculator = nullptr;
 
 	Zone* _search(const u16 pZoneID, const u16 pInstanceID) const;

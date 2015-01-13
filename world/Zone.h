@@ -34,6 +34,7 @@ class CommandHandler;
 class ItemFactory;
 class Transmutation;
 class AccountManager;
+class NPCFactory;
 
 namespace Experience {
 	class Calculator;
@@ -77,7 +78,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory);
+	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory);
 
 	void onEnterZone(Character* pCharacter);
 	void onLeaveZone(Character* pCharacter);
@@ -261,8 +262,23 @@ public:
 private:
 
 	bool mInitialised = false;
+	ZoneConnectionManager* mZoneConnectionManager = nullptr;
+	ZoneManager* mZoneManager = nullptr;
+	ILogFactory* mLogFactory = nullptr;
+	ILog* mLog = nullptr;
+	AccountManager* mAccountManager = nullptr;
+	SpawnPointManager* mSpawnPointManager = nullptr;
+	GuildManager* mGuildManager = nullptr;
+	GroupManager* mGroupManager = nullptr;
+	RaidManager* mRaidManager = nullptr;
+	CommandHandler* mCommandHandler = nullptr;
+	Experience::Calculator* mExperienceCalculator = nullptr;
+	Experience::Modifier* mExperienceModifer = nullptr;
+	LootAllocator* mLootAllocator = nullptr;
+	Scene* mScene = nullptr;
 	ItemFactory* mItemFactory = nullptr;
 	Transmutation* mTransmutation = nullptr;
+	NPCFactory* mNPCFactory = nullptr;
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
 	const bool loadObjects(Data::ObjectList pObjects);
@@ -301,21 +317,6 @@ private:
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	ZonePointList mZonePoints;
-
-	ZoneConnectionManager* mZoneConnectionManager = nullptr;
-	ZoneManager* mZoneManager = nullptr;
-	ILogFactory* mLogFactory = nullptr;
-	ILog* mLog = nullptr;
-	AccountManager* mAccountManager = nullptr;
-	SpawnPointManager* mSpawnPointManager = nullptr;
-	GuildManager* mGuildManager = nullptr;
-	GroupManager* mGroupManager = nullptr;
-	RaidManager* mRaidManager = nullptr;
-	CommandHandler* mCommandHandler = nullptr;
-	Experience::Calculator* mExperienceCalculator = nullptr;
-	Experience::Modifier* mExperienceModifer = nullptr;
-	LootAllocator* mLootAllocator = nullptr;
-	Scene* mScene = nullptr;
 
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;

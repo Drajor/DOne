@@ -1,5 +1,4 @@
 #include "SpawnPointManager.h"
-#include "ServiceLocator.h"
 #include "Utility.h"
 #include "SpawnPoint.h"
 #include "SpawnGroup.h"
@@ -9,15 +8,19 @@
 #include "NPCFactory.h"
 #include "LogSystem.h"
 
-const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pZone);
-	mNPCFactory = ServiceLocator::getNPCFactory();
-	EXPECTED_BOOL(mNPCFactory);
-
-	Log::status("[SpawnPointManager] Initialising.");
-
+const bool SpawnPointManager::initialise(Zone* pZone, NPCFactory* pNPCFactory, ILog* pLog, std::list<Data::SpawnGroup*>& pSpawnGroupData, std::list<Data::SpawnPoint*>& pSpawnPointData) {
+	if (mInitialised) return false;
+	if (!pZone) return false;
+	if (!pNPCFactory) return false;
+	if (!pLog) return false;
+	
 	mZone = pZone;
+	mNPCFactory = pNPCFactory;
+	mLog = pLog;
+
+	StringStream ss;
+	ss << "[SpawnPointManager (ID: " << mZone->getID() << " InstanceID: " << mZone->getInstanceID() << ")]";
+	mLog->setContext(ss.str());
 
 	// Create SpawnGroups
 	for (auto i : pSpawnGroupData) {
@@ -41,12 +44,17 @@ const bool SpawnPointManager::initialise(Zone* pZone, std::list<Data::SpawnGroup
 		
 		// Assign SpawnGroup
 		auto spawnGroup = findSpawnGroup(i->mSpawnGroupID);
-		EXPECTED_BOOL(spawnGroup);
+		if (!spawnGroup) {
+			mLog->error("Could not find SpawnGroup with ID " + toString(i->mSpawnGroupID));
+			return false;
+		}
 		spawnPoint->setSpawnGroup(spawnGroup);
 	}
 
-	Log::info("[SpawnPointManager] Finished initialising. " + std::to_string(pSpawnPointData.size()) + " Spawn Points.");
+	mLog->info("Loaded " + toString(mRespawnSpawnPoints.size()) + " spawn points.");
 	mPopulated = true;
+
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }

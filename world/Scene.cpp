@@ -1,5 +1,5 @@
 #include "Scene.h"
-#include "Utility.h"
+#include "LogSystem.h"
 #include "Zone.h"
 #include "Actor.h"
 #include "Character.h"
@@ -36,6 +36,7 @@ Scene::~Scene() {
 }
 
 const bool Scene::initialise(Zone* pZone, ILog* pLog) {
+	if (mInitialised) return false;
 	if (!pZone) return false;
 	if (!pLog) return false;
 
@@ -48,6 +49,7 @@ const bool Scene::initialise(Zone* pZone, ILog* pLog) {
 	
 
 	mLog->status("Finished initialising.");
+	mInitialised = true;
 	return true;
 }
 

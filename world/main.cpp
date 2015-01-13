@@ -118,10 +118,14 @@ int main(int argc, char** argv)  {
 	CommandHandler* commandHandler = new CommandHandler();
 	EXPECTED_MAIN(commandHandler->initialise(dataStore));
 
+	NPCFactory* npcFactory = new NPCFactory();
+	ServiceLocator::setNPCFactory(npcFactory);
+	EXPECTED_MAIN(npcFactory->initialise(dataStore, itemFactory, shopDataStore));
+
 	World* world = new World();
 	ServiceLocator::setWorld(world);
 
-	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory));
+	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, zoneManager));
@@ -133,9 +137,6 @@ int main(int argc, char** argv)  {
 	ServiceLocator::setUCS(ucs);
 	EXPECTED_MAIN(ucs->initialise());
 
-	NPCFactory* npcFactory = new NPCFactory();
-	ServiceLocator::setNPCFactory(npcFactory);
-	EXPECTED_MAIN(npcFactory->initialise(dataStore, itemFactory, shopDataStore));
 
 	// Validate Data
 	if (Settings::getValidationEnabled()) {

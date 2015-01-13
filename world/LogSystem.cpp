@@ -46,21 +46,36 @@ void Log::end(){
 	logFile.close();
 }
 
-enum ConsoleColours : WORD {
-	CC_BLUE = 1,
-	CC_GREEN = 2,
-	CC_RED = 4
-};
+namespace ConsoleColours {
+	enum : WORD {
+		Black = 0,
+		Blue = 1,
+		Green = 2,
+		Cyan = 3,
+		Red = 4,
+		Magenta = 5,
+		Brown = 6,
+		LightGray = 7,
+		DarkGray = 8,
+		LightBlue = 9,
+		LightGreen = 10,
+		LightCyan = 11,
+		LightRed = 12,
+		LightMagenta = 13,
+		Yellow = 14,
+		White = 15,
+	};
+}
 
 void Log::status(String pMessage) {
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(consoleHandle, CC_BLUE);
+	SetConsoleTextAttribute(consoleHandle, ConsoleColours::Yellow);
 	Log::commonlog("[STATUS] " + pMessage);
 }
 
 void Log::info(String pMessage) {
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(consoleHandle, CC_GREEN);
+	SetConsoleTextAttribute(consoleHandle, ConsoleColours::White);
 	Log::commonlog("[INFO] " + pMessage);
 }
 
@@ -69,7 +84,7 @@ void Log::error(String pMessage) {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(consoleHandle, &csbi);
 
-	SetConsoleTextAttribute(consoleHandle, CC_RED);
+	SetConsoleTextAttribute(consoleHandle, ConsoleColours::Red);
 	Log::commonlog("[ERROR] " + pMessage);
 
 	SetConsoleTextAttribute(consoleHandle, csbi.wAttributes);
