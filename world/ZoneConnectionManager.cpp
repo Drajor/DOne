@@ -154,7 +154,7 @@ void ZoneConnectionManager::updateActiveConnections() {
 		auto character = connection->getCharacter();
 
 		// Check: Character camped out.
-		if (character->getCampComplete()) {
+		if (character->isCampComplete()) {
 
 			// Notify Zone.
 			mZone->onCampComplete(character);

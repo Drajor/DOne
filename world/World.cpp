@@ -506,7 +506,7 @@ void World::onLeaveWorld(Character* pCharacter) {
 		mAccountManager->onDisconnect(account);
 	}
 	// Camping Character leaving World.
-	else if (pCharacter->getCampComplete()) {
+	else if (pCharacter->isCampComplete()) {
 		mLog->info("Camping Character (" + pCharacter->getName() + ") leaving world.");
 		account->clearActiveCharacter();
 	}

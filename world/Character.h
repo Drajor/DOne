@@ -142,7 +142,7 @@ public:
 	
 	void startCamp();
 	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
-	inline bool getCampComplete() { return mCampComplete; }
+	inline bool isCampComplete() { return mCampComplete; }
 	inline void setZoningOut() { mIsZoningOut = true; }
 	inline bool isZoningOut() { return mIsZoningOut; }
 
