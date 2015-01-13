@@ -498,9 +498,22 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 void World::onLeaveWorld(Character* pCharacter) {
 	if (!pCharacter) return;
 
-	mLog->info("Character (" + pCharacter->getName() + ") leaving world.");
-
 	auto account = pCharacter->getAccount();
-	account->clearActiveCharacter();
+	
+	// LinkDead Character leaving World.
+	if (pCharacter->isLinkDead()) {
+		mLog->info("LinkDead Character (" + pCharacter->getName() + ") leaving world.");
+		mAccountManager->onDisconnect(account);
+	}
+	// Camping Character leaving World.
+	else if (pCharacter->getCampComplete()) {
+		mLog->info("Camping Character (" + pCharacter->getName() + ") leaving world.");
+		account->clearActiveCharacter();
+	}
+	else {
+		mLog->error("Character leaving world under unknown circumstances.");
+		mAccountManager->onDisconnect(account);
+	}
+
 	delete pCharacter;
 }
