@@ -161,7 +161,7 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 
 	switch (opcode) {
 	case OP_Unknown:
-		_handleUnknown(pPacket);
+		//_handleUnknown(pPacket);
 		break;
 	case OP_AckPacket:
 		// Ignore.
@@ -600,9 +600,9 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleLeadershipExperienceToggle(pPacket);
 		break;
 	default:
-		StringStream ss;
-		ss << "Unknown Packet: " << opcode;
-		Utility::print(ss.str());
+		//StringStream ss;
+		//ss << "Unknown Packet: " << opcode;
+		//Utility::print(ss.str());z
 		break;
 	}
 	return true;
@@ -1225,7 +1225,18 @@ void ZoneConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) 
 }
 
 void ZoneConnection::_handleCamp(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+	if (!pPacket) return;
+
+	// Instant camp for GM.
+	if (mCharacter->isGM()) {
+		_sendPreLogOutReply();
+		_sendLogOutReply();
+
+		mCharacter->setCampComplete(true);
+
+		dropConnection();
+		return;
+	}
 
 	mCharacter->startCamp();
 }
