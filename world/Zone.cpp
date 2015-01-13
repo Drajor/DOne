@@ -89,13 +89,20 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mLog->setContext(ss.str());
 	mLog->status("Initialising");
 
+	// Create ZoneConnectionManager.
 	mZoneConnectionManager = new ZoneConnectionManager();
 	if (!mZoneConnectionManager->initialise(mPort, this, mLogFactory, mZoneManager, mGroupManager, mRaidManager, mGuildManager)) {
-		mLog->error("Failure: ZoneConnectionManager failed to initialise.");
+		mLog->error("ZoneConnectionManager failed to initialise.");
 		return false;
 	}
 
-	mScene = new Scene(this);
+	// Create Scene.
+	mScene = new Scene();
+	if (!mScene->initialise(this, mLogFactory->make())) {
+		mLog->error("Scene failed to initialise.");
+		return false;
+	}
+
 	mLootAllocator = new LootAllocator();
 	mTransmutation = new Transmutation();
 	mExperienceModifer = new Experience::Modifier();

@@ -28,12 +28,31 @@ inline void diff(C& pNew, C& pOld, C& pAdded, C& pRemoved) {
 	_diff(pOld, pNew, pRemoved);
 }
 
-Scene::Scene(Zone* pZone) : mZone(pZone) {
-	EXPECTED(mZone);
+Scene::~Scene() {
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
+
+const bool Scene::initialise(Zone* pZone, ILog* pLog) {
+	if (!pZone) return false;
+	if (!pLog) return false;
+
+	mLog = pLog;
+	mZone = pZone;
+
+	StringStream ss;
+	ss << "[Scene (ID: " << mZone->getID() << " InstanceID: " << mZone->getInstanceID() << ")]";
+	mLog->setContext(ss.str());
+	
+
+	mLog->status("Finished initialising.");
+	return true;
 }
 
 const bool Scene::add(Actor* pActor) {
-	EXPECTED_BOOL(pActor);
+	if (!pActor) return false;
 	
 	// Character being added to Scene.
 	if (pActor->isCharacter()){
@@ -56,7 +75,7 @@ const bool Scene::add(Actor* pActor) {
 }
 
 const bool Scene::remove(Actor* pActor) {
-	EXPECTED_BOOL(pActor);
+	if (!pActor) return false;
 
 	// Character being removed from Scene.
 	if (pActor->isCharacter()) {
@@ -79,7 +98,9 @@ const bool Scene::remove(Actor* pActor) {
 }
 
 void Scene::onCharacterAdded(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	if (!pCharacter) return;
+	mLog->info("Adding Character (" + pCharacter->getName() + ")");
+
 	std::list<Character*> visible;
 	queryCharacters(pCharacter, visible);
 
@@ -94,8 +115,8 @@ void Scene::onCharacterAdded(Character* pCharacter) {
 }
 
 void Scene::onCharacterRemoved(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	Log::info("Removing " + pCharacter->getName() + " from the scene.");
+	if (!pCharacter) return;
+	mLog->info("Removing Character (" + pCharacter->getName() + ")");
 
 	// Remove pCharacter from everyone who can see pCharacter.
 	for (auto i : pCharacter->getVisibleTo()) {
@@ -108,6 +129,8 @@ void Scene::onCharacterRemoved(Character* pCharacter) {
 }
 
 void Scene::onNPCAdded(NPC* pNPC) {
+	if (!pNPC) return;
+
 	// Query for Characters near npc
 
 	// NOTE: Brute force for now, the fancy stuff comes later.
@@ -132,8 +155,8 @@ void Scene::onNPCRemoved(NPC* pNPC) {
 
 
 void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pCharacters) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacters.empty());
+	if (!pCharacter) return;
+	if (pCharacters.empty()) return;
 
 	const float squareVisibility = pCharacter->getVisibleRange() * pCharacter->getVisibleRange();
 
@@ -146,8 +169,8 @@ void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pChara
 }
 
 void Scene::queryNPCs(Character* pCharacter, std::list<NPC*>& pNPCs) {
-	EXPECTED(pCharacter);
-	EXPECTED(pNPCs.empty());
+	if (!pCharacter) return;
+	if (pNPCs.empty()) return;
 
 	const float squareVisibility = pCharacter->getVisibleRange() * pCharacter->getVisibleRange();
 
