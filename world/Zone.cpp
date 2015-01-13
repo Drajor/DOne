@@ -37,6 +37,7 @@
 #include "ExperienceController.h"
 #include "ExperienceCalculator.h"
 #include "HateController.h"
+#include "CommandHandler.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -444,12 +445,17 @@ void Zone::handleChannelMessage(Character* pCharacter, const u32 pChannelID, con
 	case ChannelID::Tell:
 		break;
 	case ChannelID::Say:
+		// Check whether user has entered a command.
+		if (pMessage[0] == COMMAND_TOKEN) {
+			mCommandHandler->command(pCharacter, pMessage);
+			break;
+		}
 		break;
 	case ChannelID::GMSay:
 		break;
 	case ChannelID::Raid:
 		EXPECTED(pCharacter->hasRaid());
-		//mRaidManager->handleMessage(pCharacter, pMessage);
+		mRaidManager->handleMessage(pCharacter, pMessage);
 		break;
 	case ChannelID::UCS:
 		break;

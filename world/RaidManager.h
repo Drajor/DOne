@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Types.h"
 #include <list>
 
 class ZoneManager;
@@ -14,6 +15,7 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
+	void handleMessage(Character* pCharacter, const String pMessage) {};
 
 private:
 
