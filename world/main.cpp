@@ -128,7 +128,7 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
-	EXPECTED_MAIN(guildManager->initialise(dataStore, zoneManager));
+	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory, zoneManager));
 
 
 	EXPECTED_MAIN(world->initialise(dataStore, logFactory, zoneManager, accountManager));

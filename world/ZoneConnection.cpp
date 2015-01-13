@@ -3,6 +3,7 @@
 #include "GroupManager.h"
 #include "RaidManager.h"
 #include "GuildManager.h"
+#include "Guild.h"
 #include "TitleManager.h"
 #include "Zone.h"
 #include "ZoneManager.h"

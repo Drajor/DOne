@@ -2,6 +2,8 @@
 
 #include "IDataStore.h"
 
+class TiXmlElement;
+
 class XMLDataStore : public IDataStore {
 public:
 	const bool initialise();
@@ -19,6 +21,15 @@ public:
 	const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData);
 	const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData);
 	const bool deleteCharacter(const String& pCharacterName);
+
+	// Guild
+	virtual const bool loadGuilds(Data::GuildList pGuilds);
+	virtual const bool readGuild(TiXmlElement* pElement, Data::Guild* pGuild);
+	virtual const bool readGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember);
+
+	virtual const bool saveGuilds(Data::GuildList pGuilds);
+	virtual const bool writeGuild(TiXmlElement* pElement, Data::Guild* pGuild);
+	virtual const bool writeGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember);
 
 	// Zone Data
 	const bool loadZones(Data::ZoneList pZones);

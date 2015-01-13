@@ -17,6 +17,8 @@ public:
 	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData)  { return true; }
 	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData)  { return true; }
 	virtual const bool deleteCharacter(const String& pCharacterName)  { return true; }
+	virtual const bool loadGuilds(Data::GuildList pGuilds) { return true; };
+	virtual const bool saveGuilds(Data::GuildList pGuilds) { return true; };
 	virtual const bool loadZones(Data::ZoneList pZones)  { return true; }
 	virtual const bool saveZones(Data::ZoneList pZones)  { return true; }
 	virtual const bool loadNPCAppearanceData(Data::NPCAppearanceList pAppearances)  { return true; }

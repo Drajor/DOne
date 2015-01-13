@@ -2001,3 +2001,197 @@ const bool XMLDataStore::loadShops(Data::ShopList pShops) {
 
 	return true;
 }
+
+namespace GuildXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/guilds.xml";
+	namespace Tag {
+		SCA Guilds = "guilds";
+		SCA Guild = "guild";
+		SCA Members = "members";
+		SCA Member = "member";
+	}
+	namespace Attribute {
+		// Tag::Guild
+		SCA ID = "id";
+		SCA Name = "name";
+		SCA MOTD = "motd";
+		SCA MOTDSetter = "motd_setter";
+		SCA URL = "url";
+		SCA Channel = "channel";
+		// Tag::Member
+		namespace Member {
+			SCA Name = "name";
+			SCA Rank = "rank";
+			SCA Level = "level";
+			SCA Banker = "banker";
+			SCA Alt = "alt";
+			SCA Class = "class";
+			SCA TimeLastOn = "time_last_on";
+			SCA TributeEnabled = "tribute_enabled";
+			SCA TotalTribute = "total_tribtue";
+			SCA LastTribute = "last_tribute";
+			SCA PublicNote = "public_note";
+		}
+	}
+#undef SCA
+}
+ // <member id="170123" name="Playerzero" rank="2" level="7" banker="0" class="1" time_last_on="0" tribute_enabled="0" total_tribute="0" last_tribute="0" public_note="" />
+const bool XMLDataStore::readGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::readGuildMember");
+#endif
+	if (!pElement) return false;
+	if (!pMember) return false;
+
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Name, pMember->mName));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Rank, pMember->mRank));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Level, pMember->mLevel));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Banker, pMember->mBanker));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Alt, pMember->mAlt));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Class, pMember->mClass));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TimeLastOn, pMember->mTimeLastOn));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TributeEnabled, pMember->mTributeEnabled));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TotalTribute, pMember->mTotalTribute));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::LastTribute, pMember->mLastTribute));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::PublicNote, pMember->mPublicNote));
+
+	return true;
+}
+
+const bool XMLDataStore::readGuild(TiXmlElement* pElement, Data::Guild* pGuild) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::readGuild");
+#endif
+	if (!pElement) return false;
+	if (!pGuild) return false;
+
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pGuild->mID));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Name, pGuild->mName));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::MOTD, pGuild->mMOTD));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::MOTDSetter, pGuild->mMOTDSetter));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::URL, pGuild->mURL));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Channel, pGuild->mChannel));
+
+	auto membersElement = pElement->FirstChildElement(Tag::Members);
+	EXPECTED_BOOL(membersElement);
+	auto memberElement = membersElement->FirstChildElement(Tag::Member);
+
+	// Read Data::GuidMember
+	while (memberElement) {
+		auto member = new Data::GuildMember();
+		pGuild->mMembers.push_back(member);
+
+		if (!readGuildMember(memberElement, member)) {
+			return false;
+		}
+
+		memberElement = memberElement->NextSiblingElement(Tag::Member);
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::loadGuilds(Data::GuildList pGuilds) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::loadGuilds");
+#endif
+	if (!pGuilds.empty()) return false;
+
+	TiXmlDocument document(GuildXML::FileLocation);
+	EXPECTED_BOOL(document.LoadFile());
+
+	auto guildsElement = document.FirstChildElement(Tag::Guilds);
+	EXPECTED_BOOL(guildsElement);
+	auto guildElement = guildsElement->FirstChildElement(Tag::Guild);
+
+	// Read Data::Guild
+	while (guildElement) {
+		auto guild = new Data::Guild();
+		pGuilds.push_back(guild);
+
+		if (!readGuild(guildElement, guild)) {
+			return false;
+		}
+
+		guildElement = guildElement->NextSiblingElement(Tag::Guild);
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::writeGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::writeGuildMember");
+#endif
+	if (!pElement) return false;
+	if (!pMember) return false;
+
+	pElement->SetAttribute(Attribute::Member::Name, pMember->mName.c_str());
+	pElement->SetAttribute(Attribute::Member::Rank, std::to_string(pMember->mRank).c_str());
+	pElement->SetAttribute(Attribute::Member::Level, std::to_string(pMember->mLevel).c_str());
+	pElement->SetAttribute(Attribute::Member::Banker, std::to_string(pMember->mBanker).c_str());
+	pElement->SetAttribute(Attribute::Member::Alt, std::to_string(pMember->mAlt).c_str());
+	pElement->SetAttribute(Attribute::Member::Class, std::to_string(pMember->mClass).c_str());
+	pElement->SetAttribute(Attribute::Member::TimeLastOn, std::to_string(pMember->mTimeLastOn).c_str());
+	pElement->SetAttribute(Attribute::Member::TotalTribute, std::to_string(pMember->mTotalTribute).c_str());
+	pElement->SetAttribute(Attribute::Member::LastTribute, std::to_string(pMember->mLastTribute).c_str());
+	pElement->SetAttribute(Attribute::Member::PublicNote, pMember->mPublicNote.c_str());
+
+	return true;
+}
+
+const bool XMLDataStore::writeGuild(TiXmlElement* pElement, Data::Guild* pGuild) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::writeGuild");
+#endif
+	if (!pElement) return false;
+	if (!pGuild) return false;
+
+	pElement->SetAttribute(Attribute::ID, std::to_string(pGuild->mID).c_str());
+	pElement->SetAttribute(Attribute::Name, pGuild->mName.c_str());
+	pElement->SetAttribute(Attribute::MOTD, pGuild->mMOTD.c_str());
+	pElement->SetAttribute(Attribute::MOTDSetter, pGuild->mMOTDSetter.c_str());
+	pElement->SetAttribute(Attribute::URL, pGuild->mURL.c_str());
+	pElement->SetAttribute(Attribute::Channel, pGuild->mChannel.c_str());
+
+	auto membersElement = new TiXmlElement(Tag::Members);
+	pElement->LinkEndChild(membersElement);
+
+	// Write Data::GuildMember.
+	for (auto i : pGuild->mMembers) {
+		auto memberElement = new TiXmlElement(Tag::Member);
+		membersElement->LinkEndChild(memberElement);
+
+		EXPECTED_BOOL(writeGuildMember(memberElement, i));
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::saveGuilds(Data::GuildList pGuilds) {
+	using namespace GuildXML;
+#ifdef PROFILE_XML_DS
+	Profile p("DataStore::saveGuilds");
+#endif
+	TiXmlDocument document(GuildXML::FileLocation);
+
+	auto guildsElement = new TiXmlElement(Tag::Guilds);
+	document.LinkEndChild(guildsElement);
+
+	// Write Data::Guild
+	for (auto i : pGuilds) {
+		auto guildElement = new TiXmlElement(Tag::Guild);
+		guildsElement->LinkEndChild(guildElement);
+
+		EXPECTED_BOOL(writeGuild(guildElement, i));
+	}
+
+	EXPECTED_BOOL(document.SaveFile());
+	return true;
+}

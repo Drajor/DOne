@@ -1,5 +1,8 @@
 #include "GuildManager.h"
-#include "ServiceLocator.h"
+#include "IDataStore.h"
+#include "Data.h"
+
+#include "Guild.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Character.h"
@@ -8,82 +11,36 @@
 #include "Payload.h"
 #include "ZoneManager.h"
 #include "Zone.h"
-#include "Profile.h"
 
-#include "../common/tinyxml/tinyxml.h"
+GuildManager::GuildManager() {
+	memset(mGuildNames, 0, sizeof(mGuildNames));
+}
 
-const bool GuildManager::initialise(IDataStore* pDataStore, ZoneManager* pZoneManager) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
-	EXPECTED_BOOL(pZoneManager);
+GuildManager::~GuildManager() {
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
 
+const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
+	if (!pZoneManager) return false;
+
+	mLogFactory = pLogFactory;
 	mDataStore = pDataStore;
 	mZoneManager = pZoneManager;
+	
+	mLog = mLogFactory->make();
+	mLog->setContext("[GuildManager]");
+	mLog->status("Initialising.");
 
-	Profile p("GuildManager::initialise");
-	Log::status("[Guild Manager] Initialising.");
-
-	for (auto i = 0; i < Limits::Guild::MAX_GUILDS; i++) {
-		mGuildNames[i][0] = '\0';
-	}
-
-	TiXmlDocument document;
-	bool loaded = document.LoadFile("./data/guilds.xml");
-	if (!loaded) {
-		Log::error("[Guild Manager] Failed to load data.");
+	std::list<Data::Guild*> guildData;
+	if (!mDataStore->loadGuilds(guildData)) {
+		mLog->error("DataStore::loadGuilds failed.");
 		return false;
-	}
-
-	// Read Guild data.
-	TiXmlElement* guildElement = document.FirstChildElement("guilds")->FirstChildElement("guild");
-	while (guildElement) {
-		Guild* guild = new Guild(); 
-		mGuilds.push_back(guild);
-
-		// ID
-		Utility::stou32Safe(guild->mID, String(guildElement->Attribute("id")));
-		EXPECTED_BOOL(Limits::Guild::ID(guild->mID));
-		// Name
-		guild->mName = guildElement->Attribute("name");
-		EXPECTED_BOOL(Limits::Guild::nameLength(guild->mName));
-		// MOTD
-		guild->mMOTD = guildElement->Attribute("motd");
-		EXPECTED_BOOL(Limits::Guild::MOTDLength(guild->mMOTD));
-		// MOTD Setter
-		guild->mMOTDSetter = guildElement->Attribute("motd_setter");
-		EXPECTED_BOOL(Limits::Character::nameLength(guild->mName));
-		// URL
-		guild->mURL = guildElement->Attribute("url");
-		EXPECTED_BOOL(Limits::Guild::urlLength(guild->mURL));
-		// Channel
-		guild->mChannel = guildElement->Attribute("channel");
-		EXPECTED_BOOL(Limits::Guild::channelLength(guild->mChannel));
-
-		// Read GuildMember data.
-		TiXmlElement* memberElement = guildElement->FirstChildElement("members")->FirstChildElement("member");
-		while (memberElement) {
-			GuildMember* member = new GuildMember();
-			member->mGuild = guild;
-			EXPECTED_BOOL(Utility::stou8Safe(member->mRank, String(memberElement->Attribute("rank"))));
-			EXPECTED_BOOL(Utility::stou32Safe(member->mLevel, String(memberElement->Attribute("level"))));
-			EXPECTED_BOOL(Utility::stou32Safe(member->mClass, String(memberElement->Attribute("class"))));
-			EXPECTED_BOOL(Limits::Character::classID(member->mClass));
-			member->mBanker = Utility::stobool(String(memberElement->Attribute("banker")));
-			EXPECTED_BOOL(Utility::stou32Safe(member->mTimeLastOn, String(memberElement->Attribute("time_last_on"))));
-			member->mTributeEnabled = Utility::stobool(String(memberElement->Attribute("tribute_enabled")));
-			EXPECTED_BOOL(Utility::stou32Safe(member->mTotalTribute, String(memberElement->Attribute("total_tribute"))));
-			EXPECTED_BOOL(Utility::stou32Safe(member->mLastTribute, String(memberElement->Attribute("last_tribute"))));
-
-			member->mName = String(memberElement->Attribute("name"));
-			EXPECTED_BOOL(Limits::Character::nameLength(member->mName));
-			member->mPublicNote = String(memberElement->Attribute("public_note"));
-			EXPECTED_BOOL(Limits::Guild::publicNoteLength(member->mPublicNote));
-
-			guild->mMembers.push_back(member);
-			memberElement = memberElement->NextSiblingElement();
-		}
-
-		guildElement = guildElement->NextSiblingElement();
 	}
 
 	// Store Guild names for packets.
@@ -94,6 +51,7 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ZoneManager* pZoneMa
 	StringStream ss; ss << "[Guild Manager] Loaded data for " << mGuilds.size() << " Guilds.";
 	Log::info(ss.str());
 
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
@@ -303,43 +261,43 @@ Guild* GuildManager::_findByGuildName(const String& pGuildName) {
 }
 
 void GuildManager::_save() {
-	Profile p("GuildManager::_save");
+	//Profile p("GuildManager::_save");
 
-	TiXmlDocument document;
-	TiXmlElement* guildsElement = new TiXmlElement("guilds");
+	//TiXmlDocument document;
+	//TiXmlElement* guildsElement = new TiXmlElement("guilds");
 
-	for (auto i : mGuilds) {
-		TiXmlElement* guildElement = new TiXmlElement("guild");
-		guildElement->SetAttribute("id", i->mID);
-		guildElement->SetAttribute("name", i->mName.c_str());
-		guildElement->SetAttribute("motd", i->mMOTD.c_str());
-		guildElement->SetAttribute("motd_setter", i->mMOTDSetter.c_str());
-		guildElement->SetAttribute("url", i->mURL.c_str());
-		guildElement->SetAttribute("channel", i->mChannel.c_str());
+	//for (auto i : mGuilds) {
+	//	TiXmlElement* guildElement = new TiXmlElement("guild");
+	//	guildElement->SetAttribute("id", i->mID);
+	//	guildElement->SetAttribute("name", i->mName.c_str());
+	//	guildElement->SetAttribute("motd", i->mMOTD.c_str());
+	//	guildElement->SetAttribute("motd_setter", i->mMOTDSetter.c_str());
+	//	guildElement->SetAttribute("url", i->mURL.c_str());
+	//	guildElement->SetAttribute("channel", i->mChannel.c_str());
 
-		TiXmlElement* membersElement = new TiXmlElement("members");
-		for (auto j : i->mMembers) {
-			TiXmlElement* memberElement = new TiXmlElement("member");
-			memberElement->SetAttribute("name", j->mName.c_str());
-			memberElement->SetAttribute("rank", j->mRank);
-			memberElement->SetAttribute("level", j->mLevel);
-			memberElement->SetAttribute("banker", j->mBanker);
-			memberElement->SetAttribute("class", j->mClass);
-			memberElement->SetAttribute("time_last_on", j->mTimeLastOn);
-			memberElement->SetAttribute("tribute_enabled", j->mTributeEnabled);
-			memberElement->SetAttribute("total_tribute", j->mTotalTribute);
-			memberElement->SetAttribute("banker", j->mBanker);
-			memberElement->SetAttribute("last_tribute", j->mLastTribute);
-			memberElement->SetAttribute("public_note", j->mPublicNote.c_str());
+	//	TiXmlElement* membersElement = new TiXmlElement("members");
+	//	for (auto j : i->mMembers) {
+	//		TiXmlElement* memberElement = new TiXmlElement("member");
+	//		memberElement->SetAttribute("name", j->mName.c_str());
+	//		memberElement->SetAttribute("rank", j->mRank);
+	//		memberElement->SetAttribute("level", j->mLevel);
+	//		memberElement->SetAttribute("banker", j->mBanker);
+	//		memberElement->SetAttribute("class", j->mClass);
+	//		memberElement->SetAttribute("time_last_on", j->mTimeLastOn);
+	//		memberElement->SetAttribute("tribute_enabled", j->mTributeEnabled);
+	//		memberElement->SetAttribute("total_tribute", j->mTotalTribute);
+	//		memberElement->SetAttribute("banker", j->mBanker);
+	//		memberElement->SetAttribute("last_tribute", j->mLastTribute);
+	//		memberElement->SetAttribute("public_note", j->mPublicNote.c_str());
 
-			membersElement->LinkEndChild(memberElement);
-		}
-		guildElement->LinkEndChild(membersElement);
-		guildsElement->LinkEndChild(guildElement);
-	}
+	//		membersElement->LinkEndChild(memberElement);
+	//	}
+	//	guildElement->LinkEndChild(membersElement);
+	//	guildsElement->LinkEndChild(guildElement);
+	//}
 
-	document.LinkEndChild(guildsElement);
-	EXPECTED(document.SaveFile("./data/guilds.xml"));
+	//document.LinkEndChild(guildsElement);
+	//EXPECTED(document.SaveFile("./data/guilds.xml"));
 }
 
 uint32 GuildManager::getNextGuildID() {

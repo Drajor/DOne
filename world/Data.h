@@ -187,6 +187,30 @@ namespace Data {
 		Inventory mInventory;
 	};
 
+	struct GuildMember {
+		String mName;
+		u8 mRank = 0;
+		u8 mLevel = 0;
+		u8 mClass = 0;
+		bool mBanker = false;
+		bool mTributeEnabled = false;
+		bool mAlt = false;
+		u32 mTimeLastOn = 0;
+		u32 mTotalTribute = 0;
+		u32 mLastTribute = 0;
+		String mPublicNote;
+	};
+
+	struct Guild {
+		u32 mID = 0;
+		String mName;
+		String mMOTD;
+		String mMOTDSetter;
+		String mURL;
+		String mChannel;
+		std::list<GuildMember*> mMembers;
+	};
+
 	struct NPCAppearance {
 		NPCAppearance() {
 			mOverrides.set(0);

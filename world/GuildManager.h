@@ -11,61 +11,18 @@ struct GuildSearchEntry {
 typedef std::list<GuildSearchEntry> GuildSearchResults;
 
 class IDataStore;
+class IlogFactory;
+class ILog;
 class ZoneManager;
 class Guild;
-
-struct GuildMember {
-	Guild* mGuild = nullptr;
-	String mName = "";
-	uint32 mLevel = 0; // TODO: Should really be uint16
-	uint32 mClass = 0; // For some reason Guilds use uint32 instead of uint8 for player class.
-	GuildRank mRank = GuildRanks::Member;
-	bool mBanker = false;
-	bool mTributeEnabled = false;
-	bool mAlt = false;
-	uint32 mTimeLastOn = 0;
-	uint32 mTotalTribute = 0;
-	uint32 mLastTribute = 0;
-	String mPublicNote = "";
-	u16 mZoneID = 0;
-	uint16 mInstanceID = 0;
-	inline bool isOnline() { return mCharacter != nullptr; }
-	Character* mCharacter = nullptr; // Only valid when the guild member is online.
-};
-
-class Guild {
-	friend class GuildManager;
-	GuildID mID = 0;
-	String mName = "";
-	String mMOTD = "";
-	String mMOTDSetter = ""; // The Character name of who set the current MOTD.
-	String mURL = "";
-	String mChannel = "";
-	std::list<Character*> mOnlineMembers;
-	std::list<GuildMember*> mMembers;
-
-	GuildMember* getMember(const String& pCharacterName) {
-		for (auto i : mMembers) {
-			if (i->mName == pCharacterName)
-				return i;
-		}
-
-		return nullptr;
-	}
-	Character* getOnlineMember(const String& pCharacterName) {
-		for (auto i : mOnlineMembers) {
-			if (i->getName() == pCharacterName)
-				return i;
-		}
-
-		return nullptr;
-	}
-};
+struct GuildMember;
 
 class GuildManager {
 public:
+	GuildManager();
+	~GuildManager();
 
-	const bool initialise(IDataStore* pDataStore, ZoneManager* pZoneManager);
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager);
 
 	bool isLeader(Character* pCharacter);
 	bool isOfficer(Character* pCharacter);
@@ -108,6 +65,8 @@ public:
 private:
 
 	bool mInitialised = false;
+	ILogFactory* mLogFactory = nullptr;
+	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
 	ZoneManager* mZoneManager = nullptr;
 

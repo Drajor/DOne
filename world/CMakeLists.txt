@@ -7,7 +7,7 @@ SOURCE_GROUP(Zone\\Hate FILES HateControllerFactory.h HateControllerFactory.cpp 
 SOURCE_GROUP(Zone\\Experience FILES ExperienceCalculator.h ExperienceCalculator.cpp ExperienceController.h ExperienceController.cpp)
 SOURCE_GROUP(Zone\\Group FILES GroupManager.h GroupManager.cpp Group.h)
 SOURCE_GROUP(Zone\\Raid FILES RaidManager.h Raid.h)
-SOURCE_GROUP(Zone\\Guild FILES GuildManager.h GuildManager.cpp)
+SOURCE_GROUP(Zone\\Guild FILES Guild.h GuildManager.h GuildManager.cpp)
 SOURCE_GROUP(Zone\\Command FILES CommandHandler.h CommandHandler.cpp)
 SOURCE_GROUP(Zone\\ZoneConnection FILES ZoneConnection.h ZoneConnection.cpp ZoneConnectionManager.h ZoneConnectionManager.cpp)
 SOURCE_GROUP(UCS FILES UCS.h UCS.cpp UCSClientConnection.h UCSClientConnection.cpp)
@@ -90,6 +90,7 @@ SET(world_headers
 	Group.h
 	GroupManager.h
 	GuildManager.h
+	Guild.h
 	RaidManager.h
 	Limits.h
 	Actor.h

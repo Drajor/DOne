@@ -9,6 +9,8 @@ struct TransmutationComponent;
 namespace Data {
 	struct Account;
 	struct Character;
+	struct Guild;
+	struct GuildMember;
 	struct Zone;
 	struct NPCType;
 	struct NPCAppearance;
@@ -17,6 +19,7 @@ namespace Data {
 	struct Spell;
 
 	typedef std::list<Data::Account*>& AccountList;
+	typedef std::list<Data::Guild*>& GuildList;
 	typedef std::list<Data::Zone*>& ZoneList;
 	typedef std::list<Data::NPCAppearance*>& NPCAppearanceList;
 	typedef std::list<Data::NPCType*>& NPCTypeList;
@@ -43,6 +46,10 @@ public:
 	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) = 0;
 	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData) = 0;
 	virtual const bool deleteCharacter(const String& pCharacterName) = 0;
+
+	// Guild
+	virtual const bool loadGuilds(Data::GuildList pGuilds) = 0;
+	virtual const bool saveGuilds(Data::GuildList pGuilds) = 0;
 
 	// Zone Data
 	virtual const bool loadZones(Data::ZoneList pZones) = 0;
