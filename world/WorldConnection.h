@@ -18,6 +18,7 @@ public:
 	inline Account* getAccount() const { return mAccount; }
 	inline void setAccount(Account* pAccount) { mAccount = pAccount; }
 	inline const bool hasAccount() const { return mAccount != nullptr; }
+	inline const bool isZoning() const { return mZoning; }
 
 	const u32 getIP() const;
 

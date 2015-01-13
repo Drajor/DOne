@@ -46,7 +46,7 @@ const bool WorldConnection::initialise(World* pWorld, ILog* pLog, EQStreamInterf
 
 	updateLogContext();
 
-	mLog->info("Finished initialising.");
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
@@ -372,7 +372,10 @@ bool WorldConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
 	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED_BOOL(Limits::Character::nameLength(characterName));
 
-	return mWorld->onEnterWorld(this, characterName, mZoning);
+	const bool success = mWorld->onEnterWorld(this, characterName, mZoning);
+	if (success) mZoning = true;
+
+	return success;
 }
 
 void WorldConnection::sendChatServer(const String& pCharacterName) {

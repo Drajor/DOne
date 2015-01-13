@@ -91,13 +91,22 @@ void World::update() {
 
 	// Update World Clients.
 	for (auto i = mWorldConnections.begin(); i != mWorldConnections.end();) {
-		if ((*i)->update()){
+		auto connection = *i;
+		if (connection->update()){
 			i++;
+			continue;
 		}
-		else {
-			delete *i;
-			i = mWorldConnections.erase(i);
+
+		// This basically detects when a user quits from the Character Select Screen.
+		if (connection->isZoning() == false && connection->hasAccount()) {
+			mLog->info("WorldConnection dropped from Character Select Screen. Cleaning up.");
+			if (!mAccountManager->onDisconnect(connection->getAccount())) {
+				mLog->error("AccountManager::onDisconnect failed.");
+			}
 		}
+
+		delete connection;
+		i = mWorldConnections.erase(i);
 	}
 
 	// Check: Time to update the Login Server with new numbers.
@@ -196,7 +205,7 @@ void World::checkIncomingConnections() {
 			continue;
 		}
 
-		mLog->info("Added new ZoneConnection.");
+		mLog->info("Added new WorldConnection.");
 		mWorldConnections.push_back(connection);
 	}
 }

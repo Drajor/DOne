@@ -434,7 +434,7 @@ const bool AccountManager::_unloadAccount(Account* pAccount) {
 		return false;
 	}
 
-	auto characterData = pAccount->getData()->mCharacterData;
+	auto& characterData = pAccount->getData()->mCharacterData;
 	for (auto i : characterData) {
 		delete i;
 	}
