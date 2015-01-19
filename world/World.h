@@ -16,6 +16,7 @@ namespace Payload {
 class Character;
 class AccountManager;
 class ZoneManager;
+class GuildManager;
 class IDataStore;
 class ILogFactory;
 class EventDispatcher;
@@ -30,7 +31,7 @@ public:
 	World();
 	~World();
 
-	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager, AccountManager* pAccountManager);
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	void update();
 
 	inline const i32 getStatus() const { return mStatus; }
@@ -62,6 +63,7 @@ private:
 	bool mLocked = false;
 	AccountManager* mAccountManager = nullptr;
 	ZoneManager* mZoneManager = nullptr;
+	GuildManager* mGuildManager = nullptr;
 	IDataStore* mDataStore = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;

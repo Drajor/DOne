@@ -356,7 +356,7 @@ public:
 	// Sets the spawn ID of the owner of this Actor.
 	inline void setOwnerSpawnID(const uint32 pSpawnID) { mActorData.mOwnerSpawnID = pSpawnID; }
 
-	// Returns the guild rank or this Actor.
+	// Returns the guild rank of this Actor.
 	inline const uint32 getGuildRank() const { return mActorData.mGuildRank; }
 
 	// Sets the guild rank of this Actor.

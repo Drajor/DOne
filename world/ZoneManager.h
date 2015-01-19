@@ -38,6 +38,10 @@ public:
 	const bool initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
 	void update();
 
+	// Guild Events.
+	void onCreateGuild();
+	void onDeleteGuild();
+
 	// Returns whether or not the specified Zone is running.
 	const bool isZoneRunning(const u16 pZoneID, const u16 pInstanceID) const;
 

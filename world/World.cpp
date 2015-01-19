@@ -4,6 +4,7 @@
 #include "Constants.h"
 #include "Character.h"
 #include "Utility.h"
+#include "GuildManager.h"
 #include "ZoneManager.h"
 #include "AccountManager.h"
 #include "Account.h"
@@ -37,15 +38,17 @@ World::~World() {
 	safe_delete(mStreamIdentifier);
 }
 
-const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
+const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
 	if (mInitialised) return false;
 	if (!pDataStore) return false;
 	if (!pLogFactory) return false;
+	if (!pGuildManager) return false;
 	if (!pZoneManager) return false;
 	if (!pAccountManager) return false;
 
 	mDataStore = pDataStore;
 	mLogFactory = pLogFactory;
+	mGuildManager = pGuildManager;
 	mZoneManager = pZoneManager;
 	mAccountManager = pAccountManager;
 
@@ -276,6 +279,9 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 		delete character;
 		return false;
 	}
+
+	if (characterData->mGuildID != 0xFFFFFFFF)
+		mGuildManager->onConnect(character, characterData->mGuildID);
 
 	// Register Zone Change
 	mZoneManager->onLeaveZone(character);

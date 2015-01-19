@@ -128,10 +128,10 @@ int main(int argc, char** argv)  {
 	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
-	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory, zoneManager));
+	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory));
 
 
-	EXPECTED_MAIN(world->initialise(dataStore, logFactory, zoneManager, accountManager));
+	EXPECTED_MAIN(world->initialise(dataStore, logFactory, guildManager, zoneManager, accountManager));
 
 	UCS* ucs = new UCS();
 	ServiceLocator::setUCS(ucs);

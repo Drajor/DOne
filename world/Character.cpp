@@ -154,11 +154,6 @@ const bool Character::initialise(Account* pAccount) {
 	mBaseAgility = mData->mAgility;
 	mBaseWisdom = mData->mWisdom;
 
-	// TODO: Replace this.
-	//if (mData->mGuildID != NO_GUILD) {
-	//	GuildManager::getInstance().onConnect(this, mData->mGuildID);
-	//}
-
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
 		setSkill(i, mData->mSkills[i]);

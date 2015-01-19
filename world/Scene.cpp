@@ -158,7 +158,7 @@ void Scene::onNPCRemoved(NPC* pNPC) {
 
 void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pCharacters) {
 	if (!pCharacter) return;
-	if (pCharacters.empty()) return;
+	if (!pCharacters.empty()) return;
 
 	const float squareVisibility = pCharacter->getVisibleRange() * pCharacter->getVisibleRange();
 
@@ -172,7 +172,7 @@ void Scene::queryCharacters(Character* pCharacter, std::list<Character*>& pChara
 
 void Scene::queryNPCs(Character* pCharacter, std::list<NPC*>& pNPCs) {
 	if (!pCharacter) return;
-	if (pNPCs.empty()) return;
+	if (!pNPCs.empty()) return;
 
 	const float squareVisibility = pCharacter->getVisibleRange() * pCharacter->getVisibleRange();
 

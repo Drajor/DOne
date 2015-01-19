@@ -13,6 +13,7 @@
 #include "gtest/gtest.h"
 
 #include "Test_AccountManager.h"
+#include "Test_GuildManager.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());

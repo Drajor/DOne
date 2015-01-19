@@ -86,6 +86,33 @@ public:
 	void onLinkdeadBegin(Character* pCharacter);
 	void onLinkdeadEnd(Character* pCharacter);
 
+	// Group Events.
+
+	// Raid Events.
+
+	// Guild Events.
+	const bool onGuildCreate(Character* pCharacter, const String& pGuildName);
+	const bool onGuildDelete(Character* pCharacter);
+	const bool onGuildInvite(Character* pInviter, const String& pInviteeName);
+	const bool onGuildInviteAccept(Character* pCharacter);
+	const bool onGuildInviteDecline(Character* pCharacter);
+	const bool onGuildRemove(Character* pRemover, const String& pRemoveeName);
+	const bool onGuildLeave(Character* pCharacter);
+	const bool onGuildPromote(Character* pPromoter, const String& pPromoteeName);
+	const bool onGuildDemote(Character* pDemoter, const String& pDemoteeName);
+	const bool onGuildSetMOTD(Character* pCharacter, const String& pMOTD);
+	const bool onGuildGetMOTD(Character* pCharacter);
+	const bool onGuildSetURL(Character* pSetter, const String& pURL);
+	const bool onGuildSetChannel(Character* pSetter, const String& pChannel);
+	const bool onGuildMakeLeader(Character* pCharacter, const String& pLeaderName);
+	const bool onGuildSetFlags(Character* pSetter, const String& pCharacterName, const bool pBanker, const bool pAlt);
+	const bool onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote);
+
+	const bool onGuildStatusRequest(Character* pCharacter, const String& pCharacterName);
+
+	void onChangeGuild(Character* pCharacter);
+	void onGuildsChanged();
+
 	const bool canShutdown() const;
 	const bool shutdown();
 	
@@ -170,10 +197,6 @@ public:
 	void processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent);
 
 	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
-
-	// Guild
-	void onGuildsChanged();
-	void notifyCharacterGuildChange(Character* pCharacter);
 
 	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
 

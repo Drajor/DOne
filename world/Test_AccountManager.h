@@ -1,52 +1,15 @@
 #pragma once
 
 #include "gtest/gtest.h"
+#include "Test_Utility.h"
 
 #include "AccountManager.h"
 #include "Account.h"
-#include "IDataStore.h"
-
-class NullDataStore : public IDataStore {
-public:
-	virtual const bool initialise()  { return true; }
-	virtual const bool loadSettings()  { return true; }
-	virtual const bool loadAccounts(Data::AccountList pAccounts)  { return true; }
-	virtual const bool saveAccounts(Data::AccountList pAccounts)  { return true; }
-	virtual const bool loadAccountCharacterData(Data::Account* pAccount)  { return true; }
-	virtual const bool saveAccountCharacterData(Data::Account* pAccount)  { return true; }
-	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData)  { return true; }
-	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData)  { return true; }
-	virtual const bool deleteCharacter(const String& pCharacterName)  { return true; }
-	virtual const bool loadGuilds(Data::GuildList pGuilds) { return true; };
-	virtual const bool saveGuilds(Data::GuildList pGuilds) { return true; };
-	virtual const bool loadZones(Data::ZoneList pZones)  { return true; }
-	virtual const bool saveZones(Data::ZoneList pZones)  { return true; }
-	virtual const bool loadNPCAppearanceData(Data::NPCAppearanceList pAppearances)  { return true; }
-	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes)  { return true; }
-	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded)  { return true; }
-	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded)  { return true; }
-	virtual const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents)  { return true; }
-	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies)  { return true; }
-	virtual const bool loadShops(Data::ShopList pShops)  { return true; }
-};
-
-class NullLog : public ILog {
-public:
-	void status(const String& pMessage) { }
-	void info(const String& pMessage) { }
-	void error(const String& pMessage) { }
-	void setContext(String pContext) { }
-};
-
-class NullLogFactory : public  ILogFactory {
-public:
-	ILog* make() { return new NullLog(); }
-};
 
 class AccountManagerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		mDataStore = new NullDataStore();
+		mTrueDataStore = new TrueDataStore();
 		mAccountManager = new AccountManager();
 		mLogFactory = new NullLogFactory();
 	}
@@ -55,35 +18,43 @@ protected:
 		delete mAccountManager;
 		mAccountManager = nullptr;
 
-		delete mDataStore;
-		mDataStore = nullptr;
+		delete mTrueDataStore;
+		mTrueDataStore = nullptr;
 
 		delete mLogFactory;
 		mLogFactory = nullptr;
 	}
 
 	AccountManager* mAccountManager = nullptr;
-	NullDataStore* mDataStore = nullptr;
+	TrueDataStore* mTrueDataStore = nullptr;
 	NullLogFactory* mLogFactory = nullptr;
 };
 
-TEST_F(AccountManagerTest, Initialise) {
+TEST_F(AccountManagerTest, InitialiseNull) {
 	// Fail: Null IDataStore.
 	EXPECT_EQ(false, mAccountManager->initialise(nullptr, mLogFactory));
 
 	// Fail: Null ILog.
-	EXPECT_EQ(false, mAccountManager->initialise(mDataStore, nullptr));
+	EXPECT_EQ(false, mAccountManager->initialise(mTrueDataStore, nullptr));
+}
 
+TEST_F(AccountManagerTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mAccountManager->initialise(mDataStore, mLogFactory));
+	EXPECT_EQ(true, mAccountManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mAccountManager->initialise(mDataStore, mLogFactory));
+	EXPECT_EQ(false, mAccountManager->initialise(mTrueDataStore, mLogFactory));
+}
+
+TEST_F(AccountManagerTest, InitialiseFalseDataStore) {
+	auto dataStore = new FalseDataStore();
+	EXPECT_EQ(false, mAccountManager->initialise(dataStore, mLogFactory));
+	delete dataStore;
 }
 
 TEST_F(AccountManagerTest, createAccount) {
 	// Pass.
-	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+	ASSERT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 	EXPECT_TRUE(mAccountManager->numAccounts() == 0);
 
 	// Create an Account.
@@ -117,7 +88,7 @@ TEST_F(AccountManagerTest, createAccount) {
 
 TEST_F(AccountManagerTest, BanAndSuspend) {
 	// Pass.
-	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+	ASSERT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 	EXPECT_TRUE(mAccountManager->numAccounts() == 0);
 
 	// Create an Account.
@@ -152,7 +123,7 @@ TEST_F(AccountManagerTest, BanAndSuspend) {
 
 TEST_F(AccountManagerTest, CharacterNames) {
 	// Pass.
-	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+	ASSERT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Truth table
 	std::map<bool, std::string> names = {
@@ -176,7 +147,7 @@ TEST_F(AccountManagerTest, CharacterNames) {
 
 TEST_F(AccountManagerTest, CreateCharacterA) {
 	// Pass.
-	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+	ASSERT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Create an Account.
 	auto accountA = mAccountManager->createAccount(12, "test", 1);
@@ -220,7 +191,7 @@ TEST_F(AccountManagerTest, CreateCharacterA) {
 
 TEST_F(AccountManagerTest, DeleteCharacterA) {
 	// Pass.
-	ASSERT_TRUE(mAccountManager->initialise(mDataStore, mLogFactory));
+	ASSERT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Create an Account.
 	auto accountA = mAccountManager->createAccount(12, "test", 1);

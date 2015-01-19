@@ -353,9 +353,10 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_GuildInvite:
 		// NOTE: This occurs when a player uses the /guildinvite command.
 		_handleGuildInvite(pPacket);
+		break;
 	case OP_GuildInviteAccept:
 		// NOTE: This occurs when a player presses 'accept' on the guild invite window.
-		_handleGuildInviteAccept(pPacket);
+		_handleGuildInviteResponse(pPacket);
 		break;
 	case OP_GuildRemove:
 		// NOTE: This occurs when the player uses the /guildremove command.
@@ -363,11 +364,11 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_SetGuildMOTD:
 		// NOTE: This occurs when the player uses the /guildmotd command.
-		_handleSetGuildMOTD(pPacket);
+		_handleGuildSetMOTD(pPacket);
 		break;
 	case OP_GetGuildMOTD:
 		// NOTE: This occurs when the player uses the /getguildmotd command.
-		_handleGetGuildMOTD(pPacket);
+		_handleGuildGetMOTD(pPacket);
 		break;
 	case OP_GuildUpdateURLAndChannel:
 		// NOTE: This occurs via the guild window.
@@ -385,7 +386,7 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		_handleGuildDemote(pPacket);
 		break;
 	case OP_GuildManageBanker:
-		_handleGuildBanker(pPacket);
+		_handleGuildSetFlags(pPacket);
 		break;
 	case OP_GuildLeader:
 		_handleGuildMakeLeader(pPacket);
@@ -2165,33 +2166,36 @@ void ZoneConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
 }
 
 void ZoneConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild() == false);
-	EXPECTED(pPacket->size == Limits::Guild::MAX_NAME_LENGTH);
+	using namespace Payload::Guild;
+	if (!pPacket) return;
+
+	// Check: Payload size.
+	EXPECTED(Create::sizeCheck(pPacket));
 	
-	const String guildName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Guild::MAX_NAME_LENGTH);
+	auto payload = Create::convert(pPacket);
+
+	// Check: String sanity.
+	const String guildName = Utility::safeString(payload->mName, Limits::Guild::MAX_NAME_LENGTH);
+
+	// Check: String length.
 	EXPECTED(Limits::Guild::nameLength(guildName));
 
-	mGuildManager->handleCreate(mCharacter, guildName);
+	// Notify Zone.
+	mZone->onGuildCreate(mCharacter, guildName);
 }
 
 void ZoneConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
 	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(mGuildManager->isLeader(mCharacter)); // Check: Permission.
-
-	mGuildManager->handleDelete(mCharacter);
+	
+	// Notify Zone.
+	mZone->onGuildDelete(mCharacter);
 }
 
-void ZoneConnection::sendGuildRank() {
+void ZoneConnection::sendGuildRank(const u32 pRank) {
+	using namespace Payload::Guild;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
-	auto payload = reinterpret_cast<GuildSetRank_Struct*>(packet->pBuffer);
-	payload->Rank = mCharacter->getGuildRank();
-	payload->Banker = 0;
-	strcpy(payload->MemberName, mCharacter->getName().c_str());
-
+	auto packet = RankUpdate::construct(pRank, mCharacter->getName());
 	sendPacket(packet);
 	delete packet;
 }
@@ -2209,49 +2213,57 @@ void ZoneConnection::_sendGuildNames() {
 }
 
 void ZoneConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
-	EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter)); // Check: Permission.
-	EXPECTED(pPacket->size == sizeof(GuildCommand_Struct));
+	using namespace Payload::Guild;
+	if (!pPacket) return;
+	
+	// Check: Payload size.
+	EXPECTED(Invite::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
+	auto payload = Invite::convert(pPacket);
 
-	EXPECTED(payload->guildeqid == mCharacter->getGuildID()); // Check: Sanity. Why the fuck does the client send this?
+	// Check: String sanity.
+	String characterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
 
-	String toCharacterName = Utility::safeString(payload->othername, Limits::Character::MAX_NAME_LENGTH);
-	String fromCharacterName = Utility::safeString(payload->myname, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(toCharacterName)); // NOTE: Client does not check this..
-	EXPECTED(Limits::Character::nameLength(fromCharacterName));
-	EXPECTED(fromCharacterName == mCharacter->getName()); // Check: Sanity.
+	// Check: String length.
+	EXPECTED(Limits::Character::nameLength(characterName));
 
-	if (payload->officer == 0)
-		mGuildManager->handleInviteSent(mCharacter, toCharacterName);
-	if (payload->officer == 1)
-		mGuildManager->handlePromote(mCharacter, toCharacterName);
-
-	// NOTE: UF requires that the character being promoted is targetted we can verify this later.
+	// Handle: Inviting another player to guild.
+	if (payload->mAction == CommandAction::Invite) {
+		mZone->onGuildInvite(mCharacter, characterName);
+	}
+	// Handle: Promoting a member within guild.
+	else if (payload->mAction == CommandAction::Promote) {
+		mZone->onGuildPromote(mCharacter, characterName);
+	}
+	else {
+		// TODO: Log (unknown action sent).
+	}
 }
 
 void ZoneConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-	EXPECTED(mCharacter->hasGuild()); // Check: Character has a guild.
-	EXPECTED(pPacket->size == sizeof(GuildCommand_Struct));
+	using namespace Payload::Guild;
+	if (!pPacket) return;
 
-	auto payload = reinterpret_cast<GuildCommand_Struct*>(pPacket->pBuffer);
+	// Check: Payload size.
+	EXPECTED(Remove::sizeCheck(pPacket));
 
-	String toCharacterName = Utility::safeString(payload->othername, Limits::Character::MAX_NAME_LENGTH);
-	String fromCharacterName = Utility::safeString(payload->myname, Limits::Character::MAX_NAME_LENGTH);
+	auto payload = Remove::convert(pPacket);
+
+	// Check: String sanity.
+	String toCharacterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
+	
+	// Check: String length.
 	EXPECTED(Limits::Character::nameLength(toCharacterName));
-	EXPECTED(Limits::Character::nameLength(fromCharacterName));
-	EXPECTED(fromCharacterName == mCharacter->getName()) // Check: Sanity.
 
-	// Check: Permission
-	if (toCharacterName != fromCharacterName)
-		EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter));
-
-	mGuildManager->handleRemove(mCharacter, toCharacterName);
+	// Notify Zone.
+	if (mCharacter->getName() == toCharacterName) {
+		// Character is removing themself.
+		mZone->onGuildLeave(mCharacter);
+	}
+	else {
+		// Character is removing another Character.
+		mZone->onGuildRemove(mCharacter, toCharacterName);
+	}
 }
 
 void ZoneConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
@@ -2272,55 +2284,43 @@ void ZoneConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
 	delete packet;
 }
 
-void ZoneConnection::_handleGuildInviteAccept(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-	if (mCharacter->hasGuild()) { return; } // NOTE: UF sends OP_GuildInvite and OP_GuildInviteAccept(response=2,guildid=0) when using /guildinvite .. not sure why.
-	EXPECTED(mCharacter->hasPendingGuildInvite()); // Check: This Character has actually been invited to *A* Guild
-	EXPECTED(pPacket->size == sizeof(GuildInviteAccept_Struct));
+void ZoneConnection::_handleGuildInviteResponse(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
+	if (!pPacket) return;
 
-	auto payload = reinterpret_cast<GuildInviteAccept_Struct*>(pPacket->pBuffer);
-	
-	String characterName = Utility::safeString(payload->newmember, Limits::Character::MAX_NAME_LENGTH);
-	String inviterName = Utility::safeString(payload->inviter, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(characterName));
-	EXPECTED(Limits::Character::nameLength(inviterName));
-	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
-	EXPECTED(mCharacter->getPendingGuildInviteName() == inviterName); // Check: This Character is responding to the correct inviter.
-	EXPECTED(mCharacter->getPendingGuildInviteID() == payload->guildeqid); // Check: This Character is responding to the correct Guild invite.
-	
-	static const auto Accept = 0;
-	static const auto Decline = 5;
+	// Check: Payload size.
+	EXPECTED(InviteResponse::sizeCheck(pPacket));
 
-	// Character is accepting the invite.
-	if (payload->response == Accept) {
-		mGuildManager->handleInviteAccept(mCharacter, inviterName);
-		return;
+	auto payload = InviteResponse::convert(pPacket);
+	switch (payload->mResponse) {
+	case InviteResponseType::Accept:
+		mZone->onGuildInviteAccept(mCharacter);
+		break;
+	case InviteResponseType::Decline:
+		mZone->onGuildInviteDecline(mCharacter);
+		break;
+	default:
+		// TODO: Log.
+		break;
 	}
-	// Character is declining the invite.
-	if (payload->response == Decline) {
-		mGuildManager->handleInviteDecline(mCharacter, inviterName);
-		return;
-	}
-
-	Log::error("[Zone Client Connection] Got unexpected response(" + std::to_string(payload->response) + ") to Guild invite " + Utility::characterLogDetails(mCharacter));
-	mCharacter->clearPendingGuildInvite();
 }
 
-void ZoneConnection::_handleSetGuildMOTD(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter)); // Only leader or officers can set the MOTD.
-	EXPECTED(pPacket->size == sizeof(GuildMOTD_Struct));
+void ZoneConnection::_handleGuildSetMOTD(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
+	if (!pPacket) return;
 
-	auto payload = reinterpret_cast<GuildMOTD_Struct*>(pPacket->pBuffer);
+	// Check: Payload size.
+	EXPECTED(MOTD::sizeCheck(pPacket));
 
-	String characterName = Utility::safeString(payload->name, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity.
-	String motd = Utility::safeString(payload->motd, Limits::Guild::MAX_MOTD_LENGTH);
+	auto payload = MOTD::convert(pPacket);
+	
+	// Check: String sanity.
+	String motd = Utility::safeString(payload->mMOTD, Limits::Guild::MAX_MOTD_LENGTH);
 
-	mGuildManager->handleSetMOTD(mCharacter, motd);
+	// Check: String length.
+	EXPECTED(Limits::Guild::MOTDLength(motd));
+
+	mZone->onGuildSetMOTD(mCharacter, motd);
 }
 
 void ZoneConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
@@ -2353,11 +2353,10 @@ void ZoneConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTD
 	delete packet;
 }
 
-void ZoneConnection::_handleGetGuildMOTD(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
+void ZoneConnection::_handleGuildGetMOTD(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return;
 
-	mGuildManager->handleGetMOTD(mCharacter);
+	mZone->onGuildGetMOTD(mCharacter);
 }
 
 void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
@@ -2371,10 +2370,10 @@ void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembe
 	uint32 namesLength = 0;
 	uint32 notesLength = 0;
 	for (auto i : pGuildMembers) {
-		payloadSize += i->mName.length() + 1;
-		payloadSize += i->mPublicNote.length() + 1;
-		namesLength += i->mName.length();
-		notesLength += i->mPublicNote.length();
+		payloadSize += i->getName().length() + 1;
+		payloadSize += i->getPublicNote().length() + 1;
+		namesLength += i->getName().length();
+		notesLength += i->getPublicNote().length();
 	}
 
 	auto packet = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
@@ -2389,24 +2388,24 @@ void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembe
 
 	// Write member data.
 	for (auto i : pGuildMembers) {
-		ds.write<uint32>(i->mLevel);
-		ds.write<uint32>(i->mBanker + i->mAlt * 2);
-		ds.write<uint32>(i->mClass);
-		ds.write<uint32>(i->mRank);
-		ds.write<uint32>(i->mTimeLastOn);
-		ds.write<uint32>(i->mTributeEnabled ? 1 : 0);
-		ds.write<uint32>(i->mTotalTribute);
-		ds.write<uint32>(i->mLastTribute);
-		ds.write<uint16>(i->mInstanceID);
-		ds.write<uint16>(i->mZoneID);
+		ds.write<uint32>(i->getLevel());
+		ds.write<uint32>(i->getFlags());
+		ds.write<uint32>(i->getClass());
+		ds.write<uint32>(i->getRank());
+		ds.write<uint32>(i->getLastSeen());
+		ds.write<uint32>(i->isTributeEnabled() ? 1 : 0);
+		ds.write<uint32>(i->getTotalTribute());
+		ds.write<uint32>(i->getLastTribute());
+		ds.write<uint16>(i->getInstanceID());
+		ds.write<uint16>(i->getZoneID());
 	}
 	// Write Character names.
 	for (auto i : pGuildMembers) {
-		ds.writeString(i->mName);
+		ds.writeString(i->getName());
 	}
 	// Write public notes.
 	for (auto i : pGuildMembers) {
-		ds.writeString(i->mPublicNote);
+		ds.writeString(i->getPublicNote());
 	}
 
 	sendPacket(packet);
@@ -2415,145 +2414,138 @@ void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembe
 }
 
 void ZoneConnection::sendGuildURL(const String& pURL) {
+	using namespace Payload::Guild;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(packet->pBuffer);
-	payload->mAction = Payload::Guild::GuildUpdate::GUILD_URL;
-	strcpy(&payload->mText[0], pURL.c_str());
-
+	auto packet = GuildUpdate::construct(GuildUpdateAction::URL, pURL);
 	sendPacket(packet);
 	delete packet;
 }
 
 void ZoneConnection::sendGuildChannel(const String& pChannel) {
+	using namespace Payload::Guild;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(packet->pBuffer);
-	payload->mAction = Payload::Guild::GuildUpdate::GUILD_CHANNEL;
-	strcpy(&payload->mText[0], pChannel.c_str());
-
+	auto packet = GuildUpdate::construct(GuildUpdateAction::Channel, pChannel);
 	sendPacket(packet);
 	delete packet;
 }
 
 void ZoneConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(mGuildManager->isLeader(mCharacter)); // Only a Guild leader can perform this operation.
-	EXPECTED(pPacket->size == sizeof(Payload::Guild::GuildUpdate));
+	using namespace Payload::Guild;
+	if (!pPacket) return;
 
-	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(pPacket->pBuffer);
-	if (payload->mAction == GUILD_URL) {
-		String url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
-		mGuildManager->handleSetURL(mCharacter, url);
-	}
-	else if (payload->mAction == GUILD_CHANNEL) {
-		String channel = Utility::safeString(payload->mText, Limits::Guild::MAX_CHANNEL_LENGTH);
-		mGuildManager->handleSetChannel(mCharacter, channel);
-	}
-	else {
-		StringStream ss; ss << "[Zone Client Connection]Got unknown action value(" << payload->mAction << ") in _handleSetGuildURLOrChannel from " << Utility::characterLogDetails(mCharacter);
-		Log::error(ss.str());
+	// Check: Payload size.
+	EXPECTED(GuildUpdate::sizeCheck(pPacket));
+
+	auto payload = GuildUpdate::convert(pPacket);
+
+	String url;
+	String channel;
+	switch (payload->mAction) {
+	case GuildUpdateAction::URL:
+		// Check: String sanity.
+		url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
+		mZone->onGuildSetURL(mCharacter, url);
+		break;
+	case GuildUpdateAction::Channel:
+		// Check: String sanity.
+		channel = Utility::safeString(payload->mText, Limits::Guild::MAX_CHANNEL_LENGTH);
+		mZone->onGuildSetChannel(mCharacter, channel);
+		break;
+	default:
+		// TODO: Log.
+		break;
 	}
 }
 
 void ZoneConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
+	using namespace Payload::Guild;
+	if (!pPacket) return;
+
 	// TODO: Put an upper-limit check on packet size.
-	EXPECTED(pPacket->size >= sizeof(Payload::Guild::PublicNote));
+	EXPECTED(pPacket->size >= sizeof(PublicNote));
 
-	auto payload = reinterpret_cast<Payload::Guild::PublicNote*>(pPacket->pBuffer);
+	auto payload = reinterpret_cast<PublicNote*>(pPacket->pBuffer);
 
-	String senderName = Utility::safeString(payload->mSenderName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(senderName == mCharacter->getName()); // Check: Sanity
 	String targetName = Utility::safeString(payload->mTargetName, Limits::Character::MAX_NAME_LENGTH);
 	String note = Utility::safeString(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
 
-	// Changing the note of someone else, check permission.
-	if (targetName != senderName)
-		EXPECTED(mGuildManager->isLeader(mCharacter) || mGuildManager->isOfficer(mCharacter));
-
-	mGuildManager->handleSetPublicNote(mCharacter, targetName, note);
+	// Notify Zone.
+	mZone->onGuildSetPublicNote(mCharacter, targetName, note);
 }
 
 void ZoneConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GuildStatus_Struct));
+	using namespace Payload::Guild;
+	if (!pPacket) return;
 
-	auto payload = reinterpret_cast<GuildStatus_Struct*>(pPacket->pBuffer);
+	// Check: Payload size.
+	EXPECTED(StatusRequest::sizeCheck(pPacket));
 
-	String targetName = Utility::safeString(payload->Name, Limits::Character::MAX_NAME_LENGTH);
+	auto payload = StatusRequest::convert(pPacket);
+
+	// Check: String sanity.
+	String targetName = Utility::safeString(payload->mName, Limits::Character::MAX_NAME_LENGTH);
 	
-	// NOTE: UF does not prevent the player from sending smaller than possible names.
-	if (Limits::Character::nameLength(targetName) == false)
-		return;
-	
-	mGuildManager->handleStatusRequest(mCharacter, targetName);
+	// Notify Zone.
+	mZone->onGuildStatusRequest(mCharacter, targetName);
 }
 
 void ZoneConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(Demote::sizeCheck(pPacket->size));
+	if (!pPacket) return;
+
+	// Check: Payload size.
+	EXPECTED(Demote::sizeCheck(pPacket));
 
 	auto payload = Demote::convert(pPacket->pBuffer);
 
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(characterName));
-	EXPECTED(characterName == mCharacter->getName()); // Check: Sanity
-	String demoteName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(demoteName));
+	// Check: String sanity.
+	String demoteeName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
 
-	// Check: Permission (Only guild leader can demote others).
-	if (characterName != demoteName)
-		EXPECTED(mGuildManager->isLeader(mCharacter));
+	// Check: String length.
+	EXPECTED(Limits::Character::nameLength(demoteeName));
 
-	// Check: Leader can not self-demote.
-	if (characterName == demoteName)
-		EXPECTED(mGuildManager->isLeader(mCharacter) == false);
-
-	mGuildManager->handleDemote(mCharacter, demoteName);
+	// Notify Zone.
+	mZone->onGuildDemote(mCharacter, demoteeName);
 }
 
-void ZoneConnection::_handleGuildBanker(const EQApplicationPacket* pPacket) {
+void ZoneConnection::_handleGuildSetFlags(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(BankerAltStatus::sizeCheck(pPacket->size));
+	if (!pPacket) return;
 
-	auto payload = BankerAltStatus::convert(pPacket->pBuffer);
+	// Check: Payload size.
+	EXPECTED(FlagsUpdate::sizeCheck(pPacket));
+
+	auto payload = FlagsUpdate::convert(pPacket);
 
 	// NOTE: UF does not send BankerAltStatus::mCharacterName like other packets. /shrug
 	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
 	EXPECTED(Limits::Character::nameLength(otherName));
 
-	bool banker = (payload->mStatus & 0x01) > 1;
-	bool alt = (payload->mStatus & 0x02) > 1;
+	bool isBanker = (payload->mStatus & 0x01) > 1;
+	bool isAlt = (payload->mStatus & 0x02) > 1;
 
-	mGuildManager->handleSetBanker(mCharacter, otherName, banker);
-	mGuildManager->handleSetAlt(mCharacter, otherName, alt);
+	// Notify Zone.
+	mZone->onGuildSetFlags(mCharacter, otherName, isBanker, isAlt);
 }
 
 void ZoneConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->hasGuild());
-	EXPECTED(mGuildManager->isLeader(mCharacter));
-	EXPECTED(MakeLeader::sizeCheck(pPacket->size));
 
-	auto payload = MakeLeader::convert(pPacket->pBuffer);
+	// Check: Payload size.
+	EXPECTED(MakeLeader::sizeCheck(pPacket));
 
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(characterName));
-	EXPECTED(mCharacter->getName() == characterName); // Check: Sanity.
+	auto payload = MakeLeader::convert(pPacket);
+
+	// Check: String sanity.
 	String leaderName = Utility::safeString(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+
+	// Check: String length.
 	EXPECTED(Limits::Character::nameLength(leaderName));
 
-	mGuildManager->handleMakeLeader(mCharacter, leaderName);
+	// Notify Zone.
+	mZone->onGuildMakeLeader(mCharacter, leaderName);
 }
 
 void ZoneConnection::_unimplementedFeature(String pOpCodeName)

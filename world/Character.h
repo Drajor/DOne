@@ -110,9 +110,9 @@ public:
 
 	// Guild
 	inline bool hasGuild() const { return mGuild != nullptr; }
-	inline Guild* getGuild() { return mGuild; }
+	inline Guild* getGuild() const { return mGuild; }
 	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
-	inline void setGuild(Guild* pGuild, GuildID pGuildID, GuildRank pGuildRank, const String pGuildName) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); mGuildName = pGuildName; }
+	inline void setGuild(Guild* pGuild, const u32 pGuildID, const u8 pGuildRank, const String pGuildName) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); mGuildName = pGuildName; }
 	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None, ""); }
 	const String& getGuildName() const { return mGuildName; }
 
@@ -121,7 +121,7 @@ public:
 	GuildID getPendingGuildInviteID() { return mPendingGuildInviteID; }
 	void setPendingGuildInviteID(GuildID pGuildID) { mPendingGuildInviteID = pGuildID; }
 	String getPendingGuildInviteName() { return mPendingGuildInviteName; }
-	void setPendingGuildInviteName(String pName) { mPendingGuildInviteName = pName; }
+	void setPendingGuildInviteName(const String& pName) { mPendingGuildInviteName = pName; }
 	void clearPendingGuildInvite() { mPendingGuildInviteID = NO_GUILD; mPendingGuildInviteName = ""; }
 
 	// Raid

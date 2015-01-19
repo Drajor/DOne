@@ -425,53 +425,53 @@ public:
 	}
 };
 
-/*****************************************************************************************************************************/
-// Allows for cross zone and offline guild promotion.
-class GuildPromoteCommand : public Command {
-public:
-	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #guildpromote <name>");
-	};
+///*****************************************************************************************************************************/
+//// Allows for cross zone and offline guild promotion.
+//class GuildPromoteCommand : public Command {
+//public:
+//	GuildPromoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+//		mHelpMessages.push_back("Usage: #guildpromote <name>");
+//	};
+//
+//	const bool handleCommand(CommandParameters pParameters) {
+//		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
+//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
+//				ServiceLocator::getGuildManager()->onPromote(mInvoker, pParameters[0]);
+//			}
+//			else {
+//				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
+//			}
+//
+//			return true;
+//		}
+//
+//		return false;
+//	}
+//};
 
-	const bool handleCommand(CommandParameters pParameters) {
-		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
-			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
-				ServiceLocator::getGuildManager()->handlePromote(mInvoker, pParameters[0]);
-			}
-			else {
-				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-};
-
-/*****************************************************************************************************************************/
-// Allows for cross zone and offline guild demotion.
-class GuildDemoteCommand : public Command {
-public:
-	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #guilddemote <name>");
-	};
-
-	const bool handleCommand(CommandParameters pParameters) {
-		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
-			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
-				ServiceLocator::getGuildManager()->handleDemote(mInvoker, pParameters[0]);
-			}
-			else {
-				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-};
+///*****************************************************************************************************************************/
+//// Allows for cross zone and offline guild demotion.
+//class GuildDemoteCommand : public Command {
+//public:
+//	GuildDemoteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+//		mHelpMessages.push_back("Usage: #guilddemote <name>");
+//	};
+//
+//	const bool handleCommand(CommandParameters pParameters) {
+//		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
+//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
+//				ServiceLocator::getGuildManager()->onDemote(mInvoker, pParameters[0]);
+//			}
+//			else {
+//				mInvoker->message(MessageType::Yellow, "No guild or not guild leader.");
+//			}
+//
+//			return true;
+//		}
+//
+//		return false;
+//	}
+//};
 
 class WearChangeCommand : public Command {
 public:
@@ -1712,8 +1712,8 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 
 	mCommands.push_back(new GuildSearchCommand(100, { "guildsearch", "gs", "findguild", "fg" }));
 	mCommands.push_back(new GuildInformationCommand(100, { "ginfo" }));
-	mCommands.push_back(new GuildPromoteCommand(0, {"guildpromote", "gpromote"}));
-	mCommands.push_back(new GuildDemoteCommand(0, { "guilddemote", "gdemote" }));
+	//mCommands.push_back(new GuildPromoteCommand(0, {"guildpromote", "gpromote"}));
+	//mCommands.push_back(new GuildDemoteCommand(0, { "guilddemote", "gdemote" }));
 
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));

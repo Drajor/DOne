@@ -2049,10 +2049,10 @@ const bool XMLDataStore::readGuildMember(TiXmlElement* pElement, Data::GuildMemb
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Rank, pMember->mRank));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Level, pMember->mLevel));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Banker, pMember->mBanker));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TributeEnabled, pMember->mTributeEnabled));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Alt, pMember->mAlt));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Class, pMember->mClass));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TimeLastOn, pMember->mTimeLastOn));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TributeEnabled, pMember->mTributeEnabled));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TotalTribute, pMember->mTotalTribute));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::LastTribute, pMember->mLastTribute));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::PublicNote, pMember->mPublicNote));
@@ -2135,6 +2135,7 @@ const bool XMLDataStore::writeGuildMember(TiXmlElement* pElement, Data::GuildMem
 	pElement->SetAttribute(Attribute::Member::Rank, std::to_string(pMember->mRank).c_str());
 	pElement->SetAttribute(Attribute::Member::Level, std::to_string(pMember->mLevel).c_str());
 	pElement->SetAttribute(Attribute::Member::Banker, std::to_string(pMember->mBanker).c_str());
+	pElement->SetAttribute(Attribute::Member::TributeEnabled, std::to_string(pMember->mTributeEnabled).c_str());
 	pElement->SetAttribute(Attribute::Member::Alt, std::to_string(pMember->mAlt).c_str());
 	pElement->SetAttribute(Attribute::Member::Class, std::to_string(pMember->mClass).c_str());
 	pElement->SetAttribute(Attribute::Member::TimeLastOn, std::to_string(pMember->mTimeLastOn).c_str());

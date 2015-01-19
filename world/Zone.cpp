@@ -6,6 +6,7 @@
 #include "ZoneManager.h"
 #include "GroupManager.h"
 #include "GuildManager.h"
+#include "Guild.h"
 #include "RaidManager.h"
 #include "Character.h"
 #include "NPC.h"
@@ -428,7 +429,7 @@ void Zone::handleChannelMessage(Character* pCharacter, const u32 pChannelID, con
 	switch (pChannelID) {
 	case ChannelID::Guild:
 		EXPECTED(pCharacter->hasGuild());
-		mGuildManager->handleMessage(pCharacter, pMessage);
+		mGuildManager->onMessage(pCharacter, pMessage);
 		break;
 	case ChannelID::Group:
 		EXPECTED(pCharacter->hasGroup());
@@ -721,8 +722,8 @@ void Zone::onGuildsChanged() {
 	delete packet;
 }
 
-void Zone::notifyCharacterGuildChange(Character* pCharacter) {
-	EXPECTED(pCharacter);
+void Zone::onChangeGuild(Character* pCharacter) {
+	if (!pCharacter) return;
 
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildID, pCharacter->getGuildID(), true);
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildRank, pCharacter->getGuildRank(), true);
@@ -2222,4 +2223,222 @@ void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
 		pCharacter->getInventory()->pushCursor(i);
 		connection->sendItemSummon(i);
 	}
+}
+
+const bool Zone::onGuildCreate(Character* pCharacter, const String& pGuildName) {
+	if (!pCharacter) return false;
+
+	const bool success = mGuildManager->onCreate(pCharacter, pGuildName);
+
+	// Handle: Failure.
+	if (!success) {
+
+		// Check: Guild name already used.
+		if (mGuildManager->exists(pGuildName)) {
+			pCharacter->getConnection()->sendSimpleMessage(MessageType::Red, StringID::GUILD_NAME_IN_USE);
+			return true;
+		}
+
+		// TODO: Log
+		return false;
+	}
+
+	// Notify ZoneManager.
+	mZoneManager->onCreateGuild();
+
+	// Update Zone.
+	onChangeGuild(pCharacter);
+
+	return true;
+}
+
+const bool Zone::onGuildDelete(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	const bool success = mGuildManager->onDelete(pCharacter);
+
+	return true;
+}
+
+const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) {
+	if (!pInviter) return false;
+	
+	// Try to find Character to invite.
+	auto character = mZoneManager->findCharacter(pInviteeName, false, nullptr);
+
+	// Handle: Character not found, either offline, zoning or does not exist.
+	if (!character) {
+		pInviter->message(MessageType::Yellow, pInviteeName + " could not be found.");
+		return true;
+	}
+
+	const bool success = mGuildManager->onInvite(pInviter, character);
+
+	// Handle: Failure.
+	if (!success) {
+
+		// Handle: Character was found but is already in another guild.
+		if (character->hasGuild()) {
+			pInviter->message(MessageType::Yellow, pInviteeName + " already has a guild.");
+			return true;
+		}
+		// Handle: Character has a pending guild invite.
+		else if (character->hasPendingGuildInvite()) {
+			pInviter->message(MessageType::Yellow, pInviteeName + " is considering joining another guild.");
+			return true;
+		}
+
+		// TODO: Log
+		return false;
+	}
+
+	// Record invitation.
+	character->setPendingGuildInviteID(pInviter->getGuildID());
+	character->setPendingGuildInviteName(pInviter->getName());
+
+	// Notify invitee.
+	character->getConnection()->sendGuildInvite(pInviter->getName(), pInviter->getGuild()->getID());
+	return true;
+}
+
+const bool Zone::onGuildInviteAccept(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	const bool success = mGuildManager->onInviteAccept(pCharacter);
+
+	if (!success) {
+		// TODO: Log
+		return true;
+	}
+	
+	// Let the inviter know the invite was accepted.
+	auto inviter = mZoneManager->findCharacter(pCharacter->getPendingGuildInviteName());
+	if (inviter)
+		inviter->message(MessageType::Yellow, pCharacter->getName() + " has accepted your invitation to join the guild.");
+
+	pCharacter->clearPendingGuildInvite();
+
+	// Update Zone.
+	onChangeGuild(pCharacter);
+
+	return true;
+}
+
+const bool Zone::onGuildInviteDecline(Character* pCharacter) {
+	if (!pCharacter) return false;
+	if (!pCharacter->hasPendingGuildInvite()) return false;
+
+	// Let the inviter know the invite was accepted.
+	auto inviter = mZoneManager->findCharacter(pCharacter->getPendingGuildInviteName());
+	if (inviter)
+		inviter->message(MessageType::Yellow, pCharacter->getName() + " has declined your invitation to join the guild.");
+
+	pCharacter->clearPendingGuildInvite();
+	return true;
+}
+
+const bool Zone::onGuildRemove(Character* pRemover, const String& pRemoveeName) {
+	if (!pRemover) return false;
+
+	// Try to find Character to remove.
+	auto character = mZoneManager->findCharacter(pRemoveeName, false, nullptr);
+
+	//// Handle: Character not found, either offline, zoning or does not exist.
+	//if (!character) {
+	//	pRemover->message(MessageType::Yellow, pRemoveeName + " could not be found.");
+	//	return true;
+	//}
+
+	if (pRemover->getName() == pRemoveeName) {
+		mGuildManager->onLeave(pRemover);
+	}
+
+	const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
+
+	return true;
+}
+
+const bool Zone::onGuildLeave(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	const bool success = mGuildManager->onLeave(pCharacter);
+	return true;
+}
+
+const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeName) {
+	if (!pPromoter) return false;
+
+	// Check: Character has a valid target.
+	if (!pPromoter->hasTarget()) return false;
+	if (!pPromoter->targetIsCharacter()) return false;
+
+	auto promotee = Actor::cast<Character*>(pPromoter->getTarget());
+
+	const auto success = mGuildManager->onPromote(pPromoter, promotee);
+
+	// Handle: Failure.
+	if (!success) {
+		// TODO: Log
+		return false;
+	}
+
+	return true;
+}
+
+const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) {
+	return true;
+}
+
+const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
+	if (pCharacter) return false;
+
+	const bool success = mGuildManager->onSetMOTD(pCharacter, pMOTD);
+	return true;
+}
+
+const bool Zone::onGuildGetMOTD(Character* pCharacter) {
+	if (pCharacter) return false;
+
+	const bool success = mGuildManager->onGetMOTD(pCharacter);
+	return true;
+}
+
+const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	if (pCharacter) return false;
+
+	const bool success = mGuildManager->onMakeLeader(pCharacter, pLeaderName);
+	return true;
+}
+
+const bool Zone::onGuildSetURL(Character* pSetter, const String& pURL) {
+	if (pSetter) return false;
+
+	const bool success = mGuildManager->onSetURL(pSetter, pURL);
+	return true;
+}
+
+const bool Zone::onGuildSetChannel(Character* pSetter, const String& pChannel) {
+	if (pSetter) return false;
+
+	const bool success = mGuildManager->onSetChannel(pSetter, pChannel);
+	return true;
+}
+
+const bool Zone::onGuildStatusRequest(Character* pCharacter, const String& pCharacterName) {
+	// TODO
+	return true;
+}
+
+const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterName, const bool pBanker, const bool pAlt) {
+	if (!pSetter) return false;
+
+	const bool success = mGuildManager->onSetFlags(pSetter, pCharacterName, pBanker, pAlt);
+	return true;
+}
+
+const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote) {
+	if (!pSetter) return false;
+
+	const bool success = mGuildManager->onSetPublicNote(pSetter, pCharacterName, pPublicNote);
+	return true;
 }

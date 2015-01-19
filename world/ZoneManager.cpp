@@ -270,3 +270,13 @@ void ZoneManager::onLeaveWorld(Character* pCharacter) {
 	// Notify World.
 	mWorld->onLeaveWorld(pCharacter);
 }
+
+void ZoneManager::onCreateGuild() {
+	for (auto i : mZones)
+		i->onGuildsChanged();
+}
+
+void ZoneManager::onDeleteGuild() {
+	for (auto i : mZones)
+		i->onGuildsChanged();
+}

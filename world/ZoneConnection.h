@@ -15,7 +15,7 @@ class IDataStore;
 class ILog;
 class Guild;
 class Item;
-struct GuildMember;
+class GuildMember;
 
 class ZoneManager;
 class GroupManager;
@@ -115,7 +115,7 @@ public:
 	void sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
 	void sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess);
 
-	void sendGuildRank();
+	void sendGuildRank(const u32 pRank);
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName);
@@ -240,27 +240,34 @@ private:
 	void _handleEmote(const EQApplicationPacket* pPacket);
 	void _handleAnimation(const EQApplicationPacket* pPacket);
 	void _handleWhoRequest(const EQApplicationPacket* pPacket);
+
+	// Group Packets.
 	void _handleGroupInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupFollow(const EQApplicationPacket* pPacket);
 	void _handleGroupCanelInvite(const EQApplicationPacket* pPacket);
 	void _handleGroupDisband(const EQApplicationPacket* pPacket);
 	void _handleGroupMakeLeader(const EQApplicationPacket* pPacket);
-	void _handleZoneChange(const EQApplicationPacket* pPacket);
-	void _handleFaceChange(const EQApplicationPacket* pPacket);
 
+
+	// Raid Packets.
+
+	// Guild Packets.
 	void _handleGuildCreate(const EQApplicationPacket* pPacket);
 	void _handleGuildDelete(const EQApplicationPacket* pPacket);
 	void _handleGuildInvite(const EQApplicationPacket* pPacket);
-	void _handleGuildInviteAccept(const EQApplicationPacket* pPacket);
+	void _handleGuildInviteResponse(const EQApplicationPacket* pPacket);
 	void _handleGuildRemove(const EQApplicationPacket* pPacket);
-	void _handleSetGuildMOTD(const EQApplicationPacket* pPacket);
-	void _handleGetGuildMOTD(const EQApplicationPacket* pPacket);
+	void _handleGuildSetMOTD(const EQApplicationPacket* pPacket);
+	void _handleGuildGetMOTD(const EQApplicationPacket* pPacket);
 	void _handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
 	void _handleSetGuildPublicNote(const EQApplicationPacket* pPacket);
 	void _handleGetGuildStatus(const EQApplicationPacket* pPacket);
 	void _handleGuildDemote(const EQApplicationPacket* pPacket);
-	void _handleGuildBanker(const EQApplicationPacket* pPacket);
+	void _handleGuildSetFlags(const EQApplicationPacket* pPacket);
 	void _handleGuildMakeLeader(const EQApplicationPacket* pPacket);
+
+	void _handleZoneChange(const EQApplicationPacket* pPacket);
+	void _handleFaceChange(const EQApplicationPacket* pPacket);
 
 	void _handleAutoAttack(const EQApplicationPacket* pPacket);
 

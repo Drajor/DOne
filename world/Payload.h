@@ -5,11 +5,6 @@
 #include "Vector3.h"
 #include "../common/EQPacket.h"
 
-enum GuildUpdateAction : u32 {
-	GUILD_URL = 0,
-	GUILD_CHANNEL = 1
-};
-
 #pragma pack(1)
 
 namespace Payload {
@@ -1768,7 +1763,68 @@ namespace Payload {
 
 	namespace Guild {
 
+		// C->S
+		struct Create : public Fixed<Create> {
+			Create() { memset(mName, 0, sizeof(mName)); }
+			char mName[64];
+		};
+
+		// C->S
+		namespace InviteResponseType {
+			enum : u32 { Accept = 0, Decline = 5, };
+		}
+		struct InviteResponse : public Fixed<InviteResponse> {
+			InviteResponse() {
+				//memset()
+			}
+			char inviter[64];
+			char newmember[64];
+			u32 mResponse = 0;
+			u32 mGuildID = 0;
+		};
+
+		// S->C
+		struct RankUpdate : public FixedT<RankUpdate, OP_SetGuildRank> {
+			RankUpdate() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
+			static EQApplicationPacket* construct(const u32 pRank, const String& pCharacterName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mRank = pRank;
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+
+				return packet;
+			}
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32 mRank = 0;
+			char mCharacterName[64];
+			u32 mBanker = 0;
+		};
+
+		namespace CommandAction {
+			enum : u32 { Invite = 0, Promote = 1, };
+		}
+		struct Command {
+			Command() {
+				memset(mToCharacter, 0, sizeof(mToCharacter));
+				memset(mFromCharacter, 0, sizeof(mFromCharacter));
+			}
+			char mToCharacter[64];
+			char mFromCharacter[64];
+			u16 mGuildID = 0;
+			u8 unknown[2]; // for guildinvite all 0's, for remove 0=0x56, 2=0x02
+			u32 mAction = 0;
+		};
+
+		typedef FixedT<Command, OP_GuildInvite> Invite;
+		typedef Fixed<Command> Remove;
+
+		// C->S
 		struct MakeLeader : public Fixed<MakeLeader> {
+			MakeLeader() {
+				memset(mCharacterName, 0, sizeof(mCharacterName));
+				memset(mLeaderName, 0, sizeof(mLeaderName));
+			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			char mLeaderName[Limits::Character::MAX_NAME_LENGTH];
 		};
@@ -1778,8 +1834,8 @@ namespace Payload {
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
 		};
 
-		// Used for changing both banker and alt status of a guild member.
-		struct BankerAltStatus : public Fixed<BankerAltStatus> {
+		// C->S
+		struct FlagsUpdate : public Fixed<FlagsUpdate> {
 			u32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
 			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
@@ -1787,28 +1843,83 @@ namespace Payload {
 		};
 
 		// S->C
-		struct Remove : public Fixed<Remove> {
-			GuildID mGuildID;
-			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-		};
-		
-		struct LevelUpdate {
-			GuildID mGuildID; // why?!
-			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
-			u32 mLevel;
+		// THIS DOES NOT WORK.
+		struct MemberJoin : public FixedT<MemberJoin, OP_GuildManageAdd> {
+			MemberJoin() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
+			static EQApplicationPacket* construct(const u32 pGuildID, const String& pCharacterName, const u32 pLevel, const u32 pClass, const u32 pZoneID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				payload->mGuildID = pGuildID;
+				payload->mLevel = pLevel;
+				payload->mClass = pClass;
+				payload->mZoneID = pZoneID;
+
+				return packet;
+			}
+			u32 mGuildID = 0;
+			u32 mUnknown0 = 1;
+			u32 mLevel = 0;
+			u32 mClass = 0;
+			u32 mRank = 0;
+			u32 mZoneID = 0; // Probably instance in there too.
+			u32 mUnknown1 = 0;
+			char mCharacterName[64];
 		};
 
-		struct MOTD {
-			u32 mUnknown0;
+		// S->C
+		//struct Remove : public FixedT<Remove, OP_GuildManageRemove> {
+		//	u32 mGuildID;
+		//	char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+		//};
+		
+		struct LevelUpdate {
+			u32 mGuildID = 0;
+			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
+			u32 mLevel = 0;
+		};
+
+		// S<->C
+		struct MOTD : public FixedT<MOTD, OP_GuildMOTD> {
+			MOTD() {
+				memset(mCharacterName, 0, sizeof(mCharacterName));
+				memset(mSetByName, 0, sizeof(mSetByName));
+				memset(mMOTD, 0, sizeof(mMOTD));
+			}
+			static EQApplicationPacket* construct(const String& pSetByName, const String& pMOTD) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mSetByName, pSetByName.c_str());
+				strcpy(payload->mMOTD, pMOTD.c_str());
+
+				return packet;
+			}
+			u32 mUnknown0 = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Receiver name.. why.
 			char mSetByName[Limits::Character::MAX_NAME_LENGTH];
-			u32 mUnknown1;
+			u32 mUnknown1 = 0;
 			char mMOTD[Limits::Guild::MAX_MOTD_LENGTH];
 		};
 
-		struct GuildUpdate {
-			enum Action : u32 { GUILD_URL = 0, GUILD_CHANNEL = 1 };
-			Action mAction;
+		// S<->C
+		namespace GuildUpdateAction {
+			enum : u32 { URL = 0, Channel = 1, };
+		}
+		struct GuildUpdate : public FixedT<GuildUpdate, OP_GuildUpdateURLAndChannel> {
+			GuildUpdate() {
+				memset(mUnknown0, 0, sizeof(mUnknown0));
+				memset(mText, 0, sizeof(mText));
+				memset(mUnknown1, 0, sizeof(mUnknown1));
+			}
+			static EQApplicationPacket* construct(const u32 pAction, const String& pText) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mAction = pAction;
+				strcpy(payload->mText, pText.c_str());
+
+				return packet;
+			}
+			u32 mAction = 0;
 			char mUnknown0[76];
 			char mText[512];
 			char mUnknown1[3584];
@@ -1821,12 +1932,35 @@ namespace Payload {
 			char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
 		};
 
-		struct MemberUpdate {
-			GuildID mGuildID;
-			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
+		// S->C
+		struct MemberUpdate : public FixedT<MemberUpdate, OP_GuildMemberUpdate> {
+			MemberUpdate() { memset(mMemberName, 0, sizeof(mMemberName)); }
+			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pZoneID, const u16 pInstanceID, const u32 pLastSeen) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mGuildID = pGuildID;
+				strcpy(payload->mMemberName, pMemberName.c_str());
+				payload->mZoneID = pZoneID;
+				payload->mInstanceID = pInstanceID;
+				payload->mLastSeen = pLastSeen;
+
+				return packet;
+			}
+			u32 mGuildID = 0;
+			char mMemberName[64];
 			u32 mZoneID;
 			u16 mInstanceID;
 			u32 mLastSeen;
+		};
+
+		// C->S
+		struct StatusRequest : public Fixed<StatusRequest> {
+			StatusRequest() {
+				memset(mName, 0, sizeof(mName));
+				memset(mUnknown, 0, sizeof(mUnknown));
+			}
+			char mName[64];
+			uint8 mUnknown[72];
 		};
 	}
 
