@@ -69,7 +69,7 @@ void Character::update() {
 
 	if (mAutoSave.Check()) {
 		_updateForSave();
-		mZone->requestSave(this);
+		mZone->saveCharacter(this);
 	}
 
 	if (mAutoAttacking) {

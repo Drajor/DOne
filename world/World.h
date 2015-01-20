@@ -34,6 +34,7 @@ public:
 
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, CharacterFactory* pCharacterFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	void update();
+	const bool saveCharacter(Character* pCharacter);
 
 	inline const i32 getStatus() const { return mStatus; }
 	inline const i32 numPlayers() const { return mPlayers; }

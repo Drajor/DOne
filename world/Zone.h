@@ -207,7 +207,7 @@ public:
 	bool trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage);
 	void processCharacterQueuedTells(Character* );
 	void getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter);
-	void requestSave(Character* pCharacter);
+	void saveCharacter(Character* pCharacter);
 
 	
 	void handleVisibilityAdd(Character* pCharacter, Actor* pAddActor);

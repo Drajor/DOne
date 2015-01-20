@@ -1,5 +1,4 @@
 #include "Transmutation.h"
-#include "ServiceLocator.h"
 #include "IDataStore.h"
 #include "Data.h"
 #include "Utility.h"
@@ -7,24 +6,33 @@
 #include "ItemFactory.h"
 #include "Random.h"
 
-const bool Transmutation::initialise() {
-	EXPECTED_BOOL(mInitialised == false);
+const bool Transmutation::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
+	if (!pItemFactory) return false;
 
-	mDataStore = ServiceLocator::getDataStore();
-	EXPECTED_BOOL(mDataStore);
-	mItemFactory = ServiceLocator::getItemFactory();
-	EXPECTED_BOOL(mItemFactory);
+	mDataStore = pDataStore;
+	mItemFactory = pItemFactory;
+	mLog = pLogFactory->make();
 
-	Log::status("[Transmutation] Initialising.");
-	EXPECTED_BOOL(mDataStore->loadTransmutationComponents(mComponents));
-	Log::info("[Transmutation] Loaded data for " + std::to_string(mComponents.size()) + " Components.");
+	mLog->setContext("[Transmutation]");
+	mLog->status("Initialising.");
 
+	// Load data.
+	if (!mDataStore->loadTransmutationComponents(mComponents)) {
+		mLog->error("Failed to load data.");
+		return false;
+	}
+	mLog->info("Loaded data for " + toString(mComponents.size()) + " Components.");
+
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
 Item* Transmutation::transmute(std::list<Item*> pItems) {
-	EXPECTED_PTR(pItems.empty() == false);
+	if (pItems.empty()) return nullptr;
 
 	std::list<TransmutationComponent*> components;
 	for (auto i : pItems) {
@@ -72,7 +80,7 @@ TransmutationComponent* Transmutation::_get(const uint32 pItemID) const {
 	return nullptr;
 }
 
-const int32 Transmutation::_roll(Item* pItem, TransmutationComponent* pComponent) {
+const i32 Transmutation::_roll(Item* pItem, TransmutationComponent* pComponent) {
 	int32 roll = Random::make(pComponent->mMinimum, pComponent->mMaximum);
 	pItem->setMaxPower(pItem->getMaxPower() + pComponent->mMaximum);
 	pItem->setPower(pItem->getPower() + roll);

@@ -68,7 +68,6 @@ int main(int argc, char** argv)  {
 	ILogFactory* logFactory = new DefaultLogFactory();
 
 	IDataStore* dataStore = new XMLDataStore();
-	ServiceLocator::setDataStore(dataStore);
 	EXPECTED_MAIN(dataStore->loadSettings());
 	EXPECTED_MAIN(dataStore->initialise());
 

@@ -309,7 +309,7 @@ void Zone::onCampComplete(Character* pCharacter) {
 
 	// Save
 	pCharacter->_updateForSave();
-	requestSave(pCharacter);
+	saveCharacter(pCharacter);
 
 	// Clean up.
 	mScene->remove(pCharacter);
@@ -364,7 +364,7 @@ void Zone::onLinkdeadEnd(Character* pCharacter) {
 	
 	// Save
 	pCharacter->_updateForSave();
-	requestSave(pCharacter);
+	saveCharacter(pCharacter);
 
 	// Clean up.
 	mScene->remove(pCharacter);
@@ -614,15 +614,12 @@ void Zone::_sendActorLevel(Actor* pActor) {
 	_sendSpawnAppearance(pActor, SpawnAppearanceTypeID::WhoLevel, pActor->getLevel());
 }
 
-void Zone::requestSave(Character*pCharacter) {
-	if (!ServiceLocator::getDataStore()->saveCharacter(pCharacter->getName(), pCharacter->getData())) {
-		pCharacter->getConnection()->sendMessage(MessageType::Red, "[ERROR] There was an error saving your character. I suggest you log out.");
-		Log::error("[Zone] Failed to save character");
-		return;
-	}
+void Zone::saveCharacter(Character*pCharacter) {
+	if (!pCharacter) return;
 
-	// Update the Account
-	ServiceLocator::getAccountManager()->updateCharacter(pCharacter->getAccount(), pCharacter);
+	if (!mZoneManager->saveCharacter(pCharacter)) {
+		mLog->error("Failed to save Character: " + pCharacter->getName());
+	}
 }
 
 void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilter) {

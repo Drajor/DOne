@@ -65,3 +65,10 @@ TEST_F(CharacterFactoryTest, DoubleInitialise) {
 TEST_F(CharacterFactoryTest, InitialiseFalseDataStore) {
 	//EXPECT_FALSE(mCharacterFactory->initialise(mFalseDataStore, mLogFactory, mItemFactory));
 }
+
+TEST_F(CharacterFactoryTest, makeNullAccount) {
+	// Pass:
+	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory));
+
+	EXPECT_FALSE(mCharacterFactory->make("", nullptr));
+}

@@ -23,6 +23,7 @@
 #include "Test_ItemFactory.h"
 #include "Test_ItemGenerator.h"
 #include "Test_CharacterFactory.h"
+#include "Test_Transmutation.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());

@@ -280,3 +280,9 @@ void ZoneManager::onDeleteGuild() {
 	for (auto i : mZones)
 		i->onGuildsChanged();
 }
+
+const bool ZoneManager::saveCharacter(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	return mWorld->saveCharacter(pCharacter);
+}

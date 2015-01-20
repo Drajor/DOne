@@ -37,6 +37,7 @@ public:
 
 	const bool initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
 	void update();
+	const bool saveCharacter(Character* pCharacter);
 
 	// Guild Events.
 	void onCreateGuild();

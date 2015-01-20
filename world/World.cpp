@@ -123,6 +123,24 @@ void World::update() {
 	}
 }
 
+const bool World::saveCharacter(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	// Save Character.
+	if (!mDataStore->saveCharacter(pCharacter->getName(), pCharacter->getData())) {
+		mLog->error("Failed to save Character: " + pCharacter->getName());
+		return false;
+	}
+
+	// Update the Account
+	if (!mAccountManager->updateCharacter(pCharacter->getAccount(), pCharacter)){
+		mLog->error("Failed to update Account for Character: " + pCharacter->getName());
+		return false;
+	}
+
+	return true;
+}
+
 void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID) {
 	if (!pConnection) return;
 

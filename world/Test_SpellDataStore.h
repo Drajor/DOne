@@ -36,20 +36,20 @@ protected:
 
 TEST_F(SpellDataStoreTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_EQ(false, mSpellDataStore->initialise(nullptr, mLogFactory));
+	EXPECT_FALSE(mSpellDataStore->initialise(nullptr, mLogFactory));
 
 	// Fail: Null ILogFactory.
-	EXPECT_EQ(false, mSpellDataStore->initialise(mTrueDataStore, nullptr));
+	EXPECT_FALSE(mSpellDataStore->initialise(mTrueDataStore, nullptr));
 }
 
 TEST_F(SpellDataStoreTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mSpellDataStore->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_TRUE(mSpellDataStore->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mSpellDataStore->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_FALSE(mSpellDataStore->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(SpellDataStoreTest, InitialiseFalseDataStore) {
-	EXPECT_EQ(false, mSpellDataStore->initialise(mFalseDataStore, mLogFactory));
+	EXPECT_FALSE(mSpellDataStore->initialise(mFalseDataStore, mLogFactory));
 }

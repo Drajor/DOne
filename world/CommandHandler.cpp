@@ -2109,7 +2109,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	// Force save.
 	else if (pCommandName == "save") {
 		pCharacter->_updateForSave();
-		pCharacter->getZone()->requestSave(pCharacter);
+		pCharacter->getZone()->saveCharacter(pCharacter);
 	}
 	// Respawn
 	else if (pCommandName == "respawn") {
