@@ -2,24 +2,31 @@
 
 #include "Types.h"
 
-class IDataStore;
-class Zone;
-
 namespace Data {
 	struct Spell;
 }
 
+class ILog;
+class ILogFactory;
+class IDataStore;
+class Zone;
+
 class SpellDataStore {
 public:
 
-	const bool initialise(IDataStore* pDataStore);
+	~SpellDataStore();
+
+	// Initialises the SpellDataStore.
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 	const Data::Spell* getData(const u16 pSpellID);
 
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
-	Data::Spell* mSpellData = nullptr;
+
+	Data::Spell* mData = nullptr;
 };
 
 namespace Spell {

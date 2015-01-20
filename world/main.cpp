@@ -97,7 +97,7 @@ int main(int argc, char** argv)  {
 
 	ItemDataStore* itemDataStore = new ItemDataStore();
 	ServiceLocator::setItemDataStore(itemDataStore);
-	EXPECTED_MAIN(itemDataStore->initialise(dataStore));
+	EXPECTED_MAIN(itemDataStore->initialise(dataStore, logFactory));
 
 	ItemFactory* itemFactory = new ItemFactory();
 	ServiceLocator::setItemFactory(itemFactory);

@@ -36,20 +36,23 @@ protected:
 
 TEST_F(ShopDataStoreTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_EQ(false, mShopDataStore->initialise(nullptr, mLogFactory));
+	EXPECT_FALSE(mShopDataStore->initialise(nullptr, mLogFactory));
 
 	// Fail: Null ILogFactory.
-	EXPECT_EQ(false, mShopDataStore->initialise(mTrueDataStore, nullptr));
+	EXPECT_FALSE(mShopDataStore->initialise(mTrueDataStore, nullptr));
+
+	// Pass.
+	EXPECT_TRUE(mShopDataStore->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(ShopDataStoreTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mShopDataStore->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_TRUE(mShopDataStore->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mShopDataStore->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_FALSE(mShopDataStore->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(ShopDataStoreTest, InitialiseFalseDataStore) {
-	EXPECT_EQ(false, mShopDataStore->initialise(mFalseDataStore, mLogFactory));
+	EXPECT_FALSE(mShopDataStore->initialise(mFalseDataStore, mLogFactory));
 }

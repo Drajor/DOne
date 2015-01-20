@@ -61,7 +61,7 @@ const bool TestServer::initialise() {
 	if (!mAlternateCurrencyManager->initialise(mDataStore, mLogFactory)) return false;
 
 	mItemDataStore = new ItemDataStore();
-	if (!mItemDataStore->initialise(mDataStore)) return false;
+	if (!mItemDataStore->initialise(mDataStore, mLogFactory)) return false;
 
 	mItemFactory = new ItemFactory();
 	if (!mItemFactory->initialise(mItemDataStore)) return false;

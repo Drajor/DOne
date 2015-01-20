@@ -1,5 +1,4 @@
 #include "ItemDataStore.h"
-#include "ServiceLocator.h"
 #include "IDataStore.h"
 
 #include "Utility.h"
@@ -9,14 +8,31 @@ ItemDataStore::ItemDataStore() {
 	mItemData.resize(1000000);
 }
 
-const bool ItemDataStore::initialise(IDataStore* pDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
+ItemDataStore::~ItemDataStore() {
+	mDataStore = nullptr;
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+	
+	mItemData.clear();
+}
+
+const bool ItemDataStore::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
 
 	mDataStore = pDataStore;
+	mLog = pLogFactory->make();
+
+	mLog->setContext("[ItemDataStore]");
+	mLog->status("Initialising.");
 
 	_bootstrap();
 
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
