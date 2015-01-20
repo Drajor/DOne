@@ -1792,6 +1792,13 @@ namespace Payload {
 			uint32	unknown0140;
 			uint32	unknown0144;
 		};
+
+		struct MakeLeader : public Fixed<MakeLeader> {
+			uint32 Unknown000;
+			char CurrentLeader[64];
+			char NewLeader[64];
+			char Unknown072[324];
+		};
 	}
 
 	namespace Guild {

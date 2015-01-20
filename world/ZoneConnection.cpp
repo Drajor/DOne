@@ -36,7 +36,7 @@
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
 
-#define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); return false; }
+#define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 
 EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupJoinPacket = nullptr;
@@ -324,7 +324,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player presses 'Follow' on the group window.
 		// NOTE: This also occurs when the player uses the /invite command when they have a current group invitation.
 		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
-		handleGroupFollow(pPacket);
+		handleGroupAcceptInvite(pPacket);
 		break;
 	case OP_GroupFollow2:
 		Utility::print("[UNHANDLED OP_GroupFollow2]");
@@ -333,7 +333,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player presses 'Decline' on the group window.
 		// NOTE: This also occurs when the player uses the /disband command when they have a current group invitation.
 		// NOTE: This also occurs when using the 'Disband' mapped command (Options->Keys).
-		handleGroupCanelInvite(pPacket);
+		handleGroupDeclineInvite(pPacket);
 		break;
 	case OP_GroupDisband:
 		// NOTE: This occurs when the player presses 'Disband' on group window.
@@ -1942,7 +1942,7 @@ void ZoneConnection::sendGroupInvite(const String pFromCharacterName) {
 	delete packet;
 }
 
-const bool ZoneConnection::handleGroupFollow(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGroupAcceptInvite(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Group;
 	if(!pPacket) return false;
 	SIZE_CHECK(Follow::sizeCheck(pPacket));
@@ -1962,7 +1962,7 @@ const bool ZoneConnection::handleGroupFollow(const EQApplicationPacket* pPacket)
 	return true;
 }
 
-const bool ZoneConnection::handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGroupDeclineInvite(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Group;
 	if(!pPacket) return false;
 	SIZE_CHECK(DeclineInvite::sizeCheck(pPacket));
@@ -2113,10 +2113,11 @@ void ZoneConnection::sendGroupDisband() {
 }
 
 const bool ZoneConnection::handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Group;
 	if(!pPacket) return false;
-	if (pPacket->size != sizeof(GroupMakeLeader_Struct)) return false;
+	SIZE_CHECK(MakeLeader::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
+	auto payload = MakeLeader::convert(pPacket);
 
 	String currentLeader = Utility::safeString(payload->CurrentLeader, Limits::Character::MAX_NAME_LENGTH);
 	String newLeader = Utility::safeString(payload->NewLeader, Limits::Character::MAX_NAME_LENGTH);
@@ -2522,6 +2523,7 @@ const bool ZoneConnection::handleGuildSetFlags(const EQApplicationPacket* pPacke
 
 const bool ZoneConnection::handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
+	if (!pPacket) return false;
 	SIZE_CHECK(MakeLeader::sizeCheck(pPacket));
 
 	auto payload = MakeLeader::convert(pPacket);

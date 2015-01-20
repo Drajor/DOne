@@ -54,10 +54,6 @@ public:
 	inline Character* getCharacter() { return mCharacter; }
 	void update();
 	bool handlePacket(const EQApplicationPacket* pPacket);
-	const bool handleZoneEntry(const EQApplicationPacket* pPacket);
-	const bool handleRequestClientSpawn(const EQApplicationPacket* pPacket);
-	const bool handleClientReady(const EQApplicationPacket* pPacket);
-	const bool handleRequestNewZoneData(const EQApplicationPacket* pPacket);
 
 	void dropConnection();
 
@@ -202,6 +198,48 @@ public:
 	void sendPacket(const EQApplicationPacket* pPacket);
 
 	void sendZoneEntry();
+
+	const bool handleZoneEntry(const EQApplicationPacket* pPacket);
+	const bool handleRequestClientSpawn(const EQApplicationPacket* pPacket);
+	const bool handleClientReady(const EQApplicationPacket* pPacket);
+	const bool handleRequestNewZoneData(const EQApplicationPacket* pPacket);
+	const bool handleClientUpdate(const EQApplicationPacket* pPacket);
+	const bool handleSpawnAppearance(const EQApplicationPacket* pPacket);
+	const bool handleTarget(const EQApplicationPacket* pPacket);
+
+	// Group Packets.
+	const bool handleGroupInvite(const EQApplicationPacket* pPacket);
+	const bool handleGroupAcceptInvite(const EQApplicationPacket* pPacket);
+	const bool handleGroupDeclineInvite(const EQApplicationPacket* pPacket);
+	const bool handleGroupDisband(const EQApplicationPacket* pPacket);
+	const bool handleGroupMakeLeader(const EQApplicationPacket* pPacket);
+
+	// Guild Packets.
+	const bool handleGuildCreate(const EQApplicationPacket* pPacket);
+	const bool handleGuildDelete(const EQApplicationPacket* pPacket);
+	const bool handleGuildInvite(const EQApplicationPacket* pPacket);
+	const bool handleGuildInviteResponse(const EQApplicationPacket* pPacket);
+	const bool handleGuildRemove(const EQApplicationPacket* pPacket);
+	const bool handleGuildSetMOTD(const EQApplicationPacket* pPacket);
+	const bool handleGuildGetMOTD(const EQApplicationPacket* pPacket);
+	const bool handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
+	const bool handleSetGuildPublicNote(const EQApplicationPacket* pPacket); // TODO: I need to check whether this has a fixed length.
+	const bool handleGetGuildStatus(const EQApplicationPacket* pPacket);
+	const bool handleGuildDemote(const EQApplicationPacket* pPacket);
+	const bool handleGuildSetFlags(const EQApplicationPacket* pPacket);
+	const bool handleGuildMakeLeader(const EQApplicationPacket* pPacket);
+
+	// TEST LINE
+
+	const bool handleCamp(const EQApplicationPacket* pPacket);
+
+	// Variable Length.
+	const bool handleChannelMessage(const EQApplicationPacket* pPacket);
+
+	const bool handleLogOut(const EQApplicationPacket* pPacket);
+	const bool handleDeleteSpawn(const EQApplicationPacket* pPacket);
+
+	inline const bool hasSizeError() const { return mSizeError; }
 private:
 	const bool handleUnknown(const EQApplicationPacket* pPacket);
 	void _sendTimeOfDay();
@@ -225,46 +263,19 @@ private:
 	void _sendZoneServerReady();
 	void _sendExpZoneIn();
 	void _sendWorldObjectsSent();
-	const bool handleClientUpdate(const EQApplicationPacket* pPacket);
-	const bool handleSpawnAppearance(const EQApplicationPacket* pPacket);
-	const bool handleCamp(const EQApplicationPacket* pPacket);
-	const bool handleChannelMessage(const EQApplicationPacket* pPacket);
-	const bool handleLogOut(const EQApplicationPacket* pPacket);
-	const bool handleDeleteSpawn(const EQApplicationPacket* pPacket);
+
 
 	void _sendZoneData();
 	const bool handleSendAATable(const EQApplicationPacket* pPacket);
 	const bool handleUpdateAA(const EQApplicationPacket* pPacket);
-	const bool handleTarget(const EQApplicationPacket* pPacket);
+	
 	const bool handleTGB(const EQApplicationPacket* pPacket);
 	const bool handleEmote(const EQApplicationPacket* pPacket);
 	const bool handleAnimation(const EQApplicationPacket* pPacket);
 	const bool handleWhoRequest(const EQApplicationPacket* pPacket);
 
-	// Group Packets.
-	const bool handleGroupInvite(const EQApplicationPacket* pPacket);
-	const bool handleGroupFollow(const EQApplicationPacket* pPacket);
-	const bool handleGroupCanelInvite(const EQApplicationPacket* pPacket);
-	const bool handleGroupDisband(const EQApplicationPacket* pPacket);
-	const bool handleGroupMakeLeader(const EQApplicationPacket* pPacket);
-
 
 	// Raid Packets.
-
-	// Guild Packets.
-	const bool handleGuildCreate(const EQApplicationPacket* pPacket);
-	const bool handleGuildDelete(const EQApplicationPacket* pPacket);
-	const bool handleGuildInvite(const EQApplicationPacket* pPacket);
-	const bool handleGuildInviteResponse(const EQApplicationPacket* pPacket);
-	const bool handleGuildRemove(const EQApplicationPacket* pPacket);
-	const bool handleGuildSetMOTD(const EQApplicationPacket* pPacket);
-	const bool handleGuildGetMOTD(const EQApplicationPacket* pPacket);
-	const bool handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
-	const bool handleSetGuildPublicNote(const EQApplicationPacket* pPacket);
-	const bool handleGetGuildStatus(const EQApplicationPacket* pPacket);
-	const bool handleGuildDemote(const EQApplicationPacket* pPacket);
-	const bool handleGuildSetFlags(const EQApplicationPacket* pPacket);
-	const bool handleGuildMakeLeader(const EQApplicationPacket* pPacket);
 
 	const bool handleZoneChange(const EQApplicationPacket* pPacket);
 	const bool handleFaceChange(const EQApplicationPacket* pPacket);
@@ -364,4 +375,6 @@ private:
 	static EQApplicationPacket* mGroupDisbandPacket;
 	static EQApplicationPacket* mGroupLeaderChangePacket;
 	static EQApplicationPacket* mGroupUpdateMembersPacket;
+
+	bool mSizeError = false; // For unit testing.
 };
