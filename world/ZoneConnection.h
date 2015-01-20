@@ -53,9 +53,11 @@ public:
 	inline bool isConnectComplete() const { return mConnectingStatus == ZCStatus::Complete; }
 	inline Character* getCharacter() { return mCharacter; }
 	void update();
-	bool _handlePacket(const EQApplicationPacket* pPacket);
-	void _handleZoneEntry(const EQApplicationPacket* pPacket);
-	void _handleRequestClientSpawn(const EQApplicationPacket* pPacket);
+	bool handlePacket(const EQApplicationPacket* pPacket);
+	const bool _handleZoneEntry(const EQApplicationPacket* pPacket);
+	const bool _handleRequestClientSpawn(const EQApplicationPacket* pPacket);
+	const bool _handleClientReady(const EQApplicationPacket* pPacket);
+	const bool _handleRequestNewZoneData(const EQApplicationPacket* pPacket);
 
 	void dropConnection();
 
@@ -229,10 +231,8 @@ private:
 	void _handleChannelMessage(const EQApplicationPacket* pPacket);
 	void _handleLogOut(const EQApplicationPacket* pPacket);
 	void _handleDeleteSpawn(const EQApplicationPacket* pPacket);
-	void _handleRequestNewZoneData(const EQApplicationPacket* pPacket);
 
 	void _sendZoneData();
-	void _handleClientReady(const EQApplicationPacket* pPacket);
 	void _handleSendAATable(const EQApplicationPacket* pPacket);
 	void _handleUpdateAA(const EQApplicationPacket* pPacket);
 	void _handleTarget(const EQApplicationPacket* pPacket);

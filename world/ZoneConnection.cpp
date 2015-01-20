@@ -141,7 +141,7 @@ void ZoneConnection::update() {
 	EQApplicationPacket* packet = 0;
 	bool ret = true;
 	while (ret && mConnected && (packet = (EQApplicationPacket*)mStreamInterface->PopPacket())) {
-		ret = _handlePacket(packet);
+		ret = handlePacket(packet);
 		delete packet;
 	}
 }
@@ -152,12 +152,28 @@ void ZoneConnection::dropConnection() {
 		mStreamInterface->Close();
 }
 
-bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
-	EXPECTED_BOOL(pPacket);
+bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
 
 	if (!mStreamInterface->CheckState(ESTABLISHED)) return false;
 
-	EmuOpcode opcode = pPacket->GetOpcode();
+	const EmuOpcode opcode = pPacket->GetOpcode();
+
+	// Not fully connected.
+	if (mConnectingStatus < ZCStatus::Complete) {
+		switch (opcode) {
+		case OP_ZoneEntry:
+			return _handleZoneEntry(pPacket);
+		case OP_ReqClientSpawn:
+			return _handleRequestClientSpawn(pPacket);
+		case OP_ClientReady:
+			return _handleClientReady(pPacket);
+		default:
+			break;
+		}
+		return true;
+	}
+
 	if (/*opcode == 0 || */opcode == OP_FloatListThing) return true;
 
 	switch (opcode) {
@@ -166,12 +182,6 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_AckPacket:
 		// Ignore.
-		break;
-	case OP_ZoneEntry:
-		_handleZoneEntry(pPacket);
-		break;
-	case OP_ReqClientSpawn:
-		_handleRequestClientSpawn(pPacket);
 		break;
 	case OP_SetServerFilter:
 		_handleSetServerFiler(pPacket);
@@ -226,9 +236,6 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_SendAAStats:
 		Utility::print("[UNHANDLED OP_SendAAStats]");
-		break;
-	case OP_ClientReady:
-		_handleClientReady(pPacket);
 		break;
 	case OP_UpdateAA:
 		_handleUpdateAA(pPacket);
@@ -610,21 +617,21 @@ bool ZoneConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	if (!mConnected) return;
-	if (!pPacket) return;
+	if (!mConnected) return false;
+	if (!pPacket) return false;
 
 	// Check: Connecting packet sequence.
 	if (mConnectingStatus != ZCStatus::None) {
 		mLog->error("Got unexpected OP_ZoneEntry, dropping connection.");
 		dropConnection();
-		return;
+		return false;
 	}
 	// Update connecting status.
 	mConnectingStatus = ZCStatus::ZoneEntryReceived;
 
-	EXPECTED(ZoneEntry::sizeCheck(pPacket));
+	EXPECTED_BOOL(ZoneEntry::sizeCheck(pPacket));
 
 	auto payload = ZoneEntry::convert(pPacket);
 
@@ -635,7 +642,7 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	if (!Limits::Character::nameLength(characterName)) {
 		mLog->error("Invalid name length.");
 		dropConnection();
-		return;
+		return false;
 	}
 
 	mLog->info("Got OP_ZoneEntry from " + characterName);
@@ -645,14 +652,14 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	if (!mCharacter) {
 		mLog->error("Unable to find zoning Character.");
 		dropConnection();
-		return;
+		return false;
 	}
 
 	updateLogContext();
 	mLog->info("Identified.");
 
 	// Check: Character authenticated for this Zone.
-	EXPECTED(mZone->checkAuthentication(mCharacter));
+	EXPECTED_BOOL(mZone->checkAuthentication(mCharacter));
 	// Clear ZoneChange
 	mCharacter->clearZoneChange();
 
@@ -683,7 +690,53 @@ void ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
 	// Weather
 	
 	_sendWeather();
+
 	mConnectingStatus = ZCStatus::ZoneInformationSent;
+	return true;
+}
+
+const bool ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+
+	// Check: Connecting packet sequence.
+	if (mConnectingStatus != ZCStatus::ZoneInformationSent) {
+		mLog->error("Got unexpected OP_ReqClientSpawn, dropping connection.");
+		dropConnection();
+		return false;
+	}
+
+	_sendDoors();
+	_sendObjects();
+	_sendAAStats();
+	_sendZonePoints();
+	_sendZoneServerReady();
+	_sendExpZoneIn();
+	_sendWorldObjectsSent();
+
+	// Alternate Currency
+	sendAlternateCurrencies();
+	sendAlternateCurrencyQuantities(false);
+
+	sendMOTD("Welcome to Fading Light.");
+
+	mConnectingStatus = ZCStatus::ClientRequestSpawn;
+	return true;
+}
+
+const bool ZoneConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+
+	// Check: Connecting packet sequence.
+	if (mConnectingStatus != ZCStatus::ClientRequestSpawn) {
+		mLog->error("Got unexpected OP_ClientReady, dropping connection.");
+		dropConnection();
+		return false;
+	}
+
+	mForceSendPositionTimer.Start(4000);
+
+	mConnectingStatus = ZCStatus::Complete;
+	return true;
 }
 
 void ZoneConnection::_sendTimeOfDay() {
@@ -957,43 +1010,6 @@ void ZoneConnection::_sendWeather() {
 	auto packet = Weather::construct(0, 0, 0);
 	sendPacket(packet);
 	delete packet;
-}
-
-void ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
-
-	mConnectingStatus = ZCStatus::ClientRequestSpawn;
-	_sendDoors();
-	_sendObjects();
-	_sendAAStats();
-	_sendZonePoints();
-	_sendZoneServerReady();
-	_sendExpZoneIn();
-	_sendWorldObjectsSent();
-
-	// Alternate Currency
-	sendAlternateCurrencies();
-	sendAlternateCurrencyQuantities(false);
-
-	sendMOTD("Welcome to Fading Light.");
-
-	//if (mCharacter->hasGuild()) {
-	//	mGuildManager->onEnterZone(mCharacter);
-	//}
-	//if (mCharacter->hasGroup()) {
-	//	GroupManager::getInstance().onEnterZone(mCharacter);
-	//}
-	//if (mCharacter->hasRaid()) {
-	//	RaidManager::getInstance().onEnterZone(mCharacter);
-	//}
-}
-
-void ZoneConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-
-	mConnectingStatus = ZCStatus::Complete;
-	mForceSendPositionTimer.Start(4000);
 }
 
 void ZoneConnection::_sendDoors() {
@@ -1401,9 +1417,13 @@ void ZoneConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 	dropConnection();
 }
 
-void ZoneConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+
 	mConnectingStatus = ZCStatus::ClientRequestZoneData;
 	_sendZoneData();
+
+	return true;
 }
 
 void ZoneConnection::_sendZoneData() {
