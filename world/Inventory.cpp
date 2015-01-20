@@ -16,20 +16,75 @@ Inventoryy::Inventoryy() {
 	for (auto& i : mTrade) i = nullptr;
 
 	memset(mCurrency, 0, sizeof(mCurrency));
+}
 
-	mItemFactory = ServiceLocator::getItemFactory();
+Inventoryy::~Inventoryy() {
+	mItemFactory = nullptr;
+	mData = nullptr;
 
-	//put(ItemGenerator::makeDice("Yera"), SlotID::POWER_SOURCE);
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
 
-	//auto container = ItemFactory::make(ItemID::StartContainer);
-	//container->setContents(ItemFactory::make(ItemID::StartFood, 10000), 8);
-	//container->setContents(ItemFactory::make(ItemID::StartDrink, 10000), 9);
-	//container->setContents(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common), 0);
-	//put(container, SlotID::MAIN_7);
-	//container->updateContentsSlots();
+const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFactory, ILogFactory* pLogFactory, const String& pCharacterName) {
+	if (mInitialised) return false;
+	if (!pData) return false;
+	if (!pItemFactory) return false;
+	if (!pLogFactory) return false;
 
-	//pushCursor(ItemGenerator::makeTwoHandBlunt(1, Rarity::Common));
-	//pushCursor(ItemGenerator::makeOneHandBlunt(1, Rarity::Common));
+	mData = pData;
+	mItemFactory = pItemFactory;
+	mLog = pLogFactory->make();
+
+	mLog->setContext("[Inventory (" + pCharacterName + ")]");
+	mLog->status("Initialising.");
+
+	for (auto i : mData->mItems) {
+		// Create Item.
+		auto item = loadItem(i);
+		if (!item) {
+			mLog->error("Failed to load Item: ");
+			return false;
+		}
+		// Put Item in Inventory.
+		if (!put(item, i.mSlot)) {
+			mLog->error("Failed to put Item: ");
+			return false;
+		}
+	}
+
+	mLog->status("Finished initialising.");
+	mInitialised = true;
+	return true;
+}
+
+Item* Inventoryy::loadItem(Data::Item& pItem) {
+	auto item = mItemFactory->make(pItem.mItemID, pItem.mStacks);
+	EXPECTED_PTR(item);
+	item->setIsAttuned(pItem.mAttuned == 1 ? true : false);
+	item->setLastCastTime(pItem.mLastCastTime);
+	item->setCharges(pItem.mCharges);
+
+	// Container contents.
+	if (item->isContainer()) {
+		for (auto& i : pItem.mSubItems) {
+			auto subItem = loadItem(i);
+			EXPECTED_PTR(subItem);
+			EXPECTED_PTR(item->setContents(subItem, i.mSlot));
+		}
+	}
+	// Augmentations.
+	else if (pItem.mSubItems.size() > 0) {
+		for (auto& i : pItem.mSubItems) {
+			auto subItem = loadItem(i);
+			EXPECTED_PTR(subItem);
+			item->setAugmentation(i.mSlot, subItem);
+		}
+	}
+
+	return item;
 }
 
 const unsigned char* Inventoryy::getData(uint32& pSize) {
@@ -1104,43 +1159,6 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 		if (i) {
 			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
 		}
-	}
-
-	return true;
-}
-
-Item* Inventoryy::loadItem(Data::Item& pItem) {
-	auto item = mItemFactory->make(pItem.mItemID, pItem.mStacks);
-	EXPECTED_PTR(item);
-	item->setIsAttuned(pItem.mAttuned == 1 ? true : false);
-	item->setLastCastTime(pItem.mLastCastTime);
-	item->setCharges(pItem.mCharges);
-
-	// Container contents.
-	if (item->isContainer()) {
-		for (auto& i : pItem.mSubItems) {
-			auto subItem = loadItem(i);
-			EXPECTED_PTR(subItem);
-			EXPECTED_PTR(item->setContents(subItem, i.mSlot));
-		}
-	}
-	// Augmentations.
-	else if (pItem.mSubItems.size() > 0) {
-		for (auto& i : pItem.mSubItems) {
-			auto subItem = loadItem(i);
-			EXPECTED_PTR(subItem);
-			item->setAugmentation(i.mSlot, subItem);
-		}
-	}
-
-	return item;
-}
-
-const bool Inventoryy::loadFromSave(Data::Inventory& pInventoryData) {
-	for (auto i : pInventoryData.mItems) {
-		auto item = loadItem(i);
-		EXPECTED_BOOL(item);
-		EXPECTED_BOOL(put(item, i.mSlot));
 	}
 
 	return true;

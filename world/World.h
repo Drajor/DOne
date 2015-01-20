@@ -20,6 +20,7 @@ class GuildManager;
 class IDataStore;
 class ILogFactory;
 class EventDispatcher;
+class CharacterFactory;
 
 class LoginServerConnection;
 class EQStreamFactory;
@@ -31,7 +32,7 @@ public:
 	World();
 	~World();
 
-	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager);
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, CharacterFactory* pCharacterFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager);
 	void update();
 
 	inline const i32 getStatus() const { return mStatus; }
@@ -67,6 +68,7 @@ private:
 	IDataStore* mDataStore = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
+	CharacterFactory* mCharacterFactory = nullptr;
 	EventDispatcher* mEventDispatcher = nullptr;
 	LoginServerConnection* mLoginServerConnection = nullptr;
 	EQStreamFactory* mStreamFactory = nullptr;

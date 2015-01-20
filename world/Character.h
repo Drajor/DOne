@@ -40,7 +40,7 @@ public:
 	Character(Data::Character* pCharacterData);
 	~Character();
 
-	const bool initialise(Account* pAccount);
+	const bool initialise(Account* pAccount, Inventoryy* pInventory);
 	
 	// Returns the Account this Character belongs to.
 	inline Account* getAccount() const { return mAccount; }

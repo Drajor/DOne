@@ -1,4 +1,5 @@
 #include "Account.h"
+#include "LogSystem.h"
 #include "Data.h"
 
 Account::Account(Data::Account* pData, ILog* pLog) : mData(pData), mLog(pLog) { }
@@ -24,6 +25,7 @@ const bool Account::ownsCharacter(const String& pCharacterName) const {
 			return true;
 	}
 
+	mLog->error("Ownership failed, Character: " + pCharacterName);
 	return false;
 }
 
@@ -32,6 +34,8 @@ Data::AccountCharacter* Account::getData(const String& pCharacterName) {
 		if (i->mName == pCharacterName)
 			return i;
 	}
+
+	mLog->error("Could not find data for Character: " + pCharacterName);
 	return nullptr;
 }
 

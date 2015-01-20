@@ -1,5 +1,4 @@
 #include "ItemGenerator.h"
-#include "ServiceLocator.h"
 #include "ItemData.h"
 #include "Item.h"
 #include "Random.h"
@@ -65,14 +64,31 @@ const u32 getColour() {
 	return colours[Random::make<u32>(0, colours.size() - 1)];
 }
 
-ItemGenerator::ItemGenerator(ServiceLocator* pServiceLocator) : mServiceLocator(pServiceLocator) { }
+ItemGenerator::~ItemGenerator() {
+	mDataStore = nullptr;
+	mItemFactory = nullptr;
 
-const bool ItemGenerator::initialise() {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(mServiceLocator);
-	mItemFactory = mServiceLocator->getItemFactory();
-	EXPECTED_BOOL(mItemFactory);
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
 
+const bool ItemGenerator::initialise(ItemFactory* pItemFactory, IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pItemFactory) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
+
+	mItemFactory = pItemFactory;
+	mDataStore = pDataStore;
+	mLog = pLogFactory->make();
+
+	mLog->setContext("[ItemGenerator]");
+	mLog->status("Initialising.");
+
+	mLog->status("Finished initialising.");
+	mInitialised = true;
 	return true;
 }
 

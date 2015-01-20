@@ -31,6 +31,7 @@
 #include "RaidManager.h"
 #include "ItemFactory.h"
 #include "CommandHandler.h"
+#include "CharacterFactory.h"
 
 #include "Testing.h"
 #include "gtest/gtest.h"
@@ -101,7 +102,7 @@ int main(int argc, char** argv)  {
 
 	ItemFactory* itemFactory = new ItemFactory();
 	ServiceLocator::setItemFactory(itemFactory);
-	EXPECTED_MAIN(itemFactory->initialise(itemDataStore));
+	EXPECTED_MAIN(itemFactory->initialise(itemDataStore, logFactory));
 
 	ZoneManager* zoneManager = new ZoneManager();
 	ServiceLocator::setZoneManager(zoneManager);
@@ -125,13 +126,16 @@ int main(int argc, char** argv)  {
 	World* world = new World();
 	ServiceLocator::setWorld(world);
 
+	CharacterFactory* characterFactory = new CharacterFactory();
+	EXPECTED_MAIN(characterFactory->initialise(dataStore, logFactory, itemFactory));
+
 	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory));
 
 
-	EXPECTED_MAIN(world->initialise(dataStore, logFactory, guildManager, zoneManager, accountManager));
+	EXPECTED_MAIN(world->initialise(dataStore, logFactory, characterFactory, guildManager, zoneManager, accountManager));
 
 	UCS* ucs = new UCS();
 	ServiceLocator::setUCS(ucs);

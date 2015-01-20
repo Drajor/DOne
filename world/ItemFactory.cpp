@@ -1,21 +1,38 @@
 #include "ItemFactory.h"
-#include "ServiceLocator.h"
-#include "Utility.h"
-#include "Item.h"
 #include "ItemDataStore.h"
+#include "LogSystem.h"
+#include "Item.h"
+#include "Constants.h"
 
-const bool ItemFactory::initialise(ItemDataStore* pItemDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pItemDataStore);
+ItemFactory::~ItemFactory() {
+	mItemDataStore = nullptr;
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
+
+const bool ItemFactory::initialise(ItemDataStore* pItemDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pItemDataStore) return false;
+	if (!pLogFactory) return false;
 
 	mItemDataStore = pItemDataStore;
+	mLog = pLogFactory->make();
+
+	mLog->setContext("[ItemFactory]");
+	mLog->status("Initialising.");
+
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
 Item* ItemFactory::make(const u32 pItemID, const u32 pStacks) {
 	auto data = mItemDataStore->get(pItemID);
-	EXPECTED_PTR(data);
+	if (!data) return nullptr;
+
 	auto item = new Item(data);
 	item->setInstanceID(mItemDataStore->getNextSerial());
 	item->setStacks(pStacks);
@@ -30,7 +47,8 @@ Item* ItemFactory::make(const u32 pItemID, const u32 pStacks) {
 
 Item* ItemFactory::make(){
 	auto data = mItemDataStore->getNew();
-	EXPECTED_PTR(data);
+	if (!data) return nullptr;
+
 	auto item = new Item(data);
 	item->setCharmFile(std::to_string(item->getID()) + "|" + std::to_string(item->getInstanceID()));
 
@@ -41,7 +59,7 @@ Item* ItemFactory::make(){
 
 Item* ItemFactory::makeAugment() {
 	Item* augment = make();
-	EXPECTED_PTR(augment);
+	if (!augment) return false;
 
 	augment->setName("Unnamed Augmentation");
 	augment->setIcon(2876);

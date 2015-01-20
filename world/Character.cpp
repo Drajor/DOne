@@ -34,7 +34,6 @@ Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
 	mSkills.fill(0);
 	mLanguages.fill(0);
 
-	mInventory = new Inventoryy();
 	mXTargetController = new ExtendedTargetController();
 	mRespawnOptions = new RespawnOptions();
 	mExperienceController = std::make_shared<Experience::Controller>();
@@ -91,11 +90,13 @@ void Character::update() {
 	}
 }
 
-const bool Character::initialise(Account* pAccount) {
+const bool Character::initialise(Account* pAccount, Inventoryy* pInventory) {
 	if (mInitialised) return false;
 	if (!pAccount) return false;
+	if (!pInventory) return false;
 
 	mAccount = pAccount;
+	mInventory = pInventory;
 
 	setLastName(mData->mLastName);
 	setTitle(mData->mTitle);
@@ -197,9 +198,6 @@ const bool Character::initialise(Account* pAccount) {
 				mSpellBar->setSpell(i, mData->mSpellBar[i]);
 		}
 	}
-
-	// Inventory.
-	EXPECTED_BOOL(mInventory->loadFromSave(mData->mInventory));
 
 	// Bind Locations.
 	for (auto i = 0; i < 5; i++) {

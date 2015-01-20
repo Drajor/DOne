@@ -17,6 +17,7 @@
 #include "NPCFactory.h"
 #include "World.h"
 #include "UCS.h"
+#include "CharacterFactory.h"
 
 TestServer::~TestServer() {
 	
@@ -64,7 +65,7 @@ const bool TestServer::initialise() {
 	if (!mItemDataStore->initialise(mDataStore, mLogFactory)) return false;
 
 	mItemFactory = new ItemFactory();
-	if (!mItemFactory->initialise(mItemDataStore)) return false;
+	if (!mItemFactory->initialise(mItemDataStore, mLogFactory)) return false;
 
 	mZoneManager = new ZoneManager();
 	mGroupManager = new GroupManager();
@@ -75,6 +76,9 @@ const bool TestServer::initialise() {
 	mNPCFactory = new NPCFactory();
 	if (!mNPCFactory->initialise(mDataStore, mLogFactory, mItemFactory, mShopDataStore)) return false;
 
+	mCharacterFactory = new CharacterFactory();
+	if (!mCharacterFactory->initialise(mDataStore, mLogFactory, mItemFactory)) return false;
+
 	mWorld = new World();
 
 	if (!mZoneManager->initialise(mWorld, mZoneDataStore, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory, mLogFactory, mNPCFactory)) return false;
@@ -83,7 +87,7 @@ const bool TestServer::initialise() {
 	if (!mGuildManager->initialise(mDataStore, mLogFactory)) return false;
 
 
-	if(!mWorld->initialise(mDataStore, mLogFactory, mGuildManager, mZoneManager, mAccountManager)) return false;
+	if(!mWorld->initialise(mDataStore, mLogFactory, mCharacterFactory, mGuildManager, mZoneManager, mAccountManager)) return false;
 
 	mUCS = new UCS();
 	if (!mUCS->initialise()) return false;

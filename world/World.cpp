@@ -3,6 +3,7 @@
 #include "EventDispatcher.h"
 #include "Constants.h"
 #include "Character.h"
+#include "Inventory.h"
 #include "Utility.h"
 #include "GuildManager.h"
 #include "ZoneManager.h"
@@ -14,6 +15,7 @@
 #include "UCS.h"
 #include "Limits.h"
 #include "Payload.h"
+#include "CharacterFactory.h"
 
 #include "../common/EQStreamFactory.h"
 #include "../common/EQStreamIdent.h"
@@ -38,16 +40,18 @@ World::~World() {
 	safe_delete(mStreamIdentifier);
 }
 
-const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
+const bool World::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, CharacterFactory* pCharacterFactory, GuildManager* pGuildManager, ZoneManager* pZoneManager, AccountManager* pAccountManager) {
 	if (mInitialised) return false;
 	if (!pDataStore) return false;
 	if (!pLogFactory) return false;
+	if (!pCharacterFactory) return false;
 	if (!pGuildManager) return false;
 	if (!pZoneManager) return false;
 	if (!pAccountManager) return false;
 
 	mDataStore = pDataStore;
 	mLogFactory = pLogFactory;
+	mCharacterFactory = pCharacterFactory;
 	mGuildManager = pGuildManager;
 	mZoneManager = pZoneManager;
 	mAccountManager = pAccountManager;
@@ -256,32 +260,27 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	// Check: Account owns Character.
 	if (!account->ownsCharacter(pCharacterName)) return false;
 
-	// Check: Data::Character loaded.
-	auto characterData = new Data::Character();
-	if (!mDataStore->loadCharacter(pCharacterName, characterData)) {
-		delete characterData;
+	// Create Character.
+	auto character = mCharacterFactory->make(pCharacterName, account);
+	if (!character) {
+		mLog->error("Failed to make Character: " + pCharacterName);
 		return false;
 	}
 
 	// Character Destination.
-	const u16 zoneID = characterData->mZoneID;
-	const u16 instanceID = characterData->mInstanceID;
+	auto data = character->getData();
+	const u16 zoneID = data->mZoneID;
+	const u16 instanceID = data->mInstanceID;
 
 	// Check: Destination Zone is available to pCharacter.
 	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
-		delete characterData;
-		return false;
-	}
-
-	// Create and initialise Character.
-	auto character = new Character(characterData);
-	if (!character->initialise(account)) {
+		mLog->error("Zone unavailable to Character: " + pCharacterName);
 		delete character;
 		return false;
 	}
 
-	if (characterData->mGuildID != 0xFFFFFFFF)
-		mGuildManager->onConnect(character, characterData->mGuildID);
+	if (character->getGuildID() != 0xFFFFFFFF)
+		mGuildManager->onConnect(character, character->getGuildID());
 
 	// Register Zone Change
 	mZoneManager->onLeaveZone(character);

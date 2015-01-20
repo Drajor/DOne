@@ -18,6 +18,7 @@ class CommandHandler;
 class NPCFactory;
 class World;
 class UCS;
+class CharacterFactory;
 
 class TestServer {
 public:
@@ -46,4 +47,5 @@ private:
 	NPCFactory* mNPCFactory = nullptr;
 	World* mWorld = nullptr;
 	UCS* mUCS = nullptr;
+	CharacterFactory* mCharacterFactory = nullptr;
 };

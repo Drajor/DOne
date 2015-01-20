@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Constants.h"
-#include "Singleton.h"
 
-class ServiceLocator;
+class ILog;
+class ILogFactory;
+class IDataStore;
 class ItemFactory;
 class Item;
-struct ItemData;
 
 class ItemGenerator {
 public:
 
-	ItemGenerator(ServiceLocator* pServiceLocator);
-	const bool initialise();
+	~ItemGenerator();
+
+	const bool initialise(ItemFactory* pItemFactory, IDataStore* pDataStore, ILogFactory* pLogFactory);
 
 	Item* makeRandom(const u8 pLevel, const Rarity pRarity);
 	Item* makeRandomContainer(const Rarity pRarity);
@@ -56,14 +57,12 @@ public:
 	// Augmentations
 	Item* makeAugmentation(const u8 pLevel, const Rarity pRarity);
 
-protected:
-
-	ServiceLocator* mServiceLocator = nullptr;
-	ItemFactory* mItemFactory = nullptr;
-
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
+	IDataStore* mDataStore = nullptr;
+	ItemFactory* mItemFactory = nullptr;
 
 	Item* _makeBaseArmorItem(const u8 pLevel);
 	Item* _makeBaseOneHandWeapon();

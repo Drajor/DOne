@@ -8,6 +8,8 @@ namespace Data {
 	struct Inventory;
 }
 
+class ILog;
+class ILogFactory;
 class ItemFactory;
 class Item;
 
@@ -15,6 +17,10 @@ class Inventoryy : public Bonuses { // We get an extra y for now.
 
 public:
 	Inventoryy();
+	~Inventoryy();
+
+	const bool initialise(Data::Inventory* pData, ItemFactory* pItemFactory, ILogFactory* pLogFactory, const String& pCharacterName);
+
 	const bool updateForSave(Data::Inventory& pInventoryData);
 	const bool loadFromSave(Data::Inventory& pInventoryData);
 	Item* loadItem(Data::Item& pItem);
@@ -152,7 +158,11 @@ public:
 	inline const bool isAutoDrink(Item* pItem) const { return pItem == mAutoDrink; }
 
 private:
+
+	bool mInitialised = false;
+	ILog* mLog = nullptr;
 	ItemFactory* mItemFactory = nullptr;
+	Data::Inventory* mData = nullptr;
 
 	Item* _popCursor();
 	Item* _peekCursor() const;
