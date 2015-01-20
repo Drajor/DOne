@@ -8,7 +8,8 @@ namespace Data {
 	struct NPCType;
 }
 
-class LogContext;
+class ILog;
+class ILogFactory;
 class IDataStore;
 class ItemFactory;
 class ShopDataStore;
@@ -18,9 +19,9 @@ class HateControllerFactory;
 class NPCFactory {
 public:
 
-	NPCFactory();
 	~NPCFactory();
-	const bool initialise(IDataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
+
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
 
 	NPC* create(const u32 pTypeID);
 	NPC* createInvisibleMan();
@@ -36,7 +37,7 @@ public:
 private:
 
 	bool mInitialised = false;
-	LogContext* mLog = nullptr;
+	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
 	ItemFactory* mItemFactory = nullptr;
 	ShopDataStore* mShopDataStore = nullptr;

@@ -1,8 +1,7 @@
 #include "NPCFactory.h"
-#include "ServiceLocator.h"
-#include "Utility.h"
 #include "IDataStore.h"
 #include "Data.h"
+#include "LogSystem.h"
 #include "NPC.h"
 #include "ShopDataStore.h"
 #include "Item.h"
@@ -11,35 +10,53 @@
 #include "HateControllerFactory.h"
 #include "HateController.h"
 
-NPCFactory::NPCFactory() {
-	mLog = new LogContext("[NPCFactory]");
-}
-
 NPCFactory::~NPCFactory() {
-	delete mLog;
-	mLog = nullptr;
+	mDataStore = nullptr;
+	
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
 }
 
 
-const bool NPCFactory::initialise(IDataStore* pDataStore, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore) {
-	mLog->status("Initialising.");
+const bool NPCFactory::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
+	if (!pItemFactory) return false;
+	if (!pShopDataStore) return false;
 
-	EXPECTED_BOOLX(mInitialised == false, mLog);
-	EXPECTED_BOOLX(pDataStore, mLog);
-	EXPECTED_BOOLX(pItemFactory, mLog);
-	EXPECTED_BOOLX(pShopDataStore, mLog);
+	mLog = pLogFactory->make();
+	mLog->setContext("[NPCFactory]");
+	mLog->status("Initialising.");
 
 	mDataStore = pDataStore;
 	mItemFactory = pItemFactory;
 	mShopDataStore = pShopDataStore;
-	
-	EXPECTED_BOOLX(mDataStore->loadNPCAppearanceData(mNPCAppearances), mLog);
-	EXPECTED_BOOLX(calculateAppearanceData(), mLog);
-	mLog->info("Loaded data for " + std::to_string(mNPCAppearances.size()) + " Appearances.");
 
-	EXPECTED_BOOLX(mDataStore->loadNPCTypeData(mNPCTypes), mLog);
+	// Load appearance data.
+	if (!mDataStore->loadNPCAppearanceData(mNPCAppearances)) {
+		mLog->error("Failed to load appearance data.");
+		return false;
+	}
+	mLog->info("Loaded data for " + toString(mNPCAppearances.size()) + " Appearances.");
+
+	// Calculate appearance data.
+	if (!calculateAppearanceData()) {
+		mLog->error("Failed to calculate appearance data.");
+		return false;
+	}
+
+	// Load type data.
+	if (!mDataStore->loadNPCTypeData(mNPCTypes)) {
+		mLog->error("Failed to load type data.");
+		return false;
+	}
+	mLog->info("Loaded data for " + toString(mNPCTypes.size()) + " Types.");
+
 	EXPECTED_BOOLX(validateNPCTypeData(), mLog);
-	mLog->info("Loaded data for " + std::to_string(mNPCTypes.size()) + " Types.");
+	
 
 	// HateControllerFactory.
 	mHateControllerFactory = new HateControllerFactory();
@@ -48,8 +65,8 @@ const bool NPCFactory::initialise(IDataStore* pDataStore, ItemFactory* pItemFact
 	mHateControllerFactory->set("first", []() { return new FirstHateController(); });
 	mHateControllerFactory->set("last", []() { return new LastHateController(); });
 
-	mInitialised = true;
 	mLog->status("Finished initialising.");
+	mInitialised = true;
 	return true;
 }
 
@@ -63,14 +80,14 @@ const bool NPCFactory::calculateAppearanceData() {
 }
 
 const bool NPCFactory::_resolveAppearanceData(Data::NPCAppearance* pAppearance) {
-	EXPECTED_BOOL(pAppearance);
+	if (!pAppearance) return false;
 
 	if (pAppearance->mResolved) return true;
 	if (pAppearance->mParentID == 0) return true;
 
 	u32 parentID = pAppearance->mParentID;
 	auto parent = findAppearance(parentID);
-	EXPECTED_BOOL(parent);
+	if (!parent) return false;
 
 	// Parent needs to be resolved.
 	if (!parent->mResolved) {
@@ -136,7 +153,7 @@ const bool NPCFactory::_resolveAppearanceData(Data::NPCAppearance* pAppearance) 
 
 const bool NPCFactory::validateNPCTypeData() {
 	for (auto i : mNPCTypes) {
-		EXPECTED_BOOL(findAppearance(i->mAppearanceID));
+		if (!findAppearance(i->mAppearanceID)) return false;
 	}
 
 	return true;
@@ -144,16 +161,14 @@ const bool NPCFactory::validateNPCTypeData() {
 
 NPC* NPCFactory::create(const u32 pTypeID) {
 	auto type = findType(pTypeID);
-	EXPECTED_PTR(type);
+	if (!type) return nullptr;
 	auto appearance = findAppearance(type->mAppearanceID);
-	EXPECTED_PTR(appearance);
+	if (!appearance) return nullptr;
 
 	
 	auto hateController = mHateControllerFactory->make("proximity");
 
 	NPC* npc = new NPC(hateController);
-	
-
 	npc->setName(type->mName);
 	npc->setLastName(type->mLastName);
 	npc->setClass(type->mClass);
@@ -192,7 +207,7 @@ NPC* NPCFactory::create(const u32 pTypeID) {
 
 NPC* NPCFactory::createInvisibleMan() {
 	auto hateController = mHateControllerFactory->make("null");
-	EXPECTED_PTR(hateController);
+	if (!hateController) return nullptr;
 
 	NPC* npc = new NPC(hateController);
 	npc->setRace(127);
@@ -204,16 +219,16 @@ NPC* NPCFactory::createInvisibleMan() {
 }
 
 const bool NPCFactory::initialiseMerchant(NPC* pNPC, Data::NPCType* pType) {
-	EXPECTED_BOOL(pNPC);
-	EXPECTED_BOOL(pType);
+	if (!pNPC) return false;
+	if (!pType) return false;
 
 	auto shopData = mShopDataStore->getShopData(pType->mShopID);
-	EXPECTED_BOOL(shopData);
+	if (!shopData) return false;
 
 	// Add shop Items to NPC.
 	for (auto i : shopData->mItems) {
 		auto item = mItemFactory->make(i.first);
-		EXPECTED_BOOL(item);
+		if (!item) return false;
 
 		item->setShopQuantity(i.second);
 		pNPC->addShopItem(item);

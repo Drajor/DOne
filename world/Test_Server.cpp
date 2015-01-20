@@ -73,7 +73,7 @@ const bool TestServer::initialise() {
 	mCommandHandler = new CommandHandler();
 
 	mNPCFactory = new NPCFactory();
-	if (!mNPCFactory->initialise(mDataStore, mItemFactory, mShopDataStore)) return false;
+	if (!mNPCFactory->initialise(mDataStore, mLogFactory, mItemFactory, mShopDataStore)) return false;
 
 	mWorld = new World();
 

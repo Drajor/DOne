@@ -120,7 +120,7 @@ int main(int argc, char** argv)  {
 
 	NPCFactory* npcFactory = new NPCFactory();
 	ServiceLocator::setNPCFactory(npcFactory);
-	EXPECTED_MAIN(npcFactory->initialise(dataStore, itemFactory, shopDataStore));
+	EXPECTED_MAIN(npcFactory->initialise(dataStore, logFactory, itemFactory, shopDataStore));
 
 	World* world = new World();
 	ServiceLocator::setWorld(world);
