@@ -2196,3 +2196,18 @@ const bool XMLDataStore::saveGuilds(Data::GuildList pGuilds) {
 	EXPECTED_BOOL(document.SaveFile());
 	return true;
 }
+
+const bool XMLDataStore::loadTitles(Data::TitleList pTitles) {
+	auto a = new Data::Title();
+	a->mID = 1;
+	a->mPrefix = "Apples";
+	a->mSuffix = "Oranges";
+	pTitles.push_back(a);
+
+	auto b = new Data::Title();
+	b->mID = 2;
+	b->mPrefix = "Jam";
+	pTitles.push_back(b);
+
+	return true;
+}

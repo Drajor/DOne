@@ -73,19 +73,19 @@ int main(int argc, char** argv)  {
 
 	ShopDataStore* shopDataStore = new ShopDataStore();
 	ServiceLocator::setShopDataStore(shopDataStore);
-	EXPECTED_MAIN(shopDataStore->initialise(dataStore));
+	EXPECTED_MAIN(shopDataStore->initialise(dataStore, logFactory));
 
 	AccountManager* accountManager = new AccountManager();
 	ServiceLocator::setAccountManager(accountManager);
 	EXPECTED_MAIN(accountManager->initialise(dataStore, logFactory));
 
-	ZoneDataManager* zoneDataManager = new ZoneDataManager();
+	ZoneDataStore* zoneDataManager = new ZoneDataStore();
 	ServiceLocator::setZoneDataManager(zoneDataManager);
-	EXPECTED_MAIN(zoneDataManager->initialise(dataStore));
+	EXPECTED_MAIN(zoneDataManager->initialise(dataStore, logFactory));
 
 	TitleManager* titleManager = new TitleManager();
 	ServiceLocator::setTitleManager(titleManager);
-	EXPECTED_MAIN(titleManager->initialise(dataStore));
+	EXPECTED_MAIN(titleManager->initialise(dataStore, logFactory));
 
 	SpellDataStore* spellDataStore = new SpellDataStore();
 	ServiceLocator::setSpellDataStore(spellDataStore);
@@ -93,7 +93,7 @@ int main(int argc, char** argv)  {
 
 	AlternateCurrencyManager* alternateCurrencyManager = new AlternateCurrencyManager();
 	ServiceLocator::setAlternateCurrencyManager(alternateCurrencyManager);
-	EXPECTED_MAIN(alternateCurrencyManager->initialise(dataStore));
+	EXPECTED_MAIN(alternateCurrencyManager->initialise(dataStore, logFactory));
 
 	ItemDataStore* itemDataStore = new ItemDataStore();
 	ServiceLocator::setItemDataStore(itemDataStore);

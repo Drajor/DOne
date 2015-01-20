@@ -15,29 +15,39 @@
 #include "Shlwapi.h"
 
 AccountManager::~AccountManager() {
-	if (mInitialised == false) return;
+	if (mDataStore)	_save();
 
-	_save();
-	_clear();
+	mDataStore = nullptr;
+	mLogFactory = nullptr;
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+
+	for (auto i : mAccounts)
+		delete i;
+	mAccounts.clear();
 }
 
 const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
 	if (mInitialised) return false;
-	if (!pLogFactory) return false;
-	if (!pDataStore) return false;
+
+	mLogFactory = pLogFactory;
+	mDataStore = pDataStore;
+
+	if (!mDataStore) return false;
+	if (!mLogFactory) return false;
 
 	// Create and configure AccountManager log.
-	mLogFactory = pLogFactory;
 	mLog = mLogFactory->make();
-	mDataStore = pDataStore;
 	mLog->setContext("[AccountManager]");
 	mLog->status("Initialising.");
 
-	// Load Account Data.
+	// Load Data.
 	std::list<Data::Account*> accountData;
 	if (!mDataStore->loadAccounts(accountData)) {
 		mLog->error("Failed to load accounts!");
-		_clear();
 		return false;
 	}
 	
@@ -79,12 +89,6 @@ Account* AccountManager::createAccount(const u32 pLoginAccountID, const String p
 
 Account* AccountManager::getAccount(const u32 pLoginAccountID, const u32 pLoginServerID) {
 	return _find(pLoginAccountID, pLoginServerID);
-}
-
-void AccountManager::_clear() {
-	for (auto i : mAccounts)
-		delete i;
-	mAccounts.clear();
 }
 
 bool AccountManager::_save() {

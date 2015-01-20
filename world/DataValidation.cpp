@@ -89,7 +89,7 @@ const bool validateNPCTypes() {
 const bool validateZoneData() {
 	Profile p("validateZoneData");
 
-	auto zoneData = ServiceLocator::getZoneDataManager()->getZoneData();
+	auto zoneData = ServiceLocator::getZoneDataManager()->getData();
 	for (auto i : zoneData) {
 		// Spawn Groups.
 		for (auto j : i->mSpawnGroups) {

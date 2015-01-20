@@ -37,7 +37,7 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-const bool ZoneManager::initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory) {
+const bool ZoneManager::initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory) {
 	if (mInitialised) return false;
 	if (!pWorld) return false;
 	if (!pZoneDataManager) return false;
@@ -146,7 +146,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	
 	
 	// Check: Zone initialises correctly.
-	auto zoneData = mZoneDataManager->getZoneData(pZoneID);
+	auto zoneData = mZoneDataManager->getData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);

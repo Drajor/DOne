@@ -1,59 +1,47 @@
 #include "ZoneData.h"
-#include "ServiceLocator.h"
-#include "IDataStore.h"
 #include "Data.h"
-#include "Utility.h"
+#include "IDataStore.h"
 #include "LogSystem.h"
 #include "Vector3.h"
+#include "Utility.h"
 
-const bool ZoneDataManager::initialise(IDataStore* pDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
+ZoneDataStore::~ZoneDataStore() {
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
 
-	Log::status("[Zone Data] Initialising.");
+	for (auto i : mData) {
+		delete i;
+	}
+	mData.clear();
+}
+
+const bool ZoneDataStore::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pLogFactory) return false;
+	if (!pDataStore) return false;
 
 	mDataStore = pDataStore;
+	mLog = pLogFactory->make();
 
-	EXPECTED_BOOL(load(0));
-	Log::info("[Zone Data] Loaded data for " + std::to_string(mZoneData.size()) + " Zones.");
+	mLog->setContext("[ZoneDataManager]");
+	mLog->status("Initialising.");
+
+	// Load data.
+	if (!mDataStore->loadZones(mData)) {
+		mLog->error("Failed to load data.");
+		return false;
+	}
+	mLog->info("Loaded data for " + toString(mData.size()) + " Zones.");
 	
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
-const bool ZoneDataManager::save(const u16 pZoneID) {
-	// TODO: Make this zone specific.
-	EXPECTED_BOOL(mDataStore->saveZones(mZoneData));
-	return true;
-}
-
-const bool ZoneDataManager::load(const u16 pZoneID) {
-	EXPECTED_BOOL(mZoneData.empty());
-	EXPECTED_BOOL(mDataStore->loadZones(mZoneData));
-
-	return true;
-}
-
-const bool ZoneDataManager::unload(const u16 pZoneID) {
-	for (auto i : mZoneData) {
-		delete i;
-	}
-	mZoneData.clear();
-
-	return true;
-}
-
-const bool ZoneDataManager::reload(const u16 pZoneID) {
-	EXPECTED_BOOL(save(pZoneID));
-	EXPECTED_BOOL(unload(pZoneID));
-	EXPECTED_BOOL(load(pZoneID));
-
-	return true;
-}
-
-
-Data::Zone* ZoneDataManager::getZoneData(const u16 pZoneID) const {
-	for (auto i : mZoneData) {
+Data::Zone* ZoneDataStore::getData(const u16 pZoneID) const {
+	for (auto i : mData) {
 		if (pZoneID == i->mID)
 			return i;
 	}
@@ -61,30 +49,9 @@ Data::Zone* ZoneDataManager::getZoneData(const u16 pZoneID) const {
 	return nullptr;
 }
 
-const bool ZoneDataManager::getLongName(const u16 pZoneID, String& pLongName) {
-	auto zoneData = getZoneData(pZoneID);
-	EXPECTED_BOOL(zoneData);
-	pLongName = zoneData->mLongName;
-	return true;
-}
-
-const bool ZoneDataManager::getShortName(const u16 pZoneID, String& pShortName){
-	auto zoneData = getZoneData(pZoneID);
-	EXPECTED_BOOL(zoneData);
-	pShortName = zoneData->mShortName;
-	return true;
-}
-
-const bool ZoneDataManager::getLongNameStringID(const u16 pZoneID, u32& pStringID) {
-	auto zoneData = getZoneData(pZoneID);
-	EXPECTED_BOOL(zoneData);
-	pStringID = zoneData->mLongNameStringID;
-	return true;
-}
-
-ZoneDataSearchResults ZoneDataManager::searchByName(String pSearchText) {
+ZoneDataSearchResults ZoneDataStore::searchByName(String pSearchText) {
 	ZoneDataSearchResults results;
-	for (auto i : mZoneData) {
+	for (auto i : mData) {
 		if (Utility::findCI(i->mShortName, pSearchText) || Utility::findCI(i->mLongName, pSearchText)) {
 			results.push_back({i->mID, i->mShortName, i->mLongName});
 		}
@@ -93,8 +60,8 @@ ZoneDataSearchResults ZoneDataManager::searchByName(String pSearchText) {
 	return results;
 }
 
-const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
-	for (auto i : mZoneData) {
+const uint16 ZoneDataStore::findFirstByName(const String& pSearchText) {
+	for (auto i : mData) {
 		if (Utility::compareCI(i->mShortName, pSearchText) || Utility::compareCI(i->mLongName, pSearchText)) {
 			return i->mID;
 		}
@@ -103,29 +70,29 @@ const uint16 ZoneDataManager::findFirstByName(const String& pSearchText) {
 	return 0;
 }
 
-const bool ZoneDataManager::getSpawnGroups(const u16 pZoneID, std::list<Data::SpawnGroup*>& pSpawnGroupData) {
-	auto zoneData = getZoneData(pZoneID);
+const bool ZoneDataStore::getSpawnGroups(const u16 pZoneID, std::list<Data::SpawnGroup*>& pSpawnGroupData) {
+	auto zoneData = getData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSpawnGroupData = zoneData->mSpawnGroups;
 	return true;
 }
 
-const bool ZoneDataManager::getSpawnPoints(const u16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData) {
-	auto zoneData = getZoneData(pZoneID);
+const bool ZoneDataStore::getSpawnPoints(const u16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData) {
+	auto zoneData = getData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSpawnPointData = zoneData->mSpawnPoints;
 	return true;
 }
 
-const bool ZoneDataManager::getZonePoints(const u16 pZoneID, std::list<Data::ZonePoint*>& pZonePoints) {
-	auto zoneData = getZoneData(pZoneID);
+const bool ZoneDataStore::getZonePoints(const u16 pZoneID, std::list<Data::ZonePoint*>& pZonePoints) {
+	auto zoneData = getData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pZonePoints = zoneData->mZonePoints;
 	return true;
 }
 
-const bool ZoneDataManager::getSafePoint(const u16 pZoneID, Vector3& pSafePoint) {
-	auto zoneData = getZoneData(pZoneID);
+const bool ZoneDataStore::getSafePoint(const u16 pZoneID, Vector3& pSafePoint) {
+	auto zoneData = getData(pZoneID);
 	EXPECTED_BOOL(zoneData);
 	pSafePoint = zoneData->mSafePosition;
 	return true;

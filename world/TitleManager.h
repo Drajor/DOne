@@ -3,30 +3,31 @@
 #include "Types.h"
 #include <list>
 
+namespace Data {
+	struct Title;
+}
+
+class ILog;
+class ILogFactory;
 class IDataStore;
 class Character;
-
-struct Title {
-	u32 mID = 0;
-	String mPrefix;
-	String mSuffix;
-};
 
 class TitleManager {
 public:
 	~TitleManager();
 
-	const bool initialise(IDataStore* pDataStore);
-	const bool deinitialise();
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLog);
 
-	const std::list<const Title*> getTitles(Character* pCharacter);
+	std::list<Data::Title*> getTitles(Character* pCharacter);
+
 	const String& getPrefix(const u32 pTitleID) const;
 	const String& getSuffix(const u32 pTitleID) const;
 
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
 
-	std::list<Title*> mTitles;
+	std::list<Data::Title*> mData;
 };

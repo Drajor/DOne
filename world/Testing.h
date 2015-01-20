@@ -14,6 +14,9 @@
 
 #include "Test_AccountManager.h"
 #include "Test_GuildManager.h"
+#include "Test_AlternateCurrencyManager.h"
+#include "Test_ShopDataStore.h"
+#include "Test_ZoneDataStore.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());

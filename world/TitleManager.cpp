@@ -1,59 +1,48 @@
 #include "TitleManager.h"
-#include "ServiceLocator.h"
+#include "Data.h"
 #include "IDataStore.h"
-
-#include "Utility.h"
+#include "LogSystem.h"
 #include "Character.h"
-#include "Profile.h"
 
 TitleManager::~TitleManager() {
-	deinitialise();
+	for (auto i : mData)
+		delete i;
+	mData.clear();
 }
 
-const bool TitleManager::initialise(IDataStore* pDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
+const bool TitleManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
 
-	Profile p("TitleManager::initialise");
-	Log::status("[Title Manager] Initialising.");
-
+	mLog = pLogFactory->make();
 	mDataStore = pDataStore;
 
-	Title* a = new Title();
-	a->mID = 1;
-	a->mPrefix = "Apples";
-	a->mSuffix = "Oranges";
-	mTitles.push_back(a);
+	mLog->setContext("[TitleManager]");
+	mLog->status("Initialising.");
 
-	Title* b = new Title();
-	b->mID = 2;
-	b->mPrefix = "Jam";
-	mTitles.push_back(b);
+	// Load data.
+	if (!mDataStore->loadTitles(mData)) {
+		return false;
+	}
 
-	Log::info("[Title Manager] Loaded data for " + std::to_string(mTitles.size()) + " Titles.");
+	mLog->info("Loaded data for " + std::to_string(mData.size()) + " Titles.");
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
-const bool TitleManager::deinitialise() {
-	for (auto i : mTitles)
-		delete i;
-	mTitles.clear();
+std::list<Data::Title*> TitleManager::getTitles(Character* pCharacter) {
+	std::list<Data::Title*> availableTitles;
 
-	return true;
-}
-
-const std::list<const Title*> TitleManager::getTitles(Character* pCharacter) {
-	std::list<const Title*> availableTitles;
-
-	for (auto i : mTitles)
+	for (auto i : mData)
 		availableTitles.push_back(i);
 
 	return availableTitles;
 }
 
 const String& TitleManager::getPrefix(const u32 pTitleID) const {
-	for (auto i : mTitles) {
+	for (auto i : mData) {
 		if (i->mID == pTitleID)
 			return i->mPrefix;
 	}
@@ -63,7 +52,7 @@ const String& TitleManager::getPrefix(const u32 pTitleID) const {
 }
 
 const String& TitleManager::getSuffix(const u32 pTitleID) const {
-	for (auto i : mTitles) {
+	for (auto i : mData) {
 		if (i->mID == pTitleID)
 			return i->mSuffix;
 	}

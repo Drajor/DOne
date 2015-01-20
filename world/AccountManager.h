@@ -90,7 +90,6 @@ private:
 	// Returns whether a specific Character name is currently reserved.
 	const bool _isCharacterNameReserved(const String& pCharacterName) const;
 
-	void _clear();
 	bool _save(Data::Account* pAccountData);
 	bool _save();
 	

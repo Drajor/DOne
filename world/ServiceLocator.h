@@ -4,7 +4,7 @@ class IDataStore;
 class ItemDataStore;
 class SpellDataStore;
 class ShopDataStore;
-class ZoneDataManager; // TODO: ZoneDataStore.
+class ZoneDataStore; // TODO: ZoneDataStore.
 class TitleManager; 
 class AccountManager;
 class World;
@@ -38,8 +38,8 @@ public:
 	static inline void setShopDataStore(ShopDataStore* pShopDataStore) { mShopDataStore = pShopDataStore; }
 
 	// ZoneDataManager
-	static inline ZoneDataManager* getZoneDataManager() { return mZoneDataManager; }
-	static inline void setZoneDataManager(ZoneDataManager* pZoneDataManager) { mZoneDataManager = pZoneDataManager; }
+	static inline ZoneDataStore* getZoneDataManager() { return mZoneDataManager; }
+	static inline void setZoneDataManager(ZoneDataStore* pZoneDataManager) { mZoneDataManager = pZoneDataManager; }
 
 	// TitleManager
 	static inline TitleManager* getTitleManager() { return mTitleManager; }
@@ -117,7 +117,7 @@ private:
 	static ItemDataStore* mItemDataStore;
 	static SpellDataStore* mSpellDataStore;
 	static ShopDataStore* mShopDataStore;
-	static ZoneDataManager* mZoneDataManager;
+	static ZoneDataStore* mZoneDataManager;
 	static TitleManager* mTitleManager;
 	static AccountManager* mAccountManager;
 	static World* mWorld;

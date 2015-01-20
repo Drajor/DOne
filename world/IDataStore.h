@@ -17,6 +17,7 @@ namespace Data {
 	struct Shop;
 	struct AlternateCurrency;
 	struct Spell;
+	struct Title;
 
 	typedef std::list<Data::Account*>& AccountList;
 	typedef std::list<Data::Guild*>& GuildList;
@@ -25,6 +26,7 @@ namespace Data {
 	typedef std::list<Data::NPCType*>& NPCTypeList;
 	typedef std::list<Data::Shop*>& ShopList;
 	typedef std::list<Data::AlternateCurrency*>& AlternateCurrencyList;
+	typedef std::list<Data::Title*>& TitleList;
 }
 
 class IDataStore {
@@ -69,4 +71,5 @@ public:
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) = 0;
 
 	virtual const bool loadShops(Data::ShopList pShops) = 0;
+	virtual const bool loadTitles(Data::TitleList pTitles) = 0;
 };

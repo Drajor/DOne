@@ -10,6 +10,7 @@ class AccountManagerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
 		mTrueDataStore = new TrueDataStore();
+		mFalseDataStore = new FalseDataStore();
 		mAccountManager = new AccountManager();
 		mLogFactory = new NullLogFactory();
 	}
@@ -21,12 +22,16 @@ protected:
 		delete mTrueDataStore;
 		mTrueDataStore = nullptr;
 
+		delete mFalseDataStore;
+		mFalseDataStore = nullptr;
+
 		delete mLogFactory;
 		mLogFactory = nullptr;
 	}
 
 	AccountManager* mAccountManager = nullptr;
 	TrueDataStore* mTrueDataStore = nullptr;
+	FalseDataStore* mFalseDataStore = nullptr;
 	NullLogFactory* mLogFactory = nullptr;
 };
 
@@ -47,9 +52,7 @@ TEST_F(AccountManagerTest, DoubleInitialise) {
 }
 
 TEST_F(AccountManagerTest, InitialiseFalseDataStore) {
-	auto dataStore = new FalseDataStore();
-	EXPECT_EQ(false, mAccountManager->initialise(dataStore, mLogFactory));
-	delete dataStore;
+	EXPECT_EQ(false, mAccountManager->initialise(mFalseDataStore, mLogFactory));
 }
 
 TEST_F(AccountManagerTest, createAccount) {

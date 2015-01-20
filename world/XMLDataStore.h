@@ -49,4 +49,5 @@ public:
 	const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies);
 
 	const bool loadShops(Data::ShopList pShops);
+	const bool loadTitles(Data::TitleList pTitles);
 };

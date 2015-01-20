@@ -494,4 +494,10 @@ namespace Data {
 		u32 mMaterial = 0;
 		String mNames;
 	};
+
+	struct Title {
+		u32 mID = 0;
+		String mPrefix;
+		String mSuffix;
+	};
 }

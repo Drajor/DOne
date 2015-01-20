@@ -6,19 +6,19 @@
 namespace Data {
 	struct AlternateCurrency;
 }
-class LogContext;
+class ILog;
+class ILogFactory;
 class IDataStore;
 
 class AlternateCurrencyManager {
 public:
-	AlternateCurrencyManager();
 	~AlternateCurrencyManager();
 
 	// Initialises the AlternateCurrencyManager.
-	const bool initialise(IDataStore* pDataStore);
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 
 	// Returns the list of alternate currencies.
-	inline std::list<Data::AlternateCurrency*>& getCurrencies() { return mCurrencies; }
+	inline std::list<Data::AlternateCurrency*>& getCurrencies() { return mData; }
 
 	// Returns the Item ID associated with a currency ID. Returns zero if not found.
 	const u32 getItemID(const u32 pCurrencyID) const;
@@ -30,7 +30,7 @@ private:
 
 	bool mInitialised = false;
 	IDataStore* mDataStore = nullptr;
-	LogContext* mLog = nullptr;
+	ILog* mLog = nullptr;
 
-	std::list<Data::AlternateCurrency*> mCurrencies;
+	std::list<Data::AlternateCurrency*> mData;
 };

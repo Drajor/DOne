@@ -1433,7 +1433,7 @@ void ZoneConnection::_sendZoneData() {
 	strcpy(payload->mShortName2, mZone->getShortName().c_str());
 
 	// Temp until I decide how I want to represent fog and weather in Zone.
-	auto zoneData = ServiceLocator::getZoneDataManager()->getZoneData(mZone->getID());
+	auto zoneData = ServiceLocator::getZoneDataManager()->getData(mZone->getID());
 	EXPECTED(zoneData);
 
 	// Fog.

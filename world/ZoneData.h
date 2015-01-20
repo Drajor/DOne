@@ -11,6 +11,8 @@ struct ZoneDataSearchEntry {
 }; // NOTE: No initializer due to PoD rules.
 typedef std::list<ZoneDataSearchEntry> ZoneDataSearchResults;
 
+class ILog;
+class ILogFactory;
 class IDataStore;
 
 namespace Data {
@@ -21,20 +23,14 @@ namespace Data {
 }
 struct Vector3;
 
-class ZoneDataManager {
+class ZoneDataStore {
 public:
-	const bool initialise(IDataStore* pDataStore);
+
+	~ZoneDataStore();
+
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 	
-	const bool load(const u16 pZoneID);
-	const bool unload(const u16 pZoneID);
-	const bool reload(const u16 pZoneID);
-	const bool save(const u16 pZoneID);
-
-	const bool getLongName(const u16 pZoneID, String& pLongName);
-	const bool getShortName(const u16 pZoneID, String& pShortName);
-	const bool getLongNameStringID(const u16 pZoneID, u32& pStringID);
 	const bool getSafePoint(const u16 pZoneID, Vector3& pSafePoint);
-
 	const bool getSpawnGroups(const u16 pZoneID, std::list<Data::SpawnGroup*>& pSpawnGroupData);
 	const bool getSpawnPoints(const u16 pZoneID, std::list<Data::SpawnPoint*>& pSpawnPointData);
 	const bool getZonePoints(const u16 pZoneID, std::list<Data::ZonePoint*>& pZonePoints);
@@ -42,12 +38,14 @@ public:
 	ZoneDataSearchResults searchByName(String pSearchText);
 	const uint16 findFirstByName(const String& pSearchText);
 
-	Data::Zone* getZoneData(const u16 pZoneID) const;
-	inline std::list<Data::Zone*>& getZoneData() { return mZoneData; }
+	Data::Zone* getData(const u16 pZoneID) const;
+	inline std::list<Data::Zone*>& getData() { return mData; }
 	
 private:
 
 	bool mInitialised = false;
+	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
-	std::list<Data::Zone*> mZoneData;
+
+	std::list<Data::Zone*> mData;
 };

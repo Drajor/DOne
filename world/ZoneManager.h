@@ -8,7 +8,7 @@
 class ILog;
 class ILogFactory;
 class NPCFactory;
-class ZoneDataManager;
+class ZoneDataStore;
 class GroupManager;
 class RaidManager;
 class GuildManager;
@@ -35,7 +35,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(World* pWorld, ZoneDataManager* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
+	const bool initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
 	void update();
 
 	// Guild Events.
@@ -78,7 +78,7 @@ private:
 	ILog* mLog = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	World* mWorld = nullptr;
-	ZoneDataManager* mZoneDataManager = nullptr;
+	ZoneDataStore* mZoneDataManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
