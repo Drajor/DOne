@@ -21,21 +21,15 @@ ZoneConnectionManager::~ZoneConnectionManager() {
 	}
 }
 
-const bool ZoneConnectionManager::initialise(const u16 pPort, Zone* pZone, ILogFactory* pLogFactory, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) {
+const bool ZoneConnectionManager::initialise(const u16 pPort, Zone* pZone, ILogFactory* pLogFactory, GuildManager* pGuildManager) {
 	if (mInitialised) return false;
 	if (!pZone) return false;
 	if (!pLogFactory) return false;
-	if (!pZoneManager) return false;
-	if (!pGroupManager) return false;
-	if (!pRaidManager) return false;
 	if (!pGuildManager) return false;
 
 	mPort = pPort;
 	mZone = pZone;
 	mLogFactory = pLogFactory;
-	mZoneManager = pZoneManager;
-	mGroupManager = pGroupManager;
-	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
 
 	// Create and configure ZoneConnectionManager log.
@@ -79,7 +73,7 @@ void ZoneConnectionManager::checkIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		auto connection = new ZoneConnection();
-		if (!connection->initialise(incomingStreamInterface, mLogFactory->make(), mZone, mZoneManager, mGroupManager, mRaidManager, mGuildManager)){
+		if (!connection->initialise(incomingStreamInterface, mLogFactory->make(), mZone, mGuildManager)) {
 			mLog->error("ZoneConnection::initialise failed.");
 			delete connection;
 			continue;

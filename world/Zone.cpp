@@ -99,7 +99,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 
 	// Create ZoneConnectionManager.
 	mZoneConnectionManager = new ZoneConnectionManager();
-	if (!mZoneConnectionManager->initialise(mPort, this, mLogFactory, mZoneManager, mGroupManager, mRaidManager, mGuildManager)) {
+	if (!mZoneConnectionManager->initialise(mPort, this, mLogFactory, mGuildManager)) {
 		mLog->error("ZoneConnectionManager failed to initialise.");
 		return false;
 	}
@@ -879,6 +879,8 @@ const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
 	//// Update Zone.
 	//const uint32 t = payload->mAction == SetTitle::SET_TITLE ? TitleOption::Title : TitleOption::Suffix;
 	//mZone->handleTitleChanged(mCharacter, t);
+
+	return true;
 }
 
 const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
@@ -894,6 +896,8 @@ const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
 	// Update Character.
 	pCharacter->setSuffix(suffix);
 	//mZone->handleTitleChanged(mCharacter, t);
+
+	return true;
 }
 
 void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
@@ -2470,5 +2474,35 @@ const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharact
 	if (!pSetter) return false;
 
 	const bool success = mGuildManager->onSetPublicNote(pSetter, pCharacterName, pPublicNote);
+	return true;
+}
+
+const bool Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) {
+	mGroupManager->handleInviteSent(pInviter, pInviteeName);
+	return true;
+}
+
+const bool Zone::onGroupInviteAccept(Character* pCharacter, const String& pInviterName) {
+	mGroupManager->handleAcceptInvite(pCharacter, pInviterName);
+	return true;
+}
+
+const bool Zone::onGroupInviteDecline(Character* pCharacter, const String& pInviterName) {
+	mGroupManager->handleDeclineInvite(pCharacter, pInviterName);
+	return true;
+}
+
+const bool Zone::onGroupLeave(Character* pCharacter) {
+	mGroupManager->handleDisband(pCharacter, pCharacter->getName());
+	return true;
+}
+
+const bool Zone::onGroupDisband(Character* pCharacter, const String& pCharacterName) {
+	mGroupManager->handleDisband(pCharacter, pCharacterName);
+	return true;
+}
+
+const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	mGroupManager->handleMakeLeader(pCharacter, pLeaderName);
 	return true;
 }

@@ -10,16 +10,13 @@ class ZoneConnection;
 class Zone;
 class ILogFactory;
 class ILog;
-class ZoneManager;
-class GroupManager;
-class RaidManager;
 class GuildManager;
 
 class ZoneConnectionManager {
 public:
 	~ZoneConnectionManager();
 
-	const bool initialise(const u16 pPort, Zone* pZone, ILogFactory* pLogFactory, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
+	const bool initialise(const u16 pPort, Zone* pZone, ILogFactory* pLogFactory, GuildManager* pGuildManager);
 	void update();
 
 	const std::size_t numPreConnections() const { return mPreConnections.size(); }
@@ -33,9 +30,6 @@ private:
 	ILog* mLog = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	Zone* mZone = nullptr;
-	ZoneManager* mZoneManager = nullptr;
-	GroupManager* mGroupManager = nullptr;
-	RaidManager* mRaidManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
 
 	u16 mPort = 0;

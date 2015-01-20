@@ -17,7 +17,6 @@ class Guild;
 class Item;
 class GuildMember;
 
-class ZoneManager;
 class GroupManager;
 class RaidManager;
 class GuildManager;
@@ -46,7 +45,7 @@ public:
 	ZoneConnection();
 	~ZoneConnection();
 
-	const bool initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager);
+	const bool initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, GuildManager* pGuildManager);
 	inline const i64& getConnectTime() const { return mConnectTime; }
 
 	bool isConnected();
@@ -355,10 +354,7 @@ private:
 	u32 mConnectingStatus = ZCStatus::None;
 	
 	ILog* mLog = nullptr;
-	ZoneManager* mZoneManager = nullptr;
 	GuildManager* mGuildManager = nullptr;
-	GroupManager* mGroupManager = nullptr;
-	RaidManager* mRaidManager = nullptr;
 
 	static EQApplicationPacket* mPlayerProfilePacket;
 

@@ -79,22 +79,16 @@ ZoneConnection::~ZoneConnection() {
 	}
 }
 
-const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, ZoneManager* pZoneManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager) {
+const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, GuildManager* pGuildManager) {
 	if (mInitialised) return false;
 	if (!pStreamInterface) return false;
 	if (!pLog) return false;
 	if (!pZone) return false;
-	if (!pZoneManager) return false;
-	if (!pGroupManager) return false;
-	if (!pRaidManager) return false;
 	if (!pGuildManager) return false;
 
 	mStreamInterface = pStreamInterface;
 	mLog = pLog;
 	mZone = pZone;
-	mZoneManager = pZoneManager;
-	mGroupManager = pGroupManager;
-	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
 	mConnected = true;
 	mConnectTime = Utility::Time::now();
@@ -1934,7 +1928,8 @@ const bool ZoneConnection::handleGroupInvite(const EQApplicationPacket* pPacket)
 	if (!Limits::Character::nameLength(inviterName)) return false;
 	if (!Limits::Character::nameLength(inviteeName)) return false;
 	
-	mGroupManager->handleInviteSent(mCharacter, inviteeName);
+	// Notify Zone.
+	mZone->onGroupInvite(mCharacter, inviteeName);
 	return true;
 }
 
@@ -1962,7 +1957,8 @@ const bool ZoneConnection::handleGroupFollow(const EQApplicationPacket* pPacket)
 
 	// TODO: This can be spoofed to join groups...
 
-	mGroupManager->handleAcceptInvite(mCharacter, inviterName);
+	// Notify Zone.
+	mZone->onGroupInviteAccept(mCharacter, inviterName);
 	return true;
 }
 
@@ -1977,7 +1973,8 @@ const bool ZoneConnection::handleGroupCanelInvite(const EQApplicationPacket* pPa
 	if (!Limits::Character::nameLength(inviterName)) return false;
 	if (!Limits::Character::nameLength(inviteeName)) return false;
 
-	mGroupManager->handleDeclineInvite(mCharacter, inviterName);
+	// Notify Zone.
+	mZone->onGroupInviteDecline(mCharacter, inviterName);
 	return true;
 }
 
@@ -2083,7 +2080,12 @@ const bool ZoneConnection::handleGroupDisband(const EQApplicationPacket* pPacket
 	if (!Limits::Character::nameLength(removeCharacterName)) return false;
 	if (!Limits::Character::nameLength(myCharacterName)) return false;
 
-	mGroupManager->handleDisband(mCharacter, removeCharacterName);
+	if (mCharacter->getName() == removeCharacterName) {
+		mZone->onGroupLeave(mCharacter);
+	}
+	else {
+		mZone->onGroupDisband(mCharacter, removeCharacterName);
+	}
 	return true;
 }
 
@@ -2121,7 +2123,8 @@ const bool ZoneConnection::handleGroupMakeLeader(const EQApplicationPacket* pPac
 	if (!Limits::Character::nameLength(currentLeader))return false;
 	if (!Limits::Character::nameLength(newLeader)) return false;
 
-	mGroupManager->handleMakeLeader(mCharacter, newLeader);
+	// Notify Zone.
+	mZone->onGroupMakeLeader(mCharacter, newLeader);
 	return true;
 }
 

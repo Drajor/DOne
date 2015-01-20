@@ -87,6 +87,12 @@ public:
 	void onLinkdeadEnd(Character* pCharacter);
 
 	// Group Events.
+	const bool onGroupInvite(Character* pInviter, const String& pInviteeName);
+	const bool onGroupInviteAccept(Character* pCharacter, const String& pInviterName);
+	const bool onGroupInviteDecline(Character* pCharacter, const String& pInviterName);
+	const bool onGroupLeave(Character* pCharacter);
+	const bool onGroupDisband(Character* pCharacter, const String& pCharacterName);
+	const bool onGroupMakeLeader(Character* pCharacter, const String& pLeaderName);
 
 	// Raid Events.
 
