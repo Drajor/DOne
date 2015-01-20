@@ -5,7 +5,14 @@
 #include "Inventory.h"
 
 CharacterFactory::~CharacterFactory() {
+	mDataStore = nullptr;
+	mLogFactory = nullptr;
+	mItemFactory = nullptr;
 
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
 }
 
 const bool CharacterFactory::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory) {

@@ -22,6 +22,7 @@
 #include "Test_ItemDataStore.h"
 #include "Test_ItemFactory.h"
 #include "Test_ItemGenerator.h"
+#include "Test_CharacterFactory.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());
