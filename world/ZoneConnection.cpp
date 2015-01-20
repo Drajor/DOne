@@ -79,15 +79,15 @@ ZoneConnection::~ZoneConnection() {
 	}
 }
 
-const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, GuildManager* pGuildManager) {
+const bool ZoneConnection::initialise(EQStreamInterface* pStreamInterface, ILogFactory* pLogFactory, Zone* pZone, GuildManager* pGuildManager) {
 	if (mInitialised) return false;
 	if (!pStreamInterface) return false;
-	if (!pLog) return false;
+	if (!pLogFactory) return false;
 	if (!pZone) return false;
 	if (!pGuildManager) return false;
 
 	mStreamInterface = pStreamInterface;
-	mLog = pLog;
+	mLog = pLogFactory->make();
 	mZone = pZone;
 	mGuildManager = pGuildManager;
 	mConnected = true;

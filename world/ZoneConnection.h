@@ -13,6 +13,7 @@ class Object;
 class Door;
 class IDataStore;
 class ILog;
+class ILogFactory;
 class Guild;
 class Item;
 class GuildMember;
@@ -45,7 +46,7 @@ public:
 	ZoneConnection();
 	~ZoneConnection();
 
-	const bool initialise(EQStreamInterface* pStreamInterface, ILog* pLog, Zone* pZone, GuildManager* pGuildManager);
+	const bool initialise(EQStreamInterface* pStreamInterface, ILogFactory* pLogFactory, Zone* pZone, GuildManager* pGuildManager);
 	inline const i64& getConnectTime() const { return mConnectTime; }
 
 	bool isConnected();

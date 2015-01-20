@@ -73,7 +73,7 @@ void ZoneConnectionManager::checkIncomingConnections() {
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
 		auto connection = new ZoneConnection();
-		if (!connection->initialise(incomingStreamInterface, mLogFactory->make(), mZone, mGuildManager)) {
+		if (!connection->initialise(incomingStreamInterface, mLogFactory, mZone, mGuildManager)) {
 			mLog->error("ZoneConnection::initialise failed.");
 			delete connection;
 			continue;
