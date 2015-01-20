@@ -41,39 +41,42 @@ const u32 Controller::getRaidExperienceForPoint(const u32 pTotalPoints) {
 	return (*mRequiredRaidExperienceFunction)(pTotalPoints);
 }
 
-const bool Controller::initalise(Data::Experience& pData) {
-	EXPECTED_BOOL(!mInitialised);
-	EXPECTED_BOOL(mRequiredExperienceFunction);
-	EXPECTED_BOOL(mRequiredAAExperienceFunction);
-	EXPECTED_BOOL(mRequiredGroupExperienceFunction);
-	EXPECTED_BOOL(mRequiredRaidExperienceFunction);
-	EXPECTED_BOOL(pData.mLevel > 0);
-	EXPECTED_BOOL(pData.mLevel <= pData.mMaximumLevel);
-	EXPECTED_BOOL(pData.mExperienceToAA <= 100);
-	EXPECTED_BOOL(pData.mUnspentAAPoints <= pData.mMaximumUnspentAA);
-	EXPECTED_BOOL(pData.mSpentAAPoints <= pData.mMaximumSpentAA);
+const bool Controller::initalise(Data::Experience* pData) {
+	if (mInitialised) return false;
+	if (!pData) return false;
+	if (!mRequiredExperienceFunction) return false;
+	if (!mRequiredAAExperienceFunction) return false;
+	if (!mRequiredGroupExperienceFunction) return false;
+	if (!mRequiredRaidExperienceFunction) return false;
+	
+	mData = pData;
+	if (mData->mLevel == 0) return false;
+	if (mData->mLevel > mData->mMaximumLevel) return false;
+	if (mData->mExperienceToAA > 100) return false;
+	if (mData->mUnspentAAPoints > mData->mMaximumUnspentAA) return false;
+	if (mData->mSpentAAPoints > mData->mMaximumSpentAA) return false;
 
 	// Normal experience.
-	mLevel = pData.mLevel;
-	mMaximumLevel = pData.mMaximumLevel;
-	mExperience = pData.mExperience;
+	mLevel = mData->mLevel;
+	mMaximumLevel = mData->mMaximumLevel;
+	mExperience = mData->mExperience;
 
 	// Alternate Advanced experience.
-	mExperienceToAA = pData.mExperienceToAA;
-	mAAExperience = pData.mAAExperience;
-	mUnspentAAPoints = pData.mUnspentAAPoints;
-	mMaximumUnspentAAPoints = pData.mMaximumUnspentAA;
-	mSpentAAPoints = pData.mSpentAAPoints;
-	mMaximumSpentAAPoints = pData.mMaximumSpentAA;
+	mExperienceToAA = mData->mExperienceToAA;
+	mAAExperience = mData->mAAExperience;
+	mUnspentAAPoints = mData->mUnspentAAPoints;
+	mMaximumUnspentAAPoints = mData->mMaximumUnspentAA;
+	mSpentAAPoints = mData->mSpentAAPoints;
+	mMaximumSpentAAPoints = mData->mMaximumSpentAA;
 
 	// Leadership experience.
-	mLeadershipExperienceOn = pData.mLeadershipExperienceOn;
+	mLeadershipExperienceOn = mData->mLeadershipExperienceOn;
 	
-	mGroupExperience = pData.mGroupExperience;
-	mGroupPoints = pData.mGroupPoints;
+	mGroupExperience = mData->mGroupExperience;
+	mGroupPoints = mData->mGroupPoints;
 
-	mRaidExperience = pData.mRaidExperience;
-	mRaidPoints = pData.mRaidPoints;
+	mRaidExperience = mData->mRaidExperience;
+	mRaidPoints = mData->mRaidPoints;
 
 	mInitialised = true;
 	return true;

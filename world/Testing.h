@@ -195,27 +195,27 @@ TEST_F(ExperienceControllerTest, InitialiseFunctions) {
 	Experience::Controller::setRequiredRaidExperienceFunction(nullptr);
 	setData(1, 10, 2, 20, 3, 4, 4, 5, 6, 7, 1, 6, 2);
 	
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Set the experience function.
 	std::function<u32(u8)> expF = [](u8) { return 1; };
 	Experience::Controller::setRequiredExperienceFunction(&expF);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Set the AA experience function.
 	std::function<u32(u32)> expAAF = [](u32) { return 1; };
 	Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Set the Group Leadership experience function.
 	std::function<u32(u32)> expGLF = [](u32) { return 1; };
 	Experience::Controller::setRequiredGroupExperienceFunction(&expGLF);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Set the Raid Leadership experience function. (should succeed)
 	std::function<u32(u32)> expRLF = [](u32) { return 1; };
 	Experience::Controller::setRequiredRaidExperienceFunction(&expRLF);
-	EXPECT_EQ(true, mController->initalise(mData));
+	EXPECT_TRUE(mController->initalise(&mData));
 }
 
 TEST_F(ExperienceControllerTest, InitialiseParameterChecks) {
@@ -226,19 +226,19 @@ TEST_F(ExperienceControllerTest, InitialiseParameterChecks) {
 
 	// Fail: Zero level.
 	setData(0, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Fail: Level greater than max level.
 	setData(3, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Fail: Unspent AA greater than max.
 	setData(1, 2, 3, 70, 5, 4, 6, 7, 8, 9, 10, 11, 12);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 
 	// Fail: Spent AA greater than max.
 	setData(1, 2, 3, 70, 4, 5, 7, 6, 8, 9, 10, 11, 12);
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 }
 
 TEST_F(ExperienceControllerTest, DoubleInitialise) {
@@ -248,8 +248,8 @@ TEST_F(ExperienceControllerTest, DoubleInitialise) {
 	setRaidExpFunction();
 
 	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-	EXPECT_EQ(true, mController->initalise(mData));
-	EXPECT_EQ(false, mController->initalise(mData));
+	EXPECT_TRUE(mController->initalise(&mData));
+	EXPECT_FALSE(mController->initalise(&mData));
 }
 
 TEST_F(ExperienceControllerTest, InitalisedValues) {
@@ -259,7 +259,7 @@ TEST_F(ExperienceControllerTest, InitalisedValues) {
 	setRaidExpFunction();
 
 	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
-	EXPECT_EQ(true, mController->initalise(mData));
+	EXPECT_TRUE(mController->initalise(&mData));
 	EXPECT_EQ(1, mController->getLevel());
 	EXPECT_EQ(10, mController->getMaximumLevel());
 	EXPECT_EQ(2, mController->getExperience());
@@ -285,7 +285,7 @@ protected:
 		Experience::Controller::setRequiredRaidExperienceFunction(&expRF);
 
 		setData(1, 20, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0);
-		mController->initalise(mData);
+		mController->initalise(&mData);
 	}
 	virtual void TearDown() {
 		mController = nullptr;
@@ -345,7 +345,7 @@ TEST_F(ExperienceControllerTestAddExperience, Adding) {
 	mController->addExperience(998374623); // Really big hit, max level.
 	EXPECT_EQ(mController->getMaximumLevel(), mController->getLevel());
 	EXPECT_EQ(mController->getExperienceCap(), mController->getExperience()); // Experience is capped.
-	EXPECT_EQ(false, mController->canGainExperience()); // Can no longer gain experience.
+	EXPECT_FALSE(mController->canGainExperience()); // Can no longer gain experience.
 
 
 	mController->setLevel(1);
@@ -377,7 +377,7 @@ TEST_F(ExperienceControllerTestAddExperience, AddingAAExperience) {
 
 	mController->addAAExperience(998374623); // Really big hit, max unspent points.
 	EXPECT_EQ(3, mController->getUnspentAAPoints());
-	EXPECT_EQ(false, mController->canGainAAExperience()); // Can no longer gain AA experience.
+	EXPECT_FALSE(mController->canGainAAExperience()); // Can no longer gain AA experience.
 }
 
 TEST_F(ExperienceControllerTestAddExperience, AddingGroupLeadershipExperience) {
@@ -430,13 +430,13 @@ protected:
 };
 
 TEST_F(LootControllerTest, Defaults) {
-	EXPECT_EQ(false, mLootController->hasLooter());
+	EXPECT_FALSE(mLootController->hasLooter());
 	EXPECT_EQ(nullptr, mLootController->getLooter());
-	EXPECT_EQ(false, mLootController->isOpen());
+	EXPECT_FALSE(mLootController->isOpen());
 }
 
 TEST_F(LootControllerTest, Nulls) {
-	EXPECT_EQ(false,  mLootController->canLoot(nullptr));
+	EXPECT_FALSE( mLootController->canLoot(nullptr));
 }
 
 class convertCurrencyTest : public ::testing::Test {

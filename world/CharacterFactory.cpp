@@ -3,6 +3,7 @@
 #include "Data.h"
 #include "Character.h"
 #include "Inventory.h"
+#include "ExperienceController.h"
 
 CharacterFactory::~CharacterFactory() {
 	mDataStore = nullptr;
@@ -50,16 +51,28 @@ Character* CharacterFactory::make(const String& pCharacterName, Account* pAccoun
 	if (!inventory->initialise(&characterData->mInventory, mItemFactory, mLogFactory, pCharacterName)) {
 		mLog->error("Failed to initialise Inventory for Character: " + pCharacterName);
 		delete inventory;
+		delete characterData;
+		return nullptr;
+	}
+
+	// Create and initialise Experience::Controller.
+	auto experienceController = new Experience::Controller();
+	if (!experienceController->initalise(&characterData->mExperience)) {
+		mLog->error("Failed to initialise Experience::Controller for Character: " + pCharacterName);
+		delete inventory;
+		delete characterData;
+		delete experienceController;
 		return nullptr;
 	}
 
 	// Create and initialise Character.
 	auto character = new Character(characterData);
-	if (!character->initialise(pAccount, inventory)) {
+	if (!character->initialise(pAccount, inventory, experienceController)) {
 		mLog->error("Failed to initialise Character: " + pCharacterName);
-		delete character;
 		delete inventory;
 		delete characterData;
+		delete experienceController;
+		delete character;
 		return nullptr;
 	}
 

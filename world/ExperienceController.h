@@ -26,7 +26,7 @@ namespace Experience {
 		static void _initialise();
 
 		// Initialises the ExperienceController.
-		const bool initalise(Data::Experience& pData);
+		const bool initalise(Data::Experience* pData);
 
 		void add(GainResult& pResult, const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience);
 
@@ -211,6 +211,8 @@ namespace Experience {
 
 	private:
 		bool mInitialised = false;
+		Data::Experience* mData = nullptr;
+
 		static std::function<u32(u8)>* mRequiredExperienceFunction;
 		static std::function<u32(u32)>* mRequiredAAExperienceFunction;
 		static std::function<u32(u32)>* mRequiredGroupExperienceFunction;

@@ -2031,7 +2031,7 @@ void Zone::allocateSoloExperience(Character* pCharacter, NPC* pNPC) {
 	context.mSoloKill = true;
 	context.mNPCLevel = pNPC->getLevel();
 	context.mNPCMod = pNPC->getExperienceModifier();
-	context.mController = pCharacter->getExperienceController().get();
+	context.mController = pCharacter->getExperienceController();
 	context.mZoneMod = getExperienceModifier();
 
 	// Calculate solo experience for kill.
@@ -2060,7 +2060,7 @@ void Zone::allocateGroupExperience(Group* pGroup, NPC* pNPC) {
 
 	std::list<Character*> members;
 	for (auto i : members) {
-		context.mController = i->getExperienceController().get();
+		context.mController = i->getExperienceController();
 
 		// Calculate group experience for kill.
 		mExperienceCalculator->calculate(result, context);

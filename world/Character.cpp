@@ -36,7 +36,6 @@ Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
 
 	mXTargetController = new ExtendedTargetController();
 	mRespawnOptions = new RespawnOptions();
-	mExperienceController = std::make_shared<Experience::Controller>();
 
 	RespawnOption option;
 	option.mID = 0;
@@ -90,13 +89,15 @@ void Character::update() {
 	}
 }
 
-const bool Character::initialise(Account* pAccount, Inventoryy* pInventory) {
+const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController) {
 	if (mInitialised) return false;
 	if (!pAccount) return false;
 	if (!pInventory) return false;
+	if (!pExperienceController) return false;
 
 	mAccount = pAccount;
 	mInventory = pInventory;
+	mExperienceController = pExperienceController;
 
 	setLastName(mData->mLastName);
 	setTitle(mData->mTitle);
@@ -107,9 +108,6 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory) {
 	setGender(mData->mGender);
 	setLevel(mData->mExperience.mLevel);
 	setStatus(mData->mStatus);
-
-	// Experience
-	EXPECTED_BOOL(mExperienceController->initalise(mData->mExperience));
 
 	mPosition = mData->mPosition;
 	mHeading = mData->mHeading;

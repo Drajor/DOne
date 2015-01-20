@@ -40,7 +40,7 @@ public:
 	Character(Data::Character* pCharacterData);
 	~Character();
 
-	const bool initialise(Account* pAccount, Inventoryy* pInventory);
+	const bool initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController);
 	
 	// Returns the Account this Character belongs to.
 	inline Account* getAccount() const { return mAccount; }
@@ -91,7 +91,7 @@ public:
 	inline Inventoryy* getInventory() const { return mInventory; }
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
-	inline std::shared_ptr<Experience::Controller> getExperienceController() const { return mExperienceController; }
+	inline Experience::Controller* getExperienceController() const { return mExperienceController; }
 	
 	bool onEnterZone();
 	void onLeaveZone();
@@ -377,5 +377,5 @@ private:
 
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
-	std::shared_ptr<Experience::Controller> mExperienceController = nullptr;
+	Experience::Controller* mExperienceController = nullptr;
 };
