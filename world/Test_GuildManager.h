@@ -18,6 +18,7 @@ class GuildManagerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
 		mTrueDataStore = new TrueDataStore();
+		mFalseDataStore = new FalseDataStore();
 		mFakeGuildDataStore = new FakeGuildDataStore();
 		mGuildManager = new GuildManager();
 		mLogFactory = new NullLogFactory();
@@ -30,6 +31,9 @@ protected:
 		delete mTrueDataStore;
 		mTrueDataStore = nullptr;
 
+		delete mFalseDataStore;
+		mFalseDataStore = nullptr;
+
 		delete mFakeGuildDataStore;
 		mTrueDataStore = nullptr;
 
@@ -39,30 +43,32 @@ protected:
 
 	GuildManager* mGuildManager = nullptr;
 	TrueDataStore* mTrueDataStore = nullptr;
+	FalseDataStore* mFalseDataStore = nullptr;
 	NullLogFactory* mLogFactory = nullptr;
 	FakeGuildDataStore* mFakeGuildDataStore = nullptr;
 };
 
 TEST_F(GuildManagerTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_EQ(false, mGuildManager->initialise(nullptr, mLogFactory));
+	EXPECT_FALSE(mGuildManager->initialise(nullptr, mLogFactory));
 
-	// Fail: Null ILog.
-	EXPECT_EQ(false, mGuildManager->initialise(mTrueDataStore, nullptr));
+	// Fail: Null ILogFactory.
+	EXPECT_FALSE(mGuildManager->initialise(mTrueDataStore, nullptr));
+
+	// Pass.
+	EXPECT_TRUE(mGuildManager->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(GuildManagerTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mGuildManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_TRUE(mGuildManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mGuildManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_FALSE(mGuildManager->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(GuildManagerTest, InitialiseFalseDataStore) {
-	auto dataStore = new FalseDataStore();
-	EXPECT_EQ(false, mGuildManager->initialise(dataStore, mLogFactory));
-	delete dataStore;
+	EXPECT_FALSE(mGuildManager->initialise(mFalseDataStore, mLogFactory));
 }
 
 TEST_F(GuildManagerTest, onCreateNull) {

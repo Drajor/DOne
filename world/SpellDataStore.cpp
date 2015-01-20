@@ -1,41 +1,58 @@
 #include "SpellDataStore.h"
-#include "ServiceLocator.h"
 #include "IDataStore.h"
+#include "Data.h"
 #include "Utility.h"
 #include "Limits.h"
-#include "Data.h"
-#include "Profile.h"
 
-const bool SpellDataStore::initialise(IDataStore* pDataStore) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pDataStore);
+SpellDataStore::~SpellDataStore() {
+	mDataStore = nullptr;
 
-	Profile p("SpellDataStore::initialise");
-	Log::status("[Spell Data Store] Initialising.");
+	if (mData) {
+		delete[] mData;
+		mData = nullptr;
+	}
+
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
+
+const bool SpellDataStore::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
+	if (!pDataStore) return false;
+	if (!pLogFactory) return false;
 
 	mDataStore = pDataStore;
+	mLog = pLogFactory->make();
+
+	mLog->setContext("[SpellDataStore]");
+	mLog->status("Initialising.");
 
 	// Allocate block of memory for spells.
-	mSpellData = new Data::Spell[Limits::Spells::MAX_SPELL_ID];
+	mData = new Data::Spell[Limits::Spells::MAX_SPELL_ID];
 
-	// DataStore to load and populate.
-	uint32 numSpellsLoaded = 0;
-	EXPECTED_BOOL(mDataStore->loadSpells(mSpellData, numSpellsLoaded));
+	// Load data.
+	u32 numSpellsLoaded = 0;
+	if (!mDataStore->loadSpells(mData, numSpellsLoaded)){
+		mLog->error("Failed to load data.");
+		return false;
+	}
+	mLog->info("Loaded data for " + toString(numSpellsLoaded) + " Spells.");
 
-	Log::info("[Spell Data Store] Loaded data for " + std::to_string(numSpellsLoaded) + " Spells.");
-
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
 const Data::Spell* SpellDataStore::getData(const u16 pSpellID) {
-	EXPECTED_PTR(Limits::Spells::spellIDValid(pSpellID));
+	// Guard.
+	if (!Limits::Spells::spellIDValid(pSpellID)) {
+		mLog->error("Out of range SpellID " + toString(pSpellID) + " requested");
+		return nullptr;
+	}
 	
-	auto spell = &mSpellData[pSpellID];
-	EXPECTED_PTR(spell);
-	EXPECTED_PTR(spell->mInUse);
-
-	return spell;
+	return &mData[pSpellID];
 }
 
 namespace Spell {

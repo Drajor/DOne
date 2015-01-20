@@ -15,6 +15,11 @@ NPCFactory::~NPCFactory() {
 	mItemFactory = nullptr;
 	mShopDataStore = nullptr;
 
+	if (mHateControllerFactory) {
+		delete mHateControllerFactory;
+		mHateControllerFactory = nullptr;
+	}
+
 	if (mLog) {
 		delete mLog;
 		mLog = nullptr;

@@ -17,6 +17,8 @@
 #include "Test_AlternateCurrencyManager.h"
 #include "Test_ShopDataStore.h"
 #include "Test_ZoneDataStore.h"
+#include "Test_NPCFactory.h"
+#include "Test_SpellDataStore.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());

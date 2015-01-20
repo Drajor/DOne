@@ -37,22 +37,25 @@ protected:
 
 TEST_F(AccountManagerTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_EQ(false, mAccountManager->initialise(nullptr, mLogFactory));
+	EXPECT_FALSE(mAccountManager->initialise(nullptr, mLogFactory));
 
-	// Fail: Null ILog.
-	EXPECT_EQ(false, mAccountManager->initialise(mTrueDataStore, nullptr));
+	// Fail: Null ILogFactory.
+	EXPECT_FALSE(mAccountManager->initialise(mTrueDataStore, nullptr));
+
+	// Pass.
+	EXPECT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(AccountManagerTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mAccountManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_TRUE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mAccountManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_FALSE(mAccountManager->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(AccountManagerTest, InitialiseFalseDataStore) {
-	EXPECT_EQ(false, mAccountManager->initialise(mFalseDataStore, mLogFactory));
+	EXPECT_FALSE(mAccountManager->initialise(mFalseDataStore, mLogFactory));
 }
 
 TEST_F(AccountManagerTest, createAccount) {

@@ -55,7 +55,7 @@ const bool TestServer::initialise() {
 	if (!mTitleManager->initialise(mDataStore, mLogFactory)) return false;
 
 	mSpellDataStore = new SpellDataStore();
-	if (!mSpellDataStore->initialise(mDataStore)) return false;
+	if (!mSpellDataStore->initialise(mDataStore, mLogFactory)) return false;
 
 	mAlternateCurrencyManager = new AlternateCurrencyManager();
 	if (!mAlternateCurrencyManager->initialise(mDataStore, mLogFactory)) return false;

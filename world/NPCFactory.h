@@ -21,6 +21,7 @@ public:
 
 	~NPCFactory();
 
+	// Initialises the NPCFactory.
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, ShopDataStore* pShopDataStore);
 
 	NPC* create(const u32 pTypeID);

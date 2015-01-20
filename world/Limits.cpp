@@ -138,7 +138,7 @@ const bool Limits::SpellBar::spellIDValid(const uint32 pSpellID) {
 }
 
 const bool Limits::Spells::spellIDValid(const uint16 pSpellID) {
-	return true;
+	return pSpellID < Limits::Spells::MAX_SPELL_ID;
 }
 
 const bool Limits::Skills::validID(const uint32 pSkillID) {

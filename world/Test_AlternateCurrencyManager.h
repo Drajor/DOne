@@ -9,6 +9,7 @@ class AlternateCurrencyManagerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
 		mTrueDataStore = new TrueDataStore();
+		mFalseDataStore = new FalseDataStore();
 		mAlternateCurrencyManager = new AlternateCurrencyManager();
 		mLogFactory = new NullLogFactory();
 	}
@@ -20,33 +21,35 @@ protected:
 		delete mTrueDataStore;
 		mTrueDataStore = nullptr;
 
+		delete mFalseDataStore;
+		mFalseDataStore = nullptr;
+
 		delete mLogFactory;
 		mLogFactory = nullptr;
 	}
 
 	AlternateCurrencyManager* mAlternateCurrencyManager = nullptr;
 	TrueDataStore* mTrueDataStore = nullptr;
+	FalseDataStore* mFalseDataStore = nullptr;
 	NullLogFactory* mLogFactory = nullptr;
 };
 
 TEST_F(AlternateCurrencyManagerTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_EQ(false, mAlternateCurrencyManager->initialise(nullptr, mLogFactory));
+	EXPECT_FALSE(mAlternateCurrencyManager->initialise(nullptr, mLogFactory));
 
-	// Fail: Null ILog.
-	EXPECT_EQ(false, mAlternateCurrencyManager->initialise(mTrueDataStore, nullptr));
+	// Fail: Null ILogFactory.
+	EXPECT_FALSE(mAlternateCurrencyManager->initialise(mTrueDataStore, nullptr));
 }
 
 TEST_F(AlternateCurrencyManagerTest, DoubleInitialise) {
 	// Pass.
-	EXPECT_EQ(true, mAlternateCurrencyManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_TRUE(mAlternateCurrencyManager->initialise(mTrueDataStore, mLogFactory));
 
 	// Fail: Already initialised.
-	EXPECT_EQ(false, mAlternateCurrencyManager->initialise(mTrueDataStore, mLogFactory));
+	EXPECT_FALSE(mAlternateCurrencyManager->initialise(mTrueDataStore, mLogFactory));
 }
 
 TEST_F(AlternateCurrencyManagerTest, InitialiseFalseDataStore) {
-	auto dataStore = new FalseDataStore();
-	EXPECT_EQ(false, mAlternateCurrencyManager->initialise(dataStore, mLogFactory));
-	delete dataStore;
+	EXPECT_FALSE(mAlternateCurrencyManager->initialise(mFalseDataStore, mLogFactory));
 }

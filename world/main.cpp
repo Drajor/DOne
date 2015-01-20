@@ -89,7 +89,7 @@ int main(int argc, char** argv)  {
 
 	SpellDataStore* spellDataStore = new SpellDataStore();
 	ServiceLocator::setSpellDataStore(spellDataStore);
-	EXPECTED_MAIN(spellDataStore->initialise(dataStore));
+	EXPECTED_MAIN(spellDataStore->initialise(dataStore, logFactory));
 
 	AlternateCurrencyManager* alternateCurrencyManager = new AlternateCurrencyManager();
 	ServiceLocator::setAlternateCurrencyManager(alternateCurrencyManager);

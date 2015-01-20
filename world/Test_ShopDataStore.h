@@ -38,7 +38,7 @@ TEST_F(ShopDataStoreTest, InitialiseNull) {
 	// Fail: Null IDataStore.
 	EXPECT_EQ(false, mShopDataStore->initialise(nullptr, mLogFactory));
 
-	// Fail: Null ILog.
+	// Fail: Null ILogFactory.
 	EXPECT_EQ(false, mShopDataStore->initialise(mTrueDataStore, nullptr));
 }
 
