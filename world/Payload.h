@@ -182,10 +182,10 @@ namespace Payload {
 		};
 
 		// C->S
+		namespace SetTitleAction { enum : u32 { Title = 0, Suffix = 1, }; }
 		struct SetTitle : public Fixed<SetTitle> {
-			enum : u32 { SET_TITLE = 0, SET_SUFFIX = 1 };
-			u32 mOption = SET_TITLE;
-			u32 mTitleID = 0;
+			u32 mAction = 0;
+			u32 mID = 0;
 		};
 
 		// S->C
@@ -871,8 +871,8 @@ namespace Payload {
 		};
 
 		// C->S
+		namespace CrystalCreateType { enum : u32 { Radiant = 4, Ebon = 5, }; }
 		struct CrystalCreate : public Fixed<CrystalCreate>  {
-			enum Type : u32 { RADIANT = 4, EBON = 5 };
 			u32 mType = 0;
 			u32 mAmount = 0;
 			String _debug() const {
@@ -1502,26 +1502,6 @@ namespace Payload {
 				return ss.str();
 			}
 		};
-
-		// S->C
-		struct GroupInvite : public FixedT<GroupInvite, OP_GroupInvite> {
-			static EQApplicationPacket* construct(const String& pFrom, const String& pTo) {
-				auto packet = create();
-				auto payload = convert(packet);
-				strcpy(payload->mFrom, pFrom.c_str());
-				strcpy(payload->mTo, pTo.c_str());
-
-				return packet;
-			}
-
-			char mFrom[64];
-			char mTo[64];
-			u32 unknown0128 = 0;
-			u32 unknown0132 = 0;
-			u32 unknown0136 = 0;
-			u32 unknown0140 = 0;
-			u32 unknown0144 = 0;
-		};
 	}
 
 	namespace World {
@@ -1758,6 +1738,59 @@ namespace Payload {
 			char	protocolversion[25];	// Major protocol version number
 			char	serverversion[64];		// minor server software version number
 			uint8 mServerType = 0;
+		};
+	}
+
+	namespace Group {
+		// S->C
+		struct Invite : public FixedT<Invite, OP_GroupInvite> {
+			static EQApplicationPacket* construct(const String& pFrom, const String& pTo) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mFrom, pFrom.c_str());
+				strcpy(payload->mTo, pTo.c_str());
+
+				return packet;
+			}
+
+			char mFrom[64];
+			char mTo[64];
+			u32 unknown0128 = 0;
+			u32 unknown0132 = 0;
+			u32 unknown0136 = 0;
+			u32 unknown0140 = 0;
+			u32 unknown0144 = 0;
+		};
+
+		// C->S
+		struct Follow : public Fixed<Follow> {
+			char	name1[64];
+			char	name2[64];
+			uint32	unknown0128;
+			uint32	unknown0132;
+			uint32	unknown0136;
+			uint32	unknown0140;
+			uint32	unknown0144;
+			uint32	unknown0148;
+		};
+
+		// C->S
+		struct DeclineInvite : public Fixed<DeclineInvite> {
+			char	name1[64];
+			char	name2[64];
+			uint8	unknown128[20];
+			uint32	toggle;
+		};
+
+		// C->S
+		struct Disband : public Fixed<Disband> {
+			char name1[64];
+			char name2[64];
+			uint32	unknown0128;
+			uint32	unknown0132;
+			uint32	unknown0136;
+			uint32	unknown0140;
+			uint32	unknown0144;
 		};
 	}
 

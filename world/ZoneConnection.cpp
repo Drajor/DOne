@@ -36,6 +36,8 @@
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
 
+#define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); return false; }
+
 EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupJoinPacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupLeavePacket = nullptr;
@@ -163,11 +165,11 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	if (mConnectingStatus < ZCStatus::Complete) {
 		switch (opcode) {
 		case OP_ZoneEntry:
-			return _handleZoneEntry(pPacket);
+			return handleZoneEntry(pPacket);
 		case OP_ReqClientSpawn:
-			return _handleRequestClientSpawn(pPacket);
+			return handleRequestClientSpawn(pPacket);
 		case OP_ClientReady:
-			return _handleClientReady(pPacket);
+			return handleClientReady(pPacket);
 		default:
 			break;
 		}
@@ -178,16 +180,16 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 
 	switch (opcode) {
 	case OP_Unknown:
-		//_handleUnknown(pPacket);
+		//handleUnknown(pPacket);
 		break;
 	case OP_AckPacket:
 		// Ignore.
 		break;
 	case OP_SetServerFilter:
-		_handleSetServerFiler(pPacket);
+		handleSetServerFiler(pPacket);
 		break;
 	case OP_SendAATable:
-		_handleSendAATable(pPacket);
+		handleSendAATable(pPacket);
 		break;
 	case OP_SendExpZonein:
 		Utility::print("[UNHANDLED OP_SendExpZonein]");
@@ -200,10 +202,10 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_ReqNewZone:
 		// UF sends this but still works when there is no reply.
-		_handleRequestNewZoneData(pPacket);
+		handleRequestNewZoneData(pPacket);
 		break;
 	case OP_SpawnAppearance:
-		_handleSpawnAppearance(pPacket);
+		handleSpawnAppearance(pPacket);
 		break;
 	case OP_WearChange:
 		// Ignore.
@@ -211,7 +213,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_ClientUpdate:
 		// NOTE: Sent when a Character moves
 		// NOTE: Sent automatically every X seconds by the client.
-		_handleClientUpdate(pPacket);
+		handleClientUpdate(pPacket);
 		break;
 	case OP_ClientError:
 		Utility::print("[UNHANDLED OP_ClientError]");
@@ -226,7 +228,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 			- first 0 or 1 for on and off
 			- then 2 for some reason.
 		*/
-		_handleTGB(pPacket);
+		handleTGB(pPacket);
 		break;
 	case OP_SendTributes:
 		// Ignore. Tribute system later.
@@ -238,7 +240,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		Utility::print("[UNHANDLED OP_SendAAStats]");
 		break;
 	case OP_UpdateAA:
-		_handleUpdateAA(pPacket);
+		handleUpdateAA(pPacket);
 		break;
 	case OP_BlockedBuffs:
 		// Ignore. Not Implemented.
@@ -248,7 +250,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_XTargetAutoAddHaters:
 		// NOTE: This occurs when the user clicks the 'Auto Add Hater Targets' from the 'Extended Target' window.
-		_handleXTargetAutoAddHaters(pPacket);
+		handleXTargetAutoAddHaters(pPacket);
 		break;
 	case OP_GetGuildsList:
 		Utility::print("[UNHANDLED OP_GetGuildsList]");
@@ -256,23 +258,23 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_TargetMouse:
 	case OP_TargetCommand:
 		// NOTE: This is sent when the current target dies.
-		_handleTarget(pPacket);
+		handleTarget(pPacket);
 		break;
 	case OP_Camp:
 		// Sent when user types /camp or presses the camp button.
-		_handleCamp(pPacket);
+		handleCamp(pPacket);
 		break;
 	case OP_Logout:
 		// This occurs 30 seconds after /camp
-		_handleLogOut(pPacket);
+		handleLogOut(pPacket);
 		return false;
 	case OP_DeleteSpawn:
 		// Client sends this after /camp
 		// NOTE: Sent as a Character is about to zone out.
-		_handleDeleteSpawn(pPacket);
+		handleDeleteSpawn(pPacket);
 		break;
 	case OP_ChannelMessage:
-		_handleChannelMessage(pPacket);
+		handleChannelMessage(pPacket);
 		break;
 	case OP_Jump:
 		// Ignore.
@@ -297,10 +299,10 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_MercenaryTimerRequest:
 		break;
 	case OP_Emote:
-		_handleEmote(pPacket);
+		handleEmote(pPacket);
 		break;
 	case OP_Animation:
-		_handleAnimation(pPacket);
+		handleAnimation(pPacket);
 		break;
 	case OP_Save:
 		Utility::print("[UNHANDLED OP_Save]");
@@ -310,16 +312,16 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_FaceChange:
 		// NOTE: This occurs when the player presses 'Accept' in the Face interface.
-		_handleFaceChange(pPacket);
+		handleFaceChange(pPacket);
 		break;
 	case OP_WhoAllRequest:
-		_handleWhoRequest(pPacket);
+		handleWhoRequest(pPacket);
 		break;
 	case OP_GroupInvite:
 		// NOTE: This occurs when the player presses 'Invite' on the group window.
 		// NOTE: This also occurs when the player uses the /invite command.
 		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
-		_handleGroupInvite(pPacket);
+		handleGroupInvite(pPacket);
 		break;
 	case OP_GroupInvite2:
 		Utility::print("[UNHANDLED OP_GroupInvite2]");
@@ -328,7 +330,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player presses 'Follow' on the group window.
 		// NOTE: This also occurs when the player uses the /invite command when they have a current group invitation.
 		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
-		_handleGroupFollow(pPacket);
+		handleGroupFollow(pPacket);
 		break;
 	case OP_GroupFollow2:
 		Utility::print("[UNHANDLED OP_GroupFollow2]");
@@ -337,66 +339,66 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the player presses 'Decline' on the group window.
 		// NOTE: This also occurs when the player uses the /disband command when they have a current group invitation.
 		// NOTE: This also occurs when using the 'Disband' mapped command (Options->Keys).
-		_handleGroupCanelInvite(pPacket);
+		handleGroupCanelInvite(pPacket);
 		break;
 	case OP_GroupDisband:
 		// NOTE: This occurs when the player presses 'Disband' on group window.
 		// NOTE: This occurs when the player uses the /disband command.
-		_handleGroupDisband(pPacket);
+		handleGroupDisband(pPacket);
 		break;
 	case OP_GroupMakeLeader:
 		// NOTE: This occurs when the player uses the /makeleader command.
 		// NOTE: This occurs when the player uses the context menu on the group window (Roles->Leader).
-		_handleGroupMakeLeader(pPacket);
+		handleGroupMakeLeader(pPacket);
 		break;
 	case OP_GuildCreate:
 		// NOTE: This occurs when the player uses the /guildcreate command.
-		_handleGuildCreate(pPacket);
+		handleGuildCreate(pPacket);
 		break;
 	case OP_GuildDelete:
 		// Note: This occurs when the player uses the /guilddelete command.
-		_handleGuildDelete(pPacket);
+		handleGuildDelete(pPacket);
 		break;
 	case OP_GuildInvite:
 		// NOTE: This occurs when a player uses the /guildinvite command.
-		_handleGuildInvite(pPacket);
+		handleGuildInvite(pPacket);
 		break;
 	case OP_GuildInviteAccept:
 		// NOTE: This occurs when a player presses 'accept' on the guild invite window.
-		_handleGuildInviteResponse(pPacket);
+		handleGuildInviteResponse(pPacket);
 		break;
 	case OP_GuildRemove:
 		// NOTE: This occurs when the player uses the /guildremove command.
-		_handleGuildRemove(pPacket);
+		handleGuildRemove(pPacket);
 		break;
 	case OP_SetGuildMOTD:
 		// NOTE: This occurs when the player uses the /guildmotd command.
-		_handleGuildSetMOTD(pPacket);
+		handleGuildSetMOTD(pPacket);
 		break;
 	case OP_GetGuildMOTD:
 		// NOTE: This occurs when the player uses the /getguildmotd command.
-		_handleGuildGetMOTD(pPacket);
+		handleGuildGetMOTD(pPacket);
 		break;
 	case OP_GuildUpdateURLAndChannel:
 		// NOTE: This occurs via the guild window.
-		_handleSetGuildURLOrChannel(pPacket);
+		handleSetGuildURLOrChannel(pPacket);
 		break;
 	case OP_GuildPublicNote:
 		// NOTE: This occurs via the guild window.
-		_handleSetGuildPublicNote(pPacket);
+		handleSetGuildPublicNote(pPacket);
 		break;
 	case OP_GuildStatus:
 		// NOTE: This occurs when the player uses the /guildstatus command.
-		_handleGetGuildStatus(pPacket);
+		handleGetGuildStatus(pPacket);
 		break;
 	case OP_GuildDemote:
-		_handleGuildDemote(pPacket);
+		handleGuildDemote(pPacket);
 		break;
 	case OP_GuildManageBanker:
-		_handleGuildSetFlags(pPacket);
+		handleGuildSetFlags(pPacket);
 		break;
 	case OP_GuildLeader:
-		_handleGuildMakeLeader(pPacket);
+		handleGuildMakeLeader(pPacket);
 		break;
 	case OP_GuildWar:
 		// NOT IMPLEMENTED
@@ -408,143 +410,143 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_ZoneChange:
 		Utility::print("[GOT OP_ZoneChange]");
-		_handleZoneChange(pPacket);
+		handleZoneChange(pPacket);
 		break;
 	case OP_AutoAttack:
-		_handleAutoAttack(pPacket);
+		handleAutoAttack(pPacket);
 		break;
 	case OP_AutoAttack2:
 		// Ignore. This sent directly after OP_AutoAttack. I don't know why.
 		break;
 		// Spells Begin
 	case OP_MemorizeSpell:
-		_handleMemoriseSpell(pPacket);
+		handleMemoriseSpell(pPacket);
 		break;
 	case OP_DeleteSpell:
-		_handleDeleteSpell(pPacket);
+		handleDeleteSpell(pPacket);
 		break;
 	case OP_LoadSpellSet:
-		_handleLoadSpellSet(pPacket);
+		handleLoadSpellSet(pPacket);
 		break;
 	case OP_SwapSpell:
-		_handleSwapSpell(pPacket);
+		handleSwapSpell(pPacket);
 		break;
 	case OP_CastSpell:
-		_handleCastSpell(pPacket);
+		handleCastSpell(pPacket);
 		break;
 		// Spells End
 	case OP_CombatAbility:
-		_handleCombatAbility(pPacket);
+		handleCombatAbility(pPacket);
 		break;
 	case OP_Taunt:
-		_handleTaunt(pPacket);
+		handleTaunt(pPacket);
 		break;
 	case OP_Consider:
-		_handleConsider(pPacket);
+		handleConsider(pPacket);
 		break;
 	case OP_ConsiderCorpse:
-		_handleConsiderCorpse(pPacket);
+		handleConsiderCorpse(pPacket);
 		break;
 	case OP_Surname:
 		// NOTE: This occurs when the player uses the /surname command.
-		_handleSurname(pPacket);
+		handleSurname(pPacket);
 		break;
 	case OP_ClearSurname:
 		// NOTE: This occurs when the player uses the /surname command with no text
-		_handleClearSurname(pPacket);
+		handleClearSurname(pPacket);
 		break;
 	case OP_GMLastName:
 		// NOTE: This occurs when the player uses the /lastname command.
-		_handleGMLastName(pPacket);
+		handleGMLastName(pPacket);
 		break;
 	case OP_SetTitle:
 		// NOTE: This occurs when the player presses the 'Change Title', 'Clear Title', 'Change Suffix' or 'Clear Suffix' buttons.
-		_handleSetTitle(pPacket);
+		handleSetTitle(pPacket);
 		break;
 	case OP_RequestTitles:
 		// NOTE: This occurs when the player opens the title window.
-		_handleRequestTitles(pPacket);
+		handleRequestTitles(pPacket);
 		break;
 	case OP_LootRequest:
-		_handleBeginLootRequest(pPacket);
+		handleBeginLootRequest(pPacket);
 		break;
 	case OP_EndLootRequest:
-		_handleEndLootRequest(pPacket);
+		handleEndLootRequest(pPacket);
 		break;
 	case OP_LootItem:
-		_handleLootItem(pPacket);
+		handleLootItem(pPacket);
 		break;
 	case OP_MoveItem:
-		_handleMoveItem(pPacket);
+		handleMoveItem(pPacket);
 		break;
 	case OP_Consume:
-		_handleConsume(pPacket);
+		handleConsume(pPacket);
 		break;
 	case OP_ItemVerifyRequest:
 		// NOTE: UF Requires a reply or the UI will lock up.
 		// NOTE: This occurs when the player right clicks on any Item (except containers).
-		_handleItemRightClick(pPacket);
+		handleItemRightClick(pPacket);
 		break;
 	case OP_PotionBelt:
-		_handlePotionBelt(pPacket);
+		handlePotionBelt(pPacket);
 		break;
 	case OP_OpenContainer:
 		// NOTE: This occurs when the player opens a container.
-		_handleOpenContainer(pPacket);
+		handleOpenContainer(pPacket);
 		break;
 	case OP_TradeRequest:
 		// NOTE: This occurs when a player left clicks on an NPC with an Item on the cursor.
-		_handleTradeRequest(pPacket);
+		handleTradeRequest(pPacket);
 		break;
 	case OP_TradeRequestAck:
-		_handleTradeRequestAck(pPacket);
+		handleTradeRequestAck(pPacket);
 		break;
 	case OP_CancelTrade:
 		// NOTE: This occurs when a player presses the 'Cancel' button whilst trading with an NPC.
-		_handleCancelTrade(pPacket);
+		handleCancelTrade(pPacket);
 		break;
 	case OP_TradeAcceptClick:
 		// NOTE: This occurs when a player presses 'Give' button whilst trading with an NPC.
-		_handleAcceptTrade(pPacket);
+		handleAcceptTrade(pPacket);
 		break;
 	case OP_TradeBusy:
-		_handleTradeBusy(pPacket);
+		handleTradeBusy(pPacket);
 		break;
 	case OP_ItemLinkClick:
 		// Note: This occurs when a player clicks on an Item Link.
-		_handleItemLinkClick(pPacket);
+		handleItemLinkClick(pPacket);
 		break;
 	case OP_ItemViewUnknown:
-		_handleItemView(pPacket);
+		handleItemView(pPacket);
 		break;
 	case OP_MoveCoin:
-		_handleMoveCoin(pPacket);
+		handleMoveCoin(pPacket);
 		break;
 	case OP_CrystalCreate:
 		// NOTE: This occurs when a player selects Radiant or Ebon Crystals from within the inventory window.
-		_handleCrystalCreate(pPacket);
+		handleCrystalCreate(pPacket);
 		break;
 	case OP_CrystalReclaim:
 		// NOTE: This occurs when a player clicks the 'Reclaim' button in the inventory window.
 		// NOTE: No payload is sent (Size=0)
-		_handleCrystalReclaim(pPacket);
+		handleCrystalReclaim(pPacket);
 		break;
 	case OP_EvolvingItem:
 		Log::error("OP_EvolvingItem");
 		break;
 	case OP_EnvDamage:
-		_handleEnvironmentalDamage(pPacket);
+		handleEnvironmentalDamage(pPacket);
 		break;
 	case OP_PopupResponse:
-		_handlePopupResponse(pPacket);
+		handlePopupResponse(pPacket);
 		break;
 	case OP_VetClaimRequest:
 		// NOTE: This occurs when a player clicks the 'Refresh' button in the Claim Window.
-		_handleClaimRequest(pPacket);
+		handleClaimRequest(pPacket);
 		break;
 	case OP_AugmentItem:
 		// NOTE: This occurs when the player presses 'Insert' on the Augmentation Sealer.
-		_handleAugmentItem(pPacket);
+		handleAugmentItem(pPacket);
 		break;
 	case OP_WeaponEquip1:
 		Log::info("OP_WeaponEquip1 size= " + std::to_string(pPacket->size));
@@ -556,57 +558,57 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		Log::info("OP_WeaponUnequip2 size= " + std::to_string(pPacket->size));
 		break;
 	case OP_AugmentInfo:
-		_handleAugmentInfo(pPacket);
+		handleAugmentInfo(pPacket);
 		break;
 	case OP_ReadBook:
-		_handleReadBook(pPacket);
+		handleReadBook(pPacket);
 		break;
 	case OP_TradeSkillCombine:
 		// NOTE: This occurs when a player presses the 'Combine' button on an opened container.
-		_handleCombine(pPacket);
+		handleCombine(pPacket);
 		break;
 	case OP_ShopRequest:
 		// NOTE: This occurs when a player right clicks on a merchant.
-		_handleShopRequest(pPacket);
+		handleShopRequest(pPacket);
 		break;
 	case OP_ShopEnd:
 		// NOTE: This occurs when a player presses the 'Done' button on the merchant window.
 		// NOTE: This occurs when a player presses 'escape' whilst a merchant window is open.
 		// NOTE: This occurs when a player moves their character too far away from a merchant.
-		_handleShopEnd(pPacket);
+		handleShopEnd(pPacket);
 		break;
 	case OP_ShopPlayerSell:
 		// NOTE: This occurs when a player tries to sell an Item to a merchant.
-		_handleShopSell(pPacket);
+		handleShopSell(pPacket);
 		break;
 	case OP_ShopPlayerBuy:
 		// NOTE: This occurs when a player tries to buy an Item from a merchant.
-		_handleShopBuy(pPacket);
+		handleShopBuy(pPacket);
 		break;
 	case OP_AltCurrencyReclaim:
 		// NOTE: This occurs when a player presses the 'Reclaim' button in the 'Alt. Currency' tab (Inventory window).
 		// NOTE: This occurs when a player presses the 'Create' button in the 'Alt. Currency' tab (Inventory window).
-		_handleAlternateCurrencyReclaim(pPacket);
+		handleAlternateCurrencyReclaim(pPacket);
 		break;
 	case OP_RandomReq:
 		// NOTE: This occurs when a player enters the /random command.
-		_handleRandomRequest(pPacket);
+		handleRandomRequest(pPacket);
 		break;
 	case OP_GroundSpawn:
 		// NOTE: This occurs when a player drops an Item on the ground.
-		_handleDropItem(pPacket);
+		handleDropItem(pPacket);
 		break;
 	case OP_RespawnWindow:
 		// NOTE: This occurs when a player selects a respawn option from the 'Respawn Window'.
-		_handleRespawnWindowSelect(pPacket);
+		handleRespawnWindowSelect(pPacket);
 		break;
 	case OP_AAAction:
 		// NOTE: This occurs when a player adjusts the 'Exp to AA' setting in the 'Alternate Advancement Window'.
-		_handleAAAction(pPacket);
+		handleAAAction(pPacket);
 		break;
 	case OP_LeadershipExpToggle:
 		// NOTE: This occurs when a player uses the 'Leadership Exp' toggle in the 'Leadership Window'
-		_handleLeadershipExperienceToggle(pPacket);
+		handleLeadershipExperienceToggle(pPacket);
 		break;
 	default:
 		//StringStream ss;
@@ -617,9 +619,8 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-const bool ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleZoneEntry(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	if (!mConnected) return false;
 	if (!pPacket) return false;
 
 	// Check: Connecting packet sequence.
@@ -631,7 +632,7 @@ const bool ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	// Update connecting status.
 	mConnectingStatus = ZCStatus::ZoneEntryReceived;
 
-	EXPECTED_BOOL(ZoneEntry::sizeCheck(pPacket));
+	SIZE_CHECK(ZoneEntry::sizeCheck(pPacket));
 
 	auto payload = ZoneEntry::convert(pPacket);
 
@@ -695,7 +696,7 @@ const bool ZoneConnection::_handleZoneEntry(const EQApplicationPacket* pPacket) 
 	return true;
 }
 
-const bool ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 
 	// Check: Connecting packet sequence.
@@ -723,7 +724,7 @@ const bool ZoneConnection::_handleRequestClientSpawn(const EQApplicationPacket* 
 	return true;
 }
 
-const bool ZoneConnection::_handleClientReady(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleClientReady(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 
 	// Check: Connecting packet sequence.
@@ -1092,10 +1093,10 @@ void ZoneConnection::_sendWorldObjectsSent() {
 	delete packet;
 }
 
-void ZoneConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleClientUpdate(const EQApplicationPacket* pPacket) {
 	using namespace Payload;
-	EXPECTED(pPacket);
-	EXPECTED(PositionUpdate::sizeCheck(pPacket) || pPacket->size == PositionUpdate::size() + 1); // Payload has an extra byte from time to time.
+	if (!pPacket) return false;
+	SIZE_CHECK(PositionUpdate::sizeCheck(pPacket) || pPacket->size == PositionUpdate::size() + 1); // Payload has an extra byte from time to time.
 
 	auto payload = PositionUpdate::convert(pPacket);
 	
@@ -1116,12 +1117,14 @@ void ZoneConnection::_handleClientUpdate(const EQApplicationPacket* pPacket) {
 		// Restart the force send timer.
 		mForceSendPositionTimer.Start();
 	//}
+
+		return true;
 }
 
-void ZoneConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSpawnAppearance(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(SpawnAppearance::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(SpawnAppearance::sizeCheck(pPacket));
 
 	auto payload = SpawnAppearance::convert(pPacket);
 	const uint16 actionType = payload->mType;
@@ -1130,7 +1133,7 @@ void ZoneConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) 
 	// Ignore if spawn id does not match this characters ID.
 	if (payload->mSpawnID != mCharacter->getSpawnID()) {
 		// Note: UF client sends spawn ID (0) and action type (51) every few seconds. Not sure why.
-		return;
+		return true;
 	}
 
 	switch (actionType) {
@@ -1240,10 +1243,12 @@ void ZoneConnection::_handleSpawnAppearance(const EQApplicationPacket* pPacket) 
 		Log::error(ss.str());
 		break;
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleCamp(const EQApplicationPacket* pPacket) {
-	if (!pPacket) return;
+const bool ZoneConnection::handleCamp(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
 
 	// Instant camp for GM.
 	if (mCharacter->isGM()) {
@@ -1253,19 +1258,19 @@ void ZoneConnection::_handleCamp(const EQApplicationPacket* pPacket) {
 		mCharacter->setCampComplete(true);
 
 		dropConnection();
-		return;
+		return true;;
 	}
 
 	mCharacter->startCamp();
+	return true;
 }
 
-void ZoneConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleChannelMessage(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct); // NOTE: This packet size increases with message size.
 	static const auto MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
 
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size <= MAXIMUM_SIZE);
-	EXPECTED(pPacket->size >= EXPECTED_SIZE);
+	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size <= MAXIMUM_SIZE && pPacket->size >= EXPECTED_SIZE);
 
 	auto payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
 
@@ -1278,55 +1283,8 @@ void ZoneConnection::_handleChannelMessage(const EQApplicationPacket* pPacket) {
 	const u32 channel = payload->chan_num;
 
 	mZone->handleChannelMessage(mCharacter, channel, senderName, targetName, message);
-	//
-	//switch (channel) {
-	//case ChannelID::Guild:
-	//	EXPECTED(mCharacter->hasGuild());
-	//	mGuildManager->handleMessage(mCharacter, message);
-	//	break;
-	//case ChannelID::Group:
-	//	mGroupManager->handleMessage(mCharacter, message);
-	//	break;
-	//case ChannelID::Shout:
-	//	mZone->handleShout(mCharacter, message);
-	//	break;
-	//case ChannelID::Auction:
-	//	mZone->handleAuction(mCharacter, message);
-	//	break;
-	//case ChannelID::OOC:
-	//	mZone->handleOOC(mCharacter, message);
-	//	break;
-	//case ChannelID::GMSay:
-	//case ChannelID::Broadcast:
-	//	// GM_SAY / CH_BROADAST are unused as far as I know.
-	//	break;
-	//case ChannelID::Tell:
-	//	if (senderName.length() > 0 && targetName.length() > 0) {
-	//		mZone->handleTell(mCharacter, targetName, message);
-	//	}
-	//	break;
-	//case ChannelID::Say:
-	//	// Check whether user has entered a command.
-	//	if (message[0] == COMMAND_TOKEN) {
-	//		mCommandHandler->command(mCharacter, message);
-	//		break;
-	//	}
-	//	mZone->handleSay(mCharacter, message);
-	//	break;
-	//case ChannelID::Raid:
-	//	break;
-	//case ChannelID::UCS:
-	//	break;
-	//	// /emote dances around wildly!
-	//case ChannelID::Emote:
-	//	mZone->handleEmote(mCharacter, message);
-	//	break;
-	//default:
-	//	StringStream ss;
-	//	ss << "[Zone Client Connection] " << __FUNCTION__ << " Got unexpected channel number: " << channel;
-	//	Log::error(ss.str());
-	//	break;
-	//}
+
+	return true;
 }
 
 void ZoneConnection::sendPosition() {
@@ -1372,9 +1330,8 @@ void ZoneConnection::sendMessage(const u32 pType, String pMessage) {
 	delete packet;
 }
 
-void ZoneConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mConnected);
+const bool ZoneConnection::handleLogOut(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 
 	auto packet = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	auto payload = reinterpret_cast<CancelTrade_Struct*>(packet->pBuffer);
@@ -1391,6 +1348,7 @@ void ZoneConnection::_handleLogOut(const EQApplicationPacket* pPacket) {
 
 	// NOTE: Zone picks up the dropped connection next update.
 	dropConnection();
+	return true;
 }
 
 void ZoneConnection::_sendLogOutReply() {
@@ -1409,15 +1367,16 @@ void ZoneConnection::_sendPreLogOutReply() {
 	delete packet;
 }
 
-void ZoneConnection::_handleDeleteSpawn(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleDeleteSpawn(const EQApplicationPacket* pPacket) {
 	_sendLogOutReply();
 	mCharacter->setZoningOut();
 
 	// NOTE: Zone picks up the dropped connection next update.
 	dropConnection();
+	return true;
 }
 
-const bool ZoneConnection::_handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 
 	mConnectingStatus = ZCStatus::ClientRequestZoneData;
@@ -1491,30 +1450,33 @@ void ZoneConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 	delete packet;
 }
 
-void ZoneConnection::_handleSendAATable(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleSendAATable(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleUpdateAA(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleUpdateAA(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleTarget(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTarget(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Target::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(Target::sizeCheck(pPacket->size));
 
 	auto payload = Target::convert(pPacket->pBuffer);
 	mZone->handleTarget(mCharacter, payload->mSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleTGB(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTGB(const EQApplicationPacket* pPacket) {
 	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(uint32);
 
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
 
 	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
 	if (tgb == 0 || tgb == 1) {
@@ -1522,6 +1484,8 @@ void ZoneConnection::_handleTGB(const EQApplicationPacket* pPacket) {
 		sendSimpleMessage(MessageType::White, mCharacter->getTGB() ? StringID::TGB_ON : StringID::TGB_OFF);
 	}
 	// Ignore anything else, including the extra 2 packet UF sends.
+
+	return true;
 }
 
 void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID) {
@@ -1600,26 +1564,28 @@ void ZoneConnection::sendPacket(const EQApplicationPacket* pPacket) {
 	mStreamInterface->QueuePacket(pPacket);
 }
 
-void ZoneConnection::_handleEmote(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleEmote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Emote::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(Emote::sizeCheck(pPacket));
 
 	auto payload = Emote::convert(pPacket);
 
 	String message = Utility::safeString(payload->mMessage, EmoteLimits::MAX_MESSAGE);
 	mZone->handleEmote(mCharacter, message);
+
+	return true;
 }
 
-void ZoneConnection::_handleAnimation(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAnimation(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ActorAnimation::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(ActorAnimation::sizeCheck(pPacket));
 	
 	auto payload = ActorAnimation::convert(pPacket);
-	EXPECTED(payload->mSpawnID == mCharacter->getSpawnID());
-
 	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
+
+	return true;
 }
 
 void ZoneConnection::sendExperienceUpdate(const u32 pExperience,  const u32 pAAExperience) {
@@ -1729,14 +1695,14 @@ void ZoneConnection::sendStats() {
 	delete packet;
 }
 
-void ZoneConnection::_handleWhoRequest(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleWhoRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(WhoRequest::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(WhoRequest::sizeCheck(pPacket));
 
 	auto payload = WhoRequest::convert(pPacket);
 	Log::info(payload->_debug());
-	EXPECTED(payload->mType == 0 || payload->mType == 3); // who or who all.
+	if (payload->mType != 0 && payload->mType != 3) return false; // who or who all.
 
 	WhoFilter filter;
 	filter.mType = payload->mType == 0 ? WhoType::Zone : WhoType::All;
@@ -1749,6 +1715,7 @@ void ZoneConnection::_handleWhoRequest(const EQApplicationPacket* pPacket) {
 	// TODO: GM.
 
 	mZone->handleWhoRequest(mCharacter, filter);
+	return true;
 }
 
 void ZoneConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& pResults) {
@@ -1955,61 +1922,63 @@ void ZoneConnection::sendGuildMessage(const String& pSenderName, const String& p
 	sendChannelMessage(ChannelID::Guild, pSenderName, pMessage);
 }
 
-// NOTE: This occurs when the player presses 'Invite' on the group window.
-void ZoneConnection::_handleGroupInvite(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GroupInvite_Struct));
+const bool ZoneConnection::handleGroupInvite(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Group;
+	if(!pPacket) return false;
+	SIZE_CHECK(Invite::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<GroupInvite_Struct*>(pPacket->pBuffer);
+	auto payload = Invite::convert(pPacket);
 
-	const String inviterName = Utility::safeString(payload->inviter_name, Limits::Character::MAX_NAME_LENGTH);
-	const String inviteeName = Utility::safeString(payload->invitee_name, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(inviterName));
-	EXPECTED(Limits::Character::nameLength(inviteeName));
-	EXPECTED(inviterName == mCharacter->getName()); // Check: Spoofing
-	EXPECTED(inviteeName != mCharacter->getName()); // Check: Not inviting ourself
+	const String inviterName = Utility::safeString(payload->mFrom, Limits::Character::MAX_NAME_LENGTH);
+	const String inviteeName = Utility::safeString(payload->mTo, Limits::Character::MAX_NAME_LENGTH);
+	if (!Limits::Character::nameLength(inviterName)) return false;
+	if (!Limits::Character::nameLength(inviteeName)) return false;
 	
 	mGroupManager->handleInviteSent(mCharacter, inviteeName);
+	return true;
 }
 
 void ZoneConnection::sendGroupInvite(const String pFromCharacterName) {
-	using namespace Payload::Zone;
+	using namespace Payload::Group;
 	EXPECTED(mConnected);
 
-	auto packet = GroupInvite::construct(pFromCharacterName, mCharacter->getName());
+	auto packet = Invite::construct(pFromCharacterName, mCharacter->getName());
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneConnection::_handleGroupFollow(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
+const bool ZoneConnection::handleGroupFollow(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Group;
+	if(!pPacket) return false;
+	SIZE_CHECK(Follow::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
+	auto payload = Follow::convert(pPacket);
 	
 	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH); // Character who invited.
 	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH); // Character accepting invite.
-	EXPECTED(Limits::Character::nameLength(inviterName));
-	EXPECTED(Limits::Character::nameLength(inviteeName));
-	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
+	if (!Limits::Character::nameLength(inviterName)) return false;
+	if (!Limits::Character::nameLength(inviteeName)) return false;
+
 
 	// TODO: This can be spoofed to join groups...
 
 	mGroupManager->handleAcceptInvite(mCharacter, inviterName);
+	return true;
 }
 
-void ZoneConnection::_handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GroupCancel_Struct));
+const bool ZoneConnection::handleGroupCanelInvite(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Group;
+	if(!pPacket) return false;
+	SIZE_CHECK(DeclineInvite::sizeCheck(pPacket));
 
-	auto payload = reinterpret_cast<GroupCancel_Struct*>(pPacket->pBuffer);
+	auto payload = DeclineInvite::convert(pPacket);
 	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
 	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(inviterName));
-	EXPECTED(Limits::Character::nameLength(inviteeName));
-	EXPECTED(inviteeName == mCharacter->getName()); // Check: Sanity
+	if (!Limits::Character::nameLength(inviterName)) return false;
+	if (!Limits::Character::nameLength(inviteeName)) return false;
 
 	mGroupManager->handleDeclineInvite(mCharacter, inviterName);
+	return true;
 }
 
 void ZoneConnection::sendGroupCreate() {
@@ -2102,20 +2071,20 @@ void ZoneConnection::sendGroupUpdate(std::list<String>& pGroupMemberNames) {
 	sendPacket(mGroupUpdateMembersPacket);
 }
 
-void ZoneConnection::_handleGroupDisband(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GroupGeneric_Struct));
+const bool ZoneConnection::handleGroupDisband(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Group;
+	if(!pPacket) return false;
+	SIZE_CHECK(Disband::sizeCheck(pPacket));
 	
-	auto payload = reinterpret_cast<GroupGeneric_Struct*>(pPacket->pBuffer);
+	auto payload = Disband::convert(pPacket);
 
 	String removeCharacterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
 	String myCharacterName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(removeCharacterName));
-	EXPECTED(Limits::Character::nameLength(myCharacterName));
-	EXPECTED(myCharacterName == mCharacter->getName()); // Check: Sanity
-	EXPECTED(mCharacter->hasGroup());
+	if (!Limits::Character::nameLength(removeCharacterName)) return false;
+	if (!Limits::Character::nameLength(myCharacterName)) return false;
 
 	mGroupManager->handleDisband(mCharacter, removeCharacterName);
+	return true;
 }
 
 void ZoneConnection::sendGroupLeave(const String& pLeavingCharacterName) {
@@ -2141,20 +2110,19 @@ void ZoneConnection::sendGroupDisband() {
 	sendPacket(mGroupDisbandPacket);
 }
 
-void ZoneConnection::_handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(pPacket->size == sizeof(GroupMakeLeader_Struct));
-	EXPECTED(mCharacter->hasGroup());
+const bool ZoneConnection::handleGroupMakeLeader(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
+	if (pPacket->size != sizeof(GroupMakeLeader_Struct)) return false;
 
 	auto payload = reinterpret_cast<GroupMakeLeader_Struct*>(pPacket->pBuffer);
 
 	String currentLeader = Utility::safeString(payload->CurrentLeader, Limits::Character::MAX_NAME_LENGTH);
 	String newLeader = Utility::safeString(payload->NewLeader, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(currentLeader));
-	EXPECTED(Limits::Character::nameLength(newLeader));
-	EXPECTED(currentLeader == mCharacter->getName());
+	if (!Limits::Character::nameLength(currentLeader))return false;
+	if (!Limits::Character::nameLength(newLeader)) return false;
 
 	mGroupManager->handleMakeLeader(mCharacter, newLeader);
+	return true;
 }
 
 void ZoneConnection::sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
@@ -2176,21 +2144,20 @@ void ZoneConnection::sendZoneChange(const uint16 pZoneID, const uint16 pInstance
 	safe_delete(packet);
 }
 
-void ZoneConnection::_handleZoneChange(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleZoneChange(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ZoneChange::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(ZoneChange::sizeCheck(pPacket));
 
 	auto payload = ZoneChange::convert(pPacket);
 	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID, Vector3(payload->mX, payload->mY, payload->mZ));
+	return true;
 }
 
-void ZoneConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildCreate(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(Create::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(Create::sizeCheck(pPacket));
 	
 	auto payload = Create::convert(pPacket);
 
@@ -2198,17 +2165,19 @@ void ZoneConnection::_handleGuildCreate(const EQApplicationPacket* pPacket) {
 	const String guildName = Utility::safeString(payload->mName, Limits::Guild::MAX_NAME_LENGTH);
 
 	// Check: String length.
-	EXPECTED(Limits::Guild::nameLength(guildName));
+	if (!Limits::Guild::nameLength(guildName)) return false;
 
 	// Notify Zone.
 	mZone->onGuildCreate(mCharacter, guildName);
+	return true;
 }
 
-void ZoneConnection::_handleGuildDelete(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleGuildDelete(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 	
 	// Notify Zone.
 	mZone->onGuildDelete(mCharacter);
+	return true;
 }
 
 void ZoneConnection::sendGuildRank(const u32 pRank) {
@@ -2232,12 +2201,10 @@ void ZoneConnection::_sendGuildNames() {
 	delete packet;
 }
 
-void ZoneConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildInvite(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-	
-	// Check: Payload size.
-	EXPECTED(Invite::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(Invite::sizeCheck(pPacket));
 
 	auto payload = Invite::convert(pPacket);
 
@@ -2245,7 +2212,7 @@ void ZoneConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
 	String characterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
 
 	// Check: String length.
-	EXPECTED(Limits::Character::nameLength(characterName));
+	if (!Limits::Character::nameLength(characterName)) return false;
 
 	// Handle: Inviting another player to guild.
 	if (payload->mAction == CommandAction::Invite) {
@@ -2258,14 +2225,14 @@ void ZoneConnection::_handleGuildInvite(const EQApplicationPacket* pPacket) {
 	else {
 		// TODO: Log (unknown action sent).
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildRemove(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(Remove::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(Remove::sizeCheck(pPacket));
 
 	auto payload = Remove::convert(pPacket);
 
@@ -2273,7 +2240,7 @@ void ZoneConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
 	String toCharacterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
 	
 	// Check: String length.
-	EXPECTED(Limits::Character::nameLength(toCharacterName));
+	if (!Limits::Character::nameLength(toCharacterName)) return false;
 
 	// Notify Zone.
 	if (mCharacter->getName() == toCharacterName) {
@@ -2284,6 +2251,8 @@ void ZoneConnection::_handleGuildRemove(const EQApplicationPacket* pPacket) {
 		// Character is removing another Character.
 		mZone->onGuildRemove(mCharacter, toCharacterName);
 	}
+
+	return true;
 }
 
 void ZoneConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
@@ -2304,12 +2273,10 @@ void ZoneConnection::sendGuildInvite(String pInviterName, GuildID pGuildID) {
 	delete packet;
 }
 
-void ZoneConnection::_handleGuildInviteResponse(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildInviteResponse(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(InviteResponse::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(InviteResponse::sizeCheck(pPacket));
 
 	auto payload = InviteResponse::convert(pPacket);
 	switch (payload->mResponse) {
@@ -2323,14 +2290,14 @@ void ZoneConnection::_handleGuildInviteResponse(const EQApplicationPacket* pPack
 		// TODO: Log.
 		break;
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleGuildSetMOTD(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildSetMOTD(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(MOTD::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(MOTD::sizeCheck(pPacket));
 
 	auto payload = MOTD::convert(pPacket);
 	
@@ -2338,14 +2305,14 @@ void ZoneConnection::_handleGuildSetMOTD(const EQApplicationPacket* pPacket) {
 	String motd = Utility::safeString(payload->mMOTD, Limits::Guild::MAX_MOTD_LENGTH);
 
 	// Check: String length.
-	EXPECTED(Limits::Guild::MOTDLength(motd));
+	if (!Limits::Guild::MOTDLength(motd)) return false;
 
 	mZone->onGuildSetMOTD(mCharacter, motd);
+	return true;
 }
 
 void ZoneConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
 	EXPECTED(mConnected);
-	//EXPECTED(mCharacter->hasGuild());
 
 	auto packet = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
 	auto payload = reinterpret_cast<GuildMOTD_Struct*>(packet->pBuffer);
@@ -2373,10 +2340,11 @@ void ZoneConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTD
 	delete packet;
 }
 
-void ZoneConnection::_handleGuildGetMOTD(const EQApplicationPacket* pPacket) {
-	if (!pPacket) return;
+const bool ZoneConnection::handleGuildGetMOTD(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
 
 	mZone->onGuildGetMOTD(mCharacter);
+	return true;
 }
 
 void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
@@ -2451,12 +2419,10 @@ void ZoneConnection::sendGuildChannel(const String& pChannel) {
 	delete packet;
 }
 
-void ZoneConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(GuildUpdate::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(GuildUpdate::sizeCheck(pPacket));
 
 	auto payload = GuildUpdate::convert(pPacket);
 
@@ -2477,14 +2443,16 @@ void ZoneConnection::_handleSetGuildURLOrChannel(const EQApplicationPacket* pPac
 		// TODO: Log.
 		break;
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
+	if (!pPacket) return false;
 
 	// TODO: Put an upper-limit check on packet size.
-	EXPECTED(pPacket->size >= sizeof(PublicNote));
+	if (!(pPacket->size >= sizeof(PublicNote))) return false;
 
 	auto payload = reinterpret_cast<PublicNote*>(pPacket->pBuffer);
 
@@ -2493,14 +2461,14 @@ void ZoneConnection::_handleSetGuildPublicNote(const EQApplicationPacket* pPacke
 
 	// Notify Zone.
 	mZone->onGuildSetPublicNote(mCharacter, targetName, note);
+
+	return true;
 }
 
-void ZoneConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGetGuildStatus(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(StatusRequest::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(StatusRequest::sizeCheck(pPacket));
 
 	auto payload = StatusRequest::convert(pPacket);
 
@@ -2509,14 +2477,13 @@ void ZoneConnection::_handleGetGuildStatus(const EQApplicationPacket* pPacket) {
 	
 	// Notify Zone.
 	mZone->onGuildStatusRequest(mCharacter, targetName);
+	return true;
 }
 
-void ZoneConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildDemote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(Demote::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(Demote::sizeCheck(pPacket));
 
 	auto payload = Demote::convert(pPacket->pBuffer);
 
@@ -2524,37 +2491,35 @@ void ZoneConnection::_handleGuildDemote(const EQApplicationPacket* pPacket) {
 	String demoteeName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
 
 	// Check: String length.
-	EXPECTED(Limits::Character::nameLength(demoteeName));
+	if (!Limits::Character::nameLength(demoteeName)) return false;
 
 	// Notify Zone.
 	mZone->onGuildDemote(mCharacter, demoteeName);
+	return true;
 }
 
-void ZoneConnection::_handleGuildSetFlags(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildSetFlags(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-	if (!pPacket) return;
-
-	// Check: Payload size.
-	EXPECTED(FlagsUpdate::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(FlagsUpdate::sizeCheck(pPacket));
 
 	auto payload = FlagsUpdate::convert(pPacket);
 
 	// NOTE: UF does not send BankerAltStatus::mCharacterName like other packets. /shrug
 	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(otherName));
+	if (!Limits::Character::nameLength(otherName)) return false;
 
 	bool isBanker = (payload->mStatus & 0x01) > 1;
 	bool isAlt = (payload->mStatus & 0x02) > 1;
 
 	// Notify Zone.
 	mZone->onGuildSetFlags(mCharacter, otherName, isBanker, isAlt);
+	return true;
 }
 
-void ZoneConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildMakeLeader(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
-
-	// Check: Payload size.
-	EXPECTED(MakeLeader::sizeCheck(pPacket));
+	SIZE_CHECK(MakeLeader::sizeCheck(pPacket));
 
 	auto payload = MakeLeader::convert(pPacket);
 
@@ -2562,20 +2527,21 @@ void ZoneConnection::_handleGuildMakeLeader(const EQApplicationPacket* pPacket) 
 	String leaderName = Utility::safeString(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
 
 	// Check: String length.
-	EXPECTED(Limits::Character::nameLength(leaderName));
+	if (!Limits::Character::nameLength(leaderName)) return false;
 
 	// Notify Zone.
 	mZone->onGuildMakeLeader(mCharacter, leaderName);
+	return true;
 }
 
 void ZoneConnection::_unimplementedFeature(String pOpCodeName)
 {
 }
 
-void ZoneConnection::_handleFaceChange(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleFaceChange(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(FaceChange::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(FaceChange::sizeCheck(pPacket));
 
 	auto payload = FaceChange::convert(pPacket->pBuffer);
 	Log::info(payload->_debug());
@@ -2595,6 +2561,7 @@ void ZoneConnection::_handleFaceChange(const EQApplicationPacket* pPacket) {
 
 	// Notify Zone.
 	mZone->handleFaceChange(mCharacter);
+	return true;
 }
 
 void ZoneConnection::sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID) {
@@ -2606,161 +2573,160 @@ void ZoneConnection::sendWearChange(const uint16 pSpawnID, const uint32 pMateria
 	delete packet;
 }
 
-void ZoneConnection::_handleAutoAttack(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAutoAttack(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(AutoAttack::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AutoAttack::sizeCheck(pPacket));
 
 	auto payload = AutoAttack::convert(pPacket->pBuffer);
 	mCharacter->setAutoAttack(payload->mAttacking);
+	return true;
 }
 
-void ZoneConnection::_handleMemoriseSpell(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleMemoriseSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(MemoriseSpell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCaster());
+	if(!pPacket) return false;
+	SIZE_CHECK(MemoriseSpell::sizeCheck(pPacket));
 
 	auto payload = MemoriseSpell::convert(pPacket->pBuffer);
 
 	switch (payload->mAction){
 		// Character is scribing a spell into the SpellBook.
 	case MemoriseSpell::SCRIBE:
-		EXPECTED(mCharacter->handleScribeSpell(payload->mSlot, payload->mSpellID));
+		mCharacter->handleScribeSpell(payload->mSlot, payload->mSpellID);
 		break;
 		// Character is adding a spell to the SpellBar.
 	case MemoriseSpell::MEMORISE:
-		EXPECTED(mCharacter->handleMemoriseSpell(payload->mSlot, payload->mSpellID));
+		mCharacter->handleMemoriseSpell(payload->mSlot, payload->mSpellID);
 		break;
 		// Character is removing a spell from the SpellBar.
 	case MemoriseSpell::UNMEMORISE:
-		EXPECTED(mCharacter->handleUnmemoriseSpell(payload->mSlot));
+		mCharacter->handleUnmemoriseSpell(payload->mSlot);
 		break;
 	default:
-		Log::error("Unknown action in _handleMemoriseSpell from " + Utility::characterLogDetails(mCharacter));
+		mLog->error("Unknown action: " + toString(payload->mAction) + " in" + String(__FUNCTION__));
 		break;
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleDeleteSpell(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleDeleteSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(DeleteSpell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCaster()); // Sanity.
+	if(!pPacket) return false;
+	SIZE_CHECK(DeleteSpell::sizeCheck(pPacket));
 
 	auto payload = DeleteSpell::convert(pPacket);
 	const bool success = mCharacter->handleDeleteSpell(payload->mSlot);
 	sendDeleteSpellDelete(payload->mSlot, success);
+
+	return true;
 }
 
-void ZoneConnection::_handleLoadSpellSet(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleLoadSpellSet(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(LoadSpellSet::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCaster()); // Sanity.
+	if(!pPacket) return false;
+	SIZE_CHECK(LoadSpellSet::sizeCheck(pPacket));
 
 	auto payload = LoadSpellSet::convert(pPacket->pBuffer);
+
+	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleSwapSpell(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSwapSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(SwapSpell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCaster()); // Sanity.
+	if(!pPacket) return false;
+	SIZE_CHECK(SwapSpell::sizeCheck(pPacket));
 
 	auto payload = SwapSpell::convert(pPacket->pBuffer);
-	EXPECTED(mCharacter->handleSwapSpells(payload->mFrom, payload->mTo));
+	mCharacter->handleSwapSpells(payload->mFrom, payload->mTo);
 
 	// Client requires a reply.
 	sendPacket(pPacket);
+	return true;
 }
 
-void ZoneConnection::_handleCastSpell(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCastSpell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(CastSpell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isCasting() == false);
+	if(!pPacket) return false;
+	SIZE_CHECK(CastSpell::sizeCheck(pPacket));
 	
 	auto payload = CastSpell::convert(pPacket->pBuffer);
 
 	if (payload->mInventorySlot == 0xFFFF)
-		EXPECTED(mCharacter->isCaster());
+		EXPECTED_BOOL(mCharacter->isCaster());
 
 	// Check: Target validity
 	if (mCharacter->hasTarget()) {
 		// Match spawn IDs
-		EXPECTED(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
+		EXPECTED_BOOL(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
 	}
 	else {
 		// Expect both zero.
-		EXPECTED(payload->mTargetID == 0);
+		EXPECTED_BOOL(payload->mTargetID == 0);
 	}
 
-	EXPECTED(Limits::SpellBar::slotValid(payload->mSlot));
-	EXPECTED(Limits::SpellBar::spellIDValid(payload->mSpellID));
+	EXPECTED_BOOL(Limits::SpellBar::slotValid(payload->mSlot));
+	EXPECTED_BOOL(Limits::SpellBar::spellIDValid(payload->mSpellID));
 
 	// Casting from Spell Bar.
 	mZone->handleCastingBegin(mCharacter, payload->mSlot, payload->mSpellID);
+	return true;
 }
 
-void ZoneConnection::_handleCombatAbility(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCombatAbility(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(CombatAbility::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->hasTarget());
+	if(!pPacket) return false;
+	SIZE_CHECK(CombatAbility::sizeCheck(pPacket));
 
 	auto payload = CombatAbility::convert(pPacket->pBuffer);
 
-	EXPECTED(payload->mTargetID == mCharacter->getTarget()->getSpawnID());
+	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleTaunt(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTaunt(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Taunt::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->hasTarget());
-	EXPECTED(mCharacter->getTarget()->isNPC());
-	EXPECTED(mCharacter->canTaunt());
+	if(!pPacket) return false;
+	SIZE_CHECK(Taunt::sizeCheck(pPacket));
 
 	auto payload = Taunt::convert(pPacket->pBuffer);
-
-	EXPECTED(payload->mSpawnID == mCharacter->getTarget()->getSpawnID());
+	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleConsider(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleConsider(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Consider::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(Consider::sizeCheck(pPacket));
 	
 	auto payload = Consider::convert(pPacket);
 	Log::info(payload->_debug());
 	mZone->handleConsider(mCharacter, payload->mTargetSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleConsiderCorpse(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleConsiderCorpse(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Consider::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(Consider::sizeCheck(pPacket));
 
 	auto payload = Consider::convert(pPacket);
 	Log::info(payload->_debug());
 	mZone->handleConsiderCorpse(mCharacter, payload->mTargetSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleSurname(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSurname(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Surname::sizeCheck(pPacket));
-	EXPECTED(mCharacter->getLevel() >= Limits::Character::MIN_LEVEL_SURNAME); // Hacker!
+	if(!pPacket) return false;
+	SIZE_CHECK(Surname::sizeCheck(pPacket));
 
 	auto payload = Surname::convert(pPacket);
 
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED(Limits::Character::nameLength(characterName));
-	EXPECTED(characterName == mCharacter->getName());
-
 	String lastName = Utility::safeString(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
-	EXPECTED(Limits::Character::surnameLengthClient(lastName)); // Match Client check.
+	if (!Limits::Character::surnameLengthClient(lastName)) return false;
 	// TODO: Check for special characters / Captialisation.
 
 	// Update Character.
@@ -2768,7 +2734,7 @@ void ZoneConnection::_handleSurname(const EQApplicationPacket* pPacket) {
 	sendSurnameApproval(true);
 	// Update Zone.
 	mZone->handleSurnameChange(mCharacter);
-	
+	return true;
 }
 
 void ZoneConnection::sendSurnameApproval(const bool pSuccess) {
@@ -2781,66 +2747,51 @@ void ZoneConnection::sendSurnameApproval(const bool pSuccess) {
 	delete packet;
 }
 
-void ZoneConnection::_handleGMLastName(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGMLastName(const EQApplicationPacket* pPacket) {
 	mCharacter->notify("Please use the command system.");
+	return true;
 }
 
-void ZoneConnection::_handleClearSurname(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleClearSurname(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 
 	// Update Character.
 	mCharacter->setLastName("");
 	// Update Zone.
 	mZone->handleSurnameChange(mCharacter);
+	return true;
 }
 
-void ZoneConnection::_handleSetTitle(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSetTitle(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(SetTitle::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(SetTitle::sizeCheck(pPacket));
 	
 	auto payload = SetTitle::convert(pPacket->pBuffer);
 
-	EXPECTED(payload->mOption == SetTitle::SET_TITLE || payload->mOption == SetTitle::SET_SUFFIX);
-
-	// TODO: Check eligibility
-
-	// Prefix changing.
-	if (payload->mOption == SetTitle::SET_TITLE) {
-		String prefix = "";
-
-		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
-		if (payload->mTitleID != 0)
-			prefix = ServiceLocator::getTitleManager()->getPrefix(payload->mTitleID);
-
-		// Update Character.
-		mCharacter->setTitle(prefix);
-	}
-
-	// Suffix changing.
-	if (payload->mOption == SetTitle::SET_SUFFIX) {
-		String suffix = "";
-
-		// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Suffix' button.
-		if (payload->mTitleID != 0)
-			suffix = ServiceLocator::getTitleManager()->getSuffix(payload->mTitleID);
-
-		// Update Character.
-		mCharacter->setSuffix(suffix);
-	}
-
-	// Update Zone.
-	const uint32 t = payload->mOption == SetTitle::SET_TITLE ? TitleOption::Title : TitleOption::Suffix;
-	mZone->handleTitleChanged(mCharacter, t);
 	
+
+	// Handle: Title change.
+	if (payload->mAction == SetTitleAction::Title) {
+		mZone->onSetTitle(mCharacter, payload->mID);
+	}
+	// Handle: Suffix change.
+	else if (payload->mAction == SetTitleAction::Suffix) {
+		mZone->onSetSuffix(mCharacter, payload->mID);
+	}
+	else {
+		mLog->error("Unknown action in " + String(__FUNCTION__));
+	}
+
+	return true;
 }
 
-void ZoneConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleRequestTitles(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 
 	auto availableTitles = ServiceLocator::getTitleManager()->getTitles(mCharacter);
 	if (availableTitles.empty())
-		return;
+		return true;
 
 	int payloadSize = sizeof(uint32); // 4 bytes: store the number of titles.
 	for (auto i : availableTitles) {
@@ -2861,7 +2812,8 @@ void ZoneConnection::_handleRequestTitles(const EQApplicationPacket* pPacket) {
 
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
+	EXPECTED_BOOL(ds.check());
+	return true;
 }
 
 void ZoneConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess) {
@@ -2938,22 +2890,21 @@ void ZoneConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) 
 	delete packet;
 }
 
-void ZoneConnection::_handleBeginLootRequest(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleBeginLootRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(LootBeginRequest::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->isLooting() == false);
+	if(!pPacket) return false;
+	SIZE_CHECK(LootBeginRequest::sizeCheck(pPacket));
 
 	auto payload = LootBeginRequest::convert(pPacket->pBuffer);
-	const uint32 corpseSpawnID = payload->mSpawnID;
-	mZone->handleBeginLootRequest(mCharacter, corpseSpawnID);
+	mZone->handleBeginLootRequest(mCharacter, payload->mSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleEndLootRequest(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->isLooting());
+const bool ZoneConnection::handleEndLootRequest(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 
 	mZone->handleEndLootRequest(mCharacter);
+	return true;
 }
 
 void ZoneConnection::sendLootComplete() {
@@ -2989,34 +2940,32 @@ void ZoneConnection::sendConsiderResponse(const uint32 pSpawnID, const uint32 pM
 	safe_delete(packet);
 }
 
-void ZoneConnection::_handleLootItem(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleLootItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(mCharacter->isLooting());
-	EXPECTED(LootItem::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(LootItem::sizeCheck(pPacket));
 	
 	auto payload = LootItem::convert(pPacket);
 	Log::info(payload->_debug());
-
-	EXPECTED(payload->mLooterSpawnID == mCharacter->getSpawnID());
-	EXPECTED(payload->mCorpseSpawnID == mCharacter->getLootingCorpse()->getSpawnID());
 
 	// Send required reply(echo).
 	sendPacket(const_cast<EQApplicationPacket*>(pPacket));
 
 	mZone->handleLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
+	return true;
 }
 
-void ZoneConnection::_handleMoveItem(const EQApplicationPacket* pPacket) {
-	if (!_handleMoveItemImpl(pPacket)) {
+const bool ZoneConnection::handleMoveItem(const EQApplicationPacket* pPacket) {
+	if (!handleMoveItemImpl(pPacket)) {
 		inventoryError();
 	}
+	return true;
 }
 
-const bool ZoneConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleMoveItemImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(MoveItem::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(MoveItem::sizeCheck(pPacket));
 
 	auto payload = MoveItem::convert(pPacket);
 	Log::info("MoveItem: From: " + std::to_string(payload->mFromSlot) + " To: " + std::to_string(payload->mToSlot) + " Stack: " + std::to_string(payload->mStacks));
@@ -3068,12 +3017,12 @@ const bool ZoneConnection::_handleMoveItemImpl(const EQApplicationPacket* pPacke
 	return true;
 }
 
-void ZoneConnection::_handleConsume(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleConsume(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Consume::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(Consume::sizeCheck(pPacket));
 
-	auto payload = Consume::convert(pPacket->pBuffer);
+	auto payload = Consume::convert(pPacket);
 
 	Log::info("Consume from slot: " + std::to_string(payload->mSlot));
 	if (!mCharacter->getInventory()->consume(payload->mSlot, 1)) {
@@ -3081,6 +3030,7 @@ void ZoneConnection::_handleConsume(const EQApplicationPacket* pPacket) {
 	}
 	
 	sendStamina(0, 0);
+	return true;
 }
 
 void ZoneConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
@@ -3096,17 +3046,19 @@ void ZoneConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
 	delete packet;
 }
 
-void ZoneConnection::_handlePotionBelt(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handlePotionBelt(const EQApplicationPacket* pPacket) {
+	return true;
 }
 
-void ZoneConnection::_handleItemRightClick(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleItemRightClick(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ItemRightClick::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(ItemRightClick::sizeCheck(pPacket));
 
 	auto payload = ItemRightClick::convert(pPacket->pBuffer);
 
 	sendItemRightClickResponse(payload->mSlot, payload->mTargetSpawnID);
+	return true;
 }
 
 void ZoneConnection::sendItemRightClickResponse(const int32 pSlot, const uint32 pTargetSpawnID) {
@@ -3128,37 +3080,38 @@ void ZoneConnection::inventoryError(){
 	Log::error("Inventory Error");
 }
 
-void ZoneConnection::_handleOpenContainer(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleOpenContainer(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(OpenContainer::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(OpenContainer::sizeCheck(pPacket));
 
 	auto payload = OpenContainer::convert(pPacket->pBuffer);
 	Log::info("Open Container: " + std::to_string(payload->mSlot));
+	return true;
 }
 
-void ZoneConnection::_handleTradeRequest(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTradeRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(TradeRequest::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(TradeRequest::sizeCheck(pPacket));
 
 	auto payload = TradeRequest::convert(pPacket);
-
-	EXPECTED(payload->mFromSpawnID == mCharacter->getSpawnID());
 
 	// OP_TradeRequestAck
 
 	// NOTE: Underfoot does appear to require a response.
 
 	mZone->handleTradeRequest(mCharacter, payload->mToSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleTradeRequestAck(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTradeRequestAck(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(TradeRequest::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(TradeRequest::sizeCheck(pPacket));
 
 	auto payload = TradeRequest::convert(pPacket);
+	return true;
 }
 
 void ZoneConnection::sendTradeRequest(const uint32 pFromSpawnID) {
@@ -3174,31 +3127,30 @@ void ZoneConnection::sendTradeRequest(const uint32 pFromSpawnID) {
 	delete packet;
 }
 
-void ZoneConnection::_handleCancelTrade(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCancelTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(TradeCancel::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(TradeCancel::sizeCheck(pPacket));
 	
 	// NOTE: Underfoot sends this twice when trade is canceled with an NPC
 	// TODO: Test whether this occurs when canceling with PC.
 	if (mCharacter->isTrading() == false) {
 		Log::info("Got OP_CancelTrade while not trading. Ignoring.");
-		return;
+		return true;
 	}
 
 	auto payload = TradeCancel::convert(pPacket);
 
-	EXPECTED(payload->mFromSpawnID == mCharacter->getSpawnID());
 	Log::info(payload->_debug());
 
 	mZone->handleTradeCancel(mCharacter, payload->mToSpawnID);
+	return true;
 }
 
-void ZoneConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAcceptTrade(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(TradeAccept::sizeCheck(pPacket->size));
-	EXPECTED(mCharacter->isTrading());
+	if(!pPacket) return false;
+	SIZE_CHECK(TradeAccept::sizeCheck(pPacket));
 
 	// TODO: I can check that mCharacter is trading with the specific Actor.
 
@@ -3210,36 +3162,39 @@ void ZoneConnection::_handleAcceptTrade(const EQApplicationPacket* pPacket) {
 	//sendTradeFinished();
 	//mCharacter->setTrading(false);
 	// TODO: Consume trade items.
+	return true;
 }
 
-void ZoneConnection::_handleTradeBusy(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleTradeBusy(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(TradeBusy::sizeCheck(pPacket->size));
+	if(!pPacket) return false;
+	SIZE_CHECK(TradeBusy::sizeCheck(pPacket));
 
 	auto payload = TradeBusy::convert(pPacket->pBuffer);
+	return true;
 }
 
-void ZoneConnection::_handleSetServerFiler(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleSetServerFiler(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ServerFilter::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(ServerFilter::sizeCheck(pPacket));
 
 	auto payload = ServerFilter::convert(pPacket->pBuffer);
 
 	mCharacter->setFilters(payload->mFilters);
+	return true;
 }
 
-void ZoneConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleItemLinkClick(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ItemLink::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(ItemLink::sizeCheck(pPacket));
 
 	auto payload = ItemLink::convert(pPacket);
 
 	// Retrieve base ItemData
 	auto itemData = ServiceLocator::getItemDataStore()->get(payload->mItemID);
-	EXPECTED(itemData);
+	EXPECTED_BOOL(itemData);
 
 	Item* item = new Item(itemData);
 
@@ -3252,7 +3207,7 @@ void ZoneConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
 		if (payload->mAugments[i] != 0) {
 			// Retrieve augmentation ItemData.
 			auto augmentationItemData = ServiceLocator::getItemDataStore()->get(payload->mAugments[i]);
-			EXPECTED(augmentationItemData);
+			EXPECTED_BOOL(augmentationItemData);
 
 			// NOTE: Memory is freed when item is deleted.
 			item->setAugmentation(i, new Item(augmentationItemData));
@@ -3261,23 +3216,27 @@ void ZoneConnection::_handleItemLinkClick(const EQApplicationPacket* pPacket) {
 
 	sendItemView(item);
 	delete item;
+	return true;
 }
 
-void ZoneConnection::_handleItemView(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleItemView(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 	Log::info("Got OP_ItemViewUnknown. Size=" + std::to_string(pPacket->size));
+	return true;
 }
 
-void ZoneConnection::_handleMoveCoin(const EQApplicationPacket* pPacket) {
-	if (!_handleMoveCoinImpl(pPacket)) {
+const bool ZoneConnection::handleMoveCoin(const EQApplicationPacket* pPacket) {
+	if (!handleMoveCoinImpl(pPacket)) {
 		inventoryError();
 	}
+
+	return true;
 }
 
-const bool ZoneConnection::_handleMoveCoinImpl(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleMoveCoinImpl(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(MoveCoin::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(MoveCoin::sizeCheck(pPacket));
 
 	auto payload = MoveCoin::convert(pPacket);
 
@@ -3336,51 +3295,55 @@ void ZoneConnection::sendCurrencyUpdate() {
 	delete packet;
 }
 
-void ZoneConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCrystalCreate(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(CrystalCreate::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(CrystalCreate::sizeCheck(pPacket));
 
 	// NOTE: Underfoot will allow crystals to be summoned to the cursor even when there are Items on it.
 	// This is to keep things simple.
 	if (mCharacter->getInventory()->isCursorEmpty() == false) {
 		mCharacter->notify("Please clear your cursor and try again.");
-		return;
+		return true;
 	}
 
 	auto payload = CrystalCreate::convert(pPacket);
-	EXPECTED(payload->mType == CrystalCreate::RADIANT || payload->mType == CrystalCreate::EBON);
 	uint32 itemID = 0;
 
 	uint32 stacks = payload->mAmount;
 	String crystalName;
 
 	// Creating Radiant Crystals.
-	if (payload->mType == CrystalCreate::RADIANT) {
+	if (payload->mType == CrystalCreateType::Radiant) {
 		itemID = ItemID::RadiantCrystal;
 		crystalName = "Radiant Crystals.";
 		// Adjust stacks to prevent over-stacking.
 		stacks = stacks > MaxRadiantCrystalsStacks ? MaxRadiantCrystalsStacks : stacks;
 		// Check: Not trying to create more than is possible.
-		EXPECTED(stacks <= mCharacter->getInventory()->getRadiantCrystals());
+		EXPECTED_BOOL(stacks <= mCharacter->getInventory()->getRadiantCrystals());
 		// Remove crystals from Character.
-		EXPECTED(mCharacter->getInventory()->removeRadiantCrystals(stacks));
+		EXPECTED_BOOL(mCharacter->getInventory()->removeRadiantCrystals(stacks));
 	}
 	// Creating Ebon Crystals.
-	else if (payload->mType == CrystalCreate::EBON) {
+	else if (payload->mType == CrystalCreateType::Ebon) {
 		itemID = ItemID::EbonCrystal;
 		crystalName = "Ebon Crystals.";
 		// Adjust stacks to prevent over-stacking.
 		stacks = stacks > MaxEbonCrystalsStacks ? MaxEbonCrystalsStacks : stacks;
 		// Check: Not trying to create more than is possible.
-		EXPECTED(stacks <= mCharacter->getInventory()->getEbonCrystals());
+		EXPECTED_BOOL(stacks <= mCharacter->getInventory()->getEbonCrystals());
 		// Remove crystals from Character.
-		EXPECTED(mCharacter->getInventory()->removeEbonCrystals(stacks));
+		EXPECTED_BOOL(mCharacter->getInventory()->removeEbonCrystals(stacks));
 		
+	}
+	// Unknown.
+	else {
+		mLog->error("Unknown crystal type: " + toString(payload->mType) + " in " + String(__FUNCTION__));
+		return true;
 	}
 
 	auto item = ServiceLocator::getItemFactory()->make(itemID, stacks);
-	EXPECTED(item);
+	EXPECTED_BOOL(item);
 	mCharacter->getInventory()->pushCursor(item);
 	sendItemSummon(item);
 
@@ -3389,17 +3352,18 @@ void ZoneConnection::_handleCrystalCreate(const EQApplicationPacket* pPacket) {
 
 	// Update client.
 	sendCrystals();
+	return true;
 }
 
-void ZoneConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCrystalReclaim(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
+	if(!pPacket) return false;
 
 	// Check: Character has Radiant or Ebon crystals on cursor.
 	Item* item = mCharacter->getInventory()->peekCursor();
 	if (!item || (item->getID() != ItemID::RadiantCrystal && item->getID() != ItemID::EbonCrystal)) {
 		mCharacter->notify("Please place crystals on your cursor and try again.");
-		return;
+		return true;
 	}
 
 	const uint32 stacks = item->getStacks();
@@ -3409,14 +3373,14 @@ void ZoneConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
 	if (item->getID() == ItemID::RadiantCrystal) {
 		crystalName = "Radiant Crystals.";
 		// Consume from Inventory.
-		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+		EXPECTED_BOOL(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
 		mCharacter->getInventory()->addRadiantCrystals(stacks);
 	}
 	// Add Ebon Crystals.
 	else if (item->getID() == ItemID::EbonCrystal) {
 		crystalName = "Ebon Crystals.";
 		// Consume from Inventory.
-		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+		EXPECTED_BOOL(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
 		mCharacter->getInventory()->addEbonCrystals(stacks);
 	}
 
@@ -3428,6 +3392,7 @@ void ZoneConnection::_handleCrystalReclaim(const EQApplicationPacket* pPacket) {
 
 	// Update client.
 	sendCrystals();
+	return true;
 }
 
 void ZoneConnection::sendCrystals() {
@@ -3445,16 +3410,18 @@ void ZoneConnection::sendCrystals() {
 	safe_delete(packet);
 }
 
-void ZoneConnection::_handleUnknown(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handleUnknown(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
 	auto raw = static_cast<EQRawApplicationPacket*>(const_cast<EQApplicationPacket*>(pPacket));
 	Log::info("OpCode= " + std::to_string(raw->GetRawOpcode()));
+	return true;
 }
 
-void ZoneConnection::_handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
+const bool ZoneConnection::handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
 {
 	sendHealthUpdate();
+	return true;
 }
 
 void ZoneConnection::sendPopup(const String& pTitle, const String& pText) {
@@ -3466,13 +3433,16 @@ void ZoneConnection::sendPopup(const String& pTitle, const String& pText) {
 	safe_delete(packet);
 }
 
-void ZoneConnection::_handlePopupResponse(const EQApplicationPacket* pPacket) {
-	EXPECTED(pPacket);
+const bool ZoneConnection::handlePopupResponse(const EQApplicationPacket* pPacket) {
+	if(!pPacket) return false;
+	// TODO:
+	return true;
 }
 
-void ZoneConnection::_handleClaimRequest(const EQApplicationPacket* pPacket)
-{
-	throw std::logic_error("The method or operation is not implemented.");
+const bool ZoneConnection::handleClaimRequest(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+	// TODO:
+	return true;
 }
 
 void ZoneConnection::sendItemView(Item* pItem) {
@@ -3524,26 +3494,26 @@ void ZoneConnection::sendItemShop(Item* pItem) {
 }
 
 
-void ZoneConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAugmentItem(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(AugmentItem::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AugmentItem::sizeCheck(pPacket));
 
 	auto payload = AugmentItem::convert(pPacket);
 
 	Log::info(payload->_debug());
 
 	auto container = mCharacter->getInventory()->getItem(payload->mContainerSlot);
-	EXPECTED(container);
-	EXPECTED(container->getContainerType() == ContainerType::AugmentationSealer);
-	EXPECTED(container->getContainerSlots() == 2);
+	EXPECTED_BOOL(container);
+	EXPECTED_BOOL(container->getContainerType() == ContainerType::AugmentationSealer);
+	EXPECTED_BOOL(container->getContainerSlots() == 2);
 
 	// Insert
 	if (payload->mAugmentSlot == -1) {
 		auto item0 = container->getContents(0);
-		EXPECTED(item0);
+		EXPECTED_BOOL(item0);
 		auto item1 = container->getContents(1);
-		EXPECTED(item1);
+		EXPECTED_BOOL(item1);
 
 		Item* item = nullptr;
 		Item* augment = nullptr;
@@ -3555,7 +3525,7 @@ void ZoneConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 			item = item1;
 		}
 		else {
-			EXPECTED(item1->getItemType() == ItemType::Augmentation);
+			EXPECTED_BOOL(item1->getItemType() == ItemType::Augmentation);
 			augment = item1;
 			item = item0;
 		}
@@ -3568,7 +3538,7 @@ void ZoneConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 		sendDeleteItem(item->getSlot());
 
 		// Send the augmented item back.
-		EXPECTED(item->insertAugment(augment));
+		EXPECTED_BOOL(item->insertAugment(augment));
 		mCharacter->getInventory()->pushCursor(item);
 
 		uint32 payloadSize = 0;
@@ -3578,13 +3548,15 @@ void ZoneConnection::_handleAugmentItem(const EQApplicationPacket* pPacket) {
 		sendPacket(packet);
 		delete packet;
 
-		return;
+		return true;
 	}
 
 	// Remove.
 	if (payload->mAugmentSlot == 0) {
 
 	}
+
+	return true;
 }
 
 void ZoneConnection::sendDeleteItem(const uint32 pSlot, const uint32 pStacks, const uint32 pToSlot) {
@@ -3648,15 +3620,16 @@ void ZoneConnection::sendFinishWindow2() {
 	delete packet;
 }
 
-void ZoneConnection::_handleAugmentInfo(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAugmentInfo(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(AugmentInformation::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AugmentInformation::sizeCheck(pPacket));
 
 	auto payload = AugmentInformation::convert(pPacket);
 	Log::info(payload->_debug());
 
 	//sendReadBook(payload->mWindow, 0, 2, "You must use a <c \"#FF0000\">monster cock</c> to remove this augment safely.");
+	return true;
 }
 
 void ZoneConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText) {
@@ -3689,10 +3662,10 @@ void ZoneConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, cons
 	
 }
 
-void ZoneConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleReadBook(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(BookRequest::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(BookRequest::sizeCheck(pPacket));
 
 	auto payload = BookRequest::convert(pPacket);
 	Log::info(payload->_debug());
@@ -3703,10 +3676,10 @@ void ZoneConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 
 	String text(payload->mText);
 	std::vector<String> elements = Utility::split(text, '|');
-	EXPECTED(elements.size() == 2);
+	EXPECTED_BOOL(elements.size() == 2);
 
-	EXPECTED(Utility::stoSafe(itemID, elements[0]));
-	EXPECTED(Utility::stoSafe(itemInstanceID, elements[1]));
+	EXPECTED_BOOL(Utility::stoSafe(itemID, elements[0]));
+	EXPECTED_BOOL(Utility::stoSafe(itemInstanceID, elements[1]));
 
 	auto item = mCharacter->getInventory()->find(itemID, itemInstanceID);
 
@@ -3736,17 +3709,19 @@ void ZoneConnection::_handleReadBook(const EQApplicationPacket* pPacket) {
 			//}
 		}
 	}
+	return true;
 }
 
-void ZoneConnection::_handleCombine(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleCombine(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(Combine::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(Combine::sizeCheck(pPacket));
 
 	auto payload = Combine::convert(pPacket);
 	Log::info(payload->_debug());
 
 	mZone->onCombine(mCharacter, payload->mSlot);
+	return true;
 }
 
 void ZoneConnection::sendCombineReply() {
@@ -3756,20 +3731,16 @@ void ZoneConnection::sendCombineReply() {
 	delete packet;
 }
 
-void ZoneConnection::_handleShopRequest(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleShopRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ShopRequest::sizeCheck(pPacket));
-
-	// Check: Character is in a state that allows for shopping.
-	EXPECTED(mCharacter->canShop());
+	if(!pPacket) return false;
+	SIZE_CHECK(ShopRequest::sizeCheck(pPacket));
 
 	auto payload = ShopRequest::convert(pPacket);
 	Log::info(payload->_debug());
 
-	EXPECTED(mCharacter->getSpawnID() == payload->mCharacterSpawnID); // Sanity.
-
 	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
+	return true;
 }
 
 void ZoneConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32 pAction, const float pRate) {
@@ -3781,15 +3752,14 @@ void ZoneConnection::sendShopRequestReply(const uint32 pNPCSpawnID, const uint32
 	delete packet;
 }
 
-void ZoneConnection::_handleShopEnd(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleShopEnd(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ShopEnd::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(ShopEnd::sizeCheck(pPacket));
 
 	auto payload = ShopEnd::convert(pPacket);
-
-	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
 	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
+	return true;
 }
 
 void ZoneConnection::sendShopEndReply() {
@@ -3800,16 +3770,16 @@ void ZoneConnection::sendShopEndReply() {
 	delete packet;
 }
 
-void ZoneConnection::_handleShopSell(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleShopSell(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ShopSell::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isShopping());
+	if(!pPacket) return false;
+	SIZE_CHECK(ShopSell::sizeCheck(pPacket));
 
 	auto payload = ShopSell::convert(pPacket);
 	Log::info(payload->_debug());
 
 	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
+	return true;
 }
 
 void ZoneConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks, const uint32 pPrice) {
@@ -3821,19 +3791,16 @@ void ZoneConnection::sendShopSellReply(const uint32 pSpawnID, const uint32 pSlot
 	delete packet;
 }
 
-void ZoneConnection::_handleShopBuy(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleShopBuy(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(ShopBuy::sizeCheck(pPacket));
-	EXPECTED(mCharacter->isShopping());
+	if(!pPacket) return false;
+	SIZE_CHECK(ShopBuy::sizeCheck(pPacket));
 
 	auto payload = ShopBuy::convert(pPacket);
 	Log::info(payload->_debug());
 
-	EXPECTED(payload->mCharacterSpawnID == mCharacter->getSpawnID()); // Sanity.
-	EXPECTED(payload->mStacks >= 1); // Sanity.
-
 	mZone->handleShopBuy(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
+	return true;
 }
 
 void ZoneConnection::sendShopBuyReply(const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks, const uint64 pPrice, const uint32 pResponse) {
@@ -3966,10 +3933,10 @@ void ZoneConnection::sendAlternateCurrencyQuantity(const uint32 pCurrencyID) {
 	sendAlternateCurrencyQuantity(pCurrencyID, mCharacter->getInventory()->getAlternateCurrencyQuantity(pCurrencyID));
 }
 
-void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(AlternateCurrencyReclaim::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AlternateCurrencyReclaim::sizeCheck(pPacket));
 
 	auto payload = AlternateCurrencyReclaim::convert(pPacket);
 	Log::info(payload->_debug());
@@ -3979,21 +3946,21 @@ void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* 
 		// NOTE: Underfoot will allow currencies to be summoned to the cursor even when there are Items on it.
 		if (mCharacter->getInventory()->isCursorEmpty() == false) {
 			mCharacter->notify("Please clear your cursor and try again.");
-			return;
+			return true;
 		}
 
 		// Check: Currency Type.
 		const uint32 itemID = ServiceLocator::getAlternateCurrencyManager()->getItemID(payload->mCurrencyID);
 		if (itemID == 0) {
 			// TODO: Logging.
-			return;
+			return true;
 		}
 
 		// Check: Stacks.
 		const uint32 currentQuantity = mCharacter->getInventory()->getAlternateCurrencyQuantity(payload->mCurrencyID);
 		if (currentQuantity < payload->mStacks) {
 			// TODO: Logging.
-			return;
+			return true;
 		}
 
 		// Update alternate currency.
@@ -4001,7 +3968,7 @@ void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* 
 
 		// Create Item
 		auto item = ServiceLocator::getItemFactory()->make(itemID, payload->mStacks);
-		EXPECTED(item);
+		EXPECTED_BOOL(item);
 
 		// Add to cursor.
 		mCharacter->getInventory()->pushCursor(item);
@@ -4019,14 +3986,14 @@ void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* 
 		Item* item = mCharacter->getInventory()->peekCursor();
 		if (!item) {
 			mCharacter->notify("Please place an alternate currency on your cursor and try again.");
-			return;
+			return true;
 		}
 
 		// Check: Item on cursor is alternate currency Item.
 		const uint32 currencyID = ServiceLocator::getAlternateCurrencyManager()->getCurrencyID(item->getID());
 		if (currencyID == 0) {
 			mCharacter->notify("Please place an alternate currency on your cursor and try again.");
-			return;
+			return true;
 		}
 
 		const uint32 stacks = item->getStacks();
@@ -4036,7 +4003,7 @@ void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* 
 		mCharacter->getInventory()->addAlternateCurrency(currencyID, stacks);
 		
 		// Consume from Inventory.
-		EXPECTED(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
+		EXPECTED_BOOL(mCharacter->getInventory()->consume(SlotID::CURSOR, stacks));
 
 		// Clear cursor.
 		sendMoveItem(SlotID::CURSOR, SlotID::SLOT_DELETE);
@@ -4050,8 +4017,10 @@ void ZoneConnection::_handleAlternateCurrencyReclaim(const EQApplicationPacket* 
 	else {
 		// Unknown Action.
 		// TODO: Logging.
-		return;
+		return true;
 	}
+
+	return true;
 }
 
 void ZoneConnection::sendMOTD(const String& pMOTD) {
@@ -4062,18 +4031,20 @@ void ZoneConnection::sendMOTD(const String& pMOTD) {
 	delete packet;
 }
 
-void ZoneConnection::_handleRandomRequest(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleRandomRequest(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(RandomRequest::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(RandomRequest::sizeCheck(pPacket));
 
 	auto payload = RandomRequest::convert(pPacket);
 
 	mZone->handleRandomRequest(mCharacter, payload->mLow, payload->mHigh);
+	return true;
 }
 
-void ZoneConnection::_handleDropItem(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleDropItem(const EQApplicationPacket* pPacket) {
 	mZone->handleDropItem(mCharacter);
+	return true;
 }
 
 void ZoneConnection::sendObject(Object* pObject) {
@@ -4132,13 +4103,14 @@ void ZoneConnection::sendEnduranceUpdate() {
 	delete packet;
 }
 
-void ZoneConnection::_handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone::ExtendedTarget;
-	EXPECTED(pPacket);
-	EXPECTED(AutoAddHaters::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AutoAddHaters::sizeCheck(pPacket));
 
 	auto payload = AutoAddHaters::convert(pPacket);
 	mCharacter->getXTargetController()->setAutoAddHaters(payload->mAction == 1 ? true : false);
+	return true;
 }
 
 void ZoneConnection::sendRespawnWindow() {
@@ -4182,27 +4154,27 @@ void ZoneConnection::sendRespawnWindow() {
 	EXPECTED(ds.check());
 }
 
-void ZoneConnection::_handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(RespawnWindowSelect::sizeCheck(pPacket));
-	EXPECTED(mCharacter->getRespawnOptions()->isActive()); // Sanity.
+	if(!pPacket) return false;
+	SIZE_CHECK(RespawnWindowSelect::sizeCheck(pPacket));
 
 	auto payload = RespawnWindowSelect::convert(pPacket);
 	Log::info(payload->_debug());
 
 	mZone->handleRespawnSelection(mCharacter, payload->mSelection);
+	return true;
 }
 
-void ZoneConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleAAAction(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(AAAction::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(AAAction::sizeCheck(pPacket));
 
 	auto payload = AAAction::convert(pPacket);
 	Log::info(payload->_debug());
 
-	EXPECTED(Utility::inRange<u32>(payload->mExperienceToAA, 0, 100)); // Sanity.
+	if (!Utility::inRange<u32>(payload->mExperienceToAA, 0, 100)) return false; // Sanity.
 
 	auto controller = mCharacter->getExperienceController();
 
@@ -4220,17 +4192,17 @@ void ZoneConnection::_handleAAAction(const EQApplicationPacket* pPacket) {
 		sendAAExperienceOffMessage();
 		mCharacter->getExperienceController()->setExperienceToAA(0);
 	}
+
+	return true;
 }
 
-void ZoneConnection::_handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
-	EXPECTED(pPacket);
-	EXPECTED(LeadershipExperienceToggle::sizeCheck(pPacket));
+	if(!pPacket) return false;
+	SIZE_CHECK(LeadershipExperienceToggle::sizeCheck(pPacket));
 
 	auto payload = LeadershipExperienceToggle::convert(pPacket);
 	Log::info(payload->_debug());
-
-	EXPECTED(payload->mValue == 1 || payload->mValue == 0); // Sanity.
 
 	auto controller = mCharacter->getExperienceController();
 
@@ -4240,10 +4212,17 @@ void ZoneConnection::_handleLeadershipExperienceToggle(const EQApplicationPacket
 		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOn);
 	}
 	// Turning leadership experience off.
-	else {
+	else if (payload->mValue == 1) {
 		controller->setLeadershipExperience(false);
 		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOff);
-	}	
+	}
+	// Unknown.
+	else {
+		mLog->error("Unknown value: " + toString(payload->mValue) + " in " + String(__FUNCTION__));
+		return true;
+	}
+
+	return true;
 }
 
 //

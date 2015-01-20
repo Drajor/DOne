@@ -2131,31 +2131,31 @@ ENCODE(OP_VetRewardsAvaliable)
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_GroupFollow) {
-	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
-	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
-	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
-	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
-	FINISH_ENCODE();
-}
+//ENCODE(OP_GroupFollow) {
+//	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
+//	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
+//	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
+//	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
+//	FINISH_ENCODE();
+//}
 
-ENCODE(OP_GroupFollow2) {
-	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
-	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
-	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
-	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
-	FINISH_ENCODE();
-}
+//ENCODE(OP_GroupFollow2) {
+//	ENCODE_LENGTH_EXACT(GroupGeneric_Struct);
+//	SETUP_DIRECT_ENCODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
+//	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
+//	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
+//	FINISH_ENCODE();
+//}
 
-ENCODE(OP_GroupCancelInvite)
-{
-	ENCODE_LENGTH_EXACT(GroupCancel_Struct);
-	SETUP_DIRECT_ENCODE(GroupCancel_Struct, structs::GroupCancel_Struct);
-	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
-	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
-	OUT(toggle);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_GroupCancelInvite)
+//{
+//	ENCODE_LENGTH_EXACT(GroupCancel_Struct);
+//	SETUP_DIRECT_ENCODE(GroupCancel_Struct, structs::GroupCancel_Struct);
+//	memcpy(eq->name1, emu->name1, sizeof(eq->name1));
+//	memcpy(eq->name2, emu->name2, sizeof(eq->name2));
+//	OUT(toggle);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_GroupUpdate)
 {
@@ -2919,48 +2919,48 @@ DECODE(OP_ApplyPoison) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_GroupFollow) {
-	//EQApplicationPacket *in = __packet;
-	//_log(NET__ERROR, "Received incoming OP_GroupFollow");
-	//_hex(NET__ERROR, in->pBuffer, in->size);
-	DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
-	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
-	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
-	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_GroupFollow) {
+//	//EQApplicationPacket *in = __packet;
+//	//_log(NET__ERROR, "Received incoming OP_GroupFollow");
+//	//_hex(NET__ERROR, in->pBuffer, in->size);
+//	DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
+//	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
+//	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+//	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+//	FINISH_DIRECT_DECODE();
+//}
+//
+//DECODE(OP_GroupFollow2) {
+//	//EQApplicationPacket *in = __packet;
+//	//_log(NET__ERROR, "Received incoming OP_GroupFollow2");
+//	//_hex(NET__ERROR, in->pBuffer, in->size);
+//	DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
+//	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
+//	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+//	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+//	FINISH_DIRECT_DECODE();
+//}
 
-DECODE(OP_GroupFollow2) {
-	//EQApplicationPacket *in = __packet;
-	//_log(NET__ERROR, "Received incoming OP_GroupFollow2");
-	//_hex(NET__ERROR, in->pBuffer, in->size);
-	DECODE_LENGTH_EXACT(structs::GroupFollow_Struct);
-	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupFollow_Struct);
-	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
-	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_GroupDisband) {
+//	//EQApplicationPacket *in = __packet;
+//	//_log(NET__ERROR, "Received incoming OP_Disband");
+//	//_hex(NET__ERROR, in->pBuffer, in->size);
+//	DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
+//	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
+//	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+//	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+//	FINISH_DIRECT_DECODE();
+//}
 
-DECODE(OP_GroupDisband) {
-	//EQApplicationPacket *in = __packet;
-	//_log(NET__ERROR, "Received incoming OP_Disband");
-	//_hex(NET__ERROR, in->pBuffer, in->size);
-	DECODE_LENGTH_EXACT(structs::GroupGeneric_Struct);
-	SETUP_DIRECT_DECODE(GroupGeneric_Struct, structs::GroupGeneric_Struct);
-	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
-	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
-	FINISH_DIRECT_DECODE();
-}
-
-DECODE(OP_GroupCancelInvite)
-{
-	DECODE_LENGTH_EXACT(structs::GroupCancel_Struct);
-	SETUP_DIRECT_DECODE(GroupCancel_Struct, structs::GroupCancel_Struct);
-	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
-	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
-	IN(toggle);
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_GroupCancelInvite)
+//{
+//	DECODE_LENGTH_EXACT(structs::GroupCancel_Struct);
+//	SETUP_DIRECT_DECODE(GroupCancel_Struct, structs::GroupCancel_Struct);
+//	memcpy(emu->name1, eq->name1, sizeof(emu->name1));
+//	memcpy(emu->name2, eq->name2, sizeof(emu->name2));
+//	IN(toggle);
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_Buff) {
 	DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Underfoot);

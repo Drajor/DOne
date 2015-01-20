@@ -863,6 +863,39 @@ void Zone::handleTitleChanged(Character* pCharacter, const uint32 pOption) {
 	safe_delete(packet);
 }
 
+const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
+	if (!pCharacter) return false;
+	// TODO: Check eligibility
+
+	String prefix = "";
+
+	// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
+	//if (payload->mID != 0)
+	//	prefix = ServiceLocator::getTitleManager()->getPrefix(payload->mID);
+
+	// Update Character.
+	pCharacter->setTitle(prefix);
+
+	//// Update Zone.
+	//const uint32 t = payload->mAction == SetTitle::SET_TITLE ? TitleOption::Title : TitleOption::Suffix;
+	//mZone->handleTitleChanged(mCharacter, t);
+}
+
+const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
+	if (!pCharacter) return false;
+	// TODO: Check eligibility
+
+	String suffix = "";
+
+	//// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Suffix' button.
+	//if (payload->mID != 0)
+	//	suffix = ServiceLocator::getTitleManager()->getSuffix(payload->mID);
+
+	// Update Character.
+	pCharacter->setSuffix(suffix);
+	//mZone->handleTitleChanged(mCharacter, t);
+}
+
 void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(Limits::SpellBar::slotValid(pSlot));

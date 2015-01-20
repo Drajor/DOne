@@ -214,6 +214,9 @@ public:
 	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
 
 	void handleSurnameChange(Actor* pActor);
+
+	const bool onSetTitle(Character* pCharacter, const u32 pTitleID);
+	const bool onSetSuffix(Character* pCharacter, const u32 pSuffixID);
 	void handleTitleChanged(Character* pCharacter, const uint32 pOption);
 
 	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
