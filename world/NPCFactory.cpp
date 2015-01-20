@@ -12,11 +12,21 @@
 
 NPCFactory::~NPCFactory() {
 	mDataStore = nullptr;
-	
+	mItemFactory = nullptr;
+	mShopDataStore = nullptr;
+
 	if (mLog) {
 		delete mLog;
 		mLog = nullptr;
 	}
+
+	for (auto i : mNPCAppearances)
+		delete i;
+	mNPCAppearances.clear();
+
+	for (auto i : mNPCTypes)
+		delete i;
+	mNPCTypes.clear();
 }
 
 
