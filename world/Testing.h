@@ -25,6 +25,7 @@
 #include "Test_CharacterFactory.h"
 #include "Test_Transmutation.h"
 #include "Test_ZoneConnectionHandlerSanity.h"
+#include "Test_WorldConnectionHandlerSanity.h"
 
 TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());
@@ -111,6 +112,9 @@ TEST(ZonePayload, FixedSizes) {
 	// CharacterSelect
 	EXPECT_EQ(72, Payload::World::NameGeneration::size());
 	EXPECT_EQ(544, Payload::World::ApproveWorld::size());
+
+	EXPECT_EQ(76, Payload::World::ApproveName::size());
+	EXPECT_EQ(1, Payload::World::ApproveNameResponse::size());
 	
 }
 

@@ -36,9 +36,6 @@
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
 
-#define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
-#define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
-
 EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupJoinPacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupLeavePacket = nullptr;

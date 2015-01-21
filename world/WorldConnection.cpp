@@ -34,13 +34,13 @@ WorldConnection::~WorldConnection() {
 	}
 }
 
-const bool WorldConnection::initialise(World* pWorld, ILog* pLog, EQStreamInterface* pStreamInterface) {
+const bool WorldConnection::initialise(World* pWorld, ILogFactory* pLogFactory, EQStreamInterface* pStreamInterface) {
 	if (mInitialised) return false;
-	if (!pLog) return false;
+	if (!pLogFactory) return false;
 	if (!pWorld) return false;
 	if (!pStreamInterface) return false;
 
-	mLog = pLog;
+	mLog = pLogFactory->make();
 	mWorld = pWorld;
 	mStreamInterface = pStreamInterface;
 
@@ -64,14 +64,14 @@ bool WorldConnection::update() {
 	// Handle any incoming packets.
 	EQApplicationPacket* packet = 0;
 	while (ret && (packet = (EQApplicationPacket *)mStreamInterface->PopPacket())) {
-		ret = _handlePacket(packet);
+		ret = handlePacket(packet);
 		delete packet;
 	}
 
 	return ret;
 }
 
-bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 
 	// WorldConnection must receive OP_SendLoginInfo and have a valid Account before anything else can occur.
@@ -89,24 +89,24 @@ bool WorldConnection::_handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_SendLoginInfo:
 		// NOTE: Sent when Client initially connects (Moving from Server Selection to Character Selection).
 		// NOTE: Sent when Client is moving from one zone to another.
-		return _handleConnect(pPacket);
+		return handleConnect(pPacket);
 	case OP_ApproveName:
 		// NOTE: This occurs when the user clicks the 'Create Character' button.
-		return _handleApproveName(pPacket);
+		return handleApproveName(pPacket);
 	case OP_RandomNameGenerator:
 		// NOTE: This occurs when the user clicks the 'Get Name' button.
-		return _handleGenerateRandomName(pPacket);
+		return handleGenerateRandomName(pPacket);
 	case OP_CharacterCreateRequest:
 		// NOTE: This occurs when the user clicks the 'New a New Character' button.
-		return _handleCharacterCreateRequest(pPacket);
+		return handleCharacterCreateRequest(pPacket);
 	case OP_CharacterCreate:
 		// NOTE: This occurs when the client receives OP_ApproveName.
-		return _handleCharacterCreate(pPacket);
+		return handleCharacterCreate(pPacket);
 	case OP_EnterWorld:
-		return _handleEnterWorld(pPacket);
+		return handleEnterWorld(pPacket);
 	case OP_DeleteCharacter:
 		// NOTE: This occurs when the user clicks the 'Delete Character' button.
-		return _handleDeleteCharacter(pPacket);
+		return handleDeleteCharacter(pPacket);
 	case OP_WorldComplete:
 		// NOTE: This occurs after OP_EnterWorld is replied to.
 		mStreamInterface->Close();
@@ -213,21 +213,30 @@ void WorldConnection::sendPostEnterWorld() {
 	safe_delete(outPacket);
 }
 
-bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleConnect(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
 	if (!pPacket) return false;
-
-	EXPECTED_BOOL(Connect::sizeCheck(pPacket));
+	SIZE_CHECK(Connect::sizeCheck(pPacket));
+	
 	auto payload = Connect::convert(pPacket);
 
-	String accountIDStr = Utility::safeString(payload->mInformation, 19);
-	String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
+	STRING_CHECK(payload->mInformation, 19);
+	const String accountIDStr(payload->mInformation);
+	STRING_CHECK(payload->mInformation + accountIDStr.length() + 1, 16);
+	String accountKey(payload->mInformation + accountIDStr.length() + 1);
+
+	//String accountIDStr = Utility::safeString(payload->mInformation, 19);
+	//String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
 	
 	u32 accountID = 0;
-	EXPECTED_BOOL(Utility::stoSafe(accountID, accountIDStr));
+	if (!Utility::stoSafe(accountID, accountIDStr)) {
+		mLog->error("Failed to convert account ID string.");
+		return false;
+	}
 
 	mZoning = (payload->mZoning == 1);
 
+	// Notify World.
 	const bool success = mWorld->onConnect(this, accountID, accountKey, mZoning);
 
 	if (success) {
@@ -239,24 +248,28 @@ bool WorldConnection::_handleConnect(const EQApplicationPacket* pPacket) {
 	return false;
 }
 
-bool WorldConnection::_handleApproveName(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleApproveName(const EQApplicationPacket* pPacket) {
+	using namespace Payload::World;
 	if (!pPacket) return false;
+	SIZE_CHECK(ApproveName::sizeCheck(pPacket));
 
-	// TODO: Size check. Is this fixed?
+	auto payload = ApproveName::convert(pPacket);
 
-	// Check: Name Length.
-	String characterName = Utility::safeString((char*)pPacket->pBuffer, Limits::Character::MAX_INPUT_LENGTH);
-	
-	// TODO: Consider why race and class are sent here?
-	uchar race = pPacket->pBuffer[64];
-	uchar clas = pPacket->pBuffer[68];
+	STRING_CHECK(payload->mName, Limits::Character::MAX_INPUT_LENGTH);
+	const String characterName(payload->mName);
 
+	// Notify World.
 	return mWorld->onApproveName(this, characterName);
 }
 
-bool WorldConnection::_handleGenerateRandomName(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleGenerateRandomName(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
-	EXPECTED_BOOL(pPacket);
+	if (!pPacket) return false;
+	SIZE_CHECK(NameGeneration::sizeCheck(pPacket));
+
+	auto payload = NameGeneration::convert(pPacket);
+
+	STRING_CHECK(payload->mName, Limits::Character::MAX_INPUT_LENGTH);
 
 	auto packet = NameGeneration::construct(0, 0, Utility::getRandomName());
 	sendPacket(packet);
@@ -265,7 +278,10 @@ bool WorldConnection::_handleGenerateRandomName(const EQApplicationPacket* pPack
 	return true;
 }
 
-bool WorldConnection::_handleCharacterCreateRequest(const EQApplicationPacket* packet) {
+const bool WorldConnection::handleCharacterCreateRequest(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
+
 	struct RaceClassAllocation {
 		unsigned int Index;
 		unsigned int BaseStats[7];
@@ -353,25 +369,28 @@ bool WorldConnection::_handleCharacterCreateRequest(const EQApplicationPacket* p
 	return true;
 }
 
-bool WorldConnection::_handleCharacterCreate(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleCharacterCreate(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(CreateCharacter::sizeCheck(pPacket->size));
+	if (!pPacket) return false;
+	SIZE_CHECK(CreateCharacter::sizeCheck(pPacket));
 
-	auto payload = CreateCharacter::convert(pPacket->pBuffer);
+	auto payload = CreateCharacter::convert(pPacket);
 
+	// Notify World.
 	return mWorld->onCreateCharacter(this, payload);
 }
 
-bool WorldConnection::_handleEnterWorld(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleEnterWorld(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(EnterWorld::sizeCheck(pPacket));
+	if (!pPacket) return false;
+	SIZE_CHECK(EnterWorld::sizeCheck(pPacket));
 
 	auto payload = EnterWorld::convert(pPacket->pBuffer);
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	EXPECTED_BOOL(Limits::Character::nameLength(characterName));
 
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	const String characterName(payload->mCharacterName);
+
+	// Notify World.
 	const bool success = mWorld->onEnterWorld(this, characterName, mZoning);
 	if (success) mZoning = true;
 
@@ -392,20 +411,22 @@ void WorldConnection::sendChatServer(const String& pCharacterName) {
 }
 
 void WorldConnection::sendApproveNameResponse(const bool pResponse) {
-	auto packet = new EQApplicationPacket(OP_ApproveName, 1);
-	packet->pBuffer[0] = pResponse ? 1 : 0;
+	using namespace Payload::World;
 
+	auto packet = ApproveNameResponse::construct(pResponse ? 1 : 0);
 	sendPacket(packet);
 	delete packet;
 }
 
-bool WorldConnection::_handleDeleteCharacter(const EQApplicationPacket* pPacket) {
+const bool WorldConnection::handleDeleteCharacter(const EQApplicationPacket* pPacket) {
 	using namespace Payload::World;
-	EXPECTED_BOOL(pPacket);
-	EXPECTED_BOOL(DeleteCharacter::sizeCheck(pPacket->size));
+	if (!pPacket) return false;
+	SIZE_CHECK(DeleteCharacter::sizeCheck(pPacket->size)); // Variable.
 
-	String characterName = Utility::safeString(reinterpret_cast<char*>(pPacket->pBuffer), Limits::Character::MAX_NAME_LENGTH);
-
+	STRING_CHECK(reinterpret_cast<char*>(pPacket->pBuffer), pPacket->size);
+	String characterName(reinterpret_cast<char*>(pPacket->pBuffer));
+	
+	// Notify World.
 	return mWorld->onDeleteCharacter(this, characterName);
 }
 

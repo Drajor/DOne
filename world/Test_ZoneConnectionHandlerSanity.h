@@ -6,20 +6,6 @@
 #include "ZoneConnection.h"
 #include "GuildManager.h"
 #include "Zone.h"
-#include "../common/EQStreamIntf.h"
-
-class NullEQStreamInterface : public EQStreamInterface {
-	void QueuePacket(const EQApplicationPacket *p, bool ack_req = true) { };
-	void FastQueuePacket(EQApplicationPacket **p, bool ack_req = true) { };
-	EQApplicationPacket *PopPacket() { return nullptr; };
-	void Close() {};
-	void ReleaseFromUse() {};
-	void RemoveData() {};
-	uint32 GetRemoteIP() const { return 0; }
-	uint16 GetRemotePort() const { return 0; }
-	bool CheckState(EQStreamState state) { return EQStreamState::ESTABLISHED; }
-	std::string Describe() const { return ""; }
-};
 
 class ZoneConnectionHandlerSanityTest : public ::testing::Test {
 protected:
@@ -96,7 +82,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleZoneEntry_Small) {
 	delete p;
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleZoneEntry_Overflow) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleZoneEntry_Overflow_0) {
 	EXPECT_TRUE(initialise());
 
 	auto p = makePacket(Payload::Zone::ZoneEntry::size());

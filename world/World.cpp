@@ -221,11 +221,9 @@ void World::checkIncomingConnections() {
 	// Check for identified streams.
 	EQStreamInterface* incomingStreamInterface = nullptr;
 	while (incomingStreamInterface = mStreamIdentifier->PopIdentified()) {
-		auto log = mLogFactory->make();
 		auto connection = new WorldConnection();
-		if (!connection->initialise(this, log, incomingStreamInterface)) {
+		if (!connection->initialise(this, mLogFactory, incomingStreamInterface)) {
 			mLog->error("Failure: Initialising WorldConnection");
-			delete log;
 			delete connection;
 			continue;
 		}

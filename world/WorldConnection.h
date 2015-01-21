@@ -7,12 +7,13 @@ class EQStreamInterface;
 class World;
 class Account;
 class ILog;
+class ILogFactory;
 
 class WorldConnection {
 public:
 	~WorldConnection();
 
-	const bool initialise(World* pWorld, ILog* pLog, EQStreamInterface* pStreamInterface);
+	const bool initialise(World* pWorld, ILogFactory* pLogFactory, EQStreamInterface* pStreamInterface);
 	bool update();
 
 	inline Account* getAccount() const { return mAccount; }
@@ -36,6 +37,19 @@ public:
 	void sendChatServer(const String& pCharacterName);
 	void sendApproveNameResponse(const bool pResponse);
 
+	const bool handlePacket(const EQApplicationPacket* pPacket);
+
+	const bool handleGenerateRandomName(const EQApplicationPacket* pPacket);
+	const bool handleCharacterCreate(const EQApplicationPacket* pPacket);
+	const bool handleEnterWorld(const EQApplicationPacket* pPacket);
+	const bool handleDeleteCharacter(const EQApplicationPacket* pPacket);
+	const bool handleConnect(const EQApplicationPacket* packet);
+	const bool handleCharacterCreateRequest(const EQApplicationPacket* packet);
+	const bool handleApproveName(const EQApplicationPacket* packet);
+
+	inline const bool hasSizeError() const { return mSizeError; } // For unit testing.
+	inline const bool hasStringError() const { return mStringError; } // For unit testing.
+
 private:
 
 	bool mInitialised = false;
@@ -46,17 +60,11 @@ private:
 
 	void updateLogContext();
 
-	bool _handlePacket(const EQApplicationPacket* pPacket);
-	bool _handleGenerateRandomName(const EQApplicationPacket* pPacket);
-	bool _handleCharacterCreate(const EQApplicationPacket* pPacket);
-	bool _handleEnterWorld(const EQApplicationPacket* pPacket);
-	bool _handleDeleteCharacter(const EQApplicationPacket* pPacket);
-	bool _handleConnect(const EQApplicationPacket* packet);
-	bool _handleCharacterCreateRequest(const EQApplicationPacket* packet);
-	bool _handleApproveName(const EQApplicationPacket* packet);
-
 	inline void dropConnection() { mConnectionDropped = true; }
 
 	bool mConnectionDropped = false;
 	bool mZoning = false;
+
+	bool mSizeError = false; // For unit testing.
+	bool mStringError = false; // For unit testing.
 };

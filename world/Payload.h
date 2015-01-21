@@ -5,6 +5,9 @@
 #include "Vector3.h"
 #include "../common/EQPacket.h"
 
+#define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
+#define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
+
 #pragma pack(1)
 
 namespace Payload {
@@ -1572,7 +1575,7 @@ namespace Payload {
 		struct DeleteCharacter : public VariableLengthPayload<DeleteCharacter> {
 			char* mCharacterName = 0;
 			static const bool sizeCheck(const std::size_t pSize) {
-				return pSize >= Limits::Character::MIN_NAME_LENGTH && pSize <= Limits::Character::MAX_NAME_LENGTH;
+				return pSize >= Limits::Character::MIN_INPUT_LENGTH && pSize <= Limits::Character::MAX_INPUT_LENGTH;
 			}
 		};
 
@@ -1721,6 +1724,36 @@ namespace Payload {
 		// S->C
 		struct ApproveWorld : public Fixed<ApproveWorld> {
 			u8 mUnknown0[544];
+		};
+
+		// C->S
+		struct ApproveName : public Fixed<ApproveName> {
+			ApproveName() { memset(mName, 0, sizeof(mName)); }
+			char mName[64];
+			u32 mRace = 0;
+			u32 mClass = 0;
+			u32 mUnknown = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "{ApproveName} ";
+				PRINT_MEMBER(mName);
+				PRINT_MEMBER(mRace);
+				PRINT_MEMBER(mClass);
+				PRINT_MEMBER(mUnknown);
+				return ss.str();
+			}
+		};
+
+		// S->C
+		struct ApproveNameResponse : public FixedT<ApproveNameResponse, OP_ApproveName> {
+			static EQApplicationPacket* construct(const u8 pResponse) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mResponse = pResponse;
+
+				return packet;
+			}
+			u8 mResponse = 0; // 0 = Fail, 1 = Success.
 		};
 	}
 
