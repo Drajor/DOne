@@ -529,7 +529,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		Log::error("OP_EvolvingItem");
 		break;
 	case OP_EnvDamage:
-		handleEnvironmentalDamage(pPacket);
+		handleEnvironmentDamage(pPacket);
 		break;
 	case OP_PopupResponse:
 		handlePopupResponse(pPacket);
@@ -1242,7 +1242,9 @@ const bool ZoneConnection::handleSpawnAppearance(const EQApplicationPacket* pPac
 }
 
 const bool ZoneConnection::handleCamp(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	if (!pPacket) return false;
+	SIZE_CHECK(Camp::sizeCheck(pPacket));
 
 	// Instant camp for GM.
 	if (mCharacter->isGM()) {
@@ -1326,6 +1328,7 @@ void ZoneConnection::sendMessage(const u32 pType, String pMessage) {
 
 const bool ZoneConnection::handleLogOut(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	auto packet = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	auto payload = reinterpret_cast<CancelTrade_Struct*>(packet->pBuffer);
@@ -1362,6 +1365,10 @@ void ZoneConnection::_sendPreLogOutReply() {
 }
 
 const bool ZoneConnection::handleDeleteSpawn(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(DeleteSpawn::sizeCheck(pPacket));
+
 	_sendLogOutReply();
 	mCharacter->setZoningOut();
 
@@ -1467,14 +1474,14 @@ const bool ZoneConnection::handleTarget(const EQApplicationPacket* pPacket) {
 }
 
 const bool ZoneConnection::handleTGB(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_PAYLOAD_SIZE = sizeof(uint32);
-
+	using namespace Payload::Zone;
 	if(!pPacket) return false;
-	SIZE_CHECK(pPacket->size == EXPECTED_PAYLOAD_SIZE);
+	SIZE_CHECK(TGB::sizeCheck(pPacket)) return false;
 
-	const uint32 tgb = *(uint32 *)pPacket->pBuffer;
-	if (tgb == 0 || tgb == 1) {
-		mCharacter->setTGB(tgb == 1);
+	auto payload = TGB::convert(pPacket);
+
+	if (payload->mAction == 0 || payload->mAction == 1) {
+		mCharacter->setTGB(payload->mAction == 1);
 		sendSimpleMessage(MessageType::White, mCharacter->getTGB() ? StringID::TGB_ON : StringID::TGB_OFF);
 	}
 	// Ignore anything else, including the extra 2 packet UF sends.
@@ -2759,6 +2766,7 @@ const bool ZoneConnection::handleGMLastName(const EQApplicationPacket* pPacket) 
 
 const bool ZoneConnection::handleClearSurname(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	// Update Character.
 	mCharacter->setLastName("");
@@ -2773,8 +2781,6 @@ const bool ZoneConnection::handleSetTitle(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(SetTitle::sizeCheck(pPacket));
 	
 	auto payload = SetTitle::convert(pPacket->pBuffer);
-
-	
 
 	// Handle: Title change.
 	if (payload->mAction == SetTitleAction::Title) {
@@ -2793,6 +2799,7 @@ const bool ZoneConnection::handleSetTitle(const EQApplicationPacket* pPacket) {
 
 const bool ZoneConnection::handleRequestTitles(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	auto availableTitles = ServiceLocator::getTitleManager()->getTitles(mCharacter);
 	if (availableTitles.empty())
@@ -3052,6 +3059,12 @@ void ZoneConnection::sendStamina(const uint32 pHunger, const uint32 pThirst) {
 }
 
 const bool ZoneConnection::handlePotionBelt(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(PotionBelt::sizeCheck(pPacket));
+
+	auto payload = PotionBelt::convert(pPacket);
+	// TODO:
 	return true;
 }
 
@@ -3423,8 +3436,12 @@ const bool ZoneConnection::handleUnknown(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-const bool ZoneConnection::handleEnvironmentalDamage(const EQApplicationPacket* pPacket)
-{
+const bool ZoneConnection::handleEnvironmentDamage(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(EnvironmentDamage::sizeCheck(pPacket));
+
+	// TODO:
 	sendHealthUpdate();
 	return true;
 }
@@ -3439,13 +3456,21 @@ void ZoneConnection::sendPopup(const String& pTitle, const String& pText) {
 }
 
 const bool ZoneConnection::handlePopupResponse(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	if(!pPacket) return false;
+	SIZE_CHECK(PopupResponse::sizeCheck(pPacket));
+
+	auto payload = PopupResponse::convert(pPacket);
 	// TODO:
 	return true;
 }
 
 const bool ZoneConnection::handleClaimRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	if (!pPacket) return false;
+	SIZE_CHECK(ClaimRequest::sizeCheck(pPacket));
+
+	auto payload = ClaimRequest::convert(pPacket);
 	// TODO:
 	return true;
 }
@@ -4048,6 +4073,9 @@ const bool ZoneConnection::handleRandomRequest(const EQApplicationPacket* pPacke
 }
 
 const bool ZoneConnection::handleDropItem(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
+
 	mZone->handleDropItem(mCharacter);
 	return true;
 }

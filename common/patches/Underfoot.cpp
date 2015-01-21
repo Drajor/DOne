@@ -3131,15 +3131,15 @@ DECODE(OP_LoadSpellSet)
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_EnvDamage) {
-	DECODE_LENGTH_EXACT(structs::EnvDamage2_Struct);
-	SETUP_DIRECT_DECODE(EnvDamage2_Struct, structs::EnvDamage2_Struct);
-	IN(id);
-	IN(damage);
-	IN(dmgtype);
-	emu->constant = 0xFFFF;
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_EnvDamage) {
+//	DECODE_LENGTH_EXACT(structs::EnvDamage2_Struct);
+//	SETUP_DIRECT_DECODE(EnvDamage2_Struct, structs::EnvDamage2_Struct);
+//	IN(id);
+//	IN(damage);
+//	IN(dmgtype);
+//	emu->constant = 0xFFFF;
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_PetCommands)
 {

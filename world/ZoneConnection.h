@@ -214,6 +214,8 @@ public:
 	const bool handleGroupDisband(const EQApplicationPacket* pPacket);
 	const bool handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 
+	// Raid Packets.
+
 	// Guild Packets.
 	const bool handleGuildCreate(const EQApplicationPacket* pPacket);
 	const bool handleGuildDelete(const EQApplicationPacket* pPacket);
@@ -240,18 +242,79 @@ public:
 	const bool handleZoneChange(const EQApplicationPacket* pPacket);
 	const bool handleFaceChange(const EQApplicationPacket* pPacket);
 	const bool handleAutoAttack(const EQApplicationPacket* pPacket);
+	const bool handleTGB(const EQApplicationPacket* pPacket);
+	const bool handleEmote(const EQApplicationPacket* pPacket);
+	const bool handleAnimation(const EQApplicationPacket* pPacket);
+	const bool handleWhoRequest(const EQApplicationPacket* pPacket);
+	const bool handleCombatAbility(const EQApplicationPacket* pPacket);
+	const bool handleTaunt(const EQApplicationPacket* pPacket);
+	const bool handleConsider(const EQApplicationPacket* pPacket);
+	const bool handleConsiderCorpse(const EQApplicationPacket* pPacket);
 
-	// TEST LINE
+	const bool handleBeginLootRequest(const EQApplicationPacket* pPacket);
+	const bool handleEndLootRequest(const EQApplicationPacket* pPacket);
+	const bool handleLootItem(const EQApplicationPacket* pPacket);
+	const bool handleConsume(const EQApplicationPacket* pPacket);
+	const bool handleItemRightClick(const EQApplicationPacket* pPacket);
+	const bool handleOpenContainer(const EQApplicationPacket* pPacket);
+	const bool handleSetServerFiler(const EQApplicationPacket* pPacket);
+	const bool handleItemLinkClick(const EQApplicationPacket* pPacket);
 
+	const bool handleMoveItem(const EQApplicationPacket* pPacket);
+	const bool handleMoveItemImpl(const EQApplicationPacket* pPacket);
+
+	const bool handleMoveCoin(const EQApplicationPacket* pPacket);
+	const bool handleMoveCoinImpl(const EQApplicationPacket* pPacket);
+
+	const bool handleShopRequest(const EQApplicationPacket* pPacket);
+	const bool handleShopEnd(const EQApplicationPacket* pPacket);
+	const bool handleShopSell(const EQApplicationPacket* pPacket);
+	const bool handleShopBuy(const EQApplicationPacket* pPacket);
+
+	const bool handleTradeRequest(const EQApplicationPacket* pPacket);
+	const bool handleTradeRequestAck(const EQApplicationPacket* pPacket);
+	const bool handleCancelTrade(const EQApplicationPacket* pPacket);
+	const bool handleAcceptTrade(const EQApplicationPacket* pPacket);
+	const bool handleTradeBusy(const EQApplicationPacket* pPacket);
+
+	const bool handleCrystalCreate(const EQApplicationPacket* pPacket);
+	const bool handleCrystalReclaim(const EQApplicationPacket* pPacket);
+	const bool handleAugmentItem(const EQApplicationPacket* pPacket);
+	const bool handleAugmentInfo(const EQApplicationPacket* pPacket);
+	const bool handleReadBook(const EQApplicationPacket* pPacket);
+	const bool handleCombine(const EQApplicationPacket* pPacket);
+	const bool handleEnvironmentDamage(const EQApplicationPacket* pPacket);
+	const bool handlePopupResponse(const EQApplicationPacket* pPacket);
+	const bool handleClaimRequest(const EQApplicationPacket* pPacket);
 	const bool handleCamp(const EQApplicationPacket* pPacket);
+	const bool handlePotionBelt(const EQApplicationPacket* pPacket);
+	const bool handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
+	const bool handleRandomRequest(const EQApplicationPacket* pPacket);
+	const bool handleDropItem(const EQApplicationPacket* pPacket);
+	const bool handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
+	const bool handleRespawnWindowSelect(const EQApplicationPacket* pPacket);
+	const bool handleAAAction(const EQApplicationPacket* pPacket);
+	const bool handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket);
+	const bool handleSurname(const EQApplicationPacket* pPacket);
+	const bool handleClearSurname(const EQApplicationPacket* pPacket);
+	const bool handleLogOut(const EQApplicationPacket* pPacket);
+	const bool handleDeleteSpawn(const EQApplicationPacket* pPacket);
+	const bool handleSetTitle(const EQApplicationPacket* pPacket);
+	const bool handleRequestTitles(const EQApplicationPacket* pPacket);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// TEST LINE
 
 	// Variable Length.
 	const bool handleChannelMessage(const EQApplicationPacket* pPacket);
 
-	const bool handleLogOut(const EQApplicationPacket* pPacket);
-	const bool handleDeleteSpawn(const EQApplicationPacket* pPacket);
+	// Unsure below
+	const bool handleSendAATable(const EQApplicationPacket* pPacket);
+	const bool handleUpdateAA(const EQApplicationPacket* pPacket);
+	const bool handleItemView(const EQApplicationPacket* pPacket);
+	const bool handleGMLastName(const EQApplicationPacket* pPacket);
 
-	inline const bool hasSizeError() const { return mSizeError; }
+	inline const bool hasSizeError() const { return mSizeError; } // For unit testing.
 private:
 	const bool handleUnknown(const EQApplicationPacket* pPacket);
 	void _sendTimeOfDay();
@@ -278,84 +341,9 @@ private:
 
 
 	void _sendZoneData();
-	const bool handleSendAATable(const EQApplicationPacket* pPacket);
-	const bool handleUpdateAA(const EQApplicationPacket* pPacket);
-	
-	const bool handleTGB(const EQApplicationPacket* pPacket);
-	const bool handleEmote(const EQApplicationPacket* pPacket);
-	const bool handleAnimation(const EQApplicationPacket* pPacket);
-	const bool handleWhoRequest(const EQApplicationPacket* pPacket);
-
-
-	// Raid Packets.
 
 	void _unimplementedFeature(String pOpCodeName);
-
-	const bool handleCombatAbility(const EQApplicationPacket* pPacket);
-	const bool handleTaunt(const EQApplicationPacket* pPacket);
-
-	const bool handleConsider(const EQApplicationPacket* pPacket);
-
-	const bool handleConsiderCorpse(const EQApplicationPacket* pPacket);
-
-	const bool handleSurname(const EQApplicationPacket* pPacket);
-	const bool handleClearSurname(const EQApplicationPacket* pPacket);
-	const bool handleGMLastName(const EQApplicationPacket* pPacket);
-
-	const bool handleSetTitle(const EQApplicationPacket* pPacket);
-	const bool handleRequestTitles(const EQApplicationPacket* pPacket);
-
-	const bool handleBeginLootRequest(const EQApplicationPacket* pPacket);
-	const bool handleEndLootRequest(const EQApplicationPacket* pPacket);
-	const bool handleLootItem(const EQApplicationPacket* pPacket);
-	const bool handleMoveItem(const EQApplicationPacket* pPacket);
-	const bool handleMoveItemImpl(const EQApplicationPacket* pPacket);
-
 	void inventoryError();
-
-	const bool handleConsume(const EQApplicationPacket* pPacket);
-	const bool handlePotionBelt(const EQApplicationPacket* pPacket);
-	const bool handleItemRightClick(const EQApplicationPacket* pPacket);
-	const bool handleOpenContainer(const EQApplicationPacket* pPacket);
-	
-	const bool handleTradeRequest(const EQApplicationPacket* pPacket);
-	const bool handleTradeRequestAck(const EQApplicationPacket* pPacket);
-	const bool handleCancelTrade(const EQApplicationPacket* pPacket);
-	const bool handleAcceptTrade(const EQApplicationPacket* pPacket);
-	const bool handleTradeBusy(const EQApplicationPacket* pPacket);
-
-	const bool handleSetServerFiler(const EQApplicationPacket* pPacket);
-
-	const bool handleItemLinkClick(const EQApplicationPacket* pPacket);
-	const bool handleItemView(const EQApplicationPacket* pPacket);
-	const bool handleMoveCoin(const EQApplicationPacket* pPacket);
-	const bool handleMoveCoinImpl(const EQApplicationPacket* pPacket);
-	const bool handleCrystalCreate(const EQApplicationPacket* pPacket);
-	const bool handleCrystalReclaim(const EQApplicationPacket* pPacket);
-	const bool handleEnvironmentalDamage(const EQApplicationPacket* pPacket);
-	const bool handlePopupResponse(const EQApplicationPacket* pPacket);
-	const bool handleClaimRequest(const EQApplicationPacket* pPacket);
-	const bool handleAugmentItem(const EQApplicationPacket* pPacket);
-	const bool handleAugmentInfo(const EQApplicationPacket* pPacket);
-	const bool handleReadBook(const EQApplicationPacket* pPacket);
-	const bool handleCombine(const EQApplicationPacket* pPacket);
-	
-	const bool handleShopRequest(const EQApplicationPacket* pPacket);
-	const bool handleShopEnd(const EQApplicationPacket* pPacket);
-	const bool handleShopSell(const EQApplicationPacket* pPacket);
-	const bool handleShopBuy(const EQApplicationPacket* pPacket);
-
-	const bool handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
-
-	const bool handleRandomRequest(const EQApplicationPacket* pPacket);
-	const bool handleDropItem(const EQApplicationPacket* pPacket);
-
-	const bool handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
-	const bool handleRespawnWindowSelect(const EQApplicationPacket* pPacket);
-
-	const bool handleAAAction(const EQApplicationPacket* pPacket);
-	const bool handleLeadershipExperienceToggle(const EQApplicationPacket* pPacket);
-
 	void updateLogContext();
 	bool mInitialised = false;
 	bool mConnected = false;

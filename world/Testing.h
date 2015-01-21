@@ -51,6 +51,9 @@ TEST(ZonePayload, FixedSizes) {
 
 	EXPECT_EQ(256, Payload::Zone::AppearanceUpdate::size());
 	
+	EXPECT_EQ(4292, Payload::Zone::PopupWindow::size());
+	EXPECT_EQ(8, Payload::Zone::PopupResponse::size());
+
 	// AugmentInformation
 	EXPECT_EQ(8212, Payload::Zone::BookRequest::size());
 	EXPECT_EQ(4, Payload::Zone::Combine::size());
@@ -73,6 +76,11 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(156, Payload::Zone::WhoRequest::size());
 	EXPECT_EQ(16, Payload::Zone::AAAction::size());
 	EXPECT_EQ(1, Payload::Zone::LeadershipExperienceToggle::size());
+	EXPECT_EQ(37, Payload::Zone::EnvironmentDamage::size());
+	EXPECT_EQ(72, Payload::Zone::ClaimRequest::size());
+	EXPECT_EQ(4, Payload::Zone::Camp::size());
+	EXPECT_EQ(12, Payload::Zone::PotionBelt::size());
+	EXPECT_EQ(4, Payload::Zone::DeleteSpawn::size());
 
 	// Login Server Connection
 	

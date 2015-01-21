@@ -609,6 +609,12 @@ namespace Payload {
 			u32 mSpawnID = 0;
 		};
 
+		// C->S
+		namespace TGBAction { enum : u32 { Off = 0, On = 1, }; }
+		struct TGB : public Fixed<TGB> {
+			u32 mAction = 0;
+		};
+
 		// S->C
 		struct RequestZoneChange : public FixedT<RequestZoneChange, OP_RequestClientZoneChange> {
 			static EQApplicationPacket* construct(const u16 pZoneID, const u16 pInstanceID, const Vector3& pPosition) {
@@ -974,7 +980,7 @@ namespace Payload {
 			char mName[64];
 		};
 
-		// C->S
+		// S->C
 		struct PopupWindow : public FixedT<PopupWindow, OP_OnLevelMessage> {
 			PopupWindow() {
 				memset(mTitle, 0, sizeof(mTitle));
@@ -1001,6 +1007,12 @@ namespace Payload {
 			u32 mLeftButtonResponse = 1;
 			u32 mRightButtonResponse = 2;
 			u32 __Unknown1 = 0;
+		};
+
+		// C->S
+		struct PopupResponse : public Fixed<PopupResponse> {
+			u32	mUnknown = 0;
+			u32 mPopupID = 0;
 		};
 
 		// C->S
@@ -1501,6 +1513,45 @@ namespace Payload {
 				PRINT_MEMBER((int)mValue);
 				return ss.str();
 			}
+		};
+
+		// C->S
+		struct EnvironmentDamage : public Fixed<EnvironmentDamage> {
+			uint32 id;
+			uint16 unknown4;
+			uint32 damage;
+			float unknown10;	// New to Underfoot - Seen 1
+			uint8 unknown14[12];
+			uint8 dmgtype;		// FA = Lava; FC = Falling
+			uint8 unknown27[4];
+			uint16 unknown31;	// New to Underfoot - Seen 66
+			uint16 constant;		// Always FFFF
+			uint16 unknown35;
+		};
+
+		// C->S
+		struct ClaimRequest : public Fixed<EnvironmentDamage> {
+			ClaimRequest() { memset(mName, 0, sizeof(mName)); }
+			char mName[64];
+			u32 mClaimID = 0;
+			u32 mUnknown = 0;
+		};
+
+		// C->S
+		struct Camp : public Fixed <Camp> {
+			u32 mUnknown = 0;
+		};
+
+		// C->S
+		struct PotionBelt : public Fixed<PotionBelt> {
+			u32	mAction = 0;
+			u32	mSlotID = 0;
+			u32 mItemID = 0;
+		};
+
+		// C->S
+		struct DeleteSpawn : public Fixed<DeleteSpawn> {
+			u32 mUnknown = 0;
 		};
 	}
 
