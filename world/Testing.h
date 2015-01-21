@@ -93,6 +93,19 @@ TEST(ZonePayload, FixedSizes) {
 	// Raid.
 
 	// Guild.
+	EXPECT_EQ(80, Payload::Guild::RankUpdate::size());
+	EXPECT_EQ(136, Payload::Guild::Invite::size());
+	EXPECT_EQ(136, Payload::Guild::Remove::size());
+	EXPECT_EQ(128, Payload::Guild::MakeLeader::size());
+	EXPECT_EQ(128, Payload::Guild::Demote::size());
+	EXPECT_EQ(136, Payload::Guild::FlagsUpdate::size());
+	EXPECT_EQ(648, Payload::Guild::MOTD::size());
+	EXPECT_EQ(4176, Payload::Guild::GuildUpdate::size());
+	// Public Note
+	// MemberJoin
+	// LevelUpdate
+	EXPECT_EQ(78, Payload::Guild::MemberUpdate::size());
+	EXPECT_EQ(136, Payload::Guild::StatusRequest::size());
 
 	// Login Server Connection
 	

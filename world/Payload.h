@@ -1972,6 +1972,7 @@ namespace Payload {
 			char mLeaderName[Limits::Character::MAX_NAME_LENGTH];
 		};
 
+		// C->S
 		struct Demote : public Fixed<Demote> {
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Character doing the demoting
 			char mDemoteName[Limits::Character::MAX_NAME_LENGTH]; // Character being demoted.
@@ -2016,6 +2017,7 @@ namespace Payload {
 		//	char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		//};
 		
+		// S->C
 		struct LevelUpdate {
 			u32 mGuildID = 0;
 			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
