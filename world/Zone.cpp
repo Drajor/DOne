@@ -1554,7 +1554,7 @@ void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->getConnection()->sendShopEndReply();
 }
 
-void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks) {
+void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 
@@ -1608,7 +1608,7 @@ void Zone::handleShopSell(Character* pCharacter, const uint32 pSpawnID, const ui
 	// TODO: Dynamic merchant Items.
 }
 
-void Zone::handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks) {
+void Zone::onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 

@@ -245,8 +245,8 @@ public:
 
 	void handleShopRequest(Character* pCharacter, const uint32 pSpawnID);
 	void handleShopEnd(Character* pCharacter, const uint32 pSpawnID);
-	void handleShopSell(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks);
-	void handleShopBuy(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks);
+	void onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks);
+	void onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks);
 	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks);
 
 	const ZonePointList& getZonePoints() { return mZonePoints; }

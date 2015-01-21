@@ -37,6 +37,7 @@
 #include "../common/packet_dump_file.h"
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
+#define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
 
 EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
 EQApplicationPacket* ZoneConnection::mGroupJoinPacket = nullptr;
@@ -164,6 +165,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 			return handleRequestClientSpawn(pPacket);
 		case OP_ClientReady:
 			return handleClientReady(pPacket);
+		case OP_ReqNewZone:
+			// UF sends this but still works when there is no reply.
+			return handleRequestNewZoneData(pPacket);
 		default:
 			break;
 		}
@@ -193,10 +197,6 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_ZoneComplete:
 		Utility::print("[UNHANDLED OP_ZoneComplete]");
-		break;
-	case OP_ReqNewZone:
-		// UF sends this but still works when there is no reply.
-		handleRequestNewZoneData(pPacket);
 		break;
 	case OP_SpawnAppearance:
 		handleSpawnAppearance(pPacket);
@@ -616,6 +616,12 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 const bool ZoneConnection::handleZoneEntry(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	if (!pPacket) return false;
+	SIZE_CHECK(ZoneEntry::sizeCheck(pPacket));
+	
+	auto payload = ZoneEntry::convert(pPacket);
+	
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	String characterName(payload->mCharacterName);
 
 	// Check: Connecting packet sequence.
 	if (mConnectingStatus != ZCStatus::None) {
@@ -625,13 +631,6 @@ const bool ZoneConnection::handleZoneEntry(const EQApplicationPacket* pPacket) {
 	}
 	// Update connecting status.
 	mConnectingStatus = ZCStatus::ZoneEntryReceived;
-
-	SIZE_CHECK(ZoneEntry::sizeCheck(pPacket));
-
-	auto payload = ZoneEntry::convert(pPacket);
-
-	// Check: String is safe.
-	String characterName = Utility::safeString(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 
 	// Check: Name is of valid length.
 	if (!Limits::Character::nameLength(characterName)) {
@@ -686,12 +685,30 @@ const bool ZoneConnection::handleZoneEntry(const EQApplicationPacket* pPacket) {
 	
 	_sendWeather();
 
+	return true;
+}
+
+const bool ZoneConnection::handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
+	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
+
+	// Check: Connecting packet sequence.
+	if (mConnectingStatus != ZCStatus::PlayerProfileSent) {
+		mLog->error("Got unexpected OP_ReqNewZone, dropping connection.");
+		dropConnection();
+		return false;
+	}
+
+	mConnectingStatus = ZCStatus::ClientRequestZoneData;
+	_sendZoneData();
+
 	mConnectingStatus = ZCStatus::ZoneInformationSent;
 	return true;
 }
 
 const bool ZoneConnection::handleRequestClientSpawn(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	// Check: Connecting packet sequence.
 	if (mConnectingStatus != ZCStatus::ZoneInformationSent) {
@@ -720,6 +737,7 @@ const bool ZoneConnection::handleRequestClientSpawn(const EQApplicationPacket* p
 
 const bool ZoneConnection::handleClientReady(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	// Check: Connecting packet sequence.
 	if (mConnectingStatus != ZCStatus::ClientRequestSpawn) {
@@ -1377,15 +1395,6 @@ const bool ZoneConnection::handleDeleteSpawn(const EQApplicationPacket* pPacket)
 	return true;
 }
 
-const bool ZoneConnection::handleRequestNewZoneData(const EQApplicationPacket* pPacket) {
-	if (!pPacket) return false;
-
-	mConnectingStatus = ZCStatus::ClientRequestZoneData;
-	_sendZoneData();
-
-	return true;
-}
-
 void ZoneConnection::_sendZoneData() {
 	EXPECTED(mConnected);
 
@@ -1572,9 +1581,11 @@ const bool ZoneConnection::handleEmote(const EQApplicationPacket* pPacket) {
 
 	auto payload = Emote::convert(pPacket);
 
-	String message = Utility::safeString(payload->mMessage, EmoteLimits::MAX_MESSAGE);
-	mZone->handleEmote(mCharacter, message);
+	STRING_CHECK(payload->mMessage, EmoteLimits::MAX_MESSAGE);
+	String message(payload->mMessage);
 
+	// Notify Zone.
+	mZone->handleEmote(mCharacter, message);
 	return true;
 }
 
@@ -1584,8 +1595,9 @@ const bool ZoneConnection::handleAnimation(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(ActorAnimation::sizeCheck(pPacket));
 	
 	auto payload = ActorAnimation::convert(pPacket);
-	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
 
+	// Notify Zone.
+	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
 	return true;
 }
 
@@ -1702,12 +1714,16 @@ const bool ZoneConnection::handleWhoRequest(const EQApplicationPacket* pPacket) 
 	SIZE_CHECK(WhoRequest::sizeCheck(pPacket));
 
 	auto payload = WhoRequest::convert(pPacket);
+
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	const String characterName(payload->mCharacterName);
+
 	Log::info(payload->_debug());
 	if (payload->mType != 0 && payload->mType != 3) return false; // who or who all.
 
 	WhoFilter filter;
 	filter.mType = payload->mType == 0 ? WhoType::Zone : WhoType::All;
-	filter.mText = Utility::safeString(payload->mCharacterName, 64);
+	filter.mText = characterName;
 	filter.mRace = payload->mRace;
 	filter.mClass = payload->mClass;
 	filter.mLevelMinimum = payload->mLevelMinimum;
@@ -1930,10 +1946,9 @@ const bool ZoneConnection::handleGroupInvite(const EQApplicationPacket* pPacket)
 
 	auto payload = Invite::convert(pPacket);
 
-	const String inviterName = Utility::safeString(payload->mFrom, Limits::Character::MAX_NAME_LENGTH);
-	const String inviteeName = Utility::safeString(payload->mTo, Limits::Character::MAX_NAME_LENGTH);
-	if (!Limits::Character::nameLength(inviterName)) return false;
-	if (!Limits::Character::nameLength(inviteeName)) return false;
+	STRING_CHECK(payload->mFrom, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mTo, Limits::Character::MAX_NAME_LENGTH);
+	const String inviteeName(payload->mTo);
 	
 	// Notify Zone.
 	mZone->onGroupInvite(mCharacter, inviteeName);
@@ -1955,12 +1970,10 @@ const bool ZoneConnection::handleGroupAcceptInvite(const EQApplicationPacket* pP
 	SIZE_CHECK(Follow::sizeCheck(pPacket));
 
 	auto payload = Follow::convert(pPacket);
-	
-	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH); // Character who invited.
-	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH); // Character accepting invite.
-	if (!Limits::Character::nameLength(inviterName)) return false;
-	if (!Limits::Character::nameLength(inviteeName)) return false;
 
+	STRING_CHECK(payload->mName1, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mName2, Limits::Character::MAX_NAME_LENGTH);
+	const String inviterName(payload->mName1);
 
 	// TODO: This can be spoofed to join groups...
 
@@ -1975,10 +1988,10 @@ const bool ZoneConnection::handleGroupDeclineInvite(const EQApplicationPacket* p
 	SIZE_CHECK(DeclineInvite::sizeCheck(pPacket));
 
 	auto payload = DeclineInvite::convert(pPacket);
-	String inviterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
-	String inviteeName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
-	if (!Limits::Character::nameLength(inviterName)) return false;
-	if (!Limits::Character::nameLength(inviteeName)) return false;
+
+	STRING_CHECK(payload->mName1, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mName2, Limits::Character::MAX_NAME_LENGTH);
+	const String inviterName(payload->mName1);
 
 	// Notify Zone.
 	mZone->onGroupInviteDecline(mCharacter, inviterName);
@@ -2082,10 +2095,9 @@ const bool ZoneConnection::handleGroupDisband(const EQApplicationPacket* pPacket
 	
 	auto payload = Disband::convert(pPacket);
 
-	String removeCharacterName = Utility::safeString(payload->name1, Limits::Character::MAX_NAME_LENGTH);
-	String myCharacterName = Utility::safeString(payload->name2, Limits::Character::MAX_NAME_LENGTH);
-	if (!Limits::Character::nameLength(removeCharacterName)) return false;
-	if (!Limits::Character::nameLength(myCharacterName)) return false;
+	STRING_CHECK(payload->name1, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->name2, Limits::Character::MAX_NAME_LENGTH);
+	const String removeCharacterName(payload->name1);
 
 	if (mCharacter->getName() == removeCharacterName) {
 		mZone->onGroupLeave(mCharacter);
@@ -2126,10 +2138,9 @@ const bool ZoneConnection::handleGroupMakeLeader(const EQApplicationPacket* pPac
 
 	auto payload = MakeLeader::convert(pPacket);
 
-	String currentLeader = Utility::safeString(payload->CurrentLeader, Limits::Character::MAX_NAME_LENGTH);
-	String newLeader = Utility::safeString(payload->NewLeader, Limits::Character::MAX_NAME_LENGTH);
-	if (!Limits::Character::nameLength(currentLeader))return false;
-	if (!Limits::Character::nameLength(newLeader)) return false;
+	STRING_CHECK(payload->mCurrentLeader, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mNewLeader, Limits::Character::MAX_NAME_LENGTH);
+	const String newLeader(payload->mNewLeader);
 
 	// Notify Zone.
 	mZone->onGroupMakeLeader(mCharacter, newLeader);
@@ -2161,6 +2172,9 @@ const bool ZoneConnection::handleZoneChange(const EQApplicationPacket* pPacket) 
 	SIZE_CHECK(ZoneChange::sizeCheck(pPacket));
 
 	auto payload = ZoneChange::convert(pPacket);
+
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	
 	mZone->handleZoneChange(mCharacter, payload->mZoneID, payload->mInstanceID, Vector3(payload->mX, payload->mY, payload->mZ));
 	return true;
 }
@@ -2172,8 +2186,8 @@ const bool ZoneConnection::handleGuildCreate(const EQApplicationPacket* pPacket)
 	
 	auto payload = Create::convert(pPacket);
 
-	// Check: String sanity.
-	const String guildName = Utility::safeString(payload->mName, Limits::Guild::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mName, Limits::Guild::MAX_NAME_LENGTH);
+	const String guildName(payload->mName);
 
 	// Check: String length.
 	if (!Limits::Guild::nameLength(guildName)) return false;
@@ -2185,6 +2199,7 @@ const bool ZoneConnection::handleGuildCreate(const EQApplicationPacket* pPacket)
 
 const bool ZoneConnection::handleGuildDelete(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 	
 	// Notify Zone.
 	mZone->onGuildDelete(mCharacter);
@@ -2219,8 +2234,9 @@ const bool ZoneConnection::handleGuildInvite(const EQApplicationPacket* pPacket)
 
 	auto payload = Invite::convert(pPacket);
 
-	// Check: String sanity.
-	String characterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mFromCharacter, Limits::Character::MAX_NAME_LENGTH);
+	const String characterName(payload->mToCharacter);
 
 	// Check: String length.
 	if (!Limits::Character::nameLength(characterName)) return false;
@@ -2247,8 +2263,9 @@ const bool ZoneConnection::handleGuildRemove(const EQApplicationPacket* pPacket)
 
 	auto payload = Remove::convert(pPacket);
 
-	// Check: String sanity.
-	String toCharacterName = Utility::safeString(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mToCharacter, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mFromCharacter, Limits::Character::MAX_NAME_LENGTH);
+	const String toCharacterName(payload->mToCharacter);
 	
 	// Check: String length.
 	if (!Limits::Character::nameLength(toCharacterName)) return false;
@@ -2290,6 +2307,10 @@ const bool ZoneConnection::handleGuildInviteResponse(const EQApplicationPacket* 
 	SIZE_CHECK(InviteResponse::sizeCheck(pPacket));
 
 	auto payload = InviteResponse::convert(pPacket);
+
+	STRING_CHECK(payload->mInviter, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mNewMember, Limits::Character::MAX_NAME_LENGTH);
+
 	switch (payload->mResponse) {
 	case InviteResponseType::Accept:
 		mZone->onGuildInviteAccept(mCharacter);
@@ -2298,7 +2319,7 @@ const bool ZoneConnection::handleGuildInviteResponse(const EQApplicationPacket* 
 		mZone->onGuildInviteDecline(mCharacter);
 		break;
 	default:
-		// TODO: Log.
+		mLog->error("Unknown invite response type: " + toString(payload->mResponse) + " in " + __FUNCTION__);
 		break;
 	}
 
@@ -2311,13 +2332,13 @@ const bool ZoneConnection::handleGuildSetMOTD(const EQApplicationPacket* pPacket
 	SIZE_CHECK(MOTD::sizeCheck(pPacket));
 
 	auto payload = MOTD::convert(pPacket);
-	
-	// Check: String sanity.
-	String motd = Utility::safeString(payload->mMOTD, Limits::Guild::MAX_MOTD_LENGTH);
 
-	// Check: String length.
-	if (!Limits::Guild::MOTDLength(motd)) return false;
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mSetByName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mMOTD, Limits::Guild::MAX_MOTD_LENGTH);
+	const String motd(payload->mMOTD);
 
+	// Notify Zone.
 	mZone->onGuildSetMOTD(mCharacter, motd);
 	return true;
 }
@@ -2353,6 +2374,7 @@ void ZoneConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTD
 
 const bool ZoneConnection::handleGuildGetMOTD(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	mZone->onGuildGetMOTD(mCharacter);
 	return true;
@@ -2437,21 +2459,19 @@ const bool ZoneConnection::handleSetGuildURLOrChannel(const EQApplicationPacket*
 
 	auto payload = GuildUpdate::convert(pPacket);
 
-	String url;
-	String channel;
+	STRING_CHECK(payload->mText, 512);
+	const String text(payload->mText);
+
+	// Notify Zone.
 	switch (payload->mAction) {
 	case GuildUpdateAction::URL:
-		// Check: String sanity.
-		url = Utility::safeString(payload->mText, Limits::Guild::MAX_URL_LENGTH);
-		mZone->onGuildSetURL(mCharacter, url);
+		mZone->onGuildSetURL(mCharacter, text);
 		break;
 	case GuildUpdateAction::Channel:
-		// Check: String sanity.
-		channel = Utility::safeString(payload->mText, Limits::Guild::MAX_CHANNEL_LENGTH);
-		mZone->onGuildSetChannel(mCharacter, channel);
+		mZone->onGuildSetChannel(mCharacter, text);
 		break;
 	default:
-		// TODO: Log.
+		mLog->error("Unknown action: " + toString(payload->mAction) + " in " + __FUNCTION__);
 		break;
 	}
 
@@ -2467,7 +2487,10 @@ const bool ZoneConnection::handleSetGuildPublicNote(const EQApplicationPacket* p
 
 	auto payload = reinterpret_cast<PublicNote*>(pPacket->pBuffer);
 
-	String targetName = Utility::safeString(payload->mTargetName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mSenderName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mTargetName, Limits::Character::MAX_NAME_LENGTH);
+	const String targetName(payload->mTargetName);
+
 	String note = Utility::safeString(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
 
 	// Notify Zone.
@@ -2483,8 +2506,8 @@ const bool ZoneConnection::handleGetGuildStatus(const EQApplicationPacket* pPack
 
 	auto payload = StatusRequest::convert(pPacket);
 
-	// Check: String sanity.
-	String targetName = Utility::safeString(payload->mName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mName, Limits::Character::MAX_NAME_LENGTH);
+	String targetName(payload->mName);
 	
 	// Notify Zone.
 	mZone->onGuildStatusRequest(mCharacter, targetName);
@@ -2498,8 +2521,9 @@ const bool ZoneConnection::handleGuildDemote(const EQApplicationPacket* pPacket)
 
 	auto payload = Demote::convert(pPacket->pBuffer);
 
-	// Check: String sanity.
-	String demoteeName = Utility::safeString(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mDemoteName, Limits::Character::MAX_NAME_LENGTH);
+	const String demoteeName(payload->mDemoteName);
 
 	// Check: String length.
 	if (!Limits::Character::nameLength(demoteeName)) return false;
@@ -2516,8 +2540,11 @@ const bool ZoneConnection::handleGuildSetFlags(const EQApplicationPacket* pPacke
 
 	auto payload = FlagsUpdate::convert(pPacket);
 
-	// NOTE: UF does not send BankerAltStatus::mCharacterName like other packets. /shrug
-	String otherName = Utility::safeString(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
+	const String otherName(payload->mOtherName);
+
+	// Check: String length
 	if (!Limits::Character::nameLength(otherName)) return false;
 
 	bool isBanker = (payload->mStatus & 0x01) > 1;
@@ -2535,8 +2562,9 @@ const bool ZoneConnection::handleGuildMakeLeader(const EQApplicationPacket* pPac
 
 	auto payload = MakeLeader::convert(pPacket);
 
-	// Check: String sanity.
-	String leaderName = Utility::safeString(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+	const String leaderName(payload->mLeaderName);
 
 	// Check: String length.
 	if (!Limits::Character::nameLength(leaderName)) return false;
@@ -2555,7 +2583,7 @@ const bool ZoneConnection::handleFaceChange(const EQApplicationPacket* pPacket) 
 	if(!pPacket) return false;
 	SIZE_CHECK(FaceChange::sizeCheck(pPacket));
 
-	auto payload = FaceChange::convert(pPacket->pBuffer);
+	auto payload = FaceChange::convert(pPacket);
 	Log::info(payload->_debug());
 
 	// TODO: Validation of values?
@@ -2590,7 +2618,7 @@ const bool ZoneConnection::handleAutoAttack(const EQApplicationPacket* pPacket) 
 	if(!pPacket) return false;
 	SIZE_CHECK(AutoAttack::sizeCheck(pPacket));
 
-	auto payload = AutoAttack::convert(pPacket->pBuffer);
+	auto payload = AutoAttack::convert(pPacket);
 	mCharacter->setAutoAttack(payload->mAttacking);
 	return true;
 }
@@ -2600,19 +2628,19 @@ const bool ZoneConnection::handleMemoriseSpell(const EQApplicationPacket* pPacke
 	if(!pPacket) return false;
 	SIZE_CHECK(MemoriseSpell::sizeCheck(pPacket));
 
-	auto payload = MemoriseSpell::convert(pPacket->pBuffer);
+	auto payload = MemoriseSpell::convert(pPacket);
 
 	switch (payload->mAction){
 		// Character is scribing a spell into the SpellBook.
-	case MemoriseSpell::SCRIBE:
+	case MemoriseSpellAction::Scribe:
 		mCharacter->handleScribeSpell(payload->mSlot, payload->mSpellID);
 		break;
 		// Character is adding a spell to the SpellBar.
-	case MemoriseSpell::MEMORISE:
+	case MemoriseSpellAction::Memorise:
 		mCharacter->handleMemoriseSpell(payload->mSlot, payload->mSpellID);
 		break;
 		// Character is removing a spell from the SpellBar.
-	case MemoriseSpell::UNMEMORISE:
+	case MemoriseSpellAction::Unmemorise:
 		mCharacter->handleUnmemoriseSpell(payload->mSlot);
 		break;
 	default:
@@ -2640,7 +2668,7 @@ const bool ZoneConnection::handleLoadSpellSet(const EQApplicationPacket* pPacket
 	if(!pPacket) return false;
 	SIZE_CHECK(LoadSpellSet::sizeCheck(pPacket));
 
-	auto payload = LoadSpellSet::convert(pPacket->pBuffer);
+	auto payload = LoadSpellSet::convert(pPacket);
 
 	// TODO:
 	return true;
@@ -2651,7 +2679,7 @@ const bool ZoneConnection::handleSwapSpell(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
 	SIZE_CHECK(SwapSpell::sizeCheck(pPacket));
 
-	auto payload = SwapSpell::convert(pPacket->pBuffer);
+	auto payload = SwapSpell::convert(pPacket);
 	mCharacter->handleSwapSpells(payload->mFrom, payload->mTo);
 
 	// Client requires a reply.
@@ -2664,7 +2692,7 @@ const bool ZoneConnection::handleCastSpell(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
 	SIZE_CHECK(CastSpell::sizeCheck(pPacket));
 	
-	auto payload = CastSpell::convert(pPacket->pBuffer);
+	auto payload = CastSpell::convert(pPacket);
 
 	if (payload->mInventorySlot == 0xFFFF)
 		EXPECTED_BOOL(mCharacter->isCaster());
@@ -2692,7 +2720,7 @@ const bool ZoneConnection::handleCombatAbility(const EQApplicationPacket* pPacke
 	if(!pPacket) return false;
 	SIZE_CHECK(CombatAbility::sizeCheck(pPacket));
 
-	auto payload = CombatAbility::convert(pPacket->pBuffer);
+	auto payload = CombatAbility::convert(pPacket);
 
 	// TODO:
 	return true;
@@ -2703,7 +2731,7 @@ const bool ZoneConnection::handleTaunt(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
 	SIZE_CHECK(Taunt::sizeCheck(pPacket));
 
-	auto payload = Taunt::convert(pPacket->pBuffer);
+	auto payload = Taunt::convert(pPacket);
 	// TODO:
 	return true;
 }
@@ -2737,8 +2765,12 @@ const bool ZoneConnection::handleSurname(const EQApplicationPacket* pPacket) {
 
 	auto payload = Surname::convert(pPacket);
 
-	String lastName = Utility::safeString(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
+	const String lastName(payload->mLastName);
+
 	if (!Limits::Character::surnameLengthClient(lastName)) return false;
+
 	// TODO: Check for special characters / Captialisation.
 
 	// Update Character.
@@ -2780,7 +2812,7 @@ const bool ZoneConnection::handleSetTitle(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
 	SIZE_CHECK(SetTitle::sizeCheck(pPacket));
 	
-	auto payload = SetTitle::convert(pPacket->pBuffer);
+	auto payload = SetTitle::convert(pPacket);
 
 	// Handle: Title change.
 	if (payload->mAction == SetTitleAction::Title) {
@@ -2843,7 +2875,7 @@ void ZoneConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellI
 
 	auto packet = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
 	auto payload = MemoriseSpell::convert(packet->pBuffer);
-	payload->mAction = static_cast<MemoriseSpell::Action>(pAction);
+	payload->mAction = pAction;
 	payload->mSlot = pSlot;
 	payload->mSpellID = pSpellID;
 
@@ -2852,15 +2884,15 @@ void ZoneConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellI
 }
 
 void ZoneConnection::sendScribeSpell(const u16 pSlot, const u32 pSpellID) {
-	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SCRIBE);
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpellAction::Scribe);
 }
 
 void ZoneConnection::sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID) {
-	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::MEMORISE);
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpellAction::Memorise);
 }
 
 void ZoneConnection::sendUnmemoriseSpell(const uint16 pSlot) {
-	_sendMemoriseSpell(pSlot, 0, Payload::Zone::MemoriseSpell::UNMEMORISE);
+	_sendMemoriseSpell(pSlot, 0, Payload::Zone::MemoriseSpellAction::Unmemorise);
 }
 
 void ZoneConnection::sendInterruptCast() {
@@ -2877,7 +2909,7 @@ void ZoneConnection::sendInterruptCast() {
 }
 
 void ZoneConnection::sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID) {
-	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpell::SPELLBAR_REFRESH);
+	_sendMemoriseSpell(pSlot, pSpellID, Payload::Zone::MemoriseSpellAction::SpellBarRefresh);
 }
 
 void ZoneConnection::sendEnableSpellBar(const uint32 pSpellID) {
@@ -2907,14 +2939,18 @@ const bool ZoneConnection::handleBeginLootRequest(const EQApplicationPacket* pPa
 	if(!pPacket) return false;
 	SIZE_CHECK(LootBeginRequest::sizeCheck(pPacket));
 
-	auto payload = LootBeginRequest::convert(pPacket->pBuffer);
+	auto payload = LootBeginRequest::convert(pPacket);
+
+	// Notify Zone.
 	mZone->handleBeginLootRequest(mCharacter, payload->mSpawnID);
 	return true;
 }
 
 const bool ZoneConnection::handleEndLootRequest(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
+	// Notify Zone.
 	mZone->handleEndLootRequest(mCharacter);
 	return true;
 }
@@ -2963,6 +2999,7 @@ const bool ZoneConnection::handleLootItem(const EQApplicationPacket* pPacket) {
 	// Send required reply(echo).
 	sendPacket(const_cast<EQApplicationPacket*>(pPacket));
 
+	// Notify Zone.
 	mZone->handleLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
 	return true;
 }
@@ -3073,7 +3110,7 @@ const bool ZoneConnection::handleItemRightClick(const EQApplicationPacket* pPack
 	if(!pPacket) return false;
 	SIZE_CHECK(ItemRightClick::sizeCheck(pPacket));
 
-	auto payload = ItemRightClick::convert(pPacket->pBuffer);
+	auto payload = ItemRightClick::convert(pPacket);
 
 	sendItemRightClickResponse(payload->mSlot, payload->mTargetSpawnID);
 	return true;
@@ -3103,7 +3140,7 @@ const bool ZoneConnection::handleOpenContainer(const EQApplicationPacket* pPacke
 	if(!pPacket) return false;
 	SIZE_CHECK(OpenContainer::sizeCheck(pPacket));
 
-	auto payload = OpenContainer::convert(pPacket->pBuffer);
+	auto payload = OpenContainer::convert(pPacket);
 	Log::info("Open Container: " + std::to_string(payload->mSlot));
 	return true;
 }
@@ -3119,6 +3156,7 @@ const bool ZoneConnection::handleTradeRequest(const EQApplicationPacket* pPacket
 
 	// NOTE: Underfoot does appear to require a response.
 
+	// Notify Zone.
 	mZone->handleTradeRequest(mCharacter, payload->mToSpawnID);
 	return true;
 }
@@ -3161,6 +3199,7 @@ const bool ZoneConnection::handleCancelTrade(const EQApplicationPacket* pPacket)
 
 	Log::info(payload->_debug());
 
+	// Notify Zone.
 	mZone->handleTradeCancel(mCharacter, payload->mToSpawnID);
 	return true;
 }
@@ -3172,14 +3211,15 @@ const bool ZoneConnection::handleAcceptTrade(const EQApplicationPacket* pPacket)
 
 	// TODO: I can check that mCharacter is trading with the specific Actor.
 
-	auto payload = TradeAccept::convert(pPacket->pBuffer);
+	auto payload = TradeAccept::convert(pPacket);
 	Log::info(payload->_debug());
-
-	mZone->handleTradeAccept(mCharacter, payload->mFromSpawnID);
 
 	//sendTradeFinished();
 	//mCharacter->setTrading(false);
 	// TODO: Consume trade items.
+
+	// Notify Zone.
+	mZone->handleTradeAccept(mCharacter, payload->mFromSpawnID);
 	return true;
 }
 
@@ -3188,7 +3228,9 @@ const bool ZoneConnection::handleTradeBusy(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
 	SIZE_CHECK(TradeBusy::sizeCheck(pPacket));
 
-	auto payload = TradeBusy::convert(pPacket->pBuffer);
+	auto payload = TradeBusy::convert(pPacket);
+
+	// TODO:
 	return true;
 }
 
@@ -3197,7 +3239,7 @@ const bool ZoneConnection::handleSetServerFiler(const EQApplicationPacket* pPack
 	if(!pPacket) return false;
 	SIZE_CHECK(ServerFilter::sizeCheck(pPacket));
 
-	auto payload = ServerFilter::convert(pPacket->pBuffer);
+	auto payload = ServerFilter::convert(pPacket);
 
 	mCharacter->setFilters(payload->mFilters);
 	return true;
@@ -3376,6 +3418,7 @@ const bool ZoneConnection::handleCrystalCreate(const EQApplicationPacket* pPacke
 const bool ZoneConnection::handleCrystalReclaim(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 
 	// Check: Character has Radiant or Ebon crystals on cursor.
 	Item* item = mCharacter->getInventory()->peekCursor();
@@ -3471,6 +3514,9 @@ const bool ZoneConnection::handleClaimRequest(const EQApplicationPacket* pPacket
 	SIZE_CHECK(ClaimRequest::sizeCheck(pPacket));
 
 	auto payload = ClaimRequest::convert(pPacket);
+
+	STRING_CHECK(payload->mName, Limits::Character::MAX_NAME_LENGTH);
+
 	// TODO:
 	return true;
 }
@@ -3698,13 +3744,17 @@ const bool ZoneConnection::handleReadBook(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(BookRequest::sizeCheck(pPacket));
 
 	auto payload = BookRequest::convert(pPacket);
+
+	STRING_CHECK(payload->mText, 8194);
+	const String text(payload->mText);
+
 	Log::info(payload->_debug());
 
 	// Extract Item ID and Instance ID from text.
 	uint32 itemID = 0;
 	uint32 itemInstanceID = 0;
 
-	String text(payload->mText);
+	
 	std::vector<String> elements = Utility::split(text, '|');
 	EXPECTED_BOOL(elements.size() == 2);
 
@@ -3750,7 +3800,8 @@ const bool ZoneConnection::handleCombine(const EQApplicationPacket* pPacket) {
 	auto payload = Combine::convert(pPacket);
 	Log::info(payload->_debug());
 
-	mZone->onCombine(mCharacter, payload->mSlot);
+	// Notify Zone.
+	mZone->onCombine(mCharacter, payload->mContainerSlotID);
 	return true;
 }
 
@@ -3769,6 +3820,7 @@ const bool ZoneConnection::handleShopRequest(const EQApplicationPacket* pPacket)
 	auto payload = ShopRequest::convert(pPacket);
 	Log::info(payload->_debug());
 
+	// Notify Zone.
 	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
 	return true;
 }
@@ -3788,6 +3840,8 @@ const bool ZoneConnection::handleShopEnd(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(ShopEnd::sizeCheck(pPacket));
 
 	auto payload = ShopEnd::convert(pPacket);
+
+	// Notify Zone.
 	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
 	return true;
 }
@@ -3808,7 +3862,8 @@ const bool ZoneConnection::handleShopSell(const EQApplicationPacket* pPacket) {
 	auto payload = ShopSell::convert(pPacket);
 	Log::info(payload->_debug());
 
-	mZone->handleShopSell(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
+	// Notify Zone.
+	mZone->onSellItem(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
 	return true;
 }
 
@@ -3829,7 +3884,8 @@ const bool ZoneConnection::handleShopBuy(const EQApplicationPacket* pPacket) {
 	auto payload = ShopBuy::convert(pPacket);
 	Log::info(payload->_debug());
 
-	mZone->handleShopBuy(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
+	// Notify Zone.
+	mZone->onBuyItem(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
 	return true;
 }
 
@@ -4068,6 +4124,7 @@ const bool ZoneConnection::handleRandomRequest(const EQApplicationPacket* pPacke
 
 	auto payload = RandomRequest::convert(pPacket);
 
+	// Notify Zone.
 	mZone->handleRandomRequest(mCharacter, payload->mLow, payload->mHigh);
 	return true;
 }
@@ -4076,6 +4133,7 @@ const bool ZoneConnection::handleDropItem(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 	SIZE_CHECK(pPacket->size == 0);
 
+	// Notify Zone.
 	mZone->handleDropItem(mCharacter);
 	return true;
 }
@@ -4195,6 +4253,7 @@ const bool ZoneConnection::handleRespawnWindowSelect(const EQApplicationPacket* 
 	auto payload = RespawnWindowSelect::convert(pPacket);
 	Log::info(payload->_debug());
 
+	// Notify Zone.
 	mZone->handleRespawnSelection(mCharacter, payload->mSelection);
 	return true;
 }
@@ -4224,6 +4283,9 @@ const bool ZoneConnection::handleAAAction(const EQApplicationPacket* pPacket) {
 		// " Alternate Experience is *OFF*."
 		sendAAExperienceOffMessage();
 		mCharacter->getExperienceController()->setExperienceToAA(0);
+	}
+	else {
+		mLog->error("Unknown action: " + toString(payload->mAction) + " in " + __FUNCTION__);
 	}
 
 	return true;

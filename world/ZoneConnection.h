@@ -250,7 +250,6 @@ public:
 	const bool handleTaunt(const EQApplicationPacket* pPacket);
 	const bool handleConsider(const EQApplicationPacket* pPacket);
 	const bool handleConsiderCorpse(const EQApplicationPacket* pPacket);
-
 	const bool handleBeginLootRequest(const EQApplicationPacket* pPacket);
 	const bool handleEndLootRequest(const EQApplicationPacket* pPacket);
 	const bool handleLootItem(const EQApplicationPacket* pPacket);
@@ -266,19 +265,24 @@ public:
 	const bool handleMoveCoin(const EQApplicationPacket* pPacket);
 	const bool handleMoveCoinImpl(const EQApplicationPacket* pPacket);
 
+	// Shop / Merchant
 	const bool handleShopRequest(const EQApplicationPacket* pPacket);
 	const bool handleShopEnd(const EQApplicationPacket* pPacket);
 	const bool handleShopSell(const EQApplicationPacket* pPacket);
 	const bool handleShopBuy(const EQApplicationPacket* pPacket);
 
+	// Trade.
 	const bool handleTradeRequest(const EQApplicationPacket* pPacket);
 	const bool handleTradeRequestAck(const EQApplicationPacket* pPacket);
 	const bool handleCancelTrade(const EQApplicationPacket* pPacket);
 	const bool handleAcceptTrade(const EQApplicationPacket* pPacket);
 	const bool handleTradeBusy(const EQApplicationPacket* pPacket);
 
+	// Alternate Currency
 	const bool handleCrystalCreate(const EQApplicationPacket* pPacket);
 	const bool handleCrystalReclaim(const EQApplicationPacket* pPacket);
+	const bool handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
+
 	const bool handleAugmentItem(const EQApplicationPacket* pPacket);
 	const bool handleAugmentInfo(const EQApplicationPacket* pPacket);
 	const bool handleReadBook(const EQApplicationPacket* pPacket);
@@ -288,7 +292,6 @@ public:
 	const bool handleClaimRequest(const EQApplicationPacket* pPacket);
 	const bool handleCamp(const EQApplicationPacket* pPacket);
 	const bool handlePotionBelt(const EQApplicationPacket* pPacket);
-	const bool handleAlternateCurrencyReclaim(const EQApplicationPacket* pPacket);
 	const bool handleRandomRequest(const EQApplicationPacket* pPacket);
 	const bool handleDropItem(const EQApplicationPacket* pPacket);
 	const bool handleXTargetAutoAddHaters(const EQApplicationPacket* pPacket);
@@ -315,6 +318,7 @@ public:
 	const bool handleGMLastName(const EQApplicationPacket* pPacket);
 
 	inline const bool hasSizeError() const { return mSizeError; } // For unit testing.
+	inline const bool hasStringError() const { return mStringError; } // For unit testing.
 private:
 	const bool handleUnknown(const EQApplicationPacket* pPacket);
 	void _sendTimeOfDay();
@@ -366,4 +370,5 @@ private:
 	static EQApplicationPacket* mGroupUpdateMembersPacket;
 
 	bool mSizeError = false; // For unit testing.
+	bool mStringError = false; // For unit testing.
 };

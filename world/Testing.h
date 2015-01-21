@@ -19,7 +19,7 @@
 #include "Test_ZoneDataStore.h"
 #include "Test_NPCFactory.h"
 #include "Test_SpellDataStore.h"
-#include "Test_ItemDataStore.h"
+//#include "Test_ItemDataStore.h"
 #include "Test_ItemFactory.h"
 #include "Test_ItemGenerator.h"
 #include "Test_CharacterFactory.h"
@@ -82,6 +82,17 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(12, Payload::Zone::PotionBelt::size());
 	EXPECT_EQ(4, Payload::Zone::DeleteSpawn::size());
 
+	// Group.
+	EXPECT_EQ(148, Payload::Group::Invite::size());
+	EXPECT_EQ(152, Payload::Group::Follow::size());
+	EXPECT_EQ(152, Payload::Group::DeclineInvite::size());
+	EXPECT_EQ(148, Payload::Group::Disband::size());
+	EXPECT_EQ(456, Payload::Group::MakeLeader::size());
+
+	// Raid.
+
+	// Guild.
+
 	// Login Server Connection
 	
 	EXPECT_EQ(12, Payload::LoginServer::WorldStatus::size());
@@ -129,6 +140,36 @@ TEST(safeString, Strings) {
 	// Long String
 	char buffer[] = "HelloWorld";
 	EXPECT_EQ("", Utility::safeString(buffer, 2));
+}
+
+TEST(isSafe, Misc) {
+	// Long String
+	char buffer[] = "HelloWorld";
+	EXPECT_EQ("", Utility::safeString(buffer, 2));
+
+	// Fail: Null.
+	EXPECT_FALSE(Utility::isSafe(nullptr, 0));
+
+	char a[10];
+	memset(a, 1, sizeof(a));
+
+	// Fail: Not terminated.
+	EXPECT_FALSE(Utility::isSafe(a, 0));
+	EXPECT_FALSE(Utility::isSafe(a, 1));
+	EXPECT_FALSE(Utility::isSafe(a, 2));
+	EXPECT_FALSE(Utility::isSafe(a, 3));
+	EXPECT_FALSE(Utility::isSafe(a, 4));
+	EXPECT_FALSE(Utility::isSafe(a, 5));
+	EXPECT_FALSE(Utility::isSafe(a, 6));
+
+	char name[64];
+	memset(name, 1, sizeof(name));
+	EXPECT_FALSE(Utility::isSafe(name, 64));
+
+	char name2[64];
+	memset(name2, 0, sizeof(name2));
+	strcpy(name2, "Drajor");
+	EXPECT_TRUE(Utility::isSafe(name2, 64));
 }
 
 TEST(LimitsTest, ShopQuantityValid) {

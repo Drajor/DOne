@@ -97,8 +97,18 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleZoneEntry_Small) {
 }
 
 TEST_F(ZoneConnectionHandlerSanityTest, handleZoneEntry_Overflow) {
-	// TODO:
-	EXPECT_TRUE(false);
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ZoneEntry::size());
+	auto payload = Payload::Zone::ZoneEntry::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+	
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleZoneEntry(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
 }
 
 /*
@@ -112,6 +122,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRequestClientSpawn_Null) {
 	EXPECT_FALSE(mZoneConnection->handleRequestClientSpawn(nullptr));
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleRequestClientSpawn_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRequestClientSpawn(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
 /*
 	handleClientReady
 */
@@ -123,6 +144,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleClientReady_Null) {
 	EXPECT_FALSE(mZoneConnection->handleClientReady(nullptr));
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleClientReady_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleClientReady(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
 /*
 	handleRequestNewZoneData
 */
@@ -132,6 +164,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRequestNewZoneData_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleRequestNewZoneData(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRequestNewZoneData_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRequestNewZoneData(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 /*
@@ -266,9 +309,34 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupInvite_Small) {
 	delete p;
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleGroupInvite_Overflow) {
-	// TODO:
-	EXPECT_TRUE(false);
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupInvite_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Invite::size());
+	auto payload = Payload::Group::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mFrom, 1, sizeof(payload->mFrom));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupInvite_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Invite::size());
+	auto payload = Payload::Group::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mTo, 1, sizeof(payload->mTo));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
 }
 
 /*
@@ -301,6 +369,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGroupAcceptInvite(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Follow::size());
+	auto payload = Payload::Group::Follow::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName1, 1, sizeof(payload->mName1));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupAcceptInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Follow::size());
+	auto payload = Payload::Group::Follow::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName2, 1, sizeof(payload->mName2));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupAcceptInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -337,6 +435,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDeclineInvite_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDeclineInvite_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::DeclineInvite::size());
+	auto payload = Payload::Group::DeclineInvite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName1, 1, sizeof(payload->mName1));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupDeclineInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDeclineInvite_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::DeclineInvite::size());
+	auto payload = Payload::Group::DeclineInvite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName2, 1, sizeof(payload->mName2));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupDeclineInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGroupDisband
 */
@@ -367,6 +495,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDisband_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGroupDisband(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDisband_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Disband::size());
+	auto payload = Payload::Group::Disband::convert(p);
+	// Setup string with no null termination.
+	memset(payload->name1, 1, sizeof(payload->name1));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupDisband(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDisband_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Disband::size());
+	auto payload = Payload::Group::Disband::convert(p);
+	// Setup string with no null termination.
+	memset(payload->name2, 1, sizeof(payload->name2));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupDisband(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -403,6 +561,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupMakeLeader_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupMakeLeader_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::MakeLeader::size());
+	auto payload = Payload::Group::MakeLeader::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCurrentLeader, 1, sizeof(payload->mCurrentLeader));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupMakeLeader(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupMakeLeader_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::MakeLeader::size());
+	auto payload = Payload::Group::MakeLeader::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mNewLeader, 1, sizeof(payload->mNewLeader));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupMakeLeader(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGuildCreate
 */
@@ -436,6 +624,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildCreate_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildCreate_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Create::size());
+	auto payload = Payload::Guild::Create::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName, 1, sizeof(payload->mName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildCreate(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGuildDelete
 */
@@ -445,6 +648,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleGuildDelete(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGuildDelete(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 /*
@@ -477,6 +691,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInvite_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGuildInvite(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInvite_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Invite::size());
+	auto payload = Payload::Guild::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mToCharacter, 1, sizeof(payload->mToCharacter));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInvite_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Invite::size());
+	auto payload = Payload::Guild::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mFromCharacter, 1, sizeof(payload->mFromCharacter));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -513,6 +757,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInviteResponse_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInviteResponse_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::InviteResponse::size());
+	auto payload = Payload::Guild::InviteResponse::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mInviter, 1, sizeof(payload->mInviter));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildInviteResponse(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildInviteResponse_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::InviteResponse::size());
+	auto payload = Payload::Guild::InviteResponse::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mNewMember, 1, sizeof(payload->mNewMember));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildInviteResponse(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGuildRemove
 */
@@ -543,6 +817,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildRemove_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGuildRemove(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildRemove_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Remove::size());
+	auto payload = Payload::Guild::Remove::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mToCharacter, 1, sizeof(payload->mToCharacter));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildRemove(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildRemove_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Remove::size());
+	auto payload = Payload::Guild::Remove::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mFromCharacter, 1, sizeof(payload->mFromCharacter));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildRemove(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -579,6 +883,51 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetMOTD_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetMOTD_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MOTD::size());
+	auto payload = Payload::Guild::MOTD::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildSetMOTD(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetMOTD_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MOTD::size());
+	auto payload = Payload::Guild::MOTD::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mSetByName, 1, sizeof(payload->mSetByName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildSetMOTD(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetMOTD_Overflow_2) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MOTD::size());
+	auto payload = Payload::Guild::MOTD::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mMOTD, 1, sizeof(payload->mMOTD));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildSetMOTD(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGuildGetMOTD
 */
@@ -588,6 +937,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildGetMOTD_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleGuildGetMOTD(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildGetMOTD_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGuildGetMOTD(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 /*
@@ -623,6 +983,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildURLOrChannel_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildURLOrChannel_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::GuildUpdate::size());
+	auto payload = Payload::Guild::GuildUpdate::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mText, 1, sizeof(payload->mText));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildURLOrChannel(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleSetGuildPublicNote
 */
@@ -632,6 +1007,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::PublicNote::size());
+	auto payload = Payload::Guild::PublicNote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mSenderName, 1, sizeof(payload->mSenderName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::PublicNote::size());
+	auto payload = Payload::Guild::PublicNote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mTargetName, 1, sizeof(payload->mTargetName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
 }
 
 /*
@@ -664,6 +1069,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGetGuildStatus_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGetGuildStatus(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGetGuildStatus_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::StatusRequest::size());
+	auto payload = Payload::Guild::StatusRequest::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName, 1, sizeof(payload->mName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGetGuildStatus(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -700,6 +1120,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDemote_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDemote_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Demote::size());
+	auto payload = Payload::Guild::Demote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildDemote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDemote_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Demote::size());
+	auto payload = Payload::Guild::Demote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mDemoteName, 1, sizeof(payload->mDemoteName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildDemote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleGuildSetFlags
 */
@@ -730,6 +1180,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetFlags_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGuildSetFlags(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetFlags_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::FlagsUpdate::size());
+	auto payload = Payload::Guild::FlagsUpdate::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildSetFlags(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetFlags_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::FlagsUpdate::size());
+	auto payload = Payload::Guild::FlagsUpdate::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mOtherName, 1, sizeof(payload->mOtherName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildSetFlags(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -766,6 +1246,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMakeLeader_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMakeLeader_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MakeLeader::size());
+	auto payload = Payload::Guild::MakeLeader::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildMakeLeader(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMakeLeader_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MakeLeader::size());
+	auto payload = Payload::Guild::MakeLeader::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mLeaderName, 1, sizeof(payload->mLeaderName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildMakeLeader(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleZoneChange
 */
@@ -796,6 +1306,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleZoneChange_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleZoneChange(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleZoneChange_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ZoneChange::size());
+	auto payload = Payload::Zone::ZoneChange::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleZoneChange(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -1096,6 +1621,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleEmote_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleEmote_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::Emote::size());
+	auto payload = Payload::Zone::Emote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mMessage, 1, sizeof(payload->mMessage));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleEmote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleAnimation
 */
@@ -1159,6 +1699,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleWhoRequest_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleWhoRequest(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleWhoRequest_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::WhoRequest::size());
+	auto payload = Payload::Zone::WhoRequest::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleWhoRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -1336,6 +1891,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleEndLootRequest_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleEndLootRequest(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleEndLootRequest_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleEndLootRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 /*
@@ -1943,6 +2509,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleCrystalReclaim_Null) {
 	EXPECT_FALSE(mZoneConnection->handleCrystalReclaim(nullptr));
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleCrystalReclaim_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleCrystalReclaim(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
 /*
 	handleAugmentItem
 */
@@ -2039,6 +2616,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleReadBook_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleReadBook(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleReadBook_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::BookRequest::size());
+	auto payload = Payload::Zone::BookRequest::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mText, 1, sizeof(payload->mText));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleReadBook(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -2171,6 +2763,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleClaimRequest_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleClaimRequest(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleClaimRequest_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ClaimRequest::size());
+	auto payload = Payload::Zone::ClaimRequest::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mName, 1, sizeof(payload->mName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleClaimRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 
@@ -2482,6 +3089,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSurname_Small) {
 	delete p;
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleSurname_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::Surname::size());
+	auto payload = Payload::Zone::Surname::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSurname(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSurname_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::Surname::size());
+	auto payload = Payload::Zone::Surname::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mLastName, 1, sizeof(payload->mLastName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSurname(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
 /*
 	handleClearSurname
 */
@@ -2493,6 +3130,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleClearSurname_Null) {
 	EXPECT_FALSE(mZoneConnection->handleClearSurname(nullptr));
 }
 
+TEST_F(ZoneConnectionHandlerSanityTest, handleClearSurname_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleClearSurname(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
 /*
 	handleLogOut
 */
@@ -2502,6 +3150,17 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleLogOut_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleLogOut(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleLogOut_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleLogOut(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 /*
@@ -2579,4 +3238,15 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRequestTitles_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleRequestTitles(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRequestTitles_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRequestTitles(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }

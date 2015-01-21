@@ -267,11 +267,11 @@ namespace Payload {
 		};
 
 		// C<->S
+		namespace MemoriseSpellAction { enum : u32 { Scribe = 0, Memorise = 1, Unmemorise = 2, SpellBarRefresh = 3, }; }
 		struct MemoriseSpell : public Fixed<MemoriseSpell> {
-			enum Action : u32 { SCRIBE = 0, MEMORISE = 1, UNMEMORISE = 2, SPELLBAR_REFRESH = 3 };
 			u32 mSlot = 0;
 			u32 mSpellID = 0;
-			Action mAction = SCRIBE;
+			u32 mAction = 0;
 			u32 mUnknown0 = 0;
 		};
 
@@ -404,7 +404,6 @@ namespace Payload {
 		};
 
 		// C->S
-		// Based on: CombatAbility_Struct
 		struct CombatAbility : public Fixed<CombatAbility> {
 			u32 mTargetID = 0;
 			u32 mAttack = 0;
@@ -562,7 +561,6 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: moneyOnCorpseStruct
 		struct LootResponse : public Fixed<LootResponse> {
 			enum Response : u8 { 
 				ALREADY = 0,
@@ -713,7 +711,6 @@ namespace Payload {
 		};
 
 		// C->S
-		// Based on: Consume_Struct
 		struct Consume : public Fixed<Consume> {
 			enum ConsumeAction : u32{ AUTO = 0xFFFFFF, MANUAL = 999 };
 			enum ConsumeType : u8 { FOOD = 1, DRINK = 2 };
@@ -732,7 +729,6 @@ namespace Payload {
 		};
 
 		// C->S
-		// Based on: ItemVerifyRequest_Struct
 		struct ItemRightClick : public Fixed<ItemRightClick> {
 			i32 mSlot = 0;
 			u32 mTargetSpawnID = 0;
@@ -1073,11 +1069,11 @@ namespace Payload {
 
 		// C->S
 		struct Combine : Fixed<Combine> {
-			u32 mSlot = 0;
+			u32 mContainerSlotID = 0;
 			String _debug() const {
 				StringStream ss;
 				ss << "{Combine} ";
-				PRINT_MEMBER(mSlot);
+				PRINT_MEMBER(mContainerSlotID);
 				return ss.str();
 			}
 		};
@@ -1530,7 +1526,7 @@ namespace Payload {
 		};
 
 		// C->S
-		struct ClaimRequest : public Fixed<EnvironmentDamage> {
+		struct ClaimRequest : public Fixed<ClaimRequest> {
 			ClaimRequest() { memset(mName, 0, sizeof(mName)); }
 			char mName[64];
 			u32 mClaimID = 0;
@@ -1795,6 +1791,10 @@ namespace Payload {
 	namespace Group {
 		// S->C
 		struct Invite : public FixedT<Invite, OP_GroupInvite> {
+			Invite() {
+				memset(mFrom, 0, sizeof(mFrom));
+				memset(mTo, 0, sizeof(mTo));
+			}
 			static EQApplicationPacket* construct(const String& pFrom, const String& pTo) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -1806,49 +1806,67 @@ namespace Payload {
 
 			char mFrom[64];
 			char mTo[64];
-			u32 unknown0128 = 0;
-			u32 unknown0132 = 0;
-			u32 unknown0136 = 0;
-			u32 unknown0140 = 0;
-			u32 unknown0144 = 0;
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32	mUnknown2 = 0;
+			u32	mUnknown3 = 0;
+			u32	mUnknown4 = 0;
 		};
 
 		// C->S
 		struct Follow : public Fixed<Follow> {
-			char	name1[64];
-			char	name2[64];
-			uint32	unknown0128;
-			uint32	unknown0132;
-			uint32	unknown0136;
-			uint32	unknown0140;
-			uint32	unknown0144;
-			uint32	unknown0148;
+			Follow() {
+				memset(mName1, 0, sizeof(mName1));
+				memset(mName2, 0, sizeof(mName2));
+			}
+			char mName1[64];
+			char mName2[64];
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32	mUnknown2 = 0;
+			u32	mUnknown3 = 0;
+			u32	mUnknown4 = 0;
+			u32	mUnknown5 = 0;
 		};
 
 		// C->S
 		struct DeclineInvite : public Fixed<DeclineInvite> {
-			char	name1[64];
-			char	name2[64];
-			uint8	unknown128[20];
-			uint32	toggle;
+			DeclineInvite() {
+				memset(mName1, 0, sizeof(mName1));
+				memset(mName2, 0, sizeof(mName2));
+			}
+			char mName1[64];
+			char mName2[64];
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32	mUnknown2 = 0;
+			u32	mUnknown3 = 0;
+			u32	mUnknown4 = 0;
+			u32 mToggle = 0;
 		};
 
 		// C->S
 		struct Disband : public Fixed<Disband> {
 			char name1[64];
 			char name2[64];
-			uint32	unknown0128;
-			uint32	unknown0132;
-			uint32	unknown0136;
-			uint32	unknown0140;
-			uint32	unknown0144;
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32	mUnknown2 = 0;
+			u32	mUnknown3 = 0;
+			u32	mUnknown4 = 0;
 		};
 
+		// C->S
 		struct MakeLeader : public Fixed<MakeLeader> {
-			uint32 Unknown000;
-			char CurrentLeader[64];
-			char NewLeader[64];
-			char Unknown072[324];
+			MakeLeader() {
+				memset(mCurrentLeader, 0, sizeof(mCurrentLeader));
+				memset(mNewLeader, 0, sizeof(mNewLeader));
+				memset(mUnknown1, 0, sizeof(mUnknown1));
+			}
+			u32 mUnknown0 = 0;
+			char mCurrentLeader[64];
+			char mNewLeader[64];
+			char mUnknown1[324];
 		};
 	}
 
@@ -1866,10 +1884,11 @@ namespace Payload {
 		}
 		struct InviteResponse : public Fixed<InviteResponse> {
 			InviteResponse() {
-				//memset()
+				memset(mInviter, 0, sizeof(mInviter));
+				memset(mNewMember, 0, sizeof(mNewMember));
 			}
-			char inviter[64];
-			char newmember[64];
+			char mInviter[64];
+			char mNewMember[64];
 			u32 mResponse = 0;
 			u32 mGuildID = 0;
 		};
@@ -2016,8 +2035,14 @@ namespace Payload {
 			char mUnknown1[3584];
 		};
 
-		struct PublicNote {
-			u32 mUnknown;
+		// C->S
+		struct PublicNote : public Fixed<PublicNote> {
+			PublicNote() {
+				memset(mSenderName, 0, sizeof(mSenderName));
+				memset(mTargetName, 0, sizeof(mTargetName));
+				// TODO: Note when I know if this is really fixed.
+			}
+			u32 mUnknown = 0;
 			char mSenderName[Limits::Character::MAX_NAME_LENGTH];
 			char mTargetName[Limits::Character::MAX_NAME_LENGTH];
 			char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
@@ -2051,7 +2076,7 @@ namespace Payload {
 				memset(mUnknown, 0, sizeof(mUnknown));
 			}
 			char mName[64];
-			uint8 mUnknown[72];
+			u8 mUnknown[72];
 		};
 	}
 

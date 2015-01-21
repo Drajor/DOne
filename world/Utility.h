@@ -161,6 +161,13 @@ namespace Utility {
 	String zoneLogDetails(Zone* pZone);
 	String guildRankToString(const GuildRank& pRank);
 
+	static const bool isSafe(char* pCString, u32 pMaxSize) {
+		if (!pCString) return false;
+		// strnlen_s - http://msdn.microsoft.com/en-us/library/z50ty2zh.aspx
+		auto strLength = strnlen_s(pCString, pMaxSize);
+		return strLength != pMaxSize;
+	}
+
 	static String safeString(char* pCString, unsigned int pMaxSize) {
 		// strnlen_s - http://msdn.microsoft.com/en-us/library/z50ty2zh.aspx
 		std::size_t strLength = strnlen_s(pCString, pMaxSize);
