@@ -229,6 +229,18 @@ public:
 	const bool handleGuildSetFlags(const EQApplicationPacket* pPacket);
 	const bool handleGuildMakeLeader(const EQApplicationPacket* pPacket);
 
+	// Spells
+	const bool handleMemoriseSpell(const EQApplicationPacket* pPacket);
+	const bool handleDeleteSpell(const EQApplicationPacket* pPacket);
+	const bool handleLoadSpellSet(const EQApplicationPacket* pPacket);
+	const bool handleSwapSpell(const EQApplicationPacket* pPacket);
+	const bool handleCastSpell(const EQApplicationPacket* pPacket);
+
+	// Misc
+	const bool handleZoneChange(const EQApplicationPacket* pPacket);
+	const bool handleFaceChange(const EQApplicationPacket* pPacket);
+	const bool handleAutoAttack(const EQApplicationPacket* pPacket);
+
 	// TEST LINE
 
 	const bool handleCamp(const EQApplicationPacket* pPacket);
@@ -277,18 +289,7 @@ private:
 
 	// Raid Packets.
 
-	const bool handleZoneChange(const EQApplicationPacket* pPacket);
-	const bool handleFaceChange(const EQApplicationPacket* pPacket);
-
-	const bool handleAutoAttack(const EQApplicationPacket* pPacket);
-
 	void _unimplementedFeature(String pOpCodeName);
-
-	const bool handleMemoriseSpell(const EQApplicationPacket* pPacket);
-	const bool handleDeleteSpell(const EQApplicationPacket* pPacket);
-	const bool handleLoadSpellSet(const EQApplicationPacket* pPacket);
-	const bool handleSwapSpell(const EQApplicationPacket* pPacket);
-	const bool handleCastSpell(const EQApplicationPacket* pPacket);
 
 	const bool handleCombatAbility(const EQApplicationPacket* pPacket);
 	const bool handleTaunt(const EQApplicationPacket* pPacket);

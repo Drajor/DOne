@@ -755,3 +755,267 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMakeLeader_Small) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handleZoneChange
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleZoneChange_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleZoneChange(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleZoneChange_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ZoneChange::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleZoneChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleZoneChange_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ZoneChange::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleZoneChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleFaceChange
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFaceChange_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleFaceChange(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFaceChange_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::FaceChange::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleFaceChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFaceChange_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::FaceChange::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleFaceChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleAutoAttack
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleAutoAttack_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleAutoAttack(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleAutoAttack_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::AutoAttack::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleAutoAttack(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleAutoAttack_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::AutoAttack::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleAutoAttack(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleMemoriseSpell
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleMemoriseSpell_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleMemoriseSpell(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleMemoriseSpell_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::MemoriseSpell::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleMemoriseSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleMemoriseSpell_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::MemoriseSpell::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleMemoriseSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleDeleteSpell
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleDeleteSpell_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleDeleteSpell(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleDeleteSpell_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::DeleteSpell::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleDeleteSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleDeleteSpell_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::DeleteSpell::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleDeleteSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleLoadSpellSet
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleLoadSpellSet_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleLoadSpellSet(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleLoadSpellSet_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::LoadSpellSet::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleLoadSpellSet(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleLoadSpellSet_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::LoadSpellSet::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleLoadSpellSet(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleSwapSpell
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSwapSpell_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleSwapSpell(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSwapSpell_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::SwapSpell::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSwapSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSwapSpell_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::SwapSpell::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSwapSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleCastSpell
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleCastSpell_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleCastSpell(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleCastSpell_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::CastSpell::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleCastSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleCastSpell_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::CastSpell::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleCastSpell(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
