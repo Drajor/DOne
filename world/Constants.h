@@ -84,7 +84,7 @@ namespace Limits {
 		static const auto MAX_SUFFIX_LENGTH = 32;
 		static const auto MAX_LAST_NAME_LENGTH = 32; // MAX for payload.
 		static const auto MAX_LAST_NAME_CLIENT_LENGTH = 20; // MAX for player input
-		static const auto MAX_SPELLS_MEMED = 9; // Maximum number of spells that can be on the spell bar.
+		static const auto MAX_SPELLS_MEMED = 10; // Maximum number of spells that can be on the spell bar.
 		static const uint8 MIN_LEVEL_SURNAME = 20; // The minimum level to change surname.
 		static const auto MAX_CLASS_ID = 16;
 	}

@@ -40,7 +40,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(4, Payload::Zone::AutoAttack::size());
 	EXPECT_EQ(16, Payload::Zone::MemoriseSpell::size());
 	EXPECT_EQ(8, Payload::Zone::DeleteSpell::size());
-	EXPECT_EQ(40, Payload::Zone::LoadSpellSet::size());
+	EXPECT_EQ(44, Payload::Zone::LoadSpellSet::size());
 	EXPECT_EQ(8, Payload::Zone::SwapSpell::size());
 	EXPECT_EQ(36, Payload::Zone::CastSpell::size());
 	EXPECT_EQ(8, Payload::Zone::BeginCast::size());

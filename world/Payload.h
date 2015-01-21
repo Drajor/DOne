@@ -294,7 +294,7 @@ namespace Payload {
 
 		// C->S
 		struct LoadSpellSet : public Fixed<LoadSpellSet> {
-			u32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+			u32 mSpellIDs[Limits::Character::MAX_SPELLS_MEMED];
 			u32 mUnknown0 = 0;
 		};
 

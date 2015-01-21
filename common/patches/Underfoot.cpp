@@ -3117,19 +3117,19 @@ DECODE(OP_TributeItem) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_LoadSpellSet)
-{
-	DECODE_LENGTH_EXACT(structs::LoadSpellSet_Struct);
-	SETUP_DIRECT_DECODE(LoadSpellSet_Struct, structs::LoadSpellSet_Struct);
-
-	for(unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
-		if(eq->spell[i]==0)
-			emu->spell[i] = 0xFFFFFFFF;
-		else
-			emu->spell[i] = eq->spell[i];
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_LoadSpellSet)
+//{
+//	DECODE_LENGTH_EXACT(structs::LoadSpellSet_Struct);
+//	SETUP_DIRECT_DECODE(LoadSpellSet_Struct, structs::LoadSpellSet_Struct);
+//
+//	for(unsigned int i = 0; i < MAX_PP_MEMSPELL; ++i)
+//		if(eq->spell[i]==0)
+//			emu->spell[i] = 0xFFFFFFFF;
+//		else
+//			emu->spell[i] = eq->spell[i];
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_EnvDamage) {
 //	DECODE_LENGTH_EXACT(structs::EnvDamage2_Struct);
