@@ -1552,6 +1552,12 @@ namespace Payload {
 		struct DeleteSpawn : public Fixed<DeleteSpawn> {
 			u32 mUnknown = 0;
 		};
+
+		// C->S
+		struct PetCommand : Fixed<PetCommand> {
+			u32 mCommand = 0;
+			u32 mUnknown = 0;
+		};
 	}
 
 	namespace World {

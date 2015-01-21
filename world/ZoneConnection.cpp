@@ -601,6 +601,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when a player uses the 'Leadership Exp' toggle in the 'Leadership Window'
 		handleLeadershipExperienceToggle(pPacket);
 		break;
+	case OP_PetCommands:
+		handlePetCommand(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4314,6 +4317,18 @@ const bool ZoneConnection::handleLeadershipExperienceToggle(const EQApplicationP
 		return true;
 	}
 
+	return true;
+}
+
+const bool ZoneConnection::handlePetCommand(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(PetCommand::sizeCheck(pPacket));
+
+	auto payload = PetCommand::convert(pPacket);
+
+	// Notify Zone.
+	mZone->onPetCommand(mCharacter, payload->mCommand);
 	return true;
 }
 

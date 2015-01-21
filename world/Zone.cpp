@@ -2506,3 +2506,7 @@ const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pLeaderN
 	mGroupManager->handleMakeLeader(pCharacter, pLeaderName);
 	return true;
 }
+
+const bool Zone::onPetCommand(Character* pCharacter, const u32 pCommand) {
+	return true;
+}

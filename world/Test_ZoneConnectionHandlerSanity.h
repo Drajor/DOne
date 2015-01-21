@@ -3236,3 +3236,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRequestTitles_Big) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handlePetCommand
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handlePetCommand_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handlePetCommand(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handlePetCommand_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::PetCommand::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handlePetCommand(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handlePetCommand_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::PetCommand::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handlePetCommand(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}

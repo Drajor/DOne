@@ -304,6 +304,7 @@ public:
 	const bool handleDeleteSpawn(const EQApplicationPacket* pPacket);
 	const bool handleSetTitle(const EQApplicationPacket* pPacket);
 	const bool handleRequestTitles(const EQApplicationPacket* pPacket);
+	const bool handlePetCommand(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

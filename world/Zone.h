@@ -86,6 +86,9 @@ public:
 	void onLinkdeadBegin(Character* pCharacter);
 	void onLinkdeadEnd(Character* pCharacter);
 
+	// Misc.
+	const bool onPetCommand(Character* pCharacter, const u32 pCommand);
+
 	// Group Events.
 	const bool onGroupInvite(Character* pInviter, const String& pInviteeName);
 	const bool onGroupInviteAccept(Character* pCharacter, const String& pInviterName);
