@@ -1687,6 +1687,30 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class MuteCommand : public Command {
+public:
+	MuteCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #mute <name> <v=1>");
+		mHelpMessages.push_back("Example: #mute Sillyguy 1");
+		mMinimumParameters = 2;
+		mMaximumParameters = 2;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		const String characterName = pParameters[0];
+		bool mute = true;
+		if (!convertParameter(1, mute)) { return false; }
+
+		if (mute)
+			mInvoker->getZone()->mute(mInvoker, characterName);
+		else
+			mInvoker->getZone()->unmute(mInvoker, characterName);
+
+		return true;
+	}
+};
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -1703,6 +1727,7 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 	mDataStore = pDataStore;
 
 	mCommands.push_back(new WorldLockCommand(255, { "lock" }));
+	mCommands.push_back(new MuteCommand(100, { "mute" }));
 
 	mCommands.push_back(new ZoneCommand(100, { "zone", "z" }));
 	mCommands.push_back(new WarpCommand(100, { "warp", "goto", "go" }));
@@ -1788,7 +1813,7 @@ void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
 	Command* command = findCommand(commandName);
 	if (command) {
 		// Check: Invoker has the required status.
-		if (command->getMinimumStatus() >= pCharacter->getStatus()) { return; }
+		if (command->getMinimumStatus() > pCharacter->getStatus()) { return; }
 
 		command->setInvoker(pCharacter);
 

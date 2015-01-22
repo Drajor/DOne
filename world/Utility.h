@@ -408,6 +408,7 @@ namespace Utility {
 
 	inline bool stoSafe(float& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stof); }
 	inline bool stoSafe(double& pValue, const String& pString) { return stdext::stoExecute(pValue, pString, stdext::stod); }
+	inline bool stoSafe(bool& pValue, const String& pString) { pValue = pString != "0"; return true; }
 
 	// Thank you: http://stackoverflow.com/questions/236129/how-to-split-a-string-in-c
 	static std::vector<String> &split(const String &s, char delim, std::vector<String> &elems) {

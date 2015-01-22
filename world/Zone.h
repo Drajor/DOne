@@ -81,6 +81,12 @@ public:
 
 	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory);
 
+	// Mutes a Character.
+	const bool mute(Character* pCharacter, const String& pCharacterName);
+
+	// Unmutes a Character.
+	const bool unmute(Character* pCharacter, const String& pCharacterName);
+
 	void onEnterZone(Character* pCharacter);
 	void onLeaveZone(Character* pCharacter);
 	void onCampComplete(Character* pCharacter);

@@ -2629,3 +2629,77 @@ const bool Zone::onEmote(Character* pCharacter, const String& pMessage) {
 
 	return onEmoteMessage(pCharacter, pMessage);
 }
+
+const bool Zone::mute(Character* pCharacter, const String& pCharacterName) {
+	// Find Character.
+	auto character = mZoneManager->findCharacter(pCharacterName, true); // Muting a zoning Character is fine.
+
+	// Check: Character exists.
+	if (!character) {
+		pCharacter->notify("Could not find Character: " + pCharacterName);
+		return false;
+	}
+	
+	// Check: You can not mute yourself.
+	if (character == pCharacter) {
+		pCharacter->notify("You can not mute yourself.");
+		return false;
+	}
+
+	// Check: You can not mute someone with higher status.
+	if (pCharacter->getStatus() < character->getStatus()) {
+		pCharacter->notify("You can not mute a Character with higher status.");
+		return false;
+	}
+
+	// Check: Already muted.
+	if (character->isMuted()) {
+		pCharacter->notify(pCharacterName + " is already muted.");
+		return false;
+	}
+
+	// Send the muted Character a message if they are not zoning.
+	if (!character->isZoning())
+		character->notify("You have been muted.");
+
+	character->setMuted(true);
+	pCharacter->notify(pCharacterName + " has been muted.");
+	return true;
+}
+
+const bool Zone::unmute(Character* pCharacter, const String& pCharacterName) {
+	// Find Character.
+	auto character = mZoneManager->findCharacter(pCharacterName, true); // Unmuting a zoning Character is fine.
+
+	// Check: Character exists.
+	if (!character) {
+		pCharacter->notify("Could not find Character: " + pCharacterName);
+		return false;
+	}
+
+	// Check: You can not unmute yourself.
+	if (character == pCharacter) {
+		pCharacter->notify("You can not unmute yourself.");
+		return false;
+	}
+
+	// Check: You can not unmute someone with higher status.
+	if (pCharacter->getStatus() < character->getStatus()) {
+		pCharacter->notify("You can not unmute a Character with higher status.");
+		return false;
+	}
+
+	// Check: Not muted.
+	if (!character->isMuted()) {
+		pCharacter->notify(pCharacterName + " is not muted.");
+		return false;
+	}
+
+	// Send the unmuted Character a message if they are not zoning.
+	if (!character->isZoning())
+		character->notify("You have been unmuted.");
+
+	character->setMuted(false);
+	pCharacter->notify(pCharacterName + " has been unmuted.");
+	return true;
+}

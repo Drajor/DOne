@@ -140,8 +140,8 @@ public:
 	void update();
 
 	void setStanding(bool pStanding);
-	inline const uint32 getStatus() const { return mStatus; }
-	inline void setStatus(const uint32 pStatus) { mStatus = pStatus; }
+	inline const u32 getStatus() const { return mStatus; }
+	inline void setStatus(const u32 pStatus) { mStatus = pStatus; }
 	
 	void startCamp();
 	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
@@ -308,7 +308,7 @@ private:
 	bool mAutoConsentGroup = false;
 	bool mAutoConsentRaid = false;
 	bool mAutoConsentGuild = false;
-	uint8 mStatus = 0;
+	u32 mStatus = 0;
 	Timer mCampTimer; // 30 seconds.
 
 	Timer mAutoSave;

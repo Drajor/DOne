@@ -14,10 +14,10 @@ class Character;
 
 class Command {
 public:
-	Command(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : mMinimumStatus(pMinimumStatus), mAliases(pAliases), mLogged(pLogged) {};
+	Command(u32 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : mMinimumStatus(pMinimumStatus), mAliases(pAliases), mLogged(pLogged) {};
 	virtual ~Command() {};
 	inline std::list<String>& getAliases() { return mAliases; }
-	inline const uint8 getMinimumStatus() const { return mMinimumStatus; }
+	inline const u32 getMinimumStatus() const { return mMinimumStatus; }
 	void setInvoker(Character* pCharacter) { mInvoker = pCharacter; }
 	inline void setParameters(CommandParameters pParameters) { mParameters = pParameters; }
 	inline void clearParameters() { mParameters.clear(); }
@@ -48,7 +48,8 @@ protected:
 	
 	CommandParameters mParameters;
 	std::list<String> mAliases;
-	u8 mMinimumStatus = UINT8_MAX;
+	u32 mMinimumStatus = UINT32_MAX;
+
 	std::list<String> mHelpMessages;
 	Character* mInvoker = nullptr;
 	bool mLogged = true;
