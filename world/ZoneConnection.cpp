@@ -607,6 +607,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_ApplyPoison:
 		handleApplyPoison(pPacket);
 		break;
+	case OP_RaidInvite:
+		handleRaidInvite(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4384,6 +4387,20 @@ const bool ZoneConnection::handleApplyPoison(const EQApplicationPacket* pPacket)
 	if (!pPacket) return false;
 	SIZE_CHECK(ApplyPoison::sizeCheck(pPacket));
 
+	return true;
+}
+
+const bool ZoneConnection::handleRaidInvite(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Raid;
+	if (!pPacket) return false;
+	SIZE_CHECK(Invite::sizeCheck(pPacket));
+
+	auto payload = Invite::convert(pPacket);
+
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+
+	// TODO:
 	return true;
 }
 

@@ -217,6 +217,7 @@ public:
 	const bool handleGroupMakeLeader(const EQApplicationPacket* pPacket);
 
 	// Raid Packets.
+	const bool handleRaidInvite(const EQApplicationPacket* pPacket);
 
 	// Guild Packets.
 	const bool handleGuildCreate(const EQApplicationPacket* pPacket);

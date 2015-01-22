@@ -2736,17 +2736,17 @@ DECODE(OP_BazaarSearch)
 	FINISH_DIRECT_DECODE();
 }
 
-DECODE(OP_RaidInvite) {
-	DECODE_LENGTH_EXACT(structs::RaidGeneral_Struct);
-	SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
-
-	strn0cpy(emu->leader_name, eq->leader_name, 64);
-	strn0cpy(emu->player_name, eq->player_name, 64);
-	IN(action);
-	IN(parameter);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_RaidInvite) {
+//	DECODE_LENGTH_EXACT(structs::RaidGeneral_Struct);
+//	SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);
+//
+//	strn0cpy(emu->leader_name, eq->leader_name, 64);
+//	strn0cpy(emu->player_name, eq->player_name, 64);
+//	IN(action);
+//	IN(parameter);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 DECODE(OP_AdventureMerchantSell) {
 	DECODE_LENGTH_EXACT(structs::Adventure_Sell_Struct);

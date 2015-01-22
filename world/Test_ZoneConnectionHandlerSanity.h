@@ -3335,3 +3335,66 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleApplyPoison_Small) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handleRaidInvite
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleRaidInvite(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Raid::Invite::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRaidInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Raid::Invite::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRaidInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Raid::Invite::size());
+	auto payload = Payload::Raid::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleRaidInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Raid::Invite::size());
+	auto payload = Payload::Raid::Invite::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mLeaderName, 1, sizeof(payload->mLeaderName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleRaidInvite(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}

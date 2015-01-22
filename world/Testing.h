@@ -94,6 +94,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(456, Payload::Group::MakeLeader::size());
 
 	// Raid.
+	EXPECT_EQ(140, Payload::Raid::Invite::size());
 
 	// Guild.
 	EXPECT_EQ(80, Payload::Guild::RankUpdate::size());

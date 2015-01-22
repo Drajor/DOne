@@ -1572,6 +1572,19 @@ namespace Payload {
 		};
 	}
 
+	namespace Raid {
+
+		struct Action {
+			u32 mAction = 0;
+			char mCharacterName[64];
+			u32 mUnknown = 0;
+			char mLeaderName[64];
+			u32 mParameter = 0;
+		};
+
+		typedef Fixed<Action> Invite;
+	}
+
 	namespace World {
 
 		// C->S
