@@ -2995,15 +2995,15 @@ DECODE(OP_Buff) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_FindPersonRequest) {
-	DECODE_LENGTH_EXACT(structs::FindPersonRequest_Struct);
-	SETUP_DIRECT_DECODE(FindPersonRequest_Struct, structs::FindPersonRequest_Struct);
-	IN(npc_id);
-	IN(client_pos.x);
-	IN(client_pos.y);
-	IN(client_pos.z);
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_FindPersonRequest) {
+//	DECODE_LENGTH_EXACT(structs::FindPersonRequest_Struct);
+//	SETUP_DIRECT_DECODE(FindPersonRequest_Struct, structs::FindPersonRequest_Struct);
+//	IN(npc_id);
+//	IN(client_pos.x);
+//	IN(client_pos.y);
+//	IN(client_pos.z);
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_WearChange) {
 //	DECODE_LENGTH_EXACT(structs::WearChange_Struct);
@@ -3236,19 +3236,19 @@ DECODE(OP_TributeItem) {
 //	delete [] __eq_buffer;
 //}
 
-DECODE(OP_BuffRemoveRequest)
-{
-	// This is to cater for the fact that short buff box buffs start at 30 as opposed to 25 in prior clients.
-	//
-	DECODE_LENGTH_EXACT(structs::BuffRemoveRequest_Struct);
-	SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, structs::BuffRemoveRequest_Struct);
-
-	emu->SlotID = (eq->SlotID < 30 ) ? eq->SlotID : (eq->SlotID - 5);
-
-	IN(EntityID);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_BuffRemoveRequest)
+//{
+//	// This is to cater for the fact that short buff box buffs start at 30 as opposed to 25 in prior clients.
+//	//
+//	DECODE_LENGTH_EXACT(structs::BuffRemoveRequest_Struct);
+//	SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, structs::BuffRemoveRequest_Struct);
+//
+//	emu->SlotID = (eq->SlotID < 30 ) ? eq->SlotID : (eq->SlotID - 5);
+//
+//	IN(EntityID);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 uint32 NextItemInstSerialNumber = 1;
 uint32 MaxInstances = 2000000000;

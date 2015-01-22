@@ -619,6 +619,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_InspectMessageUpdate:
 		handleSetInspectMessage(pPacket);
 		break;
+	case OP_BuffRemoveRequest:
+		handleRemoveBuffRequest(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4363,6 +4366,17 @@ const bool ZoneConnection::handleSetInspectMessage(const EQApplicationPacket* pP
 
 	STRING_CHECK(payload->mMessage, 256);
 	const String newMessage(payload->mMessage);
+
+	// TODO:
+	return true;
+}
+
+const bool ZoneConnection::handleRemoveBuffRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(RemoveBuffRequest::sizeCheck(pPacket));
+
+	auto payload = RemoveBuffRequest::convert(pPacket);
 
 	// TODO:
 	return true;

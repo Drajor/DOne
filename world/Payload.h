@@ -1610,6 +1610,12 @@ namespace Payload {
 		struct InspectMessage : public Fixed<InspectMessage> {
 			char mMessage[256];
 		};
+
+		// C->S
+		struct RemoveBuffRequest : public Fixed<RemoveBuffRequest> {
+			u32 mSlotID = 0;
+			u32 mSpawnID = 0;
+		};
 	}
 
 	namespace Raid {

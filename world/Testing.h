@@ -89,6 +89,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::InspectRequest::size());
 	EXPECT_EQ(1860, Payload::Zone::InspectResponse::size());
 	EXPECT_EQ(256, Payload::Zone::InspectMessage::size());
+	EXPECT_EQ(8, Payload::Zone::RemoveBuffRequest::size());
 
 	// Group.
 	EXPECT_EQ(148, Payload::Group::Invite::size());

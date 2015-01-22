@@ -3512,3 +3512,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetInspectMessage_Overflow_0) {
 
 	delete p;
 }
+
+/*
+	handleRemoveBuffRequest
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRemoveBuffRequest_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleRemoveBuffRequest(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRemoveBuffRequest_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::RemoveBuffRequest::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRemoveBuffRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleRemoveBuffRequest_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::RemoveBuffRequest::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleRemoveBuffRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
