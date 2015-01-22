@@ -1605,6 +1605,11 @@ namespace Payload {
 			u32 mItemIcons[23];
 			char mText[288];
 		};
+
+		// C->S
+		struct InspectMessage : public Fixed<InspectMessage> {
+			char mMessage[256];
+		};
 	}
 
 	namespace Raid {

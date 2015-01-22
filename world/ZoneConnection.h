@@ -312,6 +312,7 @@ public:
 	const bool handleApplyPoison(const EQApplicationPacket* pPacket);
 	const bool handleFindPersonRequest(const EQApplicationPacket* pPacket);
 	const bool handleInspectRequest(const EQApplicationPacket* pPacket);
+	const bool handleSetInspectMessage(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

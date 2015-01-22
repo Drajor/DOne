@@ -3464,3 +3464,51 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleInspectRequest_Small) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handleSetInspectMessage
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetInspectMessage_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleSetInspectMessage(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetInspectMessage_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::InspectMessage::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSetInspectMessage(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetInspectMessage_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::InspectMessage::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSetInspectMessage(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetInspectMessage_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::InspectMessage::size());
+	auto payload = Payload::Zone::InspectMessage::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mMessage, 1, sizeof(payload->mMessage));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSetInspectMessage(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}

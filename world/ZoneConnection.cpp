@@ -616,6 +616,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_InspectRequest:
 		handleInspectRequest(pPacket);
 		break;
+	case OP_InspectMessageUpdate:
+		handleSetInspectMessage(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4346,6 +4349,20 @@ const bool ZoneConnection::handleInspectRequest(const EQApplicationPacket* pPack
 	using namespace Payload::Zone;
 	if (!pPacket) return false;
 	SIZE_CHECK(InspectRequest::sizeCheck(pPacket));
+
+	// TODO:
+	return true;
+}
+
+const bool ZoneConnection::handleSetInspectMessage(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(InspectMessage::sizeCheck(pPacket));
+
+	auto payload = InspectMessage::convert(pPacket);
+
+	STRING_CHECK(payload->mMessage, 256);
+	const String newMessage(payload->mMessage);
 
 	// TODO:
 	return true;
