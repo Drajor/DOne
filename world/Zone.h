@@ -65,6 +65,7 @@ typedef std::list<Door*> DoorList;
 struct ZonePoint {
 	uint16 mID = 0;
 	Vector3 mPosition;
+	float mHeading = 0.0f;
 
 	Vector3 mDestinationPosition;
 	float mDestinationHeading = 0.0f;

@@ -350,24 +350,24 @@ ENCODE(OP_OpenNewTasksWindow) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_SendZonepoints) {
-	SETUP_VAR_ENCODE(ZonePoints);
-	ALLOC_VAR_ENCODE(structs::ZonePoints, sizeof(structs::ZonePoints) + sizeof(structs::ZonePoint_Entry) * (emu->count + 1));
-
-	eq->count = emu->count;
-	for(uint32 i = 0; i < emu->count; ++i)
-	{
-		eq->zpe[i].iterator = emu->zpe[i].iterator;
-		eq->zpe[i].x = emu->zpe[i].x;
-		eq->zpe[i].y = emu->zpe[i].y;
-		eq->zpe[i].z = emu->zpe[i].z;
-		eq->zpe[i].heading = emu->zpe[i].heading;
-		eq->zpe[i].zoneid = emu->zpe[i].zoneid;
-		eq->zpe[i].zoneinstance = emu->zpe[i].zoneinstance;
-	}
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_SendZonepoints) {
+//	SETUP_VAR_ENCODE(ZonePoints);
+//	ALLOC_VAR_ENCODE(structs::ZonePoints, sizeof(structs::ZonePoints) + sizeof(structs::ZonePoint_Entry) * (emu->count + 1));
+//
+//	eq->count = emu->count;
+//	for(uint32 i = 0; i < emu->count; ++i)
+//	{
+//		eq->zpe[i].iterator = emu->zpe[i].iterator;
+//		eq->zpe[i].x = emu->zpe[i].x;
+//		eq->zpe[i].y = emu->zpe[i].y;
+//		eq->zpe[i].z = emu->zpe[i].z;
+//		eq->zpe[i].heading = emu->zpe[i].heading;
+//		eq->zpe[i].zoneid = emu->zpe[i].zoneid;
+//		eq->zpe[i].zoneinstance = emu->zpe[i].zoneinstance;
+//	}
+//
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_SendAATable) {
 	ENCODE_LENGTH_ATLEAST(SendAA_Struct);

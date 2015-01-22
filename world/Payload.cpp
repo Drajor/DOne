@@ -1,5 +1,6 @@
 #include "Payload.h"
 #include "Data.h"
+#include "Zone.h"
 
 #pragma pack(1)
 
@@ -114,5 +115,48 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 	}
 
 	auto packet = new EQApplicationPacket(OP_SendCharInfo, data, size);
+	return packet;
+}
+
+#pragma pack(1)
+namespace Payload {
+	struct ZonePointData { //28 octets
+		u32 mID = 0;
+		float mY = 0.0f;
+		float mX = 0.0f;
+		float mZ = 0.0f;
+		float mHeading = 0.0f;
+		u16 mZoneID = 0;
+		u16 mInstanceID = 0;
+		u32 mUnknown = 0;
+	};
+}
+#pragma pack()
+
+EQApplicationPacket* Payload::makeZonePoints(const std::list<ZonePoint*>& pZonePoints) {
+	const u32 numZonePoints = pZonePoints.size();
+	u32 size = 0;
+	
+	unsigned char * data = new unsigned char[size];
+	Utility::DynamicStructure ds(data, size);
+
+	// Count.
+	ds.write<u32>(numZonePoints);
+
+	for (auto i : pZonePoints) {
+		ZonePointData p;
+		p.mID = i->mID;
+		p.mY = i->mPosition.y;
+		p.mX = i->mPosition.x;
+		p.mZ = i->mPosition.z;
+		p.mHeading = i->mHeading;
+		p.mZoneID = i->mDestinationZoneID;
+		p.mInstanceID = i->mDestinationInstanceID;
+		p.mUnknown = 0;
+
+		ds.write<ZonePointData>(p);
+	}
+
+	auto packet = new EQApplicationPacket(OP_SendZonepoints, data, size);
 	return packet;
 }

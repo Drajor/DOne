@@ -726,7 +726,7 @@ const bool ZoneConnection::handleRequestClientSpawn(const EQApplicationPacket* p
 	_sendDoors();
 	_sendObjects();
 	_sendAAStats();
-	_sendZonePoints();
+	sendZonePoints();
 	_sendZoneServerReady();
 	_sendExpZoneIn();
 	_sendWorldObjectsSent();
@@ -1046,39 +1046,10 @@ void ZoneConnection::_sendObjects() {
 	}
 }
 
-void ZoneConnection::_sendZonePoints() {
-	EXPECTED(mConnected);
-
-	const std::list<ZonePoint*>& zonePoints = mZone->getZonePoints();
-	const std::size_t numZonePoints = zonePoints.size();
-	if (numZonePoints == 0)
-		return;
-
-	uint32 packetSize = 0;
-	packetSize += sizeof(uint32); // id
-	packetSize += sizeof(uint16); // zone id
-	packetSize += sizeof(uint16); // instance id
-	packetSize += sizeof(float) * 4; // position / heading.
-	packetSize *= numZonePoints;
-	packetSize += sizeof(uint32); // count.
-
-	auto packet = new EQApplicationPacket(OP_SendZonepoints, packetSize);
-	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
-	
-	ds.write<uint32>(numZonePoints); // Count.
-	for (auto i : zonePoints) {
-		ds.write<uint32>(i->mID);
-		ds.write<float>(i->mDestinationPosition.x);
-		ds.write<float>(i->mDestinationPosition.y);
-		ds.write<float>(i->mDestinationPosition.z);
-		ds.write<float>(i->mDestinationHeading);
-		ds.write<uint16>(i->mDestinationZoneID);
-		ds.write<uint16>(i->mDestinationInstanceID);
-	}
-
+void ZoneConnection::sendZonePoints() {
+	auto packet = Payload::makeZonePoints(mZone->getZonePoints());
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
 }
 
 void ZoneConnection::_sendAAStats() {

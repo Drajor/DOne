@@ -340,7 +340,7 @@ private:
 
 	void _sendDoors();
 	void _sendObjects();
-	void _sendZonePoints();
+	void sendZonePoints();
 	void _sendAAStats();
 	void _sendZoneServerReady();
 	void _sendExpZoneIn();
