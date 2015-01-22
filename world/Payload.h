@@ -1590,6 +1590,21 @@ namespace Payload {
 			float mZ = 0.0f;
 			u32 mUnknown1 = 0;
 		};
+		
+		// C->S
+		struct InspectRequest : public Fixed<InspectRequest> {
+			u32 mTargetSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
+		};
+
+		// S->C
+		struct InspectResponse : public FixedT<InspectResponse, OP_InspectAnswer> {
+			u32 mTargetSpawnID = 0;
+			u32 mCharacterSpawnID = 0;
+			char mItemNames[23][64];
+			u32 mItemIcons[23];
+			char mText[288];
+		};
 	}
 
 	namespace Raid {

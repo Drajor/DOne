@@ -3431,3 +3431,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleFindPersonRequest_Small) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handleInspectRequest
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleInspectRequest_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleInspectRequest(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleInspectRequest_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::InspectRequest::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleInspectRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleInspectRequest_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::InspectRequest::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleInspectRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}

@@ -613,6 +613,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_FindPersonRequest:
 		handleFindPersonRequest(pPacket);
 		break;
+	case OP_InspectRequest:
+		handleInspectRequest(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4334,6 +4337,15 @@ const bool ZoneConnection::handleFindPersonRequest(const EQApplicationPacket* pP
 	using namespace Payload::Zone;
 	if (!pPacket) return false;
 	SIZE_CHECK(FindPersonRequest::sizeCheck(pPacket));
+
+	// TODO:
+	return true;
+}
+
+const bool ZoneConnection::handleInspectRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(InspectRequest::sizeCheck(pPacket));
 
 	// TODO:
 	return true;
