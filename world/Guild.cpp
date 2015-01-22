@@ -185,7 +185,7 @@ void Guild::sendMemberZoneUpdate(GuildMember* pMember) {
 	using namespace Payload::Guild;
 	if (!pMember) return;
 
-	auto packet = MemberUpdate::construct(getID(), pMember->getName(), pMember->getZoneID(), pMember->getInstanceID(), pMember->getLastSeen());
+	auto packet = MemberZoneUpdate::construct(getID(), pMember->getName(), pMember->getZoneID(), pMember->getInstanceID(), pMember->getLastSeen());
 	for (auto i : mOnlineMembers) {
 		if (i->isZoning()) { continue; }
 		i->getConnection()->sendPacket(packet);
@@ -195,7 +195,16 @@ void Guild::sendMemberZoneUpdate(GuildMember* pMember) {
 }
 
 void Guild::sendMemberLevelUpdate(GuildMember* pMember) {
+	using namespace Payload::Guild;
+	if (!pMember) return;
 
+	auto packet = MemberLevelUpdate::construct(getID(), pMember->getName(), pMember->getLevel());
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) { continue; }
+		i->getConnection()->sendPacket(packet);
+	}
+
+	delete packet;
 }
 
 void Guild::onEnterZone(Character* pCharacter) {

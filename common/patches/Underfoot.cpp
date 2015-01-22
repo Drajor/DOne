@@ -429,13 +429,13 @@ ENCODE(OP_SendAATable) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_GuildMemberLevelUpdate) {
-	SETUP_DIRECT_ENCODE(GuildMemberLevelUpdate_Struct, structs::GuildMemberLevelUpdate_Struct);
-	OUT(guild_id);
-	OUT_str(member_name);
-	OUT(level);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_GuildMemberLevelUpdate) {
+//	SETUP_DIRECT_ENCODE(GuildMemberLevelUpdate_Struct, structs::GuildMemberLevelUpdate_Struct);
+//	OUT(guild_id);
+//	OUT_str(member_name);
+//	OUT(level);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_RespondAA) {
 	SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);

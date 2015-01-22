@@ -2049,11 +2049,11 @@ namespace Payload {
 		//};
 		
 		// S->C
-		struct LevelUpdate {
-			u32 mGuildID = 0;
-			char mMemberName[Limits::Character::MAX_NAME_LENGTH];
-			u32 mLevel = 0;
-		};
+		//struct LevelUpdate {
+		//	u32 mGuildID = 0;
+		//	char mMemberName[Limits::Character::MAX_NAME_LENGTH];
+		//	u32 mLevel = 0;
+		//};
 
 		// S<->C
 		struct MOTD : public FixedT<MOTD, OP_GuildMOTD> {
@@ -2115,8 +2115,8 @@ namespace Payload {
 		};
 
 		// S->C
-		struct MemberUpdate : public FixedT<MemberUpdate, OP_GuildMemberUpdate> {
-			MemberUpdate() { memset(mMemberName, 0, sizeof(mMemberName)); }
+		struct MemberZoneUpdate : public FixedT<MemberZoneUpdate, OP_GuildMemberUpdate> {
+			MemberZoneUpdate() { memset(mMemberName, 0, sizeof(mMemberName)); }
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pZoneID, const u16 pInstanceID, const u32 pLastSeen) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -2133,6 +2133,22 @@ namespace Payload {
 			u32 mZoneID;
 			u16 mInstanceID;
 			u32 mLastSeen;
+		};
+
+		// S->C
+		struct MemberLevelUpdate : public FixedT<MemberLevelUpdate, OP_GuildMemberLevelUpdate>{
+			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pLevel) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mGuildID = pGuildID;
+				strcpy(payload->mMemberName, pMemberName.c_str());
+				payload->mLevel = pLevel;
+
+				return packet;
+			}
+			u32 mGuildID = 0;
+			char mMemberName[64];
+			u32 mLevel = 0;
 		};
 
 		// C->S
