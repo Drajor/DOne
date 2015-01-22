@@ -610,6 +610,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_RaidInvite:
 		handleRaidInvite(pPacket);
 		break;
+	case OP_FindPersonRequest:
+		handleFindPersonRequest(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4322,6 +4325,15 @@ const bool ZoneConnection::handleRaidInvite(const EQApplicationPacket* pPacket) 
 
 	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	STRING_CHECK(payload->mLeaderName, Limits::Character::MAX_NAME_LENGTH);
+
+	// TODO:
+	return true;
+}
+
+const bool ZoneConnection::handleFindPersonRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(FindPersonRequest::sizeCheck(pPacket));
 
 	// TODO:
 	return true;

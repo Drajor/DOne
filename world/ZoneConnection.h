@@ -310,6 +310,7 @@ public:
 	const bool handlePetCommand(const EQApplicationPacket* pPacket);
 	const bool handleSaveRequest(const EQApplicationPacket* pPacket);
 	const bool handleApplyPoison(const EQApplicationPacket* pPacket);
+	const bool handleFindPersonRequest(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

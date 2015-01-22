@@ -3398,3 +3398,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRaidInvite_Overflow_1) {
 
 	delete p;
 }
+
+/*
+	handleFindPersonRequest
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFindPersonRequest_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleFindPersonRequest(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFindPersonRequest_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::FindPersonRequest::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleFindPersonRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleFindPersonRequest_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::FindPersonRequest::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleFindPersonRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}

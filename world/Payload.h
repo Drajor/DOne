@@ -1580,6 +1580,16 @@ namespace Payload {
 			u32 mSlotID = 0;
 			u32 mSuccess = 0;
 		};
+
+		// C->S
+		struct FindPersonRequest : public Fixed<FindPersonRequest> {
+			u32 mUnknown0 = 0;
+			u32 mSpawnID = 0;
+			float mY = 0.0f;
+			float mX = 0.0f;
+			float mZ = 0.0f;
+			u32 mUnknown1 = 0;
+		};
 	}
 
 	namespace Raid {

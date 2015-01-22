@@ -85,6 +85,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(8, Payload::Zone::PetCommand::size());
 	EXPECT_EQ(368, Payload::Zone::SaveRequest::size());
 	EXPECT_EQ(8, Payload::Zone::ApplyPoison::size());
+	EXPECT_EQ(24, Payload::Zone::FindPersonRequest::size());
 
 	// Group.
 	EXPECT_EQ(148, Payload::Group::Invite::size());
