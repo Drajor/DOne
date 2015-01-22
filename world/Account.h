@@ -67,6 +67,9 @@ public:
 	// Returns whether this Account owns the specified Character.
 	const bool ownsCharacter(const String& pCharacterName) const;
 
+	// Sets the active Character.
+	inline void setActiveCharacter(Character* pCharacter) { mActiveCharacter = pCharacter; }
+
 	// Returns the active Character.
 	inline Character* getActiveCharacter() const { return mActiveCharacter; }
 

@@ -242,21 +242,40 @@ void World::setLocked(bool pLocked) {
 
 const bool World::_handleZoning(WorldConnection* pConnection, const String& pCharacterName) {
 	if (!pConnection) return false;
-	if (!pConnection->hasAccount()) return false;
 
-	auto character = mZoneManager->getZoningCharacter(pCharacterName);
-	EXPECTED_BOOL(character);
-	EXPECTED_BOOL(character->getName() == pCharacterName);
+	// Check: Account is valid.
+	auto account = pConnection->getAccount();
+	if (!account) {
+		mLog->error("Null Account in " + String(__FUNCTION__));
+		return false;
+	}
+
+	// Check: Account Character is valid.
+	auto character = account->getActiveCharacter();
+	if (!character) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
+	// Check: Character names match.
+	if (character->getName() != pCharacterName) {
+		mLog->error("Character name mismatch in " + String(__FUNCTION__) + " got: " + pCharacterName + " expected: " + character->getName());
+		return false;
+	}
 
 	auto zoneChange = character->getZoneChange();
-	const uint16 zoneID = zoneChange.mZoneID;
-	const uint16 instanceID = zoneChange.mInstanceID;
+	const u16 zoneID = zoneChange.mZoneID;
+	const u16 instanceID = zoneChange.mInstanceID;
 
 	// Check: Zone Authentication.
-	EXPECTED_BOOL(character->checkZoneAuthentication(zoneID, instanceID));
+	if (!character->checkZoneAuthentication(zoneID, instanceID)) {
+		mLog->error("Character not authenticated to enter zone.");
+		return false;
+	}
 
 	// Check: Destination Zone is available to Character.
 	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
+		mLog->error("Zone unavailable.");
 		return false;
 	}
 
@@ -306,6 +325,8 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	pConnection->sendChatServer(pCharacterName);
 	pConnection->sendZoneServerInfo("127.0.0.1", mZoneManager->getZonePort(zoneID, instanceID));
 
+	// Associated Account and Character.
+	account->setActiveCharacter(character);
 	return true;
 }
 
@@ -382,7 +403,7 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccoun
 	if (pZoning) {
 		auto character = account->getActiveCharacter();
 		if (!character) {
-			// LOG. This is really bad.
+			mLog->error("Got null Character while zoning");
 			return false;
 		}
 
