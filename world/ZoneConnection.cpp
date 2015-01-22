@@ -1279,25 +1279,58 @@ const bool ZoneConnection::handleCamp(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
+struct ChannelMessage {
+	String mSender;
+	String mTarget;
+	u32 mUnknown0 = 0;
+	u32 mLanguage = 0;
+	u32 mChannel = 0;
+	u32 mUnknown1 = 0;
+	u8 mUnknown2 = 0;
+	u32 mSkill = 0;
+	String mMessage;
+	String _debug() const {
+		StringStream ss;
+		ss << "{ChannelMessage} ";
+		PRINT_MEMBER(mSender);
+		PRINT_MEMBER(mTarget);
+		PRINT_MEMBER(mUnknown0);
+		PRINT_MEMBER(mLanguage);
+		PRINT_MEMBER(mChannel);
+		PRINT_MEMBER(mUnknown1);
+		PRINT_MEMBER((int)mUnknown2);
+		PRINT_MEMBER(mSkill);
+		PRINT_MEMBER(mMessage);
+		return ss.str();
+	}
+};
+#define CHECKED_READ(pRead) if(!(pRead)) { StringStream ss; ss << "[CHECKED_READ] (" << ARG_STR(pRead) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); return false; }
+
 const bool ZoneConnection::handleChannelMessage(const EQApplicationPacket* pPacket) {
-	static const auto EXPECTED_SIZE = sizeof(ChannelMessage_Struct); // NOTE: This packet size increases with message size.
-	static const auto MAXIMUM_SIZE = 661; // This is the absolute largest (513 characters + 148 bytes for the rest of the contents).
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
 
-	if(!pPacket) return false;
-	SIZE_CHECK(pPacket->size <= MAXIMUM_SIZE && pPacket->size >= EXPECTED_SIZE);
+	Utility::MemoryReader reader(pPacket->pBuffer, pPacket->size);
+	static ChannelMessage m;
 
-	auto payload = reinterpret_cast<ChannelMessage_Struct*>(pPacket->pBuffer);
+	CHECKED_READ(reader.readString(m.mSender, 64));
+	CHECKED_READ(reader.readString(m.mTarget, 64));
+	CHECKED_READ(reader.read<u32>(m.mUnknown0));
+	CHECKED_READ(reader.read<u32>(m.mLanguage));
+	CHECKED_READ(reader.read<u32>(m.mChannel));
+	CHECKED_READ(reader.read<u32>(m.mUnknown1));
+	CHECKED_READ(reader.read<u8>(m.mUnknown2));
+	CHECKED_READ(reader.read<u32>(m.mSkill));
+	CHECKED_READ(reader.readString(m.mMessage, 1500)); // This is just a estimate.
 
-	static const auto MAX_MESSAGE_SIZE = 513;
-	static const auto MAX_SENDER_SIZE = 64;
-	static const auto MAX_TARGET_SIZE = 64;
-	const String message = Utility::safeString(payload->message, MAX_MESSAGE_SIZE);
-	const String senderName = Utility::safeString(payload->sender, MAX_SENDER_SIZE);
-	const String targetName = Utility::safeString(payload->targetname, MAX_TARGET_SIZE);
-	const u32 channel = payload->chan_num;
+	/* NOTE:
+		- This payload consistently has another 15 bytes after the message.
+		- Sometimes those values are non-zero and cause the payload size to increase.
+		- It is odd and I suspect that it is a client error, therefore we just read the important stuff and ignore the variation.
+	*/
 
-	mZone->handleChannelMessage(mCharacter, channel, senderName, targetName, message);
-
+	// Notify Zone.
+	mZone->handleChannelMessage(mCharacter, m.mChannel, m.mSender, m.mTarget, m.mMessage);
 	return true;
 }
 
@@ -1462,12 +1495,15 @@ void ZoneConnection::sendAppearance(uint16 pType, uint32 pParameter) {
 
 const bool ZoneConnection::handleSendAATable(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
 	// TODO:
 	return true;
 }
 
 const bool ZoneConnection::handleUpdateAA(const EQApplicationPacket* pPacket) {
 	if(!pPacket) return false;
+	SIZE_CHECK(pPacket->size == 0);
+
 	// TODO:
 	return true;
 }

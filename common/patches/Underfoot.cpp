@@ -3201,40 +3201,40 @@ DECODE(OP_TributeItem) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_ChannelMessage)
-{
-	unsigned char *__eq_buffer = __packet->pBuffer;
-
-	char *InBuffer = (char *)__eq_buffer;
-
-	char Sender[64];
-	char Target[64];
-
-	VARSTRUCT_DECODE_STRING(Sender, InBuffer);
-	VARSTRUCT_DECODE_STRING(Target, InBuffer);
-
-	InBuffer += 4;
-
-	uint32 Language = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-	uint32 Channel = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-
-	InBuffer += 5;
-
-	uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
-
-	__packet->size = sizeof(ChannelMessage_Struct) + strlen(InBuffer) + 1;
-	__packet->pBuffer = new unsigned char[__packet->size];
-	ChannelMessage_Struct *emu = (ChannelMessage_Struct *) __packet->pBuffer;
-
-	strn0cpy(emu->targetname, Target, sizeof(emu->targetname));
-	strn0cpy(emu->sender, Target, sizeof(emu->sender));
-	emu->language = Language;
-	emu->chan_num = Channel;
-	emu->skill_in_language = Skill;
-	strcpy(emu->message, InBuffer);
-
-	delete [] __eq_buffer;
-}
+//DECODE(OP_ChannelMessage)
+//{
+//	unsigned char *__eq_buffer = __packet->pBuffer;
+//
+//	char *InBuffer = (char *)__eq_buffer;
+//
+//	char Sender[64];
+//	char Target[64];
+//
+//	VARSTRUCT_DECODE_STRING(Sender, InBuffer);
+//	VARSTRUCT_DECODE_STRING(Target, InBuffer);
+//
+//	InBuffer += 4;
+//
+//	uint32 Language = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//	uint32 Channel = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//
+//	InBuffer += 5;
+//
+//	uint32 Skill = VARSTRUCT_DECODE_TYPE(uint32, InBuffer);
+//
+//	__packet->size = sizeof(ChannelMessage_Struct) + strlen(InBuffer) + 1;
+//	__packet->pBuffer = new unsigned char[__packet->size];
+//	ChannelMessage_Struct *emu = (ChannelMessage_Struct *) __packet->pBuffer;
+//
+//	strn0cpy(emu->targetname, Target, sizeof(emu->targetname));
+//	strn0cpy(emu->sender, Target, sizeof(emu->sender));
+//	emu->language = Language;
+//	emu->chan_num = Channel;
+//	emu->skill_in_language = Skill;
+//	strcpy(emu->message, InBuffer);
+//
+//	delete [] __eq_buffer;
+//}
 
 DECODE(OP_BuffRemoveRequest)
 {

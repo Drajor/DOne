@@ -251,6 +251,48 @@ namespace Utility {
 		char* mPointer; // current location in memory.
 	};
 
+	class MemoryReader {
+	public:
+		template <typename T>
+		MemoryReader(T pStart, int pSize) : mStart(reinterpret_cast<char*>(pStart)), mPointer(mStart), mSize(pSize), mRead(0) {}
+
+		const bool readString(std::string& pString, const unsigned int pMaxSize) {
+			if (mRead == mSize) return false; // No more memory left.
+			auto maxSize = pMaxSize;
+			if (mRead + pMaxSize > mSize) maxSize = mSize - mRead; // Adjust max string length if the amount of memory remaining is less than the requested max string length.
+			// Check whether it is safe to read a string from this memory.
+			if (isSafe(mPointer, maxSize)) {
+				pString = std::string(mPointer);
+				mPointer += pString.length() + 1;
+				mRead += pString.length() + 1;
+				return true;
+			}
+
+			return false;
+		}
+
+		template <typename T>
+		const bool read(T& pData) {
+			if (mRead == mSize) return false; // No more memory left.
+			if (mRead + sizeof(T) > mSize) return false; // Not enough memory left to read this sized type.
+
+			pData = *reinterpret_cast<T*>(mPointer); // Copy data.
+			mPointer += sizeof(T);
+			mRead += sizeof(T);
+			return true;
+		}
+
+		inline const std::size_t getSize() const { return mSize; }
+		inline const std::size_t getRead() const { return mRead; }
+		inline const std::size_t getRemaining() const { return getSize() - getRead(); }
+		inline const bool check() const { return getRemaining() == 0; }
+	private:
+		std::size_t mSize = 0; // maximum number of bytes to be read.
+		std::size_t mRead = 0; // number of bytes read.
+		char* mStart = nullptr; // start memory location.
+		char* mPointer = nullptr; // current location in memory.
+	};
+
 	// list.remove_if(Utility::containerEntryDelete)
 	template <typename T>
 	bool containerEntryDelete(T pValue) {

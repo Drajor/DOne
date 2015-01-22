@@ -207,6 +207,8 @@ public:
 	const bool handleSpawnAppearance(const EQApplicationPacket* pPacket);
 	const bool handleTarget(const EQApplicationPacket* pPacket);
 
+	const bool handleChannelMessage(const EQApplicationPacket* pPacket); // TODO: Write some unit tests for this method.
+
 	// Group Packets.
 	const bool handleGroupInvite(const EQApplicationPacket* pPacket);
 	const bool handleGroupAcceptInvite(const EQApplicationPacket* pPacket);
@@ -308,9 +310,6 @@ public:
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE
-
-	// Variable Length.
-	const bool handleChannelMessage(const EQApplicationPacket* pPacket);
 
 	// Unsure below
 	const bool handleSendAATable(const EQApplicationPacket* pPacket);
