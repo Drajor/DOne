@@ -1,6 +1,7 @@
 #include "Payload.h"
 #include "Data.h"
 #include "Zone.h"
+#include "Guild.h"
 
 #pragma pack(1)
 
@@ -120,7 +121,7 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 
 #pragma pack(1)
 namespace Payload {
-	struct ZonePointData { //28 octets
+	struct ZonePointData {
 		u32 mID = 0;
 		float mY = 0.0f;
 		float mX = 0.0f;
@@ -158,5 +159,53 @@ EQApplicationPacket* Payload::makeZonePoints(const std::list<ZonePoint*>& pZoneP
 	}
 
 	auto packet = new EQApplicationPacket(OP_SendZonepoints, data, size);
+	return packet;
+}
+
+EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>& pMembers) {
+	static const auto fixedSize = 40; // 40 bytes per member.
+	const u32 numMembers = pMembers.size();
+	
+	u32 size = 0;
+
+	size += 1; // Empty Character name.
+	size += sizeof(u32); // Count.
+	size += fixedSize * numMembers;
+
+	// Add name lengths.
+	for (auto i : pMembers) {
+		size += i->getName().length() + 1;
+	}
+
+	// Add public note lengths.
+	for (auto i : pMembers) {
+		size += i->getPublicNote().length() + 1;
+	}
+
+	unsigned char * data = new unsigned char[size];
+	Utility::DynamicStructure ds(data, size);
+
+	// Count.
+	ds.write<u8>(0); // Empty Character name.
+	ds.write<u32>(htonl(numMembers));
+
+	// Members.
+	for (auto i : pMembers) {
+		ds.writeString(i->getName());
+		ds.write<u32>(htonl(i->getLevel()));
+		ds.write<u32>(htonl(i->getFlags()));
+		ds.write<u32>(htonl(i->getClass()));
+		ds.write<u32>(htonl(i->getRank()));
+		ds.write<u32>(htonl(i->getLastSeen()));
+		ds.write<u32>(htonl(i->isTributeEnabled() ? 1 : 0));
+		ds.write<u32>(htonl(i->getTotalTribute()));
+		ds.write<u32>(htonl(i->getLastTribute()));
+		ds.write<u32>(htonl(1)); // Unknown.
+		ds.writeString(i->getPublicNote());
+		ds.write<u16>(htons(i->getInstanceID()));
+		ds.write<u16>(htons(i->getZoneID()));	
+	}
+
+	auto packet = new EQApplicationPacket(OP_GuildMemberList, data, size);
 	return packet;
 }

@@ -2394,57 +2394,9 @@ const bool ZoneConnection::handleGuildGetMOTD(const EQApplicationPacket* pPacket
 }
 
 void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
-	EXPECTED(mConnected);
-
-	static const auto HeaderSize = 76; // Member count etc.
-	static const auto MemberBodySize = 36; // Level, class etc.
-
-	// Calculate payload size.
-	std::size_t payloadSize = HeaderSize + (MemberBodySize * pGuildMembers.size());
-	uint32 namesLength = 0;
-	uint32 notesLength = 0;
-	for (auto i : pGuildMembers) {
-		payloadSize += i->getName().length() + 1;
-		payloadSize += i->getPublicNote().length() + 1;
-		namesLength += i->getName().length();
-		notesLength += i->getPublicNote().length();
-	}
-
-	auto packet = new EQApplicationPacket(OP_GuildMemberList, payloadSize);
-	
-	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
-	
-	// Write Header.
-	ds.writeFixedString(mCharacter->getName(), Limits::Character::MAX_NAME_LENGTH);
-	ds.write<uint32>(pGuildMembers.size());
-	ds.write<uint32>(namesLength);
-	ds.write<uint32>(notesLength);
-
-	// Write member data.
-	for (auto i : pGuildMembers) {
-		ds.write<uint32>(i->getLevel());
-		ds.write<uint32>(i->getFlags());
-		ds.write<uint32>(i->getClass());
-		ds.write<uint32>(i->getRank());
-		ds.write<uint32>(i->getLastSeen());
-		ds.write<uint32>(i->isTributeEnabled() ? 1 : 0);
-		ds.write<uint32>(i->getTotalTribute());
-		ds.write<uint32>(i->getLastTribute());
-		ds.write<uint16>(i->getInstanceID());
-		ds.write<uint16>(i->getZoneID());
-	}
-	// Write Character names.
-	for (auto i : pGuildMembers) {
-		ds.writeString(i->getName());
-	}
-	// Write public notes.
-	for (auto i : pGuildMembers) {
-		ds.writeString(i->getPublicNote());
-	}
-
+	auto packet = Payload::makeGuildMemberList(pGuildMembers);
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
 }
 
 void ZoneConnection::sendGuildURL(const String& pURL) {

@@ -9,6 +9,7 @@ namespace Data {
 	struct Account;
 }
 struct ZonePoint;
+class GuildMember;
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
@@ -59,6 +60,7 @@ namespace Payload {
 
 	EQApplicationPacket* makeCharacterSelection(Data::Account* pData);
 	EQApplicationPacket* makeZonePoints(const std::list<ZonePoint*>& pZonePoints);
+	EQApplicationPacket* makeGuildMemberList(const std::list<GuildMember*>& pMembers);
 
 	namespace Zone {
 
