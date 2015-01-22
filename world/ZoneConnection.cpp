@@ -296,7 +296,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		handleAnimation(pPacket);
 		break;
 	case OP_Save:
-		Utility::print("[UNHANDLED OP_Save]");
+		handleSaveRequest(pPacket);
 		break;
 	case OP_SaveOnZoneReq:
 		Utility::print("[UNHANDLED OP_SaveOnZoneReq]");
@@ -4365,6 +4365,14 @@ const bool ZoneConnection::handlePetCommand(const EQApplicationPacket* pPacket) 
 
 	// Notify Zone.
 	mZone->onPetCommand(mCharacter, payload->mCommand);
+	return true;
+}
+
+const bool ZoneConnection::handleSaveRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(SaveRequest::sizeCheck(pPacket));
+
 	return true;
 }
 

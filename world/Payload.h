@@ -1558,6 +1558,12 @@ namespace Payload {
 			u32 mCommand = 0;
 			u32 mUnknown = 0;
 		};
+
+		// C->S
+		struct SaveRequest : public Fixed<SaveRequest> {
+			u8 mUnknown0[192];
+			u8 mUnknown1[176];
+		};
 	}
 
 	namespace World {

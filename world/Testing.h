@@ -83,6 +83,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(12, Payload::Zone::PotionBelt::size());
 	EXPECT_EQ(4, Payload::Zone::DeleteSpawn::size());
 	EXPECT_EQ(8, Payload::Zone::PetCommand::size());
+	EXPECT_EQ(368, Payload::Zone::SaveRequest::size());
 
 	// Group.
 	EXPECT_EQ(148, Payload::Group::Invite::size());
