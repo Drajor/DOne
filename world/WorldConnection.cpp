@@ -159,49 +159,8 @@ void WorldConnection::sendExpansionInfo() {
 	delete packet;
 }
 
-void WorldConnection::sendCharacterSelectInfo() {
-	using namespace Payload::World;
-	auto packet = new EQApplicationPacket(OP_SendCharInfo, CharacterSelect::size());
-	auto payload = CharacterSelect::convert(packet->pBuffer);
-	auto accountData = mAccount->getData();
-
-	int charSlot = 0;
-	for (auto i : accountData->mCharacterData) {
-		strcpy(payload->mNames[charSlot], i->mName.c_str());
-		payload->mRaces[charSlot] = i->mRace;
-		payload->mClasses[charSlot] = i->mClass;
-		payload->mZoneIDs[charSlot] = i->mZoneID;
-		payload->mLevels[charSlot] = i->mLevel;
-
-		payload->mFaceStyles[charSlot] = i->mFaceStyle;
-		payload->mGenders[charSlot] = i->mGender;
-		payload->mBeardStyles[charSlot] = i->mBeardStyle;
-		payload->mBeardColours[charSlot] = i->mBeardColour;
-		payload->mHairStyles[charSlot] = i->mHairStyle;
-		payload->mHairColours[charSlot] = i->mHairColour;
-		payload->mDrakkinHeritages[charSlot] = i->mDrakkinHeritage;
-		payload->mDrakkinTattoos[charSlot] = i->mDrakkinTattoo;
-		payload->mDrakkinDetails[charSlot] = i->mDrakkinDetails;
-		payload->mDeities[charSlot] = i->mDeity;
-		payload->mDrakkinTattoos[charSlot] = i->mDrakkinTattoo;
-		payload->eyecolor1[charSlot] = i->mEyeColourLeft;
-		payload->eyecolor2[charSlot] = i->mEyeColourRight;
-
-		payload->mTutorialAvailable[charSlot] = 0;
-		payload->mGoHomeAvailable[charSlot] = 0;
-
-		// Equipment
-		payload->mPrimaryItems[charSlot] = i->mPrimary;
-		payload->mSecondaryItems[charSlot] = i->mSecondary;
-
-		for (auto j = 0; j < Limits::Account::MAX_EQUIPMENT_SLOTS; j++) {
-			payload->mEquipmentColours[charSlot][j].mColour = i->mEquipment[j].mColour;
-			payload->mEquipment[charSlot][j] = i->mEquipment[j].mMaterial;
-		}
-
-		charSlot++;
-	}
-
+void WorldConnection::sendCharacterSelection() {
+	auto packet = Payload::makeCharacterSelection(mAccount->getData());
 	sendPacket(packet);
 	delete packet;
 }

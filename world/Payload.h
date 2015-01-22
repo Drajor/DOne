@@ -5,6 +5,10 @@
 #include "Vector3.h"
 #include "../common/EQPacket.h"
 
+namespace Data {
+	struct Account;
+}
+
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
 
@@ -51,6 +55,8 @@ namespace Payload {
 		ItemPacketWorldContainer = 0x6B,
 		ItemPacketCharmUpdate = 0x6E
 	};
+
+	EQApplicationPacket* makeCharacterSelection(Data::Account* pData);
 
 	namespace Zone {
 
@@ -1675,36 +1681,6 @@ namespace Payload {
 				return packet;
 			}
 			u32 mExpansions = 0;
-		};
-
-		// S->C
-		// Based on: CharacterSelect_Struct
-		struct CharacterSelect : public Fixed<CharacterSelect> {
-			u32 mRaces[18];
-			Colour mEquipmentColours[18][9];
-			u8 mBeardColours[18];
-			u8 mHairStyles[18];
-			u32 mEquipment[18][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2 (Might not be)
-			u32 mSecondaryItems[18];
-			u32 mDrakkinHeritages[18];
-			u32 mDrakkinTattoos[18];
-			u32 mDrakkinDetails[18];
-			u32 mDeities[18];
-			u8 mGoHomeAvailable[18];
-			u8 mTutorialAvailable[18];
-			u8 mBeardStyles[18];
-			u8	unknown902[18];			// 10x ff
-			u32 mPrimaryItems[18]; // ID File
-			u8 mHairColours[18];
-			u8	unknown0962[2];			// 2x 00
-			u32 mZoneIDs[18];
-			u8 mClasses[18];
-			u8 mFaceStyles[18];
-			char mNames[18][64];
-			u8 mGenders[18];
-			u8	eyecolor1[18];			// Characters Eye Color
-			u8	eyecolor2[18];			// Characters Eye 2 Color
-			u8 mLevels[18];
 		};
 
 		// S<->C

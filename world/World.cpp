@@ -406,7 +406,7 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccoun
 		pConnection->sendEnterWorld(""); // Empty character name when coming from Server Select. 
 		pConnection->sendPostEnterWorld(); // Required.
 		pConnection->sendExpansionInfo(); // Required.
-		pConnection->sendCharacterSelectInfo(); // Required.
+		pConnection->sendCharacterSelection(); // Required.
 	}
 
 	/*
@@ -454,7 +454,7 @@ const bool World::onDeleteCharacter(WorldConnection* pConnection, const String& 
 	// Delete the Character.
 	if (mAccountManager->deleteCharacter(account, pCharacterName)) {
 		mLog->info("Success: Character deleted.");
-		pConnection->sendCharacterSelectInfo();
+		pConnection->sendCharacterSelection();
 		return true;
 	}
 
@@ -472,7 +472,7 @@ const bool World::onCreateCharacter(WorldConnection* pConnection, Payload::World
 	// Create the Character.
 	if (mAccountManager->createCharacter(account, pPayload)) {
 		mLog->info("Success: Character created.");
-		pConnection->sendCharacterSelectInfo();
+		pConnection->sendCharacterSelection();
 		return true;
 	}
 
@@ -502,7 +502,7 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 		// Character Select to World -OR- Character Create to World.
 		if (!pZoning) {
 			pConnection->sendZoneUnavailable();
-			pConnection->sendCharacterSelectInfo();
+			pConnection->sendCharacterSelection();
 			// NOTE: This just bumps the client to Character Select screen.
 			return true;
 		}

@@ -24,6 +24,8 @@ namespace Data {
 		u32 mDrakkinDetails = 0;
 		u32 mPrimary = 0;
 		u32 mSecondary = 0;
+		bool mCanReturnHome = true;
+		bool mCanEnterTutorial = false;
 		struct Equipment {
 			u32 mMaterial = 0;
 			u32 mColour = 0;

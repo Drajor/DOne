@@ -25,7 +25,7 @@ public:
 
 	void sendPacket(const EQApplicationPacket* pPacket);
 
-	void sendCharacterSelectInfo();
+	void sendCharacterSelection();
 	void sendGuildList();
 	void sendEnterWorld(const String& pCharacterName);
 	void sendExpansionInfo();

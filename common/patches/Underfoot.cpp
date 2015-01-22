@@ -265,83 +265,83 @@ ENCODE(OP_OpenNewTasksWindow) {
 }
 
 
-ENCODE(OP_SendCharInfo) {
-	ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
-	SETUP_VAR_ENCODE(CharacterSelect_Struct);
-
-
-	//EQApplicationPacket *packet = *p;
-	//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
-
-	int char_count;
-	int namelen = 0;
-	for(char_count = 0; char_count < 18; char_count++) {
-		if(emu->name[char_count][0] == '\0')
-			break;
-		if(strcmp(emu->name[char_count], "<none>") == 0)
-			break;
-		namelen += strlen(emu->name[char_count]);
-    }
-
-	int total_length = sizeof(structs::CharacterSelect_Struct)
-		+ char_count * sizeof(structs::CharacterSelectEntry_Struct)
-		+ namelen;
-
-	ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
-
-	//unsigned char *eq_buffer = new unsigned char[total_length];
-	//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
-
-	eq->char_count = char_count;
-	eq->total_chars = 18;
-
-	unsigned char *bufptr = (unsigned char *) eq->entries;
-	int r;
-	for(r = 0; r < char_count; r++) {
-		{	//pre-name section...
-			structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-			eq2->level = emu->level[r];
-			eq2->hairstyle = emu->hairstyle[r];
-			eq2->gender = emu->gender[r];
-			memcpy(eq2->name, emu->name[r], strlen(emu->name[r])+1);
-		}
-		//adjust for name.
-		bufptr += strlen(emu->name[r]);
-		{	//post-name section...
-			structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-			eq2->beard = emu->beard[r];
-			eq2->haircolor = emu->haircolor[r];
-			eq2->face = emu->face[r];
-			int k;
-			for(k = 0; k < _MaterialCount; k++) {
-				eq2->equip[k].equip0 = emu->equip[r][k];
-				eq2->equip[k].equip1 = 0;
-				eq2->equip[k].itemid = 0;
-				eq2->equip[k].color.color = emu->cs_colors[r][k].color;
-			}
-			eq2->primary = emu->primary[r];
-			eq2->secondary = emu->secondary[r];
-			eq2->tutorial = emu->tutorial[r]; // was u15
-			eq2->u15 = 0xff;
-			eq2->deity = emu->deity[r];
-			eq2->zone = emu->zone[r];
-			eq2->u19 = 0xFF;
-			eq2->race = emu->race[r];
-			eq2->gohome = emu->gohome[r];
-			eq2->class_ = emu->class_[r];
-			eq2->eyecolor1 = emu->eyecolor1[r];
-			eq2->beardcolor = emu->beardcolor[r];
-			eq2->eyecolor2 = emu->eyecolor2[r];
-			eq2->drakkin_heritage = emu->drakkin_heritage[r];
-			eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
-			eq2->drakkin_details = emu->drakkin_details[r];
-		}
-		bufptr += sizeof(structs::CharacterSelectEntry_Struct);
-	}
-
-	FINISH_ENCODE();
-
-}
+//ENCODE(OP_SendCharInfo) {
+//	ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
+//	SETUP_VAR_ENCODE(CharacterSelect_Struct);
+//
+//
+//	//EQApplicationPacket *packet = *p;
+//	//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
+//
+//	int char_count;
+//	int namelen = 0;
+//	for(char_count = 0; char_count < 18; char_count++) {
+//		if(emu->name[char_count][0] == '\0')
+//			break;
+//		if(strcmp(emu->name[char_count], "<none>") == 0)
+//			break;
+//		namelen += strlen(emu->name[char_count]);
+//    }
+//
+//	int total_length = sizeof(structs::CharacterSelect_Struct)
+//		+ char_count * sizeof(structs::CharacterSelectEntry_Struct)
+//		+ namelen;
+//
+//	ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+//
+//	//unsigned char *eq_buffer = new unsigned char[total_length];
+//	//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
+//
+//	eq->char_count = char_count;
+//	eq->total_chars = 18;
+//
+//	unsigned char *bufptr = (unsigned char *) eq->entries;
+//	int r;
+//	for(r = 0; r < char_count; r++) {
+//		{	//pre-name section...
+//			structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
+//			eq2->level = emu->level[r];
+//			eq2->hairstyle = emu->hairstyle[r];
+//			eq2->gender = emu->gender[r];
+//			memcpy(eq2->name, emu->name[r], strlen(emu->name[r])+1);
+//		}
+//		//adjust for name.
+//		bufptr += strlen(emu->name[r]);
+//		{	//post-name section...
+//			structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
+//			eq2->beard = emu->beard[r];
+//			eq2->haircolor = emu->haircolor[r];
+//			eq2->face = emu->face[r];
+//			int k;
+//			for(k = 0; k < _MaterialCount; k++) {
+//				eq2->equip[k].equip0 = emu->equip[r][k];
+//				eq2->equip[k].equip1 = 0;
+//				eq2->equip[k].itemid = 0;
+//				eq2->equip[k].color.color = emu->cs_colors[r][k].color;
+//			}
+//			eq2->primary = emu->primary[r];
+//			eq2->secondary = emu->secondary[r];
+//			eq2->tutorial = emu->tutorial[r]; // was u15
+//			eq2->u15 = 0xff;
+//			eq2->deity = emu->deity[r];
+//			eq2->zone = emu->zone[r];
+//			eq2->u19 = 0xFF;
+//			eq2->race = emu->race[r];
+//			eq2->gohome = emu->gohome[r];
+//			eq2->class_ = emu->class_[r];
+//			eq2->eyecolor1 = emu->eyecolor1[r];
+//			eq2->beardcolor = emu->beardcolor[r];
+//			eq2->eyecolor2 = emu->eyecolor2[r];
+//			eq2->drakkin_heritage = emu->drakkin_heritage[r];
+//			eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
+//			eq2->drakkin_details = emu->drakkin_details[r];
+//		}
+//		bufptr += sizeof(structs::CharacterSelectEntry_Struct);
+//	}
+//
+//	FINISH_ENCODE();
+//
+//}
 
 ENCODE(OP_ZoneServerInfo) {
 	SETUP_DIRECT_ENCODE(ZoneServerInfo_Struct, ZoneServerInfo_Struct);
