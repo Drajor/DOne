@@ -86,8 +86,24 @@ public:
 	void onLinkdeadBegin(Character* pCharacter);
 	void onLinkdeadEnd(Character* pCharacter);
 
+	// Chat Events.
+	const bool onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
+	const bool onGuildMessage(Character* pCharacter, const String& pMessage);
+	const bool onGroupMessage(Character* pCharacter, const String& pMessage);
+	const bool onShoutMessage(Character* pCharacter, const String& pMessage);
+	const bool onAuctionMessage(Character* pCharacter, const String& pMessage);
+	const bool onOOCMessage(Character* pCharacter, const String& pMessage);
+	const bool onBroadcastMessage(Character* pCharacter, const String& pMessage);
+	const bool onTellMessage(Character* pCharacter, const String& pTargetName, const String& pMessage);
+	const bool onSayMessage(Character* pCharacter, const String& pMessage);
+	const bool onGMSayMessage(Character* pCharacter, const String& pMessage);
+	const bool onRaidMessage(Character* pCharacter, const String& pMessage);
+	const bool onUCSMessage(Character* pCharacter, const String& pMessage);
+	const bool onEmoteMessage(Character* pCharacter, const String& pMessage);
+
 	// Misc.
 	const bool onPetCommand(Character* pCharacter, const u32 pCommand);
+	const bool onEmote(Character* pCharacter, const String& pMessage); // This comes from using the /em command.
 
 	// Group Events.
 	const bool onGroupInvite(Character* pInviter, const String& pInviteeName);
@@ -170,14 +186,6 @@ public:
 	void handleSitting(Character* pCharacter);
 	void handleCrouching(Character* pCharacter);
 
-	void handleChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
-
-	void handleSay(Character* pCharacter, const String pMessage);
-	void handleShout(Character* pCharacter, const String pMessage);
-	void handleOOC(Character* pCharacter, const String pMessage);
-	void handleEmote(Character* pCharacter, const String pMessage);
-	void handleAuction(Character* pCharacter, const String pMessage);
-	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 	void handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pSpeed = 10, const bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
@@ -325,7 +333,7 @@ private:
 	void _updateCharacters();
 	void _updateNPCs();
 
-	void _sendChat(Character* pCharacter, const u32 pChannel, const String pMessage);
+	void sendMessage(Character* pCharacter, const u32 pChannel, const String pMessage);
 	void _sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender = false);
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);

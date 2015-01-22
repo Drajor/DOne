@@ -18,7 +18,7 @@ public:
 	void handleDeclineInvite(Character* pCharacter, String pInviterName);
 	void handleDisband(Character* pCharacter, String pRemoveName);
 	void handleMakeLeader(Character* pCharacter, const String& pLeaderName);
-	void handleMessage(Character* pCharacter, const String pMessage);
+	void onMessage(Character* pCharacter, const String pMessage);
 	
 	// Character Events.
 	void onEnterZone(Character* pCharacter);

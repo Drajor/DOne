@@ -1330,7 +1330,7 @@ const bool ZoneConnection::handleChannelMessage(const EQApplicationPacket* pPack
 	*/
 
 	// Notify Zone.
-	mZone->handleChannelMessage(mCharacter, m.mChannel, m.mSender, m.mTarget, m.mMessage);
+	mZone->onChannelMessage(mCharacter, m.mChannel, m.mSender, m.mTarget, m.mMessage);
 	return true;
 }
 
@@ -1621,7 +1621,7 @@ const bool ZoneConnection::handleEmote(const EQApplicationPacket* pPacket) {
 	String message(payload->mMessage);
 
 	// Notify Zone.
-	mZone->handleEmote(mCharacter, message);
+	mZone->onEmote(mCharacter, message);
 	return true;
 }
 

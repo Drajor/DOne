@@ -15,7 +15,7 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
-	void handleMessage(Character* pCharacter, const String pMessage) {};
+	void onMessage(Character* pCharacter, const String pMessage) {};
 
 private:
 

@@ -55,7 +55,7 @@ void GroupManager::_disbandGroup(Group* pGroup) {
 	delete pGroup;
 }
 
-void GroupManager::handleMessage(Character* pCharacter, const String pMessage) {
+void GroupManager::onMessage(Character* pCharacter, const String pMessage) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->getGroup());
 

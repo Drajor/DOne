@@ -423,94 +423,209 @@ void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pPa
 	delete packet;
 }
 
-void Zone::handleChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage) {
-	EXPECTED(pCharacter);
+const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
 
-	switch (pChannelID) {
-	case ChannelID::Guild:
-		EXPECTED(pCharacter->hasGuild());
-		mGuildManager->onMessage(pCharacter, pMessage);
-		break;
-	case ChannelID::Group:
-		EXPECTED(pCharacter->hasGroup());
-		mGroupManager->handleMessage(pCharacter, pMessage);
-		break;
-	case ChannelID::Shout:
-		break;
-	case ChannelID::Auction:
-		break;
-	case ChannelID::OOC:
-		break;
-	case ChannelID::Broadcast:
-		break;
-	case ChannelID::Tell:
-		break;
-	case ChannelID::Say:
-		// Check whether user has entered a command.
-		if (pMessage[0] == COMMAND_TOKEN) {
-			mCommandHandler->command(pCharacter, pMessage);
-			break;
-		}
-		break;
-	case ChannelID::GMSay:
-		break;
-	case ChannelID::Raid:
-		EXPECTED(pCharacter->hasRaid());
-		mRaidManager->handleMessage(pCharacter, pMessage);
-		break;
-	case ChannelID::UCS:
-		break;
-	case ChannelID::Emote:
-		handleEmote(pCharacter, pMessage);
-		break;
-	default:
-		break;
+	// Check: Character may be muted.
+	if (pCharacter->isMuted()) {
+		pCharacter->notify("You are muted! Your message was not delivered.");
+		return true;
 	}
+
+	// Handle: Guild.
+	if (pChannelID == ChannelID::Group) {
+		onGuildMessage(pCharacter, pMessage);
+	}
+	// Handle: Group.
+	if (pChannelID == ChannelID::Group) {
+		onGroupMessage(pCharacter, pMessage);
+	}
+	// Handle: Shout.
+	else if (pChannelID == ChannelID::Shout) {
+		onShoutMessage(pCharacter, pMessage);
+	}
+	// Handle: Auction.
+	else if (pChannelID == ChannelID::Auction) {
+		onAuctionMessage(pCharacter, pMessage);
+	}
+	// Handle: OOC.
+	else if (pChannelID == ChannelID::OOC) {
+		onOOCMessage(pCharacter, pMessage);
+	}
+	// Handle: Broadcast.
+	else if (pChannelID == ChannelID::Broadcast) {
+		onBroadcastMessage(pCharacter, pMessage);
+	}
+	// Handle: Tell.
+	else if (pChannelID == ChannelID::Tell) {
+		onTellMessage(pCharacter, pTargetName, pMessage);
+	}
+	// Handle: Say.
+	else if (pChannelID == ChannelID::Say) {
+		onSayMessage(pCharacter, pMessage);
+	}
+	// Handle: GMSay.
+	else if (pChannelID == ChannelID::GMSay) {
+		onGMSayMessage(pCharacter, pMessage);
+	}
+	// Handle: Raid.
+	else if (pChannelID == ChannelID::Raid) {
+		onRaidMessage(pCharacter, pMessage);
+	}
+	// Handle: UCS.
+	else if (pChannelID == ChannelID::UCS) {
+		onUCSMessage(pCharacter, pMessage);
+	}
+	// Handle: Emote.
+	else if (pChannelID == ChannelID::Emote) {
+		onEmoteMessage(pCharacter, pMessage);
+	}
+	// Handle: Unknown.
+	else {
+		mLog->error("Unknown channel ID: " + toString(pChannelID) + " from: " + pCharacter->getName());
+	}
+
+	return true;
 }
 
-void Zone::handleSay(Character* pCharacter, const String pMessage) {
-	EXPECTED(pCharacter);
+const bool Zone::onGuildMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (!pCharacter->hasGuild()) return false;
+	if (pMessage.empty()) return false;
 
-	// Send to other Characters.
-	_sendChat(pCharacter, ChannelID::Say, pMessage);
-
-	// Dispatch Event.
-	EventDispatcher::getInstance().event(Event::Say, pCharacter);
+	// Notify GuildManager.
+	mGuildManager->onMessage(pCharacter, pMessage);
+	return true;
 }
 
-void Zone::handleShout(Character* pCharacter, const String pMessage) {
-	EXPECTED(pCharacter);
+const bool Zone::onGroupMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (!pCharacter->hasGroup()) return false;
+	if (pMessage.empty()) return false;
+
+	// Notify GroupManager.
+	mGroupManager->onMessage(pCharacter, pMessage);
+	return true;
+}
+
+const bool Zone::onShoutMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
 
 	// Send to other Characters.
-	_sendChat(pCharacter, ChannelID::Shout, pMessage);
+	sendMessage(pCharacter, ChannelID::Shout, pMessage);
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Shout, pCharacter);
+
+	return true;
 }
 
-void Zone::handleAuction(Character* pCharacter, const String pMessage) {
-	_sendChat(pCharacter, ChannelID::Auction, pMessage);
+const bool Zone::onAuctionMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	sendMessage(pCharacter, ChannelID::Auction, pMessage);
 
 	// TODO: Server Auction
+	return true;
 }
 
-void Zone::handleOOC(Character* pCharacter, const String pMessage) {
-	_sendChat(pCharacter, ChannelID::OOC, pMessage);
-	
+const bool Zone::onOOCMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	sendMessage(pCharacter, ChannelID::OOC, pMessage);
+
 	// TODO: Server OOC
+	return true;
 }
 
-void Zone::handleEmote(Character* pCharacter, const String pMessage) {
+const bool Zone::onBroadcastMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	// Check: Character is a GM.
+	if (!pCharacter->isGM()) {
+		mLog->error("Character: " + pCharacter->getName() + " tried to use Broadcast channel while not GM!");
+		return false;
+	}
+
+	return true;
+}
+
+const bool Zone::onTellMessage(Character* pCharacter, const String& pTargetName, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	mZoneManager->handleTell(pCharacter, pTargetName, pMessage);
+	return true;
+}
+
+const bool Zone::onSayMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	// Check: Command entered.
+	if (pMessage[0] == COMMAND_TOKEN) {
+		mCommandHandler->command(pCharacter, pMessage);
+		return true;
+	}
+
+	// Send to other Characters.
+	sendMessage(pCharacter, ChannelID::Say, pMessage);
+
+	// Dispatch Event.
+	EventDispatcher::getInstance().event(Event::Say, pCharacter);
+
+	return true;
+}
+
+const bool Zone::onGMSayMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	// Check: Character is a GM.
+	if (!pCharacter->isGM()) {
+		mLog->error("Character: " + pCharacter->getName() + " tried to use GMSay channel while not GM!");
+		return false;
+	}
+
+	return true;
+}
+
+const bool Zone::onRaidMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (!pCharacter->hasRaid()) return false;
+	if (pMessage.empty()) return false;
+
+	// Notify RaidManager.
+	mRaidManager->onMessage(pCharacter, pMessage);
+	return true;
+}
+
+const bool Zone::onUCSMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	return true;
+}
+
+const bool Zone::onEmoteMessage(Character* pCharacter, const String& pMessage) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
 
 	String message = pCharacter->getName() + " " + pMessage;
 	auto packet = Emote::construct(message);
 	sendToVisible(pCharacter, packet, false);
 	delete packet;
+
+	return true;
 }
 
-void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMessage) {
+void Zone::sendMessage(Character* pCharacter, const u32 pChannel, const String pMessage) {
 	EXPECTED(pCharacter);
 
 	const auto sender = pCharacter->getConnection();
@@ -522,10 +637,6 @@ void Zone::_sendChat(Character* pCharacter, const u32 pChannel, const String pMe
 	}
 
 	delete packet;
-}
-
-void Zone::handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage) {
-	ServiceLocator::getZoneManager()->handleTell(pCharacter, pTargetName, pMessage);
 }
 
 bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage) {
@@ -2509,4 +2620,17 @@ const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pLeaderN
 
 const bool Zone::onPetCommand(Character* pCharacter, const u32 pCommand) {
 	return true;
+}
+
+const bool Zone::onEmote(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
+	if (pMessage.empty()) return false;
+
+	// Check: Character may be muted.
+	if (pCharacter->isMuted()) {
+		pCharacter->notify("You are muted! Your message was not delivered.");
+		return true;
+	}
+
+	return onEmoteMessage(pCharacter, pMessage);
 }

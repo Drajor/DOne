@@ -55,6 +55,9 @@ public:
 	inline const bool isHidden() const { return mHidden; }
 	inline void setHidden(const bool pValue) { mHidden = pValue; }
 
+	inline const bool isMuted() const { return mIsMuted; }
+	inline void setMuted(const bool pValue) { mIsMuted = pValue; }
+
 	const u8 getLevel() const;
 	
 	void setLevel(const u8 pLevel);
@@ -295,6 +298,7 @@ private:
 	std::array<uint32, Limits::Skills::MAX_ID> mSkills;
 	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 
+	bool mIsMuted = false;
 	bool mHidden = false;
 	bool mAutoAttacking = false;
 	bool mStanding = true;
