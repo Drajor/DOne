@@ -119,6 +119,7 @@ namespace Data {
 		String mTitle = "";
 		String mSuffix = "";
 		bool mGM = false;
+		bool mMuted = false;
 		u8 mStatus = 0;
 
 		u16 mZoneID = 0; // TODO: Choose a good default.
