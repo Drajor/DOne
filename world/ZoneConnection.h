@@ -308,6 +308,7 @@ public:
 	const bool handleRequestTitles(const EQApplicationPacket* pPacket);
 	const bool handlePetCommand(const EQApplicationPacket* pPacket);
 	const bool handleSaveRequest(const EQApplicationPacket* pPacket);
+	const bool handleApplyPoison(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

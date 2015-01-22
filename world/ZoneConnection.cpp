@@ -604,6 +604,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_PetCommands:
 		handlePetCommand(pPacket);
 		break;
+	case OP_ApplyPoison:
+		handleApplyPoison(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -4372,6 +4375,14 @@ const bool ZoneConnection::handleSaveRequest(const EQApplicationPacket* pPacket)
 	using namespace Payload::Zone;
 	if (!pPacket) return false;
 	SIZE_CHECK(SaveRequest::sizeCheck(pPacket));
+
+	return true;
+}
+
+const bool ZoneConnection::handleApplyPoison(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(ApplyPoison::sizeCheck(pPacket));
 
 	return true;
 }

@@ -1564,6 +1564,12 @@ namespace Payload {
 			u8 mUnknown0[192];
 			u8 mUnknown1[176];
 		};
+
+		// C->S
+		struct ApplyPoison : FixedT<ApplyPoison, OP_ApplyPoison> {
+			u32 mSlotID = 0;
+			u32 mSuccess = 0;
+		};
 	}
 
 	namespace World {

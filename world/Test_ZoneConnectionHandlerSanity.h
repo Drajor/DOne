@@ -3302,3 +3302,36 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSaveRequest_Small) {
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
+
+/*
+	handleApplyPoison
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleApplyPoison_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleApplyPoison(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleApplyPoison_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ApplyPoison::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleApplyPoison(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleApplyPoison_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::ApplyPoison::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleApplyPoison(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}

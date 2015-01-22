@@ -1799,13 +1799,13 @@ ENCODE(OP_Buff) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_ApplyPoison) {
-	ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
-	SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
-	eq->inventorySlot = TitaniumToUnderfootSlot(emu->inventorySlot);
-	OUT(success);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ApplyPoison) {
+//	ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
+//	SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+//	eq->inventorySlot = TitaniumToUnderfootSlot(emu->inventorySlot);
+//	OUT(success);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_Trader) {
 
@@ -2761,15 +2761,15 @@ DECODE(OP_AdventureMerchantSell) {
 }
 
 
-DECODE(OP_ApplyPoison) {
-	DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
-	SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
-
-	emu->inventorySlot = UnderfootToTitaniumSlot(eq->inventorySlot);
-	IN(success);
-
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_ApplyPoison) {
+//	DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
+//	SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
+//
+//	emu->inventorySlot = UnderfootToTitaniumSlot(eq->inventorySlot);
+//	IN(success);
+//
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_CastSpell) {
 //	DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
