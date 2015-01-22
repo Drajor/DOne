@@ -24,7 +24,6 @@ const bool Guild::initialise(Data::Guild* pData) {
 	return true;
 }
 
-
 const u32 Guild::getID() const { return mData->mID; }
 const String& Guild::getName() const { return mData->mName; }
 const String& Guild::getMOTD() const { return mData->mMOTD; }
@@ -53,6 +52,8 @@ void Guild::onJoin(Character* pCharacter, const u8 pRank) {
 	updateMemberDetails(pCharacter, member);
 
 	mOnlineMembers.push_back(pCharacter);
+
+	// Notify other members.
 	sendMessage(SYS_NAME, pCharacter->getName() + " has come online!");
 
 	// Update Character.
@@ -65,18 +66,21 @@ void Guild::onJoin(Character* pCharacter, const u8 pRank) {
 	}
 }
 
-void Guild::onLeave(Character* pCharacter) {
-	if (!pCharacter) return;
+void Guild::removeMember(GuildMember* pMember) {
+	if (!pMember) return;
 
-	auto member = getMember(pCharacter->getName());
-	auto data = member->getData();
+	auto data = pMember->getData();
 
 	// Remove Data::GuildMember from Data::Guild
-	mData->mMembers.remove(member->getData());
+	mData->mMembers.remove(pMember->getData());
 
-	mMembers.remove(member);
-	delete member;
+	mMembers.remove(pMember);
+	delete pMember;
 	delete data;
+}
+
+void Guild::removeCharacter(Character* pCharacter) {
+	if (!pCharacter) return;
 
 	// Remove from online members list.
 	mOnlineMembers.remove(pCharacter);
@@ -97,6 +101,33 @@ void Guild::onLeave(Character* pCharacter) {
 		if (i->isZoning()) continue;
 		i->getConnection()->sendGuildMembers(mMembers);
 	}
+}
+
+void Guild::onRemove(GuildMember * pMember) {
+	if (!pMember) return;
+
+	Character* character = nullptr;
+	
+	// Check: Character being removed is online.
+	for (auto i : mOnlineMembers) {
+		if (i->getName() == pMember->getName()) {
+			character = i;
+			break;
+		}
+	}
+
+	removeMember(pMember);
+	
+	if (character)
+		removeCharacter(character);
+}
+
+void Guild::onLeave(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	auto member = getMember(pCharacter->getName());
+	removeMember(member);
+	removeCharacter(pCharacter);
 }
 
 void Guild::onConnect(Character* pCharacter) {
@@ -130,10 +161,7 @@ const bool Guild::canInvite(Character* pCharacter) const {
 	return pCharacter->getGuildRank() >= GuildRanks::Officer;
 }
 
-const bool Guild::canRemove(Character* pCharacter) const
-{
-	return pCharacter->getGuildRank() >= GuildRanks::Officer;
-}
+const bool Guild::canRemove(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
 
 const bool Guild::canPromote(Character* pCharacter) const {
 	return pCharacter->getGuildRank() == GuildRanks::Leader;
@@ -286,7 +314,6 @@ void Guild::sendMOTD() {
 
 	delete packet;
 }
-
 
 GuildMember::GuildMember(Data::GuildMember* pData) : mData(pData)
 {

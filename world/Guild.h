@@ -74,12 +74,13 @@ public:
 	const bool canInvite(Character* pCharacter) const;
 	const bool canRemove(Character* pCharacter) const;
 	const bool canPromote(Character* pCharacter) const;
-
+	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
 	void onLeave(Character* pCharacter);
 	void onConnect(Character* pCharacter);
 	void onMemberDisconnect(Character* pCharacter);
+	void onRemove(GuildMember * pMember);
 
 	// Return a copy of the online members.
 	inline std::list<Character*> getOnlineMembers() { return mOnlineMembers; }
@@ -103,4 +104,7 @@ private:
 	void sendMOTD();
 
 	void updateMemberDetails(Character* pCharacter, GuildMember* pMember);
+
+	void removeMember(GuildMember* pMember);
+	void removeCharacter(Character* pCharacter);
 };

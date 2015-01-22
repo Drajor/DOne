@@ -102,8 +102,8 @@ const bool Limits::Guild::nameValid(const String& pGuildName) {
 	// Check: Length.
 	if (!nameLength(pGuildName)) return false;
 	
-	// Check: Has numbers.
-	if (Utility::containsDigits(pGuildName)) return false;
+	//// Check: Has numbers.
+	//if (Utility::containsDigits(pGuildName)) return false;
 
 	// Check: Special characters.
 

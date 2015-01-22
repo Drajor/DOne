@@ -355,7 +355,8 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		handleGuildInvite(pPacket);
 		break;
 	case OP_GuildInviteAccept:
-		// NOTE: This occurs when a player presses 'accept' on the guild invite window.
+		// NOTE: This occurs when a player presses 'Yes' or 'No' on the 'guild invite window'.
+		// NOTE: UF automatically sends a decline after about 10 seconds if the user has not responded.
 		handleGuildInviteResponse(pPacket);
 		break;
 	case OP_GuildRemove:
@@ -2213,9 +2214,6 @@ const bool ZoneConnection::handleGuildCreate(const EQApplicationPacket* pPacket)
 
 	STRING_CHECK(payload->mName, Limits::Guild::MAX_NAME_LENGTH);
 	const String guildName(payload->mName);
-
-	// Check: String length.
-	if (!Limits::Guild::nameLength(guildName)) return false;
 
 	// Notify Zone.
 	mZone->onGuildCreate(mCharacter, guildName);

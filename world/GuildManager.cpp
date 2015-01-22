@@ -126,85 +126,38 @@ const bool GuildManager::onDelete(Character* pCharacter) {
 	return true;
 }
 
-const bool GuildManager::onRemove(Character* pCharacter, const String& pRemoveeName) {
-	if (!pCharacter) return false;
-	if (pCharacter->getName() == pRemoveeName) return false; // This should be handled by GuildManager::onLeave
+const bool GuildManager::onRemove(Character* pRemover, const String& pRemoveeName) {
+	if (!pRemover) return false;
+	if (pRemover->getName() == pRemoveeName) return false; // This should be handled by GuildManager::onLeave
 	
 	// Check: Guild is valid.
-	auto guild = pCharacter->getGuild();
-	if (!guild){
-		mLog->error(pCharacter->getName() + " has no guild in " + __FUNCTION__);
+	auto guild = pRemover->getGuild();
+	if (!guild) {
+		mLog->error(pRemover->getName() + " has no guild in " + __FUNCTION__);
 		return false;
 	}
 
-	const bool removeOther = (pCharacter->getName() != pRemoveeName);
-	const bool removeSelf = !removeOther;
-
+	// Check: Character being removed is a member of the Guild.
 	auto member = guild->getMember(pRemoveeName);
-	if (!member) return false;
+	if (!member) return false; // This is not an error because /guildremove allows users to send any name they want.
 
-	if (removeSelf) {
-		// Check: Guild leader can not remove themself
-		if (pCharacter->getGuildRank() == GuildRanks::Leader) return false;
+	// Check: Character is allowed to remove other Guild members.
+	if (!guild->canRemove(pRemover)) {
+		mLog->error(pRemover->getName() + " attempted to remove " + member->getName());
+		return false;
 	}
+
+	// Check: Character being removed is a lower or equal rank to the Character removing.
+	if (pRemover->getGuildRank() < member->getRank()) {
+		mLog->error(pRemover->getName() + " rank: " + toString(pRemover->getGuildRank()) + " attempted to remove " + member->getName() + " rank: " + toString(member->getRank()));
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onRemove(member);
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
-
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
-
-	//// NOTE: UF Prevents a Guild leader from removing them self but we still need to check it.
-	//// "You must transfer leadership or delete the guild before removing yourself."
-
-	//const bool removeOther = (pCharacter->getName() != pRemoveCharacterName);
-	//const bool removeSelf = !removeOther;
-
-	//// Check: Prevent leader from removing self.
-	//if (removeSelf)
-	//	EXPECTED(isLeader(pCharacter) == false);
-
-	//// Check: Prevent non-leader or non-officer from removing other members.
-	//if (removeOther)
-	//	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter));
-
-	//Guild* guild = pCharacter->getGuild();
-	//EXPECTED(guild);
-	//GuildMember* member = guild->getMember(pRemoveCharacterName);
-	//EXPECTED(member);
-
-	//// Check: Prevent lower or same ranked removal
-	//// Allows Leader to remove: Officer + Member
-	//// Allows Officer to remove: Member
-	//if (removeOther)
-	//	EXPECTED(member->mRank < pCharacter->getGuildRank());
-
-	//guild->mMembers.remove(member);
-	//safe_delete(member);
-
-	//// If the Character being removed is online we need to update.
-	//// NOTE: If the character is not online 
-	//Character* removeCharacter = removeSelf ? pCharacter : mZoneManager->findCharacter(pRemoveCharacterName, true);
-	//if (removeCharacter) {
-	//	guild->mOnlineMembers.remove(removeCharacter);
-	//	removeCharacter->clearGuild();
-	//	if (removeCharacter->isZoning() == false) {
-	//		removeCharacter->getZone()->onChangeGuild(removeCharacter);
-	//		removeCharacter->getConnection()->sendGuildMembers(std::list<GuildMember*>()); // NOTE: This clears the guild window member list on the removed client.
-	//		removeCharacter->getConnection()->sendGuildMOTD("", "");
-	//		removeCharacter->getConnection()->sendGuildChannel("");
-	//		removeCharacter->getConnection()->sendGuildURL("");
-	//	}
-	//}
-
-	//if (removeOther)
-	//	pCharacter->getConnection()->sendMessage(MessageType::Yellow, "Successfully removed " + pRemoveCharacterName + " from the guild.");
-
-	//// Update other guild members.
-	//_sendMemberRemoved(guild, pRemoveCharacterName);
-	//_sendMembers(guild);
-	//save();
 
 	return true;
 }
@@ -219,7 +172,7 @@ const bool GuildManager::onLeave(Character* pCharacter) {
 		return false;
 	}
 
-	// Check: Not the guild leader.
+	// Check: Not the Guild leader.
 	if (pCharacter->getGuildRank() == GuildRanks::Leader) {
 		mLog->error(pCharacter->getName() + " is the guild leader in " + String(__FUNCTION__));
 		return false;
@@ -238,12 +191,20 @@ const bool GuildManager::onLeave(Character* pCharacter) {
 const bool GuildManager::onInvite(Character* pInviter, Character* pInvitee) {
 	if (!pInviter) return false;
 	if (!pInvitee) return false;
-	if (!pInviter->hasGuild()) return false;
+
+	// Check: The Character inviting has a guild.
+	auto guild = pInviter->getGuild();
+	if (!guild) return false;
+
+	// Check: The Character inviting is allowed to invite others.
+	if (!guild->canInvite(pInviter)) return false;
+
+	// Check: The Character being invited does not already have a Guild.
 	if (pInvitee->hasGuild()) return false;
+
+	// Check: The Character being invited does not already have a pending invite.
 	if (pInvitee->hasPendingGuildInvite()) return false;
 	
-	auto guild = pInviter->getGuild();
-	if (!guild->canInvite(pInviter)) return false;
 	
 	mLog->info(pInviter->getName() + " invited " + pInvitee->getName() + " to join " + guild->getName());
 	return true;

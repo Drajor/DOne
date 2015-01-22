@@ -59,7 +59,7 @@ public:
 	const bool onDemote(Character* pCharacter, Character* pDemotee);
 
 	// Character is removing another Character from a guild.
-	const bool onRemove(Character* pCharacter, const String& pRemoveeName);
+	const bool onRemove(Character* pRemover, const String& pRemoveeName);
 
 	// Character is leaving their guild.
 	const bool onLeave(Character* pCharacter);

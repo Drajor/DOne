@@ -2368,6 +2368,7 @@ void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
 const bool Zone::onGuildCreate(Character* pCharacter, const String& pGuildName) {
 	if (!pCharacter) return false;
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onCreate(pCharacter, pGuildName);
 
 	// Handle: Failure.
@@ -2412,6 +2413,7 @@ const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) 
 		return true;
 	}
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onInvite(pInviter, character);
 
 	// Handle: Failure.
@@ -2466,6 +2468,8 @@ const bool Zone::onGuildInviteAccept(Character* pCharacter) {
 
 const bool Zone::onGuildInviteDecline(Character* pCharacter) {
 	if (!pCharacter) return false;
+
+	// Check: The Character declining the invite has a pending invite.
 	if (!pCharacter->hasPendingGuildInvite()) return false;
 
 	// Let the inviter know the invite was accepted.
@@ -2480,8 +2484,8 @@ const bool Zone::onGuildInviteDecline(Character* pCharacter) {
 const bool Zone::onGuildRemove(Character* pRemover, const String& pRemoveeName) {
 	if (!pRemover) return false;
 
-	// Try to find Character to remove.
-	auto character = mZoneManager->findCharacter(pRemoveeName, false, nullptr);
+	//// Try to find Character to remove.
+	//auto character = mZoneManager->findCharacter(pRemoveeName, false, nullptr);
 
 	//// Handle: Character not found, either offline, zoning or does not exist.
 	//if (!character) {
@@ -2489,11 +2493,15 @@ const bool Zone::onGuildRemove(Character* pRemover, const String& pRemoveeName) 
 	//	return true;
 	//}
 
+	// Character is removing themselves.
 	if (pRemover->getName() == pRemoveeName) {
-		mGuildManager->onLeave(pRemover);
-	}
+		const bool success = mGuildManager->onLeave(pRemover);
 
-	const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
+	}
+	// Character is removing another Character.
+	else {
+		const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
+	}
 
 	return true;
 }
