@@ -2,7 +2,7 @@
 //list of packets we need to encode on the way out:
 //E(OP_GuildMemberLevelUpdate)
 //E(OP_SendCharInfo)
-E(OP_ZoneServerInfo)
+//E(OP_ZoneServerInfo)
 E(OP_SendAATable)
 E(OP_PlayerProfile)
 //E(OP_NewZone)

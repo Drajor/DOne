@@ -343,12 +343,12 @@ ENCODE(OP_OpenNewTasksWindow) {
 //
 //}
 
-ENCODE(OP_ZoneServerInfo) {
-	SETUP_DIRECT_ENCODE(ZoneServerInfo_Struct, ZoneServerInfo_Struct);
-	OUT_str(ip);
-	OUT(port);
-	FINISH_ENCODE();
-}
+//ENCODE(OP_ZoneServerInfo) {
+//	SETUP_DIRECT_ENCODE(ZoneServerInfo_Struct, ZoneServerInfo_Struct);
+//	OUT_str(ip);
+//	OUT(port);
+//	FINISH_ENCODE();
+//}
 
 ENCODE(OP_SendZonepoints) {
 	SETUP_VAR_ENCODE(ZonePoints);
