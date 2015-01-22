@@ -10,6 +10,7 @@ namespace Data {
 }
 struct ZonePoint;
 class GuildMember;
+class Guild;
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
@@ -58,8 +59,11 @@ namespace Payload {
 		ItemPacketCharmUpdate = 0x6E
 	};
 
+	// More complex and variable length packets.
+
 	EQApplicationPacket* makeCharacterSelection(Data::Account* pData);
 	EQApplicationPacket* makeZonePoints(const std::list<ZonePoint*>& pZonePoints);
+	EQApplicationPacket* makeGuildNameList(const std::list<::Guild*>& pGuilds);
 	EQApplicationPacket* makeGuildMemberList(const std::list<GuildMember*>& pMembers);
 
 	namespace Zone {
@@ -1956,6 +1960,12 @@ namespace Payload {
 		struct Create : public Fixed<Create> {
 			Create() { memset(mName, 0, sizeof(mName)); }
 			char mName[64];
+		};
+
+		// C->S
+		struct Delete : public Fixed<Delete> {
+			u32 mGuildID = 0;
+			char mCharacterName[64];
 		};
 
 		// C->S

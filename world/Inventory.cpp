@@ -123,15 +123,15 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 	pSize += sizeof(uint32); // Item Count
 	data = new unsigned char[pSize];
 
-	Utility::DynamicStructure ds(data, pSize);
-	ds.write<uint32>(numItems);
+	Utility::MemoryWriter writer(data, pSize);
+	writer.write<uint32>(numItems);
 
 	// Copy: Iterates a slot range and copies Item data.
-	auto copy = [this, &ds](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
+	auto copy = [this, &writer](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
 		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
 			auto item = getItem(i);
 			if (item)
-				item->copyData(ds, Payload::ItemPacketCharInventory);
+				item->copyData(writer, Payload::ItemPacketCharInventory);
 		}
 	};
 
@@ -151,8 +151,8 @@ const unsigned char* Inventoryy::getData(uint32& pSize) {
 	copy(SlotID::SHARED_BANK_0, SlotID::SHARED_BANK_1);
 
 	// Check: The amount of data written matches what was calculated.
-	if (ds.check() == false) {
-		Log::error("[Inventory] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	if (writer.check() == false) {
+		Log::error("[Inventory] Bad Write: Written: " + std::to_string(writer.getBytesWritten()) + " Size: " + std::to_string(writer.getSize()));
 	}
 
 	return data;

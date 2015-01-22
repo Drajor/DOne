@@ -58,6 +58,7 @@ namespace Limits {
 		bool ID(const GuildID pGuildID);
 		bool MOTDLength(const String& pGuildMOTD);
 		bool nameLength(const String& pGuildName);
+		const bool nameValid(const String& pGuildName);
 		bool publicNoteLength(const String& pPublicNote);
 		bool personalNoteLength(const String& pPersonalNote);
 		bool urlLength(const String& pURL);

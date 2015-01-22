@@ -26,15 +26,11 @@ namespace Data {
 
 class GuildManager {
 public:
-	GuildManager();
 	~GuildManager();
 
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 
 	inline const bool exists(const String& pGuildName) const { return search(pGuildName) != nullptr; }
-
-	//bool isLeader(Character* pCharacter);
-	//bool isOfficer(Character* pCharacter);
 
 	// Character Events
 	void onConnect(Character* pCharacter, const u32 pGuildID);
@@ -45,7 +41,7 @@ public:
 	void onLevelChange(Character* pCharacter);
 
 	// Character is creating a guild.
-	const bool onCreate(Character* pCharacter, const String pGuildName);
+	const bool onCreate(Character* pCharacter, const String& pGuildName);
 
 	// Character is deleting a guild.
 	const bool onDelete(Character* pCharacter);
@@ -86,10 +82,7 @@ public:
 
 	const bool onStatusRequest(Character* pCharacter, const String& pCharacterName);
 
-	std::list<String> getGuildNames();
-
-	char* _getGuildNames() { return &mGuildNames[0][0]; } // For sending OP_GuildsList
-	//GuildID getHighestGuildID();
+	inline const std::list<Guild*>& getGuilds() const { return mGuilds; }
 
 	GuildSearchResults getAllGuilds();
 
@@ -103,22 +96,6 @@ private:
 	std::list<Data::Guild*> mData;
 	std::list<Guild*> mGuilds;
 
-
-	// Sends the Guild MOTD to all online members.
-	//void _sendMOTD(const Guild* pGuild);
-
-	// Sends the Guild URL to all online members.
-	//void _sendURL(Guild* pGuild);
-	
-	// Sends the Guild channel to all online members.
-	//void _sendChannel(Guild* pGuild);
-
-	//void _sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember);
-	//void _sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember);
-	//void _sendMOTDReply(Character* pCharacter);
-	//void _sendMembers(Guild* pGuild);
-	//void _sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName);
-
 	void _changeRank(GuildMember* pMember, const GuildRank pNewRank);
 	
 	// Returns a Guild, searching by name.
@@ -131,7 +108,4 @@ private:
 	const u32 getNextGuildID();
 	
 	const bool save();
-
-	void _storeGuildName(GuildID pGuildID, String pGuildName);
-	char mGuildNames[Limits::Guild::MAX_GUILDS][Limits::Guild::MAX_NAME_LENGTH];
 };

@@ -54,54 +54,54 @@ const uint32 Actor::getDataSize() const {
 	return result;
 }
 
-const bool Actor::copyData(Utility::DynamicStructure& pStructure) {
+const bool Actor::copyData(Utility::MemoryWriter& pWriter) {
 	_onCopy();
 
 	// Write name.
-	pStructure.writeString(String(mActorData.mName));
+	pWriter.writeString(String(mActorData.mName));
 
 	// Chunk Zero.
 	std::size_t chunk0 = (unsigned int)&(mActorData.mLastName) - (unsigned int)&(mActorData.mSpawnID);
-	pStructure.writeChunk((void*)&(mActorData.mSpawnID), chunk0);
+	pWriter.writeChunk((void*)&(mActorData.mSpawnID), chunk0);
 
 	// Write last name.
-	pStructure.writeString(String(mActorData.mLastName));
+	pWriter.writeString(String(mActorData.mLastName));
 
 	// Check One.
 	std::size_t chunk1Size = (unsigned int)&(mActorData.mColours) - (unsigned int)&(mActorData.mAAtitle);
-	pStructure.writeChunk((void*)&(mActorData.mAAtitle), chunk1Size);
+	pWriter.writeChunk((void*)&(mActorData.mAAtitle), chunk1Size);
 
 	if (sendsEquipment()) {
 		// Write colours.
-		pStructure.writeChunk((void*)&(mActorData.mColours), sizeof(mActorData.mColours));
+		pWriter.writeChunk((void*)&(mActorData.mColours), sizeof(mActorData.mColours));
 		// Write equipment.
-		pStructure.writeChunk((void*)&(mActorData.mEquipment), sizeof(mActorData.mEquipment));
+		pWriter.writeChunk((void*)&(mActorData.mEquipment), sizeof(mActorData.mEquipment));
 	}
 	else {
-		pStructure.write<uint32>(0);
-		pStructure.write<uint32>(0);
-		pStructure.write<uint32>(0);
+		pWriter.write<uint32>(0);
+		pWriter.write<uint32>(0);
+		pWriter.write<uint32>(0);
 
-		pStructure.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Primary]);
-		pStructure.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Secondary]);
+		pWriter.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Primary]);
+		pWriter.write<Payload::ActorData::Equipment>(mActorData.mEquipment[MaterialSlot::Secondary]);
 	}
 
 	// Write optional title.
 	if (hasTitle())
-		pStructure.writeString(String(mActorData.mTitle));
+		pWriter.writeString(String(mActorData.mTitle));
 
 	// Write optional suffix.
 	if (hasSuffix())
-		pStructure.writeString(String(mActorData.mSuffix));
+		pWriter.writeString(String(mActorData.mSuffix));
 
-	pStructure.write<uint32>(mActorData.__Unknown16);
-	pStructure.write<uint32>(mActorData.__Unknown17);
-	pStructure.write<uint8>(mActorData.mIsMercenary);
+	pWriter.write<uint32>(mActorData.__Unknown16);
+	pWriter.write<uint32>(mActorData.__Unknown17);
+	pWriter.write<uint8>(mActorData.mIsMercenary);
 
-	pStructure.writeChunk((void*)&(mActorData.mUnknowns), sizeof(mActorData.mUnknowns));
+	pWriter.writeChunk((void*)&(mActorData.mUnknowns), sizeof(mActorData.mUnknowns));
 
-	if (pStructure.check() == false) {
-		Log::error("[Actor] Bad Write: Written: " + std::to_string(pStructure.getBytesWritten()) + " Size: " + std::to_string(pStructure.getSize()));
+	if (pWriter.check() == false) {
+		Log::error("[Actor] Bad Write: Written: " + std::to_string(pWriter.getBytesWritten()) + " Size: " + std::to_string(pWriter.getSize()));
 	}
 
 	return true;

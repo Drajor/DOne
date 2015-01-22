@@ -982,8 +982,8 @@ void ZoneConnection::sendZoneEntry() {
 
 	uint32 size = mCharacter->getDataSize();
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
-	EXPECTED(mCharacter->copyData(ds));
+	Utility::MemoryWriter writer(data, size);
+	EXPECTED(mCharacter->copyData(writer));
 	
 	auto packet = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	sendPacket(packet);
@@ -1554,26 +1554,26 @@ EQApplicationPacket* ZoneConnection::makeSimpleMessage(const u32 pType, const u3
 
 	auto packet = new EQApplicationPacket(OP_FormattedMessage, packetSize);
 
-	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
+	Utility::MemoryWriter writer(packet->pBuffer, packetSize);
 
 	// Write header.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(pStringID); // String ID.
-	ds.write<u32>(pType); // Type.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pStringID); // String ID.
+	writer.write<u32>(pType); // Type.
 
 	// Write variable length strings.
-	if (pParameter0.length() != 0) ds.writeString(pParameter0);
-	if (pParameter1.length() != 0) ds.writeString(pParameter1);
-	if (pParameter2.length() != 0) ds.writeString(pParameter2);
-	if (pParameter3.length() != 0) ds.writeString(pParameter3);
-	if (pParameter4.length() != 0) ds.writeString(pParameter4);
-	if (pParameter5.length() != 0) ds.writeString(pParameter5);
-	if (pParameter6.length() != 0) ds.writeString(pParameter6);
-	if (pParameter7.length() != 0) ds.writeString(pParameter7);
-	if (pParameter8.length() != 0) ds.writeString(pParameter8);
-	if (pParameter9.length() != 0) ds.writeString(pParameter9);
+	if (pParameter0.length() != 0) writer.writeString(pParameter0);
+	if (pParameter1.length() != 0) writer.writeString(pParameter1);
+	if (pParameter2.length() != 0) writer.writeString(pParameter2);
+	if (pParameter3.length() != 0) writer.writeString(pParameter3);
+	if (pParameter4.length() != 0) writer.writeString(pParameter4);
+	if (pParameter5.length() != 0) writer.writeString(pParameter5);
+	if (pParameter6.length() != 0) writer.writeString(pParameter6);
+	if (pParameter7.length() != 0) writer.writeString(pParameter7);
+	if (pParameter8.length() != 0) writer.writeString(pParameter8);
+	if (pParameter9.length() != 0) writer.writeString(pParameter9);
 
-	EXPECTED_PTR(ds.check());
+	EXPECTED_PTR(writer.check());
 	return packet;
 }
 
@@ -1822,20 +1822,20 @@ void ZoneConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& 
 	}
 
 	auto packet = new EQApplicationPacket(OP_WhoAllResponse, payloadSize);
-	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+	Utility::MemoryWriter writer(packet->pBuffer, payloadSize);
 
 	// Write header.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(startStringID); // String ID.
-	ds.writeString(whoLine);
-	ds.write<u8>(0x0a); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(endStringID); // String ID.
-	ds.write<u32>(0); // Filtered.
-	ds.write<u32>(0); // No Active Characters.
-	ds.write<u32>(numResults); // Count.
-	ds.write<u32>(numResults); // Players.
-	ds.write<u32>(numResults); // Number of results.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(startStringID); // String ID.
+	writer.writeString(whoLine);
+	writer.write<u8>(0x0a); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(endStringID); // String ID.
+	writer.write<u32>(0); // Filtered.
+	writer.write<u32>(0); // No Active Characters.
+	writer.write<u32>(numResults); // Count.
+	writer.write<u32>(numResults); // Players.
+	writer.write<u32>(numResults); // Number of results.
 
 	// Write results.
 	for (auto i : pResults) {
@@ -1890,27 +1890,27 @@ void ZoneConnection::sendWhoResponse(const u32 pWhoType, std::list<Character*>& 
 		if (i->hasGuild())
 			guildName = "<" + i->getGuildName() + ">";
 
-		ds.write<u32>(formatString); // String ID.
-		ds.write<u32>(flags); // Flags.
-		ds.write<u32>(0xFFFFFFFF); // Unknown.
-		ds.writeString(i->getName()); // Character Name. // TODO: This is going to come up as X's corpse if the Character is dead.
-		ds.write<u32>(0xFFFFFFFF); // String ID. (Rank String ID) *GM Impossible* etc.
-		ds.writeString(guildName); // Guild Name
-		ds.write<u32>(0); // Unknown.
-		ds.write<u32>(0xFFFFFFFF); // String ID.
-		ds.write<u32>(zoneStringID); // String ID.
-		ds.write<u16>(zoneID); // Zone ID. Parameter for zoneStringID String.
-		ds.write<u16>(0); // Unknown (Tested, not part of Zone ID.)
-		ds.write<u32>(i->getClass()); // Class.
-		ds.write<u32>(i->getLevel()); // Level.
-		ds.write<u32>(i->getRace()); // Race.
-		ds.writeString(accountName); // Account Name // TODO: This does not work.
-		ds.write<u32>(0); // Unknown.
+		writer.write<u32>(formatString); // String ID.
+		writer.write<u32>(flags); // Flags.
+		writer.write<u32>(0xFFFFFFFF); // Unknown.
+		writer.writeString(i->getName()); // Character Name. // TODO: This is going to come up as X's corpse if the Character is dead.
+		writer.write<u32>(0xFFFFFFFF); // String ID. (Rank String ID) *GM Impossible* etc.
+		writer.writeString(guildName); // Guild Name
+		writer.write<u32>(0); // Unknown.
+		writer.write<u32>(0xFFFFFFFF); // String ID.
+		writer.write<u32>(zoneStringID); // String ID.
+		writer.write<u16>(zoneID); // Zone ID. Parameter for zoneStringID String.
+		writer.write<u16>(0); // Unknown (Tested, not part of Zone ID.)
+		writer.write<u32>(i->getClass()); // Class.
+		writer.write<u32>(i->getLevel()); // Level.
+		writer.write<u32>(i->getRace()); // Race.
+		writer.writeString(accountName); // Account Name // TODO: This does not work.
+		writer.write<u32>(0); // Unknown.
 	}
 
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
+	EXPECTED(writer.check());
 }
 
 EQApplicationPacket* ZoneConnection::makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage) {
@@ -1921,22 +1921,22 @@ EQApplicationPacket* ZoneConnection::makeChannelMessage(const u32 pChannel, cons
 	payloadSize += 1; // target null term
 
 	auto packet = new EQApplicationPacket(OP_ChannelMessage, payloadSize);
-	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+	Utility::MemoryWriter writer(packet->pBuffer, payloadSize);
 
-	ds.writeString(pSenderName); // Sender Name.
-	ds.write<u8>(0); // Target Name.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(0); // Language ID.
-	ds.write<u32>(pChannel); // Channel ID.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u8>(0); // Unknown.
-	ds.write<u32>(0); // Language Skill.
-	ds.writeString(pMessage); // Message.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u16>(0); // Unknown.
-	ds.write<u8>(0); // Unknown.
+	writer.writeString(pSenderName); // Sender Name.
+	writer.write<u8>(0); // Target Name.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Language ID.
+	writer.write<u32>(pChannel); // Channel ID.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u32>(0); // Language Skill.
+	writer.writeString(pMessage); // Message.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u16>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
 
 	return packet;
 }
@@ -2029,24 +2029,24 @@ void ZoneConnection::sendGroupCreate() {
 	int packetSize = 31 + mCharacter->getName().length() + 1; // Magic number due to no packet structure.
 	auto packet = new EQApplicationPacket(OP_GroupUpdateB, packetSize);
 
-	Utility::DynamicStructure ds(packet->pBuffer, packetSize);
-	ds.write<uint32>(0); // 4
-	ds.write<uint32>(1); // 8
-	ds.write<uint8>(0); // 9
-	ds.write<uint32>(0); // 13
-	ds.writeString(mCharacter->getName()); // dynamic
-	ds.write<uint8>(0); // 14
-	ds.write<uint8>(0); // 15
-	ds.write<uint8>(0); // 16
-	ds.write<uint32>(mCharacter->getLevel()); // 20
-	ds.write<uint8>(0); // 21
-	ds.write<uint32>(0); // 25
-	ds.write<uint32>(0); // 29
-	ds.write<uint16>(0); // 31
+	Utility::MemoryWriter writer(packet->pBuffer, packetSize);
+	writer.write<uint32>(0); // 4
+	writer.write<uint32>(1); // 8
+	writer.write<uint8>(0); // 9
+	writer.write<uint32>(0); // 13
+	writer.writeString(mCharacter->getName()); // dynamic
+	writer.write<uint8>(0); // 14
+	writer.write<uint8>(0); // 15
+	writer.write<uint8>(0); // 16
+	writer.write<uint32>(mCharacter->getLevel()); // 20
+	writer.write<uint8>(0); // 21
+	writer.write<uint32>(0); // 25
+	writer.write<uint32>(0); // 29
+	writer.write<uint16>(0); // 31
 
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
+	EXPECTED(writer.check());
 }
 
 void ZoneConnection::sendGroupLeaderChange(const String pCharacterName) {
@@ -2223,8 +2223,13 @@ const bool ZoneConnection::handleGuildCreate(const EQApplicationPacket* pPacket)
 }
 
 const bool ZoneConnection::handleGuildDelete(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
 	if(!pPacket) return false;
-	SIZE_CHECK(pPacket->size == 0);
+	SIZE_CHECK(Delete::sizeCheck(pPacket));
+
+	auto payload = Delete::convert(pPacket);
+
+	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
 	
 	// Notify Zone.
 	mZone->onGuildDelete(mCharacter);
@@ -2241,14 +2246,8 @@ void ZoneConnection::sendGuildRank(const u32 pRank) {
 }
 
 void ZoneConnection::_sendGuildNames() {
-	EXPECTED(mConnected);
-
-	auto packet = new EQApplicationPacket(OP_GuildsList);
-	packet->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	packet->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
-
+	auto packet = Payload::makeGuildNameList(mGuildManager->getGuilds());
 	sendPacket(packet);
-	packet->pBuffer = nullptr; // Important: This prevents the payload from being deleted.
 	delete packet;
 }
 
@@ -2822,18 +2821,18 @@ const bool ZoneConnection::handleRequestTitles(const EQApplicationPacket* pPacke
 	}
 
 	auto packet = new EQApplicationPacket(OP_SendTitleList, payloadSize);
-	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+	Utility::MemoryWriter writer(packet->pBuffer, payloadSize);
 	
-	ds.write<uint32>(availableTitles.size());
+	writer.write<uint32>(availableTitles.size());
 	for (auto i : availableTitles) {
-		ds.write<uint32>(i->mID);
-		ds.writeString(i->mPrefix);
-		ds.writeString(i->mSuffix);
+		writer.write<uint32>(i->mID);
+		writer.writeString(i->mPrefix);
+		writer.writeString(i->mSuffix);
 	}
 
 	sendPacket(packet);
 	delete packet;
-	EXPECTED_BOOL(ds.check());
+	EXPECTED_BOOL(writer.check());
 	return true;
 }
 
@@ -3697,16 +3696,16 @@ void ZoneConnection::sendReadBook(const uint32 pWindow, const uint32 pSlot, cons
 	size += sizeof(uint16); // unknown
 
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
+	Utility::MemoryWriter writer(data, size);
 
-	ds.write<uint32>(pWindow);
-	ds.write<uint32>(pSlot);
-	ds.write<uint32>(pType);
-	ds.write<uint32>(0); // unknown.
-	ds.write<uint16>(0); // unknown.
-	ds.writeString(pText);
+	writer.write<uint32>(pWindow);
+	writer.write<uint32>(pSlot);
+	writer.write<uint32>(pType);
+	writer.write<uint32>(0); // unknown.
+	writer.write<uint16>(0); // unknown.
+	writer.writeString(pText);
 
-	EXPECTED(ds.check());
+	EXPECTED(writer.check());
 
 	auto packet = new EQApplicationPacket(OP_ReadBook, data, size);
 	sendPacket(packet);
@@ -3953,9 +3952,9 @@ void ZoneConnection::sendAlternateCurrencies() {
 
 	// Allocate memory
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
+	Utility::MemoryWriter writer(data, size);
 
-	ds.write<PopulateAlternateCurrencies>(populate);
+	writer.write<PopulateAlternateCurrencies>(populate);
 
 	for (auto i : currencies) {
 		PopulateEntry entry;
@@ -3963,7 +3962,7 @@ void ZoneConnection::sendAlternateCurrencies() {
 		entry.mIcon = i->mIcon;
 		entry.mItemID = i->mItemID;
 		entry.mMaxStacks = i->mMaxStacks;
-		ds.write<PopulateEntry>(entry);
+		writer.write<PopulateEntry>(entry);
 	}
 
 	auto packet = new EQApplicationPacket(OP_AltCurrency, data, size);
@@ -4124,28 +4123,28 @@ void ZoneConnection::sendObject(Object* pObject) {
 
 	char* data = new char[payloadSize];
 
-	Utility::DynamicStructure ds(data, payloadSize);
+	Utility::MemoryWriter writer(data, payloadSize);
 
-	ds.write<u32>(1); // Drop ID.
-	ds.writeString(pObject->getAsset());
-	ds.write<u16>(mZone->getID());
-	ds.write<u16>(mZone->getInstanceID());
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<float>(pObject->getHeading());
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<float>(pObject->getSize());
-	ds.write<float>(pObject->getPosition().y);
-	ds.write<float>(pObject->getPosition().x);
-	ds.write<float>(pObject->getPosition().z);
-	ds.write<u32>(pObject->getType());
-	ds.write<u32>(0xFFFFFFFF); // Unknown.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u8>(0); // Unknown.
+	writer.write<u32>(1); // Drop ID.
+	writer.writeString(pObject->getAsset());
+	writer.write<u16>(mZone->getID());
+	writer.write<u16>(mZone->getInstanceID());
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<float>(pObject->getHeading());
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<float>(pObject->getSize());
+	writer.write<float>(pObject->getPosition().y);
+	writer.write<float>(pObject->getPosition().x);
+	writer.write<float>(pObject->getPosition().z);
+	writer.write<u32>(pObject->getType());
+	writer.write<u32>(0xFFFFFFFF); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
 
-	if (ds.check() == false) {
-		Log::error("[ObjectSpawn] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	if (writer.check() == false) {
+		Log::error("[ObjectSpawn] Bad Write: Written: " + std::to_string(writer.getBytesWritten()) + " Size: " + std::to_string(writer.getSize()));
 	}
 
 	auto packet = new EQApplicationPacket(OP_GroundSpawn, reinterpret_cast<const unsigned char*>(data), payloadSize);
@@ -4196,30 +4195,30 @@ void ZoneConnection::sendRespawnWindow() {
 		payloadSize += i.mName.length() + 1; // Variable option name size.
 	
 	auto packet = new EQApplicationPacket(OP_RespawnWindow, payloadSize);
-	Utility::DynamicStructure ds(packet->pBuffer, payloadSize);
+	Utility::MemoryWriter writer(packet->pBuffer, payloadSize);
 
 	// Write header.
-	ds.write<u32>(0); // Default selection.
-	ds.write<u32>(30000); // Timer.
-	ds.write<u32>(0); // Unknown.
-	ds.write<u32>(respawnOptions->getNumOptions());
+	writer.write<u32>(0); // Default selection.
+	writer.write<u32>(30000); // Timer.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(respawnOptions->getNumOptions());
 
 	// Write options.
 	for (auto i : options) {
-		ds.write<u32>(i.mID);
-		ds.write<u16>(i.mZoneID);
-		ds.write<u16>(i.mInstanceID);
-		ds.write<float>(i.mPosition.x);
-		ds.write<float>(i.mPosition.y);
-		ds.write<float>(i.mPosition.z);
-		ds.write<float>(i.mHeading);
-		ds.writeString(i.mName);
-		ds.write<u8>(i.mType);
+		writer.write<u32>(i.mID);
+		writer.write<u16>(i.mZoneID);
+		writer.write<u16>(i.mInstanceID);
+		writer.write<float>(i.mPosition.x);
+		writer.write<float>(i.mPosition.y);
+		writer.write<float>(i.mPosition.z);
+		writer.write<float>(i.mHeading);
+		writer.writeString(i.mName);
+		writer.write<u8>(i.mType);
 	}
 
 	sendPacket(packet);
 	delete packet;
-	EXPECTED(ds.check());
+	EXPECTED(writer.check());
 }
 
 const bool ZoneConnection::handleRespawnWindowSelect(const EQApplicationPacket* pPacket) {

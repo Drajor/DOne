@@ -12,10 +12,6 @@
 #include "ZoneManager.h"
 #include "Zone.h"
 
-GuildManager::GuildManager() {
-	memset(mGuildNames, 0, sizeof(mGuildNames));
-}
-
 GuildManager::~GuildManager() {
 	for (auto i : mGuilds) {
 		delete i;
@@ -58,9 +54,6 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFac
 			return false;
 		}
 		mGuilds.push_back(guild);
-
-		// Store Guild names for packets.
-		_storeGuildName(i->mID, i->mName);
 	}
 
 	mLog->info("Loaded data for " + toString(mGuilds.size()) + " Guilds.");
@@ -69,10 +62,14 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFac
 	return true;
 }
 
-const bool GuildManager::onCreate(Character* pCharacter, const String pGuildName) {
+const bool GuildManager::onCreate(Character* pCharacter, const String& pGuildName) {
 	if (!pCharacter) return false;
 	if (pCharacter->hasGuild()) return false;
-	if (!Limits::Guild::nameLength(pGuildName)) return false;
+	
+	// Check: Guild name is valid.
+	if (!Limits::Guild::nameValid(pGuildName)) return false;
+
+	// Check: Guild name is already in use.
 	if (exists(pGuildName)) return false;
 
 	// Create Data::Guild
@@ -83,14 +80,14 @@ const bool GuildManager::onCreate(Character* pCharacter, const String pGuildName
 	// Create Guild.
 	Guild* guild = new Guild();
 	if (!guild->initialise(data)) {
+		mLog->error("Guild: " + data->mName + " failed to initialise.");
 		delete guild;
+
 		return false;
 	}
 
 	mData.push_back(data);
 	mGuilds.push_back(guild);
-
-	_storeGuildName(data->mID, data->mName);
 	
 	guild->onJoin(pCharacter, GuildRanks::Leader);
 
@@ -289,29 +286,6 @@ const bool GuildManager::save() {
 const u32 GuildManager::getNextGuildID() {
 	return ++mNextID;
 }
-
-std::list<String> GuildManager::getGuildNames() {
-	std::list<String> guildNames;
-	for (auto i : mGuilds) {
-		guildNames.push_back(i->getName());
-	}
-
-	return guildNames;
-}
-
-void GuildManager::_storeGuildName(GuildID pGuildID, String pGuildName) {
-	// TODO: Error checking.
-	strcpy(&mGuildNames[pGuildID + 1][0], pGuildName.c_str());
-}
-
-//GuildID GuildManager::getHighestGuildID() {
-//	GuildID highest = 0;
-//	for (auto i : mGuilds) {
-//		if (i->mID > highest)
-//			highest = i->mID;
-//	}
-//	return highest;
-//}
 
 GuildSearchResults GuildManager::getAllGuilds() {
 	GuildSearchResults results;

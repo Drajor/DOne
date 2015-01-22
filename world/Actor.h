@@ -428,7 +428,7 @@ public:
 	inline const bool getDestroy() const { return mDestroy; }
 
 	const uint32 getDataSize() const;
-	const bool copyData(Utility::DynamicStructure& pStructure);
+	const bool copyData(Utility::MemoryWriter& pWriter);
 
 	inline const uint8 getPrimaryDamageType() const { return mPrimaryDamageType; }
 	inline const uint8 getSecondaryDamageType() const { return mSecondaryDamageType; }

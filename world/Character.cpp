@@ -109,6 +109,10 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	setLevel(mData->mExperience.mLevel);
 	setStatus(mData->mStatus);
 
+	// Guild.
+	setGuildID(mData->mGuildID);
+	setGuildRank(mData->mGuildRank);
+
 	mPosition = mData->mPosition;
 	mHeading = mData->mHeading;
 	_syncPosition();

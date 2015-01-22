@@ -1,4 +1,5 @@
 #include "Limits.h"
+#include "Utility.h"
 
 std::size_t stringLength(const String& pString) { return pString.length() + 1; }
 
@@ -95,6 +96,18 @@ bool Limits::Guild::rankValid(const GuildRank pRank) {
 	}
 
 	return false;
+}
+
+const bool Limits::Guild::nameValid(const String& pGuildName) {
+	// Check: Length.
+	if (!nameLength(pGuildName)) return false;
+	
+	// Check: Has numbers.
+	if (Utility::containsDigits(pGuildName)) return false;
+
+	// Check: Special characters.
+
+	return true;
 }
 
 bool Limits::LoginServer::accountNameLength(const String& pAccountName) {

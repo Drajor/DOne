@@ -64,13 +64,13 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 	size += sizeof(CharacterSelectionPartB) * numAccountCharacters;
 
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
+	Utility::MemoryWriter writer(data, size);
 
 	// Header.
 	CharacterSelectionHeader header;
 	header.mCharacterCount = numAccountCharacters;
 	header.mAdditionalSlots = 0; // Total Slots = 8 + additional slots.
-	ds.write<CharacterSelectionHeader>(header);
+	writer.write<CharacterSelectionHeader>(header);
 
 	for (auto i : pData->mCharacterData) {
 		// Part A.
@@ -78,10 +78,10 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 		pA.mLevel = i->mLevel;
 		pA.mHairStyle = i->mHairStyle;
 		pA.mGender = i->mGender;
-		ds.write<CharacterSelectionPartA>(pA);
+		writer.write<CharacterSelectionPartA>(pA);
 
 		// Name.
-		ds.writeString(i->mName);
+		writer.writeString(i->mName);
 
 		// Part B.
 		CharacterSelectionPartB pB;
@@ -112,7 +112,7 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 		pB.mDrakkinTattoo = i->mDrakkinTattoo;
 		pB.mDrakkinDetails = i->mDrakkinDetails;
 		pB.mUnknown2 = 0;
-		ds.write<CharacterSelectionPartB>(pB);
+		writer.write<CharacterSelectionPartB>(pB);
 	}
 
 	auto packet = new EQApplicationPacket(OP_SendCharInfo, data, size);
@@ -131,18 +131,22 @@ namespace Payload {
 		u16 mInstanceID = 0;
 		u32 mUnknown = 0;
 	};
+
 }
 #pragma pack()
 
 EQApplicationPacket* Payload::makeZonePoints(const std::list<ZonePoint*>& pZonePoints) {
 	const u32 numZonePoints = pZonePoints.size();
 	u32 size = 0;
+
+	size += sizeof(u32); // Count.
+	size += sizeof(ZonePointData) * numZonePoints;
 	
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
+	Utility::MemoryWriter writer(data, size);
 
 	// Count.
-	ds.write<u32>(numZonePoints);
+	writer.write<u32>(numZonePoints);
 
 	for (auto i : pZonePoints) {
 		ZonePointData p;
@@ -155,19 +159,54 @@ EQApplicationPacket* Payload::makeZonePoints(const std::list<ZonePoint*>& pZoneP
 		p.mInstanceID = i->mDestinationInstanceID;
 		p.mUnknown = 0;
 
-		ds.write<ZonePointData>(p);
+		writer.write<ZonePointData>(p);
 	}
 
-	auto packet = new EQApplicationPacket(OP_SendZonepoints, data, size);
-	return packet;
+	return new EQApplicationPacket(OP_SendZonepoints, data, size);
+}
+
+EQApplicationPacket* Payload::makeGuildNameList(const std::list<::Guild*>& pGuilds) {
+	const u32 numGuilds = pGuilds.size();
+
+	// Calculate size.
+	u32 size = 0;
+	size += 64; // Unknown 64 bytes at the start.
+	size += 1; // Unknown single byte at the end.
+	size += sizeof(u32); // Count.
+
+	// Add name/ID lengths.
+	for (auto i : pGuilds) {
+		size += i->getName().length() + 1; // Name.
+		size += sizeof(u32); // ID.
+	}
+
+	auto data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Unknown.
+	writer._memset(0, 64);
+	
+	// Count.
+	writer.write<u32>(numGuilds);
+
+	// Guilds.
+	for (auto i : pGuilds) {
+		writer.write<u32>(i->getID());
+		writer.writeString(i->getName());
+	}
+
+	// Unknown.
+	writer.write<u8>(0);
+
+	return new EQApplicationPacket(OP_GuildsList, data, size);
 }
 
 EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>& pMembers) {
 	static const auto fixedSize = 40; // 40 bytes per member.
 	const u32 numMembers = pMembers.size();
 	
+	// Calculate size.
 	u32 size = 0;
-
 	size += 1; // Empty Character name.
 	size += sizeof(u32); // Count.
 	size += fixedSize * numMembers;
@@ -183,29 +222,28 @@ EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>&
 	}
 
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
+	Utility::MemoryWriter writer(data, size);
 
 	// Count.
-	ds.write<u8>(0); // Empty Character name.
-	ds.write<u32>(htonl(numMembers));
+	writer.write<u8>(0); // Empty Character name.
+	writer.write<u32>(htonl(numMembers));
 
 	// Members.
 	for (auto i : pMembers) {
-		ds.writeString(i->getName());
-		ds.write<u32>(htonl(i->getLevel()));
-		ds.write<u32>(htonl(i->getFlags()));
-		ds.write<u32>(htonl(i->getClass()));
-		ds.write<u32>(htonl(i->getRank()));
-		ds.write<u32>(htonl(i->getLastSeen()));
-		ds.write<u32>(htonl(i->isTributeEnabled() ? 1 : 0));
-		ds.write<u32>(htonl(i->getTotalTribute()));
-		ds.write<u32>(htonl(i->getLastTribute()));
-		ds.write<u32>(htonl(1)); // Unknown.
-		ds.writeString(i->getPublicNote());
-		ds.write<u16>(htons(i->getInstanceID()));
-		ds.write<u16>(htons(i->getZoneID()));	
+		writer.writeString(i->getName());
+		writer.write<u32>(htonl(i->getLevel()));
+		writer.write<u32>(htonl(i->getFlags()));
+		writer.write<u32>(htonl(i->getClass()));
+		writer.write<u32>(htonl(i->getRank()));
+		writer.write<u32>(htonl(i->getLastSeen()));
+		writer.write<u32>(htonl(i->isTributeEnabled() ? 1 : 0));
+		writer.write<u32>(htonl(i->getTotalTribute()));
+		writer.write<u32>(htonl(i->getLastTribute()));
+		writer.write<u32>(htonl(1)); // Unknown.
+		writer.writeString(i->getPublicNote());
+		writer.write<u16>(htons(i->getInstanceID()));
+		writer.write<u16>(htons(i->getZoneID()));	
 	}
 
-	auto packet = new EQApplicationPacket(OP_GuildMemberList, data, size);
-	return packet;
+	return new EQApplicationPacket(OP_GuildMemberList, data, size);;
 }

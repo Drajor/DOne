@@ -102,6 +102,8 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(140, Payload::Raid::Invite::size());
 
 	// Guild.
+	EXPECT_EQ(64, Payload::Guild::Create::size());
+	EXPECT_EQ(68, Payload::Guild::Delete::size());
 	EXPECT_EQ(80, Payload::Guild::RankUpdate::size());
 	EXPECT_EQ(136, Payload::Guild::Invite::size());
 	EXPECT_EQ(136, Payload::Guild::Remove::size());
@@ -169,7 +171,7 @@ TEST(safeString, Strings) {
 	EXPECT_EQ("", Utility::safeString(buffer, 2));
 }
 
-TEST(isSafe, Misc) {
+TEST(isSafe, Strings) {
 	// Long String
 	char buffer[] = "HelloWorld";
 	EXPECT_EQ("", Utility::safeString(buffer, 2));
@@ -197,6 +199,30 @@ TEST(isSafe, Misc) {
 	memset(name2, 0, sizeof(name2));
 	strcpy(name2, "Drajor");
 	EXPECT_TRUE(Utility::isSafe(name2, 64));
+}
+
+TEST(containsDigits, Strings) {
+
+	for (auto i = 0; i <= 100; i++)
+		EXPECT_TRUE(Utility::containsDigits(toString(i)));
+
+	// Truth table
+	std::map<bool, std::string> strings = {
+		{ false, "" },
+		{ true, "0" },
+		{ true, "1" },
+		{ false, "testings go!" },
+		{ true, "testings 0go!" },
+		{ true, "testings go!9" },
+		{ true, "te77777stings go!" },
+		{ false, "wowowowototototo" },
+		{ false, "wowowowototot1to" },
+	};
+
+	for (auto i : strings) {
+		EXPECT_EQ(i.first, Utility::containsDigits(i.second));
+	}
+
 }
 
 TEST(LimitsTest, ShopQuantityValid) {

@@ -400,7 +400,11 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccoun
 			}
 		}
 
-		pConnection->sendGuildList(); // NOTE: Required. Character guild names do not work (on entering world) without it.
+		// NOTE: Required. Character guild names do not work (on entering world) without it.
+		auto packet = Payload::makeGuildNameList(mGuildManager->getGuilds());
+		pConnection->sendPacket(packet);
+		delete packet;
+
 		pConnection->sendLogServer();
 		pConnection->sendApproveWorld();
 		pConnection->sendEnterWorld(""); // Empty character name when coming from Server Select. 

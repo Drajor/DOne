@@ -434,11 +434,11 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 	}
 
 	// Handle: Guild.
-	if (pChannelID == ChannelID::Group) {
+	if (pChannelID == ChannelID::Guild) {
 		onGuildMessage(pCharacter, pMessage);
 	}
 	// Handle: Group.
-	if (pChannelID == ChannelID::Group) {
+	else if (pChannelID == ChannelID::Group) {
 		onGroupMessage(pCharacter, pMessage);
 	}
 	// Handle: Shout.
@@ -483,7 +483,7 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 	}
 	// Handle: Unknown.
 	else {
-		mLog->error("Unknown channel ID: " + toString(pChannelID) + " from: " + pCharacter->getName());
+		mLog->error("Unknown channel ID: " + toString(pChannelID) + " from: " + pCharacter->getName() + " in " + __FUNCTION__);
 	}
 
 	return true;
@@ -818,15 +818,10 @@ void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const u
 }
 
 void Zone::onGuildsChanged() {
-	auto packet = new EQApplicationPacket(OP_GuildsList);
-	packet->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	packet->pBuffer = reinterpret_cast<unsigned char*>(mGuildManager->_getGuildNames());
-	
+	auto packet = Payload::makeGuildNameList(mGuildManager->getGuilds());
 	for (auto i : mCharacters) {
 		i->getConnection()->sendPacket(packet);
 	}
-
-	packet->pBuffer = nullptr;
 	delete packet;
 }
 
@@ -882,8 +877,8 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 
 	uint32 size = pAddActor->getDataSize();
 	unsigned char * data = new unsigned char[size];
-	Utility::DynamicStructure ds(data, size);
-	EXPECTED(pAddActor->copyData(ds));
+	Utility::MemoryWriter writer(data, size);
+	EXPECTED(pAddActor->copyData(writer));
 
 	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
 	pCharacter->getConnection()->sendPacket(outPacket);

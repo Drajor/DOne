@@ -33,10 +33,8 @@ const String& Guild::getURL() const { return mData->mURL; }
 const String& Guild::getChannel() const { return mData->mChannel; }
 
 void Guild::onDelete() {
-	for (auto i : mOnlineMembers)
-		onLeave(i);
-
-	mOnlineMembers.clear();
+	while (!mOnlineMembers.empty())
+		onLeave(*mOnlineMembers.begin());
 }
 
 void Guild::onJoin(Character* pCharacter, const u8 pRank) {

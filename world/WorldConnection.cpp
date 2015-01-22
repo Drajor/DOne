@@ -406,16 +406,6 @@ void WorldConnection::sendZoneUnavailable() {
 	delete packet;
 }
 
-void WorldConnection::sendGuildList() {
-	auto outPacket = new EQApplicationPacket(OP_GuildsList);
-	outPacket->size = Limits::Guild::MAX_NAME_LENGTH + (Limits::Guild::MAX_NAME_LENGTH * Limits::Guild::MAX_GUILDS); // TODO: Work out the minimum sized packet UF will accept.
-	outPacket->pBuffer = reinterpret_cast<unsigned char*>(ServiceLocator::getGuildManager()->_getGuildNames());
-
-	mStreamInterface->QueuePacket(outPacket);
-	outPacket->pBuffer = nullptr;
-	safe_delete(outPacket);
-}
-
 void WorldConnection::sendApproveWorld() {
 	using namespace Payload::World; 
 

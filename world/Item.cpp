@@ -94,121 +94,121 @@ const u32 Item::_getDataSize(const u32 pCopyType) const {
 	return result;
 }
 
-const bool Item::copyData(Utility::DynamicStructure& pStructure, const u32 pCopyType) {
+const bool Item::copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType) {
 	// Check: This Item is either an augment or within a bag.
 	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
 	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
 		EXPECTED_BOOL(hasValidSubIndex());
-		pStructure.write<u32>(getSubIndex());
+		pWriter.write<u32>(getSubIndex());
 	}
 
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
 
 	// Write Item Header.
-	pStructure.write(getStacks());
-	pStructure.write(mItemData->__Unknown0);
-	pStructure.write(getSlot());
-	pStructure.write(getShopPrice());
-	pStructure.write(getShopQuantity());
-	pStructure.write(mItemData->__Unknown1);
-	pStructure.write(getInstanceID());
-	pStructure.write(mItemData->__Unknown2);
-	pStructure.write(getLastCastTime());
-	pStructure.write(getCharges());
-	pStructure.write(isAttuned() ? 1 : 0);
-	pStructure.write(getPower());
-	pStructure.write(mItemData->__Unknown3);
-	pStructure.write(mItemData->__Unknown4);
-	pStructure.write(mItemData->mIsEvolvingItem);
+	pWriter.write(getStacks());
+	pWriter.write(mItemData->__Unknown0);
+	pWriter.write(getSlot());
+	pWriter.write(getShopPrice());
+	pWriter.write(getShopQuantity());
+	pWriter.write(mItemData->__Unknown1);
+	pWriter.write(getInstanceID());
+	pWriter.write(mItemData->__Unknown2);
+	pWriter.write(getLastCastTime());
+	pWriter.write(getCharges());
+	pWriter.write(isAttuned() ? 1 : 0);
+	pWriter.write(getPower());
+	pWriter.write(mItemData->__Unknown3);
+	pWriter.write(mItemData->__Unknown4);
+	pWriter.write(mItemData->mIsEvolvingItem);
 
 	// Optional (Evolving Item)
 	if (isEvolvingItem()) {
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown0), sizeof(mItemData->mEvolvingItem.__Unknown0));
-		pStructure.write<i32>(getEvolvingLevel());
-		pStructure.write<double>(getEvolvingProgress());
-		pStructure.write<u8>(getEvolvingActive());
-		pStructure.write<i32>(mItemData->mEvolvingItem.mMaxLevel);
-		pStructure.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
+		pWriter.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown0), sizeof(mItemData->mEvolvingItem.__Unknown0));
+		pWriter.write<i32>(getEvolvingLevel());
+		pWriter.write<double>(getEvolvingProgress());
+		pWriter.write<u8>(getEvolvingActive());
+		pWriter.write<i32>(mItemData->mEvolvingItem.mMaxLevel);
+		pWriter.writeChunk((void*)&(mItemData->mEvolvingItem.__Unknown1), sizeof(mItemData->mEvolvingItem.__Unknown1));
 	}
 
-	pStructure.writeString(getOrnamentationIDFile());
-	pStructure.write(getOrnamentationIcon());
+	pWriter.writeString(getOrnamentationIDFile());
+	pWriter.write(getOrnamentationIcon());
 
-	pStructure.write<u8>(mItemData->__Unknown5);
-	pStructure.write<u8>(mItemData->__Unknown6);
+	pWriter.write<u8>(mItemData->__Unknown5);
+	pWriter.write<u8>(mItemData->__Unknown6);
 
-	pStructure.write<u8>(mItemData->mCopied);
-	pStructure.write<u8>(mItemData->mItemClass);
+	pWriter.write<u8>(mItemData->mCopied);
+	pWriter.write<u8>(mItemData->mItemClass);
 	
 	// HEADER - END
 
 	// Variable.
-	pStructure.writeString(String(mItemData->mName));
-	pStructure.writeString(String(mItemData->mLore));
-	pStructure.writeString(String(mItemData->mIDFile));
+	pWriter.writeString(String(mItemData->mName));
+	pWriter.writeString(String(mItemData->mLore));
+	pWriter.writeString(String(mItemData->mIDFile));
 
 	// Chunk One.
 	std::size_t chunk1 = (unsigned int)&(mItemData->mCharmFile) - (unsigned int)&(mItemData->mID);
-	pStructure.writeChunk((void*)&(mItemData->mID), chunk1);
+	pWriter.writeChunk((void*)&(mItemData->mID), chunk1);
 
 	// Variable.
-	pStructure.writeString(String(mItemData->mCharmFile));
+	pWriter.writeString(String(mItemData->mCharmFile));
 	
 	// Chunk Two.
 	std::size_t chunk2 = (unsigned int)&(mItemData->mFileName) - (unsigned int)&(mItemData->mAugType);
-	pStructure.writeChunk((void*)&(mItemData->mAugType), chunk2);
+	pWriter.writeChunk((void*)&(mItemData->mAugType), chunk2);
 	
 	// Variable.
-	pStructure.writeString(String(mItemData->mFileName));
+	pWriter.writeString(String(mItemData->mFileName));
 
 	// Chunk Three.
 	std::size_t chunk3 = (unsigned int)&(mItemData->mClickEffect) - (unsigned int)&(mItemData->mLoreGroup);
-	pStructure.writeChunk((void*)&(mItemData->mLoreGroup), chunk3);
+	pWriter.writeChunk((void*)&(mItemData->mLoreGroup), chunk3);
 	
 	// Click Effect.
-	pStructure.write<ItemData::ClickEffect>(mItemData->mClickEffect);
-	pStructure.writeString(String(mItemData->mClickName));
-	pStructure.write<i32>(mItemData->mClickUnknown);
+	pWriter.write<ItemData::ClickEffect>(mItemData->mClickEffect);
+	pWriter.writeString(String(mItemData->mClickName));
+	pWriter.write<i32>(mItemData->mClickUnknown);
 	
 	// Proc Effect.
-	pStructure.write<ItemData::ProcEffectStruct>(mItemData->mProcEffect);
-	pStructure.writeString(String(mItemData->mProcName));
-	pStructure.write<i32>(mItemData->mProcUnknown);
+	pWriter.write<ItemData::ProcEffectStruct>(mItemData->mProcEffect);
+	pWriter.writeString(String(mItemData->mProcName));
+	pWriter.write<i32>(mItemData->mProcUnknown);
 
 	// Worn Effect.
-	pStructure.write<ItemData::Effect>(mItemData->mWornEffect);
-	pStructure.writeString(String(mItemData->mWornName));
-	pStructure.write<i32>(mItemData->mWornUnknown);
+	pWriter.write<ItemData::Effect>(mItemData->mWornEffect);
+	pWriter.writeString(String(mItemData->mWornName));
+	pWriter.write<i32>(mItemData->mWornUnknown);
 
 	// Focus Effect.
-	pStructure.write<ItemData::Effect>(mItemData->mFocusEffect);
-	pStructure.writeString(String(mItemData->mFocusName));
-	pStructure.write<i32>(mItemData->mWornUnknown);
+	pWriter.write<ItemData::Effect>(mItemData->mFocusEffect);
+	pWriter.writeString(String(mItemData->mFocusName));
+	pWriter.write<i32>(mItemData->mWornUnknown);
 
 	// Scroll Effect.
-	pStructure.write<ItemData::Effect>(mItemData->mScrollEffect);
-	pStructure.writeString(String(mItemData->mScrollName));
-	pStructure.write<i32>(mItemData->mScrollUnknown);
+	pWriter.write<ItemData::Effect>(mItemData->mScrollEffect);
+	pWriter.writeString(String(mItemData->mScrollName));
+	pWriter.write<i32>(mItemData->mScrollUnknown);
 
 	// Bard Effect.
-	pStructure.write<ItemData::Effect>(mItemData->mBardEffect);
-	pStructure.writeString(String(mItemData->mBardName));
-	pStructure.write<i32>(mItemData->mBardUnknown);
+	pWriter.write<ItemData::Effect>(mItemData->mBardEffect);
+	pWriter.writeString(String(mItemData->mBardName));
+	pWriter.write<i32>(mItemData->mBardUnknown);
 
 	// Chunk Four.
 	std::size_t chunk4 = (unsigned int)&(mItemData->mNumSubItems) - (unsigned int)&(mItemData->mScriptFileID);
-	pStructure.writeChunk((void*)&(mItemData->mScriptFileID), chunk4);
+	pWriter.writeChunk((void*)&(mItemData->mScriptFileID), chunk4);
 
 	// Child Items.
-	pStructure.write<u32>(getSubItems());
+	pWriter.write<u32>(getSubItems());
 
 	// Write augments
 	for (auto i : mAugments)
-		if (i) EXPECTED_BOOL(i->copyData(pStructure, pCopyType));		
+		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType));		
 
 	// Write contents
 	for (auto i : mContents)
-		if (i) EXPECTED_BOOL(i->copyData(pStructure, pCopyType));
+		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType));
 
 	return true;
 }
@@ -220,15 +220,15 @@ const unsigned char* Item::copyData(u32& pSize, const u32 pCopyType) {
 	pSize += sizeof(u32); // Copy Type
 	data = new unsigned char[pSize];
 
-	Utility::DynamicStructure ds(data, pSize);
-	ds.write<u32>(pCopyType);
+	Utility::MemoryWriter writer(data, pSize);
+	writer.write<u32>(pCopyType);
 
 	// Copy Item data.
-	copyData(ds, pCopyType);
+	copyData(writer, pCopyType);
 	
 	// Check: The amount of data written matches what was calculated.
-	if (ds.check() == false) {
-		Log::error("[Item] Bad Write: Written: " + std::to_string(ds.getBytesWritten()) + " Size: " + std::to_string(ds.getSize()));
+	if (writer.check() == false) {
+		Log::error("[Item] Bad Write: Written: " + std::to_string(writer.getBytesWritten()) + " Size: " + std::to_string(writer.getSize()));
 	}
 
 	return data;

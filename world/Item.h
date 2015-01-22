@@ -4,7 +4,7 @@
 #include "ItemData.h"
 #include "Utility.h"
 
-class DynamicStructure;
+class MemoryWriter;
 class Item {
 public:
 	Item(ItemData* pItemData);
@@ -190,7 +190,7 @@ public:
 
 	const u32 getDataSize(const u32 pCopyType) const;
 	const unsigned char* copyData(u32& pSize, const u32 pCopyType);
-	const bool copyData(Utility::DynamicStructure& pStructure, const u32 pCopyType);
+	const bool copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType);
 	u32 getSubItems() const;
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }

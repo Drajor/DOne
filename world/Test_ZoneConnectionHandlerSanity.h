@@ -639,11 +639,37 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Null) {
 TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Big) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(1);
+	auto p = makePacket(Payload::Guild::Delete::size() + 1);
 	// Fail: Too big.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGuildDelete(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Delete::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGuildDelete(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildDelete_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::Delete::size());
+	auto payload = Payload::Guild::Delete::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mCharacterName, 1, sizeof(payload->mCharacterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGuildDelete(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }
 

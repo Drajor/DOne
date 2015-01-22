@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "LogSystem.h"
 #include <algorithm>
+#include <cctype>
 
 #define ARG_STR(pARG) #pARG
 #define EXPECTED(pCondition) if(!(pCondition))  { StringStream ss; ss << "[EXPECTED] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; Log::error(ss.str()); return; }
@@ -161,6 +162,12 @@ namespace Utility {
 	String zoneLogDetails(Zone* pZone);
 	String guildRankToString(const GuildRank& pRank);
 
+	// Checks a String for any digits.
+	static const bool containsDigits(const String& pString) {
+		auto f = [](char c) { return !std::isdigit(c); };
+		return !pString.empty() && std::find_if(pString.begin(), pString.end(), f) == pString.end();
+	}
+
 	static const bool isSafe(char* pCString, u32 pMaxSize) {
 		if (!pCString) return false;
 		// strnlen_s - http://msdn.microsoft.com/en-us/library/z50ty2zh.aspx
@@ -183,13 +190,25 @@ namespace Utility {
 		return std::to_string(static_cast<uint32>(pStringID));
 	}
 
-	class DynamicStructure {
+	class MemoryWriter {
 	public:
 		template <typename T>
-		DynamicStructure(T pStart, int pSize) : mStart(reinterpret_cast<char*>(pStart)), mPointer(mStart), mSize(pSize), mWritten(0) {}
+		MemoryWriter(T pStart, int pSize) : mStart(reinterpret_cast<char*>(pStart)), mPointer(mStart), mSize(pSize), mWritten(0) {}
+
+		inline const bool _memset(const int pWith, const std::size_t pSize) {
+			if (pSize == 0) return false; // Sanity.
+			if (mWritten == mSize) return false; // No more memory to write to.
+			if (mWritten + pSize > mSize) return false; // Not enough memory to write to.
+
+			memset(mPointer, pWith, pSize);
+			mPointer += pSize;
+			mWritten += pSize;
+
+			return true;
+		}
 
 		template <typename T>
-		void write(T pData) {
+		inline void write(T pData) {
 			if (mWritten + sizeof(T) <= mSize) {
 				auto TPtr = reinterpret_cast<T*>(mPointer);
 				*TPtr = pData;
@@ -201,7 +220,7 @@ namespace Utility {
 			}
 		}
 
-		void writeChunk(void* pFrom, std::size_t pSize) {
+		inline void writeChunk(void* pFrom, const std::size_t pSize) {
 			if (mWritten + pSize <= mSize) {
 				memcpy(mPointer, pFrom, pSize);
 				mPointer += pSize;
@@ -212,7 +231,7 @@ namespace Utility {
 			}
 		}
 
-		void writeString(String pData) {
+		inline void writeString(const String& pData) {
 			if (mWritten + pData.length() + 1 <= mSize) {
 				strcpy(mPointer, pData.c_str());
 				mPointer += pData.length() + 1;
@@ -223,7 +242,7 @@ namespace Utility {
 			}
 		}
 
-		void writeFixedString(String pData, std::size_t pSize) {
+		inline void writeFixedString(const String& pData, const std::size_t pSize) {
 			if (mWritten + pSize <= mSize) {
 				strcpy(mPointer, pData.c_str());
 				mPointer += pData.length() + 1;
@@ -236,7 +255,7 @@ namespace Utility {
 			}
 		}
 
-		void movePointer(int pBytes) {
+		inline void movePointer(int pBytes) {
 			// TODO: Check this!
 			mPointer += pBytes;
 			mWritten += pBytes; // I need to think about this more.
