@@ -2522,6 +2522,7 @@ const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeNam
 
 	auto promotee = Actor::cast<Character*>(pPromoter->getTarget());
 
+	// Notify GuildManager.
 	const auto success = mGuildManager->onPromote(pPromoter, promotee);
 
 	// Handle: Failure.

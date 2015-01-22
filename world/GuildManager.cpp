@@ -159,6 +159,7 @@ const bool GuildManager::onRemove(Character* pRemover, const String& pRemoveeNam
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
 
+	mLog->info(pRemover->getName() + " removed " + pRemoveeName + " from " + guild->getName());
 	return true;
 }
 
@@ -204,7 +205,6 @@ const bool GuildManager::onInvite(Character* pInviter, Character* pInvitee) {
 
 	// Check: The Character being invited does not already have a pending invite.
 	if (pInvitee->hasPendingGuildInvite()) return false;
-	
 	
 	mLog->info(pInviter->getName() + " invited " + pInvitee->getName() + " to join " + guild->getName());
 	return true;
@@ -670,15 +670,52 @@ const bool GuildManager::onStatusRequest(Character* pCharacter, const String& pC
 const bool GuildManager::onPromote(Character* pPromoter, Character* pPromotee) {
 	if (!pPromoter) return false;
 	if (!pPromotee) return false;
-	if (!pPromoter->hasGuild()) return false;
-	if (!pPromotee->hasGuild()) return false;
 
-	if (pPromoter == pPromotee) return false; // Sanity: Can not self promote.
-	if (pPromoter->getGuild() != pPromotee->getGuild()) return false; // Sanity: Must be in the same guid.
+	// Check: Attempt to promote self.
+	if (pPromoter == pPromotee) {
+		mLog->error(pPromoter->getName() + " attempted to self promote.");
+		return false;
+	}
 
-	auto guild = pPromoter->getGuild();
-	if (!guild->canPromote(pPromoter)) return false;
+	// Check: Promoter Guild is valid.
+	auto promoterGuild = pPromoter->getGuild();
+	if (!promoterGuild) {
+		mLog->error(pPromoter->getName() + " (promoter) has no guild in " + __FUNCTION__);
+		return false;
+	}
 
+	// Check: Character is allowed to promote other Guild members.
+	if (!promoterGuild->canPromote(pPromoter)) {
+		mLog->error(pPromoter->getName() + " attempted to promote " + pPromotee->getName());
+		return false;
+	}
+
+	// Check: Promotee Guild is valid.
+	auto promoteeGuild = pPromotee->getGuild();
+	if (!promoteeGuild) {
+		mLog->error(pPromotee->getName() + " (promotee) has no guild in " + __FUNCTION__);
+		return false;
+	}
+
+	// Check: Both Characters are in the same Guild.
+	if (promoterGuild != promoteeGuild) {
+		mLog->error(pPromoter->getName() + " attempted to promote " + pPromotee->getName() + " but not in the same guild.");
+		return false;
+	}
+
+	// Check: Character can be promoted.
+	if (!promoterGuild->canBePromoted(pPromotee)) {
+		mLog->error(pPromoter->getName() + " attempted to promote " + pPromotee->getName() + " but they can not be promoted.");
+		return false;
+	}
+
+	// Notify Guild.
+	promoterGuild->onPromote(pPromotee);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
+	mLog->info(pPromoter->getName() + " promoted " + pPromoter->getName() + " in " + promoterGuild->getName());
 	return true;
 
 	//GuildMember* member = pCharacter->getGuild()->getMember(pPromoteName);
