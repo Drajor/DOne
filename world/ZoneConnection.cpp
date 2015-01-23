@@ -1,9 +1,6 @@
 #include "ZoneConnection.h"
 #include "ServiceLocator.h"
-#include "GroupManager.h"
-#include "RaidManager.h"
 #include "GuildManager.h"
-#include "Guild.h"
 #include "TitleManager.h"
 #include "Zone.h"
 #include "ZoneManager.h"
@@ -2399,12 +2396,6 @@ const bool ZoneConnection::handleGuildGetMOTD(const EQApplicationPacket* pPacket
 
 	mZone->onGuildGetMOTD(mCharacter);
 	return true;
-}
-
-void ZoneConnection::sendGuildMembers(const std::list<GuildMember*>& pGuildMembers) {
-	auto packet = Payload::makeGuildMemberList(pGuildMembers);
-	sendPacket(packet);
-	delete packet;
 }
 
 void ZoneConnection::sendGuildURL(const String& pURL) {

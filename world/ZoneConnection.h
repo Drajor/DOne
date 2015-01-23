@@ -14,12 +14,8 @@ class Door;
 class IDataStore;
 class ILog;
 class ILogFactory;
-class Guild;
 class Item;
-class GuildMember;
 
-class GroupManager;
-class RaidManager;
 class GuildManager;
 
 namespace ZCStatus{
@@ -117,7 +113,6 @@ public:
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName);
-	void sendGuildMembers(const std::list<GuildMember*>& pGuildMembers);
 	void sendGuildURL(const String& pURL);
 	void sendGuildChannel(const String& pChannel);
 

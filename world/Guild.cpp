@@ -161,7 +161,9 @@ void Guild::removeCharacter(Character* pCharacter) {
 		pCharacter->getZone()->onChangeGuild(pCharacter);
 
 		// Update 'Guild Window' 'Member List' for the leaving Character.
-		pCharacter->getConnection()->sendGuildMembers(std::list<GuildMember*>()); // Send empty member list to clear guild window.
+		auto packet = Payload::makeGuildMemberList(std::list<GuildMember*>()); // Send empty member list to clear guild window.
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
 	}
 }
 
@@ -297,6 +299,8 @@ void Guild::onEnterZone(Character* pCharacter) {
 
 	// Update other guild members.
 	sendMemberZoneUpdate(member);
+
+	sendMemberList(pCharacter);
 }
 
 void Guild::onLeaveZone(Character* pCharacter) {
@@ -358,7 +362,6 @@ void Guild::sendGuildInformation(Character* pCharacter) {
 
 	auto connection = pCharacter->getConnection();
 	connection->sendGuildRank(pCharacter->getGuildRank());
-	connection->sendGuildMembers(mMembers);
 	connection->sendGuildURL(getURL());
 	connection->sendGuildChannel(getChannel());
 	connection->sendGuildMOTD(getMOTD(), getMOTDSetter());
@@ -376,11 +379,23 @@ void Guild::sendMOTD() {
 	delete packet;
 }
 
+void Guild::sendMemberList(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	auto packet = Payload::makeGuildMemberList(mMembers);
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
+}
+
 void Guild::sendMemberList() {
+	auto packet = Payload::makeGuildMemberList(mMembers);
+
 	for (auto i : mOnlineMembers) {
 		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
+		i->getConnection()->sendPacket(packet);
 	}
+
+	delete packet;
 }
 
 Character* Guild::getCharacter(const String& pCharacterName) {
@@ -388,6 +403,8 @@ Character* Guild::getCharacter(const String& pCharacterName) {
 		if (i->getName() == pCharacterName)
 			return i;
 	}
+
+	return nullptr;
 }
 
 GuildMember::GuildMember(Data::GuildMember* pData) : mData(pData)

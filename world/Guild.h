@@ -58,6 +58,8 @@ public:
 	const bool initialise(Data::Guild* pData);
 	inline Data::Guild* getData() const { return mData; }
 
+	void sendMessage(const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
+
 	void onEnterZone(Character* pCharacter);
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
@@ -89,15 +91,10 @@ public:
 	void onDemote(Character* pCharacter);
 	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
 
-	// Return a copy of the online members.
-	inline std::list<Character*> getOnlineMembers() { return mOnlineMembers; }
-
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }
 
 	GuildMember* getMember(const String& pCharacterName) const;
-
-	void sendMessage(const String& pSenderName, const String& pMessage, Character* pExclude = nullptr);
 
 private:
 
@@ -108,7 +105,13 @@ private:
 	void sendGuildInformation(Character* pCharacter);
 	void sendMemberZoneUpdate(GuildMember* pMember);
 	void sendMemberLevelUpdate(GuildMember* pMember);
+	
+	// Sends the member list to a specific Character.
+	void sendMemberList(Character* pCharacter);
+
+	// Sends the member list to the whole Guild.
 	void sendMemberList();
+
 	void sendMOTD();
 
 	void updateMemberDetails(Character* pCharacter, GuildMember* pMember);
