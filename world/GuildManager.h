@@ -58,6 +58,9 @@ public:
 	// Character is demoting a Character.
 	const bool onDemote(Character* pCharacter, Character* pDemotee);
 
+	// Character is transferring leadership.
+	const bool onMakeLeader(Character* pCharacter, const String& pLeaderName);
+
 	// Character is removing another Character from a guild.
 	const bool onRemove(Character* pRemover, const String& pRemoveeName);
 
@@ -77,8 +80,6 @@ public:
 		
 	const bool onSetFlags(Character* pCharacter, const String& pCharacterName, const bool pBanker, const bool pAlt);
 	//const bool handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt);
-
-	const bool onMakeLeader(Character* pCharacter, const String& pLeaderName);
 
 	const bool onStatusRequest(Character* pCharacter, const String& pCharacterName);
 

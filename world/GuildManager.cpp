@@ -724,10 +724,7 @@ const bool GuildManager::onDemote(Character* pDemoter, Character* pDemotee) {
 	if (!pDemotee) return false;
 
 	// Check: Attempt to demote self.
-	if (pDemoter == pDemotee) {
-		mLog->error(pDemoter->getName() + " attempted to self demote.");
-		return false;
-	}
+	if (pDemoter == pDemotee) return false; // TODO: Self demotion is allowed.
 
 	// Check: Demoter Guild is valid.
 	auto demoterGuild = pDemoter->getGuild();
@@ -768,6 +765,47 @@ const bool GuildManager::onDemote(Character* pDemoter, Character* pDemotee) {
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
 
 	mLog->info(pDemoter->getName() + " demoted " + pDemotee->getName() + " in " + demoterGuild->getName());
+	return true;
+}
+
+const bool GuildManager::onMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	if (!pCharacter) return false;
+
+	// Check: Character is not trying to make themself leader.
+	if (pCharacter->getName() == pLeaderName) {
+		mLog->error(pCharacter->getName() + " attempted to make themself leader.");
+		return false;
+	}
+
+	// Check: Guild is valid.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " has no guild in " + __FUNCTION__);
+		return false;
+	}
+
+	// Check: Character is the Guild leader.
+	if (pCharacter->getGuildRank() != GuildRanks::Leader) {
+		mLog->error(pCharacter->getName() + " attempted to change leader.");
+		return false;
+	}
+
+	// Check: New leader is a member of the Guild.
+	auto member = guild->getMember(pLeaderName);
+	if (!member) {
+		mLog->error(pCharacter->getName() + " attempted to make " + pLeaderName + " leader but guilds but not in the same guild.");
+		return false;
+	}
+
+	// NOTE: The new leader does not need to be an officer.
+
+	// Notify Guild.
+	guild->onMakeLeader(pCharacter, member);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
+	mLog->info(pCharacter->getName() + " transferred leadership to " + pLeaderName);
 	return true;
 }
 
@@ -829,27 +867,7 @@ GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
 	return nullptr;
 }
 
-const bool GuildManager::onMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	if (!pCharacter) return false;
 
-	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(isLeader(pCharacter));
-	//EXPECTED(Limits::Character::nameLength(pLeaderName));
-
-	//Guild* guild = pCharacter->getGuild();
-	//EXPECTED(guild);
-	//GuildMember* oldLeader = guild->getMember(pCharacter->getName());
-	//EXPECTED(oldLeader);
-	//GuildMember* newLeader = guild->getMember(pLeaderName);
-	//EXPECTED(newLeader);
-
-	//_changeRank(oldLeader, GuildRanks::Officer);
-	//_changeRank(newLeader, GuildRanks::Leader);
-	//_sendMembers(guild);
-	//save();
-}
 
 //void GuildManager::_changeRank(GuildMember* pMember, const GuildRank pNewRank) {
 //	EXPECTED(pMember);

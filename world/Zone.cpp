@@ -2555,6 +2555,14 @@ const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) 
 	return true;
 }
 
+const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	if (!pCharacter) return false;
+
+	// NOTE: Changing leader does not require that the new leader is targeted (like promote/demote).
+	const bool success = mGuildManager->onMakeLeader(pCharacter, pLeaderName);
+	return true;
+}
+
 const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
 	if (pCharacter) return false;
 
@@ -2566,13 +2574,6 @@ const bool Zone::onGuildGetMOTD(Character* pCharacter) {
 	if (pCharacter) return false;
 
 	const bool success = mGuildManager->onGetMOTD(pCharacter);
-	return true;
-}
-
-const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	if (pCharacter) return false;
-
-	const bool success = mGuildManager->onMakeLeader(pCharacter, pLeaderName);
 	return true;
 }
 

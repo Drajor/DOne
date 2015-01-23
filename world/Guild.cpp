@@ -83,6 +83,9 @@ void Guild::onPromote(Character* pCharacter) {
 	// Update Character.
 	sendGuildInformation(pCharacter);
 
+	// Update Zone.
+	pCharacter->getZone()->onChangeGuild(pCharacter);
+
 	// Update 'Guild Window' 'Member List' for all online members.
 	for (auto i : mOnlineMembers) {
 		if (i->isZoning()) continue;
@@ -106,6 +109,39 @@ void Guild::onDemote(Character* pCharacter) {
 
 	// Update Character.
 	sendGuildInformation(pCharacter);
+
+	// Update Zone.
+	pCharacter->getZone()->onChangeGuild(pCharacter);
+
+	// Update 'Guild Window' 'Member List' for all online members.
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) continue;
+		i->getConnection()->sendGuildMembers(mMembers);
+	}
+}
+
+void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
+	if (!pCharacter) return;
+	if (!pMember) return;
+
+	Character* character = getCharacter(pMember->getName());
+
+	// Update previous leader Character.
+	pCharacter->setGuild(this, getID(), GuildRanks::Officer, getName());
+	updateMemberDetails(pCharacter, getMember(pCharacter->getName()));
+	
+	// Update Zone Character is in.
+	pCharacter->getZone()->onChangeGuild(pCharacter);
+
+	// Update new leader Character.
+	character->setGuild(this, getID(), GuildRanks::Leader, getName());
+	updateMemberDetails(character, pMember);
+
+	// Update Zone Character is in.
+	character->getZone()->onChangeGuild(character);
+
+	// Notify other members.
+	sendMessage(SYS_NAME, pMember->getName() + " is now the leader of the guild!");
 
 	// Update 'Guild Window' 'Member List' for all online members.
 	for (auto i : mOnlineMembers) {
@@ -154,18 +190,11 @@ void Guild::removeCharacter(Character* pCharacter) {
 void Guild::onRemove(GuildMember * pMember) {
 	if (!pMember) return;
 
-	Character* character = nullptr;
-	
-	// Check: Character being removed is online.
-	for (auto i : mOnlineMembers) {
-		if (i->getName() == pMember->getName()) {
-			character = i;
-			break;
-		}
-	}
+	Character* character = getCharacter(pMember->getName());
 
 	removeMember(pMember);
 	
+	// NOTE: Character being removed may not be online.
 	if (character)
 		removeCharacter(character);
 }
@@ -355,6 +384,13 @@ void Guild::sendMOTD() {
 	}
 
 	delete packet;
+}
+
+Character* Guild::getCharacter(const String& pCharacterName) {
+	for (auto i : mOnlineMembers) {
+		if (i->getName() == pCharacterName)
+			return i;
+	}
 }
 
 GuildMember::GuildMember(Data::GuildMember* pData) : mData(pData)

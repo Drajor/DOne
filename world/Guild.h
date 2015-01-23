@@ -86,6 +86,7 @@ public:
 	void onRemove(GuildMember * pMember);
 	void onPromote(Character* pCharacter);
 	void onDemote(Character* pCharacter);
+	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
 
 	// Return a copy of the online members.
 	inline std::list<Character*> getOnlineMembers() { return mOnlineMembers; }
@@ -112,5 +113,5 @@ private:
 
 	void removeMember(GuildMember* pMember);
 	void removeCharacter(Character* pCharacter);
-
+	Character* getCharacter(const String& pCharacterName);
 };
