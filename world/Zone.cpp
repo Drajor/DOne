@@ -2558,11 +2558,17 @@ const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
 	return success;
 }
 
-const bool Zone::onGuildGetMOTD(Character* pCharacter) {
+const bool Zone::onGuildMOTDRequest(Character* pCharacter) {
 	if (!pCharacter) return false;
 
-	const bool success = mGuildManager->onGetMOTD(pCharacter);
-	return true;
+	// Notify GuildManager.
+	const bool success = mGuildManager->onMOTDRequest(pCharacter);
+
+	// Respond.
+	if (!success)
+		pCharacter->notify("Failed to retrieve guild MOTD.");
+
+	return success;
 }
 
 const bool Zone::onGuildSetURL(Character* pSetter, const String& pURL) {

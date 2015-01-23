@@ -111,6 +111,8 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(128, Payload::Guild::Demote::size());
 	EXPECT_EQ(136, Payload::Guild::FlagsUpdate::size());
 	EXPECT_EQ(648, Payload::Guild::MOTD::size());
+	EXPECT_EQ(648, Payload::Guild::MOTDResponse::size());
+	EXPECT_EQ(648, Payload::Guild::MOTDRequest::size());
 	EXPECT_EQ(4176, Payload::Guild::GuildUpdate::size());
 	// Public Note
 	// MemberJoin

@@ -112,7 +112,7 @@ public:
 	void sendGuildRank(const u32 pRank);
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
-	void sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName);
+	void sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildURL(const String& pURL);
 	void sendGuildChannel(const String& pChannel);
 
@@ -221,7 +221,7 @@ public:
 	const bool handleGuildInviteResponse(const EQApplicationPacket* pPacket);
 	const bool handleGuildRemove(const EQApplicationPacket* pPacket);
 	const bool handleGuildSetMOTD(const EQApplicationPacket* pPacket);
-	const bool handleGuildGetMOTD(const EQApplicationPacket* pPacket);
+	const bool handleGuildMOTDRequest(const EQApplicationPacket* pPacket);
 	const bool handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket);
 	const bool handleSetGuildPublicNote(const EQApplicationPacket* pPacket); // TODO: I need to check whether this has a fixed length.
 	const bool handleGetGuildStatus(const EQApplicationPacket* pPacket);

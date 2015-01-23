@@ -143,6 +143,12 @@ void Guild::onSetMOTD(Character* pCharacter, const String& pMOTD) {
 	sendMOTD();
 }
 
+void Guild::onMOTDRequest(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	pCharacter->getConnection()->sendGuildMOTDResponse(getMOTD(), getMOTDSetter());
+}
+
 void Guild::removeMember(GuildMember* pMember) {
 	if (!pMember) return;
 

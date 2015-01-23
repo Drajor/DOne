@@ -366,7 +366,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GetGuildMOTD:
 		// NOTE: This occurs when the player uses the /getguildmotd command.
-		handleGuildGetMOTD(pPacket);
+		handleGuildMOTDRequest(pPacket);
 		break;
 	case OP_GuildUpdateURLAndChannel:
 		// NOTE: This occurs via the guild window.
@@ -2362,39 +2362,30 @@ const bool ZoneConnection::handleGuildSetMOTD(const EQApplicationPacket* pPacket
 }
 
 void ZoneConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
+	using namespace Payload::Guild;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
-	auto payload = reinterpret_cast<GuildMOTD_Struct*>(packet->pBuffer);
-	payload->unknown0 = 0;
-	strcpy(payload->name, mCharacter->getName().c_str());
-	strcpy(payload->setby_name, pMOTDSetByName.c_str());
-	strcpy(payload->motd, pMOTD.c_str());
-
+	auto packet = MOTD::construct(pMOTDSetByName, pMOTD);
 	sendPacket(packet);
 	delete packet;
 }
 
-void ZoneConnection::sendGuildMOTDReply(const String& pMOTD, const String& pMOTDSetByName) {
+void ZoneConnection::sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName) {
+	using namespace Payload::Guild;
 	EXPECTED(mConnected);
-	EXPECTED(mCharacter->hasGuild());
 
-	auto packet = new EQApplicationPacket(OP_GetGuildMOTDReply, sizeof(GuildMOTD_Struct));
-	auto payload = reinterpret_cast<GuildMOTD_Struct*>(packet->pBuffer);
-	payload->unknown0 = 0;
-	strcpy(payload->name, mCharacter->getName().c_str());
-	strcpy(payload->setby_name, pMOTDSetByName.c_str());
-	strcpy(payload->motd, pMOTD.c_str());
-
+	auto packet = MOTDResponse::construct(pMOTDSetByName, pMOTD);
 	sendPacket(packet);
 	delete packet;
 }
 
-const bool ZoneConnection::handleGuildGetMOTD(const EQApplicationPacket* pPacket) {
+const bool ZoneConnection::handleGuildMOTDRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Guild;
 	if (!pPacket) return false;
-	SIZE_CHECK(pPacket->size == 0);
+	SIZE_CHECK(MOTDRequest::sizeCheck(pPacket));
 
-	mZone->onGuildGetMOTD(mCharacter);
+	// Notify Zone.
+	mZone->onGuildMOTDRequest(mCharacter);
 	return true;
 }
 

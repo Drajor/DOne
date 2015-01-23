@@ -73,7 +73,7 @@ public:
 
 	const bool onSetMOTD(Character* pCharacter, const String& pMOTD);
 
-	const bool onGetMOTD(Character* pCharacter);
+	const bool onMOTDRequest(Character* pCharacter);
 
 	const bool onSetURL(Character* pCharacter, const String& pURL);
 	const bool onSetChannel(Character* pCharacter, const String& pChannel);

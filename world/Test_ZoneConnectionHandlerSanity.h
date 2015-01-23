@@ -941,23 +941,34 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGuildSetMOTD_Overflow_2) {
 }
 
 /*
-	handleGuildGetMOTD
+	handleGuildMOTDRequest
 */
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleGuildGetMOTD_Null) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMOTDRequest_Null) {
 	EXPECT_TRUE(initialise());
 
 	// Fail: Null.
-	EXPECT_FALSE(mZoneConnection->handleGuildGetMOTD(nullptr));
+	EXPECT_FALSE(mZoneConnection->handleGuildMOTDRequest(nullptr));
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleGuildGetMOTD_Big) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMOTDRequest_Big) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(1);
+	auto p = makePacket(Payload::Guild::MOTDRequest::size() + 1);
 	// Fail: Too big.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
-	EXPECT_FALSE(mZoneConnection->handleGuildGetMOTD(p));
+	EXPECT_FALSE(mZoneConnection->handleGuildMOTDRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGuildMOTDRequest_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::MOTDRequest::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGuildMOTDRequest(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }

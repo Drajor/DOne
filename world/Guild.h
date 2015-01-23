@@ -92,6 +92,7 @@ public:
 	void onDemote(Character* pCharacter);
 	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
 	void onSetMOTD(Character* pCharacter, const String& pMOTD);
+	void onMOTDRequest(Character* pCharacter);
 
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }

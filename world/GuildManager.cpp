@@ -440,11 +440,20 @@ const bool GuildManager::onSetMOTD(Character* pCharacter, const String& pMOTD) {
 	return true;
 }
 
-const bool GuildManager::onGetMOTD(Character* pCharacter) {
+const bool GuildManager::onMOTDRequest(Character* pCharacter) {
 	if (!pCharacter) return false;
 
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to request MOTD but they are not in a guild.");
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onMOTDRequest(pCharacter);
+
 	return true;
-	//_sendMOTDReply(pCharacter);
 }
 
 //void GuildManager::_sendURL(Guild* pGuild) {

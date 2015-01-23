@@ -133,7 +133,7 @@ public:
 	const bool onGuildPromote(Character* pPromoter, const String& pPromoteeName);
 	const bool onGuildDemote(Character* pDemoter, const String& pDemoteeName);
 	const bool onGuildSetMOTD(Character* pCharacter, const String& pMOTD);
-	const bool onGuildGetMOTD(Character* pCharacter);
+	const bool onGuildMOTDRequest(Character* pCharacter);
 	const bool onGuildSetURL(Character* pSetter, const String& pURL);
 	const bool onGuildSetChannel(Character* pSetter, const String& pChannel);
 	const bool onGuildMakeLeader(Character* pCharacter, const String& pLeaderName);

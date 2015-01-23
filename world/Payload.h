@@ -2113,6 +2113,31 @@ namespace Payload {
 			char mMOTD[Limits::Guild::MAX_MOTD_LENGTH];
 		};
 
+		// S->C
+		struct MOTDResponse : public FixedT<MOTD, OP_GetGuildMOTDReply> {
+			MOTDResponse() {
+				memset(mCharacterName, 0, sizeof(mCharacterName));
+				memset(mSetByName, 0, sizeof(mSetByName));
+				memset(mMOTD, 0, sizeof(mMOTD));
+			}
+			static EQApplicationPacket* construct(const String& pSetByName, const String& pMOTD) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mSetByName, pSetByName.c_str());
+				strcpy(payload->mMOTD, pMOTD.c_str());
+
+				return packet;
+			}
+			u32 mUnknown0 = 0;
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Receiver name.. why.
+			char mSetByName[Limits::Character::MAX_NAME_LENGTH];
+			u32 mUnknown1 = 0;
+			char mMOTD[Limits::Guild::MAX_MOTD_LENGTH];
+		};
+
+		// C->S
+		typedef MOTDResponse MOTDRequest;
+
 		// S<->C
 		namespace GuildUpdateAction {
 			enum : u32 { URL = 0, Channel = 1, };
