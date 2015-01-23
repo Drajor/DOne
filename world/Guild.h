@@ -108,6 +108,7 @@ private:
 	void sendGuildInformation(Character* pCharacter);
 	void sendMemberZoneUpdate(GuildMember* pMember);
 	void sendMemberLevelUpdate(GuildMember* pMember);
+	void sendMemberList();
 	void sendMOTD();
 
 	void updateMemberDetails(Character* pCharacter, GuildMember* pMember);

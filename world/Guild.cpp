@@ -59,11 +59,7 @@ void Guild::onJoin(Character* pCharacter, const u8 pRank) {
 	// Update Character.
 	sendGuildInformation(pCharacter);
 
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
+	sendMemberList();
 }
 
 void Guild::onPromote(Character* pCharacter) {
@@ -86,11 +82,7 @@ void Guild::onPromote(Character* pCharacter) {
 	// Update Zone.
 	pCharacter->getZone()->onChangeGuild(pCharacter);
 
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
+	sendMemberList();
 }
 
 void Guild::onDemote(Character* pCharacter) {
@@ -113,11 +105,7 @@ void Guild::onDemote(Character* pCharacter) {
 	// Update Zone.
 	pCharacter->getZone()->onChangeGuild(pCharacter);
 
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
+	sendMemberList();
 }
 
 void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
@@ -143,11 +131,7 @@ void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
 	// Notify other members.
 	sendMessage(SYS_NAME, pMember->getName() + " is now the leader of the guild!");
 
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
+	sendMemberList();
 }
 
 void Guild::removeMember(GuildMember* pMember) {
@@ -179,32 +163,28 @@ void Guild::removeCharacter(Character* pCharacter) {
 		// Update 'Guild Window' 'Member List' for the leaving Character.
 		pCharacter->getConnection()->sendGuildMembers(std::list<GuildMember*>()); // Send empty member list to clear guild window.
 	}
-
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
 }
 
 void Guild::onRemove(GuildMember * pMember) {
 	if (!pMember) return;
 
-	Character* character = getCharacter(pMember->getName());
-
-	removeMember(pMember);
-	
 	// NOTE: Character being removed may not be online.
+	auto character = getCharacter(pMember->getName());
 	if (character)
 		removeCharacter(character);
+
+	removeMember(pMember);
+	sendMemberList();
 }
 
 void Guild::onLeave(Character* pCharacter) {
 	if (!pCharacter) return;
 
+	removeCharacter(pCharacter);
+
 	auto member = getMember(pCharacter->getName());
 	removeMember(member);
-	removeCharacter(pCharacter);
+	sendMemberList();
 }
 
 void Guild::onConnect(Character* pCharacter) {
@@ -368,12 +348,7 @@ void Guild::onMemberDelete(GuildMember* pMember) {
 
 	sendMessage(SYS_NAME, pMember->getName() + " has been deleted.");
 	removeMember(pMember);
-
-	// Update 'Guild Window' 'Member List' for all online members.
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendGuildMembers(mMembers);
-	}
+	sendMemberList();
 
 	// TODO: Handle when Guild Leader deletes themself.
 }
@@ -399,6 +374,13 @@ void Guild::sendMOTD() {
 	}
 
 	delete packet;
+}
+
+void Guild::sendMemberList() {
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) continue;
+		i->getConnection()->sendGuildMembers(mMembers);
+	}
 }
 
 Character* Guild::getCharacter(const String& pCharacterName) {

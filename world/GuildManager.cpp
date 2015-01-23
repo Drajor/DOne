@@ -42,7 +42,6 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFac
 	mLog->status("Initialising.");
 
 	// Load data for guilds.
-	std::list<Data::Guild*> mData;
 	if (!mDataStore->loadGuilds(mData)) {
 		mLog->error("DataStore::loadGuilds failed.");
 		return false;
