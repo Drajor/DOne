@@ -80,6 +80,7 @@ public:
 	const bool canBePromoted(Character* pCharacter) const;
 	const bool canDemote(Character* pCharacter) const;
 	const bool canBeDemoted(Character* pCharacter) const;
+	const bool canSetMOTD(Character* pCharacter) const;
 	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
@@ -90,6 +91,7 @@ public:
 	void onPromote(Character* pCharacter);
 	void onDemote(Character* pCharacter);
 	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
+	void onSetMOTD(Character* pCharacter, const String& pMOTD);
 
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }

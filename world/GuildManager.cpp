@@ -418,19 +418,26 @@ void GuildManager::onMessage(Character* pCharacter, const String& pMessage) {
 const bool GuildManager::onSetMOTD(Character* pCharacter, const String& pMOTD) {
 	if (!pCharacter) return false;
 
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to set MOTD but they are not in a guild.");
+		return false;
+	}
+
+	// Check: Character is allowed to set the MOTD.
+	if (!guild->canSetMOTD(pCharacter)){
+		mLog->error(pCharacter->getName() + " attempted to set MOTD but they are not allowed.");
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onSetMOTD(pCharacter, pMOTD);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
 	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(Limits::Guild::MOTDLength(pMOTD));
-	//EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can set the MOTD.
-
-	//Guild* guild = pCharacter->getGuild();
-	//guild->mMOTD = pMOTD;
-	//guild->mMOTDSetter = pCharacter->getName();
-
-	//// Update other members.
-	//_sendMOTD(guild);
-	//save();
 }
 
 const bool GuildManager::onGetMOTD(Character* pCharacter) {
@@ -439,24 +446,6 @@ const bool GuildManager::onGetMOTD(Character* pCharacter) {
 	return true;
 	//_sendMOTDReply(pCharacter);
 }
-
-//void GuildManager::_sendMOTD(const Guild* pGuild) {
-//	EXPECTED(pGuild);
-//
-//	auto outPacket = new EQApplicationPacket(OP_GuildMOTD, sizeof(Payload::Guild::MOTD));
-//	auto payload = reinterpret_cast<Payload::Guild::MOTD*>(outPacket->pBuffer);
-//	strcpy(payload->mSetByName, pGuild->mMOTDSetter.c_str());
-//	strcpy(payload->mMOTD, pGuild->mMOTD.c_str());
-//
-//	const String motd = pGuild->mMOTD;
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		strcpy(payload->mCharacterName, i->getName().c_str());
-//		i->getConnection()->sendPacket(outPacket);
-//	}
-//
-//	safe_delete(outPacket);
-//}
 
 //void GuildManager::_sendURL(Guild* pGuild) {
 //	EXPECTED(pGuild);
@@ -498,57 +487,6 @@ const bool GuildManager::onGetMOTD(Character* pCharacter) {
 //	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
 //}
 
-//void GuildManager::_sendMembers(Guild* pGuild) {
-//	EXPECTED(pGuild);
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		i->getConnection()->sendGuildMembers(pGuild->mMembers);
-//	}
-//}
-
-//void GuildManager::_sendMemberRemoved(const Guild* pGuild, const String& pRemoveCharacterName) {
-//	//using namespace Payload::Guild;
-//	//EXPECTED(pGuild);
-//	//EXPECTED(Limits::Character::nameLength(pRemoveCharacterName));
-//
-//	//auto outPacket = new EQApplicationPacket(OP_GuildManageRemove, Remove::size());
-//	//auto payload = Remove::convert(outPacket->pBuffer);
-//
-//	//payload->mGuildID = pGuild->mID;
-//	//strcpy(payload->mCharacterName, pRemoveCharacterName.c_str());
-//
-//	//for (auto i : pGuild->mOnlineMembers) {
-//	//	if (i->isZoning()) { continue; }
-//	//	i->getConnection()->sendPacket(outPacket);
-//	//}
-//
-//	//safe_delete(outPacket);
-//}
-
-
-//void GuildManager::_sendMemberZoneUpdate(const Guild* pGuild, const GuildMember* pMember) {
-//	EXPECTED(pGuild);
-//	EXPECTED(pMember);
-//	EXPECTED(pMember->mGuild == pGuild);
-//
-//	auto outPacket = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(Payload::Guild::MemberUpdate));
-//	auto payload = reinterpret_cast<Payload::Guild::MemberUpdate*>(outPacket->pBuffer);
-//
-//	payload->mGuildID = pGuild->mID;
-//	strcpy(payload->mMemberName, pMember->mName.c_str());
-//	payload->mZoneID = pMember->mZoneID;
-//	payload->mInstanceID = pMember->mInstanceID;
-//	payload->mLastSeen = 0; // TODO: Time
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		i->getConnection()->sendPacket(outPacket);
-//	}
-//
-//	safe_delete(outPacket);
-//}
-
 //void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember) {
 //	EXPECTED(pGuild);
 //	EXPECTED(pMember);
@@ -567,26 +505,6 @@ const bool GuildManager::onGetMOTD(Character* pCharacter) {
 //	}
 //
 //	safe_delete(outPacket);
-//}
-
-//bool GuildManager::isLeader(Character* pCharacter){
-//	EXPECTED_BOOL(pCharacter);
-//	EXPECTED_BOOL(pCharacter->hasGuild());
-//
-//	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
-//	EXPECTED_BOOL(member);
-//
-//	return member->mRank == GuildRanks::Leader;
-//}
-
-//bool GuildManager::isOfficer(Character* pCharacter){
-//	EXPECTED_BOOL(pCharacter);
-//	EXPECTED_BOOL(pCharacter->hasGuild());
-//
-//	GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
-//	EXPECTED_BOOL(member);
-//
-//	return member->mRank == GuildRanks::Officer;
 //}
 
 const bool GuildManager::onSetURL(Character* pCharacter, const String& pURL) {

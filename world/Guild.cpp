@@ -134,6 +134,15 @@ void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
 	sendMemberList();
 }
 
+void Guild::onSetMOTD(Character* pCharacter, const String& pMOTD) {
+	if (!pCharacter) return;
+
+	mData->mMOTD = pMOTD;
+	mData->mMOTDSetter = pCharacter->getName();
+
+	sendMOTD();
+}
+
 void Guild::removeMember(GuildMember* pMember) {
 	if (!pMember) return;
 
@@ -219,6 +228,7 @@ const bool Guild::canPromote(Character* pCharacter) const { return pCharacter->g
 const bool Guild::canBePromoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Member; }
 const bool Guild::canDemote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Officer; }
+const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };

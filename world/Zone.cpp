@@ -2546,14 +2546,20 @@ const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderN
 }
 
 const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
-	if (pCharacter) return false;
+	if (!pCharacter) return false;
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onSetMOTD(pCharacter, pMOTD);
-	return true;
+
+	// Respond.
+	if (!success)
+		pCharacter->notify("Failed to update guild MOTD.");
+
+	return success;
 }
 
 const bool Zone::onGuildGetMOTD(Character* pCharacter) {
-	if (pCharacter) return false;
+	if (!pCharacter) return false;
 
 	const bool success = mGuildManager->onGetMOTD(pCharacter);
 	return true;
