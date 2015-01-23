@@ -2069,10 +2069,20 @@ namespace Payload {
 		};
 
 		// S->C
-		//struct Remove : public FixedT<Remove, OP_GuildManageRemove> {
-		//	u32 mGuildID;
-		//	char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
-		//};
+		// THIS DOES NOT WORK.
+		struct MemberRemove : public FixedT<MemberRemove, OP_GuildManageRemove> {
+			MemberRemove() { memset(mCharacterName, 0, sizeof(mCharacterName)); }
+			static EQApplicationPacket* construct(const u32 pGuildID, const String& pCharacterName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				payload->mGuildID = pGuildID;
+
+				return packet;
+			}
+			u32 mGuildID = 0;
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+		};
 		
 		// S->C
 		//struct LevelUpdate {
