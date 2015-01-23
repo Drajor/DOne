@@ -477,14 +477,17 @@ const bool World::onDeleteCharacter(WorldConnection* pConnection, const String& 
 	if (!account->ownsCharacter(pCharacterName)) return false;
 
 	// Delete the Character.
-	if (mAccountManager->deleteCharacter(account, pCharacterName)) {
-		mLog->info("Success: Character deleted.");
-		pConnection->sendCharacterSelection();
-		return true;
+	if (!mAccountManager->deleteCharacter(account, pCharacterName)) {
+		mLog->error("Failed to delete " + pCharacterName);
+		return false;
 	}
+	mLog->info("Deleted " + pCharacterName);
 
-	mLog->error("Failure: Character failed to be deleted.");
-	return false;
+	// Notify GuildManager
+	mGuildManager->onCharacterDelete(pCharacterName);
+
+	pConnection->sendCharacterSelection();
+	return true;
 }
 
 const bool World::onCreateCharacter(WorldConnection* pConnection, Payload::World::CreateCharacter* pPayload) {

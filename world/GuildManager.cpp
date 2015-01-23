@@ -62,6 +62,22 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFac
 	return true;
 }
 
+void GuildManager::onCharacterDelete(const String& pCharacterName) {
+	// Check: Does this Character belong to a Guild?
+	auto guild = findGuildByMemberName(pCharacterName);
+	if (!guild) return;
+
+	auto member = guild->getMember(pCharacterName);
+
+	// Notify Guild.
+	guild->onMemberDelete(member);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
+	mLog->info("Removed deleted Character " + pCharacterName + " from " + guild->getName());
+}
+
 const bool GuildManager::onCreate(Character* pCharacter, const String& pGuildName) {
 	if (!pCharacter) return false;
 	if (pCharacter->hasGuild()) return false;
@@ -853,9 +869,7 @@ const bool GuildManager::onSetFlags(Character* pCharacter, const String& pCharac
 //	_sendMembers(member->mGuild);
 //}
 
-GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
-	EXPECTED_PTR(Limits::Character::nameLength(pCharacterName));
-
+GuildMember* GuildManager::searchMemberByName(const String& pCharacterName) {
 	for (auto i : mGuilds) {
 		for (auto j : i->getMembers()) {
 			if (j->getName() == pCharacterName)
@@ -863,40 +877,16 @@ GuildMember* GuildManager::_findByCharacterName(const String& pCharacterName) {
 		}
 	}
 
-	// Not found.
 	return nullptr;
 }
 
+Guild* GuildManager::findGuildByMemberName(const String& pCharacterName) {
+	for (auto i : mGuilds) {
+		for (auto j : i->getMembers()) {
+			if (j->getName() == pCharacterName)
+				return i;
+		}
+	}
 
-
-//void GuildManager::_changeRank(GuildMember* pMember, const GuildRank pNewRank) {
-//	EXPECTED(pMember);
-//	EXPECTED(Limits::Guild::rankValid(pNewRank));
-//
-//	Guild* guild = pMember->mGuild;
-//	EXPECTED(guild);
-//
-//	const GuildRank	previousRank = pMember->mRank;
-//	pMember->mRank = pNewRank;
-//
-//	// Check: Character is online, updates required!
-//	if (pMember->isOnline()) {
-//		Character* character = pMember->mCharacter;
-//		EXPECTED(character);
-//
-//		character->setGuildRank(pNewRank);
-//
-//		// Check: Character is not zoning, updates required!
-//		if (character->isZoning() == false) {
-//			// Update Character (Rank).
-//			character->getConnection()->sendGuildRank();
-//			// Update Character Zone (Rank).
-//			character->getZone()->onChangeGuild(character);
-//		}
-//	}
-//
-//	// Notify online guild members.
-//	const String change = previousRank < pNewRank ? "promoted" : "demoted";
-//	const String rank = Utility::guildRankToString(pNewRank);
-//	_sendMessage(guild, SYS_NAME, pMember->mName + " has been " + change + " to " + rank);
-//}
+	return nullptr;
+}

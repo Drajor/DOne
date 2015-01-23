@@ -385,6 +385,8 @@ const bool WorldConnection::handleDeleteCharacter(const EQApplicationPacket* pPa
 	STRING_CHECK(reinterpret_cast<char*>(pPacket->pBuffer), pPacket->size);
 	String characterName(reinterpret_cast<char*>(pPacket->pBuffer));
 	
+	mLog->info("Deleting " + characterName);
+
 	// Notify World.
 	return mWorld->onDeleteCharacter(this, characterName);
 }

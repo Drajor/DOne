@@ -2292,13 +2292,12 @@ const bool ZoneConnection::handleGuildRemove(const EQApplicationPacket* pPacket)
 	// Check: String length.
 	if (!Limits::Character::nameLength(toCharacterName)) return false;
 
-	// Notify Zone.
+	// Handle: Character is removing themself.
 	if (mCharacter->getName() == toCharacterName) {
-		// Character is removing themself.
 		mZone->onGuildLeave(mCharacter);
 	}
+	// Handle: Character is removing another Character.
 	else {
-		// Character is removing another Character.
 		mZone->onGuildRemove(mCharacter, toCharacterName);
 	}
 

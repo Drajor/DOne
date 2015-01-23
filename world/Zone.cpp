@@ -2484,25 +2484,7 @@ const bool Zone::onGuildInviteDecline(Character* pCharacter) {
 const bool Zone::onGuildRemove(Character* pRemover, const String& pRemoveeName) {
 	if (!pRemover) return false;
 
-	//// Try to find Character to remove.
-	//auto character = mZoneManager->findCharacter(pRemoveeName, false, nullptr);
-
-	//// Handle: Character not found, either offline, zoning or does not exist.
-	//if (!character) {
-	//	pRemover->message(MessageType::Yellow, pRemoveeName + " could not be found.");
-	//	return true;
-	//}
-
-	// Character is removing themselves.
-	if (pRemover->getName() == pRemoveeName) {
-		const bool success = mGuildManager->onLeave(pRemover);
-
-	}
-	// Character is removing another Character.
-	else {
-		const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
-	}
-
+	const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
 	return true;
 }
 

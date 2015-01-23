@@ -62,6 +62,7 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
+	void onMemberDelete(GuildMember* pMember);
 
 	const u32 getID() const;
 	const String& getName() const;

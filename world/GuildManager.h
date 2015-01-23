@@ -32,6 +32,9 @@ public:
 
 	inline const bool exists(const String& pGuildName) const { return search(pGuildName) != nullptr; }
 
+	// Guild Message.
+	void onMessage(Character* pCharacter, const String& pMessage);
+
 	// Character Events
 	void onConnect(Character* pCharacter, const u32 pGuildID);
 	void onEnterZone(Character* pCharacter);
@@ -39,6 +42,7 @@ public:
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
 	void onLevelChange(Character* pCharacter);
+	void onCharacterDelete(const String& pCharacterName);
 
 	// Character is creating a guild.
 	const bool onCreate(Character* pCharacter, const String& pGuildName);
@@ -66,8 +70,6 @@ public:
 
 	// Character is leaving their guild.
 	const bool onLeave(Character* pCharacter);
-	
-	void onMessage(Character* pCharacter, const String& pMessage);
 
 	const bool onSetMOTD(Character* pCharacter, const String& pMOTD);
 
@@ -96,14 +98,15 @@ private:
 
 	std::list<Data::Guild*> mData;
 	std::list<Guild*> mGuilds;
-
-	void _changeRank(GuildMember* pMember, const GuildRank pNewRank);
 	
 	// Returns a Guild, searching by name.
 	Guild* search(const String& pGuildName) const;
 
 	Guild* _findByID(const u32 pID);
-	GuildMember* _findByCharacterName(const String& pCharacterName);
+
+	GuildMember* searchMemberByName(const String& pCharacterName);
+
+	Guild* findGuildByMemberName(const String& pCharacterName);
 	
 	u32 mNextID = 0;
 	const u32 getNextGuildID();

@@ -363,6 +363,21 @@ void Guild::onLinkdead(Character* pCharacter) {
 	sendMessage(SYS_NAME, pCharacter->getName() + " has gone offline (LinkDead).", pCharacter);
 }
 
+void Guild::onMemberDelete(GuildMember* pMember) {
+	if (!pMember) return;
+
+	sendMessage(SYS_NAME, pMember->getName() + " has been deleted.");
+	removeMember(pMember);
+
+	// Update 'Guild Window' 'Member List' for all online members.
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) continue;
+		i->getConnection()->sendGuildMembers(mMembers);
+	}
+
+	// TODO: Handle when Guild Leader deletes themself.
+}
+
 void Guild::sendGuildInformation(Character* pCharacter) {
 	if (!pCharacter) return;
 
