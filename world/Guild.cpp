@@ -90,6 +90,30 @@ void Guild::onPromote(Character* pCharacter) {
 	}
 }
 
+void Guild::onDemote(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	auto member = getMember(pCharacter->getName());
+
+	// Update Character.
+	pCharacter->setGuild(this, getID(), GuildRanks::Member, getName());
+
+	// Update GuildMember.
+	updateMemberDetails(pCharacter, member);
+
+	// Notify other members.
+	sendMessage(SYS_NAME, pCharacter->getName() + " has been demoted to member!");
+
+	// Update Character.
+	sendGuildInformation(pCharacter);
+
+	// Update 'Guild Window' 'Member List' for all online members.
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) continue;
+		i->getConnection()->sendGuildMembers(mMembers);
+	}
+}
+
 void Guild::removeMember(GuildMember* pMember) {
 	if (!pMember) return;
 
@@ -182,6 +206,8 @@ const bool Guild::canInvite(Character* pCharacter) const { return pCharacter->ge
 const bool Guild::canRemove(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
 const bool Guild::canPromote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canBePromoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Member; }
+const bool Guild::canDemote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
+const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Officer; }
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };

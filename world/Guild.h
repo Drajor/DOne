@@ -75,7 +75,9 @@ public:
 	const bool canRemove(Character* pCharacter) const;
 	const bool canPromote(Character* pCharacter) const;
 	const bool canBePromoted(Character* pCharacter) const;
-
+	const bool canDemote(Character* pCharacter) const;
+	const bool canBeDemoted(Character* pCharacter) const;
+	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
 	void onLeave(Character* pCharacter);
@@ -83,6 +85,7 @@ public:
 	void onMemberDisconnect(Character* pCharacter);
 	void onRemove(GuildMember * pMember);
 	void onPromote(Character* pCharacter);
+	void onDemote(Character* pCharacter);
 
 	// Return a copy of the online members.
 	inline std::list<Character*> getOnlineMembers() { return mOnlineMembers; }
@@ -109,4 +112,5 @@ private:
 
 	void removeMember(GuildMember* pMember);
 	void removeCharacter(Character* pCharacter);
+
 };

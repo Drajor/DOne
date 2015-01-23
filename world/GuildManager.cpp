@@ -715,35 +715,60 @@ const bool GuildManager::onPromote(Character* pPromoter, Character* pPromotee) {
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
 
-	mLog->info(pPromoter->getName() + " promoted " + pPromoter->getName() + " in " + promoterGuild->getName());
+	mLog->info(pPromoter->getName() + " promoted " + pPromotee->getName() + " in " + promoterGuild->getName());
 	return true;
 }
 
 const bool GuildManager::onDemote(Character* pDemoter, Character* pDemotee) {
 	if (!pDemoter) return false;
 	if (!pDemotee) return false;
-	if (!pDemoter->hasGuild()) return false;
-	if (!pDemotee->hasGuild()) return false;
 
+	// Check: Attempt to demote self.
+	if (pDemoter == pDemotee) {
+		mLog->error(pDemoter->getName() + " attempted to self demote.");
+		return false;
+	}
+
+	// Check: Demoter Guild is valid.
+	auto demoterGuild = pDemoter->getGuild();
+	if (!demoterGuild) {
+		mLog->error(pDemoter->getName() + " (demoter) has no guild in " + __FUNCTION__);
+		return false;
+	}
+
+	// Check: Character is allowed to demote other Guild members.
+	if (!demoterGuild->canDemote(pDemoter)) {
+		mLog->error(pDemoter->getName() + " attempted to demote " + pDemotee->getName());
+		return false;
+	}
+
+	// Check: Demotee Guild is valid.
+	auto demoteeGuild = pDemotee->getGuild();
+	if (!demoteeGuild) {
+		mLog->error(pDemotee->getName() + " (demotee) has no guild in " + __FUNCTION__);
+		return false;
+	}
+
+	// Check: Both Characters are in the same Guild.
+	if (demoterGuild != demoteeGuild) {
+		mLog->error(pDemoter->getName() + " attempted to demote " + pDemotee->getName() + " but not in the same guild.");
+		return false;
+	}
+
+	// Check: Character can be demoted.
+	if (!demoterGuild->canBeDemoted(pDemotee)) {
+		mLog->error(pDemoter->getName() + " attempted to demote " + pDemotee->getName() + " but they can not be demoted.");
+		return false;
+	}
+
+	// Notify Guild.
+	demoterGuild->onDemote(pDemotee);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
+	mLog->info(pDemoter->getName() + " demoted " + pDemotee->getName() + " in " + demoterGuild->getName());
 	return true;
-
-	//// Officer demotes self.
-	//if (pDemoter->getName() == pDemoteName) {
-	//	EXPECTED(isOfficer(pDemoter));
-	//	GuildMember* member = guild->getMember(pDemoter->getName());
-	//	EXPECTED(member);
-	//	_changeRank(member, GuildRanks::Member);
-	//}
-	//// Leader demotes officer
-	//else {
-	//	EXPECTED(isLeader(pDemoter));
-	//	GuildMember* member = guild->getMember(pDemoteName);
-	//	EXPECTED(member->mRank == GuildRanks::Officer);
-	//	_changeRank(member, GuildRanks::Member);
-	//}
-
-	//_sendMembers(guild);
-	//save();
 }
 
 const bool GuildManager::onSetFlags(Character* pCharacter, const String& pCharacterName, const bool pBanker, const bool pAlt) {

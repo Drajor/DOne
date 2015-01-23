@@ -2535,6 +2535,23 @@ const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeNam
 }
 
 const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) {
+	if (!pDemoter) return false;
+
+	// Check: Character has a valid target.
+	if (!pDemoter->hasTarget()) return false;
+	if (!pDemoter->targetIsCharacter()) return false;
+
+	auto demotee = Actor::cast<Character*>(pDemoter->getTarget());
+
+	// Notify GuildManager.
+	const auto success = mGuildManager->onDemote(pDemoter, demotee);
+
+	// Handle: Failure.
+	if (!success) {
+		// TODO: Log
+		return false;
+	}
+
 	return true;
 }
 
