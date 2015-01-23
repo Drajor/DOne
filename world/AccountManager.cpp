@@ -173,6 +173,7 @@ const bool AccountManager::createCharacter(Account* pAccount, Payload::World::Cr
 	c->mDrakkinTattoo = pPayload->mDrakkinTattoo;
 	c->mDrakkinDetails = pPayload->mDrakkinDetails;
 	c->mDeity = pPayload->mDeity;
+	c->mNew = true;
 
 	// Save Character.
 	if (!mDataStore->saveCharacter(characterName, c)) {
@@ -209,7 +210,18 @@ const bool AccountManager::createCharacter(Account* pAccount, Payload::World::Cr
 	data->mCharacterData.push_back(accountCharacterData);
 
 	// Save.
-	return _save(data);
+	if (!_save(data)){
+		mLog->error("Save failed in " + String(__FUNCTION__));
+
+		// Clean up.
+		data->mCharacterData.remove(accountCharacterData);
+		delete accountCharacterData;
+		delete c;
+
+		return false;
+	}
+
+	return true;
 }
 
 const bool AccountManager::deleteCharacter(Account* pAccount, const String& pCharacterName) {

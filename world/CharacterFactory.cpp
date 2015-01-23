@@ -76,5 +76,10 @@ Character* CharacterFactory::make(const String& pCharacterName, Account* pAccoun
 		return nullptr;
 	}
 
+	// Check: Is this the first time the Character has logged in.
+	if (character->isNew()) {
+		//mLog->info("")
+	}
+
 	return character;
 }

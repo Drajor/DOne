@@ -120,6 +120,7 @@ namespace Data {
 		String mSuffix = "";
 		bool mGM = false;
 		bool mMuted = false;
+		bool mNew = true; // This flag is set to false the first time the Character enters the world.
 		u32 mStatus = 0;
 
 		u16 mZoneID = 0; // TODO: Choose a good default.

@@ -58,6 +58,9 @@ public:
 	inline const bool isMuted() const { return mIsMuted; }
 	inline void setMuted(const bool pValue) { mIsMuted = pValue; }
 
+	inline const bool isNew() const { return mIsNew; }
+	inline void setNew(const bool pValue) { mIsNew = pValue; }
+
 	const u8 getLevel() const;
 	
 	void setLevel(const u8 pLevel);
@@ -299,6 +302,7 @@ private:
 	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 
 	bool mIsMuted = false;
+	bool mIsNew = false;
 	bool mHidden = false;
 	bool mAutoAttacking = false;
 	bool mStanding = true;

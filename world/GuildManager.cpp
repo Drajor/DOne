@@ -717,18 +717,6 @@ const bool GuildManager::onPromote(Character* pPromoter, Character* pPromotee) {
 
 	mLog->info(pPromoter->getName() + " promoted " + pPromoter->getName() + " in " + promoterGuild->getName());
 	return true;
-
-	//GuildMember* member = pCharacter->getGuild()->getMember(pPromoteName);
-	//EXPECTED(member);
-
-	//if (member->mRank != GuildRanks::Member) {
-	//	pCharacter->getConnection()->sendMessage(MessageType::Yellow, pPromoteName + " can not be promoted beyond officer.");
-	//	return;
-	//}
-
-	//_changeRank(member, GuildRanks::Officer);
-	//_sendMembers(pCharacter->getGuild());
-	//save();
 }
 
 const bool GuildManager::onDemote(Character* pDemoter, Character* pDemotee) {

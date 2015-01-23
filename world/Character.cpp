@@ -105,6 +105,7 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	setRace(mData->mRace);
 	setIsGM(mData->mGM);
 	setMuted(mData->mMuted);
+	setNew(mData->mNew);
 	setClass(mData->mClass);
 	setGender(mData->mGender);
 	setLevel(mData->mExperience.mLevel);
@@ -294,6 +295,7 @@ const bool Character::_updateForSave() {
 
 	mData->mGM = isGM();
 	mData->mMuted = isMuted();
+	mData->mNew = isNew();
 	mData->mName = getName();
 	mData->mLastName = getLastName();
 	mData->mTitle = getTitle();

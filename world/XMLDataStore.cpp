@@ -373,6 +373,7 @@ namespace CharacterXML {
 		SCA Name = "name";
 		SCA GM = "gm";
 		SCA Muted = "muted";
+		SCA New = "new";
 		SCA Status = "status";
 		// Tag::Experience
 		namespace Experience {
@@ -560,6 +561,7 @@ const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Chara
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, pCharacter->mName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::GM, pCharacter->mGM));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Muted, pCharacter->mMuted));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::New, pCharacter->mNew));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Status, pCharacter->mStatus));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, pCharacter->mClass));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, pCharacter->mZoneID));
@@ -826,6 +828,7 @@ const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data:
 	characterElement->SetAttribute(Attribute::Name, pCharacter->mName.c_str());
 	characterElement->SetAttribute(Attribute::GM, pCharacter->mGM);
 	characterElement->SetAttribute(Attribute::Muted, pCharacter->mMuted);
+	characterElement->SetAttribute(Attribute::New, pCharacter->mNew);
 	characterElement->SetAttribute(Attribute::Status, pCharacter->mStatus);
 	characterElement->SetAttribute(Attribute::Class, pCharacter->mClass);
 	characterElement->SetAttribute(Attribute::Zone, pCharacter->mZoneID);
