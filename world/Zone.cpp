@@ -2599,16 +2599,18 @@ const bool Zone::onGuildSetChannel(Character* pSetter, const String& pChannel) {
 	return success;
 }
 
-const bool Zone::onGuildStatusRequest(Character* pCharacter, const String& pCharacterName) {
-	// TODO
-	return true;
-}
-
-const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterName, const bool pBanker, const bool pAlt) {
+const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterName, const u32 pFlags) {
 	if (!pSetter) return false;
 
-	const bool success = mGuildManager->onSetFlags(pSetter, pCharacterName, pBanker, pAlt);
-	return true;
+	const bool success = mGuildManager->onSetFlags(pSetter, pCharacterName, pFlags);
+
+	// Respond.
+	if (!success)
+		pSetter->notify("Failed to update flags.");
+	else
+		pSetter->notify(pCharacterName + " flags updated.");
+
+	return success;
 }
 
 const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote) {

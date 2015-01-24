@@ -492,46 +492,6 @@ const bool GuildManager::onSetPublicNote(Character* pCharacter, const String& pC
 	return true;
 }
 
-const bool GuildManager::onStatusRequest(Character* pCharacter, const String& pCharacterName) {
-	if (!pCharacter) return false;
-
-	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(Limits::Character::nameLength(pCharacterName));
-
-	//ZoneConnection* connection = pCharacter->getConnection();
-	//EXPECTED(connection);
-
-	//// Try to find requested Character.
-	//GuildMember* member = _findByCharacterName(pCharacterName);
-	//if (!member) {
-	//	// Character was not found, they either do not exist or do not have a guild.
-	//	connection->sendSimpleMessage(MessageType::White, StringID::NOT_IN_A_GUILD, pCharacterName);
-	//	return;
-	//}
-
-	//u32 stringID = StringID::SI_NONE;
-	//String message = "";
-
-	//// Same Guild
-	//if (member->mGuild == pCharacter->getGuild()) {
-	//	message = pCharacterName;
-	//	if (member->mRank == GuildRanks::Leader) { stringID = StringID::LEADER_OF_YOUR_GUILD; }
-	//	else if (member->mRank == GuildRanks::Officer) { stringID = StringID::OFFICER_OF_YOUR_GUILD; }
-	//	else if (member->mRank == GuildRanks::Member){ stringID = StringID::MEMBER_OF_YOUR_GUILD; }
-	//}
-	//// Different Guild
-	//else {
-	//	message = member->mGuild->mName;
-	//	if (member->mRank == GuildRanks::Leader) { stringID = StringID::LEADER_OF_X_GUILD; }
-	//	else if (member->mRank == GuildRanks::Officer) { stringID = StringID::OFFICER_OF_X_GUILD; }
-	//	else if (member->mRank == GuildRanks::Member){ stringID = StringID::MEMBER_OF_X_GUILD; }
-	//}
-
-	//if (stringID != StringID::SI_NONE)
-	//	connection->sendSimpleMessage(MessageType::White, stringID, message);
-}
-
 const bool GuildManager::onPromote(Character* pPromoter, Character* pPromotee) {
 	if (!pPromoter) return false;
 	if (!pPromotee) return false;
@@ -674,49 +634,55 @@ const bool GuildManager::onMakeLeader(Character* pCharacter, const String& pLead
 	return true;
 }
 
-const bool GuildManager::onSetFlags(Character* pCharacter, const String& pCharacterName, const bool pBanker, const bool pAlt) {
+const bool GuildManager::onSetFlags(Character* pCharacter, const String& pCharacterName, const u32 pFlags) {
 	if (!pCharacter) return false;
 
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to set flags but they are not in a guild.");
+		return false;
+	}
+
+	// Check: Target Character is a member of the Guild.
+	auto member = guild->getMember(pCharacterName);
+	if (!member) {
+		mLog->error(pCharacter->getName() + " attempted to set the flags of " + pCharacterName + " but they are not a guild member.");
+		return false;
+	}
+
+	// Check: Flags value range.
+	if (pFlags > 3) {
+		mLog->error(pCharacter->getName() + " attempted to set the flags of " + pCharacterName + " with an invalid value of" + toString(pFlags));
+		return false;
+	}
+
+	const bool setSelf = pCharacter->getName() == pCharacterName;
+	const bool setBanker = pFlags & 0x01;
+	const bool changeBanker = member->isBanker() != setBanker;
+	const bool setAlt = pFlags & 0x02;
+	const bool changeAlt = member->isAlt() != setAlt;
+
+	// Check: Character is allowed to set banker flag.
+	if (changeBanker && !guild->canSetBankerFlag(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to set banker flag but they are not allowed.");
+		return false;
+	}
+
+	// Check: Character is allowed to set alt flag.
+	if (changeAlt && !setSelf && !guild->canSetAltFlag(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to set alt flag but they are not allowed.");
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onSetFlags(member, pFlags);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
 	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(isLeader(pCharacter));
-	//EXPECTED(Limits::Character::nameLength(pOtherName));
-
-	//GuildMember* member = pCharacter->getGuild()->getMember(pOtherName);
-	//EXPECTED(member);
-
-	//if (member->mBanker != pBanker) {
-	//	member->mBanker = pBanker;
-	//	save();
-	//	// TODO: Use _sendMembers until a better way is found.
-	//	_sendMembers(member->mGuild);
-	//	return;
-	//}
 }
-
-//void GuildManager::handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt) {
-//	EXPECTED(pCharacter);
-//	EXPECTED(pCharacter->hasGuild());
-//	EXPECTED(Limits::Character::nameLength(pAltName));
-//
-//	GuildMember* member = pCharacter->getGuild()->getMember(pAltName);
-//	EXPECTED(member);
-//
-//	// Check: Return early if member is already an alt.
-//	if (member->mAlt == pAlt)
-//		return;
-//
-//	// Check: Permission
-//	const bool changingOther = (pCharacter->getName() != pAltName);
-//	if (changingOther)
-//		EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only the leader or an officer can change the alt status of another member.
-//
-//	member->mAlt = pAlt;
-//	save();
-//	// TODO: Use _sendMembers until a better way is found.
-//	_sendMembers(member->mGuild);
-//}
 
 GuildMember* GuildManager::searchMemberByName(const String& pCharacterName) {
 	for (auto i : mGuilds) {

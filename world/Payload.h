@@ -2037,10 +2037,10 @@ namespace Payload {
 
 		// C->S
 		struct FlagsUpdate : public Fixed<FlagsUpdate> {
-			u32 mUnknown = 0;
+			u32 mUnknown = 0; // Probably Guild ID.
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // NOTE: UF does not send this
 			char mOtherName[Limits::Character::MAX_NAME_LENGTH]; // Character whose status is being changed.
-			u32 mStatus = 0;
+			u32 mFlags = 0;
 		};
 
 		// S->C

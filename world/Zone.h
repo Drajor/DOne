@@ -137,10 +137,8 @@ public:
 	const bool onGuildSetURL(Character* pSetter, const String& pURL);
 	const bool onGuildSetChannel(Character* pSetter, const String& pChannel);
 	const bool onGuildMakeLeader(Character* pCharacter, const String& pLeaderName);
-	const bool onGuildSetFlags(Character* pSetter, const String& pCharacterName, const bool pBanker, const bool pAlt);
+	const bool onGuildSetFlags(Character* pSetter, const String& pCharacterName, const u32 pFlags);
 	const bool onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote);
-
-	const bool onGuildStatusRequest(Character* pCharacter, const String& pCharacterName);
 
 	void onChangeGuild(Character* pCharacter);
 	void onGuildsChanged();

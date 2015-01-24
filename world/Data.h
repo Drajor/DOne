@@ -196,9 +196,8 @@ namespace Data {
 		u8 mRank = 0;
 		u8 mLevel = 0;
 		u8 mClass = 0;
-		bool mBanker = false;
 		bool mTributeEnabled = false;
-		bool mAlt = false;
+		u32 mFlags = 0;
 		u32 mTimeLastOn = 0;
 		u32 mTotalTribute = 0;
 		u32 mLastTribute = 0;

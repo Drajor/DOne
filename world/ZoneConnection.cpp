@@ -2421,7 +2421,6 @@ const bool ZoneConnection::handleSetGuildPublicNote(const EQApplicationPacket* p
 
 	// Notify Zone.
 	mZone->onGuildSetPublicNote(mCharacter, targetName, note);
-
 	return true;
 }
 
@@ -2436,7 +2435,7 @@ const bool ZoneConnection::handleGetGuildStatus(const EQApplicationPacket* pPack
 	String targetName(payload->mName);
 	
 	// Notify Zone.
-	mZone->onGuildStatusRequest(mCharacter, targetName);
+	mCharacter->notify("Feature not implemented."); // This feature is lame.
 	return true;
 }
 
@@ -2470,14 +2469,8 @@ const bool ZoneConnection::handleGuildSetFlags(const EQApplicationPacket* pPacke
 	STRING_CHECK(payload->mOtherName, Limits::Character::MAX_NAME_LENGTH);
 	const String otherName(payload->mOtherName);
 
-	// Check: String length
-	if (!Limits::Character::nameLength(otherName)) return false;
-
-	bool isBanker = (payload->mStatus & 0x01) > 1;
-	bool isAlt = (payload->mStatus & 0x02) > 1;
-
 	// Notify Zone.
-	mZone->onGuildSetFlags(mCharacter, otherName, isBanker, isAlt);
+	mZone->onGuildSetFlags(mCharacter, otherName, payload->mFlags);
 	return true;
 }
 

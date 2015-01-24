@@ -80,10 +80,7 @@ public:
 
 	const bool onSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pPublicNote);
 		
-	const bool onSetFlags(Character* pCharacter, const String& pCharacterName, const bool pBanker, const bool pAlt);
-	//const bool handleSetAlt(Character* pCharacter, const String& pAltName, const bool pAlt);
-
-	const bool onStatusRequest(Character* pCharacter, const String& pCharacterName);
+	const bool onSetFlags(Character* pCharacter, const String& pCharacterName, const u32 pFlags);
 
 	inline const std::list<Guild*>& getGuilds() const { return mGuilds; }
 

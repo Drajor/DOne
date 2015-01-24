@@ -178,6 +178,13 @@ void Guild::onSetPublicNote(GuildMember* pMember, const String& pPublicNote) {
 	sendMemberList();
 }
 
+void Guild::onSetFlags(GuildMember* pMember, const u32 pFlags) {
+	if (!pMember) return;
+
+	pMember->setFlags(pFlags);
+	sendMemberList();
+}
+
 void Guild::removeMember(GuildMember* pMember) {
 	if (!pMember) return;
 
@@ -267,7 +274,8 @@ const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->g
 const bool Guild::canSetURL(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canSetChannel(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canSetPublicNotes(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
-
+const bool Guild::canSetBankerFlag(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
+const bool Guild::canSetAltFlag(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };
@@ -502,21 +510,20 @@ const String& GuildMember::getName() const { return mData->mName; }
 const u8 GuildMember::getRank() const { return mData->mRank; }
 const u8 GuildMember::getLevel() const { return mData->mLevel; }
 const u8 GuildMember::getClass() const { return mData->mClass; }
-const bool GuildMember::isBanker() const { return mData->mBanker; }
 const bool GuildMember::isTributeEnabled() const { return mData->mTributeEnabled; }
-const bool GuildMember::isAlt() const { return mData->mAlt; }
 const u32 GuildMember::getLastSeen() const { return mData->mTimeLastOn; }
 const u32 GuildMember::getTotalTribute() const { return mData->mLastTribute; }
 const u32 GuildMember::getLastTribute() const { return mData->mLastTribute; }
 const String& GuildMember::getPublicNote() const { return mData->mPublicNote; }
-const u32 GuildMember::getFlags() const { return isBanker() ? 1 : 0 + isAlt() ? 2 : 0; }
+const u32 GuildMember::getFlags() const { return mData->mFlags; }
+const bool GuildMember::isBanker() const { return mData->mFlags >> 0 & 1; }
+const bool GuildMember::isAlt() const { return mData->mFlags >> 1 & 1; }
 
 void GuildMember::setName(const String& pCharacterName) { mData->mName = pCharacterName; }
 void GuildMember::setRank(const u8 pRank) { mData->mRank = pRank; }
 void GuildMember::setLevel(const u8 pLevel) { mData->mLevel = pLevel; }
 void GuildMember::setClass(const u8 pClass) { mData->mClass = pClass; }
-void GuildMember::setIsBanker(const bool pIsBanker) { mData->mBanker = pIsBanker; }
+void GuildMember::setFlags(const u32 pFlags) { mData->mFlags = pFlags; }
 void GuildMember::setIsTributeEnabled(const bool pIsTributeEnabled) { mData->mTributeEnabled = pIsTributeEnabled; }
-void GuildMember::setIsAlt(const bool pIsAlt) { mData->mAlt = pIsAlt; }
 void GuildMember::setLastSeen(const u32 pLastSeen) { mData->mTimeLastOn = pLastSeen; }
 void GuildMember::setPublicNote(const String& pPublicNote) { mData->mPublicNote = pPublicNote; }

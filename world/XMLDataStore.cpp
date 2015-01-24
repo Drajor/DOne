@@ -2030,8 +2030,7 @@ namespace GuildXML {
 			SCA Name = "name";
 			SCA Rank = "rank";
 			SCA Level = "level";
-			SCA Banker = "banker";
-			SCA Alt = "alt";
+			SCA Flags = "flags";
 			SCA Class = "class";
 			SCA TimeLastOn = "time_last_on";
 			SCA TributeEnabled = "tribute_enabled";
@@ -2054,9 +2053,8 @@ const bool XMLDataStore::readGuildMember(TiXmlElement* pElement, Data::GuildMemb
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Name, pMember->mName));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Rank, pMember->mRank));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Level, pMember->mLevel));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Banker, pMember->mBanker));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Flags, pMember->mFlags));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TributeEnabled, pMember->mTributeEnabled));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Alt, pMember->mAlt));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::Class, pMember->mClass));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TimeLastOn, pMember->mTimeLastOn));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Member::TotalTribute, pMember->mTotalTribute));
@@ -2140,9 +2138,8 @@ const bool XMLDataStore::writeGuildMember(TiXmlElement* pElement, Data::GuildMem
 	pElement->SetAttribute(Attribute::Member::Name, pMember->mName.c_str());
 	pElement->SetAttribute(Attribute::Member::Rank, std::to_string(pMember->mRank).c_str());
 	pElement->SetAttribute(Attribute::Member::Level, std::to_string(pMember->mLevel).c_str());
-	pElement->SetAttribute(Attribute::Member::Banker, std::to_string(pMember->mBanker).c_str());
+	pElement->SetAttribute(Attribute::Member::Flags, std::to_string(pMember->mFlags).c_str());
 	pElement->SetAttribute(Attribute::Member::TributeEnabled, std::to_string(pMember->mTributeEnabled).c_str());
-	pElement->SetAttribute(Attribute::Member::Alt, std::to_string(pMember->mAlt).c_str());
 	pElement->SetAttribute(Attribute::Member::Class, std::to_string(pMember->mClass).c_str());
 	pElement->SetAttribute(Attribute::Member::TimeLastOn, std::to_string(pMember->mTimeLastOn).c_str());
 	pElement->SetAttribute(Attribute::Member::TotalTribute, std::to_string(pMember->mTotalTribute).c_str());

@@ -25,9 +25,9 @@ public:
 	const u8 getRank() const;
 	const u8 getLevel() const;
 	const u8 getClass() const;
-	const bool isBanker() const;
 	const bool isTributeEnabled() const;
 	const u32 getFlags() const;
+	const bool isBanker() const;
 	const bool isAlt() const;
 	const u32 getLastSeen() const;
 	const u32 getTotalTribute() const;
@@ -40,9 +40,8 @@ public:
 	void setRank(const u8 pRank);
 	void setLevel(const u8 pLevel);
 	void setClass(const u8 pClass);
-	void setIsBanker(const bool pIsBanker);
+	void setFlags(const u32 pFlags);
 	void setIsTributeEnabled(const bool pIsTributeEnabled);
-	void setIsAlt(const bool pIsAlt);
 	void setLastSeen(const u32 pLastSeen);
 	void setPublicNote(const String& pPublicNote);
 
@@ -86,6 +85,8 @@ public:
 	const bool canSetURL(Character* pCharacter) const;
 	const bool canSetChannel(Character* pCharacter) const;
 	const bool canSetPublicNotes(Character* pCharacter) const;
+	const bool canSetBankerFlag(Character* pCharacter) const;
+	const bool canSetAltFlag(Character* pCharacter) const;
 	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
@@ -101,6 +102,7 @@ public:
 	void onSetURL(const String& pURL);
 	void onSetChannel(const String& pChannel);
 	void onSetPublicNote(GuildMember * pMember, const String& pPublicNote);
+	void onSetFlags(GuildMember * pMember, const u32 pFlags);
 
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }
