@@ -323,20 +323,6 @@ void GuildManager::onCamp(Character* pCharacter){
 
 	// Notify Guild.
 	guild->onCamp(pCharacter);
-
-	//// Update member.
-	//GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
-	//EXPECTED(member);
-	//member->mZoneID = 0;
-	//member->mInstanceID = 0;
-	//member->mTimeLastOn = 0; // TODO: Time
-	//member->mCharacter = nullptr;
-
-	//pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
-	//_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
-
-	//// Update other members.
-	//_sendMemberZoneUpdate(pCharacter->getGuild(), member);
 }
 
 void GuildManager::onLinkdead(Character* pCharacter) {
@@ -347,23 +333,6 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 
 	// Notify Guild.
 	guild->onLinkdead(pCharacter);
-
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-
-	//// Update member.
-	//GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
-	//EXPECTED(member);
-	//member->mZoneID = 0;
-	//member->mInstanceID = 0;
-	//member->mTimeLastOn = 0; // TODO: Time
-	//member->mCharacter = nullptr;
-
-	//pCharacter->getGuild()->mOnlineMembers.remove(pCharacter);
-	//_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has gone offline (Linkdead).", pCharacter);
-
-	//// Update other members.
-	//_sendMemberZoneUpdate(pCharacter->getGuild(), member);
 }
 
 void GuildManager::onLevelChange(Character* pCharacter) {
@@ -400,21 +369,6 @@ void GuildManager::onMessage(Character* pCharacter, const String& pMessage) {
 	guild->sendMessage(pCharacter->getName(), pMessage);
 }
 
-//void GuildManager::_sendMessage(Guild* pGuild, const String& pSenderName, const String& pMessage, Character* pExclude) {
-//	EXPECTED(pGuild);
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i == pExclude) continue;;
-//
-//		// Check: Where a guild member is zoning, queue the message.
-//		if (i->isZoning()) {
-//			i->addQueuedMessage(ChannelID::Guild, pSenderName, pMessage);
-//			continue;
-//		}
-//		i->getConnection()->sendGuildMessage(pSenderName, pMessage);
-//	}
-//}
-
 const bool GuildManager::onSetMOTD(Character* pCharacter, const String& pMOTD) {
 	if (!pCharacter) return false;
 
@@ -426,7 +380,7 @@ const bool GuildManager::onSetMOTD(Character* pCharacter, const String& pMOTD) {
 	}
 
 	// Check: Character is allowed to set the MOTD.
-	if (!guild->canSetMOTD(pCharacter)){
+	if (!guild->canSetMOTD(pCharacter)) {
 		mLog->error(pCharacter->getName() + " attempted to set MOTD but they are not allowed.");
 		return false;
 	}
@@ -456,94 +410,54 @@ const bool GuildManager::onMOTDRequest(Character* pCharacter) {
 	return true;
 }
 
-//void GuildManager::_sendURL(Guild* pGuild) {
-//	EXPECTED(pGuild);
-//
-//	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-//	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
-//	payload->mAction = Payload::Guild::GuildUpdate::Action::GUILD_URL;
-//	strcpy(&payload->mText[0], pGuild->mURL.c_str());
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		i->getConnection()->sendPacket(outPacket);
-//	}
-//
-//	safe_delete(outPacket);
-//}
-
-//void GuildManager::_sendChannel(Guild* pGuild) {
-//	EXPECTED(pGuild);
-//
-//	auto outPacket = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(Payload::Guild::GuildUpdate));
-//	auto payload = reinterpret_cast<Payload::Guild::GuildUpdate*>(outPacket->pBuffer);
-//	payload->mAction = Payload::Guild::GuildUpdate::Action::GUILD_CHANNEL;
-//	strcpy(&payload->mText[0], pGuild->mChannel.c_str());
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		i->getConnection()->sendPacket(outPacket);
-//	}
-//
-//	safe_delete(outPacket);
-//}
-
-//void GuildManager::_sendMOTDReply(Character* pCharacter) {
-//	EXPECTED(pCharacter);
-//	EXPECTED(pCharacter->hasGuild());
-//
-//	Guild* guild = pCharacter->getGuild();
-//	pCharacter->getConnection()->sendGuildMOTDReply(guild->mMOTD, guild->mMOTDSetter);
-//}
-
-//void GuildManager::_sendMemberLevelUpdate(const Guild* pGuild, const GuildMember* pMember) {
-//	EXPECTED(pGuild);
-//	EXPECTED(pMember);
-//	EXPECTED(pMember->mGuild == pGuild);
-//
-//	auto outPacket = new EQApplicationPacket(OP_GuildMemberLevelUpdate, sizeof(Payload::Guild::LevelUpdate));
-//	auto payload = reinterpret_cast<Payload::Guild::LevelUpdate*>(outPacket->pBuffer);
-//
-//	payload->mGuildID = pGuild->mID;
-//	strcpy(payload->mMemberName, pMember->mName.c_str());
-//	payload->mLevel = pMember->mLevel;
-//
-//	for (auto i : pGuild->mOnlineMembers) {
-//		if (i->isZoning()) { continue; }
-//		i->getConnection()->sendPacket(outPacket);
-//	}
-//
-//	safe_delete(outPacket);
-//}
-
 const bool GuildManager::onSetURL(Character* pCharacter, const String& pURL) {
+	if (!pCharacter) return false;
+
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to set URL but they are not in a guild.");
+		return false;
+	}
+
+	// Check: Character is allowed to set the URL.
+	if (!guild->canSetURL(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to set URL but they are not allowed.");
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onSetURL(pCharacter, pURL);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
 	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(isLeader(pCharacter)); // Only leader can change the url.
-	//EXPECTED(Limits::Guild::urlLength(pURL));
-
-	//pCharacter->getGuild()->mURL = pURL;
-	//save();
-
-	//// Update other members.
-	//_sendURL(pCharacter->getGuild());
-	//_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has updated the guild URL.");
 }
 
 const bool GuildManager::onSetChannel(Character* pCharacter, const String& pChannel) {
+	if (!pCharacter) return false;
+
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to set channel but they are not in a guild.");
+		return false;
+	}
+
+	// Check: Character is allowed to set the channel.
+	if (!guild->canSetChannel(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to set channel but they are not allowed.");
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onSetChannel(pCharacter, pChannel);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
 	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(isLeader(pCharacter)); // Only leader can change the channel.
-	//EXPECTED(Limits::Guild::channelLength(pChannel));
-
-	//pCharacter->getGuild()->mChannel = pChannel;
-	//save();
-
-	//// Update other members.
-	//_sendChannel(pCharacter->getGuild());
-	//_sendMessage(pCharacter->getGuild(), SYS_NAME, pCharacter->getName() + " has updated the guild channel.");
 }
 
 const bool GuildManager::onSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pPublicNote) {

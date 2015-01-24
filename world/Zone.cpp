@@ -2507,11 +2507,9 @@ const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeNam
 	// Notify GuildManager.
 	const auto success = mGuildManager->onPromote(pPromoter, promotee);
 
-	// Handle: Failure.
-	if (!success) {
-		// TODO: Log
-		return false;
-	}
+	// Respond.
+	if (!success)
+		pPromoter->notify("Failed to promote " + pPromoteeName);
 
 	return true;
 }
@@ -2528,21 +2526,25 @@ const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) 
 	// Notify GuildManager.
 	const auto success = mGuildManager->onDemote(pDemoter, demotee);
 
-	// Handle: Failure.
-	if (!success) {
-		// TODO: Log
-		return false;
-	}
+	// Respond.
+	if (!success)
+		pDemoter->notify("Failed to demote " + pDemoteeName);
 
-	return true;
+	return success;
 }
 
 const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderName) {
 	if (!pCharacter) return false;
-
 	// NOTE: Changing leader does not require that the new leader is targeted (like promote/demote).
+
+	// Notify GuildManager.
 	const bool success = mGuildManager->onMakeLeader(pCharacter, pLeaderName);
-	return true;
+
+	// Respond.
+	if (!success)
+		pCharacter->notify("Failed to make " + pLeaderName + " leader.");
+
+	return success;
 }
 
 const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
@@ -2572,17 +2574,29 @@ const bool Zone::onGuildMOTDRequest(Character* pCharacter) {
 }
 
 const bool Zone::onGuildSetURL(Character* pSetter, const String& pURL) {
-	if (pSetter) return false;
+	if (!pSetter) return false;
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onSetURL(pSetter, pURL);
-	return true;
+
+	// Respond.
+	if (!success)
+		pSetter->notify("Failed to update guild URL.");
+
+	return success;
 }
 
 const bool Zone::onGuildSetChannel(Character* pSetter, const String& pChannel) {
-	if (pSetter) return false;
+	if (!pSetter) return false;
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onSetChannel(pSetter, pChannel);
-	return true;
+
+	// Respond.
+	if (!success)
+		pSetter->notify("Failed to update guild channel.");
+
+	return success;
 }
 
 const bool Zone::onGuildStatusRequest(Character* pCharacter, const String& pCharacterName) {

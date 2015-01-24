@@ -149,6 +149,28 @@ void Guild::onMOTDRequest(Character* pCharacter) {
 	pCharacter->getConnection()->sendGuildMOTDResponse(getMOTD(), getMOTDSetter());
 }
 
+void Guild::onSetURL(Character* pCharacter, const String& pURL) {
+	if (!pCharacter) return;
+
+	mData->mURL = pURL;
+
+	// Notify members.
+	sendMessage(SYS_NAME, pCharacter->getName() + " updated the guild URL!");
+
+	sendURL();
+}
+
+void Guild::onSetChannel(Character* pCharacter, const String& pChannel) {
+	if (!pCharacter) return;
+
+	mData->mChannel = pChannel;
+
+	// Notify members.
+	sendMessage(SYS_NAME, pCharacter->getName() + " updated the guild channel!");
+
+	sendChannel();
+}
+
 void Guild::removeMember(GuildMember* pMember) {
 	if (!pMember) return;
 
@@ -235,6 +257,8 @@ const bool Guild::canBePromoted(Character* pCharacter) const { return pCharacter
 const bool Guild::canDemote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Officer; }
 const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
+const bool Guild::canSetURL(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
+const bool Guild::canSetChannel(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };
@@ -281,11 +305,7 @@ void Guild::sendMemberZoneUpdate(GuildMember* pMember) {
 	if (!pMember) return;
 
 	auto packet = MemberZoneUpdate::construct(getID(), pMember->getName(), pMember->getZoneID(), pMember->getInstanceID(), pMember->getLastSeen());
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) { continue; }
-		i->getConnection()->sendPacket(packet);
-	}
-
+	sendPacket(packet);
 	delete packet;
 }
 
@@ -294,11 +314,7 @@ void Guild::sendMemberLevelUpdate(GuildMember* pMember) {
 	if (!pMember) return;
 
 	auto packet = MemberLevelUpdate::construct(getID(), pMember->getName(), pMember->getLevel());
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) { continue; }
-		i->getConnection()->sendPacket(packet);
-	}
-
+	sendPacket(packet);
 	delete packet;
 }
 
@@ -378,20 +394,16 @@ void Guild::sendGuildInformation(Character* pCharacter) {
 
 	auto connection = pCharacter->getConnection();
 	connection->sendGuildRank(pCharacter->getGuildRank());
-	connection->sendGuildURL(getURL());
-	connection->sendGuildChannel(getChannel());
+	sendURL(pCharacter);
+	sendChannel(pCharacter);
 	connection->sendGuildMOTD(getMOTD(), getMOTDSetter());
 }
 
 void Guild::sendMOTD() {
 	using namespace Payload::Guild;
+	
 	auto packet = MOTD::construct(getMOTDSetter(), getMOTD());
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) { continue; }
-		//strcpy(payload->mCharacterName, i->getName().c_str()); // TODO: Need to test whether this is actually needed by the client.
-		i->getConnection()->sendPacket(packet);
-	}
-
+	sendPacket(packet);
 	delete packet;
 }
 
@@ -405,12 +417,41 @@ void Guild::sendMemberList(Character* pCharacter) {
 
 void Guild::sendMemberList() {
 	auto packet = Payload::makeGuildMemberList(mMembers);
+	sendPacket(packet);
+	delete packet;
+}
 
-	for (auto i : mOnlineMembers) {
-		if (i->isZoning()) continue;
-		i->getConnection()->sendPacket(packet);
-	}
+void Guild::sendURL(Character* pCharacter) {
+	using namespace Payload::Guild;
+	if (!pCharacter) return;
 
+	auto packet = GuildUpdate::construct(GuildUpdateAction::URL, getURL());
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
+}
+
+void Guild::sendURL() {
+	using namespace Payload::Guild;
+
+	auto packet = GuildUpdate::construct(GuildUpdateAction::URL, getURL());
+	sendPacket(packet);
+	delete packet;
+}
+
+void Guild::sendChannel(Character* pCharacter) {
+	using namespace Payload::Guild;
+	if (!pCharacter) return;
+
+	auto packet = GuildUpdate::construct(GuildUpdateAction::Channel, getChannel());
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
+}
+
+void Guild::sendChannel() {
+	using namespace Payload::Guild;
+
+	auto packet = GuildUpdate::construct(GuildUpdateAction::Channel, getChannel());
+	sendPacket(packet);
 	delete packet;
 }
 
@@ -421,6 +462,13 @@ Character* Guild::getCharacter(const String& pCharacterName) {
 	}
 
 	return nullptr;
+}
+
+void Guild::sendPacket(const EQApplicationPacket* pPacket) const {
+	for (auto i : mOnlineMembers) {
+		if (i->isZoning()) continue;
+		i->getConnection()->sendPacket(pPacket);
+	}
 }
 
 GuildMember::GuildMember(Data::GuildMember* pData) : mData(pData)

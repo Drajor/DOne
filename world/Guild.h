@@ -5,6 +5,7 @@
 
 class Character;
 class Guild;
+class EQApplicationPacket;
 
 namespace Data {
 	struct Guild;
@@ -81,6 +82,8 @@ public:
 	const bool canDemote(Character* pCharacter) const;
 	const bool canBeDemoted(Character* pCharacter) const;
 	const bool canSetMOTD(Character* pCharacter) const;
+	const bool canSetURL(Character* pCharacter) const;
+	const bool canSetChannel(Character* pCharacter) const;
 	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
@@ -93,12 +96,15 @@ public:
 	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
 	void onSetMOTD(Character* pCharacter, const String& pMOTD);
 	void onMOTDRequest(Character* pCharacter);
+	void onSetURL(Character* pCharacter, const String& pURL);
+	void onSetChannel(Character* pCharacter, const String& pChannel);
 
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }
 
 	GuildMember* getMember(const String& pCharacterName) const;
 
+	void sendPacket(const EQApplicationPacket* pPacket) const;
 private:
 
 	Data::Guild* mData = nullptr;
@@ -114,6 +120,18 @@ private:
 
 	// Sends the member list to the whole Guild.
 	void sendMemberList();
+
+	// Sends the URL to a specific Character.
+	void sendURL(Character* pCharacter);
+
+	// Sends the URL to the whole Guild.
+	void sendURL();
+
+	// Sends the channel to a specific Character.
+	void sendChannel(Character* pCharacter);
+
+	// Sends the channel to the whole Guild.
+	void sendChannel();
 
 	void sendMOTD();
 

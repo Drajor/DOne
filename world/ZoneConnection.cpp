@@ -2389,24 +2389,6 @@ const bool ZoneConnection::handleGuildMOTDRequest(const EQApplicationPacket* pPa
 	return true;
 }
 
-void ZoneConnection::sendGuildURL(const String& pURL) {
-	using namespace Payload::Guild;
-	EXPECTED(mConnected);
-
-	auto packet = GuildUpdate::construct(GuildUpdateAction::URL, pURL);
-	sendPacket(packet);
-	delete packet;
-}
-
-void ZoneConnection::sendGuildChannel(const String& pChannel) {
-	using namespace Payload::Guild;
-	EXPECTED(mConnected);
-
-	auto packet = GuildUpdate::construct(GuildUpdateAction::Channel, pChannel);
-	sendPacket(packet);
-	delete packet;
-}
-
 const bool ZoneConnection::handleSetGuildURLOrChannel(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	if (!pPacket) return false;

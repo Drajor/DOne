@@ -113,8 +113,6 @@ public:
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
 	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName);
-	void sendGuildURL(const String& pURL);
-	void sendGuildChannel(const String& pChannel);
 
 	void sendSurnameApproval(const bool pSuccess);
 
