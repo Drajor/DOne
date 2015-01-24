@@ -2167,12 +2167,12 @@ namespace Payload {
 			PublicNote() {
 				memset(mSenderName, 0, sizeof(mSenderName));
 				memset(mTargetName, 0, sizeof(mTargetName));
-				// TODO: Note when I know if this is really fixed.
+				memset(mNote, 0, sizeof(mNote));
 			}
-			u32 mUnknown = 0;
+			u32 mUnknown = 0; // Probably Guild ID.
 			char mSenderName[Limits::Character::MAX_NAME_LENGTH];
 			char mTargetName[Limits::Character::MAX_NAME_LENGTH];
-			char mNote[1]; // NOTE: I believe this gets cut off to length 100 by underlying code.
+			char mNote[256];
 		};
 
 		// S->C

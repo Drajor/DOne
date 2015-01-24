@@ -2361,15 +2361,6 @@ const bool ZoneConnection::handleGuildSetMOTD(const EQApplicationPacket* pPacket
 	return true;
 }
 
-void ZoneConnection::sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName) {
-	using namespace Payload::Guild;
-	EXPECTED(mConnected);
-
-	auto packet = MOTD::construct(pMOTDSetByName, pMOTD);
-	sendPacket(packet);
-	delete packet;
-}
-
 void ZoneConnection::sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName) {
 	using namespace Payload::Guild;
 	EXPECTED(mConnected);
@@ -2418,17 +2409,15 @@ const bool ZoneConnection::handleSetGuildURLOrChannel(const EQApplicationPacket*
 const bool ZoneConnection::handleSetGuildPublicNote(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Guild;
 	if (!pPacket) return false;
+	SIZE_CHECK(PublicNote::sizeCheck(pPacket));
 
-	// TODO: Put an upper-limit check on packet size.
-	if (!(pPacket->size >= sizeof(PublicNote))) return false;
-
-	auto payload = reinterpret_cast<PublicNote*>(pPacket->pBuffer);
+	auto payload = PublicNote::convert(pPacket);
 
 	STRING_CHECK(payload->mSenderName, Limits::Character::MAX_NAME_LENGTH);
 	STRING_CHECK(payload->mTargetName, Limits::Character::MAX_NAME_LENGTH);
+	STRING_CHECK(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
 	const String targetName(payload->mTargetName);
-
-	String note = Utility::safeString(payload->mNote, Limits::Guild::MAX_PUBLIC_NOTE_LENGTH);
+	const String note(payload->mNote);
 
 	// Notify Zone.
 	mZone->onGuildSetPublicNote(mCharacter, targetName, note);

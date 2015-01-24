@@ -427,7 +427,7 @@ const bool GuildManager::onSetURL(Character* pCharacter, const String& pURL) {
 	}
 
 	// Notify Guild.
-	guild->onSetURL(pCharacter, pURL);
+	guild->onSetURL(pURL);
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
@@ -452,7 +452,7 @@ const bool GuildManager::onSetChannel(Character* pCharacter, const String& pChan
 	}
 
 	// Notify Guild.
-	guild->onSetChannel(pCharacter, pChannel);
+	guild->onSetChannel(pChannel);
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
@@ -463,24 +463,33 @@ const bool GuildManager::onSetChannel(Character* pCharacter, const String& pChan
 const bool GuildManager::onSetPublicNote(Character* pCharacter, const String& pCharacterName, const String& pPublicNote) {
 	if (!pCharacter) return false;
 
+	// Check: Character has a guild.
+	auto guild = pCharacter->getGuild();
+	if (!guild) {
+		mLog->error(pCharacter->getName() + " attempted to set a public note but they are not in a guild.");
+		return false;
+	}
+
+	// Check: Character is allowed to set public notes.
+	if (!guild->canSetPublicNotes(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to set a public note but they are not allowed.");
+		return false;
+	}
+
+	// Check: Target Character is a member of the Guild.
+	auto member = guild->getMember(pCharacterName);
+	if (!member) {
+		mLog->error(pCharacter->getName() + " attempted to set the public note of " + pCharacterName + " but they are not a guild member." );
+		return false;
+	}
+
+	// Notify Guild.
+	guild->onSetPublicNote(member, pPublicNote);
+
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
+
 	return true;
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
-	//EXPECTED(Limits::Character::nameLength(pCharacterName));
-	//EXPECTED(Limits::Guild::publicNoteLength(pNote));
-
-	//if (pCharacter->getName() != pCharacterName)
-	//	EXPECTED(isLeader(pCharacter) || isOfficer(pCharacter)); // Only leader or officers can change another Character's public note.
-
-	//Guild* guild = pCharacter->getGuild();
-	//GuildMember* member = guild->getMember(pCharacterName);
-	//EXPECTED(member);
-	//member->mPublicNote = pNote;
-	//save();
-
-	//// Update other members.
-	//// TODO: Use _sendMembers until a better way is found.
-	//_sendMembers(guild);
 }
 
 const bool GuildManager::onStatusRequest(Character* pCharacter, const String& pCharacterName) {

@@ -73,10 +73,6 @@ bool Limits::Guild::publicNoteLength(const String& pPublicNote) {
 	return stringLength(pPublicNote) <= Limits::Guild::MAX_PUBLIC_NOTE_LENGTH;
 }
 
-bool Limits::Guild::personalNoteLength(const String& pPersonalNote) {
-	return stringLength(pPersonalNote) <= Limits::Guild::MAX_PERSONAL_NOTE_LENGTH;
-}
-
 bool Limits::Guild::urlLength(const String& pURL) {
 	return stringLength(pURL) <= Limits::Guild::MAX_URL_LENGTH;
 }

@@ -149,26 +149,33 @@ void Guild::onMOTDRequest(Character* pCharacter) {
 	pCharacter->getConnection()->sendGuildMOTDResponse(getMOTD(), getMOTDSetter());
 }
 
-void Guild::onSetURL(Character* pCharacter, const String& pURL) {
-	if (!pCharacter) return;
-
+void Guild::onSetURL(const String& pURL) {
 	mData->mURL = pURL;
 
 	// Notify members.
-	sendMessage(SYS_NAME, pCharacter->getName() + " updated the guild URL!");
+	sendMessage(SYS_NAME, "URL has been updated!");
 
 	sendURL();
 }
 
-void Guild::onSetChannel(Character* pCharacter, const String& pChannel) {
-	if (!pCharacter) return;
-
+void Guild::onSetChannel(const String& pChannel) {
 	mData->mChannel = pChannel;
 
 	// Notify members.
-	sendMessage(SYS_NAME, pCharacter->getName() + " updated the guild channel!");
+	sendMessage(SYS_NAME, "Channel has been updated!");
 
 	sendChannel();
+}
+
+void Guild::onSetPublicNote(GuildMember* pMember, const String& pPublicNote) {
+	if (!pMember) return;
+
+	pMember->setPublicNote(pPublicNote);
+
+	// Notify members.
+	sendMessage(SYS_NAME, "Public note has been updated! (" + pMember->getName() + ")");
+
+	sendMemberList();
 }
 
 void Guild::removeMember(GuildMember* pMember) {
@@ -259,6 +266,8 @@ const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter-
 const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
 const bool Guild::canSetURL(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
 const bool Guild::canSetChannel(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
+const bool Guild::canSetPublicNotes(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
+
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };
@@ -396,7 +405,16 @@ void Guild::sendGuildInformation(Character* pCharacter) {
 	connection->sendGuildRank(pCharacter->getGuildRank());
 	sendURL(pCharacter);
 	sendChannel(pCharacter);
-	connection->sendGuildMOTD(getMOTD(), getMOTDSetter());
+	sendMOTD(pCharacter);
+}
+
+void Guild::sendMOTD(Character* pCharacter) {
+	if (!pCharacter) return;
+	using namespace Payload::Guild;
+
+	auto packet = MOTD::construct(getMOTDSetter(), getMOTD());
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
 }
 
 void Guild::sendMOTD() {
@@ -501,3 +519,4 @@ void GuildMember::setIsBanker(const bool pIsBanker) { mData->mBanker = pIsBanker
 void GuildMember::setIsTributeEnabled(const bool pIsTributeEnabled) { mData->mTributeEnabled = pIsTributeEnabled; }
 void GuildMember::setIsAlt(const bool pIsAlt) { mData->mAlt = pIsAlt; }
 void GuildMember::setLastSeen(const u32 pLastSeen) { mData->mTimeLastOn = pLastSeen; }
+void GuildMember::setPublicNote(const String& pPublicNote) { mData->mPublicNote = pPublicNote; }

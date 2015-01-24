@@ -44,6 +44,7 @@ public:
 	void setIsTributeEnabled(const bool pIsTributeEnabled);
 	void setIsAlt(const bool pIsAlt);
 	void setLastSeen(const u32 pLastSeen);
+	void setPublicNote(const String& pPublicNote);
 
 private:
 
@@ -84,6 +85,7 @@ public:
 	const bool canSetMOTD(Character* pCharacter) const;
 	const bool canSetURL(Character* pCharacter) const;
 	const bool canSetChannel(Character* pCharacter) const;
+	const bool canSetPublicNotes(Character* pCharacter) const;
 	
 	void onDelete();
 	void onJoin(Character* pCharacter, const u8 pRank);
@@ -96,8 +98,9 @@ public:
 	void onMakeLeader(Character* pCharacter, GuildMember * pMember);
 	void onSetMOTD(Character* pCharacter, const String& pMOTD);
 	void onMOTDRequest(Character* pCharacter);
-	void onSetURL(Character* pCharacter, const String& pURL);
-	void onSetChannel(Character* pCharacter, const String& pChannel);
+	void onSetURL(const String& pURL);
+	void onSetChannel(const String& pChannel);
+	void onSetPublicNote(GuildMember * pMember, const String& pPublicNote);
 
 	// Returns a copy of member data.
 	inline std::list<GuildMember*> getMembers() { return mMembers; }
@@ -133,6 +136,10 @@ private:
 	// Sends the channel to the whole Guild.
 	void sendChannel();
 
+	// Sends the MOTD to a specific Character.
+	void sendMOTD(Character* pCharacter);
+
+	// Sends the MOTD to the whole Guild.
 	void sendMOTD();
 
 	void updateMemberDetails(Character* pCharacter, GuildMember* pMember);

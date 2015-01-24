@@ -60,7 +60,6 @@ namespace Limits {
 		bool nameLength(const String& pGuildName);
 		const bool nameValid(const String& pGuildName);
 		bool publicNoteLength(const String& pPublicNote);
-		bool personalNoteLength(const String& pPersonalNote);
 		bool urlLength(const String& pURL);
 		bool channelLength(const String& pChannel);
 		bool rankValid(const GuildRank pRank);

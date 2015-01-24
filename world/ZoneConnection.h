@@ -111,7 +111,6 @@ public:
 
 	void sendGuildRank(const u32 pRank);
 	void sendGuildInvite(String pInviterName, GuildID pGuildID);
-	void sendGuildMOTD(const String& pMOTD, const String& pMOTDSetByName);
 	void sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName);
 
 	void sendSurnameApproval(const bool pSuccess);

@@ -2614,8 +2614,14 @@ const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterNam
 const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote) {
 	if (!pSetter) return false;
 
+	// Notify GuildManager.
 	const bool success = mGuildManager->onSetPublicNote(pSetter, pCharacterName, pPublicNote);
-	return true;
+
+	// Respond.
+	if (!success)
+		pSetter->notify("Failed to set public note.");
+
+	return success;
 }
 
 const bool Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) {

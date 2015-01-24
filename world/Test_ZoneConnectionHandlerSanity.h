@@ -1022,7 +1022,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildURLOrChannel_Overflow_0) {
 }
 
 /*
-	handleSetGuildPublicNote
+handleSetGuildPublicNote
 */
 
 TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Null) {
@@ -1030,6 +1030,28 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Null) {
 
 	// Fail: Null.
 	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::PublicNote::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::PublicNote::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
 }
 
 TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Overflow_0) {
@@ -1054,6 +1076,21 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Overflow_1) {
 	auto payload = Payload::Guild::PublicNote::convert(p);
 	// Setup string with no null termination.
 	memset(payload->mTargetName, 1, sizeof(payload->mTargetName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleSetGuildPublicNote_Overflow_2) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Guild::PublicNote::size());
+	auto payload = Payload::Guild::PublicNote::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mNote, 1, sizeof(payload->mNote));
 
 	EXPECT_FALSE(mZoneConnection->hasStringError());
 	EXPECT_FALSE(mZoneConnection->handleSetGuildPublicNote(p));
