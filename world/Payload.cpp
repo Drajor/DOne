@@ -245,5 +245,6 @@ EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>&
 		writer.write<u16>(htons(i->getZoneID()));	
 	}
 
-	return new EQApplicationPacket(OP_GuildMemberList, data, size);;
+	// NOTE: Sending this is currently wiping out the guild name at the top of the 'Guild Management' window.
+	return new EQApplicationPacket(OP_GuildMemberList, data, size);
 }

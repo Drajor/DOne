@@ -658,10 +658,8 @@ const bool GuildManager::onSetFlags(Character* pCharacter, const String& pCharac
 	}
 
 	const bool setSelf = pCharacter->getName() == pCharacterName;
-	const bool setBanker = pFlags & 0x01;
-	const bool changeBanker = member->isBanker() != setBanker;
-	const bool setAlt = pFlags & 0x02;
-	const bool changeAlt = member->isAlt() != setAlt;
+	const bool changeBanker = member->isBanker() != ((pFlags & 0x01) == 1);
+	const bool changeAlt = member->isAlt() != ((pFlags & 0x02) == 1);
 
 	// Check: Character is allowed to set banker flag.
 	if (changeBanker && !guild->canSetBankerFlag(pCharacter)) {

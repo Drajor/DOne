@@ -516,8 +516,8 @@ const u32 GuildMember::getTotalTribute() const { return mData->mLastTribute; }
 const u32 GuildMember::getLastTribute() const { return mData->mLastTribute; }
 const String& GuildMember::getPublicNote() const { return mData->mPublicNote; }
 const u32 GuildMember::getFlags() const { return mData->mFlags; }
-const bool GuildMember::isBanker() const { return mData->mFlags >> 0 & 1; }
-const bool GuildMember::isAlt() const { return mData->mFlags >> 1 & 1; }
+const bool GuildMember::isBanker() const { return mData->mFlags & 0x01; }
+const bool GuildMember::isAlt() const { return mData->mFlags & 0x02; }
 
 void GuildMember::setName(const String& pCharacterName) { mData->mName = pCharacterName; }
 void GuildMember::setRank(const u8 pRank) { mData->mRank = pRank; }
