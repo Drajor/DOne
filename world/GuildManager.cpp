@@ -336,27 +336,16 @@ void GuildManager::onLinkdead(Character* pCharacter) {
 }
 
 void GuildManager::onLevelChange(Character* pCharacter) {
-	//EXPECTED(pCharacter);
-	//EXPECTED(pCharacter->hasGuild());
+	if (!pCharacter) return;
 
-	//// Update member details.
-	//GuildMember* member = pCharacter->getGuild()->getMember(pCharacter->getName());
-	//EXPECTED(member);
+	auto guild = pCharacter->getGuild();
+	if (!guild) return;
+	
+	// Notify Guild.
+	guild->onLevelChange(pCharacter);
 
-	//uint32 previousLevel = member->mLevel;
-	//member->mLevel = pCharacter->getLevel();
-
-	//// Notify guild members.
-	//if (member->mLevel > previousLevel) {
-	//	StringStream ss; ss << pCharacter->getName() << " is now level " << member->mLevel << "!";
-	//	_sendMessage(pCharacter->getGuild(), SYS_NAME, ss.str());
-	//}
-	//// Update other members.
-	//// NOTE: This does not work.....
-	////_sendMemberLevelUpdate(member->mGuild, member);
-
-	//// TODO: Use _sendMembers until a better way is found.
-	//_sendMembers(member->mGuild);
+	// Save.
+	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
 }
 
 

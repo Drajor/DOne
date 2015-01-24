@@ -2083,13 +2083,6 @@ namespace Payload {
 			u32 mGuildID = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 		};
-		
-		// S->C
-		//struct LevelUpdate {
-		//	u32 mGuildID = 0;
-		//	char mMemberName[Limits::Character::MAX_NAME_LENGTH];
-		//	u32 mLevel = 0;
-		//};
 
 		// S<->C
 		struct MOTD : public FixedT<MOTD, OP_GuildMOTD> {
@@ -2197,7 +2190,9 @@ namespace Payload {
 		};
 
 		// S->C
-		struct MemberLevelUpdate : public FixedT<MemberLevelUpdate, OP_GuildMemberLevelUpdate>{
+		// THIS DOES NOT WORK.
+		struct LevelUpdate : public FixedT<LevelUpdate, OP_GuildMemberLevelUpdate> {
+			LevelUpdate() { memset(mMemberName, 0, sizeof(mMemberName)); }
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pLevel) {
 				auto packet = create();
 				auto payload = convert(packet);

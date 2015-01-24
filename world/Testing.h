@@ -117,7 +117,7 @@ TEST(ZonePayload, FixedSizes) {
 	EXPECT_EQ(388, Payload::Guild::PublicNote::size());
 	// MemberJoin
 	// LevelUpdate
-	EXPECT_EQ(72, Payload::Guild::MemberLevelUpdate::size());
+	EXPECT_EQ(72, Payload::Guild::LevelUpdate::size());
 	EXPECT_EQ(78, Payload::Guild::MemberZoneUpdate::size());
 	EXPECT_EQ(136, Payload::Guild::StatusRequest::size());
 

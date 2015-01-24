@@ -41,7 +41,11 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
+
+	// Character level has changed.
 	void onLevelChange(Character* pCharacter);
+
+	// Character has been deleted.
 	void onCharacterDelete(const String& pCharacterName);
 
 	// Character is creating a guild.

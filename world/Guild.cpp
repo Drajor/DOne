@@ -59,6 +59,7 @@ void Guild::onJoin(Character* pCharacter, const u8 pRank) {
 	// Update Character.
 	sendGuildInformation(pCharacter);
 
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -105,6 +106,7 @@ void Guild::onDemote(Character* pCharacter) {
 	// Update Zone.
 	pCharacter->getZone()->onChangeGuild(pCharacter);
 
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -131,6 +133,7 @@ void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
 	// Notify other members.
 	sendMessage(SYS_NAME, pMember->getName() + " is now the leader of the guild!");
 
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -175,6 +178,7 @@ void Guild::onSetPublicNote(GuildMember* pMember, const String& pPublicNote) {
 	// Notify members.
 	sendMessage(SYS_NAME, "Public note has been updated! (" + pMember->getName() + ")");
 
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -182,6 +186,8 @@ void Guild::onSetFlags(GuildMember* pMember, const u32 pFlags) {
 	if (!pMember) return;
 
 	pMember->setFlags(pFlags);
+
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -227,6 +233,8 @@ void Guild::onRemove(GuildMember * pMember) {
 		removeCharacter(character);
 
 	removeMember(pMember);
+
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -237,6 +245,8 @@ void Guild::onLeave(Character* pCharacter) {
 
 	auto member = getMember(pCharacter->getName());
 	removeMember(member);
+
+	// 'Guild Management' window update.
 	sendMemberList();
 }
 
@@ -326,15 +336,6 @@ void Guild::sendMemberZoneUpdate(GuildMember* pMember) {
 	delete packet;
 }
 
-void Guild::sendMemberLevelUpdate(GuildMember* pMember) {
-	using namespace Payload::Guild;
-	if (!pMember) return;
-
-	auto packet = MemberLevelUpdate::construct(getID(), pMember->getName(), pMember->getLevel());
-	sendPacket(packet);
-	delete packet;
-}
-
 void Guild::onEnterZone(Character* pCharacter) {
 	if (!pCharacter) return;
 	auto member = getMember(pCharacter->getName());
@@ -346,9 +347,10 @@ void Guild::onEnterZone(Character* pCharacter) {
 	// Update Character entering Zone.
 	sendGuildInformation(pCharacter);
 
-	// Update other guild members.
+	// 'Guild Management' window update.
 	sendMemberZoneUpdate(member);
 
+	// 'Guild Management' window update.
 	sendMemberList(pCharacter);
 }
 
@@ -360,7 +362,7 @@ void Guild::onLeaveZone(Character* pCharacter) {
 	// Update GuildMember.
 	updateMemberDetails(pCharacter, member);
 
-	// Update other guild members.
+	// 'Guild Management' window update.
 	sendMemberZoneUpdate(member);
 }
 
@@ -374,7 +376,7 @@ void Guild::onCamp(Character* pCharacter) {
 
 	mOnlineMembers.remove(pCharacter);
 
-	// Update other guild members.
+	// 'Guild Management' window update.
 	sendMemberZoneUpdate(member);
 
 	sendMessage(SYS_NAME, pCharacter->getName() + " has gone offline (Camped).");
@@ -390,7 +392,7 @@ void Guild::onLinkdead(Character* pCharacter) {
 
 	mOnlineMembers.remove(pCharacter);
 
-	// Update other guild members.
+	// 'Guild Management' window update.
 	sendMemberZoneUpdate(member);
 	
 	sendMessage(SYS_NAME, pCharacter->getName() + " has gone offline (LinkDead).", pCharacter);
@@ -401,9 +403,28 @@ void Guild::onMemberDelete(GuildMember* pMember) {
 
 	sendMessage(SYS_NAME, pMember->getName() + " has been deleted.");
 	removeMember(pMember);
+
+	// 'Guild Management' window update.
 	sendMemberList();
 
 	// TODO: Handle when Guild Leader deletes themself.
+}
+
+void Guild::onLevelChange(Character* pCharacter) {
+	if (!pCharacter) return;
+
+	auto member = getMember(pCharacter->getName());
+	auto previous = member->getLevel();
+	auto current = pCharacter->getLevel();
+
+	// Update GuildMember.
+	updateMemberDetails(pCharacter, member);
+
+	// 'Guild Management' window update.
+	sendMemberList();
+
+	if (current > previous)
+		sendMessage(SYS_NAME, pCharacter->getName() + " is now level " + toString(current) + "!" );
 }
 
 void Guild::sendGuildInformation(Character* pCharacter) {

@@ -65,7 +65,9 @@ public:
 	void onLeaveZone(Character* pCharacter);
 	void onCamp(Character* pCharacter);
 	void onLinkdead(Character* pCharacter);
+
 	void onMemberDelete(GuildMember* pMember);
+	void onLevelChange(Character* pCharacter);
 
 	const u32 getID() const;
 	const String& getName() const;
@@ -118,7 +120,6 @@ private:
 
 	void sendGuildInformation(Character* pCharacter);
 	void sendMemberZoneUpdate(GuildMember* pMember);
-	void sendMemberLevelUpdate(GuildMember* pMember);
 	
 	// Sends the member list to a specific Character.
 	void sendMemberList(Character* pCharacter);

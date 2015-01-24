@@ -2010,7 +2010,8 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 void Zone::handleSetLevel(Actor* pActor, const u8 pLevel) {
 	EXPECTED(pActor);
 
-	switch (pActor->getActorType()) {
+	const auto actorType = pActor->getActorType();
+	switch (actorType) {
 	case ActorType::AT_NPC:
 		handleSetLevel(Actor::cast<NPC*>(pActor), pLevel);
 		break;
@@ -2018,14 +2019,14 @@ void Zone::handleSetLevel(Actor* pActor, const u8 pLevel) {
 		handleSetLevel(Actor::cast<Character*>(pActor), pLevel);
 		break;
 	default:
-		Log::error("Unknown ActorType in " + String(__FUNCTION__));
+		mLog->error("Unknown ActorType: " + toString(actorType) + " in " + String(__FUNCTION__));
 		break;
 	}
 }
 
 
 void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
-	EXPECTED(pCharacter);
+	if (!pCharacter) return;
 	if (pCharacter->getLevel() == pLevel) return;
 
 	auto controller = pCharacter->getExperienceController();
