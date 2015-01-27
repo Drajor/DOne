@@ -65,7 +65,7 @@ bool Limits::Guild::MOTDLength(const String& pGuildMOTD){
 	return stringLength(pGuildMOTD) <= Limits::Guild::MAX_MOTD_LENGTH;
 }
 
-bool Limits::Guild::ID(const GuildID pGuildID) {
+bool Limits::Guild::ID(const u32 pGuildID) {
 	return pGuildID < Limits::Guild::MAX_GUILDS;
 }
 
@@ -81,11 +81,11 @@ bool Limits::Guild::channelLength(const String& pChannel) {
 	return stringLength(pChannel) <= Limits::Guild::MAX_CHANNEL_LENGTH;
 }
 
-bool Limits::Guild::rankValid(const GuildRank pRank) {
+bool Limits::Guild::rankValid(const u8 pRank) {
 	switch (pRank) {
-	case GuildRanks::Member:
-	case GuildRanks::Officer:
-	case GuildRanks::Leader:
+	case GuildRank::Member:
+	case GuildRank::Officer:
+	case GuildRank::Leader:
 		return true;
 	default:
 		break;

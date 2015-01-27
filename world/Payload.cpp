@@ -2,6 +2,13 @@
 #include "Data.h"
 #include "Zone.h"
 #include "Guild.h"
+#include "Group.h"
+#include "Character.h"
+#include "Inventory.h"
+#include "ExperienceController.h"
+
+#include "../common/crc32.h"
+#include "../common/packet_dump_file.h"
 
 #pragma pack(1)
 
@@ -131,7 +138,6 @@ namespace Payload {
 		u16 mInstanceID = 0;
 		u32 mUnknown = 0;
 	};
-
 }
 #pragma pack()
 
@@ -201,9 +207,16 @@ EQApplicationPacket* Payload::makeGuildNameList(const std::list<::Guild*>& pGuil
 	return new EQApplicationPacket(OP_GuildsList, data, size);
 }
 
-EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>& pMembers) {
+EQApplicationPacket* Payload::makeGuildMemberList(::Guild* pGuild) {
 	static const auto fixedSize = 40; // 40 bytes per member.
-	const u32 numMembers = pMembers.size();
+
+	std::list<GuildMember*> members;
+	u32 numMembers = 0;
+
+	if (pGuild) {
+		members = pGuild->getMembers();
+		numMembers = members.size();
+	}
 	
 	// Calculate size.
 	u32 size = 0;
@@ -212,12 +225,12 @@ EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>&
 	size += fixedSize * numMembers;
 
 	// Add name lengths.
-	for (auto i : pMembers) {
+	for (auto i : members) {
 		size += i->getName().length() + 1;
 	}
 
 	// Add public note lengths.
-	for (auto i : pMembers) {
+	for (auto i : members) {
 		size += i->getPublicNote().length() + 1;
 	}
 
@@ -229,7 +242,7 @@ EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>&
 	writer.write<u32>(htonl(numMembers));
 
 	// Members.
-	for (auto i : pMembers) {
+	for (auto i : members) {
 		writer.writeString(i->getName());
 		writer.write<u32>(htonl(i->getLevel()));
 		writer.write<u32>(htonl(i->getFlags()));
@@ -245,6 +258,256 @@ EQApplicationPacket* Payload::makeGuildMemberList(const std::list<GuildMember*>&
 		writer.write<u16>(htons(i->getZoneID()));	
 	}
 
-	// NOTE: Sending this is currently wiping out the guild name at the top of the 'Guild Management' window.
+	// NOTE: Sending this is currently wiping out the guild name at the top of the 'Guild Management' window. (only when it sent when the window is open)
 	return new EQApplicationPacket(OP_GuildMemberList, data, size);
+}
+
+EQApplicationPacket* Payload::makeGroupMemberList(::Group* pGroup) {
+	static const auto fixedSize = 31; // 31 bytes per member.
+	const auto numMembers = pGroup->numMembers();
+	auto& members = pGroup->getMembers();
+	auto leader = pGroup->getLeader();
+
+	// Calculate size.
+	u32 size = 0;
+	size += sizeof(u32); // Unknown.
+	size += sizeof(u32); // Count.
+	size += fixedSize * numMembers;
+	size += leader->getName().size() + 1;
+
+	// Member names.
+	for (auto i : members)
+		size += i->getName().length() + 1;
+
+	unsigned char * data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Header.
+	writer.write<u32>(0); // Probably Group ID.
+	writer.write<u32>(numMembers);
+	writer.writeString(leader->getName()); // Leader name.
+
+	// Members.
+	auto c = 0;
+	for (auto i : members) {
+		writer.write<u32>(c); // Member index.
+		writer.writeString(i->getName()); // Member name.
+		writer.write<u8>(0); // Unknown.
+		writer.write<u8>(0); // Unknown.
+		writer.write<u8>(0); // String: Unknown purpose. Pet Name?
+		writer.write<u32>(i->getLevel()); // Level. (maybe)
+		writer.write<u8>(i->isGroupMainTank() ? 1 : 0); // Main Tank
+		writer.write<u8>(i->isGroupMainAssist() ? 1 : 0); // Main Assist
+		writer.write<u8>(i->isGroupPuller() ? 1 : 0); // Puller
+		writer.write<u32>(0); // Unknown. Possible 'in zone' flag. 0 name = white, 1 = light gray
+		writer.write<u8>(0); // Unknown.
+		writer.write<u8>(0); // Unknown.
+		writer.write<u8>(0); // Unknown.
+		writer.write<u8>(0); // Unknown.
+		c++;
+	}
+
+	// NOTE: This packet fills the group window with names.
+	return new EQApplicationPacket(OP_GroupUpdateB, data, size);
+}
+
+EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
+	auto packet = Payload::Zone::CharacterProfile::create();
+	auto payload = Payload::Zone::CharacterProfile::convert(packet);
+	memset(payload, 0, sizeof(Payload::Zone::CharacterProfile));
+
+	auto inventory = pCharacter->getInventory();
+	auto experience = pCharacter->getExperienceController();
+	auto group = pCharacter->getGroup();
+
+	//payload->mCheckSum = 0;
+	payload->mGender = pCharacter->getGender();
+	payload->mRace = pCharacter->getRace();
+	payload->mClass = pCharacter->getClass();
+	//payload->mUnknown0[40]; // Unknown.
+	payload->mLevel0 = pCharacter->getLevel();
+	payload->mLevel1 = pCharacter->getLevel();
+	//payload->mUnknown1[2]; // Unknown.
+	//BindLocation mBindLocations[5];
+	payload->mDeity = pCharacter->getDeity();
+	payload->mIntoxication = pCharacter->getIntoxication();
+	//payload->mSpellBarTimers[10];
+	//payload->mUnknown2[14]; // Unknown.
+	//payload->abilitySlotRefresh = 0; // Not sure what this is yet.
+	payload->mHairColour = pCharacter->getHairColour();
+	payload->mBeardColour = pCharacter->getBeardColour();
+	payload->mLeftEyeColour = pCharacter->getLeftEyeColour();
+	payload->mRightEyeColour = pCharacter->getRightEyeColour();
+	payload->mHairStyle = pCharacter->getHairStyle();
+	payload->mBeardStyle = pCharacter->getBeardStyle();
+	//payload->mUnknown3[4]; // Unknown.
+	//Equipment mEquipment[9];
+	//payload->mUnknown4[168]; // Unknown.
+	//payload->mEquipmentColours[9];
+	//AA mAAs[300];
+	//payload->mTrainingPoints = 0;
+	payload->mMana = pCharacter->getCurrentMana();
+	payload->mHealth = pCharacter->getCurrentHP();
+	payload->mStrength = pCharacter->getBaseStrength();
+	payload->mStamina = pCharacter->getBaseStamina();
+	payload->mCharisma = pCharacter->getBaseCharisma();
+	payload->mDexterity = pCharacter->getBaseDexterity();
+	payload->mIntelligence = pCharacter->getBaseIntelligence();
+	payload->mAgility = pCharacter->getBaseAgility();
+	payload->mWisdom = pCharacter->getBaseWisdom();
+	//payload->mUnknown5[28]; // Unknown.
+	payload->mFaceStyle = pCharacter->getFaceStyle();
+	//payload->mUnknown6[147]; // Unknown.
+	//payload->mSpellBook[720];
+	//payload->mSpellBar[10];
+	payload->mPlatinum = inventory->getPersonalPlatinum();
+	payload->mGold = inventory->getPersonalGold();
+	payload->mSilver = inventory->getPersonalSilver();
+	payload->mCopper = inventory->getPersonalCopper();
+	payload->mPlatinumCursor = inventory->getCursorPlatinum();
+	payload->mGoldCursor = inventory->getCursorGold();
+	payload->mSilverCursor = inventory->getCursorSilver();
+	payload->mCopperCursor = inventory->getCursorCopper();
+	//payload->mSkills[100];
+	//payload->mUnknown8[136];
+	//payload->mToxicity = 0;
+	payload->mThirst = 0;
+	payload->mHunger = 0;
+	//Buff mBuffs[30];
+	//Disciplines mDisciplines;
+	//payload->mRecastTimers[20];
+	//payload->unknown11052[160]; // Some type of Timers
+	payload->mEndurance = pCharacter->getCurrentEndurance();
+	//payload->mUnknown9[20]; // Unknown.
+	payload->mSpentAAPoints = experience->getSpentAAPoints();
+	payload->mAAPoints = experience->getUnspentAAPoints();
+	//payload->mUnknown10[4]; // Unknown.
+	//Bandolier mBandoliers[20];
+	//PotionBeltItem mPotionBelt[5];
+	payload->mAvailableSlots = 0xFFFFFFFF;
+	//memset(payload->mUnknown0X, 1, sizeof(payload->mUnknown0X));
+	//payload->mColdResist = 150;
+	//payload->mFireResist = 250;
+	//payload->mPoisonResist = 69;
+	//payload->mCorruptionResist = 500;
+	//payload->mCombatManaRegen = 50;
+	//payload->mUnknown0X[0] = 15;
+	//payload->mUnknown0X[4] = 15;
+	//payload->mUnknown0X[8] = 15;
+	//payload->mUnknown1X = 15;
+	//payload->mUnknown2X = 15;
+	//payload->mUnknown3X = 15;
+	//payload->mU0 = 15;
+	//payload->mU1 = 15;
+	//payload->mU2 = 15;
+	//payload->mU3 = 15;
+	//payload->mU5 = 15;
+	//payload->mU6 = 15; // This affects AC
+	//payload->mU7 = 15;
+	//payload->mU8 = 15;
+	//payload->mU9 = 15;
+	strcpy(payload->mName, pCharacter->getName().c_str());
+	strcpy(payload->mLastName, pCharacter->getLastName().c_str());
+	//payload->mUnknown13[8]; // Unknown.
+	payload->mGuildID = pCharacter->getGuildID();
+	payload->mCharacterCreated = 0;
+	payload->mLastLogin = 0;
+	payload->mAccountCreated = 0;
+	payload->mTimePlayed = 0;
+	payload->mPVP = pCharacter->isPVP() ? 1 : 0;
+	payload->mAnonymous = pCharacter->getAnonymous();
+	payload->mGM = pCharacter->isGM() ? 1 : 0;
+	payload->mGuildRank = pCharacter->getGuildRank();
+	payload->mGuildFlags = 0;
+	//payload->mUnknown14[4];
+	payload->mExperience = experience->getExperience();
+	//payload->mUnknown15[8]; // Unknown.
+	//payload->mAccountEntitledTime = 0; // Not sure yet.
+	//payload->mLanguages;
+	payload->mY = pCharacter->getPosition().y;
+	payload->mX = pCharacter->getPosition().x;
+	payload->mZ = pCharacter->getPosition().z;
+	payload->mHeading = pCharacter->getHeading();
+	//payload->mUnknown17[4]; // Unknown.
+	payload->mPlatinumBank = inventory->getBankPlatinum();
+	payload->mGoldBank = inventory->getBankGold();
+	payload->mSilverBank = inventory->getBankSilver();
+	payload->mCopperBank = inventory->getBankCopper();
+	//payload->mPlatinumShared = 0; // TODO!
+	//payload->mUnknown18[1036]; // Unknown. Possible bank contents?
+	payload->mExpansions = 0xFFFFFFFF;
+	//payload->mUnknown19[12]; // Unknown.
+	//payload->mAutoSplit = 0;
+	//payload->mUnknown20[16]; // Unknown.
+	payload->mZoneID = pCharacter->getZone()->getID();
+	payload->mInstanceID = pCharacter->getZone()->getInstanceID();
+
+	// Character is in a group.
+	if (group) {
+		auto leader = group->getLeader();
+		auto members = group->getMembers();
+		
+		auto c = 0;
+		for (auto i : members) {
+			strcpy(payload->mGroupMemberNames[c], i->getName().c_str());
+			c++;
+		}
+
+		strcpy(payload->mGroupLeaderName, leader->getName().c_str());
+	}
+
+	//char mGroupMemberNames[6][64];
+	//char mGroupLeaderName[64];
+	//payload->mUnknown21[540]; // Unknown. Possible group/raid members
+	payload->mEntityID = 0; // Not sure yet.
+	payload->mLeadershipExperienceOn = experience->isLeadershipOn() ? 1 : 0;
+	//payload->mUnknown22[4]; // Unknown.
+	payload->mGUKEarned = 0;
+	payload->mMIREarned = 0;
+	payload->mMMCEarned = 0;
+	payload->mRUJEarned = 0;
+	payload->mTAKEarned = 0;
+	payload->mLDONPoints = 0;
+	//payload->mUnknown23[7]; // Unknown. Possible spent LDON points?
+	payload->mUnknown24 = 0; // Unknown.
+	payload->mUnknown25 = 0; // Unknown.
+	//payload->mUnknown26[4]; // Unknown.
+	//payload->mUnknown27[6]; // Unknown.
+	//payload->mUnknown28[72]; // Unknown.
+	payload->mTributeTimeRemaining = 0.0f;
+	payload->mCareerTributeFavor = 0;
+	payload->mUnknown29 = 0; // Unknown. Possible 'Active Cost'
+	payload->mCurrentFavor = 0;
+	payload->mUnknown30 = 0; // Unknown.
+	payload->mTribiteOn = 0;
+	//Tribute tributes[5]; // Not sure yet.
+	//payload->mUnknown31[4]; // Unknown.
+	payload->mGroupExperience = experience->getGroupExperience();
+	payload->mRaidExperience = experience->getRaidExperience();
+	payload->mGroupPoints = experience->getGroupPoints();
+	payload->mRaidPoints = experience->getRaidPoints();
+	//GroupLeaderAA mGroupLeaderAA;
+	for (auto i = 0; i < 16; i++)
+		payload->mGroupLeaderAA.mRanks[i] = 1;
+	//RaidLeaderAA mRaidLeaderAA;
+	//payload->mUnknown32[128]; // Unknown. Possible current group / raid leader AA. (if grouped)
+	payload->mAirRemaining = 0;
+	//PVPStats mPVPStats;
+	payload->mAAExperience = experience->getAAExperience();
+	//payload->mUnknown33[40]; // Unknown.
+	payload->mRadiantCrystals = inventory->getRadiantCrystals();
+	payload->mTotalRadiantCrystals = inventory->getTotalRadiantCrystals();
+	payload->mEbonCrystals = inventory->getEbonCrystals();
+	payload->mTotalEbonCrystals = inventory->getTotalEbonCrystals();
+	payload->mAutoConsentGroup = pCharacter->getAutoConsentGroup() ? 1 : 0;
+	payload->mAutoConsentRaid = pCharacter->getAutoConsentRaid() ? 1 : 0;
+	payload->mAutoConsentGuild = pCharacter->getAutoConsentGuild() ? 1 : 0;
+	//payload->mUnknown34 = 0; // Unknown.
+	payload->mLevel3 = pCharacter->getLevel();
+	payload->mShowHelm = 0;
+	payload->mRestTimer = 0;
+	//payload->mUnknown35[1036]
+
+	CRC32::SetEQChecksum((uchar*)payload, sizeof(Payload::Zone::CharacterProfile) - 4);
+	return packet;
 }

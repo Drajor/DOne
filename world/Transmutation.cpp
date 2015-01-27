@@ -34,7 +34,7 @@ const bool Transmutation::initialise(IDataStore* pDataStore, ILogFactory* pLogFa
 Item* Transmutation::transmute(std::list<Item*> pItems) {
 	if (pItems.empty()) return nullptr;
 
-	std::list<TransmutationComponent*> components;
+	std::list<Data::TransmutationComponent*> components;
 	for (auto i : pItems) {
 		// Find matching component.
 		auto component = _get(i->getID());
@@ -72,7 +72,7 @@ Item* Transmutation::transmute(std::list<Item*> pItems) {
 	return result;
 }
 
-TransmutationComponent* Transmutation::_get(const uint32 pItemID) const {
+Data::TransmutationComponent* Transmutation::_get(const uint32 pItemID) const {
 	for (auto i : mComponents) {
 		if (i->mItemID == pItemID) return i;
 	}
@@ -80,7 +80,7 @@ TransmutationComponent* Transmutation::_get(const uint32 pItemID) const {
 	return nullptr;
 }
 
-const i32 Transmutation::_roll(Item* pItem, TransmutationComponent* pComponent) {
+const i32 Transmutation::_roll(Item* pItem, Data::TransmutationComponent* pComponent) {
 	int32 roll = Random::make(pComponent->mMinimum, pComponent->mMaximum);
 	pItem->setMaxPower(pItem->getMaxPower() + pComponent->mMaximum);
 	pItem->setPower(pItem->getPower() + roll);

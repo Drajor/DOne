@@ -9,8 +9,9 @@ namespace Data {
 	struct Account;
 }
 struct ZonePoint;
-class GuildMember;
 class Guild;
+class Group;
+class Character;
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
@@ -61,10 +62,13 @@ namespace Payload {
 
 	// More complex and variable length packets.
 
+	EQApplicationPacket* makeCharacterProfile(Character* pCharacter);
 	EQApplicationPacket* makeCharacterSelection(Data::Account* pData);
 	EQApplicationPacket* makeZonePoints(const std::list<ZonePoint*>& pZonePoints);
 	EQApplicationPacket* makeGuildNameList(const std::list<::Guild*>& pGuilds);
-	EQApplicationPacket* makeGuildMemberList(const std::list<GuildMember*>& pMembers);
+
+	EQApplicationPacket* makeGuildMemberList(::Guild* pGuild);
+	EQApplicationPacket* makeGroupMemberList(::Group* pGroup);
 
 	namespace Zone {
 
@@ -155,19 +159,289 @@ namespace Payload {
 			u8 unknown932[12];
 		};
 
-		// C->S
-		struct Time : public FixedT<Time, OP_TimeOfDay> {
-			u8 mHour = 0;
-			u8 mMinute = 0;
-			u8 mDay = 0;
-			u8 mMonth = 0;
-			u32 mYear = 0;
-		};
-
 		// Note: ZoneEntry is C->S fixed and S->C variable.
 		struct ZoneEntry : public Fixed<ZoneEntry> {
 			u32 mUnknown = 0;
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+		};
+
+		// Used: CharacterProfile
+		struct PotionBeltItem {
+			u32 mItemID = 0;
+			u32 mItemIcon = 0;
+			char mItemName[64];
+		};
+
+		// Used: CharacterProfile
+		struct BandolierItem {
+			char mName[32];
+			u32 mItemID = 0;
+			u32 mItemIcon = 0;
+			char mItemName[64];
+		};
+
+		// Used: CharacterProfile
+		struct Bandolier {
+			char mName[32];
+			PotionBeltItem mItems[4];
+		};
+
+		// Used: CharacterProfile
+		struct Tribute {
+			u32 mID = 0;
+			u32 mTier = 0;
+		};
+
+		// Used: CharacterProfile
+		struct GroupLeaderAA {
+			u32 mRanks[16];
+		};
+
+		// Used: CharacterProfile
+		struct RaidLeaderAA {
+			u32 mRanks[16];
+		};
+
+		struct AA {
+			u32 mID = 0;
+			u32 mValue = 0;
+			u32 mUnknown = 0;
+		};
+
+		// Used: CharacterProfile
+		struct PVPEvent {
+			char mCharacterName[64];
+			u32 mLevel = 0;
+			u32 mRace = 0;
+			u32 mClass = 0;
+			u32 mZoneID = 0; // Possible u16 with instance.
+			u32 mTime = 0;
+			u32 mPoints = 0;
+		};
+
+		// Used: CharacterProfile
+		struct PVPStats {
+			u32 mTotalKills = 0;
+			u32 mTotalDeaths = 0;
+			u32 mPoints = 0;
+			u32 mCareerPoints = 0;
+			u32 mBestKillStreak = 0;
+			u32 mWorstDeathStreak = 0;
+			u32 mCurrentKillStreak = 0;
+			PVPEvent mLastKill;
+			PVPEvent mLastDeath;
+			u32 mKills24 = 0; // Number of kills in the last 24 hours.
+			PVPEvent mRecentKills[50];
+		};
+
+		// Used: CharacterProfile
+		struct Buff {
+			u8 mType = 0; // Note sure yet.
+			u8 mLevel = 0;
+			u8 mBardModifier = 0;
+			u8 mUnknown0 = 0; // Unknown.
+			u32 mUnknown1 = 0; // Unknown.
+			u32 mSpellID = 0;
+			u32 mDuration = 0;
+			u32 mUnknown2 = 0; // Unknown.
+			u32 mCasterSpawnID = 0;
+			u32 mCounters = 0;
+			u8 mUnknown3[48]; // Unknown.
+		};
+
+		// Used: CharacterProfile
+		struct BindLocation {
+			u32 mZoneID = 0; // Possible u16 with instance.
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+			float heading = 0.0f;
+		};
+
+		// Used: CharacterProfile
+		struct Disciplines {
+			u32 mValues[200];
+		};
+
+		// Used: CharacterProfile
+		struct Equipment {
+			u32 equip0;
+			u32 equip1;
+			u32 mItemID = 0;
+		};
+
+		// Drakkin stuff.
+		struct CharacterProfile : public FixedT<CharacterProfile, OP_PlayerProfile> {
+			u32 mCheckSum = 0;
+			u32 mGender = 0;
+			u32 mRace = 0;
+			u32 mClass = 0;
+			u8 mUnknown0[40]; // Unknown. Tested
+			u8 mLevel0 = 0;
+			u8 mLevel1 = 0;
+			u8 mUnknown1[2]; // Unknown. Tested.
+			BindLocation mBindLocations[5];
+			u32 mDeity = 0;
+			u32 mIntoxication = 0;
+			u32 mSpellBarTimers[10];
+			u8 mUnknown2[14]; // Unknown. Tested.
+			u32 abilitySlotRefresh = 0; // Not sure what this is yet.
+			u8 mHairColour = 0;
+			u8 mBeardColour = 0;
+			u8 mLeftEyeColour = 0;
+			u8 mRightEyeColour = 0;
+			u8 mHairStyle = 0;
+			u8 mBeardStyle = 0;
+			u8 mUnknown3[4]; // Unknown. Tested.
+			Equipment mEquipment[9];
+			u8 mUnknown4[168]; // Unknown. Tested.
+			u32 mEquipmentColours[9];
+			AA mAAs[300];
+			u32 mTrainingPoints = 0;
+			u32 mMana = 0;
+			u32 mHealth = 0;
+			u32 mStrength = 0;
+			u32 mStamina = 0;
+			u32 mCharisma = 0;
+			u32 mDexterity = 0;
+			u32 mIntelligence = 0;
+			u32 mAgility = 0;
+			u32 mWisdom = 0;
+			u8 mUnknown5[28]; // Unknown. Tested.
+			u8 mFaceStyle = 0;
+			u8 mUnknown6[147]; // Unknown. Tested.
+			u32 mSpellBook[720];
+			u32 mSpellBar[10];
+			u8 mUnknown7[28]; // Unknown. Tested.
+			u32 mPlatinum = 0;
+			u32 mGold = 0;
+			u32 mSilver = 0;
+			u32 mCopper = 0;
+			u32 mPlatinumCursor = 0;
+			u32 mGoldCursor = 0;
+			u32 mSilverCursor = 0;
+			u32 mCopperCursor = 0;
+			u32 mSkills[100];
+			u8 mUnknown8[136]; // Unknown. Tested.
+			u32 mToxicity = 0;
+			u32 mThirst = 0;
+			u32 mHunger = 0;
+			Buff mBuffs[30];
+			Disciplines mDisciplines;
+			u32 mRecastTimers[20];
+			u8 unknown11052[160]; // Unknown. Tested.
+			u32 mEndurance = 0;
+			u8 mUnknown9[20]; // Unknown. Tested.
+			u32 mSpentAAPoints = 0;
+			u32 mAAPoints = 0;
+			u8 mUnknown10[4]; // Unknown. Something to do with being hidden.
+			Bandolier mBandoliers[20];
+			PotionBeltItem mPotionBelt[5];
+			u32 mProfileType = 0; // Non-zero gives 0 mp and end.
+			u32 mTemplateType = 2;
+			u32 mAvailableSlots = 0xFFFFFFFF; // Appears to disable inventory slots.
+			u8 mUnknown0X[12];
+			i32 mColdResist = 0;
+			i32 mFireResist = 0;
+			u32 mUnknown1X = 0;
+			u32 mUnknown2X = 0;
+			i32 mPoisonResist = 0;
+			u32 mUnknown3X = 0;
+			i32 mCorruptionResist = 0;
+			i32 mU0 = 0;
+			i32 mU1 = 0;
+			i32 mU2 = 0;
+			i32 mU3 = 0;
+			i32 mCombatManaRegen = 0; // Seems to cap at 65.
+			i32 mU5 = 0;
+			i32 mU6 = 0; // This affects AC
+			i32 mU7 = 0;
+			i32 mU8 = 0;
+			i32 mU9 = 0;
+			char mName[64];
+			char mLastName[32];
+			u8 mUnknown13[8]; // Unknown. Tested.
+			u32 mGuildID = 0;
+			u32 mCharacterCreated = 0;
+			u32 mLastLogin = 0;
+			u32 mAccountCreated = 0;
+			u32 mTimePlayed = 0;
+			u8 mPVP = 0;
+			u8 mAnonymous = 0;
+			u8 mGM = 0;
+			u8 mGuildRank = 0;
+			u32 mGuildFlags = 0;
+			u8 mUnknown14[4]; // Unknown.
+			u32 mExperience = 0;
+			u8 mUnknown15[8]; // Unknown.
+			u32 mAccountEntitledTime = 0; // Not sure yet.
+			u8 mLanguages[32];
+			float mY = 0;
+			float mX = 0;
+			float mZ = 0;
+			float mHeading = 0;
+			u8 mUnknown17[4]; // Unknown.
+			u32 mPlatinumBank = 0;
+			u32 mGoldBank = 0;
+			u32 mSilverBank = 0;
+			u32 mCopperBank = 0;
+			u32 mPlatinumShared = 0;
+			u8 mUnknown18[1036]; // Unknown. Possible bank contents?
+			u32 mExpansions = 0;
+			u8 mUnknown19[12]; // Unknown. Tested.
+			u32 mAutoSplit = 0;
+			u8 mUnknown20[16]; // Unknown.
+			u16 mZoneID = 0;
+			u16 mInstanceID = 0;
+			char mGroupMemberNames[6][64];
+			char mGroupLeaderName[64];
+			u8 mUnknown21[540]; // Unknown. Possible group/raid members. Tested.
+			u32 mEntityID = 0; // Not sure yet.
+			u32 mLeadershipExperienceOn = 0;
+			u8 mUnknown22[4]; // Unknown.
+			i32 mGUKEarned = 0;
+			i32 mMIREarned = 0;
+			i32 mMMCEarned = 0;
+			i32 mRUJEarned = 0;
+			i32 mTAKEarned = 0;
+			i32 mLDONPoints = 0;
+			u32 mUnknown23[7]; // Unknown. Possible spent LDON points?
+			u32 mUnknown24 = 0; // Unknown.
+			u32 mUnknown25 = 0; // Unknown.
+			u8 mUnknown26[4]; // Unknown.
+			u32 mUnknown27[6]; // Unknown.
+			u8 mUnknown28[72]; // Unknown.
+			float mTributeTimeRemaining = 0.0f;
+			u32 mCareerTributeFavor = 0;
+			u32 mUnknown29 = 0; // Unknown. Possible 'Active Cost'
+			u32 mCurrentFavor = 0;
+			u32 mUnknown30 = 0; // Unknown.
+			u32 mTribiteOn = 0;
+			Tribute tributes[5]; // Not sure yet.
+			u8 mUnknown31[4]; // Unknown.
+			double mGroupExperience = 0.0f;
+			double mRaidExperience = 0.0f;
+			u32 mGroupPoints = 0;
+			u32 mRaidPoints = 0;
+			GroupLeaderAA mGroupLeaderAA;
+			RaidLeaderAA mRaidLeaderAA;
+			u8 mUnknown32[128]; // Unknown. Possible current group / raid leader AA. (if grouped)
+			u32 mAirRemaining = 0;
+			PVPStats mPVPStats;
+			u32 mAAExperience = 0;
+			u8 mUnknown33[40]; // Unknown.
+			u32 mRadiantCrystals = 0;
+			u32 mTotalRadiantCrystals = 0;
+			u32 mEbonCrystals = 0;
+			u32 mTotalEbonCrystals = 0;
+			u8 mAutoConsentGroup = 0;
+			u8 mAutoConsentRaid = 0;
+			u8 mAutoConsentGuild = 0;
+			u8 mUnknown34 = 0; // Unknown.
+			u32 mLevel3 = 0;
+			u32 mShowHelm = 0;
+			u32 mRestTimer = 0;
+			u8 mUnknown35[1036]; // Unknown. Tested.
 		};
 
 		// C->S
@@ -1519,13 +1793,6 @@ namespace Payload {
 		// C->S
 		struct LeadershipExperienceToggle : public FixedT<LeadershipExperienceToggle, OP_LeadershipExpToggle> {
 			u8 mValue = 0; // 0 = OFF, 1 = ON
-
-			String _debug() const {
-				StringStream ss;
-				ss << "{LeadershipExperienceToggle} ";
-				PRINT_MEMBER((int)mValue);
-				return ss.str();
-			}
 		};
 
 		// C->S
@@ -1619,6 +1886,26 @@ namespace Payload {
 		struct RemoveBuffRequest : public Fixed<RemoveBuffRequest> {
 			u32 mSlotID = 0;
 			u32 mSpawnID = 0;
+		};
+
+		// S->C
+		struct Time : public FixedT<Time, OP_TimeOfDay> {
+			static EQApplicationPacket* construct(const u8 pHour, const u8 pMinute, const u8 pDay, const u8 pMonth, const u32 pYear) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mHour = pHour;
+				payload->mMinute = pMinute;
+				payload->mDay = pDay;
+				payload->mMonth = pMonth;
+				payload->mYear = pYear;
+
+				return packet;
+			}
+			u8 mHour = 0;
+			u8 mMinute = 0;
+			u8 mDay = 0;
+			u8 mMonth = 0;
+			u32 mYear = 0;
 		};
 	}
 
@@ -1888,8 +2175,8 @@ namespace Payload {
 				return packet;
 			}
 
-			char mFrom[64];
 			char mTo[64];
+			char mFrom[64];
 			u32 mUnknown0 = 0;
 			u32 mUnknown1 = 0;
 			u32	mUnknown2 = 0;
@@ -1898,8 +2185,8 @@ namespace Payload {
 		};
 
 		// C->S
-		struct Follow : public Fixed<Follow> {
-			Follow() {
+		struct AcceptInvite : public Fixed<AcceptInvite> {
+			AcceptInvite() {
 				memset(mName1, 0, sizeof(mName1));
 				memset(mName2, 0, sizeof(mName2));
 			}
@@ -1931,13 +2218,63 @@ namespace Payload {
 
 		// C->S
 		struct Disband : public Fixed<Disband> {
-			char name1[64];
-			char name2[64];
+			char mName1[64];
+			char mName2[64];
 			u32 mUnknown0 = 0;
 			u32 mUnknown1 = 0;
 			u32	mUnknown2 = 0;
 			u32	mUnknown3 = 0;
 			u32	mUnknown4 = 0;
+		};
+
+		// S->C
+		//typedef FixedT<Disband, OP_GroupDisbandYou> DisbandYou;
+		struct DisbandYou : public FixedT<Disband, OP_GroupDisbandYou> {
+			static EQApplicationPacket* construct(const String& pCharacterName, const String& pRemoverNamer) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mName1, pCharacterName.c_str());
+				strcpy(payload->mName2, pRemoverNamer.c_str());
+
+				return packet;
+			}
+		};
+
+		// S->C
+		//typedef FixedT<Disband, OP_GroupDisbandOther> DisbandOther;
+		struct DisbandOther : public FixedT<Disband, OP_GroupDisbandOther> {
+			static EQApplicationPacket* construct(const String& pCharacterName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mName1, pCharacterName.c_str());
+				strcpy(payload->mName2, pCharacterName.c_str());
+
+				return packet;
+			}
+		};
+
+		// S->C
+		struct LeadershipAbilities : public FixedT<LeadershipAbilities, OP_GroupLeadershipAAUpdate> {
+			LeadershipAbilities() {
+				memset(mRanks, 0, sizeof(mRanks));
+				memset(Unknown1, 0, sizeof(Unknown1));
+				memset(mUnknown2, 0, sizeof(mUnknown2));
+			}
+			static EQApplicationPacket* construct() {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mRanks[0] = 1;
+				//for (auto i = 0; i < 49; i++) {
+				//	payload->Unknown1[i] = 1;
+				//}
+
+				return packet;
+			}
+			u32 mUnknown0 = 0;
+			u32 mRanks[16];
+			u32 Unknown1[49];
+			u32 mNPCMarkerID = 0;
+			u32 mUnknown2[13];
 		};
 
 		// C->S
@@ -1950,7 +2287,54 @@ namespace Payload {
 			u32 mUnknown0 = 0;
 			char mCurrentLeader[64];
 			char mNewLeader[64];
-			char mUnknown1[324];
+			char mUnknown1[324]; // LeadershipAbilityUpdate
+		};
+
+		// S->C
+		struct LeaderUpdate : public FixedT<LeaderUpdate, OP_GroupLeaderChange> {
+			LeaderUpdate() {
+				memset(mUnknown0, 0, sizeof(mUnknown0));
+				memset(mLeaderName, 0, sizeof(mLeaderName));
+				memset(mUnknown1, 0, sizeof(mUnknown1));
+			}
+			static EQApplicationPacket* construct(const String& pLeaderName) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mLeaderName, pLeaderName.c_str());
+
+				return packet;
+			}
+			char mUnknown0[64];
+			char mLeaderName[64];
+			char mUnknown1[20];
+		};
+
+		// C<->S
+		struct Roles : FixedT<Roles,  OP_GroupRoles> {
+			Roles() {
+				memset(mTargetName, 0, sizeof(mTargetName));
+				memset(mSetterName, 0, sizeof(mSetterName));
+			}
+			static EQApplicationPacket* construct(const String& pTargetName, const String& pSetterName, const u32 pRoleID, const u8 pToggle) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mTargetName, pTargetName.c_str());
+				strcpy(payload->mSetterName, pSetterName.c_str());
+				payload->mRoleID = pRoleID;
+				payload->mToggle = pToggle;
+
+				return packet;
+			}
+			char mTargetName[64]; // Character name of whoever is getting changed.
+			char mSetterName[64]; // Character name of whoever is setting the role.
+			u32 mUnknown0 = 0;
+			u32 mUnknown1 = 0;
+			u32 mUnknown2 = 0;
+			u32 mRoleID = 0;
+			u8 mToggle = 0; // 0 = OFF, 1 = ON.
+			u8 mUnknown3 = 0;
+			u8 mUnknown4 = 0;
+			u8 mUnknown5 = 0;
 		};
 	}
 
@@ -2011,12 +2395,14 @@ namespace Payload {
 			}
 			char mToCharacter[64];
 			char mFromCharacter[64];
-			u16 mGuildID = 0;
-			u8 unknown[2]; // for guildinvite all 0's, for remove 0=0x56, 2=0x02
+			u32 mGuildID = 0;
+			//u8 unknown[2]; // for guildinvite all 0's, for remove 0=0x56, 2=0x02
 			u32 mAction = 0;
 		};
 
+		// S<->C
 		typedef FixedT<Command, OP_GuildInvite> Invite;
+
 		typedef Fixed<Command> Remove;
 
 		// C->S
@@ -2368,7 +2754,7 @@ namespace Payload {
 		u32 mDrakkinDetails = 0;
 		u8 __Unknown3 = 0;
 		u32 mDeity = 0;
-		u32 mGuildID = NO_GUILD;
+		u32 mGuildID = GuildID::None;
 		u32 mGuildRank = 0;
 		u8 mClass = 0;
 		u8 mPVP = 0;

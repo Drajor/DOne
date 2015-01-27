@@ -19,6 +19,9 @@
 #include "RespawnOptions.h"
 #include "ExperienceController.h"
 
+#include "Group.h"
+#include "Guild.h"
+
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
 Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
@@ -482,31 +485,6 @@ void Character::setBaseStatistic(Statistic pStatistic, uint32 pValue) {
 	}
 }
 
-uint32 Character::getStatistic(Statistic pStatistic) {
-	switch (pStatistic)
-	{
-	case Statistic::Strength:
-		return getStrength();
-	case Statistic::Stamina:
-		return getStamina();
-	case Statistic::Charisma:
-		return getCharisma();
-	case Statistic::Dexterity:
-		return getDexterity();
-	case Statistic::Intelligence:
-		return getIntelligence();
-	case Statistic::Agility:
-		return getAgility();
-	case Statistic::Wisdom:
-		return getWisdom();
-	default:
-		Log::error("[Character] Unknown Statistic in getStatistic.");
-		break;
-	}
-
-	return 0;
-}
-
 void Character::_processMessageQueue() {
 	for (auto i : mMessageQueue)
 		mConnection->sendChannelMessage(i.mChannelID, i.mSenderName, i.mMessage);
@@ -921,6 +899,39 @@ const u8 Character::getLevel() const {
 void Character::setLevel(const u8 pLevel) {
 	mExperienceController->setLevel(pLevel);
 	Actor::setLevel(pLevel);
+}
+
+const bool Character::isGroupLeader() {
+	if (!hasGroup()) return false;
+	return mGroup->isLeader(this);
+}
+
+void Character::setGuild(Guild* pGuild) {
+	mGuild = pGuild;
+
+	if (mGuild) {
+		setGuildID(mGuild->getID());
+	}
+	else {
+		setGuildID(GuildID::None);
+		setGuildRank(GuildRank::None);
+	}
+}
+
+void Character::setGroup(Group* pGroup) {
+	mGroup = pGroup;
+
+	if (!mGroup) {
+		setIsGroupMainTank(false);
+		setIsGroupMainTank(false);
+		setIsGroupPuller(false);
+	}
+}
+
+const bool Character::isRaidLeader() const {
+	if (!hasRaid()) return false;
+	//return mRaid->isLeader(this);
+	return false;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

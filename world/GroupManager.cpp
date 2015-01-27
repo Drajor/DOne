@@ -1,7 +1,6 @@
 #include "GroupManager.h"
-#include "ServiceLocator.h"
-#include "Group.h"
 #include "ZoneManager.h"
+#include "Group.h"
 #include "Utility.h"
 #include "Character.h"
 #include "Zone.h"
@@ -11,355 +10,352 @@
 #include "../common/EQPacket.h"
 #include "../common/eq_packet_structs.h"
 
-const bool GroupManager::initialise(ZoneManager* pZoneManager) {
-	EXPECTED_BOOL(mInitialised == false);
-	EXPECTED_BOOL(pZoneManager);
+GroupManager::~GroupManager() {
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+
+	for (auto i : mGroups)
+		delete i;
+
+	mGroups.clear();
+	mZoneManager = nullptr;
+}
+
+const bool GroupManager::initialise(ILogFactory* pLogFactory, ZoneManager* pZoneManager) {
+	if (mInitialised) return false;
+	if (!pLogFactory) return false;
+	if (!pZoneManager) return false;
 
 	mZoneManager = pZoneManager;
+	mLog = pLogFactory->make();
+	mLog->setContext("[GroupManager]");
+	mLog->status("Initialising.");
+
+	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
-void GroupManager::makeGroup(Character* pLeader, Character* pMember) {
-	EXPECTED(pLeader);
-	EXPECTED(pMember);
-	EXPECTED(!(pLeader->hasGroup() || pMember->hasGroup())); // Both Characters must not have groups.
+const bool GroupManager::onMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return false;
 
-	mGroups.push_back(new Group(pLeader, pMember));
+	auto group = pCharacter->getGroup();
+	if (!group) return false;
+
+	// Notify Group.
+	group->sendMessage(pCharacter->getName(), pMessage);
+	return true;
 }
 
-void GroupManager::joinGroup(Group* pGroup, Character* pCharacter) {
-	EXPECTED(pGroup);
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->hasGroup() == false);
+const bool GroupManager::onInvite(Character* pInviter, const String& pInviteeName) {
+	if (!pInviter) return false;
 
-	// UNTESTED!
-
-	pCharacter->getConnection()->sendGroupAcknowledge();
-
-	pGroup->add(pCharacter);
-	pGroup->sendGroupUpdate();
-}
-
-void GroupManager::_disbandGroup(Group* pGroup) {
-	EXPECTED(pGroup);
-	EXPECTED(pGroup->mMembers.size() == 1); // Only disband groups with one member left.
-
-	Character* lastMember = *pGroup->mMembers.begin();
-	pGroup->mMembers.clear();
-
-	lastMember->setGroup(nullptr);
-	lastMember->getConnection()->sendGroupDisband();
-
-	mGroups.remove(pGroup);
-	delete pGroup;
-}
-
-void GroupManager::onMessage(Character* pCharacter, const String pMessage) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getGroup());
-
-	_sendMessage(pCharacter->getGroup(), pCharacter->getName(), pMessage);
-}
-
-void GroupManager::_sendMessage(Group* pGroup, String pSenderName, String pMessage) {
-	EXPECTED(pGroup);
-
-	for (auto i : pGroup->mMembers) {
-		// Check: Where a group member is zoning, queue the message.
-		if (i->isZoning()) {
-			i->addQueuedMessage(ChannelID::Group, pSenderName, pMessage);
-			continue;
-		}
-		i->getConnection()->sendGroupMessage(pSenderName, pMessage);
-	}
-}
-
-void GroupManager::_sendZoneMessage(Group* pGroup, Zone* pZone, String pSenderName, String pMessage, Character* pExcludeCharacter) {
-	EXPECTED(pGroup);
-	EXPECTED(pZone);
-
-	// NOTE: Zoning members will have a null zone pointer.
-	for (auto i : pGroup->mMembers) {
-		if (i->getZone() == pZone && i != pExcludeCharacter)
-			i->getConnection()->sendGroupMessage(SYS_NAME, pMessage);
-	}
-}
-
-void GroupManager::handleMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->hasGroup());
-	EXPECTED(_isLeader(pCharacter)); // Check: Initiator is group leader.
-
-	// Try to find the Character being invited.
-	auto character = mZoneManager->findCharacter(pLeaderName);
-	if (!character) { return; }
-
-	EXPECTED(character->getGroup() == pCharacter->getGroup()); // Check: Both Characters are in the same group.
-
-	Group* group = pCharacter->getGroup();
-	group->mLeader = character;
-	group->sendGroupLeaderChange();
-}
-
-void GroupManager::_postMemberRemoval(Group* pGroup) {
-	EXPECTED(pGroup);
-
-	// Check: Group needs disbanding.
-	if (pGroup->needsDisbanding()) {
-		_disbandGroup(pGroup);
-		return;
+	// Check: Prevent self invite.
+	if (pInviter->getName() == pInviteeName) {
+		mLog->error(pInviter->getName() + " attempted to invite themself.");
+		return false;
 	}
 
-	// Check: Group needs a new leader.
-	if (!pGroup->hasLeader()) {
-		pGroup->mLeader = *pGroup->mMembers.begin();
-		pGroup->sendGroupLeaderChange();
+	// Check: Inviter is leader (if they are already in a group).
+	if (pInviter->hasGroup() && !pInviter->isGroupLeader()) {
+		mLog->error(pInviter->getName() + " attempted to invite " + pInviteeName + " but is not leader.");
+		return false;
 	}
-}
 
-void GroupManager::handleInviteSent(Character* pCharacter, String pInviteName) {
-	EXPECTED(pCharacter);
+	// Check: Character exists.
+	auto invitee = mZoneManager->findCharacter(pInviteeName);
+	if (!invitee) {
+		pInviter->notify(pInviteeName + " was not found.");
+		return true;
+	}
 
-	// Try to find the Character being invited.
-	auto character = mZoneManager->findCharacter(pInviteName);
-	if (!character) {
-		pCharacter->getConnection()->sendMessage(MessageType::Red, "Player " + pInviteName + " was not found.");
-		return;
+	// Check: Invitee has a group already.
+	if (invitee->hasGroup()) {
+		pInviter->notify(pInviteeName + " already has a group.");
+		return true;
 	}
-	// Check if the Character being invited already has a group.
-	if (character->hasGroup()) {
-		// TODO: Check which message is sent.
-		pCharacter->getConnection()->sendMessage(MessageType::Red, "Player " + pInviteName + " already has a group.");
-		return;
+
+	// Check: Character has a pending group invite.
+	if (invitee->hasGroupInvitation()) {
+		pInviter->notify(pInviteeName + " already is considering joining a group.");
+		return true;
 	}
+
+	// Record invitation.
+	auto& invitation = invitee->getGroupInvitation();
+	invitation.mInviterName = pInviter->getName();
+	invitation.mTimeInvited = Utility::Time::now();
 
 	// Send the invite.
-	character->getConnection()->sendGroupInvite(pCharacter->getName());
+	invitee->getConnection()->sendGroupInvite(pInviter->getName());
+
+	mLog->info(pInviter->getName() + " invited " + pInviteeName + " to join a group.");
+	return true;
 }
 
-void GroupManager::handleAcceptInvite(Character* pCharacter, String pInviterName) {
-	EXPECTED(pCharacter);
+const bool GroupManager::onInviteAccept(Character* pCharacter) {
+	if (!pCharacter) return false;
 
-	// Try to find the Character who invited.
-	auto character = mZoneManager->findCharacter(pInviterName);
-	if (!character) { return; } // This is really edge case and may never occur.
-
-	// Starting a new group.
-	if (!character->hasGroup()) {
-		makeGroup(character, pCharacter);
+	// Check: Character accepting the invitation actually has an invitation.
+	if (!pCharacter->hasGroupInvitation()) {
+		mLog->error("group invite while no invitation todo");
+		return false;
 	}
-	// Joining an existing group.
-	else {
-		joinGroup(character->getGroup(), pCharacter);
+
+	auto& invitation = pCharacter->getGroupInvitation();
+
+	auto inviter = mZoneManager->findCharacter(invitation.mInviterName, true); // We can form a group while the inviter is zoning.
+
+	// LD or camped?
+	// This is kind of an edge case, without storing invitations sent on the inviting Character this may come up very rarely.
+	if (!inviter) {
+		pCharacter->notify("Unable to join group.");
+
+		// Clear invitation.
+		pCharacter->clearGroupInvitation();
+		return true;
 	}
+
+	auto group = inviter->getGroup();
+
+	// Handle: Forming a new Group.
+	if (!group) onCreate(inviter, pCharacter);
+
+	// Handle: Joining an existing Group.
+	else onJoin(group, pCharacter);
+
+	// Clear invitation.
+	pCharacter->clearGroupInvitation();
+	return true;
 }
 
-void GroupManager::handleDeclineInvite(Character* pCharacter, String pInviterName) {
-	EXPECTED(pCharacter);
-	
-	// Try to find the Character who invited.
-	auto character = mZoneManager->findCharacter(pInviterName);
+const bool GroupManager::onInviteDecline(Character* pCharacter) {
+	if (!pCharacter) return false;
 
-	if (!character) { return; } // Ignore.
-	if (character->isZoning()) { return; } // Ignore.
+	// Check: The Character declining the invite has a pending invite.
+	if (!pCharacter->hasGroupInvitation()) {
+		mLog->error(pCharacter->getName() + " declined invite but they have no invitation.");
+		return false;
+	}
 
-	character->message(MessageType::White, pCharacter->getName() + " rejects your offer to join the group.");
+	// Let the inviter know the invite was declined.
+	auto invitation = pCharacter->getGroupInvitation();
+	auto inviter = mZoneManager->findCharacter(invitation.mInviterName);
+	if (inviter)
+		inviter->notify(pCharacter->getName() + " has declined your invitation to join the group.");
+
+	// Clear invitation.
+	pCharacter->clearGroupInvitation();
+	return true;
 }
 
-void GroupManager::handleDisband(Character* pCharacter, String pRemoveName) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->hasGroup());
+const bool GroupManager::onRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle) {
+	if (!pCharacter) return false;
 
-	Group* group = pCharacter->getGroup();
-	const bool removerIsLeader = _isLeader(pCharacter);
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group){
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return false;
+	}
 
-	// Try to find the Character to remove.
-	Character* character = pCharacter->getGroup()->getMember(pRemoveName);
+	// Check: Character is leader.
+	if (!pCharacter->isGroupLeader()) {
+		mLog->error(pCharacter->getName() + " attempted to change roles but they are not leader.");
+		return false;
+	}
+
+	// Check: Target is a Group member.
+	auto character = group->getMember(pTargetName);
 	if (!character) {
-		// Not a member of the group.
-		return;
+		mLog->error(pCharacter->getName() + " attempted to change roles for " + pTargetName + " but they are not a member of the group.");
+		return false;
 	}
 
-	// Character is currently zoning.
-	if (character->isZoning()) {
-		// Ignore for now. // TODO:
-		return;
+	// Check: Role ID is valid.
+	if (pRoleID != GroupRole::MainTank && pRoleID != GroupRole::MainAssist && pRoleID != GroupRole::Puller) {
+		mLog->error(pCharacter->getName() + " attempted to change an unknown role: " + toString(pRoleID));
+		return false;
 	}
-	// Removing self.
-	if (pCharacter == character) {
-		group->remove(character);
-		character->getConnection()->sendGroupLeave(character->getName()); // Notify Character leaving.
-		group->sendMemberLeaveMessage(character->getName()); // Notify remaining group members.
 
-		_postMemberRemoval(group); // Disband or change leader if required.
-		return;
-	}
-	// Removing other member.
-	else {
-		EXPECTED(removerIsLeader);
-
-		group->remove(character);
-		character->getConnection()->sendGroupLeave(character->getName()); // Notify Character leaving.
-		group->sendMemberLeaveMessage(character->getName()); // Notify remaining group members.
-
-		_postMemberRemoval(group); // Disband or change leader if required.
-		return;
-	}
-}
-
-bool GroupManager::_isLeader(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
-	return pCharacter->getGroup()->getLeader() == pCharacter;
+	// Notify Group.
+	group->onRoleChange(character, pRoleID, pToggle == 1 ? true : false);
+	return true;
 }
 
 void GroupManager::onEnterZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->hasGroup());
-	EXPECTED(pCharacter->getZone()); // Check: Sanity
+	if (!pCharacter) return;
+	
+	auto group = pCharacter->getGroup();
+	if (!group) return;
 
-	// Send the Character group member names.
-	Group* group = pCharacter->getGroup();
-	group->sendGroupUpdate(pCharacter);
-
-	// Notify group members in the same zone that pCharacter has entered.
-	_sendZoneMessage(group, pCharacter->getZone(), SYS_NAME, pCharacter->getName() + " has entered the zone.", pCharacter);
+	group->onEnterZone(pCharacter);
 }
 
 void GroupManager::onLeaveZone(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->hasGroup());
-	EXPECTED(pCharacter->getZone()); // Check: Sanity
+	if (!pCharacter) return;
 
-	// Notify group members in the same zone that pCharacter has left.
-	_sendZoneMessage(pCharacter->getGroup(), pCharacter->getZone(), SYS_NAME, pCharacter->getName() + " has left the zone.", pCharacter);
+	auto group = pCharacter->getGroup();
+	if (!group) return;
+
+	group->onLeaveZone(pCharacter);
 }
 
 void GroupManager::onCamp(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getGroup());
+	if (!pCharacter) return;
 
-	Group* group = pCharacter->getGroup();
-	group->remove(pCharacter);
-	group->sendMemberLeaveMessage(pCharacter->getName()); // Notify remaining group members.
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group) {
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return;
+	}
 
-	_postMemberRemoval(group);
+	// Notify Group.
+	group->onLeave(pCharacter);
+
+	check(group);
 }
 
 void GroupManager::onDeath(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getGroup());
+	//EXPECTED(pCharacter);
+	//EXPECTED(pCharacter->getGroup());
 
-	// TODO: X Died.
+	//// TODO: X Died.
 }
 
 void GroupManager::onLinkdead(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getGroup());
+	if (!pCharacter) return;
 
-	Group* group = pCharacter->getGroup();
-	group->remove(pCharacter);
-	_sendMessage(group, SYS_NAME, pCharacter->getName() + " has gone Linkdead."); // Notify group of LD.
-	group->sendMemberLeaveMessage(pCharacter->getName()); // Notify remaining group members.
-
-	_postMemberRemoval(group);
-}
-
-Group::Group(Character* pLeader, Character* pMember) : mLeader(pLeader) {
-	EXPECTED(pLeader);
-	EXPECTED(pMember);
-	// NOTE: Error Conditions are ignored here as CTOR is private.
-	
-	add(pLeader);
-	add(pMember);
-
-	pLeader->getConnection()->sendGroupCreate();
-	pLeader->getConnection()->sendGroupLeaderChange(pLeader->getName());
-	pLeader->getConnection()->sendGroupAcknowledge();
-	pLeader->getConnection()->sendGroupFollow(pLeader->getName(), pMember->getName());
-
-	pMember->getConnection()->sendGroupAcknowledge();
-	pLeader->getConnection()->sendGroupJoin(pMember->getName());
-
-	sendGroupUpdate(pMember);
-}
-
-void Group::add(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED((pCharacter->hasGroup() == false)); // Check: Character does not have a group.
-	EXPECTED((mMembers.size() < Limits::Group::MAX_MEMBERS)); // Check: Group is not already full.
-
-	mMembers.push_back(pCharacter);
-	pCharacter->setGroup(this);
-}
-
-void Group::remove(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getGroup() == this); // Check: Pointer matching (sanity).
-	EXPECTED(isMember(pCharacter)); // Check: Character is already a member of this group.
-
-	mMembers.remove(pCharacter);
-	pCharacter->setGroup(nullptr);
-
-	// Handle: Leader being removed.
-	if (mLeader == pCharacter) mLeader = nullptr;
-}
-
-void Group::sendMemberLeaveMessage(String pLeaverName) {
-	// TODO: Zoning members.
-	for (auto i : mMembers)
-		i->getConnection()->sendGroupLeave(pLeaverName);
-}
-
-void Group::sendGroupLeaderChange() {
-	EXPECTED(mLeader); // Check: mLeader pointer is valid.
-
-	// TODO: Zoning members.
-	for (auto i : mMembers)
-		i->getConnection()->sendGroupLeaderChange(mLeader->getName());
-}
-
-bool Group::isMember(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
-
-	for (auto i : mMembers) {
-		if (i == pCharacter) return true;
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group) {
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return;
 	}
 
-	return false;
+	// Notify Group.
+	group->onLeave(pCharacter);
+
+	check(group);
 }
 
-void Group::getMemberNames(std::list<String>& pMemberNames, String pExcludeCharacterName) {
-	for (auto i : mMembers) {
-		if (i->getName() != pExcludeCharacterName)
-			pMemberNames.push_back(i->getName());
+const bool GroupManager::onCreate(Character* pLeader, Character* pMember) {
+	if (!pLeader) return false;
+	if (!pMember) return false;
+
+	auto group = new Group(mNextID++);
+	mGroups.push_back(group);
+
+	group->onCreate(pLeader, pMember);
+	return true;
+}
+
+const bool GroupManager::onJoin(Group* pGroup, Character* pCharacter) {
+	if (!pGroup) return false;
+	if (!pCharacter) return false;
+
+	// Check: Is Group already full?
+	if (pGroup->isFull()) {
+		pCharacter->notify("Unable to join group as it is full.");
+		return true;
 	}
+
+	pGroup->onJoin(pCharacter);
+	return true;
 }
 
-Character* Group::getMember(const String& pCharacterName) {
-	for (auto i : mMembers) {
-		if (i->getName() == pCharacterName)
-			return i;
-	}
+const bool GroupManager::onLeave(Character* pCharacter) {
+	if (!pCharacter) return false;
 
-	return nullptr;
-}
-
-void Group::sendGroupUpdate(Character* pCharacter) {
-	std::list<String> memberNames;
-	getMemberNames(memberNames, pCharacter->getName());
-	pCharacter->getConnection()->sendGroupUpdate(memberNames);
-}
-
-void Group::sendGroupUpdate() {
-	std::list<String> memberNames;
-	getMemberNames(memberNames, "");
-	for (auto i : mMembers) {
-		if (i->isZoning() == false) {
-			i->getConnection()->sendGroupUpdate(memberNames);
-		}
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group) {
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return false;
 	}
 	
+	// Notify Group.
+	group->onLeave(pCharacter);
+
+	check(group);
+	return true;
 }
 
+const bool GroupManager::onRemove(Character* pCharacter, const String& pTargetName) {
+	if (!pCharacter) return false;
 
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group) {
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return false;
+	}
+
+	// Check: Character is leader.
+	if (!pCharacter->isGroupLeader()) {
+		mLog->error(pCharacter->getName() + " attempted to remove " + pTargetName + " but they are not leader.");
+		return false;
+	}
+
+	// Check: Target is a Group member.
+	auto character = group->getMember(pTargetName);
+	if (!character) {
+		mLog->error(pCharacter->getName() + " attempted to remove " + pTargetName + " but they are not a group member.");
+		return false;
+	}
+
+	// Notify Group.
+	group->onRemove(character);
+	
+	check(group);
+	return true;
+}
+
+const bool GroupManager::onMakeLeader(Character* pCharacter, const String& pLeaderName) {
+	if (!pCharacter) return false;
+
+	// Check: Group is valid.
+	auto group = pCharacter->getGroup();
+	if (!group) {
+		mLog->error(pCharacter->getName() + " has no group in " + String(__FUNCTION__));
+		return false;
+	}
+
+	// Check: Character is leader.
+	if (!pCharacter->isGroupLeader()) {
+		mLog->error(pCharacter->getName() + " attempted to transfer leadership but they are not leader.");
+		return false;
+	}
+
+	// Check: Target is a Group member.
+	auto character = group->getMember(pLeaderName);
+	if (!character) {
+		mLog->error(pCharacter->getName() + " attempted to transfer leadership to " + pLeaderName + " but they are not a group member.");
+		return false;
+	}
+
+	// Check: Target is not self.
+	if (character == pCharacter) {
+		mLog->error(pCharacter->getName() + " attempted to transfer leadership to themself.");
+		return false;
+	}
+
+	// Notify Group.
+	group->onMakeLeader(character);
+
+	return true;
+}
+
+void GroupManager::check(Group* pGroup) {
+	if (!pGroup) return;
+
+	// Check: Do we need to disband group?
+	if (pGroup->numMembers() == 1) {
+		pGroup->onDisband();
+		mGroups.remove(pGroup);
+		delete pGroup;
+	}
+}

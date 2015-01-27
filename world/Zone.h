@@ -114,13 +114,15 @@ public:
 
 	// Group Events.
 	const bool onGroupInvite(Character* pInviter, const String& pInviteeName);
-	const bool onGroupInviteAccept(Character* pCharacter, const String& pInviterName);
-	const bool onGroupInviteDecline(Character* pCharacter, const String& pInviterName);
+	const bool onGroupInviteAccept(Character* pCharacter);
+	const bool onGroupInviteDecline(Character* pCharacter);
 	const bool onGroupLeave(Character* pCharacter);
-	const bool onGroupDisband(Character* pCharacter, const String& pCharacterName);
-	const bool onGroupMakeLeader(Character* pCharacter, const String& pLeaderName);
+	const bool onGroupRemove(Character* pCharacter, const String& pCharacterName);
+	const bool onGroupMakeLeader(Character* pCharacter, const String& pTargetName);
+	const bool onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle);
 
 	// Raid Events.
+	const bool onRaidInviteDecline(Character* pCharacter);
 
 	// Guild Events.
 	const bool onGuildCreate(Character* pCharacter, const String& pGuildName);

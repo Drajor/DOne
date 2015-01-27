@@ -46,7 +46,8 @@ void Guild::onJoin(Character* pCharacter, const u8 pRank) {
 	mMembers.push_back(member);
 
 	// Update Character.
-	pCharacter->setGuild(this, getID(), pRank, getName());
+	pCharacter->setGuild(this);
+	pCharacter->setGuildRank(pRank);
 
 	// Update GuildMember.
 	updateMemberDetails(pCharacter, member);
@@ -69,7 +70,8 @@ void Guild::onPromote(Character* pCharacter) {
 	auto member = getMember(pCharacter->getName());
 
 	// Update Character.
-	pCharacter->setGuild(this, getID(), GuildRanks::Officer, getName());
+	pCharacter->setGuild(this);
+	pCharacter->setGuildRank(GuildRank::Officer);
 
 	// Update GuildMember.
 	updateMemberDetails(pCharacter, member);
@@ -92,7 +94,8 @@ void Guild::onDemote(Character* pCharacter) {
 	auto member = getMember(pCharacter->getName());
 
 	// Update Character.
-	pCharacter->setGuild(this, getID(), GuildRanks::Member, getName());
+	pCharacter->setGuild(this);
+	pCharacter->setGuildRank(GuildRank::Member);
 
 	// Update GuildMember.
 	updateMemberDetails(pCharacter, member);
@@ -117,14 +120,16 @@ void Guild::onMakeLeader(Character* pCharacter, GuildMember * pMember) {
 	Character* character = getCharacter(pMember->getName());
 
 	// Update previous leader Character.
-	pCharacter->setGuild(this, getID(), GuildRanks::Officer, getName());
+	pCharacter->setGuild(this);
+	pCharacter->setGuildRank(GuildRank::Officer);
 	updateMemberDetails(pCharacter, getMember(pCharacter->getName()));
 	
 	// Update Zone Character is in.
 	pCharacter->getZone()->onChangeGuild(pCharacter);
 
 	// Update new leader Character.
-	character->setGuild(this, getID(), GuildRanks::Leader, getName());
+	character->setGuild(this);
+	character->setGuildRank(GuildRank::Leader);
 	updateMemberDetails(character, pMember);
 
 	// Update Zone Character is in.
@@ -218,7 +223,7 @@ void Guild::removeCharacter(Character* pCharacter) {
 		pCharacter->getZone()->onChangeGuild(pCharacter);
 
 		// Update 'Guild Window' 'Member List' for the leaving Character.
-		auto packet = Payload::makeGuildMemberList(std::list<GuildMember*>()); // Send empty member list to clear guild window.
+		auto packet = Payload::makeGuildMemberList(nullptr);
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
 	}
@@ -260,7 +265,8 @@ void Guild::onConnect(Character* pCharacter) {
 		return;
 	}
 
-	pCharacter->setGuild(this, getID(), member->getRank(), getName());
+	pCharacter->setGuild(this);
+	pCharacter->setGuildRank(member->getRank());
 
 	// Update GuildMember.
 	updateMemberDetails(pCharacter, member);
@@ -273,19 +279,19 @@ void Guild::onMemberDisconnect(Character* pCharacter) {
 	mOnlineMembers.remove(pCharacter);
 }
 
-const bool Guild::canDelete(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canInvite(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
-const bool Guild::canRemove(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
-const bool Guild::canPromote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canBePromoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Member; }
-const bool Guild::canDemote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Officer; }
-const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
-const bool Guild::canSetURL(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canSetChannel(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canSetPublicNotes(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
-const bool Guild::canSetBankerFlag(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRanks::Leader; }
-const bool Guild::canSetAltFlag(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRanks::Officer; }
+const bool Guild::canDelete(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canInvite(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRank::Officer; }
+const bool Guild::canRemove(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRank::Officer; }
+const bool Guild::canPromote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canBePromoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Member; }
+const bool Guild::canDemote(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canBeDemoted(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Officer; }
+const bool Guild::canSetMOTD(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRank::Officer; }
+const bool Guild::canSetURL(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canSetChannel(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canSetPublicNotes(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRank::Officer; }
+const bool Guild::canSetBankerFlag(Character* pCharacter) const { return pCharacter->getGuildRank() == GuildRank::Leader; }
+const bool Guild::canSetAltFlag(Character* pCharacter) const { return pCharacter->getGuildRank() >= GuildRank::Officer; }
 
 GuildMember* Guild::getMember(const String& pCharacterName) const {
 	auto f = [pCharacterName](const GuildMember* pMember) { return pMember->getName() == pCharacterName; };
@@ -457,13 +463,13 @@ void Guild::sendMOTD() {
 void Guild::sendMemberList(Character* pCharacter) {
 	if (!pCharacter) return;
 
-	auto packet = Payload::makeGuildMemberList(mMembers);
+	auto packet = Payload::makeGuildMemberList(this);
 	pCharacter->getConnection()->sendPacket(packet);
 	delete packet;
 }
 
 void Guild::sendMemberList() {
-	auto packet = Payload::makeGuildMemberList(mMembers);
+	auto packet = Payload::makeGuildMemberList(this);
 	sendPacket(packet);
 	delete packet;
 }
@@ -537,8 +543,8 @@ const u32 GuildMember::getTotalTribute() const { return mData->mLastTribute; }
 const u32 GuildMember::getLastTribute() const { return mData->mLastTribute; }
 const String& GuildMember::getPublicNote() const { return mData->mPublicNote; }
 const u32 GuildMember::getFlags() const { return mData->mFlags; }
-const bool GuildMember::isBanker() const { return mData->mFlags & 0x01; }
-const bool GuildMember::isAlt() const { return mData->mFlags & 0x02; }
+const bool GuildMember::isBanker() const { return (mData->mFlags & 0x01) == 1; }
+const bool GuildMember::isAlt() const { return (mData->mFlags & 0x02) == 1; }
 
 void GuildMember::setName(const String& pCharacterName) { mData->mName = pCharacterName; }
 void GuildMember::setRank(const u8 pRank) { mData->mRank = pRank; }

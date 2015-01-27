@@ -17,12 +17,7 @@
 #include <bitset>
 #include <cmath>
 
-typedef uint32_t GuildID;
-typedef uint8_t GuildRank;
-
 static const String EmptyString = String("");
-
-static const GuildID NO_GUILD = 0xFFFFFFFF;
 
 namespace AccountStatus {
 	enum : i8 {
@@ -1111,13 +1106,19 @@ namespace AnonType {
 		Roleplay = 2,
 	};
 }
-
-enum GuildRanks : GuildRank {
-	Member = 0,
-	Officer = 1,
-	Leader = 2,
-	GR_None = 9
-};
+namespace GuildID {
+	enum : u32 {
+		None = 0xFFFFFFFF,
+	};
+}
+namespace GuildRank {
+	enum : u8 {
+		Member = 0,
+		Officer = 1,
+		Leader = 2,
+		None = 9
+	};
+}
 
 enum ZoneIDs : u16 {
 	NoZone = 0,

@@ -29,23 +29,6 @@ String Utility::zoneLogDetails(Zone* pZone) {
 	return ss.str();
 }
 
-String Utility::guildRankToString(const GuildRank& pRank){
-	switch (pRank)	{
-	case Member:
-		return "Member";
-	case Officer:
-		return "Officer";
-	case Leader:
-		return "Leader";
-	case GR_None:
-		return "None";
-	default:
-		break;
-	}
-
-	return "ERROR";
-}
-
 String Utility::getRandomName() {
 	// creates up to a 10 char name
 	char vowels[18] = "aeiouyaeiouaeioe";

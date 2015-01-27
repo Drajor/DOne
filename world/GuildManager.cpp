@@ -61,6 +61,15 @@ const bool GuildManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFac
 	return true;
 }
 
+void GuildManager::onMessage(Character* pCharacter, const String& pMessage) {
+	if (!pCharacter) return;
+
+	auto guild = pCharacter->getGuild();
+	if (!guild) return;
+
+	guild->sendMessage(pCharacter->getName(), pMessage);
+}
+
 void GuildManager::onCharacterDelete(const String& pCharacterName) {
 	// Check: Does this Character belong to a Guild?
 	auto guild = findGuildByMemberName(pCharacterName);
@@ -104,7 +113,7 @@ const bool GuildManager::onCreate(Character* pCharacter, const String& pGuildNam
 	mData.push_back(data);
 	mGuilds.push_back(guild);
 	
-	guild->onJoin(pCharacter, GuildRanks::Leader);
+	guild->onJoin(pCharacter, GuildRank::Leader);
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
@@ -189,7 +198,7 @@ const bool GuildManager::onLeave(Character* pCharacter) {
 	}
 
 	// Check: Not the Guild leader.
-	if (pCharacter->getGuildRank() == GuildRanks::Leader) {
+	if (pCharacter->getGuildRank() == GuildRank::Leader) {
 		mLog->error(pCharacter->getName() + " is the guild leader in " + String(__FUNCTION__));
 		return false;
 	}
@@ -219,7 +228,7 @@ const bool GuildManager::onInvite(Character* pInviter, Character* pInvitee) {
 	if (pInvitee->hasGuild()) return false;
 
 	// Check: The Character being invited does not already have a pending invite.
-	if (pInvitee->hasPendingGuildInvite()) return false;
+	if (pInvitee->hasGuildInvitation()) return false;
 	
 	mLog->info(pInviter->getName() + " invited " + pInvitee->getName() + " to join " + guild->getName());
 	return true;
@@ -228,21 +237,23 @@ const bool GuildManager::onInvite(Character* pInviter, Character* pInvitee) {
 const bool GuildManager::onInviteAccept(Character* pCharacter) {
 	if (!pCharacter) return false;
 	if (pCharacter->hasGuild()) return false;
-	if (!pCharacter->hasPendingGuildInvite()) return false;
+	if (!pCharacter->hasGuildInvitation()) return false;
 
-	auto guild = _findByID(pCharacter->getPendingGuildInviteID());
+	// Find Guild.
+	auto& invitation = pCharacter->getGuildInvitation();
+	auto guild = _findByID(invitation.mGuildID);
 	if (!guild) {
-		// TODO: Log.
+		mLog->error("Could not find Guild with when accepting invitation.");
 		return false;
 	}
 
 	// Notify Guild.
-	guild->onJoin(pCharacter, GuildRanks::Member);
+	guild->onJoin(pCharacter, GuildRank::Member);
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
 
-	mLog->info(pCharacter->getName() + " accepted " + pCharacter->getPendingGuildInviteName() + "'s invitation to join " + guild->getName());
+	mLog->info(pCharacter->getName() + " accepted " + invitation.mInviterName + "'s invitation to join " + guild->getName());
 	return true;
 }
 
@@ -346,16 +357,6 @@ void GuildManager::onLevelChange(Character* pCharacter) {
 
 	// Save.
 	if (!save()) mLog->error("Save failed in " + String(__FUNCTION__));
-}
-
-
-void GuildManager::onMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return;
-
-	auto guild = pCharacter->getGuild();
-	if (!guild) return;
-
-	guild->sendMessage(pCharacter->getName(), pMessage);
 }
 
 const bool GuildManager::onSetMOTD(Character* pCharacter, const String& pMOTD) {
@@ -599,7 +600,7 @@ const bool GuildManager::onMakeLeader(Character* pCharacter, const String& pLead
 	}
 
 	// Check: Character is the Guild leader.
-	if (pCharacter->getGuildRank() != GuildRanks::Leader) {
+	if (pCharacter->getGuildRank() != GuildRank::Leader) {
 		mLog->error(pCharacter->getName() + " attempted to change leader.");
 		return false;
 	}

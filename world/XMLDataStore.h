@@ -44,7 +44,7 @@ public:
 	
 	// Items
 	const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded);
-	const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents);
+	const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents);
 
 	const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies);
 

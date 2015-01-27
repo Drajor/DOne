@@ -160,7 +160,6 @@ namespace Utility {
 
 	String characterLogDetails(Character* pCharacter);
 	String zoneLogDetails(Zone* pZone);
-	String guildRankToString(const GuildRank& pRank);
 
 	// Checks a String for any digits.
 	static const bool containsDigits(const String& pString) {
@@ -319,57 +318,57 @@ namespace Utility {
 		return true;
 	}
 
-	static bool stofSafe(float& pValue, String& pString) {
-		try {
-			pValue = std::stof(pString);
-			return true;
-		}
-		catch (...) {
-			return false;
-		}
-		return false;
-	}
+	//static bool stoSafe(float& pValue, String& pString) {
+	//	try {
+	//		pValue = std::stof(pString);
+	//		return true;
+	//	}
+	//	catch (...) {
+	//		return false;
+	//	}
+	//	return false;
+	//}
 
-	static bool stou32Safe(uint32& pValue, String& pString) {
-		try {
-			pValue = std::stoul(pString);
-			return true;
-		}
-		catch (...) {
-			return false;
-		}
-		return false;
-	}
-	static bool stou16Safe(uint16& pValue, String pString) {
-		try {
-			pValue = static_cast<uint16>(std::stoul(pString));
-			return true;
-		}
-		catch (...) {
-			return false;
-		}
-		return false;
-	}
-	static bool stou8Safe(uint8& pValue, String& pString) {
-		try {
-			pValue = static_cast<uint8>(std::stoul(pString));
-			return true;
-		}
-		catch (...) {
-			return false;
-		}
-		return false;
-	}
-	static bool stoi8Safe(int8& pValue, String& pString) {
-		try {
-			pValue = static_cast<int8>(std::stoi(pString));
-			return true;
-		}
-		catch (...) {
-			return false;
-		}
-		return false;
-	}
+	//static bool stoSafe(uint32& pValue, String& pString) {
+	//	try {
+	//		pValue = std::stoul(pString);
+	//		return true;
+	//	}
+	//	catch (...) {
+	//		return false;
+	//	}
+	//	return false;
+	//}
+	//static bool stou16Safe(uint16& pValue, String pString) {
+	//	try {
+	//		pValue = static_cast<uint16>(std::stoul(pString));
+	//		return true;
+	//	}
+	//	catch (...) {
+	//		return false;
+	//	}
+	//	return false;
+	//}
+	//static bool stou8Safe(uint8& pValue, String& pString) {
+	//	try {
+	//		pValue = static_cast<uint8>(std::stoul(pString));
+	//		return true;
+	//	}
+	//	catch (...) {
+	//		return false;
+	//	}
+	//	return false;
+	//}
+	//static bool stoi8Safe(int8& pValue, String& pString) {
+	//	try {
+	//		pValue = static_cast<int8>(std::stoi(pString));
+	//		return true;
+	//	}
+	//	catch (...) {
+	//		return false;
+	//	}
+	//	return false;
+	//}
 	static bool stobool(String& pString) {
 		// TODO: http://msdn.microsoft.com/en-us/library/chd90w8e%28VS.80%29.aspx
 		if (pString == "true" || pString == "1")

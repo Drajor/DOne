@@ -22,7 +22,7 @@ public:
 	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes) { return true; }
 	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded) { return true; }
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) { return true; }
-	virtual const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) { return true; }
+	virtual const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents) { return true; }
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return true; }
 	virtual const bool loadShops(Data::ShopList pShops) { return true; }
 	virtual const bool loadTitles(Data::TitleList pTitles) { return true; }
@@ -47,7 +47,7 @@ public:
 	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes) { return false; }
 	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded) { return false; }
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) { return false; }
-	virtual const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) { return false; }
+	virtual const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents) { return false; }
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return false; }
 	virtual const bool loadShops(Data::ShopList pShops) { return false; }
 	virtual const bool loadTitles(Data::TitleList pTitles) { return false; }

@@ -4,7 +4,6 @@
 #include <list>
 
 struct ItemData;
-struct TransmutationComponent;
 
 namespace Data {
 	struct Account;
@@ -18,6 +17,7 @@ namespace Data {
 	struct AlternateCurrency;
 	struct Spell;
 	struct Title;
+	struct TransmutationComponent;
 
 	typedef std::list<Data::Account*>& AccountList;
 	typedef std::list<Data::Guild*>& GuildList;
@@ -27,6 +27,7 @@ namespace Data {
 	typedef std::list<Data::Shop*>& ShopList;
 	typedef std::list<Data::AlternateCurrency*>& AlternateCurrencyList;
 	typedef std::list<Data::Title*>& TitleList;
+	typedef std::list<Data::TransmutationComponent*>& TransmutationComponentList;
 }
 
 class IDataStore {
@@ -66,7 +67,7 @@ public:
 
 	// Items
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) = 0;
-	virtual const bool loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) = 0;
+	virtual const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents) = 0;
 
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) = 0;
 

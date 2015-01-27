@@ -82,7 +82,7 @@ const bool TestServer::initialise() {
 	mWorld = new World();
 
 	if (!mZoneManager->initialise(mWorld, mZoneDataStore, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory, mLogFactory, mNPCFactory)) return false;
-	if (!mGroupManager->initialise(mZoneManager)) return false;
+	if (!mGroupManager->initialise(mLogFactory, mZoneManager)) return false;
 	if (!mRaidManager->initialise(mZoneManager)) return false;
 	if (!mGuildManager->initialise(mDataStore, mLogFactory)) return false;
 

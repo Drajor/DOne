@@ -185,12 +185,12 @@ private:
 	Item* mAutoDrink = nullptr;
 
 	// Radiant Crystals
-	uint32 mRadiantCrystals = 0;
-	uint32 mTotalRadiantCrystals = 0;
+	u32 mRadiantCrystals = 0;
+	u32 mTotalRadiantCrystals = 0;
 	
 	// Ebon Crystals
-	uint32 mEbonCrystals = 0;
-	uint32 mTotalEbonCrystals = 0;
+	u32 mEbonCrystals = 0;
+	u32 mTotalEbonCrystals = 0;
 	std::map<uint32, uint32> mAlternateCurrency;
 
 	int32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];

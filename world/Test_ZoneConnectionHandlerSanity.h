@@ -339,7 +339,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Null) {
 TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Big) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Group::Follow::size() + 1);
+	auto p = makePacket(Payload::Group::AcceptInvite::size() + 1);
 	// Fail: Too big.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGroupAcceptInvite(p));
@@ -350,7 +350,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Big) {
 TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Small) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Group::Follow::size() - 1);
+	auto p = makePacket(Payload::Group::AcceptInvite::size() - 1);
 	// Fail: Too small.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleGroupAcceptInvite(p));
@@ -361,8 +361,8 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Small) {
 TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Overflow_0) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Group::Follow::size());
-	auto payload = Payload::Group::Follow::convert(p);
+	auto p = makePacket(Payload::Group::AcceptInvite::size());
+	auto payload = Payload::Group::AcceptInvite::convert(p);
 	// Setup string with no null termination.
 	memset(payload->mName1, 1, sizeof(payload->mName1));
 
@@ -376,8 +376,8 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Overflow_0) {
 TEST_F(ZoneConnectionHandlerSanityTest, handleGroupAcceptInvite_Overflow_1) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Group::Follow::size());
-	auto payload = Payload::Group::Follow::convert(p);
+	auto p = makePacket(Payload::Group::AcceptInvite::size());
+	auto payload = Payload::Group::AcceptInvite::convert(p);
 	// Setup string with no null termination.
 	memset(payload->mName2, 1, sizeof(payload->mName2));
 
@@ -490,7 +490,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDisband_Overflow_0) {
 	auto p = makePacket(Payload::Group::Disband::size());
 	auto payload = Payload::Group::Disband::convert(p);
 	// Setup string with no null termination.
-	memset(payload->name1, 1, sizeof(payload->name1));
+	memset(payload->mName1, 1, sizeof(payload->mName1));
 
 	EXPECT_FALSE(mZoneConnection->hasStringError());
 	EXPECT_FALSE(mZoneConnection->handleGroupDisband(p));
@@ -505,7 +505,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupDisband_Overflow_1) {
 	auto p = makePacket(Payload::Group::Disband::size());
 	auto payload = Payload::Group::Disband::convert(p);
 	// Setup string with no null termination.
-	memset(payload->name2, 1, sizeof(payload->name2));
+	memset(payload->mName2, 1, sizeof(payload->mName2));
 
 	EXPECT_FALSE(mZoneConnection->hasStringError());
 	EXPECT_FALSE(mZoneConnection->handleGroupDisband(p));
@@ -3617,5 +3617,68 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleRemoveBuffRequest_Small) {
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
 	EXPECT_FALSE(mZoneConnection->handleRemoveBuffRequest(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+/*
+	handleGroupRoleChange
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleGroupRoleChange(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Roles::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGroupRoleChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Small) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Roles::size() - 1);
+	// Fail: Too small.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleGroupRoleChange(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Overflow_0) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Roles::size());
+	auto payload = Payload::Group::Roles::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mTargetName, 1, sizeof(payload->mTargetName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupRoleChange(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
+	delete p;
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Overflow_1) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Group::Roles::size());
+	auto payload = Payload::Group::Roles::convert(p);
+	// Setup string with no null termination.
+	memset(payload->mSetterName, 1, sizeof(payload->mSetterName));
+
+	EXPECT_FALSE(mZoneConnection->hasStringError());
+	EXPECT_FALSE(mZoneConnection->handleGroupRoleChange(p));
+	EXPECT_TRUE(mZoneConnection->hasStringError());
+
 	delete p;
 }

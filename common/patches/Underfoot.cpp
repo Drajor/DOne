@@ -12,6 +12,7 @@
 #include "../Item.h"
 #include "Underfoot_structs.h"
 #include "../rulesys.h"
+#include "../packet_dump_file.h"
 
 #include <iostream>
 #include <sstream>
@@ -457,250 +458,253 @@ ENCODE(OP_RespondAA) {
 	FINISH_ENCODE();
 }
 
-ENCODE(OP_PlayerProfile) {
-	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
-
-	uint32 r;
-
-	eq->available_slots=0xffffffff;
-	memset(eq->unknown06284, 0xff, sizeof(eq->unknown06284));
-	memset(eq->unknown07284, 0xff, sizeof(eq->unknown07284));
-
-//	OUT(checksum);
-	OUT(gender);
-	OUT(race);
-	OUT(class_);
-//	OUT(unknown00016);
-	OUT(level);
-	eq->level1 = emu->level;
-//	OUT(unknown00022[2]);
-	for(r = 0; r < 5; r++) {
-		OUT(binds[r].zoneId);
-		OUT(binds[r].x);
-		OUT(binds[r].y);
-		OUT(binds[r].z);
-		OUT(binds[r].heading);
-	}
-	OUT(deity);
-	OUT(intoxication);
-	OUT_array(spellSlotRefresh, structs::MAX_PP_MEMSPELL);
-	OUT(abilitySlotRefresh);
-	OUT(points); // Relocation Test
-//	OUT(unknown0166[4]);
-	OUT(haircolor);
-	OUT(beardcolor);
-	OUT(eyecolor1);
-	OUT(eyecolor2);
-	OUT(hairstyle);
-	OUT(beard);
-//	OUT(unknown00178[10]);
-	for(r = 0; r < 9; r++) {
-		eq->equipment[r].equip0 = emu->item_material[r];
-		eq->equipment[r].equip1 = 0;
-		eq->equipment[r].itemId = 0;
-		//eq->colors[r].color = emu->colors[r].color;
-	}
-	for(r = 0; r < 7; r++) {
-		OUT(item_tint[r].color);
-	}
-//	OUT(unknown00224[48]);
-	//NOTE: new client supports 300 AAs, our internal rep/PP
-	//only supports 240..
-	for(r = 0; r < MAX_PP_AA_ARRAY; r++) {
-		OUT(aa_array[r].AA);
-		OUT(aa_array[r].value);
-	}
-//	OUT(unknown02220[4]);
-	OUT(mana);
-	OUT(cur_hp);
-	OUT(STR);
-	OUT(STA);
-	OUT(CHA);
-	OUT(AGI);
-	OUT(INT);
-	OUT(DEX);
-	OUT(WIS);
-	OUT(face);
-//	OUT(unknown02264[47]);
-	OUT_array(spell_book, structs::MAX_PP_SPELLBOOK);
-//	OUT(unknown4184[128]);
-	OUT_array(mem_spells, structs::MAX_PP_MEMSPELL);
-//	OUT(unknown04396[32]);
-	OUT(platinum);
-	OUT(gold);
-	OUT(silver);
-	OUT(copper);
-	OUT(platinum_cursor);
-	OUT(gold_cursor);
-	OUT(silver_cursor);
-	OUT(copper_cursor);
-
-	OUT_array(skills, structs::MAX_PP_SKILL);	// 1:1 direct copy (100 dword)
-
-//	OUT(unknown04760[236]);
-	OUT(toxicity);
-	OUT(thirst_level);
-	OUT(hunger_level);
-	//PS this needs to be figured out more; but it was 'good enough'
-	for(r = 0; r < structs::BUFF_COUNT; r++)
-	{
-		if(emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
-		{
-			eq->buffs[r].unknown004 = 0x3f800000;
-			eq->buffs[r].slotid = 2;
-			eq->buffs[r].player_id = 0x000717fd;
-		}
-		else
-		{
-			eq->buffs[r].slotid = 0;
-		}
-		//OUT(buffs[r].slotid);
-		OUT(buffs[r].level);
-		//OUT(buffs[r].bard_modifier);
-		//OUT(buffs[r].effect);
-		OUT(buffs[r].spellid);
-		OUT(buffs[r].duration);
-		OUT(buffs[r].counters);
-		//OUT(buffs[r].player_id);
-	}
-	for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
-		OUT(disciplines.values[r]);
-	}
-	OUT_array(recastTimers, structs::MAX_RECAST_TYPES);
-//	OUT(unknown08124[360]);
-	OUT(endurance);
-	OUT(aapoints_spent);
-	OUT(aapoints);
-//	OUT(unknown06160[4]);
-	//NOTE: new client supports 20 bandoliers, our internal rep
-	//only supports 4..
-	for(r = 0; r < 4; r++) {
-		OUT_str(bandoliers[r].name);
-		uint32 k;
-		for(k = 0; k < structs::MAX_PLAYER_BANDOLIER_ITEMS; k++) {
-			OUT(bandoliers[r].items[k].item_id);
-			OUT(bandoliers[r].items[k].icon);
-			OUT_str(bandoliers[r].items[k].item_name);
-		}
-	}
-//	OUT(unknown07444[5120]);
-	for(r = 0; r < structs::MAX_POTIONS_IN_BELT; r++) {
-		OUT(potionbelt.items[r].item_id);
-		OUT(potionbelt.items[r].icon);
-		OUT_str(potionbelt.items[r].item_name);
-	}
-//	OUT(unknown12852[8]);
-//	OUT(unknown12864[76]);
-	OUT_str(name);
-	OUT_str(last_name);
-	OUT(guild_id);
-	OUT(birthday);
-	OUT(lastlogin);
-	OUT(timePlayedMin);
-	OUT(pvp);
-	OUT(mAnonymous);
-	OUT(gm);
-	OUT(guildrank);
-	OUT(guildbanker);
-//	OUT(unknown13054[12]);
-	OUT(exp);
-//	OUT(unknown13072[8]);
-	OUT(timeentitledonaccount);
-	OUT_array(languages, structs::MAX_PP_LANGUAGE);
-//	OUT(unknown13109[7]);
-	OUT(y); //reversed x and y
-	OUT(x);
-	OUT(z);
-	OUT(heading);
-//	OUT(unknown13132[4]);
-	OUT(platinum_bank);
-	OUT(gold_bank);
-	OUT(silver_bank);
-	OUT(copper_bank);
-	OUT(platinum_shared);
-//	OUT(unknown13156[84]);
-	//OUT(expansions);
-	eq->expansions = 0xffff;
-//	OUT(unknown13244[12]);
-	OUT(autosplit);
-//	OUT(unknown13260[16]);
-	OUT(zone_id);
-	OUT(zoneInstance);
-	for(r = 0; r < structs::MAX_GROUP_MEMBERS; r++) {
-		OUT_str(groupMembers[r]);
-	}
-	strcpy(eq->groupLeader, emu->groupMembers[0]);
-//	OUT_str(groupLeader);
-//	OUT(unknown13728[660]);
-	OUT(entityid);
-	OUT(leadAAActive);
-//	OUT(unknown14392[4]);
-	OUT(ldon_points_guk);
-	OUT(ldon_points_mir);
-	OUT(ldon_points_mmc);
-	OUT(ldon_points_ruj);
-	OUT(ldon_points_tak);
-	OUT(ldon_points_available);
-//	OUT(unknown14420[132]);
-	OUT(tribute_time_remaining);
-	OUT(career_tribute_points);
-//	OUT(unknown7208);
-	OUT(tribute_points);
-//	OUT(unknown7216);
-	OUT(tribute_active);
-	for(r = 0; r < structs::MAX_PLAYER_TRIBUTES; r++) {
-		OUT(tributes[r].tribute);
-		OUT(tributes[r].tier);
-	}
-//	OUT(unknown14616[8]);
-	OUT(group_leadership_exp);
-//	OUT(unknown14628);
-	OUT(raid_leadership_exp);
-	OUT(group_leadership_points);
-	OUT(raid_leadership_points);
-	OUT_array(leader_abilities.ranks, structs::MAX_LEADERSHIP_AA_ARRAY);
-//	OUT(unknown14772[128]);
-	OUT(air_remaining);
-	OUT(PVPKills);
-	OUT(PVPDeaths);
-	OUT(PVPCurrentPoints);
-	OUT(PVPCareerPoints);
-	OUT(PVPBestKillStreak);
-	OUT(PVPWorstDeathStreak);
-	OUT(PVPCurrentKillStreak);
-//	OUT(unknown17892[4580]);
-	OUT(expAA);
-//	OUT(unknown19516[40]);
-	OUT(currentRadCrystals);
-	OUT(careerRadCrystals);
-	OUT(currentEbonCrystals);
-	OUT(careerEbonCrystals);
-	OUT(groupAutoconsent);
-	OUT(raidAutoconsent);
-	OUT(guildAutoconsent);
-//	OUT(unknown19575[5]);
-	eq->level3 = emu->level;
-	eq->showhelm = emu->showhelm;
-	OUT(RestTimer);
-//	OUT(unknown19584[4]);
-//	OUT(unknown19588);
-
-
-const uint8 bytes[] = {
-0xa3,0x02,0x00,0x00,0x95,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x00,0x00,0x00,
-0x19,0x00,0x00,0x00,0x19,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,
-0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,0x1F,0x85,0xEB,0x3E,0x33,0x33,0x33,0x3F,
-0x04,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x07,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-};
-
-	memcpy(eq->unknown18020, bytes, sizeof(bytes));
-
-	//set the checksum...
-	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
-
-	FINISH_ENCODE();
-}
+//ENCODE(OP_PlayerProfile) {
+//	SETUP_DIRECT_ENCODE(PlayerProfile_Struct, structs::PlayerProfile_Struct);
+//
+//	uint32 r;
+//
+//	eq->available_slots=0xffffffff;
+//	memset(eq->unknown06284, 0xff, sizeof(eq->unknown06284));
+//	memset(eq->unknown07284, 0xff, sizeof(eq->unknown07284));
+//
+////	OUT(checksum);
+//	OUT(gender);
+//	OUT(race);
+//	OUT(class_);
+////	OUT(unknown00016);
+//	OUT(level);
+//	eq->level1 = emu->level;
+////	OUT(unknown00022[2]);
+//	for(r = 0; r < 5; r++) {
+//		OUT(binds[r].zoneId);
+//		OUT(binds[r].x);
+//		OUT(binds[r].y);
+//		OUT(binds[r].z);
+//		OUT(binds[r].heading);
+//	}
+//	OUT(deity);
+//	OUT(intoxication);
+//	OUT_array(spellSlotRefresh, structs::MAX_PP_MEMSPELL);
+//	OUT(abilitySlotRefresh);
+//	OUT(points); // Relocation Test
+////	OUT(unknown0166[4]);
+//	OUT(haircolor);
+//	OUT(beardcolor);
+//	OUT(eyecolor1);
+//	OUT(eyecolor2);
+//	OUT(hairstyle);
+//	OUT(beard);
+////	OUT(unknown00178[10]);
+//	for(r = 0; r < 9; r++) {
+//		eq->equipment[r].equip0 = emu->item_material[r];
+//		eq->equipment[r].equip1 = 0;
+//		eq->equipment[r].itemId = 0;
+//		//eq->colors[r].color = emu->colors[r].color;
+//	}
+//	for(r = 0; r < 7; r++) {
+//		OUT(item_tint[r].color);
+//	}
+////	OUT(unknown00224[48]);
+//	//NOTE: new client supports 300 AAs, our internal rep/PP
+//	//only supports 240..
+//	for(r = 0; r < MAX_PP_AA_ARRAY; r++) {
+//		OUT(aa_array[r].AA);
+//		OUT(aa_array[r].value);
+//	}
+////	OUT(unknown02220[4]);
+//	OUT(mana);
+//	OUT(cur_hp);
+//	OUT(STR);
+//	OUT(STA);
+//	OUT(CHA);
+//	OUT(AGI);
+//	OUT(INT);
+//	OUT(DEX);
+//	OUT(WIS);
+//	//memset(eq->unknown07284, 1, sizeof(eq->unknown07284));
+//	OUT(face);
+////	OUT(unknown02264[47]);
+//	OUT_array(spell_book, structs::MAX_PP_SPELLBOOK);
+////	OUT(unknown4184[128]);
+//	OUT_array(mem_spells, structs::MAX_PP_MEMSPELL);
+////	OUT(unknown04396[32]);
+//	OUT(platinum);
+//	OUT(gold);
+//	OUT(silver);
+//	OUT(copper);
+//	OUT(platinum_cursor);
+//	OUT(gold_cursor);
+//	OUT(silver_cursor);
+//	OUT(copper_cursor);
+//
+//	OUT_array(skills, structs::MAX_PP_SKILL);	// 1:1 direct copy (100 dword)
+//
+////	OUT(unknown04760[236]);
+//	OUT(toxicity);
+//	OUT(thirst_level);
+//	OUT(hunger_level);
+//	//PS this needs to be figured out more; but it was 'good enough'
+//	for(r = 0; r < structs::BUFF_COUNT; r++)
+//	{
+//		if(emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
+//		{
+//			eq->buffs[r].unknown004 = 0x3f800000;
+//			eq->buffs[r].slotid = 2;
+//			eq->buffs[r].player_id = 0x000717fd;
+//		}
+//		else
+//		{
+//			eq->buffs[r].slotid = 0;
+//		}
+//		//OUT(buffs[r].slotid);
+//		OUT(buffs[r].level);
+//		//OUT(buffs[r].bard_modifier);
+//		//OUT(buffs[r].effect);
+//		OUT(buffs[r].spellid);
+//		OUT(buffs[r].duration);
+//		OUT(buffs[r].counters);
+//		//OUT(buffs[r].player_id);
+//	}
+//	for(r = 0; r < MAX_PP_DISCIPLINES; r++) {
+//		OUT(disciplines.values[r]);
+//	}
+//	OUT_array(recastTimers, structs::MAX_RECAST_TYPES);
+////	OUT(unknown08124[360]);
+//	OUT(endurance);
+//	OUT(aapoints_spent);
+//	OUT(aapoints);
+////	OUT(unknown06160[4]);
+//	//NOTE: new client supports 20 bandoliers, our internal rep
+//	//only supports 4..
+//	for(r = 0; r < 4; r++) {
+//		OUT_str(bandoliers[r].name);
+//		uint32 k;
+//		for(k = 0; k < structs::MAX_PLAYER_BANDOLIER_ITEMS; k++) {
+//			OUT(bandoliers[r].items[k].item_id);
+//			OUT(bandoliers[r].items[k].icon);
+//			OUT_str(bandoliers[r].items[k].item_name);
+//		}
+//	}
+////	OUT(unknown07444[5120]);
+//	for(r = 0; r < structs::MAX_POTIONS_IN_BELT; r++) {
+//		OUT(potionbelt.items[r].item_id);
+//		OUT(potionbelt.items[r].icon);
+//		OUT_str(potionbelt.items[r].item_name);
+//	}
+////	OUT(unknown12852[8]);
+////	OUT(unknown12864[76]);
+//	OUT_str(name);
+//	OUT_str(last_name);
+//	OUT(guild_id);
+//	OUT(birthday);
+//	OUT(lastlogin);
+//	OUT(timePlayedMin);
+//	OUT(pvp);
+//	OUT(mAnonymous);
+//	OUT(gm);
+//	OUT(guildrank);
+//	OUT(guildbanker);
+////	OUT(unknown13054[12]);
+//	OUT(exp);
+////	OUT(unknown13072[8]);
+//	OUT(timeentitledonaccount);
+//	OUT_array(languages, structs::MAX_PP_LANGUAGE);
+////	OUT(unknown13109[7]);
+//	OUT(y); //reversed x and y
+//	OUT(x);
+//	OUT(z);
+//	OUT(heading);
+////	OUT(unknown13132[4]);
+//	OUT(platinum_bank);
+//	OUT(gold_bank);
+//	OUT(silver_bank);
+//	OUT(copper_bank);
+//	OUT(platinum_shared);
+////	OUT(unknown13156[84]);
+//	//OUT(expansions);
+//	eq->expansions = 0xffff;
+////	OUT(unknown13244[12]);
+//	OUT(autosplit);
+////	OUT(unknown13260[16]);
+//	OUT(zone_id);
+//	OUT(zoneInstance);
+//	for(r = 0; r < structs::MAX_GROUP_MEMBERS; r++) {
+//		OUT_str(groupMembers[r]);
+//	}
+//	strcpy(eq->groupLeader, emu->groupMembers[0]);
+////	OUT_str(groupLeader);
+////	OUT(unknown13728[660]);
+//	OUT(entityid);
+//	OUT(leadAAActive);
+////	OUT(unknown14392[4]);
+//	OUT(ldon_points_guk);
+//	OUT(ldon_points_mir);
+//	OUT(ldon_points_mmc);
+//	OUT(ldon_points_ruj);
+//	OUT(ldon_points_tak);
+//	OUT(ldon_points_available);
+////	OUT(unknown14420[132]);
+//	OUT(tribute_time_remaining);
+//	OUT(career_tribute_points);
+////	OUT(unknown7208);
+//	OUT(tribute_points);
+////	OUT(unknown7216);
+//	OUT(tribute_active);
+//	for(r = 0; r < structs::MAX_PLAYER_TRIBUTES; r++) {
+//		OUT(tributes[r].tribute);
+//		OUT(tributes[r].tier);
+//	}
+////	OUT(unknown14616[8]);
+//	OUT(group_leadership_exp);
+////	OUT(unknown14628);
+//	OUT(raid_leadership_exp);
+//	OUT(group_leadership_points);
+//	OUT(raid_leadership_points);
+//	OUT_array(leader_abilities.ranks, structs::MAX_LEADERSHIP_AA_ARRAY);
+////	OUT(unknown14772[128]);
+//	OUT(air_remaining);
+//	OUT(PVPKills);
+//	OUT(PVPDeaths);
+//	OUT(PVPCurrentPoints);
+//	OUT(PVPCareerPoints);
+//	OUT(PVPBestKillStreak);
+//	OUT(PVPWorstDeathStreak);
+//	OUT(PVPCurrentKillStreak);
+////	OUT(unknown17892[4580]);
+//	OUT(expAA);
+////	OUT(unknown19516[40]);
+//	OUT(currentRadCrystals);
+//	OUT(careerRadCrystals);
+//	OUT(currentEbonCrystals);
+//	OUT(careerEbonCrystals);
+//	OUT(groupAutoconsent);
+//	OUT(raidAutoconsent);
+//	OUT(guildAutoconsent);
+////	OUT(unknown19575[5]);
+//	eq->level3 = emu->level;
+//	eq->showhelm = emu->showhelm;
+//	OUT(RestTimer);
+////	OUT(unknown19584[4]);
+////	OUT(unknown19588);
+//
+//
+//const uint8 bytes[] = {
+//0xa3,0x02,0x00,0x00,0x95,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x19,0x00,0x00,0x00,
+//0x19,0x00,0x00,0x00,0x19,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,
+//0x0F,0x00,0x00,0x00,0x0F,0x00,0x00,0x00,0x1F,0x85,0xEB,0x3E,0x33,0x33,0x33,0x3F,
+//0x04,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x07,0x00,0x00,0x00,
+//0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+//};
+//
+//	memcpy(eq->unknown18020, bytes, sizeof(bytes));
+//
+//	//set the checksum...
+//	CRC32::SetEQChecksum(__packet->pBuffer, sizeof(structs::PlayerProfile_Struct)-4);
+//
+//	//std::cout << "PP SIZE = " << __packet->size << std::endl;
+//	FileDumpPacketHex("working.bin", __packet);
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_NewZone) {
 //	SETUP_DIRECT_ENCODE(NewZone_Struct, structs::NewZone_Struct);
@@ -2157,158 +2161,158 @@ ENCODE(OP_VetRewardsAvaliable)
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_GroupUpdate)
-{
-	//_log(NET__ERROR, "OP_GroupUpdate");
-	EQApplicationPacket *in = *p;
-
-	GroupJoin_Struct *gjs = (GroupJoin_Struct*)in->pBuffer;
-
-	//_log(NET__ERROR, "Received outgoing OP_GroupUpdate with action code %i", gjs->action);
-	if((gjs->action == groupActLeave) || (gjs->action == groupActDisband))
-	{
-		if((gjs->action == groupActDisband) || !strcmp(gjs->yourname, gjs->membername))
-		{
-			//_log(NET__ERROR, "Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
-
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandYou, sizeof(structs::GroupGeneric_Struct));
-
-			structs::GroupGeneric_Struct *ggs = (structs::GroupGeneric_Struct*)outapp->pBuffer;
-			memcpy(ggs->name1, gjs->yourname, sizeof(ggs->name1));
-			memcpy(ggs->name2, gjs->membername, sizeof(ggs->name1));
-			dest->FastQueuePacket(&outapp);
-
-			// Make an empty GLAA packet to clear out their useable GLAAs
-			//
-			outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
-
-			dest->FastQueuePacket(&outapp);
-
-			delete in;
-
-			return;
-		}
-		//if(gjs->action == groupActLeave)
-		//	_log(NET__ERROR, "Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandOther, sizeof(structs::GroupGeneric_Struct));
-
-		structs::GroupGeneric_Struct *ggs = (structs::GroupGeneric_Struct*)outapp->pBuffer;
-		memcpy(ggs->name1, gjs->yourname, sizeof(ggs->name1));
-		memcpy(ggs->name2, gjs->membername, sizeof(ggs->name2));
-		//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
-		dest->FastQueuePacket(&outapp);
-
-		delete in;
-		return;
-
-
-	}
-
-	if(in->size == sizeof(GroupUpdate2_Struct))
-	{
-		// Group Update2
-		//_log(NET__ERROR, "Struct is GroupUpdate2");
-
-		unsigned char *__emu_buffer = in->pBuffer;
-		GroupUpdate2_Struct *gu2 = (GroupUpdate2_Struct*) __emu_buffer;
-
-		//_log(NET__ERROR, "Yourname is %s", gu2->yourname);
-
-		int MemberCount = 1;
-
-		int PacketLength = 8 + strlen(gu2->leadersname) + 1 + 22 + strlen(gu2->yourname) + 1;
-
-		for(int i = 0; i < 5; ++i)
-		{
-			//_log(NET__ERROR, "Membername[%i] is %s", i,  gu2->membername[i]);
-			if(gu2->membername[i][0] != '\0')
-			{
-				PacketLength += (22 + strlen(gu2->membername[i]) + 1);
-				++MemberCount;
-			}
-		}
-
-		//_log(NET__ERROR, "Leadername is %s", gu2->leadersname);
-
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
-
-		char *Buffer = (char *)outapp->pBuffer;
-
-		// Header
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Think this should be SpawnID, but it doesn't seem to matter
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberCount);
-		VARSTRUCT_ENCODE_STRING(Buffer, gu2->leadersname);
-
-		// Leader
-		//
-
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-		VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-		//VARSTRUCT_ENCODE_STRING(Buffer, "");
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x46);	// Observed 0x41 and 0x46 here
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
-
-		int MemberNumber = 1;
-
-		for(int i = 0; i < 5; ++i)
-		{
-			if(gu2->membername[i][0] == '\0')
-				continue;
-
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberNumber++);
-			VARSTRUCT_ENCODE_STRING(Buffer, gu2->membername[i]);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			//VARSTRUCT_ENCODE_STRING(Buffer, "");
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x41);	// Observed 0x41 and 0x46 here
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Low byte is Main Assist Flag
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
-		}
-
-		//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
-		dest->FastQueuePacket(&outapp);
-
-		outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
-
-		GroupLeadershipAAUpdate_Struct *GLAAus = (GroupLeadershipAAUpdate_Struct*)outapp->pBuffer;
-
-		GLAAus->NPCMarkerID = gu2->NPCMarkerID;
-		memcpy(&GLAAus->LeaderAAs, &gu2->leader_aas, sizeof(GLAAus->LeaderAAs));
-
-		dest->FastQueuePacket(&outapp);
-		delete in;
-
-		return;
-
-	}
-	//_log(NET__ERROR, "Generic GroupUpdate, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
-	ENCODE_LENGTH_EXACT(GroupJoin_Struct);
-	SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
-
-	memcpy(eq->membername, emu->membername, sizeof(eq->membername));
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
-
-	GroupLeadershipAAUpdate_Struct *GLAAus = (GroupLeadershipAAUpdate_Struct*)outapp->pBuffer;
-
-	GLAAus->NPCMarkerID = emu->NPCMarkerID;
-
-	memcpy(&GLAAus->LeaderAAs, &emu->leader_aas, sizeof(GLAAus->LeaderAAs));
-	//_hex(NET__ERROR, __packet->pBuffer, __packet->size);
-	FINISH_ENCODE();
-
-	dest->FastQueuePacket(&outapp);
-}
+//ENCODE(OP_GroupUpdate)
+//{
+//	//_log(NET__ERROR, "OP_GroupUpdate");
+//	EQApplicationPacket *in = *p;
+//
+//	GroupJoin_Struct *gjs = (GroupJoin_Struct*)in->pBuffer;
+//
+//	//_log(NET__ERROR, "Received outgoing OP_GroupUpdate with action code %i", gjs->action);
+//	if((gjs->action == groupActLeave) || (gjs->action == groupActDisband))
+//	{
+//		if((gjs->action == groupActDisband) || !strcmp(gjs->yourname, gjs->membername))
+//		{
+//			//_log(NET__ERROR, "Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+//
+//			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandYou, sizeof(structs::GroupGeneric_Struct));
+//
+//			structs::GroupGeneric_Struct *ggs = (structs::GroupGeneric_Struct*)outapp->pBuffer;
+//			memcpy(ggs->name1, gjs->yourname, sizeof(ggs->name1));
+//			memcpy(ggs->name2, gjs->membername, sizeof(ggs->name1));
+//			dest->FastQueuePacket(&outapp);
+//
+//			// Make an empty GLAA packet to clear out their useable GLAAs
+//			//
+//			outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
+//
+//			dest->FastQueuePacket(&outapp);
+//
+//			delete in;
+//
+//			return;
+//		}
+//		//if(gjs->action == groupActLeave)
+//		//	_log(NET__ERROR, "Group Leave, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+//
+//		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupDisbandOther, sizeof(structs::GroupGeneric_Struct));
+//
+//		structs::GroupGeneric_Struct *ggs = (structs::GroupGeneric_Struct*)outapp->pBuffer;
+//		memcpy(ggs->name1, gjs->yourname, sizeof(ggs->name1));
+//		memcpy(ggs->name2, gjs->membername, sizeof(ggs->name2));
+//		//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+//		dest->FastQueuePacket(&outapp);
+//
+//		delete in;
+//		return;
+//
+//
+//	}
+//
+//	if(in->size == sizeof(GroupUpdate2_Struct))
+//	{
+//		// Group Update2
+//		//_log(NET__ERROR, "Struct is GroupUpdate2");
+//
+//		unsigned char *__emu_buffer = in->pBuffer;
+//		GroupUpdate2_Struct *gu2 = (GroupUpdate2_Struct*) __emu_buffer;
+//
+//		//_log(NET__ERROR, "Yourname is %s", gu2->yourname);
+//
+//		int MemberCount = 1;
+//
+//		int PacketLength = 8 + strlen(gu2->leadersname) + 1 + 22 + strlen(gu2->yourname) + 1;
+//
+//		for(int i = 0; i < 5; ++i)
+//		{
+//			//_log(NET__ERROR, "Membername[%i] is %s", i,  gu2->membername[i]);
+//			if(gu2->membername[i][0] != '\0')
+//			{
+//				PacketLength += (22 + strlen(gu2->membername[i]) + 1);
+//				++MemberCount;
+//			}
+//		}
+//
+//		//_log(NET__ERROR, "Leadername is %s", gu2->leadersname);
+//
+//		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupUpdateB, PacketLength);
+//
+//		char *Buffer = (char *)outapp->pBuffer;
+//
+//		// Header
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Think this should be SpawnID, but it doesn't seem to matter
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberCount);
+//		VARSTRUCT_ENCODE_STRING(Buffer, gu2->leadersname);
+//
+//		// Leader
+//		//
+//
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//		VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);
+//		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+//		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+//		//VARSTRUCT_ENCODE_STRING(Buffer, "");
+//		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x46);	// Observed 0x41 and 0x46 here
+//		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//		VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+//
+//		int MemberNumber = 1;
+//
+//		for(int i = 0; i < 5; ++i)
+//		{
+//			if(gu2->membername[i][0] == '\0')
+//				continue;
+//
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberNumber++);
+//			VARSTRUCT_ENCODE_STRING(Buffer, gu2->membername[i]);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 50);
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 25);
+//			//VARSTRUCT_ENCODE_STRING(Buffer, "");
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x41);	// Observed 0x41 and 0x46 here
+//			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Low byte is Main Assist Flag
+//			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+//			VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+//		}
+//
+//		//_hex(NET__ERROR, outapp->pBuffer, outapp->size);
+//		dest->FastQueuePacket(&outapp);
+//
+//		outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
+//
+//		GroupLeadershipAAUpdate_Struct *GLAAus = (GroupLeadershipAAUpdate_Struct*)outapp->pBuffer;
+//
+//		GLAAus->NPCMarkerID = gu2->NPCMarkerID;
+//		memcpy(&GLAAus->LeaderAAs, &gu2->leader_aas, sizeof(GLAAus->LeaderAAs));
+//
+//		dest->FastQueuePacket(&outapp);
+//		delete in;
+//
+//		return;
+//
+//	}
+//	//_log(NET__ERROR, "Generic GroupUpdate, yourname = %s, membername = %s", gjs->yourname, gjs->membername);
+//	ENCODE_LENGTH_EXACT(GroupJoin_Struct);
+//	SETUP_DIRECT_ENCODE(GroupJoin_Struct, structs::GroupJoin_Struct);
+//
+//	memcpy(eq->membername, emu->membername, sizeof(eq->membername));
+//
+//	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupLeadershipAAUpdate, sizeof(GroupLeadershipAAUpdate_Struct));
+//
+//	GroupLeadershipAAUpdate_Struct *GLAAus = (GroupLeadershipAAUpdate_Struct*)outapp->pBuffer;
+//
+//	GLAAus->NPCMarkerID = emu->NPCMarkerID;
+//
+//	memcpy(&GLAAus->LeaderAAs, &emu->leader_aas, sizeof(GLAAus->LeaderAAs));
+//	//_hex(NET__ERROR, __packet->pBuffer, __packet->size);
+//	FINISH_ENCODE();
+//
+//	dest->FastQueuePacket(&outapp);
+//}
 
 //ENCODE(OP_ChannelMessage)
 //{

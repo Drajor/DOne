@@ -93,7 +93,7 @@ public:
 			float y = 0.0f;
 			float z = 0.0f;
 			// Check: Parameter conversion.
-			const bool ok = Utility::stofSafe(x, pParameters[0]) && Utility::stofSafe(y, pParameters[1]) && Utility::stofSafe(z, pParameters[2]);
+			const bool ok = Utility::stoSafe(x, pParameters[0]) && Utility::stoSafe(y, pParameters[1]) && Utility::stoSafe(z, pParameters[2]);
 			if (!ok) { return false; }
 			Vector3 position(x, y, z);
 			mInvoker->notify("Warping to position " + position.toString());
@@ -333,7 +333,7 @@ public:
 		uint32 value = 0;
 		Statistic statistic;
 		// Check: Parameter conversion.
-		const bool ok = Utility::stou32Safe(value, pParameters[1]);
+		const bool ok = Utility::stoSafe(value, pParameters[1]);
 		if (!ok) {
 			return false;
 		}
@@ -435,7 +435,7 @@ public:
 //
 //	const bool handleCommand(CommandParameters pParameters) {
 //		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0]) ) {
-//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
+//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRank::Leader) {
 //				ServiceLocator::getGuildManager()->onPromote(mInvoker, pParameters[0]);
 //			}
 //			else {
@@ -459,7 +459,7 @@ public:
 //
 //	const bool handleCommand(CommandParameters pParameters) {
 //		if (pParameters.size() == 1 && Limits::Character::nameLength(pParameters[0])) {
-//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRanks::Leader) {
+//			if (mInvoker->hasGuild() && mInvoker->getGuildRank() == GuildRank::Leader) {
 //				ServiceLocator::getGuildManager()->onDemote(mInvoker, pParameters[0]);
 //			}
 //			else {
@@ -558,7 +558,7 @@ public:
 		uint32 skillID = 0;
 		uint32 skillValue = 0;
 		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(skillID, pParameters[0]) && Utility::stou32Safe(skillValue, pParameters[1]);
+		bool ok = Utility::stoSafe(skillID, pParameters[0]) && Utility::stoSafe(skillValue, pParameters[1]);
 		if (!ok) {
 			return false;
 		}
@@ -592,7 +592,7 @@ public:
 
 		uint32 skillID = 0;
 		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(skillID, pParameters[0]);
+		bool ok = Utility::stoSafe(skillID, pParameters[0]);
 		if (!ok) {
 			conversionError(pParameters[0]);
 			return false;
@@ -643,7 +643,7 @@ public:
 		uint32 languageID = 0;
 		uint32 languageValue = 0;
 		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(languageID, pParameters[0]) && Utility::stou32Safe(languageValue, pParameters[1]);
+		bool ok = Utility::stoSafe(languageID, pParameters[0]) && Utility::stoSafe(languageValue, pParameters[1]);
 		if (!ok) {
 			return false;
 		}
@@ -677,7 +677,7 @@ public:
 
 		uint32 languageID = 0;
 		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(languageID, pParameters[0]);
+		bool ok = Utility::stoSafe(languageID, pParameters[0]);
 		if (!ok) {
 			conversionError(pParameters[0]);
 			return false;
@@ -768,7 +768,7 @@ public:
 
 		uint32 lock = 0;
 		// Check: Parameter conversion.
-		bool ok = Utility::stou32Safe(lock, pParameters[0]);
+		bool ok = Utility::stoSafe(lock, pParameters[0]);
 		if (!ok) {
 			conversionError(pParameters[0]);
 			return false;
@@ -1877,7 +1877,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	// #damage <amount>
 	else if (pCommandName == "damage" && pParameters.size() == 1 && pCharacter->hasTarget()) {
 		unsigned int damage = 0;
-		if (Utility::stou32Safe(damage, pParameters[0])) {
+		if (Utility::stoSafe(damage, pParameters[0])) {
 			auto packet = Payload::Zone::Damage::construct(pCharacter->getTarget()->getSpawnID(), pCharacter->getSpawnID(), damage, 1, 0);
 			pCharacter->getConnection()->sendPacket(packet);
 			safe_delete(packet);
@@ -1888,7 +1888,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		if (pParameters.size() == 2) {
 			uint32 appType = 0;
 			uint32 appParameter = 0;
-			if (Utility::stou32Safe(appType, pParameters[0]) && Utility::stou32Safe(appParameter, pParameters[1])) {
+			if (Utility::stoSafe(appType, pParameters[0]) && Utility::stoSafe(appParameter, pParameters[1])) {
 				pCharacter->getConnection()->sendAppearance(appType, appParameter);
 			}
 		}
@@ -1898,7 +1898,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		if (pParameters.size() == 2 && pCharacter->hasTarget()) {
 			uint32 v0 = 0;
 			uint32 v1 = 0;
-			if (Utility::stou32Safe(v0, pParameters[0]) && Utility::stou32Safe(v1, pParameters[1])) {
+			if (Utility::stoSafe(v0, pParameters[0]) && Utility::stoSafe(v1, pParameters[1])) {
 				//pCharacter->doAnimation(animationID);
 				pCharacter->getZone()->handleAnimation(pCharacter->getTarget(), v0, v1, true);
 			}
@@ -2155,7 +2155,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	//// Speed
 	//else if (pCommandName == "speed" && pParameters.size() == 1) {
 	//	float speed = 0.0f;
-	//	if (Utility::stofSafe(speed, pParameters[0])) {
+	//	if (Utility::stoSafe(speed, pParameters[0])) {
 	//		pCharacter->setRunSpeed(speed);
 	//		pCharacter->setWalkSpeed(speed * 0.5f);
 	//		pCharacter->getConnection()->sendZoneEntry();

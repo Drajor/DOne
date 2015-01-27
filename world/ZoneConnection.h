@@ -97,20 +97,12 @@ public:
 	void sendGuildMessage(const String& pSenderName, const String& pMessage);
 
 	void sendGroupInvite(const String pFromCharacterName);
-	void sendGroupCreate();
-	void sendGroupLeaderChange(const String pCharacterName);
-	void sendGroupAcknowledge();
-	void sendGroupFollow(const String& pLeaderCharacterName, const String& pMemberCharacterName);
-	void sendGroupJoin(const String& pCharacterName);
-	void sendGroupUpdate(std::list<String>& pGroupMemberNames);
-	void sendGroupDisband();
-	void sendGroupLeave(const String& pLeavingCharacterName);
 
 	void sendRequestZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
 	void sendZoneChange(const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition, const int32 pSuccess);
 
 	void sendGuildRank(const u32 pRank);
-	void sendGuildInvite(String pInviterName, GuildID pGuildID);
+	void sendGuildInvite(const String& pInviterName, const u32 pGuildID);
 	void sendGuildMOTDResponse(const String& pMOTD, const String& pMOTDSetByName);
 
 	void sendSurnameApproval(const bool pSuccess);
@@ -306,6 +298,7 @@ public:
 	const bool handleInspectRequest(const EQApplicationPacket* pPacket);
 	const bool handleSetInspectMessage(const EQApplicationPacket* pPacket);
 	const bool handleRemoveBuffRequest(const EQApplicationPacket* pPacket);
+	const bool handleGroupRoleChange(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE
@@ -361,12 +354,6 @@ private:
 	GuildManager* mGuildManager = nullptr;
 
 	static EQApplicationPacket* mPlayerProfilePacket;
-
-	static EQApplicationPacket* mGroupJoinPacket;
-	static EQApplicationPacket* mGroupLeavePacket;
-	static EQApplicationPacket* mGroupDisbandPacket;
-	static EQApplicationPacket* mGroupLeaderChangePacket;
-	static EQApplicationPacket* mGroupUpdateMembersPacket;
 
 	bool mSizeError = false; // For unit testing.
 	bool mStringError = false; // For unit testing.

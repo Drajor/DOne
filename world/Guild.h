@@ -106,12 +106,13 @@ public:
 	void onSetPublicNote(GuildMember * pMember, const String& pPublicNote);
 	void onSetFlags(GuildMember * pMember, const u32 pFlags);
 
-	// Returns a copy of member data.
-	inline std::list<GuildMember*> getMembers() { return mMembers; }
-
 	GuildMember* getMember(const String& pCharacterName) const;
 
 	void sendPacket(const EQApplicationPacket* pPacket) const;
+
+	// Returns the Guild members.
+	inline std::list<GuildMember*>& getMembers() { return mMembers; }
+
 private:
 
 	Data::Guild* mData = nullptr;

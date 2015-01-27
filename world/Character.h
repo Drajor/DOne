@@ -29,6 +29,38 @@ namespace Data {
 	struct Spell;
 }
 
+struct GroupInvitation {
+	u32 mTimeInvited = 0;
+	String mInviterName;
+
+	inline void clear() {
+		mTimeInvited = 0;
+		mInviterName.clear();
+	}
+};
+
+struct RaidInvitation {
+	u32 mTimeInvited = 0;
+	String mInviterName;
+
+	inline void clear() {
+		mTimeInvited = 0;
+		mInviterName.clear();
+	}
+};
+
+struct GuildInvitation {
+	u32 mTimeInvited = 0;
+	u32 mGuildID = 0;
+	String mInviterName;
+
+	inline void clear() {
+		mTimeInvited = 0;
+		mGuildID = 0;
+		mInviterName.clear();
+	}
+};
+
 class Character : public Actor {
 	friend ZoneConnection;
 public:
@@ -108,33 +140,98 @@ public:
 	// Returns whether this Character has neither a Group nor a Raid.
 	const bool isSolo() const { return !hasGroup() && !hasRaid(); }
 
+	/////////////////////////////////////////////////////////////////////
 	// Group
+	
+	// Returns whether or not this Character has a Group.
 	inline bool hasGroup() const { return mGroup != nullptr; }
+
+	// Returns the Group this Character belongs to.
 	inline Group* getGroup() { return mGroup; }
-	inline void setGroup(Group* pGroup) { mGroup = pGroup; }
-	inline const bool isGroupLeader() { return false; } // TODO
 
-	// Guild
-	inline bool hasGuild() const { return mGuild != nullptr; }
-	inline Guild* getGuild() const { return mGuild; }
-	inline void setGuild(Guild* pGuild) { mGuild = pGuild; }
-	inline void setGuild(Guild* pGuild, const u32 pGuildID, const u8 pGuildRank, const String pGuildName) { setGuild(pGuild); setGuildID(pGuildID); setGuildRank(pGuildRank); mGuildName = pGuildName; }
-	inline void clearGuild() { setGuild(nullptr, NO_GUILD, GuildRanks::GR_None, ""); }
-	const String& getGuildName() const { return mGuildName; }
+	// Sets the Group this Character is a member of.
+	void setGroup(Group* pGroup);
 
-	// Pending Guild Invite
-	bool hasPendingGuildInvite() { return mPendingGuildInviteID != NO_GUILD; }
-	GuildID getPendingGuildInviteID() { return mPendingGuildInviteID; }
-	void setPendingGuildInviteID(GuildID pGuildID) { mPendingGuildInviteID = pGuildID; }
-	String getPendingGuildInviteName() { return mPendingGuildInviteName; }
-	void setPendingGuildInviteName(const String& pName) { mPendingGuildInviteName = pName; }
-	void clearPendingGuildInvite() { mPendingGuildInviteID = NO_GUILD; mPendingGuildInviteName = ""; }
+	// Clears this Character's Group.
+	inline void clearGroup() { setGroup(nullptr); }
 
+	// Returns whether or not this Character is the Group leader.
+	const bool isGroupLeader();
+
+	inline void setIsGroupMainTank(const bool pValue) { mGroupMainTank = pValue; }
+	inline const bool isGroupMainTank() const { return mGroupMainTank; }
+
+	inline void setIsGroupMainAssist(const bool pValue) { mGroupMainAssist = pValue; }
+	inline const bool isGroupMainAssist() const { return mGroupMainAssist; }
+
+	inline void setIsGroupPuller(const bool pValue) { mGroupPuller = pValue; }
+	inline const bool isGroupPuller() const { return mGroupPuller; }
+
+	// Returns whether or not this Character has a pending group invitation.
+	inline const bool hasGroupInvitation() const { return mGroupInvitation.mTimeInvited != 0; }
+
+	// Returns a reference to the group invitation.
+	inline GroupInvitation& getGroupInvitation() { return mGroupInvitation; }
+
+	// Clears the group invitation.
+	inline void clearGroupInvitation() { mGroupInvitation.clear(); }
+
+	/////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////////
 	// Raid
+	
+	// Returns whether or not this Character has a Raid.
 	inline bool hasRaid() const { return mRaid != nullptr; }
+
+	// Returns the Raid this Character belongs to.
 	inline Raid* getRaid() { return mRaid; }
+
+	// Sets the Raid this Character is a member of.
 	inline void setRaid(Raid* pRaid) { mRaid = pRaid; }
-	inline const bool isRaidLeader() { return false; } // TODO
+
+	// Clears this Character's Raid.
+	inline void clearRaid() { setRaid(nullptr); }
+
+	// Returns whether or not this Character is the Raid leader.
+	const bool isRaidLeader() const;
+
+	// Returns whether or not this Character has a pending raid invitation.
+	inline const bool hasRaidInvitation() const { return mRaidInvitation.mTimeInvited != 0; }
+
+	// Returns a reference to the raid invitation.
+	RaidInvitation& getRaidInvitation() { return mRaidInvitation; }
+
+	// Clears the raid invitation.
+	inline void clearRaidInvitation() { mRaidInvitation.clear(); }
+
+	/////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////////
+	// Guild
+
+	// Returns whether or not this Character has a Guild.
+	inline bool hasGuild() const { return mGuild != nullptr; }
+
+	// Returns the Guild this Character belongs to.
+	inline Guild* getGuild() const { return mGuild; }
+
+	// Sets the Guild this Character is a member of.
+	void setGuild(Guild* pGuild);
+
+	// Clears this Character's Guild.
+	void clearGuild() { setGuild(nullptr); }
+
+	// Returns whether or not this Character has a pending guild invitation.
+	inline const bool hasGuildInvitation() const { return mGuildInvitation.mTimeInvited != 0; }
+
+	// Returns a reference to the guild invitation.
+	GuildInvitation& getGuildInvitation() { return mGuildInvitation; }
+
+	// Clears the guild invitation.
+	inline void clearGuildInvitation() { mGuildInvitation.clear(); }
+
+	/////////////////////////////////////////////////////////////////////
 
 	void setConnection(ZoneConnection* pConnection) { mConnection = pConnection; }
 	ZoneConnection* getConnection() { return mConnection; }
@@ -169,15 +266,29 @@ public:
 	uint32 getBaseStatistic(Statistic pStatistic);
 	void setBaseStatistic(Statistic pStatistic, uint32 pValue);
 
+	inline const i32 getBasePoisonResist() const { return 0; }
+	inline const i32 getBaseMagicResist() const { return 0; }
+	inline const i32 getBaseDiseaseResist() const { return 0; }
+	inline const i32 getBaseFireResist() const { return 0; }
+	inline const i32 getBaseColdResist() const { return 0; }
+	inline const i32 getBaseCorruptionResist() const { return 0; }
+
+	inline const u32 getBaseStrength() const { return mBaseStrength; };
+	inline const u32 getBaseStamina() const { return mBaseStamina; };
+	inline const u32 getBaseCharisma() const { return mBaseCharisma; };
+	inline const u32 getBaseDexterity() const { return mBaseDexterity; };
+	inline const u32 getBaseIntelligence() const { return mBaseIntelligence; };
+	inline const u32 getBaseAgility() const { return mBaseAgility; };
+	inline const u32 getBaseWisdom() const { return mBaseWisdom; };
+
 	// 
-	uint32 getStrength() { return 0; };
-	uint32 getStamina() { return 0; };
-	uint32 getCharisma() { return 0; };
-	uint32 getDexterity() { return 0; };
-	uint32 getIntelligence() { return 0; };
-	uint32 getAgility() { return 0; };
-	uint32 getWisdom() { return 0; };
-	uint32 getStatistic(Statistic pStatistic);
+	inline const u32 getStrength() const { return 0; };
+	inline const u32 getStamina() const { return 0; };
+	inline const u32 getCharisma() const { return 0; };
+	inline const u32 getDexterity() const { return 0; };
+	inline const u32 getIntelligence() const { return 0; };
+	inline const u32 getAgility() const { return 0; };
+	inline const u32 getWisdom() const { return 0; };
 
 	// Consent
 	inline const bool getAutoConsentGroup() const { return mAutoConsentGroup; }
@@ -268,6 +379,8 @@ public:
 	const bool canCombine() const;
 	const bool canShop() const;
 
+	inline const u32 getIntoxication() const { return 0; }
+
 private:
 
 	Account* mAccount = nullptr;
@@ -285,13 +398,13 @@ private:
 
 	Filters mFilters;
 
-	uint32 mBaseStrength = 0;
-	uint32 mBaseStamina = 0;
-	uint32 mBaseCharisma = 0;
-	uint32 mBaseDexterity = 0;
-	uint32 mBaseIntelligence = 0;
-	uint32 mBaseAgility = 0;
-	uint32 mBaseWisdom = 0;
+	u32 mBaseStrength = 0;
+	u32 mBaseStamina = 0;
+	u32 mBaseCharisma = 0;
+	u32 mBaseDexterity = 0;
+	u32 mBaseIntelligence = 0;
+	u32 mBaseAgility = 0;
+	u32 mBaseWisdom = 0;
 
 	bool mIsCasting = false;
 	uint32 mCastingSpellID = 0;
@@ -318,12 +431,16 @@ private:
 	Timer mAutoSave;
 
 	Group* mGroup = nullptr;
+	GroupInvitation mGroupInvitation;
+	bool mGroupMainTank = false;
+	bool mGroupMainAssist = false;
+	bool mGroupPuller = false;
+
 	Raid* mRaid = nullptr;
+	RaidInvitation mRaidInvitation;
 
 	Guild* mGuild = nullptr;
-	String mGuildName;
-	GuildID mPendingGuildInviteID = NO_GUILD;
-	String mPendingGuildInviteName = "";
+	GuildInvitation mGuildInvitation;
 
 	ZoneConnection* mConnection = nullptr;
 	Data::Character* mData = nullptr;

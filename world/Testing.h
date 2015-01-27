@@ -28,6 +28,7 @@
 #include "Test_WorldConnectionHandlerSanity.h"
 
 TEST(ZonePayload, FixedSizes) {
+	EXPECT_EQ(26632, Payload::Zone::CharacterProfile::size());
 	EXPECT_EQ(944, Payload::Zone::ZoneData::size());
 	EXPECT_EQ(8, Payload::Zone::Time::size());
 	EXPECT_EQ(68, Payload::Zone::ZoneEntry::size());
@@ -93,10 +94,14 @@ TEST(ZonePayload, FixedSizes) {
 
 	// Group.
 	EXPECT_EQ(148, Payload::Group::Invite::size());
-	EXPECT_EQ(152, Payload::Group::Follow::size());
+	EXPECT_EQ(152, Payload::Group::AcceptInvite::size());
 	EXPECT_EQ(152, Payload::Group::DeclineInvite::size());
 	EXPECT_EQ(148, Payload::Group::Disband::size());
+	EXPECT_EQ(148, Payload::Group::DisbandYou::size());
+	EXPECT_EQ(148, Payload::Group::DisbandOther::size());
 	EXPECT_EQ(456, Payload::Group::MakeLeader::size());
+	EXPECT_EQ(148, Payload::Group::Roles::size());
+	EXPECT_EQ(148, Payload::Group::LeaderUpdate::size());
 
 	// Raid.
 	EXPECT_EQ(140, Payload::Raid::Invite::size());

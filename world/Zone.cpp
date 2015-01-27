@@ -256,6 +256,35 @@ void Zone::onLeaveZone(Character* pCharacter) {
 	if (!pCharacter) return;
 
 	mLog->info("Character (" + pCharacter->getName() + ") leaving zone.");
+
+	// NOTE: UF actually retains this. Not sure how to handle it.
+	// Character has a Group invitation.
+	if (pCharacter->hasGroupInvitation())
+		// Decline it.
+		onGroupInviteDecline(pCharacter);
+
+	// Character has a Raid invitation.
+	if (pCharacter->hasRaidInvitation())
+		// Decline it.
+		onRaidInviteDecline(pCharacter);
+
+	// Character has a Guild invitation.
+	if (pCharacter->hasGuildInvitation())
+		// Decline it.
+		onGuildInviteDecline(pCharacter);
+
+	// Character has a Guild.
+	if (pCharacter->hasGuild())
+		mGuildManager->onLeaveZone(pCharacter);
+
+	// Character has a Raid.
+	if (pCharacter->hasRaid())
+		mRaidManager->onLeaveZone(pCharacter);
+
+	// Character has a Group.
+	if (pCharacter->hasGroup())
+		mGroupManager->onLeaveZone(pCharacter);
+
 	pCharacter->onLeaveZone();
 
 	// Remove Character.
@@ -288,15 +317,6 @@ void Zone::onLeaveZone(Character* pCharacter) {
 	// Trading.
 
 	// Aggro.
-
-	if (pCharacter->hasGuild())
-		mGuildManager->onLeaveZone(pCharacter);
-
-	if (pCharacter->hasGroup())
-		mGroupManager->onLeaveZone(pCharacter);
-
-	if (pCharacter->hasRaid())
-		mRaidManager->onLeaveZone(pCharacter);
 
 	// Notify ZoneManager.
 	mZoneManager->onLeaveZone(pCharacter);
@@ -901,7 +921,7 @@ void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
 	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
 	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
 	payload->spawn_id = pRemoveActor->getSpawnID();
-	payload->Decay = 1;
+	payload->Decay = 0;
 	pCharacter->getConnection()->sendPacket(outPacket);
 	safe_delete(outPacket);
 }
@@ -2426,7 +2446,7 @@ const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) 
 			return true;
 		}
 		// Handle: Character has a pending guild invite.
-		else if (character->hasPendingGuildInvite()) {
+		else if (character->hasGuildInvitation()) {
 			pInviter->message(MessageType::Yellow, pInviteeName + " is considering joining another guild.");
 			return true;
 		}
@@ -2436,8 +2456,10 @@ const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) 
 	}
 
 	// Record invitation.
-	character->setPendingGuildInviteID(pInviter->getGuildID());
-	character->setPendingGuildInviteName(pInviter->getName());
+	auto& invitation = character->getGuildInvitation();
+	invitation.mGuildID = pInviter->getGuildID();
+	invitation.mInviterName = pInviter->getName();
+	invitation.mTimeInvited = Utility::Time::now();
 
 	// Notify invitee.
 	character->getConnection()->sendGuildInvite(pInviter->getName(), pInviter->getGuild()->getID());
@@ -2455,15 +2477,15 @@ const bool Zone::onGuildInviteAccept(Character* pCharacter) {
 	}
 	
 	// Let the inviter know the invite was accepted.
-	auto inviter = mZoneManager->findCharacter(pCharacter->getPendingGuildInviteName());
+	auto& invitation = pCharacter->getGuildInvitation();
+	auto inviter = mZoneManager->findCharacter(invitation.mInviterName);
 	if (inviter)
 		inviter->message(MessageType::Yellow, pCharacter->getName() + " has accepted your invitation to join the guild.");
-
-	pCharacter->clearPendingGuildInvite();
 
 	// Update Zone.
 	onChangeGuild(pCharacter);
 
+	pCharacter->clearGuildInvitation();
 	return true;
 }
 
@@ -2471,14 +2493,15 @@ const bool Zone::onGuildInviteDecline(Character* pCharacter) {
 	if (!pCharacter) return false;
 
 	// Check: The Character declining the invite has a pending invite.
-	if (!pCharacter->hasPendingGuildInvite()) return false;
+	if (!pCharacter->hasGuildInvitation()) return false;
 
 	// Let the inviter know the invite was accepted.
-	auto inviter = mZoneManager->findCharacter(pCharacter->getPendingGuildInviteName());
+	auto& invitation = pCharacter->getGuildInvitation();
+	auto inviter = mZoneManager->findCharacter(invitation.mInviterName);
 	if (inviter)
 		inviter->message(MessageType::Yellow, pCharacter->getName() + " has declined your invitation to join the guild.");
 
-	pCharacter->clearPendingGuildInvite();
+	pCharacter->clearGuildInvitation();
 	return true;
 }
 
@@ -2627,35 +2650,13 @@ const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharact
 	return success;
 }
 
-const bool Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) {
-	mGroupManager->handleInviteSent(pInviter, pInviteeName);
-	return true;
-}
-
-const bool Zone::onGroupInviteAccept(Character* pCharacter, const String& pInviterName) {
-	mGroupManager->handleAcceptInvite(pCharacter, pInviterName);
-	return true;
-}
-
-const bool Zone::onGroupInviteDecline(Character* pCharacter, const String& pInviterName) {
-	mGroupManager->handleDeclineInvite(pCharacter, pInviterName);
-	return true;
-}
-
-const bool Zone::onGroupLeave(Character* pCharacter) {
-	mGroupManager->handleDisband(pCharacter, pCharacter->getName());
-	return true;
-}
-
-const bool Zone::onGroupDisband(Character* pCharacter, const String& pCharacterName) {
-	mGroupManager->handleDisband(pCharacter, pCharacterName);
-	return true;
-}
-
-const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	mGroupManager->handleMakeLeader(pCharacter, pLeaderName);
-	return true;
-}
+const bool Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) { return mGroupManager->onInvite(pInviter, pInviteeName); }
+const bool Zone::onGroupInviteAccept(Character* pCharacter) { return mGroupManager->onInviteAccept(pCharacter); }
+const bool Zone::onGroupInviteDecline(Character* pCharacter) { return mGroupManager->onInviteDecline(pCharacter); }
+const bool Zone::onGroupLeave(Character* pCharacter) { return mGroupManager->onLeave(pCharacter); }
+const bool Zone::onGroupRemove(Character* pCharacter, const String& pCharacterName) { return mGroupManager->onRemove(pCharacter, pCharacterName); }
+const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pTargetName) { return mGroupManager->onMakeLeader(pCharacter, pTargetName); }
+const bool Zone::onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle) { return mGroupManager->onRoleChange(pCharacter, pTargetName, pRoleID, pToggle); }
 
 const bool Zone::onPetCommand(Character* pCharacter, const u32 pCommand) {
 	return true;
@@ -2745,5 +2746,9 @@ const bool Zone::unmute(Character* pCharacter, const String& pCharacterName) {
 
 	character->setMuted(false);
 	pCharacter->notify(pCharacterName + " has been unmuted.");
+	return true;
+}
+
+const bool Zone::onRaidInviteDecline(Character* pCharacter) {
 	return true;
 }

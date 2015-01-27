@@ -131,8 +131,8 @@ namespace Data {
 		u32 mSkills[Limits::Skills::MAX_ID];
 		u32 mLanguages[Limits::Languages::MAX_ID];
 
-		GuildID mGuildID = NO_GUILD;
-		GuildRank mGuildRank = GuildRanks::GR_None;
+		u32 mGuildID = GuildID::None;
+		u8 mGuildRank = GuildRank::None;
 
 		u32 mDyes[MAX_ARMOR_DYE_SLOTS];
 
@@ -419,67 +419,65 @@ namespace Data {
 		std::list<SpawnGroup*> mSpawnGroups;
 		std::list<SpawnPoint*> mSpawnPoints;
 	};
-}
 
-namespace AffixType{
-	enum {
-		Strength,
-		Stamina,
-		Agility,
-		Dexterity,
-		Wisdom,
-		Intelligence,
-		Charisma,
-		AllStats,
-		PoisonResist,
-		MagicResist,
-		DiseaseResist,
-		FireResist,
-		ColdResist,
-		CorruptionResist,
-		AllResist,
-		HeroicStrength,
-		HeroicStamina,
-		HeroicAgility,
-		HeroicDexterity,
-		HeroicWisdom,
-		HeroicIntelligence,
-		HeroicCharisma,
-		AllHeroicStats,
-		HeroicPoisonResist,
-		HeroicMagicResist,
-		HeroicDiseaseResist,
-		HeroicFireResist,
-		HeroicColdResist,
-		HeroicCorruptionResist,
-		AllHeroicResists,
+	namespace AffixType{
+		enum {
+			Strength,
+			Stamina,
+			Agility,
+			Dexterity,
+			Wisdom,
+			Intelligence,
+			Charisma,
+			AllStats,
+			PoisonResist,
+			MagicResist,
+			DiseaseResist,
+			FireResist,
+			ColdResist,
+			CorruptionResist,
+			AllResist,
+			HeroicStrength,
+			HeroicStamina,
+			HeroicAgility,
+			HeroicDexterity,
+			HeroicWisdom,
+			HeroicIntelligence,
+			HeroicCharisma,
+			AllHeroicStats,
+			HeroicPoisonResist,
+			HeroicMagicResist,
+			HeroicDiseaseResist,
+			HeroicFireResist,
+			HeroicColdResist,
+			HeroicCorruptionResist,
+			AllHeroicResists,
 
-		Health,
-		Mana,
-		Endurance,
+			Health,
+			Mana,
+			Endurance,
 
-		HealthRegen,
-		ManaRegen,
-		EnduranceRegen,
+			HealthRegen,
+			ManaRegen,
+			EnduranceRegen,
 
-		ArmorClass,
-		Haste,
+			ArmorClass,
+			Haste,
+		};
 	};
-};
 
-struct ItemAffix {
+	struct ItemAffix {
 
-};
+	};
 
-struct TransmutationComponent {
-	u32 mItemID = 0;
-	String mAttribute = "";
-	i32 mMinimum = 0;
-	i32 mMaximum = 0;
-	u8 mRequiredLevel = 0;
-};
+	struct TransmutationComponent {
+		u32 mItemID = 0;
+		String mAttribute = "";
+		i32 mMinimum = 0;
+		i32 mMaximum = 0;
+		u8 mRequiredLevel = 0;
+	};
 
-namespace Data {
 	struct AlternateCurrency {
 		u32 mCurrencyID = 0;
 		u32 mItemID = 0;

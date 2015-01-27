@@ -55,14 +55,14 @@ namespace Limits {
 		const bool validID(const uint32 pLanguageID);
 	}
 	namespace Guild {
-		bool ID(const GuildID pGuildID);
+		bool ID(const u32 pGuildID);
 		bool MOTDLength(const String& pGuildMOTD);
 		bool nameLength(const String& pGuildName);
 		const bool nameValid(const String& pGuildName);
 		bool publicNoteLength(const String& pPublicNote);
 		bool urlLength(const String& pURL);
 		bool channelLength(const String& pChannel);
-		bool rankValid(const GuildRank pRank);
+		bool rankValid(const u8 pRank);
 	}
 	namespace Shop {
 		const bool quantityValid(i32 pQuantity);

@@ -1879,7 +1879,7 @@ namespace TransmutationComponentXML {
 	}
 #undef SCA
 }
-const bool XMLDataStore::loadTransmutationComponents(std::list<TransmutationComponent*>& pComponents) {
+const bool XMLDataStore::loadTransmutationComponents(Data::TransmutationComponentList pComponents) {
 	using namespace TransmutationComponentXML;
 #ifdef PROFILE_XML_DS
 	Profile p("DataStore::loadTransmutationComponents");
@@ -1894,7 +1894,7 @@ const bool XMLDataStore::loadTransmutationComponents(std::list<TransmutationComp
 	auto componentElement = componentsElement->FirstChildElement(Tag::Component);
 
 	while (componentElement) {
-		TransmutationComponent* c = new TransmutationComponent();
+		auto c = new Data::TransmutationComponent();
 		pComponents.push_back(c);
 
 		EXPECTED_BOOL(readAttribute(componentElement, Attribute::ItemID, c->mItemID));

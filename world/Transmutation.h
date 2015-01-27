@@ -8,7 +8,10 @@ class ILogFactory;
 class IDataStore;
 class ItemFactory;
 class Item;
-struct TransmutationComponent;
+
+namespace Data {
+	struct TransmutationComponent;
+}
 
 class Transmutation {
 public:
@@ -23,8 +26,8 @@ private:
 	IDataStore* mDataStore = nullptr;
 	ItemFactory* mItemFactory = nullptr;
 
-	const i32 _roll(Item* pItem, TransmutationComponent* pComponent);
-	TransmutationComponent* _get(const uint32 pItemID) const;
+	const i32 _roll(Item* pItem, Data::TransmutationComponent* pComponent);
+	Data::TransmutationComponent* _get(const uint32 pItemID) const;
 	void _bootstrap();
-	std::list<TransmutationComponent*> mComponents;
+	std::list<Data::TransmutationComponent*> mComponents;
 };
