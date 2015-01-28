@@ -44,6 +44,7 @@ Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mID(pZoneID),
 	mInstanceID(pInstanceID)
 {
+	memset(mActors, 0, sizeof(mActors));
 }
 
 Zone::~Zone() {
@@ -290,31 +291,69 @@ void Zone::onLeaveZone(Character* pCharacter) {
 	removeActor(pCharacter);
 	pCharacter->setSpawnID(0);
 
-	// Handle: Character leaving zone while looting.
-	// (UNTESTED)
+	// Handle: Character leaving Zone while looting.
 	if (pCharacter->isLooting()) {
 		auto corpse = pCharacter->getLootingCorpse();
+
 		// Clear Character reference from corpse.
 		corpse->getLootController()->clearLooter();
 		// Clear corpse reference from Character.
 		pCharacter->setLootingCorpse(nullptr);
 	}
 
-	// Handle: Character leaving zone while shopping.
-	// (UNTESTED)
+	// Handle: Character leaving Zone while shopping.
 	if (pCharacter->isShopping()) {
 		auto npc = pCharacter->getShoppingWith();
-		EXPECTED(npc);
+
 		// Disassociate Character and NPC.
-		EXPECTED(npc->removeShopper(pCharacter));
+		npc->removeShopper(pCharacter);
 		pCharacter->setShoppingWith(nullptr);
 	}
 
-	// Targetters.
+	// Handle: Character is leaving the Zone while targeted by other Actors.
+	if (pCharacter->hasTargeters())
+		pCharacter->clearTargeters();
 
-	// Trading.
+	// Handle: Character is leaving the Zone while trading.
+	if (pCharacter->isTrading()) {
+		auto actor = pCharacter->getTradingWith();
 
-	// Aggro.
+		// Trading with an NPC.
+		if (actor->isNPC()) {
+			auto npc = Actor::cast<NPC*>(actor);
+
+			// Disassociate Character and NPC.
+			npc->removeTrader(pCharacter);
+			pCharacter->setTradingWith(nullptr);
+		}
+		// Trading with a Character.
+		else if (actor->isCharacter()) {
+			auto character = Actor::cast<Character*>(actor);
+
+			// Disassociate Characters.
+			character->setTradingWith(nullptr);
+			pCharacter->setTradingWith(nullptr);
+			// TODO: Packets. Inventory etc.
+
+			auto inventory = pCharacter->getInventory();
+		}
+		else {
+			// Clear.
+			pCharacter->setTradingWith(nullptr);
+		}
+	}
+
+	// Handle: Character is leaving the zone and has agro.
+	if (pCharacter->hasHaters()) {
+		auto haters = pCharacter->getHaters();
+		for (auto i : haters) {
+			i->getHateController()->remove(pCharacter);
+		}
+
+		pCharacter->clearHaters();
+	}
+
+	// Casting.
 
 	// Notify ZoneManager.
 	mZoneManager->onLeaveZone(pCharacter);
@@ -1444,13 +1483,16 @@ void Zone::handleHPChange(Actor* pActor) {
 	safe_delete(packet);
 }
 
-void Zone::handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID) {
+void Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getSpawnID() != pToSpawnID);
+	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
 	EXPECTED(pCharacter->isTrading() == false); // Check: Character is not already trading.
 
-	auto actor = getActor(pToSpawnID);
-	EXPECTED(actor);
+	// Find Actor.
+	auto actor = getActor(pSpawnID);
+	if (!actor) {
+		return;
+	}
 
 	// TODO: Check distance for trading.
 
@@ -1461,6 +1503,9 @@ void Zone::handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID) {
 		if (npc->willTrade()) {
 			// Notify: NPC will accept trading.
 			pCharacter->getConnection()->sendTradeRequestAcknowledge(npc->getSpawnID());
+
+			// Associate Character and NPC.
+			npc->addTrader(pCharacter);
 			pCharacter->setTradingWith(npc);
 			return;
 		}

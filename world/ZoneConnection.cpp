@@ -2713,7 +2713,7 @@ const bool ZoneConnection::handleTradeRequest(const EQApplicationPacket* pPacket
 	// NOTE: Underfoot does appear to require a response.
 
 	// Notify Zone.
-	mZone->handleTradeRequest(mCharacter, payload->mToSpawnID);
+	mZone->onTradeRequest(mCharacter, payload->mToSpawnID);
 	return true;
 }
 

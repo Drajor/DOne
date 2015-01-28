@@ -269,7 +269,9 @@ public:
 	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
 	
-	void handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID);
+	// Character is requesting trade with an Actor.
+	void onTradeRequest(Character* pCharacter, const u32 pSpawnID);
+
 	void handleTradeAccept(Character* pCharacter, const uint32 pSpawnID);
 	void handleTradeCancel(Character* pCharacter, const uint32 pSpawnID);
 

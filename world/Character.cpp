@@ -228,13 +228,6 @@ void Character::onLeaveZone() {
 	setZoning(true);
 	setZone(nullptr);
 	setConnection(nullptr);
-
-	// Clean up references to other Actors that this Character has attacked.
-	auto haters = getHaters();
-	for (auto i : haters) {
-		i->getHateController()->remove(this);
-	}
-	clearHaters();
 }
 
 void Character::setStanding(bool pStanding) {

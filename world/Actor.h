@@ -101,6 +101,10 @@ public:
 		mTargeters.clear();
 	}
 
+	// Returns whether or not anything has this Actor targeted.
+	inline const bool hasTargeters() const { return !mTargeters.empty(); }
+
+	// Returns a list of Actors who have this Actor targeted.
 	inline std::list<Actor*>& getTargeters() { return mTargeters; }
 
 	template <typename T>

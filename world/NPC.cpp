@@ -32,6 +32,7 @@ NPC::NPC(HateController* pHateController) {
 NPC::~NPC() {
 	// Check: NPC has been cleaned up correctly before delete.
 	if (mShoppers.empty() == false) { Log::error("[NPC] Shoppers not empty on destruction."); }
+	if (mTraders.empty() == false) { Log::error("[NPC] Traders not empty on destruction."); }
 	if (mShopItems.empty() == false) { Log::error("[NPC] Shop Items not empty on destruction."); }
 	if (mLootItems.empty() == false) { Log::error("[NPC] Loot Items not empty on destruction."); }
 	if (mHateController->hasAttackers()) { Log::error("[NPC] HaterController not empty on destruction."); }
@@ -192,4 +193,18 @@ void NPC::onCombatBegin() {
 
 void NPC::onCombatEnd() {
 	mAttacking = false;
+}
+
+const bool NPC::addTrader(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	mTraders.push_back(pCharacter);
+	return true;
+}
+
+const bool NPC::removeTrader(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	mTraders.remove(pCharacter);
+	return true;
 }

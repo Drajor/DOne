@@ -80,6 +80,10 @@ public:
 	// Returns whether or not this NPC is accepting trade.
 	inline const bool willTrade() const { return mAcceptTrade; }
 
+	inline const bool hasTraders() const { return !mTraders.empty(); }
+	const bool addTrader(Character* pCharacter);
+	const bool removeTrader(Character* pCharacter);
+
 	void onLootBegin();
 	void addLootItem(Item* pItem) { mLootItems.push_back(pItem); }
 	Item* getLootItem(const uint32 pSlot) { return mLootItems[pSlot]; }
@@ -108,4 +112,5 @@ private:
 	SpawnPoint* mSpawnPoint = nullptr;
 	std::unique_ptr<Experience::Modifier> mExperienceModifier = nullptr;
 	std::list<Character*> mShoppers;
+	std::list<Character*> mTraders;
 };
