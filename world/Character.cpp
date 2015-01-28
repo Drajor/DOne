@@ -227,7 +227,6 @@ bool Character::onEnterZone() {
 void Character::onLeaveZone() {
 	setZoning(true);
 	setZone(nullptr);
-	setSpawnID(0);
 	setConnection(nullptr);
 
 	// Clean up references to other Actors that this Character has attacked.
@@ -257,7 +256,7 @@ void Character::healPercentage(int pPercent) {
 }
 
 void Character::doAnimation(uint8 pAnimationID) {
-	mZone->handleAnimation(this, 10, pAnimationID, true);
+	mZone->onAnimationChange(this, 10, pAnimationID, true);
 }
 
 float Character::getDefaultSize(uint32 pRace) {

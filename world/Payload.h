@@ -7,6 +7,7 @@
 
 namespace Data {
 	struct Account;
+	struct Title;
 }
 struct ZonePoint;
 class Guild;
@@ -69,6 +70,8 @@ namespace Payload {
 
 	EQApplicationPacket* makeGuildMemberList(::Guild* pGuild);
 	EQApplicationPacket* makeGroupMemberList(::Group* pGroup);
+
+	EQApplicationPacket* makeTitleList(const std::list<Data::Title*>& pTitles);
 
 	namespace Zone {
 
@@ -445,6 +448,20 @@ namespace Payload {
 		};
 
 		// C->S
+		// TODO: Investigate whether this goes inside CharacterProfile, there is room.
+		struct TributeD {
+			TributeD() {
+				memset(mTributes, 0, sizeof(mTributes));
+				memset(mTiers, 0, sizeof(mTiers));
+			}
+			u32 mActive = 0;
+			u32	mTributes[5];
+			u32 mTiers[5];
+			u32 mTributeMasterID = 0; // SpawnID?
+		};
+		typedef FixedT<TributeD, OP_TributeUpdate> TributeUpdate;
+
+		// C->S
 		struct AddNimbus : public FixedT<AddNimbus, OP_SpellEffect> {
 			u32 mNimbusID = 0;
 			u32 mSpawnID = 0;
@@ -480,20 +497,19 @@ namespace Payload {
 		};
 
 		// S->C
-		namespace TitleUpdateLimits { static const auto MAX_TEXT = 32; }
+		namespace TitleUpdateAction { enum : u32 { Title = 0, Suffix = 1, }; }
 		struct TitleUpdate : public FixedT<TitleUpdate, OP_SetTitleReply> {
-			static EQApplicationPacket* construct(const u32 pOption, const u32 pSpawnID, const String& pText) {
+			static EQApplicationPacket* construct(const u32 pAction, const u32 pSpawnID, const String& pText) {
 				auto packet = create();
 				auto payload = convert(packet);
-				payload->mOption = pOption;
+				payload->mAction = pAction;
 				payload->mSpawnID = pSpawnID;
 				strcpy(payload->mText, pText.c_str());
 
 				return packet;
 			}
-			enum : u32 { UPDATE_TITLE = 0, UPDATE_SUFFIX = 1 };
-			u32 mOption = UPDATE_TITLE;
-			char mText[TitleUpdateLimits::MAX_TEXT];
+			u32 mAction = 0; // See TitleUpdateAction
+			char mText[32];
 			u32 mSpawnID = 0;
 		};
 
@@ -559,7 +575,16 @@ namespace Payload {
 
 		// C<->S
 		namespace MemoriseSpellAction { enum : u32 { Scribe = 0, Memorise = 1, Unmemorise = 2, SpellBarRefresh = 3, }; }
-		struct MemoriseSpell : public Fixed<MemoriseSpell> {
+		struct MemoriseSpell : public FixedT<MemoriseSpell, OP_MemorizeSpell> {
+			static EQApplicationPacket* construct(const u32 pSlot, const u32 pSpellID, const u32 pAction) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSlot = pSlot;
+				payload->mSpellID = pSpellID;
+				payload->mAction = pAction;
+
+				return packet;
+			}
 			u32 mSlot = 0;
 			u32 mSpellID = 0;
 			u32 mAction = 0;
@@ -758,7 +783,6 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: GMLastName_Struct
 		struct SurnameUpdate : public Fixed<SurnameUpdate> {
 			char mCharaterName[Limits::Character::MAX_NAME_LENGTH];
 			char mGMName[Limits::Character::MAX_NAME_LENGTH];
@@ -768,9 +792,34 @@ namespace Payload {
 
 		// C<->S
 		struct SpawnAppearance : public FixedT<SpawnAppearance, OP_SpawnAppearance> {
+			static EQApplicationPacket* construct(const u16 pSpawnID, const u16 pType, const u32 pParameter) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mType = pType;
+				payload->mParameter = pParameter;
+
+				return packet;
+			}
 			u16 mSpawnID = 0;
 			u16 mType = 0;
 			u32 mParameter = 0;
+		};
+		
+		// S->C
+		struct ActorSize : public FixedT<ActorSize, OP_ChangeSize> {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const float pSize) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+				payload->mSize = pSize;
+
+				return packet;
+			}
+			u32 mSpawnID = 0;
+			float mSize = 1.0f;
+			u32 mUnknown0 = 0;
+			float mUnknown1 = 1.0f;
 		};
 
 		// S->C
@@ -790,9 +839,16 @@ namespace Payload {
 		};
 
 		// S->C
-		// Based on: SkillUpdate_Struct
-		struct SkillUpdate : public Fixed<SkillUpdate> {
-			u32 mID = 0;
+		struct SkillUpdate : public FixedT<SkillUpdate, OP_SkillUpdate> {
+			static EQApplicationPacket* construct(const u32 pSkillID, const u32 pValue) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSkillID = pSkillID;
+				payload->mValue = pValue;
+
+				return packet;
+			}
+			u32 mSkillID = 0;
 			u32 mValue = 0;
 		};
 
@@ -893,9 +949,26 @@ namespace Payload {
 		};
 		
 		// C->S
-		// Based on: ClientTarget_Struct
 		struct Target : public Fixed<Target> {
 			u32 mSpawnID = 0;
+		};
+
+		// S->C
+		// THIS DOES NOT WORK.
+		struct RejectTarget : public FixedT<RejectTarget, OP_TargetReject> {
+			//RejectTarget() { memset(mUnknown, 0, sizeof(mUnknown)); }
+			static EQApplicationPacket* construct() {
+				auto packet = create();
+				auto payload = convert(packet);
+
+				// Copied. I have no idea what they do yet.
+				payload->mUnknown[0] = 0x2f;
+				payload->mUnknown[1] = 0x01;
+				payload->mUnknown[4] = 0x0d;
+
+				return packet;
+			}
+			u8 mUnknown[12];
 		};
 
 		// C->S
@@ -1692,7 +1765,7 @@ namespace Payload {
 			}
 			u32 mStringID = 0;
 			u32 mType = 0;
-			u32 mUnknown = 0;
+			u32 mUnknown = 0; // Tried SpawnID and numbers as a parameter for the String ID but nothing worked.
 		};
 
 		namespace DoorLimits { static const auto MAX_TEXT = 32; }
@@ -1906,6 +1979,18 @@ namespace Payload {
 			u8 mDay = 0;
 			u8 mMonth = 0;
 			u32 mYear = 0;
+		};
+
+		// S->C
+		struct DespawnActor : public FixedT<DespawnActor, OP_DeleteSpawn> {
+			static EQApplicationPacket* construct(const u32 pSpawnID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mSpawnID = pSpawnID;
+
+				return packet;
+			}
+			u32 mSpawnID = 0;
 		};
 	}
 

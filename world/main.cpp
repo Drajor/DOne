@@ -128,7 +128,7 @@ int main(int argc, char** argv)  {
 	CharacterFactory* characterFactory = new CharacterFactory();
 	EXPECTED_MAIN(characterFactory->initialise(dataStore, logFactory, itemFactory));
 
-	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, commandHandler, itemFactory, logFactory, npcFactory));
+	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, titleManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(logFactory, zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory));

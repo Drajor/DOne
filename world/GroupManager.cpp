@@ -1,14 +1,10 @@
 #include "GroupManager.h"
+#include "LogSystem.h"
 #include "ZoneManager.h"
 #include "Group.h"
-#include "Utility.h"
+#include "GroupConstants.h"
 #include "Character.h"
-#include "Zone.h"
 #include "ZoneConnection.h"
-#include "LogSystem.h"
-
-#include "../common/EQPacket.h"
-#include "../common/eq_packet_structs.h"
 
 GroupManager::~GroupManager() {
 	if (mLog) {

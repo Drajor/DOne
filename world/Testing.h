@@ -51,6 +51,10 @@ TEST(ZonePayload, FixedSizes) {
 	// LoadSpellSet
 	//TODO: More.
 
+	EXPECT_EQ(8, Payload::Zone::SpawnAppearance::size());
+	EXPECT_EQ(16, Payload::Zone::ActorSize::size());
+	EXPECT_EQ(4, Payload::Zone::ActorAnimation::size());
+
 	EXPECT_EQ(256, Payload::Zone::AppearanceUpdate::size());
 	
 	EXPECT_EQ(4292, Payload::Zone::PopupWindow::size());

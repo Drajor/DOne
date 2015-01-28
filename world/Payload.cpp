@@ -6,6 +6,7 @@
 #include "Character.h"
 #include "Inventory.h"
 #include "ExperienceController.h"
+#include "TitleManager.h"
 
 #include "../common/crc32.h"
 #include "../common/packet_dump_file.h"
@@ -510,4 +511,32 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 
 	CRC32::SetEQChecksum((uchar*)payload, sizeof(Payload::Zone::CharacterProfile) - 4);
 	return packet;
+}
+
+EQApplicationPacket* Payload::makeTitleList(const std::list<Data::Title*>& pTitles) {
+	const u32 numTitles = pTitles.size();
+	
+	// Calculate size.
+	u32 size = 0;
+	size += sizeof(u32); // Count
+	size += sizeof(u32) * numTitles; // Title ID
+
+	for (auto i : pTitles) {
+		size += i->mPrefix.length() + 1;
+		size += i->mSuffix.length() + 1;
+	}
+
+	unsigned char * data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	writer.write<u32>(numTitles); // Count.
+
+	// Titles.
+	for (auto i : pTitles) {
+		writer.write<u32>(i->mID); // ID
+		writer.writeString(i->mPrefix);
+		writer.writeString(i->mSuffix);
+	}
+
+	return new EQApplicationPacket(OP_SendTitleList, data, size);
 }

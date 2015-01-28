@@ -32,13 +32,6 @@ namespace ZCStatus{
 
 class ZoneConnection {
 public:
-	// Static initialise.
-	static void _initalise();
-
-	// Static deinitialise.
-	static void _deinitialise();
-
-public:
 	ZoneConnection();
 	~ZoneConnection();
 
@@ -54,19 +47,26 @@ public:
 	void dropConnection();
 
 	void sendPosition();
-	void sendMessage(const u32 pType, String pMessage);
-	void sendSimpleMessage(const u32 pType, const u32 pStringID);
-	static EQApplicationPacket* makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
-	void sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1 = EmptyString, String pParameter2 = EmptyString, String pParameter3 = EmptyString, String pParameter4 = EmptyString, String pParameter5 = EmptyString, String pParameter6 = EmptyString, String pParameter7 = EmptyString, String pParameter8 = EmptyString, String pParameter9 = EmptyString);
-	void sendAppearance(uint16 pType, uint32 pParameter);
-	void sendHealthUpdate();
-
-	void sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID);
-
-	void sendExperienceUpdate(const u32 pExperience, const u32 pAAExperience);
-	void sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA);
-	void sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints);
 	
+	// Raw message. (OP_SpecialMesg)
+	static EQApplicationPacket* makeMessage(const u32 pType, const String& pMessage, const String& pSenderName = EmptyString);
+	void sendMessage(const u32 pType, const String& pMessage, const String& pSenderName = EmptyString);
+
+	// Channel message. (OP_ChannelMessage)
+	static EQApplicationPacket* makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
+	void sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
+
+	// String ID message with no parameters. (OP_SimpleMessage)
+	void sendSimpleMessage(const u32 pType, const u32 pStringID);
+
+	// String ID message with up to 9 parameters. (OP_FormattedMessage)
+	static EQApplicationPacket* makeSimpleMessage(const u32 pType, const u32 pStringID, const String& pParameter0, const String& pParameter1 = EmptyString, const String& pParameter2 = EmptyString, const String& pParameter3 = EmptyString, const String& pParameter4 = EmptyString, const String& pParameter5 = EmptyString, const String& pParameter6 = EmptyString, const String& pParameter7 = EmptyString, const String& pParameter8 = EmptyString, const String& pParameter9 = EmptyString);
+	void sendSimpleMessage(const u32 pType, const u32 pStringID, const String& pParameter0, const String& pParameter1 = EmptyString, const String& pParameter2 = EmptyString, const String& pParameter3 = EmptyString, const String& pParameter4 = EmptyString, const String& pParameter5 = EmptyString, const String& pParameter6 = EmptyString, const String& pParameter7 = EmptyString, const String& pParameter8 = EmptyString, const String& pParameter9 = EmptyString);
+	
+	void sendTell(const String& pSenderName, const String& pMessage);
+	void sendGroupMessage(const String& pSenderName, const String& pMessage);
+	void sendGuildMessage(const String& pSenderName, const String& pMessage);
+
 	void sendExperienceMessage();
 	void sendGroupExperienceMessage();
 	void sendRaidExperienceMessage();
@@ -85,16 +85,18 @@ public:
 	void sendGainRaidLeadershipExperienceMessage();
 	void sendGainRaidLeadershipPointMessage();
 
+	void sendAppearance(const u16 pType, const u32 pParameter);
+	void sendHealthUpdate();
+
+	void sendWearChange(const uint16 pSpawnID, const uint32 pMaterialID, const uint32 pEliteMaterialID, const uint32 pColour, const uint8 pSlotID);
+
+	void sendExperienceUpdate(const u32 pExperience, const u32 pAAExperience);
+	void sendAAExperienceUpdate(const u32 pAAExperience, const u32 pUnspentAA, const u32 pExperienceToAA);
+	void sendLeadershipExperienceUpdate(const double pGroupExperience, const u32 pGroupPoints, const double pRaidExperience, const u32 pRaidPoints);
+	
 	void sendLevelAppearance(const u32 pParameter1);
 	void sendLevelUpdate(const u32 pPreviousLevel, const u32 pCurrentLevel, const u32 pExperienceRatio);
-	void sendStats();
 	void sendWhoResponse(const u32 pWhoType, std::list<Character*>& pMatches);
-
-	static EQApplicationPacket* makeChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
-	void sendChannelMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
-	void sendTell(const String& pSenderName, const String& pMessage);
-	void sendGroupMessage(const String& pSenderName, const String& pMessage);
-	void sendGuildMessage(const String& pSenderName, const String& pMessage);
 
 	void sendGroupInvite(const String pFromCharacterName);
 
@@ -110,7 +112,7 @@ public:
 	void sendDeleteSpellDelete(const uint16 pSlot, const bool pSuccess);
 	void sendScribeSpell(const u16 pSlot, const u32 pSpellID);
 	void sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID);
-	void _sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction);
+	void _sendMemoriseSpell(const u16 pSlot, const u32 pSpellID, const u32 pAction);
 	void sendUnmemoriseSpell(const uint16 pSlot);
 	void sendInterruptCast();
 	void sendRefreshSpellBar(const uint16 pSlot, const uint32 pSpellID);
@@ -119,8 +121,8 @@ public:
 	void sendManaUpdate();
 	void sendEnduranceUpdate();
 
-	void sendSkillValue(const uint32 pSkillID, const uint32 pValue);
-	void sendLanguageValue(const uint32 pLanguageID, const uint32 pValue) { sendSkillValue(pLanguageID + 100, pValue); }
+	void sendSkillValue(const u32 pSkillID, const u32 pValue);
+	inline void sendLanguageValue(const u32 pLanguageID, const u32 pValue) { sendSkillValue(pLanguageID + 100, pValue); }
 
 	void sendLootComplete();
 	void sendLootResponse(uint8 pResponse, uint32 pPlatinum = 0, uint32 pGold = 0, uint32 pSilver = 0, uint32 pCopper = 0);
@@ -160,6 +162,8 @@ public:
 
 	void sendAddNimbus(const uint32 pSpawnID, const uint32 pEffectID);
 	void sendRemoveNimbus(const uint32 pNimbusID);
+
+	void sendRejectTarget();
 
 	// Populates the 'Alt Currency' tab (Inventory Window).
 	void sendAlternateCurrencies();
@@ -352,8 +356,6 @@ private:
 	
 	ILog* mLog = nullptr;
 	GuildManager* mGuildManager = nullptr;
-
-	static EQApplicationPacket* mPlayerProfilePacket;
 
 	bool mSizeError = false; // For unit testing.
 	bool mStringError = false; // For unit testing.

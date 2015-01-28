@@ -22,7 +22,7 @@ const bool CombatSystem::preAttack(Actor* pAttacker, Actor* pDefender) {
 	if (pAttacker->isDead() || pDefender->isDead()) return false;
 
 	// Attacker animation.
-	zone->handleAnimation(pAttacker, pAttacker->getPrimaryAttackAnimation(), 10, true);
+	zone->onAnimationChange(pAttacker, pAttacker->getPrimaryAttackAnimation(), 10, true);
 
 	// Check: Defender is invulnerable
 	if (pDefender->isInvulnerable()) {

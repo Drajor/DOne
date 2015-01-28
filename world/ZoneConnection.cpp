@@ -15,7 +15,6 @@
 #include "../common/EQStreamIntf.h"
 #include "../common/emu_opcodes.h"
 #include "../common/EQPacket.h"
-#include "../common/eq_packet_structs.h"
 #include "Utility.h"
 #include "Limits.h"
 #include "Payload.h"
@@ -33,19 +32,6 @@
 
 #include "../common/MiscFunctions.h"
 #include "../common/packet_dump_file.h"
-
-// PlayerProfile_Struct
-// TributeInfo_Struct
-
-EQApplicationPacket* ZoneConnection::mPlayerProfilePacket = nullptr;
-
-void ZoneConnection::_initalise() {
-	mPlayerProfilePacket = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
-}
-
-void ZoneConnection::_deinitialise() {
-	safe_delete(mPlayerProfilePacket);
-}
 
 ZoneConnection::ZoneConnection() {
 	mForceSendPositionTimer.Disable();
@@ -302,13 +288,11 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		handleGroupInvite(pPacket);
 		break;
 	case OP_GroupFollow:
+	case OP_GroupFollow2:
 		// NOTE: This occurs when the player presses 'Follow' on the group window.
 		// NOTE: This also occurs when the player uses the /invite command when they have a current group invitation.
 		// NOTE: This also occurs when using the 'Invite/follow' mapped command (Options->Keys).
 		handleGroupAcceptInvite(pPacket);
-		break;
-	case OP_GroupFollow2:
-		Utility::print("[UNHANDLED OP_GroupFollow2]");
 		break;
 	case OP_GroupCancelInvite:
 		// NOTE: This occurs when the player presses 'Decline' on the group window.
@@ -766,202 +750,6 @@ void ZoneConnection::_sendTimeOfDay() {
 }
 
 void ZoneConnection::_sendPlayerProfile() {
-	EXPECTED(mConnected);
-
-	//auto packet = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
-	//auto payload = reinterpret_cast<PlayerProfile_Struct*>(packet->pBuffer);
-	//*payload = { 0 }; // Clear memory.
-
-	//// The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA // TODO: How?
-
-	//strncpy(payload->name, mCharacter->getName().c_str(), Limits::Character::MAX_NAME_LENGTH);
-	//strncpy(payload->last_name, mCharacter->getLastName().c_str(), Limits::Character::MAX_LAST_NAME_LENGTH);
-	//payload->gender = mCharacter->getGender();
-	//payload->race = mCharacter->getRace();
-	//payload->class_ = mCharacter->getClass();
-	//payload->level = mCharacter->getLevel();
-
-	////// Bind Locations.
-	////for (auto i = 0; i < 5; i++) {
-	////	auto bindLocation = mCharacter->getBindLocation(i);
-	////	payload->binds[i].zoneId = bindLocation.getZoneID();
-	////	payload->binds[i].x = bindLocation.getPosition().x;
-	////	payload->binds[i].y = bindLocation.getPosition().y;
-	////	payload->binds[i].z = bindLocation.getPosition().z;
-	////	payload->binds[i].heading = bindLocation.getHeading();
-	////}
-
-	//auto expController = mCharacter->getExperienceController();
-
-	//payload->aapoints = expController->getUnspentAAPoints();
-	//payload->aapoints_spent = expController->getSpentAAPoints(); // not working.
-	//
-	//payload->deity = mCharacter->getDeity();
-	//payload->guild_id = mCharacter->getGuildID();
-	////payload->birthday;			// characters bday
-	////payload->lastlogin;			// last login or zone time
-	////payload->timePlayedMin;		// in minutes
-	////payload->pvp;
-	////payload->level2;
-	//payload->mAnonymous = mCharacter->getAnonymous();
-	//payload->gm = mCharacter->isGM() ? 1 : 0;
-	//payload->guildrank = mCharacter->getGuildRank();
-	////payload->guildbanker;
-	////payload->intoxication;
-	////payload->spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
-	////payload->abilitySlotRefresh;
-	//payload->haircolor = mCharacter->getHairColour();
-	//payload->beardcolor = mCharacter->getBeardColour();
-	//payload->eyecolor1 = mCharacter->getLeftEyeColour();
-	//payload->eyecolor2 = mCharacter->getRightEyeColour();
-	//payload->hairstyle = mCharacter->getHairStyle();
-	//payload->beard = mCharacter->getBeardStyle();
-
-	//////payload->ability_time_seconds;
-	//////payload->ability_number;
-	//////payload->ability_time_minutes;
-	//////payload->ability_time_hours;
-	//////payload->item_material[_MaterialCount];
-	//////payload->item_tint[_MaterialCount];
-	////for (int i = 0; i < MAX_MATERIAL_SLOTS; i++) {
-	////	//payload->item_tint[i].color = mCharacter->getColour(i).mColour;
-	////	// TODO!
-	////	payload->item_material[i] = mCharacter->getMaterial(i);
-	////}
-	//////payload->aa_array[MAX_PP_AA_ARRAY];
-	//////payload->servername[32];
-	////strncpy(payload->title, mCharacter->getTitle().c_str(), Limits::Character::MAX_TITLE_LENGTH);
-	////strncpy(payload->suffix, mCharacter->getSuffix().c_str(), Limits::Character::MAX_SUFFIX_LENGTH);
-	//////payload->guildid2;
-	////payload->exp = mCharacter->getExperienceController()->getExperience();
-	////payload->points = 0;
-	////payload->mana = mCharacter->getCurrentMana();
-	////payload->cur_hp = mCharacter->getHPPercent();
-	////payload->STR = mCharacter->getBaseStatistic(Statistic::Strength);
-	////payload->STA = mCharacter->getBaseStatistic(Statistic::Stamina);
-	////payload->CHA = mCharacter->getBaseStatistic(Statistic::Charisma);
-	////payload->DEX = mCharacter->getBaseStatistic(Statistic::Dexterity);
-	////payload->INT = mCharacter->getBaseStatistic(Statistic::Intelligence);
-	////payload->AGI = mCharacter->getBaseStatistic(Statistic::Agility);
-	////payload->WIS = mCharacter->getBaseStatistic(Statistic::Wisdom);
-	////payload->face = mCharacter->getFaceStyle();
-
-	////mCharacter->setSkill(Skills::Meditate, 1000);
-	////mCharacter->setSkill(Skills::SenseHeading, 1000);
-	////mCharacter->setSkill(Skills::Swimming, 1000);
-
-	////mCharacter->setLanguage(LanguageID::CommonTongue, 100);
-	////mCharacter->setLanguage(LanguageID::Barbarian, 100);
-
-	////// Copy skills into profile.
-	////for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
-	////	payload->skills[i] = mCharacter->getAdjustedSkill(i);
-	////}
-
-	////// Copy languages into profile.
-	////for (int i = 0; i < Limits::Languages::MAX_ID; i++) {
-	////	payload->languages[i] = mCharacter->getLanguage(i);
-	////}
-
-	////// Copy spell book data into profile.
-	////if (mCharacter->isCaster()) {
-	////	const std::vector<uint32> spellbook = mCharacter->getSpellBookData();
-	////	for (auto i = 0; i < Limits::SpellBook::MAX_SLOTS; i++)
-	////		payload->spell_book[i] = spellbook[i];
-	////}
-	////// Copy spell bar data into profile.
-	////if (mCharacter->isCaster()) {
-	////	const std::vector<uint32> spellbar = mCharacter->getSpellBarData();
-	////	for (auto i = 0; i < Limits::SpellBar::MAX_SLOTS; i++)
-	////		payload->mem_spells[i] = spellbar[i];
-	////}
-	//payload->y = mCharacter->getY();
-	//payload->x = mCharacter->getX();
-	//payload->z = mCharacter->getZ();
-	//payload->heading = mCharacter->getHeading();
-
-	////// Personal Currency.
-	////payload->platinum = mCharacter->getInventory()->getPersonalPlatinum();
-	////payload->gold = mCharacter->getInventory()->getPersonalGold();
-	////payload->silver = mCharacter->getInventory()->getPersonalSilver();
-	////payload->copper = mCharacter->getInventory()->getPersonalCopper();
-
-	////// Bank Currency.
-	////payload->platinum_bank = mCharacter->getInventory()->getBankPlatinum();
-	////payload->gold_bank = mCharacter->getInventory()->getBankGold();
-	////payload->silver_bank = mCharacter->getInventory()->getBankSilver();
-	////payload->copper_bank = mCharacter->getInventory()->getBankCopper();
-
-	////// Cursor Currency
-	////payload->platinum_cursor = mCharacter->getInventory()->getCursorPlatinum();
-	////payload->gold_cursor = mCharacter->getInventory()->getCursorGold();
-	////payload->silver_cursor = mCharacter->getInventory()->getCursorSilver();
-	////payload->copper_cursor = mCharacter->getInventory()->getCursorCopper();
-
-	////// Shared Bank Platinum
-	////payload->platinum_shared = mCharacter->getInventory()->getSharedBankPlatinum();
-
-	//////payload->pvp2;				//
-	//////payload->pvptype;			//
-	//////payload->ability_down;		// Guessing
-	//////payload->autosplit;			//not used right now
-	//////payload->zone_change_count;
-	////payload->drakkin_heritage = mCharacter->getDrakkinHeritage();
-	////payload->drakkin_tattoo = mCharacter->getDrakkinTattoo();
-	////payload->drakkin_details = mCharacter->getDrakkinDetails();
-	//////payload->expansions = ;
-	//////payload->toxicity;			//from drinking potions, seems to increase by 3 each time you drink
-	//////payload->unknown5496[16];	//
-	////payload->hunger_level = 0;
-	////payload->thirst_level = 0;
-	//////payload->ability_up;
-	//payload->zone_id = mZone->getID();
-	//payload->zoneInstance = mZone->getInstanceID();
-	//////payload->buffs[BUFF_COUNT];	// Buffs currently on the player
-	//////payload->groupMembers[6][64];//
-	//////payload->entityid;
-	//////payload->leadAAActive;
-	//////payload->ldon_points_guk;	//client uses these as signed
-	//////payload->ldon_points_mir;
-	//////payload->ldon_points_mmc;
-	//////payload->ldon_points_ruj;
-	//////payload->ldon_points_tak;
-	//////payload->ldon_points_available;
-	//////payload->ldon_wins_guk;
-	//////payload->ldon_wins_mir;
-	//////payload->ldon_wins_mmc;
-	//////payload->ldon_wins_ruj;
-	//////payload->ldon_wins_tak;
-	//////payload->ldon_losses_guk;
-	//////payload->ldon_losses_mir;
-	//////payload->ldon_losses_mmc;
-	//////payload->ldon_losses_ruj;
-	//////payload->ldon_losses_tak;
-	//////payload->tribute_time_remaining;	//in miliseconds
-	////payload->showhelm = mCharacter->getShowHelm() ? 1 : 0;
-	//////payload->career_tribute_points;
-	//////payload->tribute_points;
-	//////payload->tribute_active;		//1=active
-	//////payload->tributes[MAX_PLAYER_TRIBUTES];
-	//////payload->disciplines;
-	//////payload->recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
-	////payload->endurance = mCharacter->getCurrentEndurance();
-
-	////payload->currentRadCrystals = mCharacter->getInventory()->getRadiantCrystals();
-	////payload->careerRadCrystals = mCharacter->getInventory()->getTotalRadiantCrystals();
-	////payload->currentEbonCrystals = mCharacter->getInventory()->getEbonCrystals();
-	////payload->careerEbonCrystals = mCharacter->getInventory()->getTotalEbonCrystals();
-
-	////payload->groupAutoconsent = mCharacter->getAutoConsentGroup() ? 1 : 0;
-	////payload->raidAutoconsent = mCharacter->getAutoConsentRaid() ? 1 : 0;
-	////payload->guildAutoconsent = mCharacter->getAutoConsentGuild() ? 1 : 0;
-
-	//for (auto i = 0; i < 16; i++)
-	//	payload->leader_abilities.ranks[i] = 1;
-
-	//sendPacket(packet);
-	//delete packet;
-
 	auto packet = Payload::makeCharacterProfile(mCharacter);
 	sendPacket(packet);
 	delete packet;
@@ -992,11 +780,10 @@ void ZoneConnection::_sendZoneSpawns() {
 }
 
 void ZoneConnection::_sendTributeUpdate() {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
-
-	auto packet = new EQApplicationPacket(OP_TributeUpdate, sizeof(TributeInfo_Struct));
-	auto payload = (TributeInfo_Struct *)packet->pBuffer;
 	
+	auto packet = TributeUpdate::create();
 	sendPacket(packet);
 	delete packet;
 }
@@ -1343,30 +1130,52 @@ header[0]
 header[1]
 */
 
-void ZoneConnection::sendMessage(const u32 pType, String pMessage) {
+EQApplicationPacket* ZoneConnection::makeMessage(const u32 pType, const String& pMessage, const String& pSenderName) {
+	// Calculate size.
+	u32 size = 0;
+
+	size += sizeof(u8); // Unknown.
+	size += sizeof(u8); // Unknown.
+	size += sizeof(u8); // Unknown.
+	size += sizeof(u32); // Type.
+	size += sizeof(u32); // SpawnID.
+	size += sizeof(u32)* 3; // Unknowns.
+
+	size += pMessage.size() + 1;
+	size += pSenderName.size() + 1;
+
+	unsigned char * data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u32>(pType); // Type.
+	writer.write<u32>(0); // SpawnID
+	writer.writeString(pSenderName); // Sender name.
+	writer.write<u32>(0); // Unknown
+	writer.write<u32>(0); // Unknown
+	writer.write<u32>(0); // Unknown
+	writer.writeString(pMessage); // Sender name.
+
+	return new EQApplicationPacket(OP_SpecialMesg, data, size);
+}
+
+void ZoneConnection::sendMessage(const u32 pType, const String& pMessage, const String& pSenderName) {
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_SpecialMesg, sizeof(SpecialMesg_Struct)+pMessage.length());
-	auto payload = reinterpret_cast<SpecialMesg_Struct*>(packet->pBuffer);
-	payload->header[0] = 0x00; // Header used for #emote style messages..
-	payload->header[1] = 0x00; // Play around with these to see other types
-	payload->header[2] = 0x00;
-	payload->msg_type = pType;
-	strcpy(payload->message, pMessage.c_str());
-
+	auto packet = makeMessage(pType, pMessage, pSenderName);
 	sendPacket(packet);
 	delete packet;
 }
 
 const bool ZoneConnection::handleLogOut(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
 	if(!pPacket) return false;
 	SIZE_CHECK(pPacket->size == 0);
 
-	auto packet = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
-	auto payload = reinterpret_cast<CancelTrade_Struct*>(packet->pBuffer);
-	payload->fromid = mCharacter->getSpawnID();
-	payload->action = groupActUpdate;
-
+	// TODO: Determine whether this is actually required when the Character is not trading.
+	auto packet = TradeCancel::construct(mCharacter->getSpawnID(), 0);
 	sendPacket(packet);
 	delete packet;
 
@@ -1461,15 +1270,11 @@ void ZoneConnection::_sendZoneData() {
 	delete packet;
 }
 
-void ZoneConnection::sendAppearance(uint16 pType, uint32 pParameter) {
+void ZoneConnection::sendAppearance(const u16 pType, const u32 pParameter) {
+	using namespace Payload::Zone;
 	EXPECTED(mConnected);
-	
-	auto packet = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	auto payload = reinterpret_cast<SpawnAppearance_Struct*>(packet->pBuffer);
-	payload->spawn_id = mCharacter->getSpawnID();
-	payload->type = pType;
-	payload->parameter = pParameter;
 
+	auto packet = SpawnAppearance::construct(mCharacter->getSpawnID(), pType, pParameter);
 	sendPacket(packet);
 	delete packet;
 }
@@ -1492,10 +1297,12 @@ const bool ZoneConnection::handleUpdateAA(const EQApplicationPacket* pPacket) {
 const bool ZoneConnection::handleTarget(const EQApplicationPacket* pPacket) {
 	using namespace Payload::Zone;
 	if(!pPacket) return false;
-	SIZE_CHECK(Target::sizeCheck(pPacket->size));
+	SIZE_CHECK(Target::sizeCheck(pPacket));
 
-	auto payload = Target::convert(pPacket->pBuffer);
-	mZone->handleTarget(mCharacter, payload->mSpawnID);
+	auto payload = Target::convert(pPacket);
+
+	// Notify Zone.
+	mZone->onTargetChange(mCharacter, payload->mSpawnID);
 	return true;
 }
 
@@ -1524,13 +1331,11 @@ void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID) {
 	delete packet;
 }
 
-EQApplicationPacket* ZoneConnection::makeSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+EQApplicationPacket* ZoneConnection::makeSimpleMessage(const u32 pType, const u32 pStringID, const String& pParameter0, const String& pParameter1, const String& pParameter2, const String& pParameter3, const String& pParameter4, const String& pParameter5, const String& pParameter6, const String& pParameter7, const String& pParameter8, const String& pParameter9) {
 	int packetSize = 0;
 	packetSize += 4; // Unknown.
 	packetSize += 4; // String ID.
 	packetSize += 4; // Type.
-
-	String message;
 
 	// Adjust payload size for variable length strings.
 	if (pParameter0.length() != 0) packetSize += pParameter0.length() + 1;
@@ -1569,7 +1374,7 @@ EQApplicationPacket* ZoneConnection::makeSimpleMessage(const u32 pType, const u3
 	return packet;
 }
 
-void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, String pParameter0, String pParameter1, String pParameter2, String pParameter3, String pParameter4, String pParameter5, String pParameter6, String pParameter7, String pParameter8, String pParameter9) {
+void ZoneConnection::sendSimpleMessage(const u32 pType, const u32 pStringID, const String& pParameter0, const String& pParameter1, const String& pParameter2, const String& pParameter3, const String& pParameter4, const String& pParameter5, const String& pParameter6, const String& pParameter7, const String& pParameter8, const String& pParameter9) {
 	EXPECTED(mConnected);
 
 	auto packet = makeSimpleMessage(pType, pStringID, pParameter0, pParameter1, pParameter2, pParameter3, pParameter4, pParameter5, pParameter6, pParameter7, pParameter8, pParameter9);
@@ -1614,7 +1419,7 @@ const bool ZoneConnection::handleAnimation(const EQApplicationPacket* pPacket) {
 	auto payload = ActorAnimation::convert(pPacket);
 
 	// Notify Zone.
-	mZone->handleAnimation(mCharacter, payload->mAnimation, payload->mSpeed, false);
+	mZone->onAnimationChange(mCharacter, payload->mAnimation, payload->mSpeed, false);
 	return true;
 }
 
@@ -1711,16 +1516,6 @@ void ZoneConnection::sendLevelAppearance(const u32 pParameter1) {
 
 	payload->mParameter1 = pParameter1;
 
-	sendPacket(packet);
-	delete packet;
-}
-
-void ZoneConnection::sendStats() {
-	EXPECTED(mConnected);
-
-	auto packet = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
-	auto payload = (IncreaseStat_Struct*)packet->pBuffer;
-	payload->str = 5;
 	sendPacket(packet);
 	delete packet;
 }
@@ -2625,30 +2420,8 @@ const bool ZoneConnection::handleRequestTitles(const EQApplicationPacket* pPacke
 	if(!pPacket) return false;
 	SIZE_CHECK(pPacket->size == 0);
 
-	auto availableTitles = ServiceLocator::getTitleManager()->getTitles(mCharacter);
-	if (availableTitles.empty())
-		return true;
-
-	int payloadSize = sizeof(uint32); // 4 bytes: store the number of titles.
-	for (auto i : availableTitles) {
-		payloadSize += sizeof(uint32); // Title ID
-		payloadSize += i->mPrefix.length() + 1; // +1 for null terminator.
-		payloadSize += i->mSuffix.length() + 1; // +1 for null terminator.
-	}
-
-	auto packet = new EQApplicationPacket(OP_SendTitleList, payloadSize);
-	Utility::MemoryWriter writer(packet->pBuffer, payloadSize);
-	
-	writer.write<uint32>(availableTitles.size());
-	for (auto i : availableTitles) {
-		writer.write<uint32>(i->mID);
-		writer.writeString(i->mPrefix);
-		writer.writeString(i->mSuffix);
-	}
-
-	sendPacket(packet);
-	delete packet;
-	EXPECTED_BOOL(writer.check());
+	// Notify Zone.
+	mZone->onRequestTitles(mCharacter);
 	return true;
 }
 
@@ -2661,16 +2434,11 @@ void ZoneConnection::sendDeleteSpellDelete(const uint16 pSlot, const bool pSucce
 	delete packet;
 }
 
-void ZoneConnection::_sendMemoriseSpell(const uint16 pSlot, const uint32 pSpellID, const uint32 pAction) {
+void ZoneConnection::_sendMemoriseSpell(const u16 pSlot, const u32 pSpellID, const u32 pAction) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_MemorizeSpell, MemoriseSpell::size());
-	auto payload = MemoriseSpell::convert(packet->pBuffer);
-	payload->mAction = pAction;
-	payload->mSlot = pSlot;
-	payload->mSpellID = pSpellID;
-
+	auto packet = MemoriseSpell::construct(pSlot, pSpellID, pAction);
 	sendPacket(packet);
 	delete packet;
 }
@@ -2713,15 +2481,11 @@ void ZoneConnection::sendEnableSpellBar(const uint32 pSpellID) {
 	delete packet;
 }
 
-void ZoneConnection::sendSkillValue(const uint32 pSkillID, const uint32 pValue) {
+void ZoneConnection::sendSkillValue(const u32 pSkillID, const u32 pValue) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = new EQApplicationPacket(OP_SkillUpdate, SkillUpdate::size());
-	auto payload = SkillUpdate::convert(packet->pBuffer);
-	payload->mID = pSkillID;
-	payload->mValue = pValue;
-
+	auto packet = SkillUpdate::construct(pSkillID, pValue);
 	sendPacket(packet);
 	delete packet;
 }
@@ -4209,6 +3973,14 @@ const bool ZoneConnection::handleGroupRoleChange(const EQApplicationPacket* pPac
 	// Notify Zone.
 	mZone->onGroupRoleChange(mCharacter, targetName, payload->mRoleID, payload->mToggle);
 	return true;
+}
+
+void ZoneConnection::sendRejectTarget() {
+	using namespace Payload::Zone;
+
+	auto packet = RejectTarget::construct();
+	sendPacket(packet);
+	delete packet;
 }
 
 //

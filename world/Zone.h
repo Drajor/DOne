@@ -35,6 +35,7 @@ class ItemFactory;
 class Transmutation;
 class AccountManager;
 class NPCFactory;
+class TitleManager;
 
 namespace Experience {
 	class Calculator;
@@ -74,12 +75,14 @@ struct ZonePoint {
 	uint16 mDestinationInstanceID = 0;
 };
 
+static const u16 MaxActorID = 65535;
+
 class Zone {
 public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory);
+	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory);
 
 	// Mutes a Character.
 	const bool mute(Character* pCharacter, const String& pCharacterName);
@@ -178,11 +181,24 @@ public:
 
 	Character* findCharacter(const String pCharacterName) const;
 
-	// Search for an Actor by Spawn ID.
-	Actor* findActor(const uint32 pSpawnID) const;
+	// Find Actor by Spawn ID.
+	inline Actor* getActor(const u16 pSpawnID) const { return mActors[pSpawnID]; }
 
 	void addActor(Actor* pActor);
 	void removeActor(Actor* pActor);
+
+	// The Character is requesting the list of titles available to them.
+	const bool onRequestTitles(Character* pCharacter);
+
+	// The Character has set their title.
+	const bool onSetTitle(Character* pCharacter, const u32 pTitleID);
+
+	// The Character has set their suffix.
+	const bool onSetSuffix(Character* pCharacter, const u32 pSuffixID);
+
+	const bool onSizeChange(Actor * pActor, float pSize);
+	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
+	const bool onTargetChange(Character* pCharacter, const u16 pSpawnID);
 
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
@@ -193,12 +209,10 @@ public:
 	void handleSitting(Character* pCharacter);
 	void handleCrouching(Character* pCharacter);
 
-	void handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pSpeed = 10, const bool pIncludeSender = false);
 	void handleLevelIncrease(Character* pCharacter);
 	void handleLevelDecrease(Character* pCharacter);
 	void notifyCharacterGM(Character* pCharacter);
 
-	void handleTarget(Character* pCharacter, const uint16 pSpawnID);
 	void handleFaceChange(Character* pCharacter);
 
 	void handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill);
@@ -239,14 +253,12 @@ public:
 
 	void handleSurnameChange(Actor* pActor);
 
-	const bool onSetTitle(Character* pCharacter, const u32 pTitleID);
-	const bool onSetSuffix(Character* pCharacter, const u32 pSuffixID);
-	void handleTitleChanged(Character* pCharacter, const uint32 pOption);
-
 	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
 	void handleCastingFinished(Actor* pActor);
 
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
+	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket, bool pIncludeSender);
+
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 	void sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket);
 
@@ -321,6 +333,7 @@ private:
 	GuildManager* mGuildManager = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
+	TitleManager* mTitleManager = nullptr;
 	CommandHandler* mCommandHandler = nullptr;
 	Experience::Calculator* mExperienceCalculator = nullptr;
 	Experience::Modifier* mExperienceModifer = nullptr;
@@ -370,7 +383,8 @@ private:
 
 	std::list<Character*> mCharacters;
 	std::list<NPC*> mNPCs;
-	std::list<Actor*> mActors;
+	Actor* mActors[MaxActorID]; // Lookup table by SpawnID. cost ~264kb per Zone.
+
 	ObjectList mObjects;
 	DoorList mDoors;
 };

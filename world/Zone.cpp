@@ -18,9 +18,8 @@
 #include "SpellDataStore.h"
 #include "Utility.h"
 #include "Limits.h"
-#include "../common/types.h"
+#include "TitleManager.h"
 
-#include "../common/eq_packet_structs.h"
 #include "LogSystem.h"
 #include "Scene.h"
 #include "SpawnPoint.h"
@@ -67,7 +66,7 @@ Zone::~Zone() {
 	safe_delete(mLog);
 }
 
-const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory) {
+const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory) {
 	if (mInitialised) return false;
 	if (!pZoneManager) return false;
 	if (!pLogFactory) return false;
@@ -76,6 +75,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	if (!pGroupManager) return false;
 	if (!pRaidManager) return false;
 	if (!pGuildManager) return false;
+	if (!pTitleManager) return false;
 	if (!pCommandHandler) return false;
 	if (!pItemFactory) return false;
 	if (!pNPCFactory) return false;
@@ -86,6 +86,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
+	mTitleManager = pTitleManager;
 	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
 	mNPCFactory = pNPCFactory;
@@ -234,10 +235,8 @@ void Zone::onEnterZone(Character* pCharacter) {
 	mLog->info("Character (" + pCharacter->getName() + ") entering zone.");
 	pCharacter->onEnterZone();
 
-	// Add Character.
-	mScene->add(pCharacter);
-	mCharacters.push_back(pCharacter);
-	mActors.push_back(pCharacter);
+	// Add.
+	addActor(pCharacter);
 
 	if (pCharacter->hasGroup())
 		mGroupManager->onEnterZone(pCharacter);
@@ -287,10 +286,9 @@ void Zone::onLeaveZone(Character* pCharacter) {
 
 	pCharacter->onLeaveZone();
 
-	// Remove Character.
-	mScene->remove(pCharacter);
-	mCharacters.remove(pCharacter);
-	mActors.remove(pCharacter);
+	// Remove.
+	removeActor(pCharacter);
+	pCharacter->setSpawnID(0);
 
 	// Handle: Character leaving zone while looting.
 	// (UNTESTED)
@@ -331,10 +329,8 @@ void Zone::onCampComplete(Character* pCharacter) {
 	pCharacter->_updateForSave();
 	saveCharacter(pCharacter);
 
-	// Clean up.
-	mScene->remove(pCharacter);
-	mCharacters.remove(pCharacter);
-	mActors.remove(pCharacter);
+	// Remove.
+	removeActor(pCharacter);
 
 	if (pCharacter->hasGuild())
 		mGuildManager->onCamp(pCharacter);
@@ -386,10 +382,8 @@ void Zone::onLinkdeadEnd(Character* pCharacter) {
 	pCharacter->_updateForSave();
 	saveCharacter(pCharacter);
 
-	// Clean up.
-	mScene->remove(pCharacter);
-	mCharacters.remove(pCharacter);
-	mActors.remove(pCharacter);
+	// Remove.
+	removeActor(pCharacter);
 
 	// Notify ZoneManager.
 	mZoneManager->onLeaveWorld(pCharacter);
@@ -426,12 +420,7 @@ void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pPa
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
-	SpawnAppearance payload;
-	payload.mSpawnID = pActor->getSpawnID();
-	payload.mType = pType;
-	payload.mParameter = pParameter;
-
-	auto packet = SpawnAppearance::create(payload);
+	auto packet = SpawnAppearance::construct(pActor->getSpawnID(), pType, pParameter);
 	// Character
 	if (pActor->isCharacter()) {
 		sendToVisible(Actor::cast<Character*>(pActor), packet, pIncludeSender);
@@ -671,21 +660,16 @@ bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, con
 	return false;
 }
 
-void Zone::handleAnimation(Actor* pActor, const uint8 pAnimation, const uint8 pSpeed, const bool pIncludeSender) {
+const bool Zone::onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed, const bool pIncludeSender) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	if (!pActor) return false;
 
-	auto packet = Payload::Zone::ActorAnimation::construct(pActor->getSpawnID(), pAnimation, pSpeed);
-	// Character animation.
-	if (pActor->isCharacter()) {
-		sendToVisible(Actor::cast<Character*>(pActor), packet, pIncludeSender);
-	}
-	// NPC animation.
-	else {
-		sendToVisible(pActor, packet);
-	}
+	// Update Zone.
+	auto packet = ActorAnimation::construct(pActor->getSpawnID(), pAnimation, pSpeed);
+	sendToVisible(pActor, packet, pIncludeSender);
+	delete packet;
 
-	safe_delete(packet);
+	return true;
 }
 
 void Zone::handleLevelIncrease(Character* pCharacter) {
@@ -852,36 +836,36 @@ void Zone::onChangeGuild(Character* pCharacter) {
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildRank, pCharacter->getGuildRank(), true);
 }
 
-void Zone::handleTarget(Character* pCharacter, const uint16 pSpawnID) {
+const bool Zone::onTargetChange(Character* pCharacter, const u16 pSpawnID) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	if (!pCharacter) return false;
 
 	// Character is clearing their target.
 	if (pSpawnID == 0) {
 		pCharacter->clearTarget();
-		return;
+		return true;
 	}
 
-	Actor* actor = findActor(pSpawnID);
-	EXPECTED(actor);
+	// Find Actor being targeted.
+	auto actor = getActor(pSpawnID);
+	if (!actor) {
+		// This can happen for legitimate reasons, just reject the target.
+		// THIS DOES NOT WORK.
+		//pCharacter->getConnection()->sendRejectTarget();
+		return true;
+	}
+
 	pCharacter->setTarget(actor);
 
 	// Send HP of new target.
 	auto packet = ActorHPUpdate::construct(actor->getHPPercent(), actor->getHPPercent());
 	pCharacter->getConnection()->sendPacket(packet);
-	safe_delete(packet);
+	delete packet;
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Target, pCharacter);
-}
 
-Actor* Zone::findActor(const uint32 pSpawnID) const {
-	for (auto i : mActors) {
-		if (i->getSpawnID() == pSpawnID)
-			return i;
-	}
-
-	return nullptr;
+	return true;
 }
 
 void Zone::handleFaceChange(Character* pCharacter) {
@@ -912,35 +896,53 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 }
 
 void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
+	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 	EXPECTED(pRemoveActor);
 
-	//Log::info(pCharacter->getName() + " can no longer see " + pRemoveActor->getName());
-
-	// 
-	auto outPacket = new EQApplicationPacket(OP_DeleteSpawn, sizeof(DeleteSpawn_Struct));
-	auto payload = reinterpret_cast<DeleteSpawn_Struct*>(outPacket->pBuffer);
-	payload->spawn_id = pRemoveActor->getSpawnID();
-	payload->Decay = 0;
-	pCharacter->getConnection()->sendPacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = DespawnActor::construct(pRemoveActor->getSpawnID());
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
 }
 
 void Zone::addActor(Actor* pActor) {
 	EXPECTED(pActor);
-
-	mScene->add(pActor);
-	mActors.push_back(pActor);
-
+	
+	// Adding NPC.
 	if (pActor->isNPC()) {
 		mNPCs.push_back(Actor::cast<NPC*>(pActor));
 	}
+	// Adding Character.
+	else if (pActor->isCharacter()) {
+		mCharacters.push_back(Actor::cast<Character*>(pActor));
+	}
+
+	// Notify Scene.
+	mScene->add(pActor);
+
+	mActors[pActor->getSpawnID()] = pActor;
 }
 
 void Zone::removeActor(Actor* pActor) {
-	EXPECTED(pActor);
+	if (!pActor) return;
+
+	mActors[pActor->getSpawnID()] = nullptr;
+
+	// Notify Scene.
 	mScene->remove(pActor);
-	mActors.remove(pActor);
+	
+	// Removing NPC.
+	if (pActor->isNPC()) {
+		mNPCs.remove(Actor::cast<NPC*>(pActor));
+	}
+	// Removing Character.
+	else if (pActor->isCharacter()) {
+		mCharacters.remove(Actor::cast<Character*>(pActor));
+	}
+	// Error.
+	else {
+		mLog->error("Unknown Actor type in " + String(__FUNCTION__));
+	}
 }
 
 void Zone::handleSurnameChange(Actor* pActor) {
@@ -969,61 +971,6 @@ void Zone::handleSurnameChange(Actor* pActor) {
 	}
 
 	safe_delete(outPacket);
-}
-
-void Zone::handleTitleChanged(Character* pCharacter, const uint32 pOption) {
-	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
-
-	EQApplicationPacket* packet = nullptr;
-
-	// Updating Title.
-	if (pOption == TitleOption::Title)
-		packet = TitleUpdate::construct(TitleUpdate::UPDATE_TITLE, pCharacter->getSpawnID(), pCharacter->getTitle());
-	// Updating Suffix.
-	else
-		packet = TitleUpdate::construct(TitleUpdate::UPDATE_SUFFIX, pCharacter->getSpawnID(), pCharacter->getSuffix());
-
-	// Update Character + those visible to
-	sendToVisible(pCharacter, packet, true);
-	safe_delete(packet);
-}
-
-const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
-	if (!pCharacter) return false;
-	// TODO: Check eligibility
-
-	String prefix = "";
-
-	// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Title' button.
-	//if (payload->mID != 0)
-	//	prefix = ServiceLocator::getTitleManager()->getPrefix(payload->mID);
-
-	// Update Character.
-	pCharacter->setTitle(prefix);
-
-	//// Update Zone.
-	//const uint32 t = payload->mAction == SetTitle::SET_TITLE ? TitleOption::Title : TitleOption::Suffix;
-	//mZone->handleTitleChanged(mCharacter, t);
-
-	return true;
-}
-
-const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
-	if (!pCharacter) return false;
-	// TODO: Check eligibility
-
-	String suffix = "";
-
-	//// NOTE: Where mTitleID = 0 the player has pressed the 'Clear Suffix' button.
-	//if (payload->mID != 0)
-	//	suffix = ServiceLocator::getTitleManager()->getSuffix(payload->mID);
-
-	// Update Character.
-	pCharacter->setSuffix(suffix);
-	//mZone->handleTitleChanged(mCharacter, t);
-
-	return true;
 }
 
 void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
@@ -1099,6 +1046,16 @@ void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
 	// Update anyone who can see pActor.
 	for (auto i : pActor->getVisibleTo())
 		i->getConnection()->sendPacket(pPacket);
+}
+
+void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket, bool pIncludeSender) {
+	if (!pActor) return;
+	if (!pPacket) return;
+
+	if (pActor->isCharacter())
+		sendToVisible(Actor::cast<Character*>(pActor), pPacket, pIncludeSender);
+	else
+		sendToVisible(pActor, pPacket);
 }
 
 void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
@@ -1216,7 +1173,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 	EXPECTED(pLooter->isLooting() == false);
 
 	// Check: Actor exists.
-	Actor* actor = findActor(pCorpseSpawnID);
+	Actor* actor = getActor(pCorpseSpawnID);
 	if (!actor) {
 		pLooter->notify("Corpse could not be found.");
 		pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
@@ -1492,7 +1449,7 @@ void Zone::handleTradeRequest(Character* pCharacter, const uint32 pToSpawnID) {
 	EXPECTED(pCharacter->getSpawnID() != pToSpawnID);
 	EXPECTED(pCharacter->isTrading() == false); // Check: Character is not already trading.
 
-	auto actor = findActor(pToSpawnID);
+	auto actor = getActor(pToSpawnID);
 	EXPECTED(actor);
 
 	// TODO: Check distance for trading.
@@ -1625,7 +1582,7 @@ void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
 	EXPECTED(pCharacter->canShop());
 
 	// Find Actor by pSpawnID.
-	auto actor = findActor(pSpawnID);
+	auto actor = getActor(pSpawnID);
 	EXPECTED(actor);
 	EXPECTED(actor->isNPC());
 
@@ -2750,5 +2707,74 @@ const bool Zone::unmute(Character* pCharacter, const String& pCharacterName) {
 }
 
 const bool Zone::onRaidInviteDecline(Character* pCharacter) {
+	return true;
+}
+
+const bool Zone::onRequestTitles(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	auto titles = mTitleManager->getTitles(pCharacter);
+	auto packet = Payload::makeTitleList(titles);
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
+
+	return true;
+}
+
+const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return false;
+	// TODO: Check eligibility
+
+	String prefix = "";
+
+	// NOTE: Where pTitleID = 0 the player has pressed the 'Clear Title' button.
+	if (pTitleID != 0)
+		prefix = mTitleManager->getPrefix(pTitleID);
+
+	// Update Character.
+	pCharacter->setTitle(prefix);
+
+	// Update Zone.
+	auto packet = TitleUpdate::construct(TitleUpdateAction::Title, pCharacter->getSpawnID(), pCharacter->getTitle());
+	sendToVisible(pCharacter, packet, true);
+	delete packet;
+	
+	return true;
+}
+
+const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return false;
+	// TODO: Check eligibility
+
+	String suffix = "";
+
+	// NOTE: Where pSuffixID = 0 the player has pressed the 'Clear Title' button.
+	if (pSuffixID != 0)
+		suffix = mTitleManager->getSuffix(pSuffixID);
+
+	// Update Character.
+	pCharacter->setSuffix(suffix);
+
+	// Update Zone.
+	auto packet = TitleUpdate::construct(TitleUpdateAction::Suffix, pCharacter->getSpawnID(), pCharacter->getSuffix());
+	sendToVisible(pCharacter, packet, true);
+	delete packet;
+
+	return true;
+}
+
+const bool Zone::onSizeChange(Actor * pActor, float pSize) {
+	using namespace Payload::Zone;
+	if (!pActor) return false;
+
+	pActor->setSize(pSize);
+	
+	// Update Zone.
+	auto packet = ActorSize::construct(pActor->getSpawnID(), pSize);
+	sendToVisible(pActor, packet, true);
+	delete packet;
+
 	return true;
 }

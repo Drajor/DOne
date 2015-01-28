@@ -14,7 +14,6 @@
 #include "GuildManager.h"
 
 ZoneManager::~ZoneManager() {
-	ZoneConnection::_deinitialise();
 }
 
 void ZoneManager::update() {
@@ -37,13 +36,14 @@ const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) con
 	return zone->getPort();
 }
 
-const bool ZoneManager::initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory) {
+const bool ZoneManager::initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory) {
 	if (mInitialised) return false;
 	if (!pWorld) return false;
 	if (!pZoneDataManager) return false;
 	if (!pGroupManager) return false;
 	if (!pRaidManager) return false;
 	if (!pGuildManager) return false;
+	if (!pTitleManager) return false;
 	if (!pCommandHandler) return false;
 	if (!pItemFactory) return false;
 	if (!pLogFactory) return false;
@@ -54,6 +54,7 @@ const bool ZoneManager::initialise(World* pWorld, ZoneDataStore* pZoneDataManage
 	mGroupManager = pGroupManager;
 	mRaidManager = pRaidManager;
 	mGuildManager = pGuildManager;
+	mTitleManager = pTitleManager;
 	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
 	mLogFactory = pLogFactory;
@@ -66,7 +67,6 @@ const bool ZoneManager::initialise(World* pWorld, ZoneDataStore* pZoneDataManage
 
 	for (int i = 0; i < 3000; i++)
 		mAvailableZonePorts.push_back(7000+i);
-	ZoneConnection::_initalise();
 	Experience::Controller::_initialise();
 
 	mExperienceCalculator = new Experience::Calculator();
@@ -150,7 +150,7 @@ const bool ZoneManager::_makeZone(const u16 pZoneID, const u16 pInstanceID) {
 	EXPECTED_BOOL(zoneData);
 
 	auto zone = new Zone(port, pZoneID, pInstanceID);
-	if (!zone->initialise(this, mLogFactory, zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mCommandHandler, mItemFactory, mNPCFactory)) {
+	if (!zone->initialise(this, mLogFactory, zoneData, mExperienceCalculator, mGroupManager, mRaidManager, mGuildManager, mTitleManager, mCommandHandler, mItemFactory, mNPCFactory)) {
 		// Restore port to available list.
 		mAvailableZonePorts.push_front(port);
 		delete zone;

@@ -1556,10 +1556,8 @@ public:
 		float size = 0.0f;
 		if (!convertParameter(0, size)) { return false; }
 
-		auto target = mInvoker->getTarget();
-		target->setSize(size);
-		target->getZone()->handleAppearanceChange(target);
-
+		// Notify Zone.
+		mInvoker->getZone()->onSizeChange(mInvoker->getTarget(), size);
 		return true;
 	}
 };
@@ -1900,7 +1898,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 			uint32 v1 = 0;
 			if (Utility::stoSafe(v0, pParameters[0]) && Utility::stoSafe(v1, pParameters[1])) {
 				//pCharacter->doAnimation(animationID);
-				pCharacter->getZone()->handleAnimation(pCharacter->getTarget(), v0, v1, true);
+				pCharacter->getZone()->onAnimationChange(pCharacter->getTarget(), v0, v1, true);
 			}
 		}
 	}
@@ -2140,6 +2138,11 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	else if (pCommandName == "respawn") {
 		pCharacter->getConnection()->sendRespawnWindow();
 	}
+	else if (pCommandName == "delspawn") {
+		auto packet = Payload::Zone::DespawnActor::construct(pCharacter->getTarget()->getSpawnID());
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
+	}
 	else if (pCommandName == "msg" && pParameters.size() == 2) {
 		u32 channelID = 0;
 		if (!Utility::stoSafe(channelID, pParameters[0])) { return; }
@@ -2161,6 +2164,9 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	//		pCharacter->getConnection()->sendZoneEntry();
 	//	}
 	//}
+	else if (pCommandName == "msg2") {
+		//pCharacter->getConnection()->sendSimpleMessage(0, 1127, 17);
+	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");
 	}

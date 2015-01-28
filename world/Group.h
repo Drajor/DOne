@@ -1,16 +1,8 @@
 #pragma once
 
 #include "Types.h"
+#include "GroupConstants.h"
 #include <list>
-
-namespace GroupRole {
-	enum : u32 {
-		MainTank = 1,
-		MainAssist = 2,
-		Puller = 3,
-	};
-}
-
 
 class Character;
 class Zone;
@@ -44,7 +36,7 @@ public:
 	inline const u32 numMembers() const { return mMembers.size(); }
 
 	// Returns whether or not the Group is full.
-	inline const bool isFull() const { return numMembers() == 6; }
+	inline const bool isFull() const { return numMembers() == MaxGroupMembers; }
 
 	void sendPacket(const EQApplicationPacket* pPacket) const;
 	void sendPacket(const EQApplicationPacket* pPacet, Zone* pZone, Character* pExcludeCharacter = nullptr) const;

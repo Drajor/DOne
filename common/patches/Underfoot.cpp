@@ -2618,34 +2618,34 @@ ENCODE(OP_BuffCreate)
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_SpawnAppearance)
-{
-	EQApplicationPacket *in = *p;
-	*p = nullptr;
-
-	unsigned char *emu_buffer = in->pBuffer;
-
-	SpawnAppearance_Struct *sas = (SpawnAppearance_Struct *)emu_buffer;
-
-	if(sas->type != AT_Size)
-	{
-		dest->FastQueuePacket(&in, ack_req);
-		return;
-	}
-
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
-
-	ChangeSize_Struct *css = (ChangeSize_Struct *)outapp->pBuffer;
-
-	css->EntityID = sas->spawn_id;
-	css->Size = (float)sas->parameter;
-	css->Unknown08 = 0;
-	css->Unknown12 = 1.0f;
-
-	dest->FastQueuePacket(&outapp, ack_req);
-
-	delete in;
-}
+//ENCODE(OP_SpawnAppearance)
+//{
+//	EQApplicationPacket *in = *p;
+//	*p = nullptr;
+//
+//	unsigned char *emu_buffer = in->pBuffer;
+//
+//	SpawnAppearance_Struct *sas = (SpawnAppearance_Struct *)emu_buffer;
+//
+//	if(sas->type != AT_Size)
+//	{
+//		dest->FastQueuePacket(&in, ack_req);
+//		return;
+//	}
+//
+//	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+//
+//	ChangeSize_Struct *css = (ChangeSize_Struct *)outapp->pBuffer;
+//
+//	css->EntityID = sas->spawn_id;
+//	css->Size = (float)sas->parameter;
+//	css->Unknown08 = 0;
+//	css->Unknown12 = 1.0f;
+//
+//	dest->FastQueuePacket(&outapp, ack_req);
+//
+//	delete in;
+//}
 
 ENCODE(OP_DisciplineUpdate)
 {
