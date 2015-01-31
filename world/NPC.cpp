@@ -44,7 +44,7 @@ const bool NPC::initialise() {
 	EXPECTED_BOOL(mZone);
 	EXPECTED_BOOL(getSpawnID() == 0);
 	setSpawnID(mZone->getNextSpawnID());
-	addNimbus(405);
+	//addNimbus(405);
 
 	setMaximumHP(getLevel() * 10);
 	setCurrentHP(getMaximumHP());

@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "Bonuses.h"
+#include <functional>
 
 namespace Data {
 	struct Item;
@@ -27,7 +28,7 @@ public:
 	// Items
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
-	const bool put(Item* pItem, const uint32 pSlot);
+	const bool put(Item* pItem, const u32 pSlot);
 	const bool putContainer(Item* pItem, const uint32 pSlot);
 
 	// Returns the Item at pSlot or nullptr.
@@ -141,22 +142,34 @@ public:
 	void removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
 
 	void getTradeItems(std::list<Item*>& pItems) const;
-	const bool clearTradeItems();
+	
+	inline void clearTradeItems() { for (auto& i : mTrade) i = nullptr; }
+
 	const bool onTradeAccept();
 	const bool onTradeCancel();
 
-	const uint32 findEmptySlot(Item* pItem) const;
-	const uint32 findEmptySlot(const bool pContainer, const uint8 pItemSize) const;
+	// Finds a slot ID for an Item. If no slot ID is found, SlotID::CURSOR is returned.
+	const u32 findEmptySlot(Item* pItem) const;
+
+	const uint32 findSlotFor(const bool pContainer, const uint8 pItemSize) const;
 	Item* findFirst(const uint8 pItemType) const;
 
 	// Finds and returns the first Item with pItemID that does not have full stacks.
-	Item* findStackable(const uint32 pItemID) const;
+	Item* findPartialStack(const u32 pItemID) const;
 
 	void updateConsumables();
 
 	inline const bool isAutoFood(Item* pItem) const { return pItem == mAutoFood; }
 	inline const bool isAutoDrink(Item* pItem) const { return pItem == mAutoDrink; }
 
+	inline const i32 _getCurrency(const u32 pSlot, const u32 pType) const { return mCurrency[pSlot][pType]; }
+
+	//template <typename T>
+	//T iterateMain(std::function<const bool(Item* pItem)> pPredicate) const {
+	//	for (auto i = SlotID::MAIN_0; i < SlotID::MAIN_7; i++) {
+	//		if (pFunction(mItems[i])) { return 0; }
+	//	} 
+	//}
 private:
 
 	bool mInitialised = false;
@@ -194,6 +207,4 @@ private:
 	std::map<uint32, uint32> mAlternateCurrency;
 
 	int32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];
-
-	inline const int32 _getCurrency(const uint32 pSlot, const uint32 pType) const { return mCurrency[pSlot][pType]; }
 };

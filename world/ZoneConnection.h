@@ -139,17 +139,14 @@ public:
 	void sendPopup(const String& pTitle, const String& pText);
 	void sendItemSummon(Item* pItem);
 	void sendItemView(Item* pItem);
+	
+	void sendItemTradeCharacter(Item* pItem);
+
 	void sendItemTrade(Item* pItem);
 	void sendItemShop(Item* pItem);
 	//void sendSpellCastOn();
 
-	void sendTradeRequestAcknowledge(const uint32 pToSpawnID);
-	void sendTradeFinished();
-	void sendFinishWindow();
-	void sendFinishWindow2();
-	void sendTradeCancel(const uint32 pToSpawnID);
-
-	void sendDeleteItem(const uint32 pSlot, const uint32 pStacks = 0xFFFFFFFF, const uint32 pToSlot = 0xFFFFFFFF);
+	void sendDeleteItem(const u32 pFromSlot, const u32 pToSlot = 0xFFFFFFFF, const u32 pStacks = 0xFFFFFFFF);
 	void sendMoveItem(const uint32 pFromSlot, const uint32 pToSlot = 0xFFFFFFFF, const uint32 pStacks = 0xFFFFFFFF);
 	void sendReadBook(const uint32 pWindow, const uint32 pSlot, const uint32 pType, const String& pText);
 	void sendCombineReply();
@@ -251,10 +248,7 @@ public:
 	const bool handleItemLinkClick(const EQApplicationPacket* pPacket);
 
 	const bool handleMoveItem(const EQApplicationPacket* pPacket);
-	const bool handleMoveItemImpl(const EQApplicationPacket* pPacket);
-
-	const bool handleMoveCoin(const EQApplicationPacket* pPacket);
-	const bool handleMoveCoinImpl(const EQApplicationPacket* pPacket);
+	const bool handleMoveCurrency(const EQApplicationPacket* pPacket);
 
 	// Shop / Merchant
 	const bool handleShopRequest(const EQApplicationPacket* pPacket);
@@ -262,12 +256,19 @@ public:
 	const bool handleShopSell(const EQApplicationPacket* pPacket);
 	const bool handleShopBuy(const EQApplicationPacket* pPacket);
 
-	// Trade.
+	// (IN) Trade.
 	const bool handleTradeRequest(const EQApplicationPacket* pPacket);
 	const bool handleTradeRequestAck(const EQApplicationPacket* pPacket);
 	const bool handleCancelTrade(const EQApplicationPacket* pPacket);
 	const bool handleAcceptTrade(const EQApplicationPacket* pPacket);
 	const bool handleTradeBusy(const EQApplicationPacket* pPacket);
+
+	// (OUT) Trade.
+	void sendTradeRequestAcknowledge(const u32 pFromSpawnID);
+	void sendTradeFinished();
+	void sendCharacterTradeClose();
+	void sendFinishWindow2();
+	void sendTradeCancel(const u32 pToSpawnID, const u32 pFromSpawnID);
 
 	// Alternate Currency
 	const bool handleCrystalCreate(const EQApplicationPacket* pPacket);
@@ -312,6 +313,7 @@ public:
 	const bool handleUpdateAA(const EQApplicationPacket* pPacket);
 	const bool handleItemView(const EQApplicationPacket* pPacket);
 	const bool handleGMLastName(const EQApplicationPacket* pPacket);
+	const bool handleWearChange(const EQApplicationPacket* pPacket);
 
 	inline const bool hasSizeError() const { return mSizeError; } // For unit testing.
 	inline const bool hasStringError() const { return mStringError; } // For unit testing.

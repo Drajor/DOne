@@ -583,8 +583,9 @@ private:
 
 	std::list<uint32> mNimbuses;
 
-	float mVisibleRange = 3000.0f;
+	float mVisibleRange = 300.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
+	std::bitset<65535> mVisibleToSpawnID;
 
 	Actor* mTarget = nullptr; // Current target.
 	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.

@@ -1190,7 +1190,20 @@ public:
 
 	const bool inspectCharacter(Character* pCharacter) {
 		mInvoker->notify("Inspecting " + pCharacter->getName());
+		auto inventory = pCharacter->getInventory();
 
+		mInvoker->notify("== Currency ==");
+		for (auto i = 0; i < CurrencySlot::MAX; i++) {
+			StringStream ss;
+			ss << "[" << CurrencySlot::toString(i) << "]";
+			for (auto j = 0; j < CurrencyType::MAX; j++) {
+				ss << " " << CurrencyType::toString(j)[0] << "( " << inventory->_getCurrency(i, j) << " )";
+			}
+			mInvoker->notify(ss.str());
+		}
+
+
+		mInvoker->notify("== Items ==");
 		auto f = [this](Item* pItem) {
 			StringStream ss;			
 			if (pItem) {
@@ -2131,7 +2144,6 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	}
 	// Force save.
 	else if (pCommandName == "save") {
-		pCharacter->_updateForSave();
 		pCharacter->getZone()->saveCharacter(pCharacter);
 	}
 	// Respawn
@@ -2153,6 +2165,35 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		u32 p1 = 0;
 		if (!Utility::stoSafe(p1, pParameters[0])) { return; }
 		pCharacter->getConnection()->sendLevelAppearance(p1);
+	}
+	else if (pCommandName == "bigspawn") {
+		for (auto i = 0; i < 1000; i++) {
+			for (auto j = 0; j < 15; j++) {
+				auto npc = ServiceLocator::getNPCFactory()->create(13);
+				if (!npc) return;
+
+				Vector3 pos(-1780 - (j * 5), 1000 - (i *5) , 0);
+				npc->setZone(pCharacter->getZone());
+				npc->initialise();
+				npc->setPosition(pos);
+				npc->_syncPosition();
+
+				pCharacter->getZone()->addActor(npc);
+			}
+		}
+	}
+	else if (pCommandName == "delitem" && pParameters.size() == 2) {
+		u32 fromSlot = 0;
+		if (!Utility::stoSafe(fromSlot, pParameters[0])) { return; }
+		//u32 toSlot = 0;
+		//if (!Utility::stoSafe(toSlot, pParameters[1])) { return; }
+		u32 stacks = 0;
+		if (!Utility::stoSafe(stacks, pParameters[1])) { return; }
+
+		//pCharacter->getConnection()->sendDeleteItem(fromSlot, toSlot, stacks);
+		auto packet = Payload::Zone::DeleteItemCharges::construct(fromSlot, stacks);
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
 	}
 	// Does not work!
 	//// Speed

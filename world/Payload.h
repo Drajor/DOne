@@ -50,9 +50,9 @@ namespace Payload {
 	enum ItemPacketType
 	{
 		ItemPacketViewLink = 0x00,
-		ItemPacketTradeView = 0x65,
+		ItemPacketTradeView = 0x65, // When trading with Character
 		ItemPacketLoot = 0x66,
-		ItemPacketTrade = 0x67,
+		ItemPacketTrade = 0x67, // When buying from a shop or looting a corpse.
 		ItemPacketCharInventory = 0x69,
 		ItemPacketSummonItem = 0x6A,
 		ItemPacketTributeItem = 0x6C,
@@ -548,6 +548,12 @@ namespace Payload {
 
 		// S->C
 		struct WearChange : public FixedT<WearChange, OP_WearChange> {
+			u16 mSpawnID = 0;
+			u32 mMaterialID = 0;
+			u32 mUnknown = 0;
+			u32 mEliteMaterialID = 0; // Not sure what this is.
+			u32 mColour = 0;
+			u8 mSlot = 0;
 			static EQApplicationPacket* construct(const u16 pSpawnID, const u32 pMaterialID, const u32 pEliteMaterialID, const u32 pColour, const u8 pSlot) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -559,12 +565,17 @@ namespace Payload {
 
 				return packet;
 			}
-			u16 mSpawnID = 0;
-			u32 mMaterialID = 0;
-			u32 mUnused0 = 0;
-			u32 mEliteMaterialID = 0; // Not sure what this is.
-			u32 mColour = 0;
-			u8 mSlot = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "[WearChange] ";
+				PRINT_MEMBER(mSpawnID);
+				PRINT_MEMBER(mMaterialID);
+				PRINT_MEMBER(mUnknown);
+				PRINT_MEMBER(mEliteMaterialID);
+				PRINT_MEMBER(mColour);
+				PRINT_MEMBER((i32)mColour);
+				return ss.str();
+			}
 		};
 		
 		// C->S
@@ -1043,6 +1054,7 @@ namespace Payload {
 		};
 
 		// C->S
+		// [UF] MoveItem causes a client crash when using trade slots.
 		struct MoveItem : public FixedT<MoveItem, OP_MoveItem> {
 			static EQApplicationPacket* construct(const u32 pFromSlot, const u32 pToSlot = 0xFFFFFFFF, const u32 pStacks = 0xFFFFFFFF) {
 				auto packet = create();
@@ -1059,12 +1071,30 @@ namespace Payload {
 		};
 
 		// S->C
+		// [UF] DeleteItem allows delete from trade slots.
 		struct DeleteItem : public FixedT<DeleteItem, OP_DeleteItem> {
 			static EQApplicationPacket* construct(const u32 pFromSlot, const u32 pToSlot = 0xFFFFFFFF, const u32 pStacks = 0xFFFFFFFF) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mFromSlot = pFromSlot;
 				payload->mToSlot = pToSlot;
+				payload->mStacks = pStacks;
+
+				return packet;
+			}
+			u32 mFromSlot = 0;
+			u32 mToSlot = 0;
+			u32 mStacks = 0;
+		};
+
+		// S->C
+		// Have not managed to get this to do anything except trigger "MOVE ITEM FAILED IN CLIENT APPLICATION" in the client.
+		struct DeleteItemCharges : public FixedT<DeleteItemCharges, OP_DeleteCharge> {
+			static EQApplicationPacket* construct(const u32 pFromSlot, /*const u32 pToSlot = 0xFFFFFFFF, */const u32 pStacks = 0xFFFFFFFF) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mFromSlot = pFromSlot;
+				payload->mToSlot = 0xFFFFFFFF;
 				payload->mStacks = pStacks;
 
 				return packet;
@@ -1138,6 +1168,9 @@ namespace Payload {
 
 		// S->C
 		struct TradeRequestAcknowledge : public FixedT<TradeRequestAcknowledge, OP_TradeRequestAck> {
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
+
 			static EQApplicationPacket* construct(const u32 pToSpawnID, const u32 pFromSpawnID) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -1146,12 +1179,13 @@ namespace Payload {
 
 				return packet;
 			}
-			u32 mToSpawnID = 0;
-			u32 mFromSpawnID = 0;
 		};
 
 		// C->S
 		struct TradeCancel : public FixedT<TradeCancel, OP_CancelTrade> {
+			u32 mToSpawnID = 0;
+			u32 mFromSpawnID = 0;
+
 			static EQApplicationPacket* construct(const u32 pToSpawnID, const u32 pFromSpawnID) {
 				auto packet = create();
 				auto payload = convert(packet);
@@ -1160,8 +1194,7 @@ namespace Payload {
 
 				return packet;
 			}
-			u32 mToSpawnID = 0;
-			u32 mFromSpawnID = 0;
+
 			String _debug() const {
 				StringStream ss;
 				ss << "[TradeCancel] ";
@@ -1171,27 +1204,42 @@ namespace Payload {
 			}
 		};
 
-		// C->S
-		struct TradeAccept : public Fixed<TradeAccept> {
+		// C<->S
+		struct TradeAccept : public FixedT<TradeAccept, OP_TradeAcceptClick> {
 			u32 mFromSpawnID = 0;
-			u32 mUnknown0 = 0;
+			u32 mUnknown = 1;
+
+			static EQApplicationPacket* construct(const u32 pFromSpawnID) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mFromSpawnID = pFromSpawnID;
+
+				return packet;
+			}
 			String _debug() const {
 				StringStream ss;
 				ss << "[TradeAccept] ";
 				PRINT_MEMBER(mFromSpawnID);
-				PRINT_MEMBER(mUnknown0);
+				PRINT_MEMBER(mUnknown);
 				return ss.str();
 			}
 		};
 
 		// C<->S
-		struct TradeBusy : public Fixed<TradeBusy> {
+		struct TradeBusy : public FixedT<TradeBusy, OP_TradeBusy> {
 			u32 mToSpawnID = 0;
 			u32 mFromSpawnID = 0;
-			u8 mType = 0;
-			u8 mUnknown0 = 0;
-			u8 mUnknown1 = 0;
-			u8 mUnknown2 = 0;
+			u32 mReason = 0;
+
+			static EQApplicationPacket* construct(const u32 pToSpawnID, const u32 pFromSpawnID, const u32 pReason) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mToSpawnID = pToSpawnID;
+				payload->mFromSpawnID = pFromSpawnID;
+				payload->mReason = pReason;
+
+				return packet;
+			}
 		};
 
 		// C->S
@@ -1200,22 +1248,28 @@ namespace Payload {
 		};
 
 		// C->S
-		struct MoveCoin : public Fixed<MoveCoin> {
+		struct MoveCurrency : public Fixed<MoveCurrency> {
 			u32 mFromSlot = 0;
 			u32 mToSlot = 0;
 			u32 mFromType = 0;
 			u32 mToType = 0;
 			i32 mAmount = 0;
-			String _debug() const {
-				StringStream ss;
-				ss << "[MoveCoin] ";
-				PRINT_MEMBER(mFromSlot);
-				PRINT_MEMBER(mToSlot);
-				PRINT_MEMBER(mFromType);
-				PRINT_MEMBER(mToType);
-				PRINT_MEMBER(mAmount);
-				return ss.str();
+		};
+
+		// S->C
+		struct TradeCurrencyUpdate : FixedT<TradeCurrencyUpdate, OP_TradeCoins> {
+			static EQApplicationPacket* construct(const u32 pSpawnID, const u32 pCurrencyType, const i32 pAmount) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTraderSpawnID = pSpawnID;
+				payload->mType = pCurrencyType;
+				payload->mAmount = pAmount;
+
+				return packet;
 			}
+			u32 mTraderSpawnID = 0;
+			u32 mType = 0;
+			i32 mAmount = 0;
 		};
 
 		// C<-S

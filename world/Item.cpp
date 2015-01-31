@@ -97,17 +97,20 @@ const u32 Item::_getDataSize(const u32 pCopyType) const {
 const bool Item::copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType) {
 	// Check: This Item is either an augment or within a bag.
 	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
-	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
+	if (hasParent() && pCopyType != Payload::ItemPacketTrade /*&& pCopyType != Payload::ItemPacketTradeView*/) {
 		EXPECTED_BOOL(hasValidSubIndex());
 		pWriter.write<u32>(getSubIndex());
 	}
 
-	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent item.
+	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent Item.
 
 	// Write Item Header.
 	pWriter.write(getStacks());
 	pWriter.write(mItemData->__Unknown0);
-	pWriter.write(getSlot());
+	if (pCopyType == Payload::ItemPacketTradeView)
+		pWriter.write(getSlot() - 3000);
+	else
+		pWriter.write(getSlot());
 	pWriter.write(getShopPrice());
 	pWriter.write(getShopQuantity());
 	pWriter.write(mItemData->__Unknown1);
@@ -254,7 +257,7 @@ Item* Item::findFirst(const u8 pItemType) const {
 
 Item* Item::findStackable(const u32 pItemID) const {
 	for (auto i : mContents) {
-		if (i && i->getID() == pItemID && i->getStacks() < i->getMaxStacks())
+		if (i && i->getID() == pItemID && i->getEmptyStacks() > 0)
 			return i;
 	}
 
@@ -459,8 +462,8 @@ const bool Item::addStacks(const u32 pStacks) {
 }
 
 const bool Item::removeStacks(const u32 pStacks) {
-	EXPECTED_BOOL(isStackable());
-	EXPECTED_BOOL(getStacks() > pStacks);
+	if (!isStackable()) return false;
+	if (getStacks() < pStacks) return false;
 
 	mStacks -= pStacks;
 	return true;
@@ -581,8 +584,8 @@ String Item::getLink() const {
 	return ss.str();
 }
 
-const u32 Item::findEmptySlot() {
-	EXPECTED_VAR(isContainer(), SlotID::None);
+const u32 Item::findEmptySlot() const {
+	if (!isContainer()) return SlotID::None;
 
 	for (int i = 0; i < SlotID::MAX_CONTENTS; i++) {
 		if (!mContents[i])

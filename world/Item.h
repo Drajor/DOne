@@ -100,6 +100,9 @@ public:
 
 	// Returns the number of stacks this Item has.
 	inline const u32 getStacks() const { return mStacks; }
+	
+	// Returns the number of stacks that this item is missing. I.e. If the item is 91/100 stacks, it will return 9.
+	inline const u32 getEmptyStacks() const { return getMaxStacks() - getStacks(); }
 
 	// Returns the slot this Item is in.
 	inline const u32 getSlot() const { return mSlot; }
@@ -200,7 +203,8 @@ public:
 	Item* findFirst(const u8 pItemType) const;
 	Item* findStackable(const u32 pItemID) const;
 
-	const u32 findEmptySlot();
+	// Returns SlotID::None if no empty slot is found.
+	const u32 findEmptySlot() const;
 
 	// Augmentation
 	// TODO: This needs some error checking.

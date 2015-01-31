@@ -150,6 +150,9 @@ namespace ItemID {
 		TCColdResist,
 		TCCorruptionResist,
 
+		// Test Items
+		TestContainer,
+
 		// Alternate Currencies
 		Token = 100,
 		Adhesive = 101,
@@ -418,6 +421,18 @@ namespace SlotID {
 		TRADE_6 = 3006,
 		TRADE_7 = 3007,
 
+		// Trade Contents
+
+		//TRADE_0_0 = 262, // (Parent) Slot 3000 with 10 slot container.
+		//TRADE_1_0 = 272, // (Parent) Slot 3001
+		//TRADE_2_0 = 282, // (Parent) Slot 3002
+		//TRADE_3_0 = 292, // (Parent) Slot 3003
+		//TRADE_4_0 = 302, // (Parent) Slot 3004
+		//TRADE_5_0 = 312, // (Parent) Slot 3005
+		//TRADE_6_0 = 322, // (Parent) Slot 3006
+		//TRADE_7_0 = 332, // (Parent) Slot 3007
+		//TRADE_7_9 = 341, // (End of Slot 30 sub-slots)
+
 		SLOT_DELETE = 4294967295,
 		None = SLOT_DELETE - 1, // Internal use only.
 	};
@@ -446,6 +461,8 @@ namespace SlotID {
 	static const bool isSharedBankContents(const uint32 pSlot) { return pSlot >= SHARED_BANK_0_0 && pSlot <= SHARED_BANK_1_9; }
 
 	static const bool isTrade(const uint32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_7; }
+	static const bool isCharacterTrade(const u32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_7; }
+	static const bool isNPCTrade(const u32 pSlot) { return pSlot >= TRADE_0 && pSlot <= TRADE_3; }
 
 	static const bool isWorn(const uint32 pSlot) { return pSlot >= CHARM && pSlot <= AMMO; }
 

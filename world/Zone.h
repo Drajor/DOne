@@ -199,6 +199,7 @@ public:
 	const bool onSizeChange(Actor * pActor, float pSize);
 	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
 	const bool onTargetChange(Character* pCharacter, const u16 pSpawnID);
+	const bool onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot);
 
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
@@ -268,12 +269,33 @@ public:
 
 	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
+
+	// Character is moving an Item.
+	const bool onMoveItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
+
+	// Character is equipping an Item.
+	const bool onEquipItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
+
+	// Character is unequipping an Item.
+	const bool onUnequipItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
+
+	// Character is moving currency.
+	const bool onMoveCurrency(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount);
 	
 	// Character is requesting trade with an Actor.
-	void onTradeRequest(Character* pCharacter, const u32 pSpawnID);
+	const bool onTradeRequest(Character* pCharacter, const u32 pSpawnID);
 
-	void handleTradeAccept(Character* pCharacter, const uint32 pSpawnID);
-	void handleTradeCancel(Character* pCharacter, const uint32 pSpawnID);
+	// Character is responding to a trade request (positive).
+	const bool onTradeResponse(Character* pCharacter, const u32 pSpawnID);
+
+	// Character is responding to trade request (negative).
+	const bool onTradeBusy(Character* pCharacter, const u32 pSpawnID);
+
+	// Character has accepted trade.
+	const bool onTradeAccept(Character* pCharacter, const u32 pSpawnID);
+
+	// Character has canceled trade.
+	const bool onTradeCancel(Character* pCharacter, const u32 pSpawnID);
 
 	void handleShopRequest(Character* pCharacter, const uint32 pSpawnID);
 	void handleShopEnd(Character* pCharacter, const uint32 pSpawnID);
@@ -381,6 +403,7 @@ private:
 	bool mPopulated = false;
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
+	const bool returnTradeItems(Character* pCharacter);
 	ZonePointList mZonePoints;
 
 	std::list<Character*> mCharacters;

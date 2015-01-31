@@ -365,7 +365,6 @@ void Zone::onCampComplete(Character* pCharacter) {
 	mLog->info("Character (" + pCharacter->getName() + ") camped.");
 
 	// Save
-	pCharacter->_updateForSave();
 	saveCharacter(pCharacter);
 
 	// Remove.
@@ -418,7 +417,6 @@ void Zone::onLinkdeadEnd(Character* pCharacter) {
 	mLog->info("Character (" + pCharacter->getName() + ") LD end.");
 	
 	// Save
-	pCharacter->_updateForSave();
 	saveCharacter(pCharacter);
 
 	// Remove.
@@ -770,6 +768,8 @@ void Zone::_sendActorLevel(Actor* pActor) {
 
 void Zone::saveCharacter(Character*pCharacter) {
 	if (!pCharacter) return;
+
+	pCharacter->_updateForSave();
 
 	if (!mZoneManager->saveCharacter(pCharacter)) {
 		mLog->error("Failed to save Character: " + pCharacter->getName());
@@ -1423,8 +1423,8 @@ ZonePoint* Zone::_getClosestZonePoint(const Vector3& pPosition) {
 }
 
 const bool Zone::canBank(Character* pCharacter) {
-	EXPECTED_BOOL(pCharacter);
-	static const float MaxBankingDistance = 5.0f; // TODO! Work out the max distance.
+	if (!pCharacter) return false;
+	static const float MaxBankingDistance = 405.0f; // TODO:
 
 	float closestDistance = 9999999.0f;
 	for (auto i : pCharacter->getVisibleNPCs()) {
@@ -1483,15 +1483,25 @@ void Zone::handleHPChange(Actor* pActor) {
 	safe_delete(packet);
 }
 
-void Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
-	EXPECTED(pCharacter->isTrading() == false); // Check: Character is not already trading.
+const bool Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
+	if (!pCharacter) return false;
+
+	// Check: Character can trade.
+	if (!pCharacter->canRequestTrade()) {
+		mLog->error("Got trade request from " + pCharacter->getName() + " but they are not allowed to trade right now.");
+		return false;
+	}
 
 	// Find Actor.
 	auto actor = getActor(pSpawnID);
 	if (!actor) {
-		return;
+		return true;
+	}
+
+	// Check: Self trade.
+	if (pCharacter == actor) {
+		mLog->error("Got self trade request from " + pCharacter->getName());
+		return false;
 	}
 
 	// TODO: Check distance for trading.
@@ -1507,117 +1517,279 @@ void Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
 			// Associate Character and NPC.
 			npc->addTrader(pCharacter);
 			pCharacter->setTradingWith(npc);
-			return;
+			return true;
 		}
 		else {
 			pCharacter->message(MessageType::White, "This NPC will not trade with you.");
-			return;
+			return true;
 		}
 	}
 	// Requesting trade with a Character.
 	else if (actor->isCharacter()) {
 		auto character = Actor::cast<Character*>(actor);
+
+		// Check: Does Character have a pending trade request.
+		if (character->hasTradeRequest()) {
+
+			return true;
+		}
+
 		character->getConnection()->sendTradeRequest(pCharacter->getSpawnID());
-		return;
+
+		// Record request.
+		auto& request = character->getTradeRequest();
+		request.mSpawnID = pCharacter->getSpawnID();
+		request.mTimeRequested = Utility::Time::now();
+
+		return true;
 	}
+
+	return true;
 }
 
-void Zone::handleTradeAccept(Character* pCharacter, const uint32 pSpawnID) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
-	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
-	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
+const bool Zone::onTradeResponse(Character* pCharacter, const u32 pSpawnID) {
+	if (!pCharacter) return false;
 
-	pCharacter->getConnection()->sendTradeFinished();
-	//pCharacter->getConnection()->sendCancelTrade(pSpawnID);
-	//pCharacter->getConnection()->sendFinishWindow();
+	// Check: Character has a pending trade request.
+	if (!pCharacter->hasTradeRequest()) {
+		mLog->error(pCharacter->getName() + " responded to trade request they do not have one pending.");
+		return false;
+	}
+
+	auto& request = pCharacter->getTradeRequest();
+
+	// Check: Trade request spawn ID matches.
+	if (request.mSpawnID != pSpawnID) {
+		mLog->error(pCharacter->getName() + " responded to trade request with spawn ID: " + toString(pSpawnID) + " but the pending trade request has spawn ID: " + toString(request.mSpawnID));
+		pCharacter->clearTradeRequest();
+		return false;
+	}
+
+	// Find Actor.
+	auto actor = getActor(pSpawnID);
+	if (!actor) {
+		// NOTE: This is probably not an error. A Character could send a request then zone out.
+		mLog->error(pCharacter->getName() + " responded to trade request with spawn ID: " + toString(pSpawnID) + " but the Actor could not be found.");
+		pCharacter->clearTradeRequest();
+		return false;
+	}
+	
+	// Check: Is visible to
+	// Check: Distance is valid.
+
+	auto character = Actor::cast<Character*>(actor);
+
+	// Associate Characters as trading with each other.
+	character->setTradingWith(pCharacter);
+	pCharacter->setTradingWith(actor);
+
+	character->getConnection()->sendTradeRequestAcknowledge(pCharacter->getSpawnID());
+
+	pCharacter->clearTradeRequest();
+	return true;
+}
+
+const bool Zone::onTradeBusy(Character* pCharacter, const u32 pSpawnID) {
+	if (!pCharacter) return false;
+
+	return true;
+}
+
+
+const bool Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return false;
+
+	// Check: Character is trading.
+	if (!pCharacter->isTrading()) {
+		mLog->error(pCharacter->getName() + " accepted trade but they are not trading.");
+		return false;
+	}
+
+	// Check: Character has already accepted trade.
+	if (pCharacter->isTradeAccepted()) {
+		mLog->error(pCharacter->getName() + " accepted trade but they have already accepted.");
+		return false;
+	}
+
+	auto tradingWithActor = pCharacter->getTradingWith();
+
+	// Check: Character is accepting trade with correct Actor.
+	if (tradingWithActor->getSpawnID() != pSpawnID) {
+		mLog->error(pCharacter->getName() + " accepted trade with incorrect Actor.");
+		return false;
+	}
+
+	// Handle: Accepted trade with another Character.
+	if (pCharacter->isTradingWithCharacter()) {
+		pCharacter->setTradeAccepted(true);
+
+		auto tradingWith = Actor::cast<Character*>(tradingWithActor);
+
+		// Update other Character.
+		auto packet = TradeAccept::construct(pCharacter->getSpawnID());
+		tradingWith->getConnection()->sendPacket(packet);
+		delete packet;
+
+		// Check: Have both Characters accepted trade.
+		if (tradingWith->isTradeAccepted()) {
+
+
+			pCharacter->setTradingWith(nullptr);
+			pCharacter->setTradeAccepted(false);
+			saveCharacter(pCharacter);
+
+			tradingWith->setTradingWith(nullptr);
+			tradingWith->setTradeAccepted(false);
+			saveCharacter(tradingWith);
+
+			return true;
+		}
+	}
+	// Handle: Accepted trade with an NPC.
+	else if (pCharacter->isTradingWithNPC()) {
+		auto tradingWith = Actor::cast<NPC*>(tradingWithActor);
+
+		pCharacter->getConnection()->sendTradeFinished();
+		pCharacter->setTradingWith(nullptr);
+
+		const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
+		pCharacter->getInventory()->onTradeAccept();
+	}
+	// Handle: Unknown.
+	else {
+		mLog->error(pCharacter->getName() + " trading with unknown type.");
+		return false;
+	}
+
+	return true;
+}
+
+const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return false;
+
+	// Check: Character is trading.
+	if (!pCharacter->isTrading()) {
+		mLog->error(pCharacter->getName() + " canceled trade but they are not trading.");
+		return false;
+	}
+
+	// Handle: Character has canceled while trading with a Character.
+	if (pCharacter->isTradingWithCharacter()) {
+		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
+
+		pCharacter->getConnection()->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
+		pCharacter->getConnection()->sendCharacterTradeClose();
+		pCharacter->setTradingWith(nullptr);
+		pCharacter->setTradeAccepted(false);
+		// Return Items to Character.
+		returnTradeItems(pCharacter);
+
+		tradingWith->getConnection()->sendTradeCancel(tradingWith->getSpawnID(), pCharacter->getSpawnID());
+		tradingWith->getConnection()->sendCharacterTradeClose();
+		tradingWith->setTradingWith(nullptr);
+		tradingWith->setTradeAccepted(false);
+
+		// Return Items to Character.
+		returnTradeItems(tradingWith);
+
+		return true;
+
+	}
+	// Handle: Character has canceled while trading with an NPC.
+	else if (pCharacter->isTradingWithNPC()) {
+		auto tradingWith = Actor::cast<NPC*>(pCharacter->getTradingWith());
+
+		pCharacter->getConnection()->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
+		pCharacter->getConnection()->sendCharacterTradeClose();
+		pCharacter->getConnection()->sendFinishWindow2();
+		pCharacter->setTradingWith(nullptr);
+
+		// Return Items to Character.
+		returnTradeItems(pCharacter);
+
+		return true;
+	}
+
+	//EXPECTED_BOOL(pCharacter->getSpawnID() != pSpawnID);
+	//EXPECTED_BOOL(pCharacter->isTrading()); // Check: Character is trading.
+	//EXPECTED_BOOL(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
+
+	//// Make a list of Items that were in the trade window.
+	//std::list<Item*> unordered;
+	//pCharacter->getInventory()->getTradeItems(unordered);
+	//
+	//// Adjust order of Items so that containers are sent first.
+	//std::list<Item*> ordered;
+	//for (auto i = unordered.begin(); i != unordered.end();) {
+	//	if ((*i)->isContainer()) {
+	//		ordered.push_back(*i);
+	//		i = unordered.erase(i);
+	//		continue;
+	//	}
+	//	i++;
+	//}
+	//// Add remaining Items.
+	//for (auto i : unordered)
+	//	ordered.push_back(i);
+
+	//// Clear all trade Items.
+	//pCharacter->getInventory()->clearTradeItems();
+
+	//// Place Items back into Character Inventory.
+	//for (auto i : ordered) {
+	//	if (i->isStackable()) {
+	//		// When an Item is being return to the Character, try stacking first.
+	//		auto existing = pCharacter->getInventory()->findStackable(i->getID());
+	//		if (existing) {
+	//			existing->addStacks(1);
+	//			// This currently only works for primary slot stacking.. when I try to send into a container I get a broken item in the charm slot.
+	//			pCharacter->getConnection()->sendItemTrade(existing);
+	//			delete i;
+	//		}
+	//		// If there is no existing Item to stack on to, find a free slot.
+	//		else {
+	//			const uint32 slotID = pCharacter->getInventory()->findSlotFor(i);
+	//			pCharacter->getInventory()->put(i, slotID);
+	//			pCharacter->getConnection()->sendItemTrade(i);
+	//		}
+	//	}
+	//	else {
+	//		const uint32 slotID = pCharacter->getInventory()->findSlotFor(i);
+
+	//		// No slot was found, try cursor.
+	//		if (SlotID::isNone(slotID)) {
+	//			//if (pCharacter->getInventory()->)
+	//		}
+	//		else {
+	//			pCharacter->getInventory()->put(i, slotID);
+	//			
+	//			// Update container contents slots
+	//			if (i->isContainer()) {
+	//				// Check: Containers can only be moved into main slots.
+	//				EXPECTED_BOOL(SlotID::isMainInventory(slotID));
+	//				i->updateContentsSlots();
+	//			}
+	//				
+
+	//			pCharacter->getConnection()->sendItemTrade(i);
+	//		}
+	//	}
+	//}
+
+	//// Update Inventory.
+	//EXPECTED_BOOL(pCharacter->getInventory()->onTradeCancel());
+
+	////pCharacter->getConnection()->sendTradeCancel(pSpawnID);
+	//pCharacter->getConnection()->sendCharacterTradeClose();
 	//pCharacter->getConnection()->sendFinishWindow2();
-	pCharacter->setTradingWith(nullptr);
+	//pCharacter->setTradingWith(nullptr);
 
-	const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
-	pCharacter->getInventory()->onTradeAccept();
-}
+	//// Update client.
+	//pCharacter->getConnection()->sendCurrencyUpdate();
 
-void Zone::handleTradeCancel(Character* pCharacter, const uint32 pSpawnID) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->getSpawnID() != pSpawnID);
-	EXPECTED(pCharacter->isTrading()); // Check: Character is trading.
-	EXPECTED(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
-
-	// Make a list of Items that were in the trade window.
-	std::list<Item*> unordered;
-	pCharacter->getInventory()->getTradeItems(unordered);
-	
-	// Adjust order of Items so that containers are sent first.
-	std::list<Item*> ordered;
-	for (auto i = unordered.begin(); i != unordered.end();) {
-		if ((*i)->isContainer()) {
-			ordered.push_back(*i);
-			i = unordered.erase(i);
-			continue;
-		}
-		i++;
-	}
-	// Add remaining Items.
-	for (auto i : unordered)
-		ordered.push_back(i);
-
-	// Clear all trade Items.
-	EXPECTED(pCharacter->getInventory()->clearTradeItems());
-
-	// Place Items back into Character Inventory.
-	for (auto i : ordered) {
-		if (i->isStackable()) {
-			// When an Item is being return to the Character, try stacking first.
-			auto existing = pCharacter->getInventory()->findStackable(i->getID());
-			if (existing) {
-				existing->addStacks(1);
-				// This currently only works for primary slot stacking.. when I try to send into a container I get a broken item in the charm slot.
-				pCharacter->getConnection()->sendItemTrade(existing);
-				delete i;
-			}
-			// If there is no existing Item to stack on to, find a free slot.
-			else {
-				const uint32 slotID = pCharacter->getInventory()->findEmptySlot(i);
-				pCharacter->getInventory()->put(i, slotID);
-				pCharacter->getConnection()->sendItemTrade(i);
-			}
-		}
-		else {
-			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(i);
-
-			// No slot was found, try cursor.
-			if (SlotID::isNone(slotID)) {
-				//if (pCharacter->getInventory()->)
-			}
-			else {
-				pCharacter->getInventory()->put(i, slotID);
-				
-				// Update container contents slots
-				if (i->isContainer()) {
-					// Check: Containers can only be moved into main slots.
-					EXPECTED(SlotID::isMainInventory(slotID));
-					i->updateContentsSlots();
-				}
-					
-
-				pCharacter->getConnection()->sendItemTrade(i);
-			}
-		}
-	}
-
-	// Update Inventory.
-	EXPECTED(pCharacter->getInventory()->onTradeCancel());
-
-	pCharacter->getConnection()->sendTradeCancel(pSpawnID);
-	pCharacter->getConnection()->sendFinishWindow();
-	pCharacter->getConnection()->sendFinishWindow2();
-	pCharacter->setTradingWith(nullptr);
-
-	// Update client.
-	pCharacter->getConnection()->sendCurrencyUpdate();
-
-	
+	return true;
 }
 
 void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
@@ -1793,7 +1965,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 			EXPECTED_BOOL(pStacks == 1);
 
 			// Try to find an empty slot for the Item.
-			const uint32 slotID = pCharacter->getInventory()->findEmptySlot(pItem->isContainer(), pItem->getSize());
+			const uint32 slotID = pCharacter->getInventory()->findSlotFor(pItem->isContainer(), pItem->getSize());
 
 			// No empty slot found.
 			if (SlotID::isNone(slotID)) {
@@ -2822,4 +2994,366 @@ const bool Zone::onSizeChange(Actor * pActor, float pSize) {
 	delete packet;
 
 	return true;
+}
+
+const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks) {
+	if (!pCharacter) return false;
+
+	// Check: Character is trying to move an Item FROM a trade slot.
+	// Note: This is never allowed under any circumstances.
+	if (SlotID::isTrade(pFromSlot)) {
+		mLog->error(pCharacter->getName() + " attempted to move Item from trade slot.");
+		return false;
+	}
+
+	auto inventory = pCharacter->getInventory();
+	Item* wornNew = nullptr; // Item that will be equipped after move.
+	Item* wornOld = nullptr; // Item that will be unequipped after move.
+
+	const bool equipItem = SlotID::isWorn(pToSlot);
+	const bool unequipItem = SlotID::isWorn(pFromSlot);
+	const bool tradeMove = SlotID::isTrade(pToSlot);
+
+	// Check: Character is trying to equip an Item.
+	if (equipItem) {
+		// Check: The Item being equipped is coming from the cursor.
+		if (!SlotID::isCursor(pFromSlot)) {
+			mLog->error(pCharacter->getName() + " attempted to equip Item from non cursor slot.");
+			return false;
+		}
+
+		// Find the Item being equipped.
+		wornNew = inventory->getItem(pFromSlot);
+		if (!wornNew) {
+			mLog->error(pCharacter->getName() + " attempted to equip null Item.");
+			return false;
+		}
+
+		// Check: Character can equip this Item.
+		if (!pCharacter->canEquip(wornNew, pToSlot)) {
+			mLog->error(pCharacter->getName() + " attempted to equip Item they are not allowed to.");
+			return false;
+		}
+
+		// NOTE: Can be null if there was no Item in the slot.
+		wornOld = inventory->getItem(pToSlot);
+	}
+	// Check: Character is trying to unequip an Item.
+	else if (unequipItem) {
+		// Check: The Item being unequipped is going to the cursor.
+		if (!SlotID::isCursor(pToSlot)) {
+			mLog->error(pCharacter->getName() + " attempted to unequip Item to non cursor slot.");
+			return false;
+		}
+
+		// Find the Item being unequipped.
+		wornOld = inventory->getItem(pFromSlot);
+		if (!wornOld) {
+			mLog->error(pCharacter->getName() + " attempted to unequip null Item.");
+			return false;
+		}
+
+		// NOTE: Can be null if there is no Item on cursor.
+		wornNew = inventory->getItem(pToSlot);
+	}
+
+	// Character is trying to put an Item into a trade slot.
+	if (tradeMove) {
+		// Check: Character is currently trading.
+		if (!pCharacter->isTrading()) {
+			mLog->error(pCharacter->getName() + " attempted to move Item to trade slot but they are not trading.");
+			return false;
+		}
+
+		// Check: The Item being moved is coming from the cursor.
+		if (!SlotID::isCursor(pFromSlot)) {
+			mLog->error(pCharacter->getName() + " attempted to move Item to trade slot from non cursor slot.");
+			return false;
+		}
+
+		// Check: Valid Item being moved into trade.
+		auto item = inventory->getItem(pFromSlot);
+		if (!item) {
+			mLog->error(pCharacter->getName() + " attempted to move null Item to trade slot.");
+			return false;
+		}
+		
+		// Check: No existing Item
+		auto existingItem = inventory->getItem(pToSlot);
+		if (existingItem) {
+			mLog->error(pCharacter->getName() + " attempted to move Item to trade slot but the slot is not empty.");
+			return false;
+		}
+
+		// Check: When trading with an NPC, a Character can only move a single stack.
+		if (pCharacter->isTradingWithNPC() && pStacks > 0) {
+			mLog->error(pCharacter->getName() + " attempted to move stacked Item to trade slot while trading with NPC.");
+			return false;
+		}
+
+		if (pCharacter->isTradingWithCharacter()) {
+			// Moving an Item into trade resets 'accepted'.
+			pCharacter->setTradeAccepted(false);
+		}
+	}
+
+	// Notify Inventory.
+	if (!inventory->moveItem(pFromSlot, pToSlot, pStacks)) {
+		mLog->error(pCharacter->getName() + " | MoveItem failed.");
+		return false;
+	}
+
+	// Trading with Character.
+	if (tradeMove && pCharacter->isTradingWithCharacter()) {
+		auto item = inventory->getItem(pToSlot);
+		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
+
+		// Note: This makes the Item appear in the 'Trade Window' for the Character that pCharacter is trading with.
+		tradingWith->getConnection()->sendItemTradeCharacter(item);
+	}
+
+	// Notify Character that a worn slot has changed.
+	if (equipItem) {
+		pCharacter->onWornSlotChange(pToSlot, wornOld, wornNew);
+	}
+	else if (unequipItem) {
+		pCharacter->onWornSlotChange(pFromSlot, wornOld, wornNew);
+	}
+
+	return true;
+}
+
+const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount) {
+	if (!pCharacter) return false;
+
+	// Check: From slot ID is valid.
+	if (!Limits::General::moneySlotIDValid(pFromSlot)) {
+		mLog->error(pCharacter->getName() + " sent invalid currency slot ID: " + toString(pFromSlot));
+		return false;
+	}
+
+	// Check: From slot ID is not 'trade'
+	if (CurrencySlot::isTrade(pFromSlot)) {
+		// UF does not move currency from trade slots.
+		mLog->error(pCharacter->getName() + " attempted to move currency from trade slot ID: " + toString(pFromSlot));
+		// [CHEAT]
+		return false;
+	}
+
+	// Check: Character is trading if moving currency into 'trade' slot.
+	if (CurrencySlot::isTrade(pToSlot) && !pCharacter->isTrading()) {
+		mLog->error(pCharacter->getName() + " attempted to move currency from trade slot but they are not trading.");
+		return false;
+	}
+
+	// Check: To slot ID is valid.
+	if (!Limits::General::moneySlotIDValid(pToSlot)) {
+		mLog->error(pCharacter->getName() + " sent invalid currency slot ID: " + toString(pToSlot));
+		return false;
+	}
+
+	// Check: From currency type is valid.
+	if (!Limits::General::moneyTypeValid(pFromType)) {
+		mLog->error(pCharacter->getName() + " sent invalid currency type: " + toString(pFromType));
+		return false;
+	}
+
+	// Check: To currency type is valid.
+	if (!Limits::General::moneyTypeValid(pToType)) {
+		mLog->error(pCharacter->getName() + " sent invalid currency type: " + toString(pToType));
+		return false;
+	}
+
+	// Check: Amount is greater than zero.
+	if (pAmount <= 0) {
+		mLog->error(pCharacter->getName() + " sent invalid currency amount: " + toString(pAmount));
+		return false;
+	}
+
+	// Check: Currency moving into Shared Bank is platinum only.
+	if (CurrencySlot::isSharedBank(pToSlot) && pToType != CurrencyType::Platinum) {
+		mLog->error(pCharacter->getName() + " attempted to move non-platinum currency type: " + toString(pToType) + " into shared bank.");
+		return false;
+	}
+
+	// Check: Currency moving from Shared Bank is platinum only.
+	if (CurrencySlot::isSharedBank(pFromSlot) && pFromType != CurrencyType::Platinum) {
+		mLog->error(pCharacter->getName() + " attempted to move non-platinum currency type: " + toString(pToType) + " from shared bank.");
+		return false;
+	}
+
+	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == CurrencySlot::Bank || pSlot == CurrencySlot::SharedBank; };
+	const bool isConversion = pFromType != pToType;
+	const bool isBankSlot = isBankingSlot(pFromSlot) || isBankingSlot(pToSlot);
+	const bool bankRequired = isConversion || isBankSlot;
+
+	// Check: Character is in range of a bank.
+	if (bankRequired && !canBank(pCharacter)) {
+		mLog->error(pCharacter->getName() + " attempted to move currency that requires a bank and they are out of range.");
+		// [CHEAT]
+		return false;
+	}
+
+	// Notify Inventory.
+	if (!pCharacter->getInventory()->moveCurrency(pFromSlot, pToSlot, pFromType, pToType, pAmount)) {
+		return false;
+	}
+
+	// Handle: 
+	if ( CurrencySlot::isTrade(pToSlot) && pCharacter->isTradingWithCharacter()) {
+		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
+
+		// Moving currency into trade resets 'accepted'.
+		pCharacter->setTradeAccepted(false);
+		tradingWith->setTradeAccepted(false);
+
+		// Update the Character being traded with.
+		auto packet = Payload::Zone::TradeCurrencyUpdate::construct(pCharacter->getSpawnID(), pToType, pAmount);
+		tradingWith->getConnection()->sendPacket(packet);
+		delete packet;
+	}
+
+	return true;
+}
+
+const bool Zone::onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return false;
+
+	auto packet = WearChange::construct(pCharacter->getSpawnID(), pMaterialID, pEliteMaterialID, pColour, pSlot);
+	sendToVisible(pCharacter, packet, false);
+	delete packet;
+}
+
+const bool giveStackableItem(Character* pCharacter, Item* pItem) {
+	if (!pCharacter) return false;
+	if (!pItem) return false;
+
+	auto inventory = pCharacter->getInventory();
+
+	// Iterate until all the stacks in pItem have been added to the Inventory.
+	while (pItem->getStacks() != 0) {
+		// Find a partial stack to add to.
+		auto mergeItem = inventory->findPartialStack(pItem->getID());
+
+		// Partial stack found - merge stacks into that Item.
+		if (mergeItem) {
+			const auto emptyStacks = mergeItem->getEmptyStacks();
+
+			// Item can take all the remaining stacks.
+			if (emptyStacks >= pItem->getStacks()) {
+				mergeItem->addStacks(pItem->getStacks());
+				delete pItem;
+
+				pCharacter->getConnection()->sendItemTrade(mergeItem);
+
+				return true;
+			}
+			// Item can take some of the remaining stacks.
+			else {
+				// Move stacks from one Item to the other.
+				pItem->removeStacks(emptyStacks);
+				mergeItem->addStacks(emptyStacks); // mergeItem should be at full stacks now.
+				pCharacter->getConnection()->sendItemTrade(mergeItem);
+
+				continue; // Still more stacks to place in Inventory.
+			}
+		}
+		// No partial stack found.
+		else {
+			// Try to find empty slot
+			auto slotID = inventory->findEmptySlot(pItem);
+
+			// No empty slot was found, push to cursor.
+			if (SlotID::isCursor(slotID)) {
+				inventory->pushCursor(pItem);
+				pCharacter->getConnection()->sendItemSummon(pItem);
+
+				return true;
+			}
+			// Move to empty slot.
+			else {
+				inventory->put(pItem, slotID);
+				pCharacter->getConnection()->sendItemTrade(pItem);
+
+				if (pItem->isContainer())
+					pItem->updateContentsSlots();
+
+				return true;
+			}
+		}
+	}
+
+	return true;
+}
+
+const bool giveItem(Character* pCharacter, Item* pItem) {
+	if (!pCharacter) return false;
+	if (!pItem) return false;
+
+	auto inventory = pCharacter->getInventory();
+
+	// Handle: Stackable Item, these are much more complex.
+	if (pItem->isStackable()) {
+		if (!giveStackableItem(pCharacter, pItem)) {
+			return false;
+			//mLog->error("Failed to return trade item to ");
+		}
+
+		return true;
+	}
+
+	// Handle: Non-stackable Item.
+	const auto slotID = pCharacter->getInventory()->findEmptySlot(pItem);
+
+	// No empty slot was found, push to cursor.
+	if (SlotID::isCursor(slotID)) {
+		inventory->pushCursor(pItem);
+		pCharacter->getConnection()->sendItemSummon(pItem);
+	}
+	// Move to empty slot.
+	else {
+		pCharacter->getInventory()->put(pItem, slotID);
+		pCharacter->getConnection()->sendItemTrade(pItem);
+	}
+
+	return true;
+}
+
+const bool Zone::returnTradeItems(Character* pCharacter) {
+	if (!pCharacter) return false;
+	
+	// Note: Ideally returning trade items would be a simple as generating 0-8 OP_MoveItem packets but that does not seem to work.
+
+	auto inventory = pCharacter->getInventory();
+
+	// Make a list of Items that are in the trade window.
+	std::list<Item*> unordered;
+	inventory->getTradeItems(unordered);
+
+	// Adjust order of Items so that containers are sent first.
+	std::list<Item*> ordered;
+	for (auto returnItem = unordered.begin(); returnItem != unordered.end();) {
+		if ((*returnItem)->isContainer()) {
+			ordered.push_back(*returnItem);
+			returnItem = unordered.erase(returnItem);
+			continue;
+		}
+		returnItem++;
+	}
+	// Add remaining Items.
+	for (auto returnItem : unordered)
+		ordered.push_back(returnItem);
+
+	// Clear all trade Items.
+	pCharacter->getInventory()->clearTradeItems();
+
+	// Return all trade Items back into Inventory.
+	for (auto returnItem : ordered) {
+		if (!giveItem(pCharacter, returnItem)) {
+			mLog->error("Failed to return trade Item to Character.");
+		}
+	}
+
+	pCharacter->getConnection()->sendCurrencyUpdate();
 }

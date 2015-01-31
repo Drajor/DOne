@@ -71,7 +71,6 @@ void Character::update() {
 	}
 
 	if (mAutoSave.Check()) {
-		_updateForSave();
 		mZone->saveCharacter(this);
 	}
 
@@ -924,6 +923,16 @@ const bool Character::isRaidLeader() const {
 	if (!hasRaid()) return false;
 	//return mRaid->isLeader(this);
 	return false;
+}
+
+const bool Character::canRequestTrade() const {
+	if (isTrading()) return false;
+	if (isDead()) return false;
+	if (isCasting()) return false;
+	if (isShopping()) return false;
+	if (isStunned()) return false;
+
+	return true;
 }
 
 const bool Character::SpellBook::deleteSpell(const uint16 pSlot) {

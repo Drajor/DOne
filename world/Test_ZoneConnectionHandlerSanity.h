@@ -1998,34 +1998,34 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleLootItem_Small) {
 }
 
 /*
-	handleMoveItemImpl
+	handleMoveItem
 */
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItemImpl_Null) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItem_Null) {
 	EXPECT_TRUE(initialise());
 
 	// Fail: Null.
-	EXPECT_FALSE(mZoneConnection->handleMoveItemImpl(nullptr));
+	EXPECT_FALSE(mZoneConnection->handleMoveItem(nullptr));
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItemImpl_Big) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItem_Big) {
 	EXPECT_TRUE(initialise());
 
 	auto p = makePacket(Payload::Zone::MoveItem::size() + 1);
 	// Fail: Too big.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
-	EXPECT_FALSE(mZoneConnection->handleMoveItemImpl(p));
+	EXPECT_FALSE(mZoneConnection->handleMoveItem(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItemImpl_Small) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveItem_Small) {
 	EXPECT_TRUE(initialise());
 
 	auto p = makePacket(Payload::Zone::MoveItem::size() - 1);
 	// Fail: Too small.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
-	EXPECT_FALSE(mZoneConnection->handleMoveItemImpl(p));
+	EXPECT_FALSE(mZoneConnection->handleMoveItem(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
@@ -2493,34 +2493,34 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleItemLinkClick_Small) {
 }
 
 /*
-	handleMoveCoinImpl
+	handleMoveCurrency
 */
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCoinImpl_Null) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCurrency_Null) {
 	EXPECT_TRUE(initialise());
 
 	// Fail: Null.
-	EXPECT_FALSE(mZoneConnection->handleMoveCoinImpl(nullptr));
+	EXPECT_FALSE(mZoneConnection->handleMoveCurrency(nullptr));
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCoinImpl_Big) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCurrency_Big) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Zone::MoveCoin::size() + 1);
+	auto p = makePacket(Payload::Zone::MoveCurrency::size() + 1);
 	// Fail: Too big.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
-	EXPECT_FALSE(mZoneConnection->handleMoveCoinImpl(p));
+	EXPECT_FALSE(mZoneConnection->handleMoveCurrency(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }
 
-TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCoinImpl_Small) {
+TEST_F(ZoneConnectionHandlerSanityTest, handleMoveCurrency_Small) {
 	EXPECT_TRUE(initialise());
 
-	auto p = makePacket(Payload::Zone::MoveCoin::size() - 1);
+	auto p = makePacket(Payload::Zone::MoveCurrency::size() - 1);
 	// Fail: Too small.
 	EXPECT_FALSE(mZoneConnection->hasSizeError());
-	EXPECT_FALSE(mZoneConnection->handleMoveCoinImpl(p));
+	EXPECT_FALSE(mZoneConnection->handleMoveCurrency(p));
 	EXPECT_TRUE(mZoneConnection->hasSizeError());
 	delete p;
 }

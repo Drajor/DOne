@@ -169,6 +169,19 @@ void ItemDataStore::_bootstrap() {
 
 		delete item;
 	}
+	// Test Container
+	{
+		auto data = &mItemData[ItemID::TestContainer];
+		data->mID = ItemID::TestContainer;
+		auto item = new Item(data);
+
+		item->setName("Test Container");
+		item->setIcon(2304);
+		item->setItemClass(ItemClass::Container);
+		item->setContainerType(ContainerType::Normal);
+		item->setContainerSlots(10);
+		item->setContainerSize(ContainerSize::Giant);
+	}
 	// Token
 	{
 		auto data = &mItemData[ItemID::Token];

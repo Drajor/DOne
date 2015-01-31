@@ -48,10 +48,42 @@ const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFact
 			mLog->error("Failed to load Item: ");
 			return false;
 		}
+
 		// Put Item in Inventory.
 		if (!put(item, i.mSlot)) {
 			mLog->error("Failed to put Item: ");
 			return false;
+		}
+
+		// Item is a container.
+		if (item->isContainer()) {
+			// Load container contents.
+			for (auto& j : i.mSubItems) {
+				// Create Item.
+				auto subItem = loadItem(j);
+				if (!subItem) {
+					mLog->error("Failed to load Item: ");
+					return false;
+				}
+
+				// Put Item in container.
+				if (!item->setContents(subItem, j.mSlot)){
+					mLog->error("Failed to setContents Item: ");
+					return false;
+				}
+			}
+		}
+		// Item has augmentations.
+		else if (i.mSubItems.size() > 0) {
+			for (auto& j : i.mSubItems) {
+				// Create Item.
+				auto subItem = loadItem(j);
+				if (!subItem) {
+					mLog->error("Failed to load Item: ");
+					return false;
+				}
+				item->setAugmentation(j.mSlot, subItem);
+			}
 		}
 	}
 
@@ -62,27 +94,12 @@ const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFact
 
 Item* Inventoryy::loadItem(Data::Item& pItem) {
 	auto item = mItemFactory->make(pItem.mItemID, pItem.mStacks);
-	EXPECTED_PTR(item);
+	if (!item)
+		return nullptr;
+
 	item->setIsAttuned(pItem.mAttuned == 1 ? true : false);
 	item->setLastCastTime(pItem.mLastCastTime);
 	item->setCharges(pItem.mCharges);
-
-	// Container contents.
-	if (item->isContainer()) {
-		for (auto& i : pItem.mSubItems) {
-			auto subItem = loadItem(i);
-			EXPECTED_PTR(subItem);
-			EXPECTED_PTR(item->setContents(subItem, i.mSlot));
-		}
-	}
-	// Augmentations.
-	else if (pItem.mSubItems.size() > 0) {
-		for (auto& i : pItem.mSubItems) {
-			auto subItem = loadItem(i);
-			EXPECTED_PTR(subItem);
-			item->setAugmentation(i.mSlot, subItem);
-		}
-	}
 
 	return item;
 }
@@ -236,7 +253,7 @@ Item* Inventoryy::getItem(const uint32 pSlot) const {
 	return nullptr;
 }
 
-const bool Inventoryy::put(Item* pItem, const uint32 pSlot) {
+const bool Inventoryy::put(Item* pItem, const u32 pSlot) {
 	EXPECTED_BOOL(pItem);
 	Log::info("[Inventory] PUT " + pItem->getName() + " to " + std::to_string(pSlot));
 
@@ -568,11 +585,11 @@ Item* Inventoryy::findFirst(const uint8 pItemType) const {
 	return nullptr;
 }
 
-Item* Inventoryy::findStackable(const uint32 pItemID) const {
+Item* Inventoryy::findPartialStack(const u32 pItemID) const {
 	// Search: Main slots.
 	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = mItems[i];
-		if (item && item->getID() == pItemID && item->getStacks() < item->getMaxStacks())
+		if (item && item->getID() == pItemID && item->getEmptyStacks() > 0)
 			return item;
 	}
 
@@ -614,13 +631,13 @@ const bool Inventoryy::_clear(const uint32 pSlot) {
 		mSharedBank[index] = nullptr;
 		return true;
 	}
-	// Clearing: Trade slot.
-	if (SlotID::isTrade(pSlot)) {
-		uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
-		mTrade[index] = nullptr;
-		return true;
-	}
+	//// Clearing: Trade slot.
+	//if (SlotID::isTrade(pSlot)) {
+	//	uint32 index = SlotID::getIndex(pSlot);
+	//	EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
+	//	mTrade[index] = nullptr;
+	//	return true;
+	//}
 
 	// Clearing: Main Contents.
 	if (SlotID::isMainContents(pSlot)) {
@@ -927,29 +944,33 @@ const bool Inventoryy::onTradeCancel() {
 	return true;
 }
 
-const uint32 Inventoryy::findEmptySlot(Item* pItem) const {
-	EXPECTED_VAR(pItem, SlotID::None); // This probably not wise :/
+const u32 Inventoryy::findEmptySlot(Item* pItem) const {
+	if (!pItem) return SlotID::CURSOR; // If null gets passed in here, we have a big problem.
 
 	// Check: Main
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = getItem(i);
 		if (!item) return i;
 	}
+
+	// If pItem is a container and there are no main slots free, it needs to go to the cursor.
+	if (pItem->isContainer()) return SlotID::CURSOR;
 	
 	// Check: Main Contents
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = getItem(i);
 		if (item && item->isContainer() && item->getContainerSize() >= pItem->getSize()) {
-			const uint32 slotID = item->findEmptySlot();
+			// Check if this container has an empty slot.
+			const auto slotID = item->findEmptySlot();
 			if (SlotID::isNone(slotID) == false)
 				return slotID;
 		}
 	}
 
-	return SlotID::None;
+	return SlotID::CURSOR;
 }
 
-const uint32 Inventoryy::findEmptySlot(const bool pContainer, const uint8 pItemSize) const {
+const uint32 Inventoryy::findSlotFor(const bool pContainer, const uint8 pItemSize) const {
 	// Check: Main
 	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = getItem(i);
@@ -975,13 +996,6 @@ void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
 	for (auto i : mTrade) {
 		if (i) pItems.push_back(i);
 	}
-}
-
-const bool Inventoryy::clearTradeItems() {
-	for (uint32 i = SlotID::TRADE_0; i <= SlotID::TRADE_7; i++)
-		EXPECTED_BOOL(_clear(i));
-
-	return true;
 }
 
 const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {

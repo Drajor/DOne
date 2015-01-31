@@ -103,6 +103,10 @@ int main(int argc, char** argv)  {
 	ServiceLocator::setItemFactory(itemFactory);
 	EXPECTED_MAIN(itemFactory->initialise(itemDataStore, logFactory));
 
+	ItemGenerator* itemGenerator = new ItemGenerator();
+	ServiceLocator::setItemGenerator(itemGenerator);
+	EXPECTED_MAIN(itemGenerator->initialise(itemFactory, dataStore, logFactory));
+
 	ZoneManager* zoneManager = new ZoneManager();
 	ServiceLocator::setZoneManager(zoneManager);
 

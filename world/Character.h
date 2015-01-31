@@ -61,6 +61,16 @@ struct GuildInvitation {
 	}
 };
 
+struct TradeRequest {
+	u32 mTimeRequested = 0;
+	u16 mSpawnID = 0;
+
+	inline void clear() {
+		mTimeRequested = 0;
+		mSpawnID = 0;
+	}
+};
+
 class Character : public Actor {
 	friend ZoneConnection;
 public:
@@ -100,6 +110,9 @@ public:
 	// Returns a reference to a specified BindLocation.
 	inline const BindLocation& getBindLocation(const i32 pIndex) const { return mBindLocations[pIndex]; }
 
+	/////////////////////////////////////////////////////////////////////
+	// Trade
+
 	// Returns the Actor this Character is trading with.
 	inline Actor* getTradingWith() const { return mTradingWith; }
 
@@ -109,6 +122,23 @@ public:
 	// Returns whether this Character is trading.
 	inline const bool isTrading() const { return getTradingWith() != nullptr; }
 
+	// Returns whether this Character is trading with another Character.
+	inline const bool isTradingWithCharacter() const { return isTrading() && getTradingWith()->isCharacter(); }
+
+	// Returns whether this Character is trading with an NPC.
+	inline const bool isTradingWithNPC() const { return isTrading() && getTradingWith()->isNPC(); }
+
+	// Returns whether this Character accepts the current trade.
+	inline const bool isTradeAccepted() const { return mTradeAccepted; }
+
+	// Sets whether this Character accepts the current trade.
+	inline void setTradeAccepted(const bool pValue) { mTradeAccepted = pValue; }
+
+	/////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////////
+	// Shopping
+
 	// Returns the NPC this Character is shopping with.
 	inline NPC* getShoppingWith() const { return mShoppingWith; }
 
@@ -117,6 +147,8 @@ public:
 
 	// Returns whether this Character is shopping.
 	inline const bool isShopping() const { return getShoppingWith() != nullptr; }
+
+	/////////////////////////////////////////////////////////////////////
 
 	// Zone Authentication
 	uint16 mAuthenticatedZoneID = 0;
@@ -136,6 +168,14 @@ public:
 	const bool onDeath();
 
 	void addQueuedMessage(const u32 pChannel, const String& pSenderName, const String& pMessage);
+
+	// Returns whether or not this Character has a pending trade request.
+	inline const bool hasTradeRequest() const { return mTradeRequest.mTimeRequested != 0; }
+
+	// Returns a reference to the trade request.
+	inline TradeRequest& getTradeRequest() { return mTradeRequest; }
+
+	inline void clearTradeRequest() { mTradeRequest.clear(); }
 
 	// Returns whether this Character has neither a Group nor a Raid.
 	const bool isSolo() const { return !hasGroup() && !hasRaid(); }
@@ -318,6 +358,9 @@ public:
 	const u16 getSpellBookSlot(const u32 pSpellID) const;
 
 	const bool canCast(const uint32 pSpellID) const;
+	const bool canRequestTrade() const;
+	//const bool canAcceptTradeRequest() const;
+
 	const bool preCastingChecks(const Data::Spell* pSpell);
 	const bool postCastingChecks(const Data::Spell* pSpell);
 	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
@@ -394,6 +437,7 @@ private:
 	bool mIsLinkDead = false;
 	Actor* mLootingCorpse = nullptr;
 	Actor* mTradingWith = nullptr;
+	bool mTradeAccepted = false;
 	NPC* mShoppingWith = nullptr;
 
 	Filters mFilters;
@@ -445,6 +489,7 @@ private:
 	ZoneConnection* mConnection = nullptr;
 	Data::Character* mData = nullptr;
 	
+	TradeRequest mTradeRequest;
 
 	std::list<NPC*> mVisibleNPCs; // NPCs that are visible to this Character
 
