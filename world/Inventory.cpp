@@ -10,11 +10,7 @@
 #include "Limits.h"
 
 Inventoryy::Inventoryy() {
-	for (auto& i : mItems) i = nullptr;
-	for (auto& i : mBank) i = nullptr;
-	for (auto& i : mSharedBank) i = nullptr;
-	for (auto& i : mTrade) i = nullptr;
-
+	mItems.fill(nullptr);
 	memset(mCurrency, 0, sizeof(mCurrency));
 }
 
@@ -104,320 +100,217 @@ Item* Inventoryy::loadItem(Data::Item& pItem) {
 	return item;
 }
 
-const unsigned char* Inventoryy::getData(uint32& pSize) {
+const unsigned char* Inventoryy::getData(u32& pSize) {
 	unsigned char * data = nullptr;
-	uint32 numItems = 0;
+	u32 numItems = 0;
 
-	// Calculate the number of Items and amount of memory required to send.
-
-	// Calc: Iterates a slot range, counting number of items and data size.
-	auto calc = [this, &numItems, &pSize](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
-		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
-			auto item = getItem(i);
-			if (item) {
-				numItems++;
-				pSize += item->getDataSize(Payload::ItemPacketCharInventory);
-			}
+	// Calculate size.
+	for (auto i : mItems) {
+		if (i) {
+			numItems++;
+			pSize += i->getDataSize(Payload::ItemPacketCharInventory);
 		}
-	};
+	}
 
-	// Worn Items.
-	calc(SlotID::CHARM, SlotID::AMMO);
-	
-	// Main Items.
-	calc(SlotID::MAIN_0, SlotID::MAIN_7);
-
-	// Cursor.
-	calc(SlotID::CURSOR, SlotID::CURSOR); // NOTE: Only the first Item on cursor is sent here.
-
-	// Bank Items
-	calc(SlotID::BANK_0, SlotID::BANK_23);
-
-	// Shared Bank Items.
-	calc(SlotID::SHARED_BANK_0, SlotID::SHARED_BANK_1);
+	auto cursorItem = peekCursor();
+	if (cursorItem) {
+		numItems++;
+		pSize += cursorItem->getDataSize(Payload::ItemPacketCharInventory);
+	}
 
 	// Allocate the required memory.
-	pSize += sizeof(uint32); // Item Count
+	pSize += sizeof(u32); // Item Count
 	data = new unsigned char[pSize];
 
 	Utility::MemoryWriter writer(data, pSize);
-	writer.write<uint32>(numItems);
-
-	// Copy: Iterates a slot range and copies Item data.
-	auto copy = [this, &writer](const uint32 pMinSlotID, const uint32 pMaxSlotID) {
-		for (auto i = pMinSlotID; i <= pMaxSlotID; i++) {
-			auto item = getItem(i);
-			if (item)
-				item->copyData(writer, Payload::ItemPacketCharInventory);
+	
+	// Write Items.
+	writer.write<u32>(numItems); // Item count.
+	for (auto i : mItems) {
+		if (i) {
+			i->copyData(writer, Payload::ItemPacketCharInventory);
 		}
-	};
-
-	// Worn Items.
-	copy(SlotID::CHARM, SlotID::AMMO);
-
-	// Main Items.
-	copy(SlotID::MAIN_0, SlotID::MAIN_7);
-
-	// Cursor.
-	copy(SlotID::CURSOR, SlotID::CURSOR);
-
-	// Bank Items
-	copy(SlotID::BANK_0, SlotID::BANK_23);
-
-	// Shared Bank Items.
-	copy(SlotID::SHARED_BANK_0, SlotID::SHARED_BANK_1);
-
-	// Check: The amount of data written matches what was calculated.
-	if (writer.check() == false) {
-		Log::error("[Inventory] Bad Write: Written: " + std::to_string(writer.getBytesWritten()) + " Size: " + std::to_string(writer.getSize()));
 	}
 
+	if (cursorItem)
+		cursorItem->copyData(writer, Payload::ItemPacketCharInventory);
+
+	// Check: The amount of data written matches what was calculated.
+	if (!writer.check()) mLog->error("Bad Write: Written: " + toString(writer.getBytesWritten()) + " Size: " + toString(writer.getSize()));
 	return data;
 }
 
-Item* Inventoryy::getItem(const uint32 pSlot) const {
-	// Getting: Cursor
-	if (SlotID::isCursor(pSlot)) {
-		Item* item = mCursor.empty() ? nullptr : mCursor.front();
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
+Item* Inventoryy::get(const u32 pSlot) const {
+	// Handle: Item being put io cursor.
+	if (SlotID::isCursor(pSlot)) return mCursorItems.empty() ? nullptr : mCursorItems.front();
+
+	// Calculate primary index.
+	const auto index = getPrimarySlotIndex(pSlot);
+	if (SlotID::isNone(pSlot)) {
+		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
+		return false;
 	}
 
-	// Getting: Main Inventory or Worn.
-	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
-		Item* item = mItems[pSlot];
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
+	if (SlotID::isPrimarySlot(pSlot))
+		return mItems[index];
+
+	// Handle: Item being put io a container slot.
+	else if (SlotID::isContainerSlot(pSlot)) {
+		// Calculate container index.
+		const auto containerIndex = getContainerSlotIndex(pSlot);
+		return mItems[index] ? mItems[index]->getContents(containerIndex) : nullptr;
 	}
 
-	// Getting: Main Contents.
-	if (SlotID::isMainContents(pSlot)) {
-		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-		Item* parentContainer = getItem(parentSlotID);
-		EXPECTED_PTR(parentContainer);
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		Item* item = parentContainer->getContents(subIndex);
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
-	// Getting: Bank.
-	if (SlotID::isBank(pSlot)) {
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_PTR(SlotID::isValidBankIndex(index));
-		Item* item = mBank[index];
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
-	// Getting: Bank Contents.
-	if (SlotID::isBankContents(pSlot)) {
-		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-		Item* parentContainer = getItem(parentSlotID);
-		EXPECTED_PTR(parentContainer);
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		Item* item = parentContainer->getContents(subIndex);
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
-	// Getting: Shared Bank.
-	if (SlotID::isSharedBank(pSlot)) {
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_PTR(SlotID::isValidSharedBankIndex(index));
-		Item* item = mSharedBank[index];
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
-	// Getting: Shared Bank Contents.
-	if (SlotID::isSharedBankContents(pSlot)) {
-		const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-		Item* parentContainer = getItem(parentSlotID);
-		EXPECTED_PTR(parentContainer);
-		const uint32 subIndex = SlotID::getSubIndex(pSlot);
-		Item* item = parentContainer->getContents(subIndex);
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
-	// Getting: Trade.
-	if (SlotID::isTrade(pSlot)) {
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_PTR(SlotID::isValidTradeIndex(index));
-		Item* item = mTrade[index];
-		if (item) EXPECTED_BOOL(item->getSlot() == pSlot); // Testing / Debug.
-		return item;
-	}
-
+	mLog->error("Failed to get Item, slot ID: " + toString(pSlot));
 	return nullptr;
 }
 
 const bool Inventoryy::put(Item* pItem, const u32 pSlot) {
-	EXPECTED_BOOL(pItem);
-	Log::info("[Inventory] PUT " + pItem->getName() + " to " + std::to_string(pSlot));
+	if (!pItem) return false;
+	mLog->info("PUT " + pItem->getName() + " to " + std::to_string(pSlot));
 
-	// Putting item on cursor.
+	// Handle: Item being put io cursor.
 	if (SlotID::isCursor(pSlot)) {
-		mCursor.push_front(pItem);
+		mCursorItems.push_front(pItem);
 		pItem->setSlot(pSlot);
 		return true;
 	}
 
-	// Putting item in Main Inventory or Worn.
-	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
-		Item* existingItem = getItem(pSlot);
-		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
-		pItem->setSlot(pSlot);
-		mItems[pSlot] = pItem;
-		return true;
+	// Calculate primary index.
+	const auto index = getPrimarySlotIndex(pSlot);
+	if (SlotID::isNone(pSlot)) {
+		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
+		return false;
 	}
-
-	// Putting: Bank.
-	if (SlotID::isBank(pSlot)) {
-		Item* existingItem = getItem(pSlot);
-		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
-		pItem->setSlot(pSlot);
-
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidBankIndex(index));
-		mBank[index] = pItem;
-		return true;
-	}
-
-	// Putting: Shared Bank.
-	if (SlotID::isSharedBank(pSlot)) {
-		// Check: Only tradeable Items can be stored in the Shared bank.
-		EXPECTED_BOOL(pItem->isTradeable());
-		Item* existingItem = getItem(pSlot);
-		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
+	
+	// Handle: Item being put io primary slot.
+	if (SlotID::isPrimarySlot(pSlot)) {
+		// Check: There is no Item already in this slot.
+		if (mItems[index] != nullptr) {
+			mLog->error("Attempted to put Item io io occupied slot.");
+			return false;
+		}
+		mItems[index] = pItem;
 		pItem->setSlot(pSlot);
 
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidSharedBankIndex(index));
-		mSharedBank[index] = pItem;
+		// If a container is being put, we need to update the contents.
+		if (pItem->isContainer())
+			pItem->updateContentsSlots();
+
+		return true;
+	}
+	// Handle: Item being put io a container slot.
+	else if (SlotID::isContainerSlot(pSlot)) {
+		// Calculate container index.
+		const auto containerIndex = getContainerSlotIndex(pSlot);
+		if (SlotID::isNone(containerIndex)) {
+			mLog->error("Failed to calculate container index for slot ID: " + toString(pSlot));
+			return false;
+		}
+
+		// Check: There is a valid container Item in this slot.
+		if (!mItems[index] || !mItems[index]->isContainer()) {
+			mLog->error("Attempted to put Item io io invalid container slot.");
+			return false;
+		}
+		// Check: There is no Item already in this slot.
+		if (mItems[index]->getContents(containerIndex)) {
+			mLog->error("Attempted to put Item io io occupied container slot.");
+			return false;
+		}
+
+		// Try putting pItem io the container.
+		if (!mItems[index]->setContents(pItem, containerIndex)) {
+			return false;
+		}
+
 		return true;
 	}
 
-	// Putting: Trade.
-	if (SlotID::isTrade(pSlot)) {
-		// TODO: Not sure whether to check that the Item is tradeable here or not. I would need to be exposed to the trading context ><
-		Item* existingItem = getItem(pSlot);
-		EXPECTED_BOOL(existingItem == nullptr); // Failure = desync.
-		pItem->setSlot(pSlot);
-
-		const uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
-		mTrade[index] = pItem;
-		return true;
-	}
-
-	// Putting: Main Contents.
-	if (SlotID::isMainContents(pSlot)) {
-		EXPECTED_BOOL(putContainer(pItem, pSlot));
-		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
-		return true;
-	}
-
-	// Putting: Bank Contents.
-	if (SlotID::isBankContents(pSlot)) {
-		EXPECTED_BOOL(putContainer(pItem, pSlot));
-		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
-		return true;
-	}
-
-	// Putting: Shared Bank Contents.
-	if (SlotID::isSharedBankContents(pSlot)) {
-		EXPECTED_BOOL(putContainer(pItem, pSlot));
-		EXPECTED_BOOL(pItem->getSlot() == pSlot); // Testing / Debug.
-		return true;
-	}
-
+	mLog->error("Failed to put Item!");
 	return false;
 }
 
-const bool Inventoryy::putContainer(Item* pItem, const uint32 pSlot) {
-	EXPECTED_BOOL(pItem);
 
-	// Determine the parent slot.
-	const uint32 parentSlotID = SlotID::getParentSlot(pSlot);
-	// Check: Parent is a valid Item.
-	Item* parentContainer = getItem(parentSlotID);
-	EXPECTED_BOOL(parentContainer);
-	// Check: Parent is a valid container.
-	EXPECTED_BOOL(parentContainer->isContainer());
-	const uint32 subIndex = SlotID::getSubIndex(pSlot);
-	// Check: Index is valid for container size.
-	EXPECTED_BOOL(parentContainer->getContainerSlots() > subIndex);
-	// Check: No existing Item where pItem is being put
-	EXPECTED_BOOL(parentContainer->getContents(subIndex) == nullptr);
-	// Finally try and put the Item inside the container.
-	EXPECTED_BOOL(parentContainer->setContents(pItem, subIndex));
-
-	return true;
-}
-
-const bool Inventoryy::moveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize) {
+const bool Inventoryy::moveItem(const u32 pFromSlot, const u32 pToSlot, const u32 pStacks) {
+	mLog->info("MOVE " + toString(pFromSlot) + " to " + toString(pToSlot) + " | Stacks: " + toString(pStacks));
 
 	// NOTE: The client sends this when an item is summoned to their cursor.
 	if (pFromSlot == pToSlot) {
-		// Debug logging until I understand any other circumstances this can occur in.
-		Log::info("MoveItem: From: " + std::to_string(pFromSlot) + " To: " + std::to_string(pToSlot) + " Stack: " + std::to_string(pStackSize));
 		return true;
 	}
 
-	// Deleting an Item.
+	// Handle: Deleting an Item.
 	if (SlotID::isDelete(pToSlot)) {
-		Log::info("[Inventory] DELETE");
-		// NOTE: As far as I know the only possible slot to delete from is cursor.
-		EXPECTED_BOOL(SlotID::isCursor(pFromSlot));
-		Item* itemFrom = _popCursor();
-		EXPECTED_BOOL(itemFrom); // Failure = desync
-		EXPECTED_BOOL(SlotID::isCursor(itemFrom->getSlot())); // Failure = bug
+		// Check: Delete is happening from the cursor.
+		if (!SlotID::isCursor(pFromSlot)) {
+			mLog->error("Attempt to delete Item from non cursor slot.");
+			return false;
+		}
 
-		delete itemFrom;
+		// Check: Deleting a valid Item.
+		auto item = _popCursor();
+		if (!item) {
+			mLog->error("Attempt to delete invalid Item.");
+			return false;
+		}
+
+		delete item;
 		return true;
 	}
 
-
-	// Putting an Item down.
+	// Handle: Picking an Item up.
 	if (SlotID::isCursor(pFromSlot)) {
-		EXPECTED_BOOL(_putDown(pToSlot, pStackSize));
+		if (!_putDown(pToSlot, pStacks)) {
+			mLog->error("Failed to put Item down.");
+			return false;
+		}
+
 		return true;
 	}
 
-	// Picking an Item up.
+	// Handle: Picking an Item up.
 	if (SlotID::isCursor(pToSlot)) {
-		EXPECTED_BOOL(_pickUp(pFromSlot, pStackSize));
+		if (!_pickUp(pFromSlot, pStacks)) {
+			mLog->error("Failed to pick Item up.");
+			return false;
+		}
+
 		return true;
 	}
 
+	mLog->error("Unknown circumstances occurred.");
 	return false;
 }
 
 Item* Inventoryy::_popCursor() {
-	EXPECTED_PTR(!mCursor.empty());
-	Item* item = mCursor.front();
-	mCursor.pop_front();
+	if (mCursorItems.empty()) {
+		mLog->error("Attempt to pop cursor when it is empty.");
+		return nullptr;
+	}
+
+	auto item = mCursorItems.front();
+	mCursorItems.pop_front();
 	return item;
 }
 
 Item* Inventoryy::_peekCursor() const {
 	if (isCursorEmpty()) return nullptr;
-	return mCursor.front();
+	return mCursorItems.front();
 }
 
 const bool Inventoryy::pushCursor(Item* pItem) {
-	EXPECTED_BOOL(pItem);
-	mCursor.push_back(pItem);
+	if (!pItem) return false;
+
+	mCursorItems.push_back(pItem);
 	pItem->setSlot(SlotID::CURSOR);
 	return true;
 }
 
-const bool Inventoryy::consume(const uint32 pSlot, const uint32 pStacks) {
+const bool Inventoryy::consume(const u32 pSlot, const u32 pStacks) {
 	// NOTE: UF will only consume from the Main Inventory
 
-	auto item = getItem(pSlot);
+	auto item = get(pSlot);
 	EXPECTED_BOOL(item);
 
 	// Consuming the whole Item.
@@ -521,7 +414,7 @@ void Inventoryy::_calculateRemove(Item* pItem) {
 }
 
 void Inventoryy::updateConsumables() {
-	Item* food = findFirst(ItemType::Food);
+	auto food = findFirst(ItemType::Food);
 	
 	// There was already food.
 	if (mAutoFood) {
@@ -543,7 +436,7 @@ void Inventoryy::updateConsumables() {
 		_calculateAdd(mAutoFood);
 	}
 
-	Item* drink = findFirst(ItemType::Drink);
+	auto drink = findFirst(ItemType::Drink);
 	
 	// There was already drink.
 	if (mAutoDrink) {
@@ -566,15 +459,15 @@ void Inventoryy::updateConsumables() {
 	}
 }
 
-Item* Inventoryy::findFirst(const uint8 pItemType) const {
+Item* Inventoryy::findFirst(const u8 pItemType) const {
 	// Search: Main Inventory slots first.
-	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->getItemType() == pItemType)
 			return mItems[i];
 	}
 
 	// Search: Slots inside each primary slot.
-	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->isContainer()) {
 			Item* item = mItems[i]->findFirst(pItemType);
 			if (item) {
@@ -587,14 +480,14 @@ Item* Inventoryy::findFirst(const uint8 pItemType) const {
 
 Item* Inventoryy::findPartialStack(const u32 pItemID) const {
 	// Search: Main slots.
-	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = mItems[i];
 		if (item && item->getID() == pItemID && item->getEmptyStacks() > 0)
 			return item;
 	}
 
 	// Search: Containers in main slots.
-	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto container = mItems[i];
 		if (container && container->isContainer()) {
 			Item* item = container->findStackable(pItemID);
@@ -606,93 +499,79 @@ Item* Inventoryy::findPartialStack(const u32 pItemID) const {
 	return nullptr;
 }
 
-const bool Inventoryy::_clear(const uint32 pSlot) {
-	// Clearing: Cursor
-	// NOTE: Only the first Item is removed.
+const bool Inventoryy::_clear(const u32 pSlot) {
+	
+	// Handle: Clearing cursor.
 	if (SlotID::isCursor(pSlot)) {
-		EXPECTED_BOOL(_popCursor());
-		return true;
-	}
-	if (SlotID::isMainInventory(pSlot) || SlotID::isWorn(pSlot)) {
-		mItems[pSlot] = nullptr;
-		return true;
-	}
-	// Clearing: Bank slot.
-	if (SlotID::isBank(pSlot)) {
-		uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidBankIndex(index));
-		mBank[index] = nullptr;
-		return true;
-	}
-	// Clearing: Shared Bank slot.
-	if (SlotID::isSharedBank(pSlot)) {
-		uint32 index = SlotID::getIndex(pSlot);
-		EXPECTED_BOOL(SlotID::isValidSharedBankIndex(index));
-		mSharedBank[index] = nullptr;
-		return true;
-	}
-	//// Clearing: Trade slot.
-	//if (SlotID::isTrade(pSlot)) {
-	//	uint32 index = SlotID::getIndex(pSlot);
-	//	EXPECTED_BOOL(SlotID::isValidTradeIndex(index));
-	//	mTrade[index] = nullptr;
-	//	return true;
-	//}
-
-	// Clearing: Main Contents.
-	if (SlotID::isMainContents(pSlot)) {
-		EXPECTED_BOOL(_clearContainerSlot(pSlot));
+		if (!_popCursor()) {
+			mLog->error("Attempted to clear cursor but it is empty.");
+			return false;
+		}
 		return true;
 	}
 
-	// Clearing: Bank Contents.
-	if (SlotID::isBankContents(pSlot)) {
-		EXPECTED_BOOL(_clearContainerSlot(pSlot));
+	// Calculate primary index.
+	const auto index = getPrimarySlotIndex(pSlot);
+	if (SlotID::isNone(pSlot)) {
+		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
+		return false;
+	}
+
+	// Handle: Clearing primary slot.
+	if (SlotID::isPrimarySlot(pSlot)) {
+		// Check: There is an in this slot.
+		if (!mItems[index]) {
+			mLog->error("Attempted to clear empty primary slot: " + toString(pSlot));
+			return false;
+		}
+		mItems[index] = nullptr;
+		return true;
+	}
+	// Handle: Clearing container slot.
+	else if (SlotID::isContainerSlot(pSlot)) {
+		// Calculate container index.
+		const auto containerIndex = getContainerSlotIndex(pSlot);
+		if (SlotID::isNone(containerIndex)) {
+			mLog->error("Failed to calculate container index for slot ID: " + toString(pSlot));
+			return false;
+		}
+
+		// Check: There is a valid container Item in this slot.
+		if (!mItems[index]) {
+			mLog->error("Attempted to clear container slot but the primary slot is empty.");
+			return false;
+		}
+
+		// Try clearing the slot.
+		if (!mItems[index]->clearContents(containerIndex)) {
+			mLog->error("Failed to clear container slot.");
+			return false;
+		}
+
 		return true;
 	}
 
-	// Clearing: Shared Bank Contents.
-	if (SlotID::isSharedBankContents(pSlot)) {
-		EXPECTED_BOOL(_clearContainerSlot(pSlot));
-		return true;
-	}
-
+	mLog->error("Failed to clear slot!");
 	return false;
 }
 
-const bool Inventoryy::_clearContainerSlot(const uint32 pSlot) {
-	const uint32 parentSlot = SlotID::getParentSlot(pSlot);
-	const uint32 subIndex = SlotID::getSubIndex(pSlot);
-
-	if (SlotID::isMainContents(pSlot)) EXPECTED_BOOL(SlotID::isMainInventory(parentSlot));
-	if (SlotID::isBankContents(pSlot)) EXPECTED_BOOL(SlotID::isBank(parentSlot));
-	if (SlotID::isSharedBankContents(pSlot)) EXPECTED_BOOL(SlotID::isSharedBank(parentSlot));
-
-	EXPECTED_BOOL(SlotID::subIndexValid(subIndex));
-
-	Item* container = getItem(parentSlot);
-	EXPECTED_BOOL(container);
-	EXPECTED_BOOL(container->isContainer());
-	EXPECTED_BOOL(container->getContainerSlots() > subIndex);
-	EXPECTED_BOOL(container->clearContents(subIndex));
-
-	return true;
-}
-
-const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
+const bool Inventoryy::_putDown(const u32 pToSlot, const u32 pStacks) {
 
 	// Check: Existing Item in pToSlot.
-	Item* existing = getItem(pToSlot);
+	Item* existing = get(pToSlot);
 	if (existing) {
 		// Potential stack merge.
-		if (pStackSize > 0) {
-			Item* cursorItem = _peekCursor();
-			EXPECTED_BOOL(cursorItem); // Failure = desync.
-			EXPECTED_BOOL(cursorItem->isStackable());
+		if (pStacks > 0) {
+			// Check: Valid cursor Item.
+			auto cursorItem = _peekCursor();
+			if (!cursorItem || !cursorItem->isStackable()) {
+				mLog->error("Invalid cursor Item in " + String(__FUNCTION__));
+				return false;
+			}
 
 			// Check: Both Items are the same.
 			if (cursorItem->getID() == existing->getID()) {
-				EXPECTED_BOOL(_stackMergeCursor(pToSlot, pStackSize));
+				EXPECTED_BOOL(_stackMergeCursor(pToSlot, pStacks));
 				return true;
 			}
 		}
@@ -725,17 +604,17 @@ const bool Inventoryy::_putDown(const uint32 pToSlot, const uint32 pStackSize) {
 	return true;
 }
 
-const bool Inventoryy::_stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize) {
+const bool Inventoryy::_stackMergeCursor(const u32 pToSlot, const u32 pStackSize) {
 
 	Item* cursorItem = _peekCursor();
 	EXPECTED_BOOL(cursorItem); // Failure = desync.
 	EXPECTED_BOOL(cursorItem->isStackable());
 
-	Item* existing = getItem(pToSlot);
+	Item* existing = get(pToSlot);
 	EXPECTED_BOOL(existing);
 	EXPECTED_BOOL(cursorItem->getID() == existing->getID());
 
-	const uint32 preMergeStacks = cursorItem->getStacks() + existing->getStacks();
+	const u32 preMergeStacks = cursorItem->getStacks() + existing->getStacks();
 
 	// Full merge.
 	if (pStackSize == cursorItem->getStacks()) {
@@ -767,14 +646,14 @@ const bool Inventoryy::_stackMergeCursor(const uint32 pToSlot, const uint32 pSta
 	}
 }
 
-const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) {
-	Item* pickUp = getItem(pFromSlot);
+const bool Inventoryy::_pickUp(const u32 pFromSlot, const u32 pStackSize) {
+	Item* pickUp = get(pFromSlot);
 	EXPECTED_BOOL(pickUp);
 
 	// Splitting the stack.
 	if (pStackSize > 0) {
 		EXPECTED_BOOL(pickUp->isStackable());
-		const uint32 preSplitStacks = pickUp->getStacks();
+		const u32 preSplitStacks = pickUp->getStacks();
 		EXPECTED_BOOL(pickUp->getStacks() > pStackSize);
 		EXPECTED_BOOL(pickUp->removeStacks(pStackSize));
 
@@ -801,22 +680,22 @@ const bool Inventoryy::_pickUp(const uint32 pFromSlot, const uint32 pStackSize) 
 	return true;
 }
 
-Item* Inventoryy::find(const uint32 pItemID, const uint32 pInstanceID) const {
+Item* Inventoryy::find(const u32 pItemID, const u32 pInstanceID) const {
 
 	// Search Worn Slots
-	for (int i = SlotID::CHARM; i <= SlotID::AMMO; i++) {
+	for (u32 i = SlotID::CHARM; i <= SlotID::AMMO; i++) {
 		if (mItems[i] && mItems[i]->getID() == pItemID && mItems[i]->getInstanceID() == pInstanceID)
 			return mItems[i];
 	}
 
 	// Search Primary Main.
-	for (int i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->getID() == pItemID && mItems[i]->getInstanceID() == pInstanceID) {
 			return mItems[i];
 		}
 		// Search Primary Contents.
 		else if (mItems[i] && mItems[i]->isContainer()) {
-			for (int j = 0; j < SlotID::MAX_CONTENTS; j++) {
+			for (u32 j = 0; j < SlotID::MAX_CONTENTS; j++) {
 				if (mItems[j] && mItems[j]->getID() == pItemID && mItems[j]->getInstanceID() == pInstanceID) {
 					return mItems[j];
 				}
@@ -827,32 +706,32 @@ Item* Inventoryy::find(const uint32 pItemID, const uint32 pInstanceID) const {
 	return nullptr;
 }
 
-const bool Inventoryy::removeRadiantCrystals(const uint32 pCrystals) {
+const bool Inventoryy::removeRadiantCrystals(const u32 pCrystals) {
 	EXPECTED_BOOL(mRadiantCrystals >= pCrystals);
 
 	mRadiantCrystals -= pCrystals;
 	return true;
 }
 
-const bool Inventoryy::removeEbonCrystals(const uint32 pCrystals) {
+const bool Inventoryy::removeEbonCrystals(const u32 pCrystals) {
 	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
 
 	mEbonCrystals -= pCrystals;
 	return true;
 }
 
-const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pFromType, const uint32 pToType, const int32 pAmount) {
+const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount) {
 	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pFromSlot));
 	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pToSlot));
 	EXPECTED_BOOL(Limits::General::moneyTypeValid(pFromType));
 	EXPECTED_BOOL(Limits::General::moneyTypeValid(pToType));
 	EXPECTED_BOOL(pAmount > 0);
 
-	const int32 currencyAtFrom = _getCurrency(pFromSlot, pFromType);
+	const i32 currencyAtFrom = _getCurrency(pFromSlot, pFromType);
 	EXPECTED_BOOL(currencyAtFrom >= pAmount);
 
-	int32 addAmount = 0;
-	int32 removeAmount = 0;
+	i32 addAmount = 0;
+	i32 removeAmount = 0;
 
 	// Trivial move (e.g. Gold to Gold)
 	if (pFromType == pToType) {
@@ -861,14 +740,14 @@ const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot
 	}
 	// (Conversion) Moving larger currency to smaller currency
 	else if (pFromType > pToType) {
-		uint32 diff = pFromType - pToType;
-		addAmount = static_cast<int32>(pAmount * std::pow(10, diff)); // Convert large to small
+		u32 diff = pFromType - pToType;
+		addAmount = static_cast<i32>(pAmount * std::pow(10, diff)); // Convert large to small
 		removeAmount = pAmount;
 	}
 	// (Conversion) Moving smaller currency to larger currency
 	else {
-		uint32 diff = pToType - pFromType;
-		uint32 denominator = static_cast<uint32>(std::pow(10, diff));
+		u32 diff = pToType - pFromType;
+		u32 denominator = static_cast<u32>(std::pow(10, diff));
 		addAmount = pAmount / denominator; // Convert small to large
 		// NOTE: The remainder of the above division is ignored, the Client will keep it on their cursor.
 		removeAmount = pAmount - (pAmount % denominator);
@@ -880,7 +759,7 @@ const bool Inventoryy::moveCurrency(const uint32 pFromSlot, const uint32 pToSlot
 	return true;
 }
 
-const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
 	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Platinum, pPlatinum));
 	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Gold, pGold));
 	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Silver, pSilver));
@@ -888,11 +767,11 @@ const bool Inventoryy::addCurrency(const uint32 pSlot, const int32 pPlatinum, co
 	return true;
 }
 
-const uint64 Inventoryy::getTotalCurrency() const {
-	uint64 total = 0;
+const u64 Inventoryy::getTotalCurrency() const {
+	u64 total = 0;
 	for (auto i = 0; i < CurrencySlot::MAX; i++) {
 		for (auto j = 0; j < CurrencyType::MAX; j++) {
-			total += _getCurrency(i, j) * static_cast<uint64>(std::pow(10, j));
+			total += _getCurrency(i, j) * static_cast<u64>(std::pow(10, j));
 		}
 	}
 	return total;
@@ -921,7 +800,7 @@ const bool Inventoryy::onTradeAccept() {
 
 const bool Inventoryy::onTradeCancel() {
 	// Record total current before moving anything.
-	const uint64 preMoveCurrency = getTotalCurrency();
+	const u64 preMoveCurrency = getTotalCurrency();
 
 	const auto platinum = getTradePlatinum();
 	const auto gold = getTradeGold();
@@ -948,8 +827,8 @@ const u32 Inventoryy::findEmptySlot(Item* pItem) const {
 	if (!pItem) return SlotID::CURSOR; // If null gets passed in here, we have a big problem.
 
 	// Check: Main
-	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
-		auto item = getItem(i);
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = get(i);
 		if (!item) return i;
 	}
 
@@ -957,8 +836,8 @@ const u32 Inventoryy::findEmptySlot(Item* pItem) const {
 	if (pItem->isContainer()) return SlotID::CURSOR;
 	
 	// Check: Main Contents
-	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
-		auto item = getItem(i);
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = get(i);
 		if (item && item->isContainer() && item->getContainerSize() >= pItem->getSize()) {
 			// Check if this container has an empty slot.
 			const auto slotID = item->findEmptySlot();
@@ -970,20 +849,20 @@ const u32 Inventoryy::findEmptySlot(Item* pItem) const {
 	return SlotID::CURSOR;
 }
 
-const uint32 Inventoryy::findSlotFor(const bool pContainer, const uint8 pItemSize) const {
+const u32 Inventoryy::findSlotFor(const bool pContainer, const u8 pItemSize) const {
 	// Check: Main
-	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
-		auto item = getItem(i);
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = get(i);
 		if (!item) return i;
 	}
 
 	if (pContainer) return SlotID::None;
 
 	// Check: Main Contents
-	for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
-		auto item = getItem(i);
+	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
+		auto item = get(i);
 		if (item && item->isContainer() && item->getContainerSize() >= pItemSize) {
-			const uint32 slotID = item->findEmptySlot();
+			const u32 slotID = item->findEmptySlot();
 			if (SlotID::isNone(slotID) == false)
 				return slotID;
 		}
@@ -992,25 +871,19 @@ const uint32 Inventoryy::findSlotFor(const bool pContainer, const uint8 pItemSiz
 	return SlotID::None;
 }
 
-void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
-	for (auto i : mTrade) {
-		if (i) pItems.push_back(i);
-	}
-}
-
-const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
 	
 	// Get current currency as copper.
-	int64 currentCurrency = 0;
+	i64 currentCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));
 
 	// Get amount being added as copper.
-	int64 addedCurrency = 0;
+	i64 addedCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(addedCurrency, pPlatinum, pGold, pSilver, pCopper));
 
-	int64 newCurrency = currentCurrency + addedCurrency;
-	int32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
-	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
+	i64 newCurrency = currentCurrency + addedCurrency;
+	i32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
+	Utility::convertFromCopper<u64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
 
 	// Set new currency amounts.
 	setCurrency(CurrencySlot::Personal, CurrencyType::Platinum, newPlatinum);
@@ -1021,7 +894,7 @@ const bool Inventoryy::addCurrency(const int32 pPlatinum, const int32 pGold, con
 	return true;
 }
 
-const bool Inventoryy::addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) {
+const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) {
 	EXPECTED_BOOL(CurrencySlot::isValid(pSlot));
 	EXPECTED_BOOL(CurrencyType::isValid(pType));
 	EXPECTED_BOOL(pAmount >= 0);
@@ -1030,21 +903,21 @@ const bool Inventoryy::addCurrency(const uint32 pSlot, const uint32 pType, const
 	return true;
 }
 
-const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper) {
+const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
 	
 	// Get current currency as copper.
-	int64 currentCurrency = 0;
+	i64 currentCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));
 
 	// Get amount being removed as copper.
-	int64 removedCurrency = 0;
+	i64 removedCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(removedCurrency, pPlatinum, pGold, pSilver, pCopper));
 
 	EXPECTED_BOOL(currentCurrency >= removedCurrency);
 
-	int64 newCurrency = currentCurrency - removedCurrency;
-	int32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
-	Utility::convertFromCopper<uint64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
+	i64 newCurrency = currentCurrency - removedCurrency;
+	i32 newPlatinum = 0, newGold = 0, newSilver = 0, newCopper = 0;
+	Utility::convertFromCopper<u64>(newCurrency, newPlatinum, newGold, newSilver, newCopper);
 
 	// Set new currency amounts.
 	setCurrency(CurrencySlot::Personal, CurrencyType::Platinum, newPlatinum);
@@ -1055,49 +928,49 @@ const bool Inventoryy::removeCurrency(const int32 pPlatinum, const int32 pGold, 
 	return true;
 }
 
-const uint64 Inventoryy::getTotalCursorCurrency() const {
-	int64 value = 0;
+const u64 Inventoryy::getTotalCursorCurrency() const {
+	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getCursorPlatinum(), getCursorGold(), getCursorSilver(), getCursorCopper()), 0);
 	return value;
 }
 
-const uint64 Inventoryy::getTotalPersonalCurrency() const {
-	int64 value = 0;
+const u64 Inventoryy::getTotalPersonalCurrency() const {
+	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()), 0);
 	return value;
 }
 
-const uint64 Inventoryy::getTotalBankCurrency() const {
-	int64 value = 0;
+const u64 Inventoryy::getTotalBankCurrency() const {
+	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getBankPlatinum(), getBankGold(), getBankSilver(), getBankCopper()), 0);
 	return value;
 }
 
-const uint64 Inventoryy::getTotalTradeCurrency() const {
-	int64 value = 0;
+const u64 Inventoryy::getTotalTradeCurrency() const {
+	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getTradePlatinum(), getTradeGold(), getTradeSilver(), getTradeCopper()), 0);
 	return value;
 }
 
-const uint64 Inventoryy::getTotalSharedBankCurrency() const {
-	int64 value = 0;
+const u64 Inventoryy::getTotalSharedBankCurrency() const {
+	i64 value = 0;
 	// NOTE: The shared bank only supports storing platinum.
 	EXPECTED_VAR(Utility::convertCurrency(value, getSharedBankPlatinum(), 0, 0, 0), 0);
 	return value;
 }
 
-const uint32 Inventoryy::getAlternateCurrencyQuantity(const uint32 pCurrencyID) const {
+const u32 Inventoryy::getAlternateCurrencyQuantity(const u32 pCurrencyID) const {
 	auto search = mAlternateCurrency.find(pCurrencyID);
 	if (search == mAlternateCurrency.end()) return 0;
 	return search->second;
 }
 
-void Inventoryy::addAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity) {
+void Inventoryy::addAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
 	setAlternateCurrencyQuantity(pCurrencyID, getAlternateCurrencyQuantity(pCurrencyID) + pQuantity);
 }
 
-void Inventoryy::removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity) {
-	const uint32 currentQuantity = getAlternateCurrencyQuantity(pCurrencyID);
+void Inventoryy::removeAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
+	const u32 currentQuantity = getAlternateCurrencyQuantity(pCurrencyID);
 	if (currentQuantity >= pQuantity)
 		setAlternateCurrencyQuantity(pCurrencyID, currentQuantity - pQuantity);
 	else {
@@ -1151,29 +1024,44 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 	}
 
 	// Cursor
-	for (auto i : mCursor)
+	for (auto i : mCursorItems)
 		EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
 
-	// Bank
-	for (auto i : mBank) {
-		if (i) {
-			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
-		}
-	}
-	
-	// Shared Bank
-	for (auto i : mSharedBank) {
-		if (i) {
-			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
-		}
-	}
-
-	// Trade
-	for (auto i : mTrade) {
-		if (i) {
-			EXPECTED_BOOL(saveItem(i, pInventoryData.mItems));
-		}
-	}
-
 	return true;
+}
+
+const u32 Inventoryy::getPrimarySlotIndex(const u32 pSlotID) {
+	// Primary Slots.
+	if (SlotID::isWorn(pSlotID) || SlotID::isMain(pSlotID)) return pSlotID;
+	if (SlotID::isBank(pSlotID)) return (pSlotID - SlotID::BankBegin) + SlotID::MainEnd;
+	if (SlotID::isSharedBank(pSlotID)) return (pSlotID - SlotID::SharedBankBegin) + SlotID::BankEnd;
+	if (SlotID::isTrade(pSlotID)) return (pSlotID - SlotID::SharedBankEnd) + SlotID::TradeBegin;
+	
+	// Container Slots.
+	const auto parentSlotID = SlotID::getParentSlot(pSlotID);
+	return parentSlotID == SlotID::None ? SlotID::None : getPrimarySlotIndex(parentSlotID);
+}
+
+const u32 Inventoryy::getContainerSlotIndex(const u32 pSlotID) {
+	if (SlotID::isMainContents(pSlotID)) return (pSlotID - SlotID::MainContentsBegin) % 10;
+	if (SlotID::isBankContents(pSlotID)) return (pSlotID - SlotID::BankContentsBegin) % 10;
+	if (SlotID::isSharedBankContents(pSlotID)) return (pSlotID - SlotID::SharedBankContentsBegin) % 10;
+
+	return SlotID::None;
+}
+
+void Inventoryy::clearTradeItems() {
+	static const auto tradeBegin = getPrimarySlotIndex(SlotID::TradeBegin);
+	static const auto tradeEnd = getPrimarySlotIndex(SlotID::TradeEnd);
+	for (auto i = tradeBegin; i < tradeEnd; i++)
+		mItems[i] = nullptr;
+}
+
+void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
+	static const auto tradeBegin = getPrimarySlotIndex(SlotID::TradeBegin);
+	static const auto tradeEnd = getPrimarySlotIndex(SlotID::TradeEnd);
+	for (auto i = tradeBegin; i < tradeEnd; i++) {
+		if (mItems[i])
+			pItems.push_back(mItems[i]);
+	}
 }

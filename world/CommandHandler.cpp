@@ -1221,12 +1221,12 @@ public:
 
 		// Worn.
 		for (auto i = 0; i <= SlotID::AMMO; i++) {
-			mInvoker->notify(f(pCharacter->getInventory()->getItem(i)));
+			mInvoker->notify(f(pCharacter->getInventory()->get(i)));
 		}
 
 		// Main.
 		for (uint32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
-			auto item = pCharacter->getInventory()->getItem(i);
+			auto item = pCharacter->getInventory()->get(i);
 			mInvoker->notify(f(item));
 		}
 

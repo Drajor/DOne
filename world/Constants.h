@@ -320,7 +320,8 @@ namespace SlotID {
 		WAIST = 20,
 		POWER_SOURCE = 21,
 		AMMO = 22,
-		MAIN_0 = 23,
+		MainBegin = 23,
+		MAIN_0 = MainBegin,
 		MAIN_1 = 24,
 		MAIN_2 = 25,
 		MAIN_3 = 26,
@@ -328,12 +329,13 @@ namespace SlotID {
 		MAIN_5 = 28,
 		MAIN_6 = 29,
 		MAIN_7 = 30,
+		MainEnd = 30,
 		CURSOR = 31,
 
 		MAX_CURSOR_DEPTH = 37, // Underfoot only allows for a maximum of 37 Items on the cursor.
 
 		// Main Inventory Contents
-
+		MainContentsBegin = 262,
 		MAIN_0_0 = 262, // (Parent) Slot 23 with 10 slot container.
 		MAIN_1_0 = 272, // (Parent) Slot 24
 		MAIN_2_0 = 282, // (Parent) Slot 25
@@ -343,9 +345,11 @@ namespace SlotID {
 		MAIN_6_0 = 322, // (Parent) Slot 29
 		MAIN_7_0 = 332, // (Parent) Slot 30
 		MAIN_7_9 = 341, // (End of Slot 30 sub-slots)
+		MainContentsEnd = 341,
 
 		// Bank Primary
 
+		BankBegin = 2000,
 		BANK_0 = 2000,
 		BANK_1 = 2001,
 		BANK_2 = 2002,
@@ -370,9 +374,11 @@ namespace SlotID {
 		BANK_21 = 2021,
 		BANK_22 = 2022,
 		BANK_23 = 2023,
+		BankEnd = 2023,
 
 		// Bank Contents
 
+		BankContentsBegin = 2032,
 		BANK_0_0 = 2032, // (Parent) Slot 2000
 		BANK_1_0 = 2042, // (Parent) Slot 2001
 		BANK_2_0 = 2052, // (Parent) Slot 2002
@@ -398,20 +404,26 @@ namespace SlotID {
 		BANK_22_0 = 2252, // (Parent) Slot 2022
 		BANK_23_0 = 2262, // (Parent) Slot 2023
 		BANK_23_9 = 2271, // (End of Slot 2023 sub-slots)
+		BankContentsEnd = 2271,
 
 		// Shared Bank Primary
 
+		SharedBankBegin = 2500,
 		SHARED_BANK_0 = 2500,
 		SHARED_BANK_1 = 2501,
+		SharedBankEnd = 2501,
 
 		// Shared Bank Contents
 
+		SharedBankContentsBegin = 2532,
 		SHARED_BANK_0_0 = 2532, // (Parent) Slot 2500
 		SHARED_BANK_1_0 = 2542, // (Parent) Slot 2501
 		SHARED_BANK_1_9 = 2551, // (End of Slot 2542 sub-slots)
+		SharedBankContentsEnd = 2551,
 
 		// Trade Primary
 
+		TradeBegin = 3000,
 		TRADE_0 = 3000,
 		TRADE_1 = 3001,
 		TRADE_2 = 3002,
@@ -420,6 +432,7 @@ namespace SlotID {
 		TRADE_5 = 3005,
 		TRADE_6 = 3006,
 		TRADE_7 = 3007,
+		TradeEnd = 3007,
 
 		// Trade Contents
 
@@ -442,6 +455,9 @@ namespace SlotID {
 	static const uint32 SHARED_BANK_SLOTS = (SHARED_BANK_1 - SHARED_BANK_0) + 1;
 	static const uint32 TRADE_SLOTS = (TRADE_7 - TRADE_0) + 1;
 
+	static const u32 MaxPrimarySlots = MAIN_SLOTS + BANK_SLOTS + SHARED_BANK_SLOTS + TRADE_SLOTS;
+	static const u32 MaxCursorSlots = 37;
+
 	static const bool isNone(const uint32 pSlot) { return pSlot == None; }
 
 	static const bool isPrimary(const uint32 pSlot) { return pSlot == Primary; }
@@ -451,7 +467,7 @@ namespace SlotID {
 	static const bool isDelete(const uint32 pSlot) { return pSlot == SLOT_DELETE; }
 	static const bool isCursor(const uint32 pSlot) { return pSlot == CURSOR; }
 
-	static const bool isMainInventory(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
+	static const bool isMain(const uint32 pSlot) { return pSlot >= MAIN_0 && pSlot <= MAIN_7; }
 	static const bool isMainContents(const uint32 pSlot) { return pSlot >= MAIN_0_0 && pSlot <= MAIN_7_9; }
 	
 	static const bool isBank(const uint32 pSlot) { return pSlot >= BANK_0 && pSlot <= BANK_23; }
@@ -472,11 +488,14 @@ namespace SlotID {
 
 	static const bool subIndexValid(const uint32 pSubIndex) { return pSubIndex >= 0 && pSubIndex < MAX_CONTENTS; }
 
-	static const bool isContainerSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isBank(pSlot) || isSharedBank(pSlot); }
+	//static const bool isContainerSlot(const uint32 pSlot) { return isMain(pSlot) || isBank(pSlot) || isSharedBank(pSlot); }
 
-	static const bool isValidShopSellSlot(const uint32 pSlot) { return isMainInventory(pSlot) || isMainContents(pSlot) || isWorn(pSlot); }
+	static const bool isValidShopSellSlot(const uint32 pSlot) { return isMain(pSlot) || isMainContents(pSlot) || isWorn(pSlot); }
 
 	static const bool isCorpseSlot(const u32 pSlot) { return true; } // TODO:
+
+	static const bool isPrimarySlot(const u32 pSlot) { return isWorn(pSlot) || isMain(pSlot) || isBank(pSlot) || isSharedBank(pSlot) || isTrade(pSlot); }
+	static const bool isContainerSlot(const u32 pSlot) { return isMainContents(pSlot) || isBankContents(pSlot) || isSharedBankContents(pSlot); }
 
 	// Returns the parent SlotID of pSlot
 	static const uint32 getParentSlot(const uint32 pSlot) {
@@ -494,12 +513,12 @@ namespace SlotID {
 		}
 
 		// This is bad.
-		return 0;
+		return SlotID::None;
 	}
 
 	static const uint32 getChildSlot(const uint32 pSlot, const uint32 pSubIndex) {
 		// Main Inventory Contents.
-		if (isMainInventory(pSlot)) {
+		if (isMain(pSlot)) {
 			return MAIN_0_0 + (MAX_CONTENTS * (pSlot - MAIN_0)) + pSubIndex; // Trust me, I'm a pirate.
 		}
 		// Bank Contents.

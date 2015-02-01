@@ -352,9 +352,9 @@ const bool Item::augmentAllowed(Item* pAugment) {
 }
 
 const bool Item::clearContents(const u32 pSubIndex) {
-	EXPECTED_BOOL(isContainer());
-	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
-	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
+	if (!isContainer()) return false;
+	if (!SlotID::subIndexValid(pSubIndex)) return false;
+	if (getContainerSlots() <= pSubIndex) return false;
 
 	// Clean up where there is Item in the slot being cleared.
 	Item* existingItem = mContents[pSubIndex];
@@ -369,14 +369,14 @@ const bool Item::clearContents(const u32 pSubIndex) {
 }
 
 const bool Item::setContents(Item* pItem, const u32 pSubIndex) {
-	EXPECTED_BOOL(pItem);
-	EXPECTED_BOOL(SlotID::subIndexValid(pSubIndex));
-	EXPECTED_BOOL(mContents[pSubIndex] == nullptr); // Prevent overriding Item pointer. Failure = bug.
-	EXPECTED_BOOL(isContainer());
-	EXPECTED_BOOL(getContainerSlots() > pSubIndex);
-	EXPECTED_BOOL(getContainerSize() >= pItem->getSize());
-	EXPECTED_BOOL(pItem->setParent(this));
-	EXPECTED_BOOL(pItem->setSubIndex(pSubIndex));
+	if (!pItem) return false;
+	if (!SlotID::subIndexValid(pSubIndex)) return false;
+	if (mContents[pSubIndex] != nullptr) return false;
+	if (!isContainer()) return false;
+	if (getContainerSlots() <= pSubIndex) return false;
+	if (getContainerSize() < pItem->getSize()) return false;
+	if (!pItem->setParent(this)) return false;
+	if (!pItem->setSubIndex(pSubIndex)) return false;
 
 	mContents[pSubIndex] = pItem;
 	// Update the slot of the Item being set.

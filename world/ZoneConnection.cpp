@@ -3065,7 +3065,7 @@ const bool ZoneConnection::handleAugmentItem(const EQApplicationPacket* pPacket)
 
 	Log::info(payload->_debug());
 
-	auto container = mCharacter->getInventory()->getItem(payload->mContainerSlot);
+	auto container = mCharacter->getInventory()->get(payload->mContainerSlot);
 	EXPECTED_BOOL(container);
 	EXPECTED_BOOL(container->getContainerType() == ContainerType::AugmentationSealer);
 	EXPECTED_BOOL(container->getContainerSlots() == 2);

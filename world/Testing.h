@@ -244,6 +244,54 @@ TEST(LimitsTest, ShopQuantityValid) {
 	EXPECT_TRUE(Limits::Shop::quantityValid(487422));
 }
 
+TEST(SlotIDTests, isPrimarySlot) {
+	struct Range {
+		bool mResult;
+		u32 mStart;
+		u32 mEnd;
+	};
+	std::list<Range> tests = {
+		{ true, 0, 22 }, // Worn
+		{ true, 23, 30 }, // Main.
+		{ false, 31, 1999 }, // Gap.
+		{ true, 2000, 2023}, // Bank.
+		{ false, 2024, 2499 }, // Gap.
+		{ true, 2500, 2501 }, // Shared Bank.
+		{ false, 2502, 2999 }, // Gap.
+		{ true, 3000, 3007 }, // Trade
+		{ false, 3008, 10000 }, // Gap.
+	};
+
+	for (auto i : tests) {
+		for (auto j = i.mStart; j <= i.mEnd; j++) {
+			EXPECT_EQ(i.mResult, SlotID::isPrimarySlot(j));
+		}
+	}
+}
+
+TEST(SlotIDTests, isContainerSlot) {
+	struct Range {
+		bool mResult;
+		u32 mStart;
+		u32 mEnd;
+	};
+	std::list<Range> tests = {
+		{ false, 0, 261}, // Gap.
+		{ true, 262, 341 }, // Main Contents.
+		{ false, 342, 2031 }, // Gap.
+		{ true, 2032, 2271 }, // Bank Contents.
+		{ false, 2272, 2531 }, // Gap.
+		{ true, 2532, 2551 }, // Shared Bank Contents.
+		{ false, 2552, 10000 }, // Gap.
+	};
+
+	for (auto i : tests) {
+		for (auto j = i.mStart; j <= i.mEnd; j++) {
+			EXPECT_EQ(i.mResult, SlotID::isContainerSlot(j));
+		}
+	}
+}
+
 class ExperienceControllerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {

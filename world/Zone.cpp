@@ -1867,7 +1867,7 @@ void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32
 	// Check: Items can be sold from pSlotID
 	EXPECTED(SlotID::isValidShopSellSlot(pSlotID));
 
-	auto item = pCharacter->getInventory()->getItem(pSlotID);
+	auto item = pCharacter->getInventory()->get(pSlotID);
 	EXPECTED(item);
 
 	// Check: Item can be sold.
@@ -2504,13 +2504,13 @@ void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
 	EXPECTED(pCharacter->canCombine());
 
 	// Check: The combine is occurring from a valid slot id. (UF Client Checked)
-	EXPECTED(SlotID::isMainInventory(pSlot));
+	EXPECTED(SlotID::isMain(pSlot));
 
 	// Check: Cursor is empty. (UF Client Checked)
 	EXPECTED(pCharacter->getInventory()->isCursorEmpty() == true);
 
 	// Check: Valid Item at slot id.
-	auto container = pCharacter->getInventory()->getItem(pSlot);
+	auto container = pCharacter->getInventory()->get(pSlot);
 	EXPECTED(container);
 
 	// Check: Item is a container.
@@ -3023,7 +3023,7 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 		}
 
 		// Find the Item being equipped.
-		wornNew = inventory->getItem(pFromSlot);
+		wornNew = inventory->get(pFromSlot);
 		if (!wornNew) {
 			mLog->error(pCharacter->getName() + " attempted to equip null Item.");
 			return false;
@@ -3036,7 +3036,7 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 		}
 
 		// NOTE: Can be null if there was no Item in the slot.
-		wornOld = inventory->getItem(pToSlot);
+		wornOld = inventory->get(pToSlot);
 	}
 	// Check: Character is trying to unequip an Item.
 	else if (unequipItem) {
@@ -3047,14 +3047,14 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 		}
 
 		// Find the Item being unequipped.
-		wornOld = inventory->getItem(pFromSlot);
+		wornOld = inventory->get(pFromSlot);
 		if (!wornOld) {
 			mLog->error(pCharacter->getName() + " attempted to unequip null Item.");
 			return false;
 		}
 
 		// NOTE: Can be null if there is no Item on cursor.
-		wornNew = inventory->getItem(pToSlot);
+		wornNew = inventory->get(pToSlot);
 	}
 
 	// Character is trying to put an Item into a trade slot.
@@ -3072,14 +3072,14 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 		}
 
 		// Check: Valid Item being moved into trade.
-		auto item = inventory->getItem(pFromSlot);
+		auto item = inventory->get(pFromSlot);
 		if (!item) {
 			mLog->error(pCharacter->getName() + " attempted to move null Item to trade slot.");
 			return false;
 		}
 		
 		// Check: No existing Item
-		auto existingItem = inventory->getItem(pToSlot);
+		auto existingItem = inventory->get(pToSlot);
 		if (existingItem) {
 			mLog->error(pCharacter->getName() + " attempted to move Item to trade slot but the slot is not empty.");
 			return false;
@@ -3105,7 +3105,7 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 
 	// Trading with Character.
 	if (tradeMove && pCharacter->isTradingWithCharacter()) {
-		auto item = inventory->getItem(pToSlot);
+		auto item = inventory->get(pToSlot);
 		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
 
 		// Note: This makes the Item appear in the 'Trade Window' for the Character that pCharacter is trading with.

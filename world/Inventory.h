@@ -3,6 +3,7 @@
 #include "Constants.h"
 #include "Bonuses.h"
 #include <functional>
+#include <array>
 
 namespace Data {
 	struct Item;
@@ -13,6 +14,21 @@ class ILog;
 class ILogFactory;
 class ItemFactory;
 class Item;
+
+//namespace SearchFlags {
+//	enum : u32 {
+//		Worn = 0x01,
+//		Main = 0x02,
+//		MainContents = 0x03,
+//		Bank = 0x04,
+//		BankContents = 0x05,
+//		SharedBank = 0x06,
+//		SharedBankContents = 0x07,
+//		Cursor = 0x08,
+//
+//		All = Worn + Main + MainContents + Bank + BankContents + SharedBank + SharedBankContents + cursor,
+//	};
+//}
 
 class Inventoryy : public Bonuses { // We get an extra y for now.
 
@@ -27,123 +43,132 @@ public:
 	Item* loadItem(Data::Item& pItem);
 	// Items
 
+	static constexpr u32 getPrimarySlotIndex(const u32 pSlotID);
+	static const u32 getContainerSlotIndex(const u32 pSlotID);
+
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
 	const bool put(Item* pItem, const u32 pSlot);
-	const bool putContainer(Item* pItem, const uint32 pSlot);
+	Item* get(const u32 pSlot) const;
+	const bool moveItem(const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
+	const bool moveCurrency(const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount);
 
-	// Returns the Item at pSlot or nullptr.
-	Item* getItem(const uint32 pSlot) const;
 
-	Item* find(const uint32 pItemID, const uint32 pInstanceID) const;
+	inline Item* find(std::function<bool(Item*)> pPredicate) const {
+		for (auto i : mItems) {
+			if (pPredicate(i))
+				return i;
+		}
+		return nullptr;
+	}
 
-	const unsigned char* getData(uint32& pSize); // Caller responsible for delete.
-	const bool moveItem(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pStackSize);
-	const bool consume(const uint32 pSlot, const uint32 pStacks);
+	Item* find(const u32 pItemID, const u32 pInstanceID) const;
+
+	const unsigned char* getData(u32& pSize); // Caller responsible for delete.
+	
+	const bool consume(const u32 pSlot, const u32 pStacks);
 	const bool pushCursor(Item* pItem);
-	inline const bool isCursorEmpty() const { return mCursor.empty(); }
+	inline const bool isCursorEmpty() const { return mCursorItems.empty(); }
 
 	inline Item* peekCursor() const { return _peekCursor(); }
-	inline std::list<Item*> getCursor() { return mCursor; }
+	inline std::list<Item*> getCursor() { return mCursorItems; }
 
 	// Currency
 
-	const bool moveCurrency(const uint32 pFromSlot, const uint32 pToSlot, const uint32 pFromType, const uint32 pToType, const int32 pAmount);
-
 	// Currency
-	inline const int32 getCursorPlatinum() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Platinum]; }
-	inline const int32 getPersonalPlatinum() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Platinum]; }
-	inline const int32 getBankPlatinum() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Platinum]; }
-	inline const int32 getTradePlatinum() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Platinum]; }
-	inline const int32 getSharedBankPlatinum() const { return mCurrency[CurrencySlot::SharedBank][CurrencyType::Platinum]; }
+	inline const i32 getCursorPlatinum() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Platinum]; }
+	inline const i32 getPersonalPlatinum() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Platinum]; }
+	inline const i32 getBankPlatinum() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Platinum]; }
+	inline const i32 getTradePlatinum() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Platinum]; }
+	inline const i32 getSharedBankPlatinum() const { return mCurrency[CurrencySlot::SharedBank][CurrencyType::Platinum]; }
 
-	inline const int32 getCursorGold() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Gold]; }
-	inline const int32 getPersonalGold() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Gold]; }
-	inline const int32 getBankGold() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Gold]; }
-	inline const int32 getTradeGold() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Gold]; }
+	inline const i32 getCursorGold() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Gold]; }
+	inline const i32 getPersonalGold() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Gold]; }
+	inline const i32 getBankGold() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Gold]; }
+	inline const i32 getTradeGold() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Gold]; }
 
-	inline const int32 getCursorSilver() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Silver]; }
-	inline const int32 getPersonalSilver() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Silver]; }
-	inline const int32 getBankSilver() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Silver]; }
-	inline const int32 getTradeSilver() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Silver]; }
+	inline const i32 getCursorSilver() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Silver]; }
+	inline const i32 getPersonalSilver() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Silver]; }
+	inline const i32 getBankSilver() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Silver]; }
+	inline const i32 getTradeSilver() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Silver]; }
 
-	inline const int32 getCursorCopper() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Copper]; }
-	inline const int32 getPersonalCopper() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Copper]; }
-	inline const int32 getBankCopper() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Copper]; }
-	inline const int32 getTradeCopper() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Copper]; }
+	inline const i32 getCursorCopper() const { return mCurrency[CurrencySlot::Cursor][CurrencyType::Copper]; }
+	inline const i32 getPersonalCopper() const { return mCurrency[CurrencySlot::Personal][CurrencyType::Copper]; }
+	inline const i32 getBankCopper() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Copper]; }
+	inline const i32 getTradeCopper() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Copper]; }
 	
-	const bool addCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount);
+	const bool addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount);
 
-	const bool addCurrency(const uint32 pSlot, const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+	const bool addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
 
-	inline bool removeCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
+	inline bool removeCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
 
 	// Sets the currency of pType at pSlot to pAmount.
-	inline void setCurrency(const uint32 pSlot, const uint32 pType, const int32 pAmount) { mCurrency[pSlot][pType] = pAmount; }
+	inline void setCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) { mCurrency[pSlot][pType] = pAmount; }
 	
 	// Adds 'personal' currency.
-	const bool addCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+	const bool addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
 
 	// Removes 'personal' currency.
-	const bool removeCurrency(const int32 pPlatinum, const int32 pGold, const int32 pSilver, const int32 pCopper);
+	const bool removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
 
 	// Returns the total value of all currency in copper pieces.
-	const uint64 getTotalCurrency() const;
+	const u64 getTotalCurrency() const;
 
 	// Returns the total value of cursor currency in copper pieces.
-	const uint64 getTotalCursorCurrency() const;
+	const u64 getTotalCursorCurrency() const;
 
 	// Returns the total value of personal currency in copper pieces.
-	const uint64 getTotalPersonalCurrency() const;
+	const u64 getTotalPersonalCurrency() const;
 
 	// Returns the total  value of bank currency in copper pieces.
-	const uint64 getTotalBankCurrency() const;
+	const u64 getTotalBankCurrency() const;
 
 	// Returns the total  value of trade currency in copper pieces.
-	const uint64 getTotalTradeCurrency() const;
+	const u64 getTotalTradeCurrency() const;
 
 	// Returns the total value of shared bank currency in copper pieces.
-	const uint64 getTotalSharedBankCurrency() const;
+	const u64 getTotalSharedBankCurrency() const;
 
 	const bool currencyValid() const;
 
 	// Alternate Currency
 
 	// Radiant Crystals.
-	inline const uint32 getRadiantCrystals() const { return mRadiantCrystals; }
-	inline const uint32 getTotalRadiantCrystals() const { return mTotalRadiantCrystals; }
-	inline void addRadiantCrystals(const uint32 pCrystals) { mRadiantCrystals += pCrystals; mTotalRadiantCrystals += pCrystals; }
-	const bool removeRadiantCrystals(const uint32 pCrystals);
+	inline const u32 getRadiantCrystals() const { return mRadiantCrystals; }
+	inline const u32 getTotalRadiantCrystals() const { return mTotalRadiantCrystals; }
+	inline void addRadiantCrystals(const u32 pCrystals) { mRadiantCrystals += pCrystals; mTotalRadiantCrystals += pCrystals; }
+	const bool removeRadiantCrystals(const u32 pCrystals);
 	
 	// Sets the number of Radiant Crystals. Should only be used during initialisation.
-	inline void _setRadiantCrystals(const uint32 pCurrent, const uint32 pTotal) { mRadiantCrystals = pCurrent; mTotalRadiantCrystals = pTotal; }
+	inline void _setRadiantCrystals(const u32 pCurrent, const u32 pTotal) { mRadiantCrystals = pCurrent; mTotalRadiantCrystals = pTotal; }
 
 	// Ebon Crystals.
-	inline const uint32 getEbonCrystals() const { return mEbonCrystals; }
-	inline const uint32 getTotalEbonCrystals() const { return mTotalEbonCrystals; }
-	inline void addEbonCrystals(const uint32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
-	const bool removeEbonCrystals(const uint32 pCrystals);
+	inline const u32 getEbonCrystals() const { return mEbonCrystals; }
+	inline const u32 getTotalEbonCrystals() const { return mTotalEbonCrystals; }
+	inline void addEbonCrystals(const u32 pCrystals) { mEbonCrystals += pCrystals; mTotalEbonCrystals += pCrystals; }
+	const bool removeEbonCrystals(const u32 pCrystals);
 
 	// Sets the number of Ebon Crystals. Should only be used during initialisation.
-	inline void _setEbonCrystals(const uint32 pCurrent, const uint32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
+	inline void _setEbonCrystals(const u32 pCurrent, const u32 pTotal) { mEbonCrystals = pCurrent; mTotalEbonCrystals = pTotal; }
 
 	// Returns the quantity of an alternate currency by ID.
-	const uint32 getAlternateCurrencyQuantity(const uint32 pCurrencyID) const;
+	const u32 getAlternateCurrencyQuantity(const u32 pCurrencyID) const;
 
 	// Returns a reference to the alternate currencies.
-	inline std::map<uint32, uint32>& getAlternateCurrency() { return mAlternateCurrency; }
+	inline std::map<u32, u32>& getAlternateCurrency() { return mAlternateCurrency; }
 
 	// Sets the quantity of an alternate currency by ID.
-	inline void setAlternateCurrencyQuantity(const uint32 pCurrencyID, const uint32 pQuantity) { mAlternateCurrency[pCurrencyID] = pQuantity; }
+	inline void setAlternateCurrencyQuantity(const u32 pCurrencyID, const u32 pQuantity) { mAlternateCurrency[pCurrencyID] = pQuantity; }
 
 	// Adds a specified quantity to an alternate currency.
-	void addAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
+	void addAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity);
 
 	// Removes a specified quantity from an alternate currency.
-	void removeAlternateCurrency(const uint32 pCurrencyID, const uint32 pQuantity);
+	void removeAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity);
 
 	void getTradeItems(std::list<Item*>& pItems) const;
 	
-	inline void clearTradeItems() { for (auto& i : mTrade) i = nullptr; }
+	void clearTradeItems();
 
 	const bool onTradeAccept();
 	const bool onTradeCancel();
@@ -151,8 +176,8 @@ public:
 	// Finds a slot ID for an Item. If no slot ID is found, SlotID::CURSOR is returned.
 	const u32 findEmptySlot(Item* pItem) const;
 
-	const uint32 findSlotFor(const bool pContainer, const uint8 pItemSize) const;
-	Item* findFirst(const uint8 pItemType) const;
+	const u32 findSlotFor(const bool pContainer, const u8 pItemSize) const;
+	Item* findFirst(const u8 pItemType) const;
 
 	// Finds and returns the first Item with pItemID that does not have full stacks.
 	Item* findPartialStack(const u32 pItemID) const;
@@ -164,12 +189,6 @@ public:
 
 	inline const i32 _getCurrency(const u32 pSlot, const u32 pType) const { return mCurrency[pSlot][pType]; }
 
-	//template <typename T>
-	//T iterateMain(std::function<const bool(Item* pItem)> pPredicate) const {
-	//	for (auto i = SlotID::MAIN_0; i < SlotID::MAIN_7; i++) {
-	//		if (pFunction(mItems[i])) { return 0; }
-	//	} 
-	//}
 private:
 
 	bool mInitialised = false;
@@ -177,23 +196,23 @@ private:
 	ItemFactory* mItemFactory = nullptr;
 	Data::Inventory* mData = nullptr;
 
+	// Removes and returns the first Item in the cursor list.
 	Item* _popCursor();
+
+	// Returns the first Item in the cursor list.
 	Item* _peekCursor() const;
-	const bool _clear(const uint32 pSlot);
-	const bool _clearContainerSlot(const uint32 pSlot);
+
+	const bool _clear(const u32 pSlot);
 
 	void _calculateAdd(Item* pItem);
 	void _calculateRemove(Item* pItem);
 
-	Item* mItems[SlotID::MAIN_SLOTS]; // Slots 0 - 30
-	std::list<Item*> mCursor; // Slot 31
-	Item* mBank[SlotID::BANK_SLOTS]; // Slots 2000 - 2023
-	Item* mSharedBank[SlotID::SHARED_BANK_SLOTS]; // Slots 2500 - 2501
-	Item* mTrade[SlotID::TRADE_SLOTS]; // Slots 3000 - ?
-	
-	const bool _putDown(const uint32 pToSlot, const uint32 pStackSize);
-	const bool _stackMergeCursor(const uint32 pToSlot, const uint32 pStackSize);
-	const bool _pickUp(const uint32 pFromSlot, const uint32 pStackSize);
+	std::array<Item*, SlotID::MaxPrimarySlots> mItems;
+	std::list<Item*> mCursorItems;
+
+	const bool _putDown(const u32 pToSlot, const u32 pStackSize);
+	const bool _stackMergeCursor(const u32 pToSlot, const u32 pStackSize);
+	const bool _pickUp(const u32 pFromSlot, const u32 pStackSize);
 	Item* mAutoFood = nullptr;
 	Item* mAutoDrink = nullptr;
 
@@ -204,7 +223,7 @@ private:
 	// Ebon Crystals
 	u32 mEbonCrystals = 0;
 	u32 mTotalEbonCrystals = 0;
-	std::map<uint32, uint32> mAlternateCurrency;
+	std::map<u32, u32> mAlternateCurrency;
 
-	int32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];
+	i32 mCurrency[CurrencySlot::MAX][CurrencyType::MAX];
 };
