@@ -203,6 +203,7 @@ public:
 	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
 	const bool onTargetChange(Character* pCharacter, const u16 pSpawnID);
 	const bool onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot);
+	const bool onCampBegin(Character* pCharacter);
 
 	void handleActorPositionChange(Actor* pActor);
 	void handleLinkDead(Character* pCharacter);
@@ -410,7 +411,6 @@ private:
 	const bool returnTradeCurrency(Character* pCharacter);
 	void orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered);
 	const bool trade(Character* pCharacterA, Character* pCharacterB);
-
 	ZonePointList mZonePoints;
 
 	std::list<Character*> mCharacters;

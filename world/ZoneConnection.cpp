@@ -1033,18 +1033,8 @@ const bool ZoneConnection::handleCamp(const EQApplicationPacket* pPacket) {
 	if (!pPacket) return false;
 	SIZE_CHECK(Camp::sizeCheck(pPacket));
 
-	// Instant camp for GM.
-	if (mCharacter->isGM()) {
-		_sendPreLogOutReply();
-		_sendLogOutReply();
-
-		mCharacter->setCampComplete(true);
-
-		dropConnection();
-		return true;;
-	}
-
-	mCharacter->startCamp();
+	// Notify Zone.
+	mZone->onCampBegin();
 	return true;
 }
 
@@ -1180,8 +1170,8 @@ const bool ZoneConnection::handleLogOut(const EQApplicationPacket* pPacket) {
 	sendPacket(packet);
 	delete packet;
 
-	_sendPreLogOutReply();
-	_sendLogOutReply();
+	sendPreLogOutReply();
+	sendLogOutReply();
 
 	mCharacter->setCampComplete(true);
 
@@ -1190,7 +1180,7 @@ const bool ZoneConnection::handleLogOut(const EQApplicationPacket* pPacket) {
 	return true;
 }
 
-void ZoneConnection::_sendLogOutReply() {
+void ZoneConnection::sendLogOutReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_LogoutReply);
@@ -1198,7 +1188,7 @@ void ZoneConnection::_sendLogOutReply() {
 	delete packet;
 }
 
-void ZoneConnection::_sendPreLogOutReply() {
+void ZoneConnection::sendPreLogOutReply() {
 	EXPECTED(mConnected);
 
 	auto packet = new EQApplicationPacket(OP_PreLogoutReply);
@@ -1211,7 +1201,7 @@ const bool ZoneConnection::handleDeleteSpawn(const EQApplicationPacket* pPacket)
 	if (!pPacket) return false;
 	SIZE_CHECK(DeleteSpawn::sizeCheck(pPacket));
 
-	_sendLogOutReply();
+	sendLogOutReply();
 	mCharacter->setZoningOut();
 
 	// NOTE: Zone picks up the dropped connection next update.

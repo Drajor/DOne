@@ -231,11 +231,14 @@ void Character::onLeaveZone() {
 
 void Character::setStanding(bool pStanding) {
 	mStanding = pStanding;
-	if (mStanding)
-		mCampTimer.Disable();		
+	if (mStanding) {
+		mIsCamping = false;
+		mCampTimer.Disable();
+	}
 }
 
 void Character::startCamp() {
+	mIsCamping = true;
 	mCampTimer.Start(29000, true);
 }
 

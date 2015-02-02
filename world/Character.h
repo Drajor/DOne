@@ -90,6 +90,7 @@ public:
 	inline const bool isCharacter() const { return true; }
 	inline const bool isInitialised() const { return mInitialised; }
 	inline const bool isZoning() const { return mIsZoning; }
+	inline const bool isCamping() const { return mIsCamping; }
 	inline void setZoning(const bool pZoning) { mIsZoning = pZoning; }
 	inline const bool isLinkDead() const { return mIsLinkDead; }
 	inline void setLinkDead() { mIsLinkDead = true; }
@@ -284,10 +285,10 @@ public:
 	inline void setStatus(const u32 pStatus) { mStatus = pStatus; }
 	
 	void startCamp();
-	inline void setCampComplete(bool pCampComplete) { mCampComplete = pCampComplete; }
-	inline bool isCampComplete() { return mCampComplete; }
+	inline void setCampComplete(const bool pCampComplete) { mCampComplete = pCampComplete; }
+	inline const bool isCampComplete() const { return mCampComplete; }
 	inline void setZoningOut() { mIsZoningOut = true; }
-	inline bool isZoningOut() { return mIsZoningOut; }
+	inline const bool isZoningOut() const { return mIsZoningOut; }
 
 	void message(const u32 pType, String pMessage);
 
@@ -463,6 +464,7 @@ private:
 	bool mHidden = false;
 	bool mAutoAttacking = false;
 	bool mStanding = true;
+	bool mIsCamping = false;
 	bool mIsZoningOut = false;
 	bool mCampComplete = false; // Flag indicating whether this character logged out via /camp
 	bool mTGB = false;

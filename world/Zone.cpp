@@ -316,31 +316,7 @@ void Zone::onLeaveZone(Character* pCharacter) {
 
 	// Handle: Character is leaving the Zone while trading.
 	if (pCharacter->isTrading()) {
-		auto actor = pCharacter->getTradingWith();
-
-		// Trading with an NPC.
-		if (actor->isNPC()) {
-			auto npc = Actor::cast<NPC*>(actor);
-
-			// Disassociate Character and NPC.
-			npc->removeTrader(pCharacter);
-			pCharacter->setTradingWith(nullptr);
-		}
-		// Trading with a Character.
-		else if (actor->isCharacter()) {
-			auto character = Actor::cast<Character*>(actor);
-
-			// Disassociate Characters.
-			character->setTradingWith(nullptr);
-			pCharacter->setTradingWith(nullptr);
-			// TODO: Packets. Inventory etc.
-
-			auto inventory = pCharacter->getInventory();
-		}
-		else {
-			// Clear.
-			pCharacter->setTradingWith(nullptr);
-		}
+		onTradeCancel(pCharacter, pCharacter->getSpawnID());
 	}
 
 	// Handle: Character is leaving the zone and has agro.
@@ -388,7 +364,23 @@ void Zone::onLinkdeadBegin(Character* pCharacter) {
 
 	mLog->info("Character (" + pCharacter->getName() + ") LD begin.");
 	pCharacter->setLinkDead();
-	handleLinkDead(pCharacter);
+
+	// Update Zone.
+	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::LinkDead, 1, false);
+
+	// Cancel trade if a Character goes LD.
+	if (pCharacter->isTrading()) {
+		onTradeCancel(pCharacter, pCharacter->getSpawnID());
+	}
+
+	// Handle: Character leaving Zone while shopping.
+	if (pCharacter->isShopping()) {
+		auto npc = pCharacter->getShoppingWith();
+
+		// Disassociate Character and NPC.
+		npc->removeShopper(pCharacter);
+		pCharacter->setShoppingWith(nullptr);
+	}
 
 	// Handle: Character going LD while looting.
 	// (UNTESTED)
@@ -451,7 +443,6 @@ void Zone::handleStanding(Character* pCharacter) { _sendSpawnAppearance(pCharact
 void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Sitting); }
 void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Crouch); }
 void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GM, pCharacter->isGM() ? 1 : 0, true); }
-void Zone::handleLinkDead(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::LinkDead, 1, false); }
 
 void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender) {
 	using namespace Payload::Zone;
@@ -1528,6 +1519,14 @@ const bool Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
 	else if (actor->isCharacter()) {
 		auto character = Actor::cast<Character*>(actor);
 
+		// Prevent trade with camping Character.
+		if (character->isCamping())
+			return true;
+
+		// Prevent trade with LD Character.
+		if (character->isLinkDead())
+			return true;
+
 		// Check: Does Character have a pending trade request.
 		if (character->hasTradeRequest()) {
 
@@ -1714,11 +1713,12 @@ const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
 	}
 	// Handle: Character has canceled while trading with an NPC.
 	else if (pCharacter->isTradingWithNPC()) {
+		auto connection = pCharacter->getConnection();
 		auto tradingWith = Actor::cast<NPC*>(pCharacter->getTradingWith());
 
-		pCharacter->getConnection()->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
-		pCharacter->getConnection()->sendCharacterTradeClose();
-		pCharacter->getConnection()->sendFinishWindow2();
+		connection->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
+		connection->sendCharacterTradeClose();
+		connection->sendFinishWindow2();
 		pCharacter->setTradingWith(nullptr);
 
 		// Return trade currency.
@@ -3403,4 +3403,28 @@ void Zone::orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered) 
 	// Add remaining Items.
 	for (auto returnItem : pUnordered)
 		pOrdered.push_back(returnItem);
+}
+
+const bool Zone::onCampBegin(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	// Cancel trade if a Character starts camping.
+	if (pCharacter->isTrading()) {
+		onTradeCancel(pCharacter, pCharacter->getSpawnID());
+	}
+
+	pCharacter->startCamp();
+
+	// Instant camp for GM.
+	if (pCharacter->isGM()) {
+		pCharacter->setCampComplete(true);
+		auto connection = pCharacter->getConnection();
+
+		connection->sendPreLogOutReply();
+		connection->sendLogOutReply();
+		connection->dropConnection();
+		return true;;
+	}
+
+	return true;
 }

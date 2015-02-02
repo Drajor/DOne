@@ -184,6 +184,9 @@ public:
 
 	void sendZoneEntry();
 
+	void sendPreLogOutReply();
+	void sendLogOutReply();
+
 	const bool handleZoneEntry(const EQApplicationPacket* pPacket);
 	const bool handleRequestClientSpawn(const EQApplicationPacket* pPacket);
 	const bool handleClientReady(const EQApplicationPacket* pPacket);
@@ -328,9 +331,6 @@ private:
 	void _sendInventory();
 	void _sendWeather();
 	void _sendGuildNames();
-
-	void _sendPreLogOutReply();
-	void _sendLogOutReply();
 	
 
 	void _sendDoors();
