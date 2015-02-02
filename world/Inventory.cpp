@@ -759,7 +759,11 @@ const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, cons
 	return true;
 }
 
-const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
+const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
+	StringStream ss;
+	ss << "Adding (" << pReason << ") currency c=(" << pCopper << ") s=(" << pSilver << ") g=(" << pGold << ") p=(" << pPlatinum << ")";
+	mLog->info(ss.str());
+
 	if (!addCurrency(pSlot, CurrencyType::Platinum, pPlatinum)) return false;
 	if (!addCurrency(pSlot, CurrencyType::Gold, pGold)) return false;
 	if (!addCurrency(pSlot, CurrencyType::Silver, pSilver)) return false;
@@ -836,7 +840,7 @@ const u32 Inventoryy::findSlotFor(const bool pContainer, const u8 pItemSize) con
 	return SlotID::None;
 }
 
-const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
+const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	
 	// Get current currency as copper.
 	i64 currentCurrency = 0;

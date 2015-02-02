@@ -1274,7 +1274,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 			npcCorpse->removeCurrency();
 
 			// Add currency to looter.
-			EXPECTED(pLooter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper));
+			EXPECTED(pLooter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::Loot));
 		}
 
 		pLooter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
@@ -1828,7 +1828,7 @@ void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32
 	const int32 platinum = (price / 1000);
 	
 	// Add currency to Character.
-	EXPECTED(pCharacter->getInventory()->addCurrency(platinum, gold, silver, copper));
+	pCharacter->getInventory()->addCurrency(platinum, gold, silver, copper, CurrencyReason::ShopSale);
 
 	// Detect when the Character's auto food / drink is being sold.
 	const bool updateConsumables = pCharacter->getInventory()->isAutoFood(item) || pCharacter->getInventory()->isAutoDrink(item);
@@ -3317,12 +3317,8 @@ const bool Zone::returnTradeCurrency(Character* pCharacter) {
 
 	inventory->clearTradeCurrency();
 
-	StringStream ss;
-	ss << "Returning trade currency c=(" << copper << ") s=(" << silver << ") g=(" << gold << ") p=(" << platinum << ") to " << pCharacter->getName();
-	mLog->info(ss.str());
-
 	// Add currency that was in trade back into personal.
-	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper))
+	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::TradeReturn))
 		mLog->error("Returning trade currency failed.");
 
 	// Update Character.
@@ -3370,7 +3366,7 @@ const bool Zone::trade(Character* pCharacterA, Character* pCharacterB) {
 		if (!giveItems(pCharacterB, orderedA))
 			mLog->error("Failed to give items A to B");
 	}
-	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA);
+	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA, CurrencyReason::Trade);
 	pCharacterB->getConnection()->sendCurrencyUpdate();
 
 	// Give B to A.
@@ -3379,7 +3375,7 @@ const bool Zone::trade(Character* pCharacterA, Character* pCharacterB) {
 		if(!giveItems(pCharacterA, orderedB))
 			mLog->error("Failed to give items B to A");
 	}
-	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB);
+	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB, CurrencyReason::Trade);
 	pCharacterA->getConnection()->sendCurrencyUpdate();
 
 	// Check: The total number of copper pieces between the two Characters matches the pre-trade total.

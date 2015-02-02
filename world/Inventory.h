@@ -15,6 +15,13 @@ class ILogFactory;
 class ItemFactory;
 class Item;
 
+namespace CurrencyReason {
+	static const String Loot = "LOOT";
+	static const String ShopSale = "SHOP_SALE";
+	static const String Trade = "TRADE";
+	static const String TradeReturn = "TRADE_RETURN";
+}
+
 //namespace SearchFlags {
 //	enum : u32 {
 //		Worn = 0x01,
@@ -95,9 +102,7 @@ public:
 	inline const i32 getBankCopper() const { return mCurrency[CurrencySlot::Bank][CurrencyType::Copper]; }
 	inline const i32 getTradeCopper() const { return mCurrency[CurrencySlot::Trade][CurrencyType::Copper]; }
 	
-	const bool addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount);
-
-	const bool addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
+	const bool addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason);
 
 	inline bool removeCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) { mCurrency[pSlot][pType] -= pAmount; return true; } // TODO: Make this not shit ;)
 
@@ -105,7 +110,7 @@ public:
 	inline void setCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) { mCurrency[pSlot][pType] = pAmount; }
 	
 	// Adds 'personal' currency.
-	const bool addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
+	const bool addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason);
 
 	// Removes 'personal' currency.
 	const bool removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
@@ -185,6 +190,9 @@ public:
 	inline const bool isAutoDrink(Item* pItem) const { return pItem == mAutoDrink; }
 
 	inline const i32 _getCurrency(const u32 pSlot, const u32 pType) const { return mCurrency[pSlot][pType]; }
+
+	// Public for tests.
+	const bool addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount);
 
 private:
 
