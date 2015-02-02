@@ -30,7 +30,6 @@
 	#include <io.h>
 #endif
 #include "../common/timer.h"
-#include "../common/seperator.h"
 
 #ifdef _WINDOWS
 	#include <windows.h>
@@ -113,19 +112,6 @@ uint32 ResolveIP(const char* hostname, char* errbuf) {
 	memcpy ((char*)&(server_sin.sin_addr), phostent->h_addr, phostent->h_length);
 #endif
 	return server_sin.sin_addr.s_addr;
-}
-
-bool ParseAddress(const char* iAddress, uint32* oIP, uint16* oPort, char* errbuf) {
-	Seperator sep(iAddress, ':', 2, 250, false, 0, 0);
-	if (sep.argnum == 1 && sep.IsNumber(1)) {
-		*oIP = ResolveIP(sep.arg[0], errbuf);
-		if (*oIP == 0)
-			return false;
-		if (oPort)
-			*oPort = atoi(sep.arg[1]);
-		return true;
-	}
-	return false;
 }
 
 #ifdef _WINDOWS

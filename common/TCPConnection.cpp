@@ -267,14 +267,7 @@ bool TCPConnection::ServerSendQueuePopForce(uchar** data, int32* size) {
 	return ret;
 }
 
-char* TCPConnection::PopLine() {
-	char* ret;
-	if (!MLineOutQueue.trylock())
-		return 0;
-	ret = (char*) LineOutQueue.pop();
-	MLineOutQueue.unlock();
-	return ret;
-}
+
 
 bool TCPConnection::LineOutQueuePush(char* line) {
 	MLineOutQueue.lock();

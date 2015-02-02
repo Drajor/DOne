@@ -806,7 +806,7 @@ struct SuspendedMinion_Struct
 static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 480;	// Increased to 480 to support SoF
 static const uint32 MAX_PP_MEMSPELL		= 9;
-static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
+//static const uint32 MAX_PP_SKILL		= _SkillPacketArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -859,190 +859,190 @@ sed -e 's/_t//g' -e 's/MAX_AA/MAX_PP_AA_ARRAY/g' \
 	-e 's/airRemaining/air_remaining/g' \
  */
 
-struct PlayerProfile_Struct
-{
-/*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
-/*0004*/	char				name[64];			// Name of player sizes not right
-/*0068*/	char				last_name[32];		// Last name of player sizes not right
-/*0100*/	uint32				gender;				// Player Gender - 0 Male, 1 Female
-/*0104*/	uint32				race;				// Player race
-/*0108*/	uint32				class_;				// Player class
-/*0112*/	uint32				unknown0112;		//
-/*0116*/	uint32				level;				// Level of player (might be one byte)
-/*0120*/	BindStruct			binds[5];			// Bind points (primary is first, home city is fifth)
-/*0220*/	uint32				deity;				// deity
-/*0224*/	uint32				guild_id;
-/*0228*/	uint32				birthday;			// characters bday
-/*0232*/	uint32				lastlogin;			// last login or zone time
-/*0236*/	uint32				timePlayedMin;		// in minutes
-/*0240*/	uint8				pvp;
-/*0241*/	uint8				level2;				//no idea why this is here, but thats how it is on live
-/*0242*/	uint8				mAnonymous;				// 2=roleplay, 1=anon, 0=not anon
-/*0243*/	uint8				gm;
-/*0244*/	uint8				guildrank;
-/*0245*/	uint8				guildbanker;
-/*0246*/	uint8				unknown0246[6];		//
-/*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
-/*0292*/	uint32				abilitySlotRefresh;
-/*0296*/	uint8				haircolor;			// Player hair color
-/*0297*/	uint8				beardcolor;			// Player beard color
-/*0298*/	uint8				eyecolor1;			// Player left eye color
-/*0299*/	uint8				eyecolor2;			// Player right eye color
-/*0300*/	uint8				hairstyle;			// Player hair style
-/*0301*/	uint8				beard;				// Beard type
-/*0302*/	uint8				ability_time_seconds;	//The following four spots are unknown right now.....
-/*0303*/	uint8				ability_number;		//ability used
-/*0304*/	uint8				ability_time_minutes;
-/*0305*/	uint8				ability_time_hours;	//place holder
-/*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[_MaterialCount];	// Item texture/material of worn/held items
-/*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[_MaterialCount];
-/*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
-/*2348*/	float				unknown2384;		//seen ~128, ~47
-/*2352*/	char				servername[32];		// length probably not right
-/*2384*/	char				title[32];			// length might be wrong
-/*2416*/	char				suffix[32];			// length might be wrong
-/*2448*/	uint32				guildid2;			//
-/*2452*/	uint32				exp;				// Current Experience
-/*2456*/	uint32				unknown2492;
-/*2460*/	uint32				points;				// Unspent Practice points
-/*2464*/	uint32				mana;				// current mana
-/*2468*/	uint32				cur_hp;				// current hp
-/*2472*/	uint32				unknown2508;		// 0x05
-/*2476*/	uint32				STR;				// Strength
-/*2480*/	uint32				STA;				// Stamina
-/*2484*/	uint32				CHA;				// Charisma
-/*2488*/	uint32				DEX;				// Dexterity
-/*2492*/	uint32				INT;				// Intelligence
-/*2496*/	uint32				AGI;				// Agility
-/*2500*/	uint32				WIS;				// Wisdom
-/*2504*/	uint8				face;				// Player face
-/*2505*/	uint8				unknown2541[47];	// ?
-/*2552*/	uint8				languages[MAX_PP_LANGUAGE];
-/*2580*/	uint8				unknown2616[4];
-/*2584*/	uint32				spell_book[MAX_PP_SPELLBOOK];
-/*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
-/*4668*/	uint8				unknown4704[32];	//
-/*4700*/	float				y;					// Player y position
-/*4704*/	float				x;					// Player x position
-/*4708*/	float				z;					// Player z position
-/*4712*/	float				heading;			// Direction player is facing
-/*4716*/	uint8				unknown4752[4];		//
-/*4720*/	int32				platinum;			// Platinum Pieces on player
-/*4724*/	int32				gold;				// Gold Pieces on player
-/*4728*/	int32				silver;				// Silver Pieces on player
-/*4732*/	int32				copper;				// Copper Pieces on player
-/*4736*/	int32				platinum_bank;		// Platinum Pieces in Bank
-/*4740*/	int32				gold_bank;			// Gold Pieces in Bank
-/*4744*/	int32				silver_bank;		// Silver Pieces in Bank
-/*4748*/	int32				copper_bank;		// Copper Pieces in Bank
-/*4752*/	int32				platinum_cursor;	// Platinum on cursor
-/*4756*/	int32				gold_cursor;		// Gold on cursor
-/*4760*/	int32				silver_cursor;		// Silver on cursor
-/*4764*/	int32				copper_cursor;		// Copper on cursor
-/*4768*/	int32				platinum_shared;	// Platinum shared between characters
-/*4772*/	uint8				unknown4808[24];
-/*4796*/	uint32				skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
-/*5196*/	uint8				unknown5132[184];
-/*5380*/	uint32				pvp2;				//
-/*5384*/	uint32				unknown5420;		//
-/*5388*/	uint32				pvptype;			//
-/*5392*/	uint32				unknown5428;		//
-/*5396*/	uint32				ability_down;		// Guessing
-/*5400*/	uint8				unknown5436[8];		//
-/*5408*/	uint32				autosplit;			//not used right now
-/*5412*/	uint8				unknown5448[8];
-/*5420*/	uint32				zone_change_count;	// Number of times user has zoned in their career (guessing)
-/*5424*/	uint8				unknown5460[16];	//
-/*5440*/	uint32				drakkin_heritage;	//
-/*5444*/	uint32				drakkin_tattoo;		//
-/*5448*/	uint32				drakkin_details;	//
-/*5452*/	uint32				expansions;			// expansion setting, bit field of expansions avaliable
-/*5456*/	int32				toxicity;			//from drinking potions, seems to increase by 3 each time you drink
-/*5460*/	char				unknown5496[16];	//
-/*5476*/	int32				hunger_level;
-/*5480*/	int32				thirst_level;
-/*5484*/	uint32				ability_up;
-/*5488*/	char				unknown5524[16];
-/*5504*/	uint16				zone_id;			// Current zone of the player
-/*5506*/	uint16				zoneInstance;		// Instance ID
-/*5508*/	SpellBuff_Struct	buffs[BUFF_COUNT];	// Buffs currently on the player
-/*6008*/	char				groupMembers[6][64];//
-/*6392*/	char				unknown6428[656];
-/*7048*/	uint32				entityid;
-/*7052*/	uint32				leadAAActive;
-/*7056*/	uint32				unknown7092;
-/*7060*/	int32				ldon_points_guk;	//client uses these as signed
-/*7064*/	int32				ldon_points_mir;
-/*7068*/	int32				ldon_points_mmc;
-/*7072*/	int32				ldon_points_ruj;
-/*7076*/	int32				ldon_points_tak;
-/*7080*/	int32				ldon_points_available;
-/*7084*/	int32				ldon_wins_guk;
-/*7088*/	int32				ldon_wins_mir;
-/*7092*/	int32				ldon_wins_mmc;
-/*7096*/	int32				ldon_wins_ruj;
-/*7100*/	int32				ldon_wins_tak;
-/*7104*/	int32				ldon_losses_guk;
-/*7108*/	int32				ldon_losses_mir;
-/*7112*/	int32				ldon_losses_mmc;
-/*7116*/	int32				ldon_losses_ruj;
-/*7120*/	int32				ldon_losses_tak;
-/*7124*/	uint8				unknown7160[72];
-/*7196*/	uint32				tribute_time_remaining;	//in miliseconds
-/*7200*/	uint32				showhelm;
-/*7204*/	uint32				career_tribute_points;
-/*7208*/	uint32				unknown7244;
-/*7212*/	uint32				tribute_points;
-/*7216*/	uint32				unknown7252;
-/*7220*/	uint32				tribute_active;		//1=active
-/*7224*/	Tribute_Struct		tributes[MAX_PLAYER_TRIBUTES];
-/*7264*/	Disciplines_Struct	disciplines;
-/*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
-/*7744*/	char				unknown7780[160];
-/*7904*/	uint32				endurance;
-/*7908*/	uint32				group_leadership_exp;	//0-1000
-/*7912*/	uint32				raid_leadership_exp;	//0-2000
-/*7916*/	uint32				group_leadership_points;
-/*7920*/	uint32				raid_leadership_points;
-/*7924*/	LeadershipAA_Struct	leader_abilities;
-/*8052*/	uint8				unknown8088[132];
-/*8184*/	uint32				air_remaining;
-/*8188*/	uint32				PVPKills;
-/*8192*/	uint32				PVPDeaths;
-/*8196*/	uint32				PVPCurrentPoints;
-/*8200*/	uint32				PVPCareerPoints;
-/*8204*/	uint32				PVPBestKillStreak;
-/*8208*/	uint32				PVPWorstDeathStreak;
-/*8212*/	uint32				PVPCurrentKillStreak;
-/*8216*/	PVPStatsEntry_Struct	PVPLastKill;
-/*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
-/*8392*/	uint32				PVPNumberOfKillsInLast24Hours;
-/*8396*/	PVPStatsEntry_Struct	PVPRecentKills[50];
-/*12796*/	uint32				aapoints_spent;
-/*12800*/	uint32				expAA;
-/*12804*/	uint32				aapoints;			//avaliable, unspent
-/*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[MAX_PLAYER_BANDOLIER];
-/*14124*/	uint8				unknown14160[4506];
-/*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
-/*19240*/	uint32				timeentitledonaccount;
-/*19244*/	PotionBelt_Struct	potionbelt;			//there should be 3 more of these
-/*19532*/	uint8				unknown19568[8];
-/*19540*/	uint32				currentRadCrystals; // Current count of radiant crystals
-/*19544*/	uint32				careerRadCrystals;	// Total count of radiant crystals ever
-/*19548*/	uint32				currentEbonCrystals;// Current count of ebon crystals
-/*19552*/	uint32				careerEbonCrystals;	// Total count of ebon crystals ever
-/*19556*/	uint8				groupAutoconsent;	// 0=off, 1=on
-/*19557*/	uint8				raidAutoconsent;	// 0=off, 1=on
-/*19558*/	uint8				guildAutoconsent;	// 0=off, 1=on
-/*19559*/	uint8				unknown19595[5];	// ***Placeholder (6/29/2005)
-/*19564*/	uint32				RestTimer;
-/*19568*/
-};
+//struct PlayerProfile_Struct
+//{
+///*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
+///*0004*/	char				name[64];			// Name of player sizes not right
+///*0068*/	char				last_name[32];		// Last name of player sizes not right
+///*0100*/	uint32				gender;				// Player Gender - 0 Male, 1 Female
+///*0104*/	uint32				race;				// Player race
+///*0108*/	uint32				class_;				// Player class
+///*0112*/	uint32				unknown0112;		//
+///*0116*/	uint32				level;				// Level of player (might be one byte)
+///*0120*/	BindStruct			binds[5];			// Bind points (primary is first, home city is fifth)
+///*0220*/	uint32				deity;				// deity
+///*0224*/	uint32				guild_id;
+///*0228*/	uint32				birthday;			// characters bday
+///*0232*/	uint32				lastlogin;			// last login or zone time
+///*0236*/	uint32				timePlayedMin;		// in minutes
+///*0240*/	uint8				pvp;
+///*0241*/	uint8				level2;				//no idea why this is here, but thats how it is on live
+///*0242*/	uint8				mAnonymous;				// 2=roleplay, 1=anon, 0=not anon
+///*0243*/	uint8				gm;
+///*0244*/	uint8				guildrank;
+///*0245*/	uint8				guildbanker;
+///*0246*/	uint8				unknown0246[6];		//
+///*0252*/	uint32				intoxication;
+///*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
+///*0292*/	uint32				abilitySlotRefresh;
+///*0296*/	uint8				haircolor;			// Player hair color
+///*0297*/	uint8				beardcolor;			// Player beard color
+///*0298*/	uint8				eyecolor1;			// Player left eye color
+///*0299*/	uint8				eyecolor2;			// Player right eye color
+///*0300*/	uint8				hairstyle;			// Player hair style
+///*0301*/	uint8				beard;				// Beard type
+///*0302*/	uint8				ability_time_seconds;	//The following four spots are unknown right now.....
+///*0303*/	uint8				ability_number;		//ability used
+///*0304*/	uint8				ability_time_minutes;
+///*0305*/	uint8				ability_time_hours;	//place holder
+///*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
+///*0312*/	uint32				item_material[_MaterialCount];	// Item texture/material of worn/held items
+///*0348*/	uint8				unknown0348[44];
+///*0392*/	Color_Struct		item_tint[_MaterialCount];
+///*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
+///*2348*/	float				unknown2384;		//seen ~128, ~47
+///*2352*/	char				servername[32];		// length probably not right
+///*2384*/	char				title[32];			// length might be wrong
+///*2416*/	char				suffix[32];			// length might be wrong
+///*2448*/	uint32				guildid2;			//
+///*2452*/	uint32				exp;				// Current Experience
+///*2456*/	uint32				unknown2492;
+///*2460*/	uint32				points;				// Unspent Practice points
+///*2464*/	uint32				mana;				// current mana
+///*2468*/	uint32				cur_hp;				// current hp
+///*2472*/	uint32				unknown2508;		// 0x05
+///*2476*/	uint32				STR;				// Strength
+///*2480*/	uint32				STA;				// Stamina
+///*2484*/	uint32				CHA;				// Charisma
+///*2488*/	uint32				DEX;				// Dexterity
+///*2492*/	uint32				INT;				// Intelligence
+///*2496*/	uint32				AGI;				// Agility
+///*2500*/	uint32				WIS;				// Wisdom
+///*2504*/	uint8				face;				// Player face
+///*2505*/	uint8				unknown2541[47];	// ?
+///*2552*/	uint8				languages[MAX_PP_LANGUAGE];
+///*2580*/	uint8				unknown2616[4];
+///*2584*/	uint32				spell_book[MAX_PP_SPELLBOOK];
+///*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
+///*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
+///*4668*/	uint8				unknown4704[32];	//
+///*4700*/	float				y;					// Player y position
+///*4704*/	float				x;					// Player x position
+///*4708*/	float				z;					// Player z position
+///*4712*/	float				heading;			// Direction player is facing
+///*4716*/	uint8				unknown4752[4];		//
+///*4720*/	int32				platinum;			// Platinum Pieces on player
+///*4724*/	int32				gold;				// Gold Pieces on player
+///*4728*/	int32				silver;				// Silver Pieces on player
+///*4732*/	int32				copper;				// Copper Pieces on player
+///*4736*/	int32				platinum_bank;		// Platinum Pieces in Bank
+///*4740*/	int32				gold_bank;			// Gold Pieces in Bank
+///*4744*/	int32				silver_bank;		// Silver Pieces in Bank
+///*4748*/	int32				copper_bank;		// Copper Pieces in Bank
+///*4752*/	int32				platinum_cursor;	// Platinum on cursor
+///*4756*/	int32				gold_cursor;		// Gold on cursor
+///*4760*/	int32				silver_cursor;		// Silver on cursor
+///*4764*/	int32				copper_cursor;		// Copper on cursor
+///*4768*/	int32				platinum_shared;	// Platinum shared between characters
+///*4772*/	uint8				unknown4808[24];
+///*4796*/	uint32				skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
+///*5196*/	uint8				unknown5132[184];
+///*5380*/	uint32				pvp2;				//
+///*5384*/	uint32				unknown5420;		//
+///*5388*/	uint32				pvptype;			//
+///*5392*/	uint32				unknown5428;		//
+///*5396*/	uint32				ability_down;		// Guessing
+///*5400*/	uint8				unknown5436[8];		//
+///*5408*/	uint32				autosplit;			//not used right now
+///*5412*/	uint8				unknown5448[8];
+///*5420*/	uint32				zone_change_count;	// Number of times user has zoned in their career (guessing)
+///*5424*/	uint8				unknown5460[16];	//
+///*5440*/	uint32				drakkin_heritage;	//
+///*5444*/	uint32				drakkin_tattoo;		//
+///*5448*/	uint32				drakkin_details;	//
+///*5452*/	uint32				expansions;			// expansion setting, bit field of expansions avaliable
+///*5456*/	int32				toxicity;			//from drinking potions, seems to increase by 3 each time you drink
+///*5460*/	char				unknown5496[16];	//
+///*5476*/	int32				hunger_level;
+///*5480*/	int32				thirst_level;
+///*5484*/	uint32				ability_up;
+///*5488*/	char				unknown5524[16];
+///*5504*/	uint16				zone_id;			// Current zone of the player
+///*5506*/	uint16				zoneInstance;		// Instance ID
+///*5508*/	SpellBuff_Struct	buffs[BUFF_COUNT];	// Buffs currently on the player
+///*6008*/	char				groupMembers[6][64];//
+///*6392*/	char				unknown6428[656];
+///*7048*/	uint32				entityid;
+///*7052*/	uint32				leadAAActive;
+///*7056*/	uint32				unknown7092;
+///*7060*/	int32				ldon_points_guk;	//client uses these as signed
+///*7064*/	int32				ldon_points_mir;
+///*7068*/	int32				ldon_points_mmc;
+///*7072*/	int32				ldon_points_ruj;
+///*7076*/	int32				ldon_points_tak;
+///*7080*/	int32				ldon_points_available;
+///*7084*/	int32				ldon_wins_guk;
+///*7088*/	int32				ldon_wins_mir;
+///*7092*/	int32				ldon_wins_mmc;
+///*7096*/	int32				ldon_wins_ruj;
+///*7100*/	int32				ldon_wins_tak;
+///*7104*/	int32				ldon_losses_guk;
+///*7108*/	int32				ldon_losses_mir;
+///*7112*/	int32				ldon_losses_mmc;
+///*7116*/	int32				ldon_losses_ruj;
+///*7120*/	int32				ldon_losses_tak;
+///*7124*/	uint8				unknown7160[72];
+///*7196*/	uint32				tribute_time_remaining;	//in miliseconds
+///*7200*/	uint32				showhelm;
+///*7204*/	uint32				career_tribute_points;
+///*7208*/	uint32				unknown7244;
+///*7212*/	uint32				tribute_points;
+///*7216*/	uint32				unknown7252;
+///*7220*/	uint32				tribute_active;		//1=active
+///*7224*/	Tribute_Struct		tributes[MAX_PLAYER_TRIBUTES];
+///*7264*/	Disciplines_Struct	disciplines;
+///*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
+///*7744*/	char				unknown7780[160];
+///*7904*/	uint32				endurance;
+///*7908*/	uint32				group_leadership_exp;	//0-1000
+///*7912*/	uint32				raid_leadership_exp;	//0-2000
+///*7916*/	uint32				group_leadership_points;
+///*7920*/	uint32				raid_leadership_points;
+///*7924*/	LeadershipAA_Struct	leader_abilities;
+///*8052*/	uint8				unknown8088[132];
+///*8184*/	uint32				air_remaining;
+///*8188*/	uint32				PVPKills;
+///*8192*/	uint32				PVPDeaths;
+///*8196*/	uint32				PVPCurrentPoints;
+///*8200*/	uint32				PVPCareerPoints;
+///*8204*/	uint32				PVPBestKillStreak;
+///*8208*/	uint32				PVPWorstDeathStreak;
+///*8212*/	uint32				PVPCurrentKillStreak;
+///*8216*/	PVPStatsEntry_Struct	PVPLastKill;
+///*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
+///*8392*/	uint32				PVPNumberOfKillsInLast24Hours;
+///*8396*/	PVPStatsEntry_Struct	PVPRecentKills[50];
+///*12796*/	uint32				aapoints_spent;
+///*12800*/	uint32				expAA;
+///*12804*/	uint32				aapoints;			//avaliable, unspent
+///*12808*/	uint8				unknown12844[36];
+///*12844*/	Bandolier_Struct	bandoliers[MAX_PLAYER_BANDOLIER];
+///*14124*/	uint8				unknown14160[4506];
+///*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
+///*19240*/	uint32				timeentitledonaccount;
+///*19244*/	PotionBelt_Struct	potionbelt;			//there should be 3 more of these
+///*19532*/	uint8				unknown19568[8];
+///*19540*/	uint32				currentRadCrystals; // Current count of radiant crystals
+///*19544*/	uint32				careerRadCrystals;	// Total count of radiant crystals ever
+///*19548*/	uint32				currentEbonCrystals;// Current count of ebon crystals
+///*19552*/	uint32				careerEbonCrystals;	// Total count of ebon crystals ever
+///*19556*/	uint8				groupAutoconsent;	// 0=off, 1=on
+///*19557*/	uint8				raidAutoconsent;	// 0=off, 1=on
+///*19558*/	uint8				guildAutoconsent;	// 0=off, 1=on
+///*19559*/	uint8				unknown19595[5];	// ***Placeholder (6/29/2005)
+///*19564*/	uint32				RestTimer;
+///*19568*/
+//};
 
 
 
