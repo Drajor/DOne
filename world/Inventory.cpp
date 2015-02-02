@@ -108,14 +108,14 @@ const unsigned char* Inventoryy::getData(u32& pSize) {
 	for (auto i : mItems) {
 		if (i) {
 			numItems++;
-			pSize += i->getDataSize(Payload::ItemPacketCharInventory);
+			pSize += i->getDataSize(Payload::ItemPacketCharInventory, true);
 		}
 	}
 
 	auto cursorItem = peekCursor();
 	if (cursorItem) {
 		numItems++;
-		pSize += cursorItem->getDataSize(Payload::ItemPacketCharInventory);
+		pSize += cursorItem->getDataSize(Payload::ItemPacketCharInventory, true);
 	}
 
 	// Allocate the required memory.
@@ -128,12 +128,12 @@ const unsigned char* Inventoryy::getData(u32& pSize) {
 	writer.write<u32>(numItems); // Item count.
 	for (auto i : mItems) {
 		if (i) {
-			i->copyData(writer, Payload::ItemPacketCharInventory);
+			i->copyData(writer, Payload::ItemPacketCharInventory, true);
 		}
 	}
 
 	if (cursorItem)
-		cursorItem->copyData(writer, Payload::ItemPacketCharInventory);
+		cursorItem->copyData(writer, Payload::ItemPacketCharInventory, true);
 
 	// Check: The amount of data written matches what was calculated.
 	if (!writer.check()) mLog->error("Bad Write: Written: " + toString(writer.getBytesWritten()) + " Size: " + toString(writer.getSize()));

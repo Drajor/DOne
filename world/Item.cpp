@@ -36,26 +36,24 @@ void Item::getContents(std::list<Item*>& pItems) const {
 	}
 }
 
-const u32 Item::getDataSize(const u32 pCopyType) const {
+const u32 Item::getDataSize(const u32 pCopyType, const bool pIncludeIndex) const {
 	u32 subItemSize = 0;
 
 	// Add augments.
 	for (auto i : mAugments)
-		if (i) subItemSize += i->getDataSize(pCopyType);
+		if (i) subItemSize += i->getDataSize(pCopyType, pIncludeIndex);
 
 	// Add contents (container)
 	for (auto i : mContents)
-		if (i) subItemSize += i->getDataSize(pCopyType);
+		if (i) subItemSize += i->getDataSize(pCopyType, pIncludeIndex);
 
-	return _getDataSize(pCopyType) + subItemSize;
+	return _getDataSize(pCopyType, pIncludeIndex) + subItemSize;
 }
 
-const u32 Item::_getDataSize(const u32 pCopyType) const {
+const u32 Item::_getDataSize(const u32 pCopyType, const bool pIncludeIndex) const {
 	u32 result = sizeof(ItemData);
 
-	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
-	if (hasParent() && pCopyType != Payload::ItemPacketTrade) {
-		// Sub-Items need 4 extra bytes to store sub-index.
+	if (hasParent() && pIncludeIndex) {
 		result += sizeof(u32);
 	}
 
@@ -94,13 +92,19 @@ const u32 Item::_getDataSize(const u32 pCopyType) const {
 	return result;
 }
 
-const bool Item::copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType) {
-	// Check: This Item is either an augment or within a bag.
-	// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
-	if (hasParent() && pCopyType != Payload::ItemPacketTrade /*&& pCopyType != Payload::ItemPacketTradeView*/) {
-		EXPECTED_BOOL(hasValidSubIndex());
+const bool Item::copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType, const bool pIncludeIndex) {
+
+	// When an Item is sent with an index,
+	if (hasParent() && pIncludeIndex) {
 		pWriter.write<u32>(getSubIndex());
 	}
+
+	//// Check: This Item is either an augment or within a bag.
+	//// NOTE: When an Item with a parent is sent with ItemPacketTrade, the sub-index is not sent.
+	//if (hasParent() && pCopyType != Payload::ItemPacketTrade /*&& pCopyType != Payload::ItemPacketTradeView*/) {
+	//	EXPECTED_BOOL(hasValidSubIndex());
+	//	
+	//}
 
 	// NOTE: When an Item has augments, those augments are sent with the same slot ID as the parent Item.
 
@@ -207,18 +211,18 @@ const bool Item::copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType) {
 
 	// Write augments
 	for (auto i : mAugments)
-		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType));		
+		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType, pIncludeIndex));		
 
 	// Write contents
 	for (auto i : mContents)
-		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType));
+		if (i) EXPECTED_BOOL(i->copyData(pWriter, pCopyType, pIncludeIndex));
 
 	return true;
 }
 
-const unsigned char* Item::copyData(u32& pSize, const u32 pCopyType) {
+const unsigned char* Item::copyData(u32& pSize, const u32 pCopyType, const bool pIncludeIndex) {
 	unsigned char * data = nullptr;
-	pSize += getDataSize(pCopyType);
+	pSize += getDataSize(pCopyType, pIncludeIndex);
 
 	pSize += sizeof(u32); // Copy Type
 	data = new unsigned char[pSize];
@@ -227,7 +231,7 @@ const unsigned char* Item::copyData(u32& pSize, const u32 pCopyType) {
 	writer.write<u32>(pCopyType);
 
 	// Copy Item data.
-	copyData(writer, pCopyType);
+	copyData(writer, pCopyType, pIncludeIndex);
 	
 	// Check: The amount of data written matches what was calculated.
 	if (writer.check() == false) {

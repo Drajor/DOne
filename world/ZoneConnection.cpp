@@ -3001,7 +3001,7 @@ void ZoneConnection::sendItemView(Item* pItem) {
 	EXPECTED(mConnected);
 
 	uint32 payloadSize = 0;
-	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketViewLink);
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketViewLink, true);
 
 	auto packet = new EQApplicationPacket(OP_ItemLinkResponse, data, payloadSize);
 	sendPacket(packet);
@@ -3012,7 +3012,7 @@ void ZoneConnection::sendItemTradeCharacter(Item* pItem) {
 	if (!pItem) return;
 
 	u32 size = 0;
-	const unsigned char* data = pItem->copyData(size, Payload::ItemPacketTradeView);
+	const unsigned char* data = pItem->copyData(size, Payload::ItemPacketTradeView, true);
 
 	auto packet = new EQApplicationPacket(OP_ItemPacket, data, size);
 	sendPacket(packet);
@@ -3024,7 +3024,7 @@ void ZoneConnection::sendItemSummon(Item* pItem) {
 	EXPECTED(mConnected);
 
 	uint32 payloadSize = 0;
-	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem);
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketSummonItem, true);
 
 	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 	sendPacket(packet);
@@ -3036,7 +3036,7 @@ void ZoneConnection::sendItemTrade(Item* pItem) {
 	EXPECTED(mConnected);
 
 	uint32 payloadSize = 0;
-	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketTrade);
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketTrade, pItem->isContainer());
 
 	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 	sendPacket(packet);
@@ -3048,7 +3048,7 @@ void ZoneConnection::sendItemShop(Item* pItem) {
 	EXPECTED(mConnected);
 
 	uint32 payloadSize = 0;
-	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketMerchant);
+	const unsigned char* data = pItem->copyData(payloadSize, Payload::ItemPacketMerchant, false);
 
 	auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 	sendPacket(packet);
@@ -3104,7 +3104,7 @@ const bool ZoneConnection::handleAugmentItem(const EQApplicationPacket* pPacket)
 		mCharacter->getInventory()->pushCursor(item);
 
 		uint32 payloadSize = 0;
-		const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketSummonItem);
+		const unsigned char* data = item->copyData(payloadSize, Payload::ItemPacketSummonItem, true);
 
 		auto packet = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 		sendPacket(packet);

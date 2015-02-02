@@ -191,9 +191,9 @@ public:
 	// Returns a copy of this Item's augmentations.
 	void getAugmentations(std::list<Item*>& pAugmentations) const;
 
-	const u32 getDataSize(const u32 pCopyType) const;
-	const unsigned char* copyData(u32& pSize, const u32 pCopyType);
-	const bool copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType);
+	const u32 getDataSize(const u32 pCopyType, const bool pIncludeIndex) const;
+	const unsigned char* copyData(u32& pSize, const u32 pCopyType, const bool pIncludeIndex);
+	const bool copyData(Utility::MemoryWriter& pWriter, const u32 pCopyType, const bool pIncludeIndex);
 	u32 getSubItems() const;
 
 	const bool isContainer() const { return getItemClass() == ItemClass::Container; }
@@ -866,7 +866,7 @@ public:
 	inline void setIsHeirloom(const bool pValue) { mItemData->mHeirloom = pValue ? 1 : 0; }
 
 private:
-	const u32 _getDataSize(const u32 pCopyType) const;
+	const u32 _getDataSize(const u32 pCopyType, const bool pIncludeIndex) const;
 	Item* mParent = nullptr;
 	Item* mAugments[5];
 	Item* mContents[10];

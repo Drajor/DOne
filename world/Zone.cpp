@@ -1289,7 +1289,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 		for (auto i : npcCorpse->getLootItems()) {
 			i->setSlot(23 + count);
 			uint32 payloadSize = 0;
-			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot);
+			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot, true);
 
 			auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
 			pLooter->getConnection()->sendPacket(outPacket);
@@ -3245,7 +3245,7 @@ const bool giveStackableItem(Character* pCharacter, Item* pItem) {
 				mergeItem->addStacks(pItem->getStacks());
 				delete pItem;
 
-				pCharacter->getConnection()->sendItemTrade(mergeItem);
+				pCharacter->getConnection()->sendItemTrade(mergeItem);		
 
 				return true;
 			}
@@ -3254,6 +3254,7 @@ const bool giveStackableItem(Character* pCharacter, Item* pItem) {
 				// Move stacks from one Item to the other.
 				pItem->removeStacks(emptyStacks);
 				mergeItem->addStacks(emptyStacks); // mergeItem should be at full stacks now.
+
 				pCharacter->getConnection()->sendItemTrade(mergeItem);
 
 				continue; // Still more stacks to place in Inventory.
@@ -3356,4 +3357,5 @@ const bool Zone::returnTradeItems(Character* pCharacter) {
 	}
 
 	pCharacter->getConnection()->sendCurrencyUpdate();
+	return true;
 }
