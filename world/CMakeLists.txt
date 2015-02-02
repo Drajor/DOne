@@ -5,9 +5,9 @@ SOURCE_GROUP(Data FILES Data.h IDataStore.h XMLDataStore.h XMLDataStore.cpp)
 SOURCE_GROUP(Zone FILES ZoneManager.h ZoneManager.cpp Zone.h Zone.cpp Actor.h Actor.cpp Character.h Character.cpp NPC.h NPC.cpp ZoneData.h ZoneData.cpp SpellDataStore.h SpellDataStore.cpp NPCFactory.h NPCFactory.cpp)
 SOURCE_GROUP(Zone\\Hate FILES HateControllerFactory.h HateControllerFactory.cpp HateController.h HateController.cpp)
 SOURCE_GROUP(Zone\\Experience FILES ExperienceCalculator.h ExperienceCalculator.cpp ExperienceController.h ExperienceController.cpp)
-SOURCE_GROUP(Zone\\Group FILES GroupManager.h GroupManager.cpp Group.h)
+SOURCE_GROUP(Zone\\Group FILES Group.h Group.cpp GroupManager.h GroupManager.cpp)
 SOURCE_GROUP(Zone\\Raid FILES RaidManager.h Raid.h)
-SOURCE_GROUP(Zone\\Guild FILES Guild.h GuildManager.h GuildManager.cpp)
+SOURCE_GROUP(Zone\\Guild FILES Guild.h Guild.cpp GuildManager.h GuildManager.cpp)
 SOURCE_GROUP(Zone\\Command FILES CommandHandler.h CommandHandler.cpp)
 SOURCE_GROUP(Zone\\ZoneConnection FILES ZoneConnection.h ZoneConnection.cpp ZoneConnectionManager.h ZoneConnectionManager.cpp)
 SOURCE_GROUP(UCS FILES UCS.h UCS.cpp UCSClientConnection.h UCSClientConnection.cpp)
@@ -67,6 +67,10 @@ SET(world_sources
 	ServiceLocator.cpp
 	ZoneConnectionManager.cpp
 	Account.cpp
+	Payload.cpp
+	CharacterFactory.cpp
+	Guild.cpp
+	Group.cpp
 )
 
 SET(world_headers
@@ -138,6 +142,7 @@ SET(world_headers
 	ServiceLocator.h
 	ZoneConnectionManager.h
 	Account.h
+	CharacterFactory.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})
