@@ -292,6 +292,90 @@ TEST(SlotIDTests, isContainerSlot) {
 	}
 }
 
+TEST(SlotIDTests, getPrimarySlotIndex_PrimaryOnly) {
+	struct Test {
+		u32 mSlot;
+		u32 mPrimaryIndex;
+	};
+
+	std::list<Test> tests = {
+		{ 0, 0 }, // Charm
+		{ 1, 1 }, // Left ear
+		{ 2, 2 }, // Head
+		{ 3, 3 }, // Face
+		{ 4, 4 }, // Right ear
+		{ 5, 5 }, // Neck
+		{ 6, 6 }, // Shoulders
+		{ 7, 7 }, // Arms
+		{ 8, 8 }, // Back
+		{ 9, 9 }, // Left wrist
+		{ 10, 10 }, // Right wrist
+		{ 11, 11 }, // Range
+		{ 12, 12 }, // Hands
+		{ 13, 13 }, // Primary
+		{ 14, 14 }, // Secondary
+		{ 15, 15 }, // Left ring
+		{ 16, 16 }, // Right ring
+		{ 17, 17 }, // Chest
+		{ 18, 18 }, // Legs
+		{ 19, 19 }, // Feet
+		{ 20, 20 }, // Waist
+		{ 21, 21 }, // Powersource
+		{ 22, 22 }, // Ammo
+
+		{ 23, 23 }, // Main 0
+		{ 24, 24 }, // Main 1
+		{ 25, 25 }, // Main 2
+		{ 26, 26 }, // Main 3
+		{ 27, 27 }, // Main 4
+		{ 28, 28 }, // Main 5
+		{ 29, 29 }, // Main 6
+		{ 30, 30 }, // Main 7
+
+		{ 2000, 31 }, // Bank 0
+		{ 2001, 32 }, // Bank 1
+		{ 2002, 33 }, // Bank 2
+		{ 2003, 34 }, // Bank 3
+		{ 2004, 35 }, // Bank 4
+		{ 2005, 36 }, // Bank 5
+		{ 2006, 37 }, // Bank 6
+		{ 2007, 38 }, // Bank 7
+		{ 2008, 39 }, // Bank 8
+		{ 2009, 40 }, // Bank 9
+		{ 2010, 41 }, // Bank 10
+		{ 2011, 42 }, // Bank 11
+		{ 2012, 43 }, // Bank 12
+		{ 2013, 44 }, // Bank 13
+		{ 2014, 45 }, // Bank 14
+		{ 2015, 46 }, // Bank 15
+		{ 2016, 47 }, // Bank 16
+		{ 2017, 48 }, // Bank 17
+		{ 2018, 49 }, // Bank 18
+		{ 2019, 50 }, // Bank 19
+		{ 2020, 51 }, // Bank 20
+		{ 2021, 52 }, // Bank 21
+		{ 2022, 53 }, // Bank 22
+		{ 2023, 54 }, // Bank 23
+
+		{ 2500, 55 }, // Shared Bank 0
+		{ 2501, 56 }, // Shared Bank 1
+
+		{ 3000, 57 }, // Trade 0
+		{ 3001, 58 }, // Trade 1
+		{ 3002, 59 }, // Trade 2
+		{ 3003, 60 }, // Trade 3
+		{ 3004, 61 }, // Trade 4
+		{ 3005, 62 }, // Trade 5
+		{ 3006, 63 }, // Trade 6
+		{ 3007, 64 }, // Trade 7
+	};
+
+	for (auto i : tests) {
+		EXPECT_EQ(i.mPrimaryIndex, SlotID::getPrimarySlotIndex(i.mSlot));
+	}
+}
+
+
 class ExperienceControllerTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {

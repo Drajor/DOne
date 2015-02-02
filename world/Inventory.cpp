@@ -145,7 +145,7 @@ Item* Inventoryy::get(const u32 pSlot) const {
 	if (SlotID::isCursor(pSlot)) return mCursorItems.empty() ? nullptr : mCursorItems.front();
 
 	// Calculate primary index.
-	const auto index = getPrimarySlotIndex(pSlot);
+	const auto index = SlotID::getPrimarySlotIndex(pSlot);
 	if (SlotID::isNone(pSlot)) {
 		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
 		return false;
@@ -177,7 +177,7 @@ const bool Inventoryy::put(Item* pItem, const u32 pSlot) {
 	}
 
 	// Calculate primary index.
-	const auto index = getPrimarySlotIndex(pSlot);
+	const auto index = SlotID::getPrimarySlotIndex(pSlot);
 	if (SlotID::isNone(pSlot)) {
 		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
 		return false;
@@ -511,7 +511,7 @@ const bool Inventoryy::_clear(const u32 pSlot) {
 	}
 
 	// Calculate primary index.
-	const auto index = getPrimarySlotIndex(pSlot);
+	const auto index = SlotID::getPrimarySlotIndex(pSlot);
 	if (SlotID::isNone(pSlot)) {
 		mLog->error("Failed to calculate primary index for slot ID: " + toString(pSlot));
 		return false;
@@ -1030,18 +1030,6 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 	return true;
 }
 
-const u32 Inventoryy::getPrimarySlotIndex(const u32 pSlotID) {
-	// Primary Slots.
-	if (SlotID::isWorn(pSlotID) || SlotID::isMain(pSlotID)) return pSlotID;
-	if (SlotID::isBank(pSlotID)) return (pSlotID - SlotID::BankBegin) + SlotID::MainEnd;
-	if (SlotID::isSharedBank(pSlotID)) return (pSlotID - SlotID::SharedBankBegin) + SlotID::BankEnd;
-	if (SlotID::isTrade(pSlotID)) return (pSlotID - SlotID::SharedBankEnd) + SlotID::TradeBegin;
-	
-	// Container Slots.
-	const auto parentSlotID = SlotID::getParentSlot(pSlotID);
-	return parentSlotID == SlotID::None ? SlotID::None : getPrimarySlotIndex(parentSlotID);
-}
-
 const u32 Inventoryy::getContainerSlotIndex(const u32 pSlotID) {
 	if (SlotID::isMainContents(pSlotID)) return (pSlotID - SlotID::MainContentsBegin) % 10;
 	if (SlotID::isBankContents(pSlotID)) return (pSlotID - SlotID::BankContentsBegin) % 10;
@@ -1051,15 +1039,15 @@ const u32 Inventoryy::getContainerSlotIndex(const u32 pSlotID) {
 }
 
 void Inventoryy::clearTradeItems() {
-	static const auto tradeBegin = getPrimarySlotIndex(SlotID::TradeBegin);
-	static const auto tradeEnd = getPrimarySlotIndex(SlotID::TradeEnd);
+	static const auto tradeBegin = SlotID::getPrimarySlotIndex(SlotID::TradeBegin);
+	static const auto tradeEnd = SlotID::getPrimarySlotIndex(SlotID::TradeEnd);
 	for (auto i = tradeBegin; i < tradeEnd; i++)
 		mItems[i] = nullptr;
 }
 
 void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
-	static const auto tradeBegin = getPrimarySlotIndex(SlotID::TradeBegin);
-	static const auto tradeEnd = getPrimarySlotIndex(SlotID::TradeEnd);
+	static const auto tradeBegin = SlotID::getPrimarySlotIndex(SlotID::TradeBegin);
+	static const auto tradeEnd = SlotID::getPrimarySlotIndex(SlotID::TradeEnd);
 	for (auto i = tradeBegin; i < tradeEnd; i++) {
 		if (mItems[i])
 			pItems.push_back(mItems[i]);

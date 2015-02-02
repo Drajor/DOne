@@ -2,38 +2,23 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(common_sources
 	BasePacket.cpp
-	classes.cpp
 	Condition.cpp
 	crash.cpp
 	CRC16.cpp
 	crc32.cpp
-	database.cpp
-	dbasync.cpp
-	dbcore.cpp
 	debug.cpp
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
 	EmuTCPServer.cpp
-	EQDB.cpp
-	EQDBRes.cpp
 	eqemu_exception.cpp
-	EQEmuConfig.cpp
 	EQPacket.cpp
 	EQStream.cpp
 	EQStreamFactory.cpp
 	EQStreamIdent.cpp
 	EQStreamProxy.cpp
-	eqtime.cpp
-	extprofile.cpp
-	faction.cpp
-	guild_base.cpp
-	guilds.cpp
 	ipc_mutex.cpp
-	Item.cpp
 	logsys.cpp
 	logsys_eqemu.cpp
-	md5.cpp
-	memory_mapped_file.cpp
 	misc.cpp
 	MiscFunctions.cpp
 	Mutex.cpp
@@ -41,25 +26,12 @@ SET(common_sources
 	packet_dump.cpp
 	packet_dump_file.cpp
 	packet_functions.cpp
-	perl_EQDB.cpp
-	perl_EQDBRes.cpp
-	ProcLauncher.cpp
-	ptimer.cpp
-	races.cpp
-	rdtsc.cpp
-	rulesys.cpp
-	serverinfo.cpp
-	shareddb.cpp
-	spdat.cpp
     StringUtil.cpp
 	StructStrategy.cpp
 	TCPConnection.cpp
 	TCPServer.cpp
 	timeoutmgr.cpp
 	timer.cpp
-	unix.cpp
-	worldconn.cpp
-	XMLParser.cpp
 	platform.cpp
 	patches/Underfoot.cpp
 	SocketLib/Base64.cpp
@@ -82,30 +54,18 @@ SET(common_sources
 
 SET(common_headers
 	BasePacket.h
-	base_data.h
-	bodytypes.h
-	breakdowns.h
-	classes.h
 	Condition.h
 	crash.h
 	CRC16.h
 	crc32.h
-	database.h
-	dbasync.h
-	dbcore.h
 	debug.h
-	deity.h
 	emu_opcodes.h
 	emu_oplist.h
 	EmuTCPConnection.h
 	EmuTCPServer.h
 	eq_constants.h
 	eq_packet_structs.h
-	EQDB.h
-	EQDBRes.h
 	eqemu_exception.h
-	EQEmuConfig.h
-	EQEmuConfig_elements.h
 	EQPacket.h
 	EQStream.h
 	EQStreamFactory.h
@@ -114,26 +74,12 @@ SET(common_headers
 	EQStreamLocator.h
 	EQStreamProxy.h
 	EQStreamType.h
-	eqtime.h
-	extprofile.h
-	faction.h
-	features.h
-	fixed_memory_hash_set.h
-	fixed_memory_variable_hash_set.h
-	guild_base.h
-	guilds.h
 	ipc_mutex.h
-	Item.h
-	item_fieldlist.h
-	item_struct.h
-	languages.h
 	linked_list.h
 	logsys.h
 	logtypes.h
 	loottable.h
 	mail_oplist.h
-	md5.h
-	memory_mapped_file.h
 	misc.h
 	MiscFunctions.h
 	Mutex.h
@@ -142,20 +88,8 @@ SET(common_headers
 	packet_dump.h
 	packet_dump_file.h
 	packet_functions.h
-	ProcLauncher.h
-	profiler.h
-	ptimer.h
 	queue.h
-	races.h
-	rdtsc.h
-	rulesys.h
-	ruletypes.h
-	seperator.h
-	serverinfo.h
 	servertalk.h
-	shareddb.h
-	skills.h
-	spdat.h
     StringUtil.h
 	StructStrategy.h
 	TCPBasicServer.h
@@ -164,12 +98,7 @@ SET(common_headers
 	timeoutmgr.h
 	timer.h
 	types.h
-	unix.h
-	useperl.h
 	version.h
-	worldconn.h
-	XMLParser.h
-	ZoneNumbers.h
 	platform.h
 	patches/SSDeclare.h
 	patches/SSDefine.h

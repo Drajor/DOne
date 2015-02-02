@@ -294,6 +294,20 @@ namespace CurrencyType {
 		return MoneyTypeStrings[pType];
 	}
 }
+namespace PrimarySlotIndex{
+	enum : u32 {
+		WornBegin = 0,
+		WornEnd = 22,
+		MainBegin = 23,
+		MainEnd = 30,
+		BankBegin = 31,
+		BankEnd = 54,
+		SharedBankBegin = 55,
+		SharedBankEnd = 56,
+		TradeBegin = 57,
+		TradeEnd = 64,
+	};
+}
 
 namespace SlotID {
 	enum : uint32 {
@@ -564,6 +578,18 @@ namespace SlotID {
 
 		// This is bad.
 		return 0;
+	}
+
+	static const u32 getPrimarySlotIndex(const u32 pSlotID) {
+		// Primary Slots.
+		if (isWorn(pSlotID) || isMain(pSlotID)) return pSlotID;
+		if (isBank(pSlotID)) return (pSlotID - BankBegin) + PrimarySlotIndex::BankBegin;
+		if (isSharedBank(pSlotID)) return (pSlotID - SharedBankBegin) + PrimarySlotIndex::SharedBankBegin;
+		if (isTrade(pSlotID)) return (pSlotID - TradeBegin) + PrimarySlotIndex::TradeBegin;
+
+		// Container Slots.
+		const auto parentSlotID = getParentSlot(pSlotID);
+		return parentSlotID == None ? None : getPrimarySlotIndex(parentSlotID);
 	}
 }
 

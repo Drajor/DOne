@@ -1,6 +1,8 @@
 #pragma once
 
+#include "SpellContants.h"
 #include "Types.h"
+#include <array>
 
 namespace Data {
 	struct Spell;
@@ -10,6 +12,8 @@ class ILog;
 class ILogFactory;
 class IDataStore;
 class Zone;
+
+typedef std::array<Data::Spell, MaxSpellID> SpellDataArray;
 
 class SpellDataStore {
 public:

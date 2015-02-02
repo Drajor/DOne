@@ -43,7 +43,6 @@ public:
 	Item* loadItem(Data::Item& pItem);
 	// Items
 
-	static const u32 getPrimarySlotIndex(const u32 pSlotID);
 	static const u32 getContainerSlotIndex(const u32 pSlotID);
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
