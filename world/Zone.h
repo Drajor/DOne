@@ -408,6 +408,8 @@ private:
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	const bool returnTradeItems(Character* pCharacter);
 	const bool returnTradeCurrency(Character* pCharacter);
+	void orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered);
+	const bool trade(Character* pCharacterA, Character* pCharacterB);
 
 	ZonePointList mZonePoints;
 

@@ -1634,13 +1634,17 @@ const bool Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) {
 		// Check: Have both Characters accepted trade.
 		if (tradingWith->isTradeAccepted()) {
 
+			if (!trade(pCharacter, tradingWith))
+				mLog->error("Trade failed");
 
 			pCharacter->setTradingWith(nullptr);
 			pCharacter->setTradeAccepted(false);
+			pCharacter->getConnection()->sendTradeFinished();
 			saveCharacter(pCharacter);
 
 			tradingWith->setTradingWith(nullptr);
 			tradingWith->setTradeAccepted(false);
+			tradingWith->getConnection()->sendTradeFinished();
 			saveCharacter(tradingWith);
 
 			return true;
@@ -1653,8 +1657,8 @@ const bool Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) {
 		pCharacter->getConnection()->sendTradeFinished();
 		pCharacter->setTradingWith(nullptr);
 
-		const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
-		pCharacter->getInventory()->onTradeAccept();
+		//const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
+		//pCharacter->getInventory()->onTradeAccept();
 	}
 	// Handle: Unknown.
 	else {
@@ -3269,6 +3273,8 @@ const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems) {
 			return false;
 		}
 	}
+
+	return true;
 }
 
 const bool Zone::returnTradeItems(Character* pCharacter) {
@@ -3280,22 +3286,14 @@ const bool Zone::returnTradeItems(Character* pCharacter) {
 
 	// Make a list of Items that are in the trade window.
 	std::list<Item*> unordered;
+	std::list<Item*> ordered;
 	inventory->getTradeItems(unordered);
 
-	// Adjust order of Items so that containers are sent first.
-	std::list<Item*> ordered;
-	for (auto returnItem = unordered.begin(); returnItem != unordered.end();) {
-		if ((*returnItem)->isContainer()) {
-			ordered.push_back(*returnItem);
-			returnItem = unordered.erase(returnItem);
-			continue;
-		}
-		returnItem++;
-	}
-	// Add remaining Items.
-	for (auto returnItem : unordered)
-		ordered.push_back(returnItem);
+	// Check: Nothing to return.
+	if (unordered.empty()) return true;
 
+	orderItems(unordered, ordered);
+	
 	// Clear all trade Items.
 	pCharacter->getInventory()->clearTradeItems();
 
@@ -3331,4 +3329,82 @@ const bool Zone::returnTradeCurrency(Character* pCharacter) {
 	pCharacter->getConnection()->sendCurrencyUpdate();
 
 	return true;
+}
+
+const bool Zone::trade(Character* pCharacterA, Character* pCharacterB) {
+	if (!pCharacterA) return false;
+	auto inventoryA = pCharacterA->getInventory();
+
+	if (!pCharacterB) return false;
+	auto inventoryB = pCharacterB->getInventory();
+
+	const auto preTradeCurrency = inventoryA->getTotalCurrency() + inventoryB->getTotalCurrency();
+
+	std::list<Item*> unorderedA;
+	std::list<Item*> orderedA;
+	inventoryA->getTradeItems(unorderedA);
+	inventoryA->clearTradeItems();
+	auto copperA = inventoryA->getTradeCopper();
+	auto silverA = inventoryA->getTradeSilver();
+	auto goldA = inventoryA->getTradeGold();
+	auto platinumA = inventoryA->getTradePlatinum();
+	inventoryA->clearTradeCurrency();
+	
+	std::list<Item*> unorderedB;
+	std::list<Item*> orderedB;
+	inventoryB->getTradeItems(unorderedB);
+	inventoryB->clearTradeItems();
+	auto copperB = inventoryB->getTradeCopper();
+	auto silverB = inventoryB->getTradeSilver();
+	auto goldB = inventoryB->getTradeGold();
+	auto platinumB = inventoryB->getTradePlatinum();
+	inventoryB->clearTradeCurrency();
+
+	// TODO:
+	StringStream tradeSummary;
+	tradeSummary << "[Trade Summary] " << pCharacterA->getName() << " trading with " << pCharacterB->getName();
+	
+	// Give A to B.
+	if (!unorderedA.empty()) {
+		orderItems(unorderedA, orderedA);
+		if (!giveItems(pCharacterB, orderedA))
+			mLog->error("Failed to give items A to B");
+	}
+	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA);
+	pCharacterB->getConnection()->sendCurrencyUpdate();
+
+	// Give B to A.
+	if (!unorderedB.empty()) {
+		orderItems(unorderedB, orderedB);
+		if(!giveItems(pCharacterA, orderedB))
+			mLog->error("Failed to give items B to A");
+	}
+	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB);
+	pCharacterA->getConnection()->sendCurrencyUpdate();
+
+	// Check: The total number of copper pieces between the two Characters matches the pre-trade total.
+	// Note: This /should/ catch 99.9% of errors / duping that involves trading.
+	const auto postTradeCurrency = inventoryA->getTotalCurrency() + inventoryB->getTotalCurrency();
+	if (preTradeCurrency != postTradeCurrency) {
+		mLog->error("Post trade currency total did not match! pre= " + toString(preTradeCurrency) + " post=" + toString(postTradeCurrency));
+		return false;
+	}
+
+	return true;
+}
+
+void Zone::orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered) {
+	// Adjust order of Items so that containers are sent first.
+	for (auto returnItem = pUnordered.begin(); returnItem != pUnordered.end();) {
+		if ((*returnItem)->isContainer()) {
+			pOrdered.push_back(*returnItem);
+			returnItem = pUnordered.erase(returnItem);
+			continue;
+		}
+		returnItem++;
+	}
+
+	// Add remaining Items.
+	for (auto returnItem : pUnordered)
+		pOrdered.push_back(returnItem);
 }

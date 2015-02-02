@@ -1061,58 +1061,58 @@ TEST_F(InventoryCurrencyTest, MoveDown) {
 	EXPECT_EQ(97137, mInventory->getTotalCursorCurrency());
 }
 
-TEST_F(InventoryCurrencyTest, AcceptTrade) {
-	// Setup
-	setupPersonal(120, 87, 23, 933);
-	EXPECT_EQ((120 * 1000) + (87 * 100) + (23 * 10) + 933, mInventory->getTotalPersonalCurrency());
-	EXPECT_EQ(mInventory->getTotalPersonalCurrency(), mInventory->getTotalCurrency());
-
-	setupTrade(43, 0, 34, 51);
-	EXPECT_EQ((43 * 1000) + (34 * 10) + 51, mInventory->getTotalTradeCurrency());
-	EXPECT_EQ(mInventory->getTotalCurrency(), mInventory->getTotalPersonalCurrency() + mInventory->getTotalTradeCurrency());
-
-	EXPECT_TRUE(mInventory->onTradeAccept());
-
-	EXPECT_EQ(0, mInventory->getTotalTradeCurrency()); // Trade currency should be clear.
-	EXPECT_EQ((120 * 1000) + (87 * 100) + (23 * 10) + 933, mInventory->getTotalPersonalCurrency());
-}
-
-TEST_F(InventoryCurrencyTest, CancelTrade) {
-	// Setup
-	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));
-	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 434));
-	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 249));
-	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 67));
-
-	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
-
-	// Move platinum into trade.
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Platinum, CurrencyType::Platinum, 67));
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Platinum, CurrencyType::Platinum, 67));
-
-	// Move gold into trade.
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Gold, CurrencyType::Gold, 249));
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Gold, CurrencyType::Gold, 249));
-
-	// Move silver into trade.
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Silver, CurrencyType::Silver, 434));
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Silver, CurrencyType::Silver, 434));
-
-	// Move copper into trade.
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Copper, CurrencyType::Copper, 897));
-	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Copper, CurrencyType::Copper, 897));
-
-	EXPECT_EQ(0, mInventory->getTotalPersonalCurrency());
-	EXPECT_EQ(97137, mInventory->getTotalCurrency());
-	EXPECT_EQ(97137, mInventory->getTotalTradeCurrency());
-
-	// Cancel trade.
-	EXPECT_TRUE(mInventory->onTradeCancel());
-
-	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
-	EXPECT_EQ(97137, mInventory->getTotalCurrency());
-	EXPECT_EQ(0, mInventory->getTotalTradeCurrency()); // Trade currency should be clear.
-}
+//TEST_F(InventoryCurrencyTest, AcceptTrade) {
+//	// Setup
+//	setupPersonal(120, 87, 23, 933);
+//	EXPECT_EQ((120 * 1000) + (87 * 100) + (23 * 10) + 933, mInventory->getTotalPersonalCurrency());
+//	EXPECT_EQ(mInventory->getTotalPersonalCurrency(), mInventory->getTotalCurrency());
+//
+//	setupTrade(43, 0, 34, 51);
+//	EXPECT_EQ((43 * 1000) + (34 * 10) + 51, mInventory->getTotalTradeCurrency());
+//	EXPECT_EQ(mInventory->getTotalCurrency(), mInventory->getTotalPersonalCurrency() + mInventory->getTotalTradeCurrency());
+//
+//	EXPECT_TRUE(mInventory->onTradeAccept());
+//
+//	EXPECT_EQ(0, mInventory->getTotalTradeCurrency()); // Trade currency should be clear.
+//	EXPECT_EQ((120 * 1000) + (87 * 100) + (23 * 10) + 933, mInventory->getTotalPersonalCurrency());
+//}
+//
+//TEST_F(InventoryCurrencyTest, CancelTrade) {
+//	// Setup
+//	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Copper, 897));
+//	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Silver, 434));
+//	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Gold, 249));
+//	EXPECT_TRUE(mInventory->addCurrency(CurrencySlot::Personal, CurrencyType::Platinum, 67));
+//
+//	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
+//
+//	// Move platinum into trade.
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Platinum, CurrencyType::Platinum, 67));
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Platinum, CurrencyType::Platinum, 67));
+//
+//	// Move gold into trade.
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Gold, CurrencyType::Gold, 249));
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Gold, CurrencyType::Gold, 249));
+//
+//	// Move silver into trade.
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Silver, CurrencyType::Silver, 434));
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Silver, CurrencyType::Silver, 434));
+//
+//	// Move copper into trade.
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Personal, CurrencySlot::Cursor, CurrencyType::Copper, CurrencyType::Copper, 897));
+//	EXPECT_TRUE(mInventory->moveCurrency(CurrencySlot::Cursor, CurrencySlot::Trade, CurrencyType::Copper, CurrencyType::Copper, 897));
+//
+//	EXPECT_EQ(0, mInventory->getTotalPersonalCurrency());
+//	EXPECT_EQ(97137, mInventory->getTotalCurrency());
+//	EXPECT_EQ(97137, mInventory->getTotalTradeCurrency());
+//
+//	// Cancel trade.
+//	EXPECT_TRUE(mInventory->onTradeCancel());
+//
+//	EXPECT_EQ(97137, mInventory->getTotalPersonalCurrency());
+//	EXPECT_EQ(97137, mInventory->getTotalCurrency());
+//	EXPECT_EQ(0, mInventory->getTotalTradeCurrency()); // Trade currency should be clear.
+//}
 
 TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 	// Setup

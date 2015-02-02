@@ -788,41 +788,6 @@ const bool Inventoryy::currencyValid() const {
 	return true;
 }
 
-const bool Inventoryy::onTradeAccept() {
-	// Clear trade currency.
-	setCurrency(CurrencySlot::Trade, CurrencyType::Platinum, 0);
-	setCurrency(CurrencySlot::Trade, CurrencyType::Gold, 0);
-	setCurrency(CurrencySlot::Trade, CurrencyType::Silver, 0);
-	setCurrency(CurrencySlot::Trade, CurrencyType::Copper, 0);
-
-	return true;
-}
-
-const bool Inventoryy::onTradeCancel() {
-	// Record total current before moving anything.
-	const u64 preMoveCurrency = getTotalCurrency();
-
-	const auto platinum = getTradePlatinum();
-	const auto gold = getTradeGold();
-	const auto silver = getTradeSilver();
-	const auto copper = getTradeCopper();
-
-	// Move trade slot currency to personal.
-	if (platinum > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Platinum, CurrencyType::Platinum, platinum)); }
-	if (gold > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Gold, CurrencyType::Gold, gold)); }
-	if (silver > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Silver, CurrencyType::Silver, silver)); }
-	if (copper > 0) { EXPECTED_BOOL(moveCurrency(CurrencySlot::Trade, CurrencySlot::Personal, CurrencyType::Copper, CurrencyType::Copper, copper)); }
-
-	// Check: Total currency has not changed.
-	EXPECTED_BOOL(preMoveCurrency == getTotalCurrency());
-	
-	// Check: Currency is still in a valid state.
-	EXPECTED_BOOL(currencyValid());
-
-
-	return true;
-}
-
 const u32 Inventoryy::findEmptySlot(Item* pItem) const {
 	if (!pItem) return SlotID::CURSOR; // If null gets passed in here, we have a big problem.
 

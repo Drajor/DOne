@@ -170,9 +170,6 @@ public:
 	void clearTradeItems();
 	void clearTradeCurrency();
 
-	const bool onTradeAccept();
-	const bool onTradeCancel();
-
 	// Finds a slot ID for an Item. If no slot ID is found, SlotID::CURSOR is returned.
 	const u32 findEmptySlot(Item* pItem) const;
 
