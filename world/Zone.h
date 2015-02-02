@@ -1,5 +1,6 @@
 #pragma once
 
+#include "types.h"
 #include "Constants.h"
 #include "ClientAuthentication.h"
 #include "../common/timer.h"
@@ -64,15 +65,15 @@ typedef std::list<Object*> ObjectList;
 typedef std::list<Door*> DoorList;
 
 struct ZonePoint {
-	uint16 mID = 0;
+	u16 mID = 0;
 	Vector3 mPosition;
 	float mHeading = 0.0f;
 
 	Vector3 mDestinationPosition;
 	float mDestinationHeading = 0.0f;
 
-	uint16 mDestinationZoneID = 0;
-	uint16 mDestinationInstanceID = 0;
+	u16 mDestinationZoneID = 0;
+	u16 mDestinationInstanceID = 0;
 };
 
 static const u16 MaxActorID = 65535;
@@ -167,7 +168,7 @@ public:
 	inline const String& getLongName() const { return mLongName; }
 	inline const String& getShortName() const { return mShortName; }
 	inline const Vector3& getSafePoint() const { return mSafePoint; }
-	inline const uint32 getLongNameStringID() const { return mLongNameStringID; }
+	inline const u32 getLongNameStringID() const { return mLongNameStringID; }
 	inline const float getGravity() const { return 0.4f; }
 	inline const float getMinimumZ() const { return -5000.0f; } // NOTE: The lowest point in the zone a Character should be able to reach.
 	inline const u8 getZoneType() const { return mZoneType; }
@@ -206,7 +207,7 @@ public:
 	const bool onCampBegin(Character* pCharacter);
 
 	void handleActorPositionChange(Actor* pActor);
-	void handleLinkDead(Character* pCharacter);
+
 	void handleAFK(Character* pCharacter);
 	void handleShowHelm(Actor* pActor);
 	void handleAnonymous(Character* pCharacter);
@@ -220,7 +221,7 @@ public:
 
 	void handleFaceChange(Character* pCharacter);
 
-	void handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill);
+	void handleDeath(Actor* pActor, Actor* pKiller, const u32 pDamage, const u32 pSkill);
 
 	// Handles specifics of NPC death.
 	void _handleDeath(NPC* pNPC, Actor* pKiller);
@@ -239,13 +240,13 @@ public:
 
 	void processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent);
 
-	void handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID);
+	void handleDamage(Actor* pAttacker, Actor* pDefender, const i32 pAmount, const u8 pType, const u16 pSpellID);
 
-	void handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition);
+	void handleZoneChange(Character* pCharacter, const u16 pZoneID, const u16 pInstanceID, const Vector3& pPosition);
 
 	void moveCharacter(Character* pCharacter, float pX, float pY, float pZ);
 	inline void moveCharacter(Character* pCharacter, Vector3& pPosition) { moveCharacter(pCharacter, pPosition.x, pPosition.y, pPosition.z); }
-	uint16 getNextSpawnID() { return mNextSpawnID++; }
+	u16 getNextSpawnID() { return mNextSpawnID++; }
 
 	bool trySendTell(const String& pSenderName, const String& pTargetName, const String& pMessage);
 	void processCharacterQueuedTells(Character* );
@@ -258,7 +259,7 @@ public:
 
 	void handleSurnameChange(Actor* pActor);
 
-	void handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID);
+	void handleCastingBegin(Character* pCharacter, const u16 pSlot, const u32 pSpellID);
 	void handleCastingFinished(Actor* pActor);
 
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
@@ -267,12 +268,12 @@ public:
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 	void sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket);
 
-	void handleBeginLootRequest(Character* pCharacter, const uint32 pCorpseSpawnID);
+	void handleBeginLootRequest(Character* pCharacter, const u32 pCorpseSpawnID);
 	void handleEndLootRequest(Character* pCharacter);
-	void handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pSlotID);
+	void handleLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID);
 
-	void handleConsider(Character* pCharacter, const uint32 pSpawnID);
-	void handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID);
+	void handleConsider(Character* pCharacter, const u32 pSpawnID);
+	void handleConsiderCorpse(Character* pCharacter, const u32 pSpawnID);
 
 	// Character is moving an Item.
 	const bool onMoveItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
@@ -301,11 +302,11 @@ public:
 	// Character has canceled trade.
 	const bool onTradeCancel(Character* pCharacter, const u32 pSpawnID);
 
-	void handleShopRequest(Character* pCharacter, const uint32 pSpawnID);
-	void handleShopEnd(Character* pCharacter, const uint32 pSpawnID);
-	void onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks);
-	void onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks);
-	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks);
+	void handleShopRequest(Character* pCharacter, const u32 pSpawnID);
+	void handleShopEnd(Character* pCharacter, const u32 pSpawnID);
+	void onSellItem(Character* pCharacter, const u32 pSpawnID, const u32 pSlotID, const u32 pStacks);
+	void onBuyItem(Character* pCharacter, const u32 pSpawnID, const u32 pItemInstanceID, const u32 pStacks);
+	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const u32 pStacks);
 
 	const ZonePointList& getZonePoints() { return mZonePoints; }
 	const ObjectList& getObjects() { return mObjects; }
@@ -313,13 +314,13 @@ public:
 	const bool canBank(Character* pCharacter);
 	const bool canShop(Character* pCharacter, NPC* pMerchant);
 
-	void handleCriticalHit(Actor* pActor, const int32 pDamage);
+	void handleCriticalHit(Actor* pActor, const i32 pDamage);
 	void handleHPChange(Actor* pActor);
 
-	void handleNimbusAdded(Actor * pActor, const uint32 pNimbusID);
-	void handleNimbusRemoved(Actor * pActor, const uint32 pNimbusID);
+	void handleNimbusAdded(Actor * pActor, const u32 pNimbusID);
+	void handleNimbusRemoved(Actor * pActor, const u32 pNimbusID);
 
-	void handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh);
+	void handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 pHigh);
 	void handleDropItem(Character* pCharacter);
 	void handleAppearanceChange(Actor* pActor);
 	void handleRespawnSelection(Character* pCharacter, const u32 pSelection);
@@ -382,7 +383,7 @@ private:
 	void _updateNPCs();
 
 	void sendMessage(Character* pCharacter, const u32 pChannel, const String pMessage);
-	void _sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender = false);
+	void _sendSpawnAppearance(Actor* pActor, const u16 pType, const u32 pParameter, const bool pIncludeSender = false);
 	void _sendAppearanceUpdate(Actor* pActor);
 	void _sendLevelAppearance(Character* pCharacter);
 	void _sendActorLevel(Actor* pActor);
@@ -394,11 +395,11 @@ private:
 	float mMinimumClip = 0.0f;
 	float mMaximumClip = 0.0f;
 
-	uint32 mLongNameStringID = 0;
+	u32 mLongNameStringID = 0;
 	String mLongName = "";
 	String mShortName = "";
 	Vector3 mSafePoint;
-	uint16 mNextSpawnID = 1;
+	u16 mNextSpawnID = 1;
 	const u16 mID;
 	const u16 mInstanceID;
 	const u16 mPort;

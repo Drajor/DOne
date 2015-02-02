@@ -444,7 +444,7 @@ void Zone::handleSitting(Character* pCharacter) { _sendSpawnAppearance(pCharacte
 void Zone::handleCrouching(Character* pCharacter) { _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::Animation, SpawnAppearanceAnimation::Crouch); }
 void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GM, pCharacter->isGM() ? 1 : 0, true); }
 
-void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const uint32 pParameter, const bool pIncludeSender) {
+void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const u32 pParameter, const bool pIncludeSender) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -909,7 +909,7 @@ void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
 
 	pAddActor->_syncPosition();
 
-	uint32 size = pAddActor->getDataSize();
+	u32 size = pAddActor->getDataSize();
 	unsigned char * data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
 	EXPECTED(pAddActor->copyData(writer));
@@ -1003,7 +1003,7 @@ void Zone::handleSurnameChange(Actor* pActor) {
 	safe_delete(outPacket);
 }
 
-void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const uint32 pSpellID) {
+void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const u32 pSpellID) {
 	using namespace Payload::Zone;
 	EXPECTED(Limits::SpellBar::slotValid(pSlot));
 	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
@@ -1100,7 +1100,7 @@ void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
 	}
 }
 
-void Zone::handleDeath(Actor* pActor, Actor* pKiller, const uint32 pDamage, const uint32 pSkill) {
+void Zone::handleDeath(Actor* pActor, Actor* pKiller, const u32 pDamage, const u32 pSkill) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -1197,7 +1197,7 @@ void Zone::_handleDeath(Character* pCharacter, Actor* pKiller) {
 	pCharacter->onDeath();
 }
 
-void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnID) {
+void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) {
 	using namespace Payload::Zone;
 	EXPECTED(pLooter);
 	EXPECTED(pLooter->isLooting() == false);
@@ -1250,10 +1250,10 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 		pLooter->setLootingCorpse(npcCorpse);
 		lootController->setLooter(pLooter);
 
-		int32 platinum = 0;
-		int32 gold = 0;
-		int32 silver = 0;
-		int32 copper = 0;
+		i32 platinum = 0;
+		i32 gold = 0;
+		i32 silver = 0;
+		i32 copper = 0;
 		bool currencyLooted = false;
 
 		// Check: Does the corpse have currency on it?
@@ -1279,7 +1279,7 @@ void Zone::handleBeginLootRequest(Character* pLooter, const uint32 pCorpseSpawnI
 		int count = 0;
 		for (auto i : npcCorpse->getLootItems()) {
 			i->setSlot(23 + count);
-			uint32 payloadSize = 0;
+			u32 payloadSize = 0;
 			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot, true);
 
 			auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
@@ -1328,7 +1328,7 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 	}
 }
 
-void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pSlotID) {
+void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCorpse);
 	EXPECTED(pCharacter->isLooting());
@@ -1355,7 +1355,7 @@ void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const uint32 pS
 	
 }
 
-void Zone::handleConsider(Character* pCharacter, const uint32 pSpawnID) {
+void Zone::handleConsider(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
 
 	if (pSpawnID == pCharacter->getSpawnID()){
@@ -1369,7 +1369,7 @@ void Zone::handleConsider(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->getConnection()->sendConsiderResponse(pSpawnID, 1); // TODO: Message
 }
 
-void Zone::handleConsiderCorpse(Character* pCharacter, const uint32 pSpawnID) {
+void Zone::handleConsiderCorpse(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
 
 	Actor* actor = pCharacter->findVisible(pSpawnID);
@@ -1438,10 +1438,10 @@ const bool Zone::canShop(Character* pCharacter, NPC* pMerchant) {
 	return pCharacter->squareDistanceTo(pMerchant) <= MaxShoppingDistance;
 }
 
-void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount, const uint8 pType, const uint16 pSpellID) {
+void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const i32 pAmount, const uint8 pType, const uint16 pSpellID) {
 	using namespace Payload::Zone;
 
-	uint32 sequence = Random::make(0, 20304843);
+	u32 sequence = Random::make(0, 20304843);
 	auto packet = Damage::construct(pDefender->getSpawnID(), pAttacker->getSpawnID(), pAmount, pType, sequence, pSpellID);
 
 	if (pDefender->isCharacter())
@@ -1452,7 +1452,7 @@ void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const int32 pAmount,
 	delete packet;
 }
 
-void Zone::handleCriticalHit(Actor* pActor, const int32 pDamage) {
+void Zone::handleCriticalHit(Actor* pActor, const i32 pDamage) {
 	EXPECTED(pActor);
 
 	auto packet = ZoneConnection::makeSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pActor->getName(), std::to_string(pDamage));
@@ -1735,7 +1735,7 @@ const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
 	return true;
 }
 
-void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
+void Zone::handleShopRequest(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
 
 	// Check: Character is in a state that allows for shopping.
@@ -1783,7 +1783,7 @@ void Zone::handleShopRequest(Character* pCharacter, const uint32 pSpawnID) {
 	}
 }
 
-void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
+void Zone::handleShopEnd(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 
@@ -1797,7 +1797,7 @@ void Zone::handleShopEnd(Character* pCharacter, const uint32 pSpawnID) {
 	pCharacter->getConnection()->sendShopEndReply();
 }
 
-void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pSlotID, const uint32 pStacks) {
+void Zone::onSellItem(Character* pCharacter, const u32 pSpawnID, const u32 pSlotID, const u32 pStacks) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 
@@ -1820,12 +1820,12 @@ void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32
 	EXPECTED(item->getStacks() >= pStacks);
 
 	// Calculate sale price.
-	const uint32 price = item->getSellPrice(pStacks, npc->getSellRate());
+	const u32 price = item->getSellPrice(pStacks, npc->getSellRate());
 
-	const int32 copper = price % 10;
-	const int32 silver = (price % 100) / 10;
-	const int32 gold = (price % 1000) / 100;
-	const int32 platinum = (price / 1000);
+	const i32 copper = price % 10;
+	const i32 silver = (price % 100) / 10;
+	const i32 gold = (price % 1000) / 100;
+	const i32 platinum = (price / 1000);
 	
 	// Add currency to Character.
 	pCharacter->getInventory()->addCurrency(platinum, gold, silver, copper, CurrencyReason::ShopSale);
@@ -1851,7 +1851,7 @@ void Zone::onSellItem(Character* pCharacter, const uint32 pSpawnID, const uint32
 	// TODO: Dynamic merchant Items.
 }
 
-void Zone::onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 pItemInstanceID, const uint32 pStacks) {
+void Zone::onBuyItem(Character* pCharacter, const u32 pSpawnID, const u32 pItemInstanceID, const u32 pStacks) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isShopping());
 
@@ -1878,9 +1878,9 @@ void Zone::onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 
 
 	if (success) {
 		// Calculate cost.
-		const uint32 price = item->getShopPrice() * pStacks;
+		const u32 price = item->getShopPrice() * pStacks;
 		// Convert currency from single number to EQ currency.
-		int32 platinum = 0, gold = 0, silver = 0, copper = 0;
+		i32 platinum = 0, gold = 0, silver = 0, copper = 0;
 		Utility::convertFromCopper(price, platinum, gold, silver, copper);
 		// Remove currency from Character.
 		EXPECTED(pCharacter->getInventory()->removeCurrency(platinum, gold, silver, copper));
@@ -1896,7 +1896,7 @@ void Zone::onBuyItem(Character* pCharacter, const uint32 pSpawnID, const uint32 
 		
 }
 
-const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const uint32 pStacks) {
+const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const u32 pStacks) {
 	EXPECTED_BOOL(pCharacter);
 	EXPECTED_BOOL(pNPC);
 	EXPECTED_BOOL(pItem);
@@ -1908,7 +1908,7 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 			EXPECTED_BOOL(pStacks == 1);
 
 			// Try to find an empty slot for the Item.
-			const uint32 slotID = pCharacter->getInventory()->findSlotFor(pItem->isContainer(), pItem->getSize());
+			const u32 slotID = pCharacter->getInventory()->findSlotFor(pItem->isContainer(), pItem->getSize());
 
 			// No empty slot found.
 			if (SlotID::isNone(slotID)) {
@@ -1945,54 +1945,9 @@ const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, c
 	}
 
 	return false;
-
-	//return true;
-
-	//// Check: Shop has enough stacks.
-	//if (pStacks > 1) {
-	//	EXPECTED_BOOL(pItem->isStackable());
-
-	//	// Limited quantity.
-	//	if (pItem->getShopQuantity() != -1)
-	//		EXPECTED_BOOL(pItem->getShopQuantity() >= pStacks);
-	//}
-
-	//Item* purchasedItem = nullptr;
-
-	//// Unlimited quantity.
-	//if (pItem->getShopQuantity() == -1) {
-	//	purchasedItem = ItemFactory::copy(pItem);
-
-	//	if (pItem->isStackable())
-	//		purchasedItem->setStacks(pStacks);
-	//}
-	//else {
-
-	//}
-
-	//if (purchasedItem->isStackable()) {
-	//	purchasedItem->setStacks(pStacks);
-	//}
-	//else {
-	//	const uint32 slotID = pCharacter->getInventory()->findSlot(purchasedItem);
-
-	//	// No slot was found
-	//	if (SlotID::isNone(slotID)) {
-	//		// Push to cursor.
-	//		EXPECTED_BOOL(pCharacter->getInventory()->pushCursor(purchasedItem));
-	//	}
-	//	else {
-	//		// Put in free slot.
-	//		EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
-	//	}
-
-	//	pCharacter->getConnection()->sendItemTrade(purchasedItem);
-	//}
-
-	//return true;
 }
 
-void Zone::handleNimbusAdded(Actor* pActor, const uint32 pNimbusID) {
+void Zone::handleNimbusAdded(Actor* pActor, const u32 pNimbusID) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -2013,7 +1968,7 @@ void Zone::handleNimbusAdded(Actor* pActor, const uint32 pNimbusID) {
 	delete packet;
 }
 
-void Zone::handleNimbusRemoved(Actor* pActor, const uint32 pNimbusID) {
+void Zone::handleNimbusRemoved(Actor* pActor, const u32 pNimbusID) {
 	using namespace Payload::Zone;
 	EXPECTED(pActor);
 
@@ -2029,7 +1984,7 @@ void Zone::handleNimbusRemoved(Actor* pActor, const uint32 pNimbusID) {
 	delete packet;
 }
 
-void Zone::handleRandomRequest(Character* pCharacter, const uint32 pLow, const uint32 pHigh) {
+void Zone::handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 pHigh) {
 	using namespace Payload::Zone;
 	EXPECTED(pCharacter);
 
@@ -2040,7 +1995,7 @@ void Zone::handleRandomRequest(Character* pCharacter, const uint32 pLow, const u
 
 	EXPECTED(low <= high);
 
-	const uint32 result = Random::make(low, high);
+	const u32 result = Random::make(low, high);
 	auto packet = RandomReply::construct(pCharacter->getName(), low, high, result);
 	sendToVisible(pCharacter, packet, true);
 	delete packet;
@@ -3125,7 +3080,7 @@ const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, cons
 		return false;
 	}
 
-	auto isBankingSlot = [](const uint32 pSlot) { return pSlot == CurrencySlot::Bank || pSlot == CurrencySlot::SharedBank; };
+	auto isBankingSlot = [](const u32 pSlot) { return pSlot == CurrencySlot::Bank || pSlot == CurrencySlot::SharedBank; };
 	const bool isConversion = pFromType != pToType;
 	const bool isBankSlot = isBankingSlot(pFromSlot) || isBankingSlot(pToSlot);
 	const bool bankRequired = isConversion || isBankSlot;

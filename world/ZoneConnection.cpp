@@ -1034,7 +1034,7 @@ const bool ZoneConnection::handleCamp(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(Camp::sizeCheck(pPacket));
 
 	// Notify Zone.
-	mZone->onCampBegin();
+	mZone->onCampBegin(mCharacter);
 	return true;
 }
 
