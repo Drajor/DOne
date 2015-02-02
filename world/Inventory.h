@@ -168,6 +168,7 @@ public:
 	void getTradeItems(std::list<Item*>& pItems) const;
 	
 	void clearTradeItems();
+	void clearTradeCurrency();
 
 	const bool onTradeAccept();
 	const bool onTradeCancel();

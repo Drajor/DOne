@@ -1683,16 +1683,27 @@ const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
 		pCharacter->getConnection()->sendCharacterTradeClose();
 		pCharacter->setTradingWith(nullptr);
 		pCharacter->setTradeAccepted(false);
-		// Return Items to Character.
-		returnTradeItems(pCharacter);
+
+		// Return trade currency.
+		if (!returnTradeCurrency(pCharacter))
+			mLog->error("Failed to return trade currency to " + pCharacter->getName());
+
+		// Return trade Items.
+		if(!returnTradeItems(pCharacter))
+			mLog->error("Failed to return trade items to " + pCharacter->getName());
 
 		tradingWith->getConnection()->sendTradeCancel(tradingWith->getSpawnID(), pCharacter->getSpawnID());
 		tradingWith->getConnection()->sendCharacterTradeClose();
 		tradingWith->setTradingWith(nullptr);
 		tradingWith->setTradeAccepted(false);
 
-		// Return Items to Character.
-		returnTradeItems(tradingWith);
+		// Return trade currency.
+		if (!returnTradeCurrency(tradingWith))
+			mLog->error("Failed to return trade currency to " + tradingWith->getName());
+
+		// Return trade Items.
+		if (!returnTradeItems(tradingWith))
+			mLog->error("Failed to return trade items to " + tradingWith->getName());
 
 		return true;
 
@@ -1706,88 +1717,16 @@ const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
 		pCharacter->getConnection()->sendFinishWindow2();
 		pCharacter->setTradingWith(nullptr);
 
-		// Return Items to Character.
-		returnTradeItems(pCharacter);
+		// Return trade currency.
+		if (!returnTradeCurrency(pCharacter))
+			mLog->error("Failed to return trade currency to " + pCharacter->getName());
+
+		// Return trade Items.
+		if (!returnTradeItems(pCharacter))
+			mLog->error("Failed to return trade items to " + pCharacter->getName());
 
 		return true;
 	}
-
-	//EXPECTED_BOOL(pCharacter->getSpawnID() != pSpawnID);
-	//EXPECTED_BOOL(pCharacter->isTrading()); // Check: Character is trading.
-	//EXPECTED_BOOL(pCharacter->getTradingWith()->getSpawnID() == pSpawnID); // Sanity.
-
-	//// Make a list of Items that were in the trade window.
-	//std::list<Item*> unordered;
-	//pCharacter->getInventory()->getTradeItems(unordered);
-	//
-	//// Adjust order of Items so that containers are sent first.
-	//std::list<Item*> ordered;
-	//for (auto i = unordered.begin(); i != unordered.end();) {
-	//	if ((*i)->isContainer()) {
-	//		ordered.push_back(*i);
-	//		i = unordered.erase(i);
-	//		continue;
-	//	}
-	//	i++;
-	//}
-	//// Add remaining Items.
-	//for (auto i : unordered)
-	//	ordered.push_back(i);
-
-	//// Clear all trade Items.
-	//pCharacter->getInventory()->clearTradeItems();
-
-	//// Place Items back into Character Inventory.
-	//for (auto i : ordered) {
-	//	if (i->isStackable()) {
-	//		// When an Item is being return to the Character, try stacking first.
-	//		auto existing = pCharacter->getInventory()->findStackable(i->getID());
-	//		if (existing) {
-	//			existing->addStacks(1);
-	//			// This currently only works for primary slot stacking.. when I try to send into a container I get a broken item in the charm slot.
-	//			pCharacter->getConnection()->sendItemTrade(existing);
-	//			delete i;
-	//		}
-	//		// If there is no existing Item to stack on to, find a free slot.
-	//		else {
-	//			const uint32 slotID = pCharacter->getInventory()->findSlotFor(i);
-	//			pCharacter->getInventory()->put(i, slotID);
-	//			pCharacter->getConnection()->sendItemTrade(i);
-	//		}
-	//	}
-	//	else {
-	//		const uint32 slotID = pCharacter->getInventory()->findSlotFor(i);
-
-	//		// No slot was found, try cursor.
-	//		if (SlotID::isNone(slotID)) {
-	//			//if (pCharacter->getInventory()->)
-	//		}
-	//		else {
-	//			pCharacter->getInventory()->put(i, slotID);
-	//			
-	//			// Update container contents slots
-	//			if (i->isContainer()) {
-	//				// Check: Containers can only be moved into main slots.
-	//				EXPECTED_BOOL(SlotID::isMainInventory(slotID));
-	//				i->updateContentsSlots();
-	//			}
-	//				
-
-	//			pCharacter->getConnection()->sendItemTrade(i);
-	//		}
-	//	}
-	//}
-
-	//// Update Inventory.
-	//EXPECTED_BOOL(pCharacter->getInventory()->onTradeCancel());
-
-	////pCharacter->getConnection()->sendTradeCancel(pSpawnID);
-	//pCharacter->getConnection()->sendCharacterTradeClose();
-	//pCharacter->getConnection()->sendFinishWindow2();
-	//pCharacter->setTradingWith(nullptr);
-
-	//// Update client.
-	//pCharacter->getConnection()->sendCurrencyUpdate();
 
 	return true;
 }
@@ -3288,7 +3227,7 @@ const bool giveStackableItem(Character* pCharacter, Item* pItem) {
 	return true;
 }
 
-const bool giveItem(Character* pCharacter, Item* pItem) {
+const bool Zone::giveItem(Character* pCharacter, Item* pItem) {
 	if (!pCharacter) return false;
 	if (!pItem) return false;
 
@@ -3321,6 +3260,17 @@ const bool giveItem(Character* pCharacter, Item* pItem) {
 	return true;
 }
 
+const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems) {
+	if (!pCharacter) return false;
+	if (pItems.empty()) return false;
+
+	for (auto i : pItems) {
+		if (!giveItem(pCharacter, i)){
+			return false;
+		}
+	}
+}
+
 const bool Zone::returnTradeItems(Character* pCharacter) {
 	if (!pCharacter) return false;
 	
@@ -3350,12 +3300,35 @@ const bool Zone::returnTradeItems(Character* pCharacter) {
 	pCharacter->getInventory()->clearTradeItems();
 
 	// Return all trade Items back into Inventory.
-	for (auto returnItem : ordered) {
-		if (!giveItem(pCharacter, returnItem)) {
-			mLog->error("Failed to return trade Item to Character.");
-		}
+	if (!giveItems(pCharacter, ordered)){
+		mLog->error("Failed to return trade Item to Character.");
 	}
 
+	return true;
+}
+
+const bool Zone::returnTradeCurrency(Character* pCharacter) {
+	if (!pCharacter) return false;
+
+	auto inventory = pCharacter->getInventory();
+
+	auto copper = inventory->getTradeCopper();
+	auto silver = inventory->getTradeSilver();
+	auto gold = inventory->getTradeGold();
+	auto platinum = inventory->getTradePlatinum();
+
+	inventory->clearTradeCurrency();
+
+	StringStream ss;
+	ss << "Returning trade currency c=(" << copper << ") s=(" << silver << ") g=(" << gold << ") p=(" << platinum << ") to " << pCharacter->getName();
+	mLog->info(ss.str());
+
+	// Add currency that was in trade back into personal.
+	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper))
+		mLog->error("Returning trade currency failed.");
+
+	// Update Character.
 	pCharacter->getConnection()->sendCurrencyUpdate();
+
 	return true;
 }

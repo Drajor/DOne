@@ -760,10 +760,10 @@ const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, cons
 }
 
 const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
-	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Platinum, pPlatinum));
-	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Gold, pGold));
-	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Silver, pSilver));
-	EXPECTED_BOOL(addCurrency(pSlot, CurrencyType::Copper, pCopper));
+	if (!addCurrency(pSlot, CurrencyType::Platinum, pPlatinum)) return false;
+	if (!addCurrency(pSlot, CurrencyType::Gold, pGold)) return false;
+	if (!addCurrency(pSlot, CurrencyType::Silver, pSilver)) return false;
+	if (!addCurrency(pSlot, CurrencyType::Copper, pCopper)) return false;
 	return true;
 }
 
@@ -895,9 +895,9 @@ const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i
 }
 
 const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) {
-	EXPECTED_BOOL(CurrencySlot::isValid(pSlot));
-	EXPECTED_BOOL(CurrencyType::isValid(pType));
-	EXPECTED_BOOL(pAmount >= 0);
+	if (!CurrencySlot::isValid(pSlot)) return false;
+	if (!CurrencyType::isValid(pType)) return false;
+	if (pAmount < 0) return false;
 
 	mCurrency[pSlot][pType] += pAmount;
 	return true;
@@ -1043,6 +1043,13 @@ void Inventoryy::clearTradeItems() {
 	static const auto tradeEnd = SlotID::getPrimarySlotIndex(SlotID::TradeEnd);
 	for (auto i = tradeBegin; i < tradeEnd; i++)
 		mItems[i] = nullptr;
+}
+
+void Inventoryy::clearTradeCurrency() {
+	setCurrency(CurrencySlot::Trade, CurrencyType::Platinum, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Gold, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Silver, 0);
+	setCurrency(CurrencySlot::Trade, CurrencyType::Copper, 0);
 }
 
 void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {

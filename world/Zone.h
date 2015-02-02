@@ -96,6 +96,9 @@ public:
 	void onLinkdeadBegin(Character* pCharacter);
 	void onLinkdeadEnd(Character* pCharacter);
 
+	const bool giveItem(Character* pCharacter, Item* pItem);
+	const bool giveItems(Character* pCharacter, std::list<Item*>& pItems);
+
 	// Chat Events.
 	const bool onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
 	const bool onGuildMessage(Character* pCharacter, const String& pMessage);
@@ -404,6 +407,8 @@ private:
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
 	const bool returnTradeItems(Character* pCharacter);
+	const bool returnTradeCurrency(Character* pCharacter);
+
 	ZonePointList mZonePoints;
 
 	std::list<Character*> mCharacters;
