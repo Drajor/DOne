@@ -425,6 +425,8 @@ public:
 
 	inline const u32 getIntoxication() const { return 0; }
 
+	inline const String& getInspectMessage() const { return mInspectMessage; }
+
 private:
 
 	Account* mAccount = nullptr;
@@ -456,6 +458,7 @@ private:
 	uint16 mCastingSlot = 0; // The Spell Bar slot ID used to cast a spell
 	Timer mCastingTimer;
 
+	String mInspectMessage;
 	std::array<uint32, Limits::Skills::MAX_ID> mSkills;
 	std::array<uint32, Limits::Languages::MAX_ID> mLanguages;
 

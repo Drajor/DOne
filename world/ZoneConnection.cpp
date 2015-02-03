@@ -3849,7 +3849,10 @@ const bool ZoneConnection::handleInspectRequest(const EQApplicationPacket* pPack
 	if (!pPacket) return false;
 	SIZE_CHECK(InspectRequest::sizeCheck(pPacket));
 
-	// TODO:
+	auto payload = InspectRequest::convert(pPacket);
+
+	// Notify Zone.
+	mZone->onInspectRequest(mCharacter, payload->mTargetSpawnID);
 	return true;
 }
 

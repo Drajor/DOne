@@ -2641,3 +2641,51 @@ void Zone::onCampBegin(Character* pCharacter) {
 		connection->dropConnection();
 	}
 }
+
+void Zone::onInspectRequest(Character* pCharacter, const u32 pSpawnID) {
+	using namespace Payload::Zone;
+	if (!pCharacter) return;
+	mLog->info(pCharacter->getName() + " requesting to inspect Spawn ID: " + toString(pSpawnID));
+
+	auto actor = getActor(pSpawnID);
+
+	// Check: Actor is valid.
+	if (!actor) {
+		mLog->error("Actor could not be found.");
+		return;
+	}
+
+	// Check: Actor is Character.
+	if (!actor->isCharacter()) {
+		mLog->error("Actor is not a Character");
+		return;
+	}
+
+	// TODO: Distance.
+
+	auto target = Actor::cast<Character*>(actor);
+	auto inventory = target->getInventory();
+
+	auto packet = InspectResponse::create();
+	auto payload = InspectResponse::convert(packet);
+
+	payload->mCharacterSpawnID = target->getSpawnID();
+	payload->mTargetSpawnID = pCharacter->getSpawnID();
+	strcpy_s(payload->mText, target->getInspectMessage().c_str());
+
+	for (auto i = 0; i < 23; i++) {
+		auto item = inventory->get(i);
+		if (!item) continue;
+
+		payload->mItemIcons[i] = item->getIcon();
+		strncpy_s(payload->mItemNames[i], item->getName().c_str(), 64);
+	}
+
+	// Send response to requester.
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
+
+	// Send notification to Character being inspected.
+	if (!pCharacter->isHidden())
+		target->getConnection()->sendSimpleMessage(MessageType::White, StringID::BeingInspected, pCharacter->getName());
+}

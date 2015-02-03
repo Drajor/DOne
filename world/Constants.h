@@ -1635,6 +1635,9 @@ namespace StringID {
 		DUEL_CONSIDERING = 1385,	//%1 is considering a duel with someone else.
 		PLAYER_REGAIN = 1394,	//You have control of yourself again.
 		REZZ_ALREADY_PENDING = 1379,	//You were unable to restore the corpse to life, but you may have success with a later attempt.
+
+		BeingInspected = 1404, // "%1 is looking at your equipment..."
+
 		IN_USE = 1406,	//Someone else is using that. Try again later.
 		DUEL_FLED = 1408,	//%1 has defeated %2 in a duel to the death! %3 has fled like a cowardly dog!
 		MEMBER_OF_YOUR_GUILD = 1429,

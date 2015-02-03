@@ -228,6 +228,7 @@ public:
 	const bool onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot);
 	void onCampBegin(Character* pCharacter);
 	void onDropItem(Character* pCharacter);
+	void onInspectRequest(Character* pCharacter, const u32 pSpawnID);
 
 	void handleActorPositionChange(Actor* pActor);
 

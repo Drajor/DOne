@@ -1997,6 +1997,11 @@ namespace Payload {
 
 		// S->C
 		struct InspectResponse : public FixedT<InspectResponse, OP_InspectAnswer> {
+			InspectResponse() {
+				memset(mItemNames, 0, sizeof(mItemNames[0][0]) * 23 * 64);
+				memset(mItemIcons, 0, sizeof(mItemIcons));
+				memset(mText, 0, sizeof(mText));
+			}
 			u32 mTargetSpawnID = 0;
 			u32 mCharacterSpawnID = 0;
 			char mItemNames[23][64];
