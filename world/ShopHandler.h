@@ -10,6 +10,14 @@ class ItemFactory;
 class NPC;
 class Item;
 
+/*
+
+Buying:
+- UF will block the client from sending a buy packet if there is an Item on the cursor.
+- UF will block the a buy packet if there is no room for the selected Item.
+
+*/
+
 class ShopHandler {
 public:
 	ShopHandler(Zone* pZone, ItemFactory* pItemFactory, ILogFactory* pLogFactory);
@@ -27,6 +35,7 @@ public:
 	// Character is buying an Item.
 	void onBuy(Character* pCharacter, const u32 pInstanceID, const u32 pStacks);
 
+	// Returns whether or not a Character can shop with a an NPC.
 	const bool canShop(Character* pCharacter, NPC* pMerchant) const;
 
 private:

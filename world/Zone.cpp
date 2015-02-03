@@ -2407,7 +2407,7 @@ const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, cons
 
 	// Check: From slot ID is valid.
 	if (!Limits::General::moneySlotIDValid(pFromSlot)) {
-		mLog->error(pCharacter->getName() + " sent invalid currency slot ID: " + toString(pFromSlot));
+		mLog->error(pCharacter->getName() + " sent invalid FROM currency slot ID: " + toString(pFromSlot));
 		return false;
 	}
 
@@ -2427,7 +2427,7 @@ const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, cons
 
 	// Check: To slot ID is valid.
 	if (!Limits::General::moneySlotIDValid(pToSlot)) {
-		mLog->error(pCharacter->getName() + " sent invalid currency slot ID: " + toString(pToSlot));
+		mLog->error(pCharacter->getName() + " sent invalid TO currency slot ID: " + toString(pToSlot));
 		return false;
 	}
 
@@ -2496,7 +2496,7 @@ const bool Zone::onWearChange(Character* pCharacter, const u32 pMaterialID, u32 
 	return true;
 }
 
-const bool giveStackableItem(Character* pCharacter, Item* pItem) {
+const bool Zone::giveStackableItem(Character* pCharacter, Item* pItem, const String& pReason) {
 	if (!pCharacter) return false;
 	if (!pItem) return false;
 
@@ -2545,7 +2545,7 @@ const bool giveStackableItem(Character* pCharacter, Item* pItem) {
 			}
 			// Move to empty slot.
 			else {
-				inventory->put(pItem, slotID);
+				inventory->put(pItem, slotID, pReason);
 				pCharacter->getConnection()->sendItemTrade(pItem);
 
 				if (pItem->isContainer())
@@ -2559,7 +2559,7 @@ const bool giveStackableItem(Character* pCharacter, Item* pItem) {
 	return true;
 }
 
-const bool Zone::giveItem(Character* pCharacter, Item* pItem) {
+const bool Zone::giveItem(Character* pCharacter, Item* pItem, const String& pReason) {
 	if (!pCharacter) return false;
 	if (!pItem) return false;
 
@@ -2567,7 +2567,7 @@ const bool Zone::giveItem(Character* pCharacter, Item* pItem) {
 
 	// Handle: Stackable Item, these are much more complex.
 	if (pItem->isStackable()) {
-		if (!giveStackableItem(pCharacter, pItem)) {
+		if (!giveStackableItem(pCharacter, pItem, pReason)) {
 			return false;
 			//mLog->error("Failed to return trade item to ");
 		}
@@ -2585,19 +2585,19 @@ const bool Zone::giveItem(Character* pCharacter, Item* pItem) {
 	}
 	// Move to empty slot.
 	else {
-		pCharacter->getInventory()->put(pItem, slotID);
+		pCharacter->getInventory()->put(pItem, slotID, pReason);
 		pCharacter->getConnection()->sendItemTrade(pItem);
 	}
 
 	return true;
 }
 
-const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems) {
+const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems, const String& pReason) {
 	if (!pCharacter) return false;
 	if (pItems.empty()) return false;
 
 	for (auto i : pItems) {
-		if (!giveItem(pCharacter, i)){
+		if (!giveItem(pCharacter, i, pReason)){
 			return false;
 		}
 	}

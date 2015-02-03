@@ -46,7 +46,7 @@ const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFact
 		}
 
 		// Put Item in Inventory.
-		if (!put(item, i.mSlot)) {
+		if (!put(item, i.mSlot, InventoryReason::Initalisation)) {
 			mLog->error("Failed to put Item: ");
 			return false;
 		}
@@ -165,9 +165,13 @@ Item* Inventoryy::get(const u32 pSlot) const {
 	return nullptr;
 }
 
-const bool Inventoryy::put(Item* pItem, const u32 pSlot) {
+const bool Inventoryy::put(Item* pItem, const u32 pSlot, const String& pReason) {
 	if (!pItem) return false;
-	mLog->info("PUT " + pItem->getName() + " to " + std::to_string(pSlot));
+
+	// All puts are logged.
+	StringStream ss;
+	ss << "Put item (" << pReason << ") Slot ID: " << pSlot << "| Name: " << pItem->getName() << " | ID: " << pItem->getID() << " | Stacks: " << pItem->getStacks();
+	mLog->info(ss.str());
 
 	// Handle: Item being put io cursor.
 	if (SlotID::isCursor(pSlot)) {
@@ -311,7 +315,9 @@ const bool Inventoryy::consume(const u32 pSlot, const u32 pStacks) {
 	// NOTE: UF will only consume from the Main Inventory
 
 	auto item = get(pSlot);
-	EXPECTED_BOOL(item);
+	if (!item) {
+		return false;
+	}
 
 	// Consuming the whole Item.
 	if (item->getStacks() == pStacks || !item->isStackable()) {
@@ -585,7 +591,7 @@ const bool Inventoryy::_putDown(const u32 pToSlot, const u32 pStacks) {
 	if (existing)
 		EXPECTED_BOOL(_pickUp(pToSlot, 0)); // pStackSize is set to 0 because 0 means the whole Item.
 
-	EXPECTED_BOOL(put(cursorItem, pToSlot));
+	EXPECTED_BOOL(put(cursorItem, pToSlot, InventoryReason::Internal));
 
 	// Check: Worn Item being equipped.
 	if (SlotID::isWorn(pToSlot)) {
@@ -761,7 +767,7 @@ const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, cons
 
 const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	StringStream ss;
-	ss << "Adding (" << pReason << ") currency c=(" << pCopper << ") s=(" << pSilver << ") g=(" << pGold << ") p=(" << pPlatinum << ")";
+	ss << "Add currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
 	mLog->info(ss.str());
 
 	if (!addCurrency(pSlot, CurrencyType::Platinum, pPlatinum)) return false;
@@ -841,7 +847,10 @@ const u32 Inventoryy::findSlotFor(const bool pContainer, const u8 pItemSize) con
 }
 
 const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
-	
+	StringStream ss;
+	ss << "Add currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
+	mLog->info(ss.str());
+
 	// Get current currency as copper.
 	i64 currentCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));
@@ -874,7 +883,7 @@ const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 p
 
 const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	StringStream ss;
-	ss << "Removing (" << pReason << ") currency c=(" << pCopper << ") s=(" << pSilver << ") g=(" << pGold << ") p=(" << pPlatinum << ")";
+	ss << "Remove currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
 	mLog->info(ss.str());
 
 	// Get current currency as copper.

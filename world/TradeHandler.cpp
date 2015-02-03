@@ -240,19 +240,19 @@ const bool TradeHandler::trade(Character* pCharacterA, Character* pCharacterB) {
 	// Give A to B.
 	if (!unorderedA.empty()) {
 		orderItems(unorderedA, orderedA);
-		if (!mZone->giveItems(pCharacterB, orderedA))
+		if (!mZone->giveItems(pCharacterB, orderedA, InventoryReason::Trade))
 			mLog->error("Failed to give items A to B");
 	}
-	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA, CurrencyReason::Trade);
+	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA, InventoryReason::Trade);
 	pCharacterB->getConnection()->sendCurrencyUpdate();
 
 	// Give B to A.
 	if (!unorderedB.empty()) {
 		orderItems(unorderedB, orderedB);
-		if (!mZone->giveItems(pCharacterA, orderedB))
+		if (!mZone->giveItems(pCharacterA, orderedB, InventoryReason::Trade))
 			mLog->error("Failed to give items B to A");
 	}
-	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB, CurrencyReason::Trade);
+	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB, InventoryReason::Trade);
 	pCharacterA->getConnection()->sendCurrencyUpdate();
 
 	// Check: The total number of copper pieces between the two Characters matches the pre-trade total.
@@ -348,7 +348,7 @@ const bool TradeHandler::returnTradeItems(Character* pCharacter)
 	pCharacter->getInventory()->clearTradeItems();
 
 	// Return all trade Items back into Inventory.
-	if (!mZone->giveItems(pCharacter, ordered)){
+	if (!mZone->giveItems(pCharacter, ordered, InventoryReason::TradeReturn)){
 		mLog->error("Failed to return trade Item to Character.");
 	}
 
@@ -369,7 +369,7 @@ const bool TradeHandler::returnTradeCurrency(Character* pCharacter)
 	inventory->clearTradeCurrency();
 
 	// Add currency that was in trade back into personal.
-	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::TradeReturn))
+	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, InventoryReason::TradeReturn))
 		mLog->error("Returning trade currency failed.");
 
 	// Update Character.

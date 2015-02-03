@@ -15,7 +15,9 @@ class ILogFactory;
 class ItemFactory;
 class Item;
 
-namespace CurrencyReason {
+namespace InventoryReason {
+	static const String Initalisation = "INIT";
+	static const String Internal = "INTERNAL";
 	static const String Loot = "LOOT";
 	static const String ShopBuy = "SHOP_BUY";
 	static const String ShopSell = "SHOP_SELL";
@@ -54,7 +56,8 @@ public:
 	static const u32 getContainerSlotIndex(const u32 pSlotID);
 
 	// Puts pItem at pSlot. Excluding the cursor, pSlot is expected to be empty (nullptr).
-	const bool put(Item* pItem, const u32 pSlot);
+	const bool put(Item* pItem, const u32 pSlot, const String& pReason);
+
 	Item* get(const u32 pSlot) const;
 	const bool moveItem(const u32 pFromSlot, const u32 pToSlot, const u32 pStacks);
 	const bool moveCurrency(const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount);

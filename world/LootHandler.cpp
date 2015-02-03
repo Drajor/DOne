@@ -89,7 +89,7 @@ void LootHandler::onRequest(Character* pCharacter, const u32 pSpawnID) {
 			npcCorpse->removeCurrency();
 
 			// Add currency to looter.
-			pCharacter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::Loot);
+			pCharacter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, InventoryReason::Loot);
 		}
 
 		pCharacter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);

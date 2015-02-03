@@ -105,40 +105,50 @@ const bool ShopHandler::canShop(Character* pCharacter, NPC* pMerchant) const {
 
 void ShopHandler::onSell(Character* pCharacter, const u32 pSlotID, const u32 pStacks) {
 	if (!pCharacter) return;
-	if (!pCharacter->isShopping()) return;
+
+	// Every sell attempt is logged.
+	StringStream ss;
+	ss << "(SELL) " << pCharacter->getName() << " Slot ID: " << pSlotID << " | Stacks: " << pStacks;
+	mLog->info(ss.str());
+
+	// Check: Character is shopping.
+	if (!pCharacter->isShopping()) {
+		mLog->error(pCharacter->getName() + " attempted to sell item but they are not shopping.");
+		return;
+	}
 
 	auto inventory = pCharacter->getInventory();
 	auto shop = pCharacter->getShoppingWith();
+	auto item = inventory->get(pSlotID);
+	auto updateConsumables = inventory->isAutoFood(item) || inventory->isAutoDrink(item);
 
 	// Check: Distance to merchant.
 	if (!canShop(pCharacter, shop)) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to sell item but they are not close enough.");
 		return;
 	}
 
 	// Check: Slot ID is valid.
 	if (!SlotID::isValidShopSellSlot(pSlotID)) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to sell item from invalid slot.");
 		return;
 	}
 
-	auto item = inventory->get(pSlotID);
-
 	// Check: Item is valid.
 	if (!item) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to sell null item.");
 		return;
 	}
 
 	// Check: Item can be sold.
 	if (!item->isSellable()) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to sell invalid item.");
 		return;
 	}
 
 	// Check: Item has enough stacks.
-	if (item->getStacks() >= pStacks) {
-		// TODO: Log.
+	if (item->getStacks() < pStacks) {
+		mLog->error(pCharacter->getName() + " attempted to sell more stacks than they own.");
 		return;
 	}
 
@@ -151,13 +161,15 @@ void ShopHandler::onSell(Character* pCharacter, const u32 pSlotID, const u32 pSt
 	const i32 platinum = (price / 1000);
 
 	// Add currency to Character.
-	inventory->addCurrency(platinum, gold, silver, copper, CurrencyReason::ShopSell);
-
-	// Detect when the Character's auto food / drink is being sold.
-	const bool updateConsumables = pCharacter->getInventory()->isAutoFood(item) || pCharacter->getInventory()->isAutoDrink(item);
+	if (!inventory->addCurrency(platinum, gold, silver, copper, InventoryReason::ShopSell)){
+		mLog->error("Failed to add currency from sale.");
+		return;
+	}
 
 	// Consume Item/stacks sold.
-	pCharacter->getInventory()->consume(pSlotID, pStacks);
+	if (!inventory->consume(pSlotID, pStacks))
+		mLog->error("Failed to remove sold Item from Inventory.");
+
 	item = nullptr;
 
 	// Update consumables.
@@ -177,52 +189,51 @@ void ShopHandler::onSell(Character* pCharacter, const u32 pSlotID, const u32 pSt
 
 void ShopHandler::onBuy(Character* pCharacter, const u32 pInstanceID, const u32 pStacks) {
 	if (!pCharacter) return;
-	if (!pCharacter->isShopping()) return;
+
+	// Every buy attempt is logged.
+	StringStream ss;
+	ss << "(BUY) " << pCharacter->getName() << " Instance: " << pInstanceID << " | Stacks: " << pStacks;
+	mLog->info(ss.str());
+
+	// Check: Character is shopping.
+	if (!pCharacter->isShopping()) {
+		mLog->error(pCharacter->getName() + " attempted to buy item but they are not shopping.");
+		return;
+	}
 
 	auto inventory = pCharacter->getInventory();
 	auto connection = pCharacter->getConnection();
 	auto shop = pCharacter->getShoppingWith();
+	auto item = shop->getShopItem(pInstanceID);
 
 	// Check: Cursor is empty. Underfoot checks this.
 	if (!inventory->isCursorEmpty()) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to buy item but their cursor is not empty.");
 		return;
 	}
 
 	// Check: Distance to merchant.
 	if (!canShop(pCharacter, shop)) {
-		// TODO: Log.
+		mLog->error(pCharacter->getName() + " attempted to buy item but they are not close enough.");
 		return;
 	}
 
-	// Find Item.
-	auto item = shop->getShopItem(pInstanceID);
+	// Check: Item is valid.
 	if (!item) {
 		pCharacter->notify("I seem to have misplaced that. Sorry!");
-		// Send failure reply to prevent UI locking up.
+		mLog->error(pCharacter->getName() + " attempted to sell null item.");
 		connection->sendShopBuyReply(shop->getSpawnID(), pInstanceID, pStacks, 0, -1);
 		return;
 	}
 
 	// Try to buy.
 	if (!buy(pCharacter, shop, item, pStacks)) {
+		mLog->error("Failed to buy Item.");
 		connection->sendShopBuyReply(shop->getSpawnID(), pInstanceID, pStacks, 0, -1);
 		return;
 	}
 
-	// Calculate cost.
-	const u32 price = item->getShopPrice() * pStacks;
-
-	// Convert currency from single number to EQ currency.
-	i32 platinum = 0, gold = 0, silver = 0, copper = 0;
-	Utility::convertFromCopper(price, platinum, gold, silver, copper);
-
-	// Remove currency from Character.
-	inventory->removeCurrency(platinum, gold, silver, copper, CurrencyReason::ShopBuy);
-
-	// Update client.
-	connection->sendCurrencyUpdate();
-	connection->sendShopBuyReply(shop->getSpawnID(), pInstanceID, pStacks, price);
+	mLog->info("(BUY) Success.");
 }
 
 const bool ShopHandler::buy(Character* pCharacter, NPC* pNPC, Item* pItem, const u32 pStacks) {
@@ -230,48 +241,54 @@ const bool ShopHandler::buy(Character* pCharacter, NPC* pNPC, Item* pItem, const
 	if (!pNPC) return false;
 	if (!pItem) return false;
 
-	// Unlimited Quantity.
-	if (pItem->getShopQuantity() == -1) {
-		// Non-stackable
-		if (pItem->isStackable() == false) {
-			EXPECTED_BOOL(pStacks == 1);
+	auto connection = pCharacter->getConnection();
+	auto inventory = pCharacter->getInventory();
+	const bool unlimited = pItem->getShopQuantity() == -1;
 
-			// Try to find an empty slot for the Item.
-			const u32 slotID = pCharacter->getInventory()->findSlotFor(pItem->isContainer(), pItem->getSize());
+	// Check: Stacks are valid.
+	if (!pItem->isStackable() && pStacks != 1) {
+		mLog->error(pCharacter->getName() + " attempted to buy non stackable item with !1 stacks.");
+		return false;
+	}
 
-			// No empty slot found.
-			if (SlotID::isNone(slotID)) {
-				// NOTE: UF still sends the packet when it knows the Inventory is full. Go figure.
-				// X tells you, 'Your inventory appears full! How can you buy more?'
-				return false;
-			}
+	// Check: Enough stacks available.
+	if (!unlimited && pItem->getShopQuantity() < pStacks) {
+		mLog->error(pCharacter->getName() + " attempted to buy more stacks than are available.");
+		return false;
+	}
+	Item* purchasedItem = nullptr;
 
-			// Make a copy of the shop Item.
-			Item* purchasedItem = mItemFactory->copy(pItem);
+	if (unlimited) {
+		purchasedItem = mItemFactory->copy(pItem);
 
-			// Put Item into Inventory.
-			EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
-
-			// Update client.
-			pCharacter->getConnection()->sendItemTrade(purchasedItem);
-
-			// Update currency.
-			//purchasedItem->getB
-
-			return true;
-		}
-		// Stackable
-		else {
-
-			// Try to find an existing stack.
-			//pCharacter->getInventory()->findStackable(pItem->getID());
+		if (pItem->isStackable()) {
+			purchasedItem->setStacks(pStacks);
 		}
 	}
-	// Limited Quantity.
 	else {
-		// TODO: Dynamic shop Items.
-		// ItemPacketMerchant
+		// TODO: Remove Item from shop inventory.
+		return false;
 	}
 
-	return false;
+
+	// Give Character their purchased Item.
+	if (!mZone->giveItem(pCharacter, purchasedItem, InventoryReason::ShopBuy)) {
+		mLog->error("Failed to give Item to Character.");
+		return false;
+	}
+	// Calculate cost.
+	const u32 price = pItem->getShopPrice() * pStacks;
+
+	// Convert currency from single number to EQ currency.
+	i32 platinum = 0, gold = 0, silver = 0, copper = 0;
+	Utility::convertFromCopper(price, platinum, gold, silver, copper);
+
+	// Remove currency from Character.
+	inventory->removeCurrency(platinum, gold, silver, copper, InventoryReason::ShopBuy);
+
+	// Update client.
+	connection->sendCurrencyUpdate();
+	connection->sendShopBuyReply(pNPC->getSpawnID(), pItem->getInstanceID(), pStacks, price);
+
+	return true;
 }

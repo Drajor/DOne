@@ -100,8 +100,9 @@ public:
 	void onLinkdeadBegin(Character* pCharacter);
 	void onLinkdeadEnd(Character* pCharacter);
 
-	const bool giveItem(Character* pCharacter, Item* pItem);
-	const bool giveItems(Character* pCharacter, std::list<Item*>& pItems);
+	const bool giveItem(Character* pCharacter, Item* pItem, const String& pReason);
+	const bool giveItems(Character* pCharacter, std::list<Item*>& pItems, const String& pReason);
+	const bool giveStackableItem(Character* pCharacter, Item* pItem, const String& pReason);
 
 	// Chat Events.
 	const bool onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
