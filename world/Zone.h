@@ -149,6 +149,11 @@ public:
 	const bool onGuildSetFlags(Character* pSetter, const String& pCharacterName, const u32 pFlags);
 	const bool onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote);
 
+	// Loot Events.
+	const bool onLootRequest(Character* pCharacter, const u32 pSpawnID);
+	void onLootEnd(Character* pCharacter);
+	void onLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID);
+
 	void onChangeGuild(Character* pCharacter);
 	void onGuildsChanged();
 
@@ -267,10 +272,6 @@ public:
 
 	void sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender);
 	void sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket);
-
-	void handleBeginLootRequest(Character* pCharacter, const u32 pCorpseSpawnID);
-	void handleEndLootRequest(Character* pCharacter);
-	void handleLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID);
 
 	void handleConsider(Character* pCharacter, const u32 pSpawnID);
 	void handleConsiderCorpse(Character* pCharacter, const u32 pSpawnID);

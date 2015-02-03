@@ -1197,24 +1197,26 @@ void Zone::_handleDeath(Character* pCharacter, Actor* pKiller) {
 	pCharacter->onDeath();
 }
 
-void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) {
+const bool Zone::onLootRequest(Character* pCharacter, const u32 pSpawnID) {
 	using namespace Payload::Zone;
-	EXPECTED(pLooter);
-	EXPECTED(pLooter->isLooting() == false);
+	if (!pCharacter) return false;
+	if (pCharacter->isLooting()) return false;
+
+	auto connection = pCharacter->getConnection();
 
 	// Check: Actor exists.
-	Actor* actor = getActor(pCorpseSpawnID);
+	Actor* actor = getActor(pSpawnID);
 	if (!actor) {
-		pLooter->notify("Corpse could not be found.");
-		pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
-		return;
+		pCharacter->notify("Corpse could not be found.");
+		connection->sendLootResponse(LootResponse::DENY);
+		return true;
 	}
 
 	// Check: Actor is a corpse.
 	if (!actor->isCorpse()) {
-		pLooter->notify("You can not loot that.");
-		pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
-		return;
+		pCharacter->notify("You can not loot that.");
+		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+		return true;
 	}
 
 	// Handle: Looting an NPC corpse.
@@ -1222,9 +1224,9 @@ void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) 
 		auto lootController = actor->getLootController();
 		auto npcCorpse = Actor::cast<NPC*>(actor);
 		// Check: Is pCharacter close enough to loot.
-		if (pLooter->squareDistanceTo(npcCorpse) > 625) { // TODO: Magic.
-			pLooter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
-			return;
+		if (pCharacter->squareDistanceTo(npcCorpse) > 625) { // TODO: Magic.
+			pCharacter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
+			return true;
 		}
 		// Check: Is corpse currently closed?
 		if (lootController->isOpen() == false) {
@@ -1236,19 +1238,20 @@ void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) 
 			}
 		}
 		// Check: Is Character allowed to loot this corpse?
-		if (lootController->canLoot(pLooter) == false) {
-			pLooter->getConnection()->sendLootResponse(LootResponse::DENY);
-			return;
+		if (lootController->canLoot(pCharacter) == false) {
+			pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
+			return true;
 		}
+
 		// Check: Is someone already looting this corpse?
 		if (lootController->hasLooter()) {
-			pLooter->getConnection()->sendLootResponse(LootResponse::ALREADY);
-			return;
+			pCharacter->getConnection()->sendLootResponse(LootResponse::ALREADY);
+			return true;
 		}
 
 		// Associate Character and Corpse.
-		pLooter->setLootingCorpse(npcCorpse);
-		lootController->setLooter(pLooter);
+		pCharacter->setLootingCorpse(npcCorpse);
+		lootController->setLooter(pCharacter);
 
 		i32 platinum = 0;
 		i32 gold = 0;
@@ -1265,10 +1268,10 @@ void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) 
 			npcCorpse->removeCurrency();
 
 			// Add currency to looter.
-			EXPECTED(pLooter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::Loot));
+			pCharacter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::Loot);
 		}
 
-		pLooter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
+		pCharacter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
 
 		if (currencyLooted) {
 			// TODO: Currency save.
@@ -1283,22 +1286,24 @@ void Zone::handleBeginLootRequest(Character* pLooter, const u32 pCorpseSpawnID) 
 			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot, true);
 
 			auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-			pLooter->getConnection()->sendPacket(outPacket);
+			pCharacter->getConnection()->sendPacket(outPacket);
 			safe_delete(outPacket);
 			count++;
 		}
 
-		return;
+		return true;
 	}
 
 	// Handle: Looting a Character corpse.
 	if (actor->isCharacterCorpse()) {
 
-		return;
+		return true;
 	}
+
+	return false;
 }
 
-void Zone::handleEndLootRequest(Character* pCharacter) {
+void Zone::onLootEnd(Character* pCharacter) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCharacter->isLooting());
 	Actor* corpse = pCharacter->getLootingCorpse();
@@ -1328,7 +1333,7 @@ void Zone::handleEndLootRequest(Character* pCharacter) {
 	}
 }
 
-void Zone::handleLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID) {
+void Zone::onLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID) {
 	EXPECTED(pCharacter);
 	EXPECTED(pCorpse);
 	EXPECTED(pCharacter->isLooting());

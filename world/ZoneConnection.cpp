@@ -2489,7 +2489,7 @@ const bool ZoneConnection::handleBeginLootRequest(const EQApplicationPacket* pPa
 	auto payload = LootBeginRequest::convert(pPacket);
 
 	// Notify Zone.
-	mZone->handleBeginLootRequest(mCharacter, payload->mSpawnID);
+	mZone->onLootRequest(mCharacter, payload->mSpawnID);
 	return true;
 }
 
@@ -2498,7 +2498,7 @@ const bool ZoneConnection::handleEndLootRequest(const EQApplicationPacket* pPack
 	SIZE_CHECK(pPacket->size == 0);
 
 	// Notify Zone.
-	mZone->handleEndLootRequest(mCharacter);
+	mZone->onLootEnd(mCharacter);
 	return true;
 }
 
@@ -2547,7 +2547,7 @@ const bool ZoneConnection::handleLootItem(const EQApplicationPacket* pPacket) {
 	sendPacket(const_cast<EQApplicationPacket*>(pPacket));
 
 	// Notify Zone.
-	mZone->handleLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
+	mZone->onLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
 	return true;
 }
 
