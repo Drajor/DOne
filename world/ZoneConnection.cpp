@@ -3609,7 +3609,7 @@ const bool ZoneConnection::handleDropItem(const EQApplicationPacket* pPacket) {
 	SIZE_CHECK(pPacket->size == 0);
 
 	// Notify Zone.
-	mZone->handleDropItem(mCharacter);
+	mZone->onDropItem(mCharacter);
 	return true;
 }
 

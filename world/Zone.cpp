@@ -1371,15 +1371,31 @@ void Zone::handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 
 	delete packet;
 }
 
-void Zone::handleDropItem(Character* pCharacter) {
-	EXPECTED(pCharacter);
+void Zone::onDropItem(Character* pCharacter) {
+	if (!pCharacter) return;
 
-	auto item = pCharacter->getInventory()->peekCursor();
-	EXPECTED(item);
-	EXPECTED(item->isTradeable());
+	auto inventory = pCharacter->getInventory();
+	auto item = inventory->peekCursor();
+
+	// Check: Item is valid.
+	if (!item) {
+		mLog->error(pCharacter->getName() + " attempted to drop null item.");
+		return;
+	}
+
+	// Check: Item can be dropped.
+	if (!item->isTradeable()) {
+		mLog->error(pCharacter->getName() + " attempted to drop item that is not tradeable.");
+		return;
+	}
 
 	// Consume 
-	EXPECTED(pCharacter->getInventory()->consume(SlotID::CURSOR, item->getStacks()));
+	if (!inventory->consume(SlotID::CURSOR, item->getStacks())) {
+		mLog->error("Failed to consume dropped item.");
+		return;
+	}
+
+	// TODO: Ground Spawns.
 }
 
 const bool Zone::loadObjects(Data::ObjectList pObjects) {
@@ -2605,8 +2621,8 @@ const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems, cons
 	return true;
 }
 
-const bool Zone::onCampBegin(Character* pCharacter) {
-	if (!pCharacter) return false;
+void Zone::onCampBegin(Character* pCharacter) {
+	if (!pCharacter) return;
 
 	// Cancel trade if a Character starts camping.
 	if (pCharacter->isTrading()) {
@@ -2623,8 +2639,5 @@ const bool Zone::onCampBegin(Character* pCharacter) {
 		connection->sendPreLogOutReply();
 		connection->sendLogOutReply();
 		connection->dropConnection();
-		return true;;
 	}
-
-	return true;
 }

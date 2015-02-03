@@ -226,7 +226,8 @@ public:
 	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
 	const bool onTargetChange(Character* pCharacter, const u16 pSpawnID);
 	const bool onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot);
-	const bool onCampBegin(Character* pCharacter);
+	void onCampBegin(Character* pCharacter);
+	void onDropItem(Character* pCharacter);
 
 	void handleActorPositionChange(Actor* pActor);
 
@@ -317,7 +318,6 @@ public:
 	void handleNimbusRemoved(Actor * pActor, const u32 pNimbusID);
 
 	void handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 pHigh);
-	void handleDropItem(Character* pCharacter);
 	void handleAppearanceChange(Actor* pActor);
 	void handleRespawnSelection(Character* pCharacter, const u32 pSelection);
 
