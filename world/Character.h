@@ -426,6 +426,7 @@ public:
 	inline const u32 getIntoxication() const { return 0; }
 
 	inline const String& getInspectMessage() const { return mInspectMessage; }
+	inline void setInspectMessage(const String& pMessage) { mInspectMessage = pMessage; }
 
 private:
 

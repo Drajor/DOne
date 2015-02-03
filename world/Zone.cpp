@@ -2665,6 +2665,7 @@ void Zone::onInspectRequest(Character* pCharacter, const u32 pSpawnID) {
 
 	auto target = Actor::cast<Character*>(actor);
 	auto inventory = target->getInventory();
+	const auto selfInspect = target == pCharacter;
 
 	auto packet = InspectResponse::create();
 	auto payload = InspectResponse::convert(packet);
@@ -2685,7 +2686,9 @@ void Zone::onInspectRequest(Character* pCharacter, const u32 pSpawnID) {
 	pCharacter->getConnection()->sendPacket(packet);
 	delete packet;
 
+	if (selfInspect) return;
+	if (pCharacter->isHidden()) return;
+
 	// Send notification to Character being inspected.
-	if (!pCharacter->isHidden())
-		target->getConnection()->sendSimpleMessage(MessageType::White, StringID::BeingInspected, pCharacter->getName());
+	target->getConnection()->sendSimpleMessage(MessageType::White, StringID::BeingInspected, pCharacter->getName());
 }

@@ -3866,7 +3866,8 @@ const bool ZoneConnection::handleSetInspectMessage(const EQApplicationPacket* pP
 	STRING_CHECK(payload->mMessage, 256);
 	const String newMessage(payload->mMessage);
 
-	// TODO:
+	mCharacter->setInspectMessage(newMessage);
+	mCharacter->notify("Inspect message updated.");
 	return true;
 }
 
