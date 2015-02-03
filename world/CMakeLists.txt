@@ -72,6 +72,9 @@ SET(world_sources
 	CharacterFactory.cpp
 	Guild.cpp
 	Group.cpp
+	LootHandler.cpp
+	TradeHandler.cpp
+	ShopHandler.cpp
 )
 
 SET(world_headers
@@ -146,6 +149,9 @@ SET(world_headers
 	ZoneConnectionManager.h
 	Account.h
 	CharacterFactory.h
+	LootHandler.h
+	TradeHandler.h
+	ShopHandler.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

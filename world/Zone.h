@@ -37,6 +37,9 @@ class Transmutation;
 class AccountManager;
 class NPCFactory;
 class TitleManager;
+class LootHandler;
+class TradeHandler;
+class ShopHandler;
 
 namespace Experience {
 	class Calculator;
@@ -120,13 +123,13 @@ public:
 	const bool onEmote(Character* pCharacter, const String& pMessage); // This comes from using the /em command.
 
 	// Group Events.
-	const bool onGroupInvite(Character* pInviter, const String& pInviteeName);
-	const bool onGroupInviteAccept(Character* pCharacter);
-	const bool onGroupInviteDecline(Character* pCharacter);
-	const bool onGroupLeave(Character* pCharacter);
-	const bool onGroupRemove(Character* pCharacter, const String& pCharacterName);
-	const bool onGroupMakeLeader(Character* pCharacter, const String& pTargetName);
-	const bool onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle);
+	void onGroupInvite(Character* pInviter, const String& pInviteeName);
+	void onGroupInviteAccept(Character* pCharacter);
+	void onGroupInviteDecline(Character* pCharacter);
+	void onGroupLeave(Character* pCharacter);
+	void onGroupRemove(Character* pCharacter, const String& pCharacterName);
+	void onGroupMakeLeader(Character* pCharacter, const String& pTargetName);
+	void onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle);
 
 	// Raid Events.
 	const bool onRaidInviteDecline(Character* pCharacter);
@@ -150,9 +153,22 @@ public:
 	const bool onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote);
 
 	// Loot Events.
-	const bool onLootRequest(Character* pCharacter, const u32 pSpawnID);
-	void onLootEnd(Character* pCharacter);
-	void onLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID);
+	void onLootRequest(Character* pCharacter, const u32 pSpawnID);
+	void onLootFinished(Character* pCharacter);
+	void onLootItem(Character* pCharacter, const u32 pSlotID);
+
+	// Shop Events.
+	void onShopRequest(Character* pCharacter, const u32 pSpawnID);
+	void onShopFinished(Character* pCharacter);
+	void onShopSell(Character* pCharacter, const u32 pSlotID, const u32 pStacks);
+	void onShopBuy(Character* pCharacter, const u32 pInstanceID, const u32 pStacks);
+
+	// Trade Events.
+	void onTradeRequest(Character* pCharacter, const u32 pSpawnID);
+	void onTradeResponse(Character* pCharacter, const u32 pSpawnID);
+	void onTradeBusy(Character* pCharacter, const u32 pSpawnID);
+	void onTradeAccept(Character* pCharacter, const u32 pSpawnID);
+	void onTradeCancel(Character* pCharacter, const u32 pSpawnID);
 
 	void onChangeGuild(Character* pCharacter);
 	void onGuildsChanged();
@@ -287,33 +303,11 @@ public:
 
 	// Character is moving currency.
 	const bool onMoveCurrency(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount);
-	
-	// Character is requesting trade with an Actor.
-	const bool onTradeRequest(Character* pCharacter, const u32 pSpawnID);
-
-	// Character is responding to a trade request (positive).
-	const bool onTradeResponse(Character* pCharacter, const u32 pSpawnID);
-
-	// Character is responding to trade request (negative).
-	const bool onTradeBusy(Character* pCharacter, const u32 pSpawnID);
-
-	// Character has accepted trade.
-	const bool onTradeAccept(Character* pCharacter, const u32 pSpawnID);
-
-	// Character has canceled trade.
-	const bool onTradeCancel(Character* pCharacter, const u32 pSpawnID);
-
-	void handleShopRequest(Character* pCharacter, const u32 pSpawnID);
-	void handleShopEnd(Character* pCharacter, const u32 pSpawnID);
-	void onSellItem(Character* pCharacter, const u32 pSpawnID, const u32 pSlotID, const u32 pStacks);
-	void onBuyItem(Character* pCharacter, const u32 pSpawnID, const u32 pItemInstanceID, const u32 pStacks);
-	const bool _handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const u32 pStacks);
 
 	const ZonePointList& getZonePoints() { return mZonePoints; }
 	const ObjectList& getObjects() { return mObjects; }
 
 	const bool canBank(Character* pCharacter);
-	const bool canShop(Character* pCharacter, NPC* pMerchant);
 
 	void handleCriticalHit(Actor* pActor, const i32 pDamage);
 	void handleHPChange(Actor* pActor);
@@ -372,6 +366,9 @@ private:
 	ItemFactory* mItemFactory = nullptr;
 	Transmutation* mTransmutation = nullptr;
 	NPCFactory* mNPCFactory = nullptr;
+	LootHandler* mLootHandler = nullptr;
+	TradeHandler* mTradeHandler = nullptr;
+	ShopHandler* mShopHandler = nullptr;
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
 	const bool loadObjects(Data::ObjectList pObjects);
@@ -409,10 +406,6 @@ private:
 	bool mPopulated = false;
 
 	ZonePoint* _getClosestZonePoint(const Vector3& pPosition);
-	const bool returnTradeItems(Character* pCharacter);
-	const bool returnTradeCurrency(Character* pCharacter);
-	void orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered);
-	const bool trade(Character* pCharacterA, Character* pCharacterB);
 	ZonePointList mZonePoints;
 
 	std::list<Character*> mCharacters;

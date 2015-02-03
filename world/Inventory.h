@@ -17,7 +17,8 @@ class Item;
 
 namespace CurrencyReason {
 	static const String Loot = "LOOT";
-	static const String ShopSale = "SHOP_SALE";
+	static const String ShopBuy = "SHOP_BUY";
+	static const String ShopSell = "SHOP_SELL";
 	static const String Trade = "TRADE";
 	static const String TradeReturn = "TRADE_RETURN";
 }
@@ -113,7 +114,7 @@ public:
 	const bool addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason);
 
 	// Removes 'personal' currency.
-	const bool removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper);
+	const bool removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason);
 
 	// Returns the total value of all currency in copper pieces.
 	const u64 getTotalCurrency() const;

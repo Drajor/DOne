@@ -19,6 +19,9 @@
 #include "Utility.h"
 #include "Limits.h"
 #include "TitleManager.h"
+#include "TradeHandler.h"
+#include "LootHandler.h"
+#include "ShopHandler.h"
 
 #include "LogSystem.h"
 #include "Scene.h"
@@ -123,6 +126,9 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mLootAllocator = new LootAllocator();
 	mTransmutation = new Transmutation();
 	mExperienceModifer = new Experience::Modifier();
+	mTradeHandler = new TradeHandler(this, mLogFactory);
+	mLootHandler = new LootHandler(this, mLogFactory);
+	mShopHandler = new ShopHandler(this, mItemFactory, mLogFactory);
 
 	mZoneType = pZoneData->mZoneType;
 	mTimeType = pZoneData->mTimeType;
@@ -1197,168 +1203,9 @@ void Zone::_handleDeath(Character* pCharacter, Actor* pKiller) {
 	pCharacter->onDeath();
 }
 
-const bool Zone::onLootRequest(Character* pCharacter, const u32 pSpawnID) {
-	using namespace Payload::Zone;
-	if (!pCharacter) return false;
-	if (pCharacter->isLooting()) return false;
-
-	auto connection = pCharacter->getConnection();
-
-	// Check: Actor exists.
-	Actor* actor = getActor(pSpawnID);
-	if (!actor) {
-		pCharacter->notify("Corpse could not be found.");
-		connection->sendLootResponse(LootResponse::DENY);
-		return true;
-	}
-
-	// Check: Actor is a corpse.
-	if (!actor->isCorpse()) {
-		pCharacter->notify("You can not loot that.");
-		pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
-		return true;
-	}
-
-	// Handle: Looting an NPC corpse.
-	if (actor->isNPCCorpse()) {
-		auto lootController = actor->getLootController();
-		auto npcCorpse = Actor::cast<NPC*>(actor);
-		// Check: Is pCharacter close enough to loot.
-		if (pCharacter->squareDistanceTo(npcCorpse) > 625) { // TODO: Magic.
-			pCharacter->getConnection()->sendLootResponse(LootResponse::TOO_FAR);
-			return true;
-		}
-		// Check: Is corpse currently closed?
-		if (lootController->isOpen() == false) {
-			// Check: Is it time to open the corpse?
-			// TODO: This is probably the most efficient place to check this however it is odd!
-			if (npcCorpse->getOpenTimer().check()) {
-				// Open corpse.
-				lootController->setOpen(true);
-			}
-		}
-		// Check: Is Character allowed to loot this corpse?
-		if (lootController->canLoot(pCharacter) == false) {
-			pCharacter->getConnection()->sendLootResponse(LootResponse::DENY);
-			return true;
-		}
-
-		// Check: Is someone already looting this corpse?
-		if (lootController->hasLooter()) {
-			pCharacter->getConnection()->sendLootResponse(LootResponse::ALREADY);
-			return true;
-		}
-
-		// Associate Character and Corpse.
-		pCharacter->setLootingCorpse(npcCorpse);
-		lootController->setLooter(pCharacter);
-
-		i32 platinum = 0;
-		i32 gold = 0;
-		i32 silver = 0;
-		i32 copper = 0;
-		bool currencyLooted = false;
-
-		// Check: Does the corpse have currency on it?
-		if (npcCorpse->hasCurrency()) {
-			currencyLooted = true;
-
-			// Remove currency from corpse.
-			npcCorpse->getCurrency(platinum, gold, silver, copper);
-			npcCorpse->removeCurrency();
-
-			// Add currency to looter.
-			pCharacter->getInventory()->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::Loot);
-		}
-
-		pCharacter->getConnection()->sendLootResponse(LootResponse::LOOT, platinum, gold, silver, copper);
-
-		if (currencyLooted) {
-			// TODO: Currency save.
-		}
-
-		// Send items.
-		npcCorpse->onLootBegin();
-		int count = 0;
-		for (auto i : npcCorpse->getLootItems()) {
-			i->setSlot(23 + count);
-			u32 payloadSize = 0;
-			const unsigned char* data = i->copyData(payloadSize, Payload::ItemPacketLoot, true);
-
-			auto outPacket = new EQApplicationPacket(OP_ItemPacket, data, payloadSize);
-			pCharacter->getConnection()->sendPacket(outPacket);
-			safe_delete(outPacket);
-			count++;
-		}
-
-		return true;
-	}
-
-	// Handle: Looting a Character corpse.
-	if (actor->isCharacterCorpse()) {
-
-		return true;
-	}
-
-	return false;
-}
-
-void Zone::onLootEnd(Character* pCharacter) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isLooting());
-	Actor* corpse = pCharacter->getLootingCorpse();
-	EXPECTED(corpse);
-	auto lootController = corpse->getLootController();
-	EXPECTED(lootController->getLooter() == pCharacter);
-
-	// Disassociate Character and corpse.
-	lootController->clearLooter();
-	pCharacter->setLootingCorpse(nullptr);
-
-	pCharacter->getConnection()->sendLootComplete();
-
-	// Finished looting an NPC corpse.
-	if (corpse->isNPCCorpse()) {
-		NPC* npcCorpse = Actor::cast<NPC*>(corpse);
-
-		// Check: Empty corpse
-		if (!npcCorpse->hasCurrency() && !npcCorpse->hasItems()) {
-			npcCorpse->destroy();
-			return;
-		}
-	}
-	// Finished looting a Character corpse.
-	else if (corpse->isCharacterCorpse()) {
-		// TODO:
-	}
-}
-
-void Zone::onLootItem(Character* pCharacter, Actor* pCorpse, const u32 pSlotID) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCorpse);
-	EXPECTED(pCharacter->isLooting());
-	EXPECTED(pCharacter->getLootingCorpse() == pCorpse);
-	auto lootController = pCorpse->getLootController();
-	EXPECTED(lootController->getLooter() == pCharacter);
-	EXPECTED(SlotID::isCorpseSlot(pSlotID));
-
-	// Looting Item from NPC corpse.
-	if (pCorpse->isNPCCorpse()) {
-		NPC* npcCorpse = Actor::cast<NPC*>(pCorpse);
-		Item* item = npcCorpse->getLootItem(pSlotID - 23);
-
-		// TODO: Cursor empty check.
-
-		// Update Character Inventory.
-		pCharacter->getInventory()->pushCursor(item);
-
-		// Update NPC loot items.
-		npcCorpse->removeLootItem(pSlotID - 23);
-
-		pCharacter->getConnection()->sendItemTrade(item);
-	}
-	
-}
+void Zone::onLootRequest(Character* pCharacter, const u32 pSpawnID) { mLootHandler->onRequest(pCharacter, pSpawnID); }
+void Zone::onLootFinished(Character* pCharacter) { mLootHandler->onFinished(pCharacter); }
+void Zone::onLootItem(Character* pCharacter, const u32 pSlotID) { mLootHandler->onLootItem(pCharacter, pSlotID); }
 
 void Zone::handleConsider(Character* pCharacter, const u32 pSpawnID) {
 	EXPECTED(pCharacter);
@@ -1434,15 +1281,6 @@ const bool Zone::canBank(Character* pCharacter) {
 	return closestDistance < MaxBankingDistance;
 }
 
-const bool Zone::canShop(Character* pCharacter, NPC* pMerchant) {
-	EXPECTED_BOOL(pCharacter);
-	EXPECTED_BOOL(pMerchant);
-
-	static const float MaxShoppingDistance = 405.0f; // This is fairly close. Have seen 401.
-
-	return pCharacter->squareDistanceTo(pMerchant) <= MaxShoppingDistance;
-}
-
 void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const i32 pAmount, const uint8 pType, const uint16 pSpellID) {
 	using namespace Payload::Zone;
 
@@ -1477,479 +1315,6 @@ void Zone::handleHPChange(Actor* pActor) {
 	auto packet = ActorHPUpdate::construct(pActor->getSpawnID(), pActor->getHPPercent());
 	sendToVisible(pActor, packet);
 	safe_delete(packet);
-}
-
-const bool Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) {
-	if (!pCharacter) return false;
-
-	// Check: Character can trade.
-	if (!pCharacter->canRequestTrade()) {
-		mLog->error("Got trade request from " + pCharacter->getName() + " but they are not allowed to trade right now.");
-		return false;
-	}
-
-	// Find Actor.
-	auto actor = getActor(pSpawnID);
-	if (!actor) {
-		return true;
-	}
-
-	// Check: Self trade.
-	if (pCharacter == actor) {
-		mLog->error("Got self trade request from " + pCharacter->getName());
-		return false;
-	}
-
-	// TODO: Check distance for trading.
-
-	// Requesting trade with an NPC.
-	if (actor->isNPC()) {
-		auto npc = Actor::cast<NPC*>(actor);
-		// Check: Is this NPC accepting trading requests?
-		if (npc->willTrade()) {
-			// Notify: NPC will accept trading.
-			pCharacter->getConnection()->sendTradeRequestAcknowledge(npc->getSpawnID());
-
-			// Associate Character and NPC.
-			npc->addTrader(pCharacter);
-			pCharacter->setTradingWith(npc);
-			return true;
-		}
-		else {
-			pCharacter->message(MessageType::White, "This NPC will not trade with you.");
-			return true;
-		}
-	}
-	// Requesting trade with a Character.
-	else if (actor->isCharacter()) {
-		auto character = Actor::cast<Character*>(actor);
-
-		// Prevent trade with camping Character.
-		if (character->isCamping())
-			return true;
-
-		// Prevent trade with LD Character.
-		if (character->isLinkDead())
-			return true;
-
-		// Check: Does Character have a pending trade request.
-		if (character->hasTradeRequest()) {
-
-			return true;
-		}
-
-		character->getConnection()->sendTradeRequest(pCharacter->getSpawnID());
-
-		// Record request.
-		auto& request = character->getTradeRequest();
-		request.mSpawnID = pCharacter->getSpawnID();
-		request.mTimeRequested = Utility::Time::now();
-
-		return true;
-	}
-
-	return true;
-}
-
-const bool Zone::onTradeResponse(Character* pCharacter, const u32 pSpawnID) {
-	if (!pCharacter) return false;
-
-	// Check: Character has a pending trade request.
-	if (!pCharacter->hasTradeRequest()) {
-		mLog->error(pCharacter->getName() + " responded to trade request they do not have one pending.");
-		return false;
-	}
-
-	auto& request = pCharacter->getTradeRequest();
-
-	// Check: Trade request spawn ID matches.
-	if (request.mSpawnID != pSpawnID) {
-		mLog->error(pCharacter->getName() + " responded to trade request with spawn ID: " + toString(pSpawnID) + " but the pending trade request has spawn ID: " + toString(request.mSpawnID));
-		pCharacter->clearTradeRequest();
-		return false;
-	}
-
-	// Find Actor.
-	auto actor = getActor(pSpawnID);
-	if (!actor) {
-		// NOTE: This is probably not an error. A Character could send a request then zone out.
-		mLog->error(pCharacter->getName() + " responded to trade request with spawn ID: " + toString(pSpawnID) + " but the Actor could not be found.");
-		pCharacter->clearTradeRequest();
-		return false;
-	}
-	
-	// Check: Is visible to
-	// Check: Distance is valid.
-
-	auto character = Actor::cast<Character*>(actor);
-
-	// Associate Characters as trading with each other.
-	character->setTradingWith(pCharacter);
-	pCharacter->setTradingWith(actor);
-
-	character->getConnection()->sendTradeRequestAcknowledge(pCharacter->getSpawnID());
-
-	pCharacter->clearTradeRequest();
-	return true;
-}
-
-const bool Zone::onTradeBusy(Character* pCharacter, const u32 pSpawnID) {
-	if (!pCharacter) return false;
-
-	return true;
-}
-
-
-const bool Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) {
-	using namespace Payload::Zone;
-	if (!pCharacter) return false;
-
-	// Check: Character is trading.
-	if (!pCharacter->isTrading()) {
-		mLog->error(pCharacter->getName() + " accepted trade but they are not trading.");
-		return false;
-	}
-
-	// Check: Character has already accepted trade.
-	if (pCharacter->isTradeAccepted()) {
-		mLog->error(pCharacter->getName() + " accepted trade but they have already accepted.");
-		return false;
-	}
-
-	auto tradingWithActor = pCharacter->getTradingWith();
-
-	// Check: Character is accepting trade with correct Actor.
-	if (tradingWithActor->getSpawnID() != pSpawnID) {
-		mLog->error(pCharacter->getName() + " accepted trade with incorrect Actor.");
-		return false;
-	}
-
-	// Handle: Accepted trade with another Character.
-	if (pCharacter->isTradingWithCharacter()) {
-		pCharacter->setTradeAccepted(true);
-
-		auto tradingWith = Actor::cast<Character*>(tradingWithActor);
-
-		// Update other Character.
-		auto packet = TradeAccept::construct(pCharacter->getSpawnID());
-		tradingWith->getConnection()->sendPacket(packet);
-		delete packet;
-
-		// Check: Have both Characters accepted trade.
-		if (tradingWith->isTradeAccepted()) {
-
-			if (!trade(pCharacter, tradingWith))
-				mLog->error("Trade failed");
-
-			pCharacter->setTradingWith(nullptr);
-			pCharacter->setTradeAccepted(false);
-			pCharacter->getConnection()->sendTradeFinished();
-			saveCharacter(pCharacter);
-
-			tradingWith->setTradingWith(nullptr);
-			tradingWith->setTradeAccepted(false);
-			tradingWith->getConnection()->sendTradeFinished();
-			saveCharacter(tradingWith);
-
-			return true;
-		}
-	}
-	// Handle: Accepted trade with an NPC.
-	else if (pCharacter->isTradingWithNPC()) {
-		auto tradingWith = Actor::cast<NPC*>(tradingWithActor);
-
-		pCharacter->getConnection()->sendTradeFinished();
-		pCharacter->setTradingWith(nullptr);
-
-		//const int64 tradeCurrency = pCharacter->getInventory()->getTotalTradeCurrency();
-		//pCharacter->getInventory()->onTradeAccept();
-	}
-	// Handle: Unknown.
-	else {
-		mLog->error(pCharacter->getName() + " trading with unknown type.");
-		return false;
-	}
-
-	return true;
-}
-
-const bool Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) {
-	using namespace Payload::Zone;
-	if (!pCharacter) return false;
-
-	// Check: Character is trading.
-	if (!pCharacter->isTrading()) {
-		mLog->error(pCharacter->getName() + " canceled trade but they are not trading.");
-		return false;
-	}
-
-	// Handle: Character has canceled while trading with a Character.
-	if (pCharacter->isTradingWithCharacter()) {
-		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
-
-		pCharacter->getConnection()->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
-		pCharacter->getConnection()->sendCharacterTradeClose();
-		pCharacter->setTradingWith(nullptr);
-		pCharacter->setTradeAccepted(false);
-
-		// Return trade currency.
-		if (!returnTradeCurrency(pCharacter))
-			mLog->error("Failed to return trade currency to " + pCharacter->getName());
-
-		// Return trade Items.
-		if(!returnTradeItems(pCharacter))
-			mLog->error("Failed to return trade items to " + pCharacter->getName());
-
-		tradingWith->getConnection()->sendTradeCancel(tradingWith->getSpawnID(), pCharacter->getSpawnID());
-		tradingWith->getConnection()->sendCharacterTradeClose();
-		tradingWith->setTradingWith(nullptr);
-		tradingWith->setTradeAccepted(false);
-
-		// Return trade currency.
-		if (!returnTradeCurrency(tradingWith))
-			mLog->error("Failed to return trade currency to " + tradingWith->getName());
-
-		// Return trade Items.
-		if (!returnTradeItems(tradingWith))
-			mLog->error("Failed to return trade items to " + tradingWith->getName());
-
-		return true;
-
-	}
-	// Handle: Character has canceled while trading with an NPC.
-	else if (pCharacter->isTradingWithNPC()) {
-		auto connection = pCharacter->getConnection();
-		auto tradingWith = Actor::cast<NPC*>(pCharacter->getTradingWith());
-
-		connection->sendTradeCancel(pCharacter->getSpawnID(), tradingWith->getSpawnID());
-		connection->sendCharacterTradeClose();
-		connection->sendFinishWindow2();
-		pCharacter->setTradingWith(nullptr);
-
-		// Return trade currency.
-		if (!returnTradeCurrency(pCharacter))
-			mLog->error("Failed to return trade currency to " + pCharacter->getName());
-
-		// Return trade Items.
-		if (!returnTradeItems(pCharacter))
-			mLog->error("Failed to return trade items to " + pCharacter->getName());
-
-		return true;
-	}
-
-	return true;
-}
-
-void Zone::handleShopRequest(Character* pCharacter, const u32 pSpawnID) {
-	EXPECTED(pCharacter);
-
-	// Check: Character is in a state that allows for shopping.
-	EXPECTED(pCharacter->canShop());
-
-	// Find Actor by pSpawnID.
-	auto actor = getActor(pSpawnID);
-	EXPECTED(actor);
-	EXPECTED(actor->isNPC());
-
-	auto npc = Actor::cast<NPC*>(actor);
-
-	// Check: NPC is a merchant.
-	EXPECTED(npc->isMerchant());
-
-	// Check: Distance to merchant.
-	EXPECTED(canShop(pCharacter, npc));
-
-	// Check: Character has Items on cursor.
-	// NOTE: UF does not prevent this, this is just to keep things more simple.
-	if (pCharacter->getInventory()->isCursorEmpty() == false) {
-		pCharacter->notify("Please clear your cursor and try again.");
-		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 0);
-		return;
-	}
-
-	// Merchant is open for business.
-	if (npc->isShopOpen()) {
-		// Associate Character and NPC.
-		pCharacter->setShoppingWith(npc);
-		npc->addShopper(pCharacter);
-
-		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 1, npc->_getSellRate());
-
-		// Send shop Items.
-		std::list<Item*> shopItems = npc->getShopItems();
-		for (auto i : shopItems) {
-			pCharacter->getConnection()->sendItemShop(i);
-		}
-	}
-	// Merchant is busy.
-	else {
-		pCharacter->getConnection()->sendSimpleMessage(MessageType::Yellow, StringID::MERCHANT_BUSY);
-		pCharacter->getConnection()->sendShopRequestReply(pSpawnID, 0);
-	}
-}
-
-void Zone::handleShopEnd(Character* pCharacter, const u32 pSpawnID) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isShopping());
-
-	NPC* npc = pCharacter->getShoppingWith();
-	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
-
-	// Disassociate Character and NPC.
-	EXPECTED(npc->removeShopper(pCharacter));
-	pCharacter->setShoppingWith(nullptr);
-	
-	pCharacter->getConnection()->sendShopEndReply();
-}
-
-void Zone::onSellItem(Character* pCharacter, const u32 pSpawnID, const u32 pSlotID, const u32 pStacks) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isShopping());
-
-	NPC* npc = pCharacter->getShoppingWith();
-	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
-
-	// Check: Distance to merchant.
-	EXPECTED(canShop(pCharacter, npc));
-
-	// Check: Items can be sold from pSlotID
-	EXPECTED(SlotID::isValidShopSellSlot(pSlotID));
-
-	auto item = pCharacter->getInventory()->get(pSlotID);
-	EXPECTED(item);
-
-	// Check: Item can be sold.
-	EXPECTED(item->isSellable());
-
-	// Check: Item has enough stacks.
-	EXPECTED(item->getStacks() >= pStacks);
-
-	// Calculate sale price.
-	const u32 price = item->getSellPrice(pStacks, npc->getSellRate());
-
-	const i32 copper = price % 10;
-	const i32 silver = (price % 100) / 10;
-	const i32 gold = (price % 1000) / 100;
-	const i32 platinum = (price / 1000);
-	
-	// Add currency to Character.
-	pCharacter->getInventory()->addCurrency(platinum, gold, silver, copper, CurrencyReason::ShopSale);
-
-	// Detect when the Character's auto food / drink is being sold.
-	const bool updateConsumables = pCharacter->getInventory()->isAutoFood(item) || pCharacter->getInventory()->isAutoDrink(item);
-	
-	// Consume Item/stacks sold.
-	EXPECTED(pCharacter->getInventory()->consume(pSlotID, pStacks));
-	item = nullptr;
-
-	// Update consumables.
-	if (updateConsumables)
-		pCharacter->getInventory()->updateConsumables();
-
-	// Item being sold from a worn slot.
-	if (SlotID::isWorn(pSlotID)) {
-
-	}
-
-	pCharacter->getConnection()->sendShopSellReply(pSpawnID, pSlotID, pStacks, price);
-
-	// TODO: Dynamic merchant Items.
-}
-
-void Zone::onBuyItem(Character* pCharacter, const u32 pSpawnID, const u32 pItemInstanceID, const u32 pStacks) {
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isShopping());
-
-	// Check: Cursor is empty. Underfoot checks this.
-	EXPECTED(pCharacter->getInventory()->isCursorEmpty());
-
-	NPC* npc = pCharacter->getShoppingWith();
-	EXPECTED(npc->getSpawnID() == pSpawnID); // Sanity.
-
-	// Check: Distance to merchant.
-	EXPECTED(canShop(pCharacter, npc));
-
-	// Find Item.
-	auto item = npc->getShopItem(pItemInstanceID);
-	if (!item) {
-		pCharacter->notify("I seem to have misplaced that. Sorry!");
-		// Send failure reply to prevent UI locking up.
-		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, 0, -1);
-		return;
-	}
-
-	//uint64 price = 0;
-	const bool success = _handleShopBuy(pCharacter, npc, item, pStacks);
-
-	if (success) {
-		// Calculate cost.
-		const u32 price = item->getShopPrice() * pStacks;
-		// Convert currency from single number to EQ currency.
-		i32 platinum = 0, gold = 0, silver = 0, copper = 0;
-		Utility::convertFromCopper(price, platinum, gold, silver, copper);
-		// Remove currency from Character.
-		EXPECTED(pCharacter->getInventory()->removeCurrency(platinum, gold, silver, copper));
-
-		// Update client.
-		pCharacter->getConnection()->sendCurrencyUpdate();
-
-		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, price);
-	}
-	else {
-		pCharacter->getConnection()->sendShopBuyReply(pSpawnID, pItemInstanceID, pStacks, 0, -1);
-	}
-		
-}
-
-const bool Zone::_handleShopBuy(Character* pCharacter, NPC* pNPC, Item* pItem, const u32 pStacks) {
-	EXPECTED_BOOL(pCharacter);
-	EXPECTED_BOOL(pNPC);
-	EXPECTED_BOOL(pItem);
-
-	// Unlimited Quantity.
-	if (pItem->getShopQuantity() == -1) {
-		// Non-stackable
-		if (pItem->isStackable() == false) {
-			EXPECTED_BOOL(pStacks == 1);
-
-			// Try to find an empty slot for the Item.
-			const u32 slotID = pCharacter->getInventory()->findSlotFor(pItem->isContainer(), pItem->getSize());
-
-			// No empty slot found.
-			if (SlotID::isNone(slotID)) {
-				// NOTE: UF still sends the packet when it knows the Inventory is full. Go figure.
-				// X tells you, 'Your inventory appears full! How can you buy more?'
-				return false;
-			}
-			
-			// Make a copy of the shop Item.
-			Item* purchasedItem = mItemFactory->copy(pItem);
-
-			// Put Item into Inventory.
-			EXPECTED_BOOL(pCharacter->getInventory()->put(purchasedItem, slotID));
-
-			// Update client.
-			pCharacter->getConnection()->sendItemTrade(purchasedItem);
-
-			// Update currency.
-			//purchasedItem->getB
-
-			return true;
-		}
-		// Stackable
-		else {
-
-			// Try to find an existing stack.
-			//pCharacter->getInventory()->findStackable(pItem->getID());
-		}
-	}
-	// Limited Quantity.
-	else {
-		// TODO: Dynamic shop Items.
-		// ItemPacketMerchant
-	}
-
-	return false;
 }
 
 void Zone::handleNimbusAdded(Actor* pActor, const u32 pNimbusID) {
@@ -2727,13 +2092,24 @@ const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharact
 	return success;
 }
 
-const bool Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) { return mGroupManager->onInvite(pInviter, pInviteeName); }
-const bool Zone::onGroupInviteAccept(Character* pCharacter) { return mGroupManager->onInviteAccept(pCharacter); }
-const bool Zone::onGroupInviteDecline(Character* pCharacter) { return mGroupManager->onInviteDecline(pCharacter); }
-const bool Zone::onGroupLeave(Character* pCharacter) { return mGroupManager->onLeave(pCharacter); }
-const bool Zone::onGroupRemove(Character* pCharacter, const String& pCharacterName) { return mGroupManager->onRemove(pCharacter, pCharacterName); }
-const bool Zone::onGroupMakeLeader(Character* pCharacter, const String& pTargetName) { return mGroupManager->onMakeLeader(pCharacter, pTargetName); }
-const bool Zone::onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle) { return mGroupManager->onRoleChange(pCharacter, pTargetName, pRoleID, pToggle); }
+void Zone::onGroupInvite(Character* pInviter, const String& pInviteeName) { mGroupManager->onInvite(pInviter, pInviteeName); }
+void Zone::onGroupInviteAccept(Character* pCharacter) { mGroupManager->onInviteAccept(pCharacter); }
+void Zone::onGroupInviteDecline(Character* pCharacter) { mGroupManager->onInviteDecline(pCharacter); }
+void Zone::onGroupLeave(Character* pCharacter) { mGroupManager->onLeave(pCharacter); }
+void Zone::onGroupRemove(Character* pCharacter, const String& pCharacterName) { mGroupManager->onRemove(pCharacter, pCharacterName); }
+void Zone::onGroupMakeLeader(Character* pCharacter, const String& pTargetName) { mGroupManager->onMakeLeader(pCharacter, pTargetName); }
+void Zone::onGroupRoleChange(Character* pCharacter, const String& pTargetName, const u32 pRoleID, const u8 pToggle) { mGroupManager->onRoleChange(pCharacter, pTargetName, pRoleID, pToggle); }
+
+void Zone::onShopRequest(Character* pCharacter, const u32 pSpawnID) { mShopHandler->onRequest(pCharacter, pSpawnID); }
+void Zone::onShopFinished(Character* pCharacter) { mShopHandler->onFinished(pCharacter); }
+void Zone::onShopSell(Character* pCharacter, const u32 pSlotID, const u32 pStacks) { mShopHandler->onSell(pCharacter, pSlotID, pStacks); }
+void Zone::onShopBuy(Character* pCharacter, const u32 pInstanceID, const u32 pStacks) { mShopHandler->onBuy(pCharacter, pInstanceID, pStacks); }
+
+void Zone::onTradeRequest(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onRequest(pCharacter, pSpawnID); }
+void Zone::onTradeResponse(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onResponse(pCharacter, pSpawnID); }
+void Zone::onTradeBusy(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onBusy(pCharacter, pSpawnID); }
+void Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onAccept(pCharacter, pSpawnID); }
+void Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onCancel(pCharacter, pSpawnID); }
 
 const bool Zone::onPetCommand(Character* pCharacter, const u32 pCommand) {
 	return true;
@@ -3102,19 +2478,9 @@ const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, cons
 		return false;
 	}
 
-	// Handle: 
-	if ( CurrencySlot::isTrade(pToSlot) && pCharacter->isTradingWithCharacter()) {
-		auto tradingWith = Actor::cast<Character*>(pCharacter->getTradingWith());
-
-		// Moving currency into trade resets 'accepted'.
-		pCharacter->setTradeAccepted(false);
-		tradingWith->setTradeAccepted(false);
-
-		// Update the Character being traded with.
-		auto packet = Payload::Zone::TradeCurrencyUpdate::construct(pCharacter->getSpawnID(), pToType, pAmount);
-		tradingWith->getConnection()->sendPacket(packet);
-		delete packet;
-	}
+	// Notify TradeHandler.
+	if (CurrencySlot::isTrade(pToSlot) && pCharacter->isTradingWithCharacter())
+		mTradeHandler->onMoveCurrency(pCharacter, pToSlot, pAmount);
 
 	return true;
 }
@@ -3126,6 +2492,8 @@ const bool Zone::onWearChange(Character* pCharacter, const u32 pMaterialID, u32 
 	auto packet = WearChange::construct(pCharacter->getSpawnID(), pMaterialID, pEliteMaterialID, pColour, pSlot);
 	sendToVisible(pCharacter, packet, false);
 	delete packet;
+
+	return true;
 }
 
 const bool giveStackableItem(Character* pCharacter, Item* pItem) {
@@ -3235,134 +2603,6 @@ const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems) {
 	}
 
 	return true;
-}
-
-const bool Zone::returnTradeItems(Character* pCharacter) {
-	if (!pCharacter) return false;
-	
-	// Note: Ideally returning trade items would be a simple as generating 0-8 OP_MoveItem packets but that does not seem to work.
-
-	auto inventory = pCharacter->getInventory();
-
-	// Make a list of Items that are in the trade window.
-	std::list<Item*> unordered;
-	std::list<Item*> ordered;
-	inventory->getTradeItems(unordered);
-
-	// Check: Nothing to return.
-	if (unordered.empty()) return true;
-
-	orderItems(unordered, ordered);
-	
-	// Clear all trade Items.
-	pCharacter->getInventory()->clearTradeItems();
-
-	// Return all trade Items back into Inventory.
-	if (!giveItems(pCharacter, ordered)){
-		mLog->error("Failed to return trade Item to Character.");
-	}
-
-	return true;
-}
-
-const bool Zone::returnTradeCurrency(Character* pCharacter) {
-	if (!pCharacter) return false;
-
-	auto inventory = pCharacter->getInventory();
-
-	auto copper = inventory->getTradeCopper();
-	auto silver = inventory->getTradeSilver();
-	auto gold = inventory->getTradeGold();
-	auto platinum = inventory->getTradePlatinum();
-
-	inventory->clearTradeCurrency();
-
-	// Add currency that was in trade back into personal.
-	if (!inventory->addCurrency(CurrencySlot::Personal, platinum, gold, silver, copper, CurrencyReason::TradeReturn))
-		mLog->error("Returning trade currency failed.");
-
-	// Update Character.
-	pCharacter->getConnection()->sendCurrencyUpdate();
-
-	return true;
-}
-
-const bool Zone::trade(Character* pCharacterA, Character* pCharacterB) {
-	if (!pCharacterA) return false;
-	auto inventoryA = pCharacterA->getInventory();
-
-	if (!pCharacterB) return false;
-	auto inventoryB = pCharacterB->getInventory();
-
-	const auto preTradeCurrency = inventoryA->getTotalCurrency() + inventoryB->getTotalCurrency();
-
-	std::list<Item*> unorderedA;
-	std::list<Item*> orderedA;
-	inventoryA->getTradeItems(unorderedA);
-	inventoryA->clearTradeItems();
-	auto copperA = inventoryA->getTradeCopper();
-	auto silverA = inventoryA->getTradeSilver();
-	auto goldA = inventoryA->getTradeGold();
-	auto platinumA = inventoryA->getTradePlatinum();
-	inventoryA->clearTradeCurrency();
-	
-	std::list<Item*> unorderedB;
-	std::list<Item*> orderedB;
-	inventoryB->getTradeItems(unorderedB);
-	inventoryB->clearTradeItems();
-	auto copperB = inventoryB->getTradeCopper();
-	auto silverB = inventoryB->getTradeSilver();
-	auto goldB = inventoryB->getTradeGold();
-	auto platinumB = inventoryB->getTradePlatinum();
-	inventoryB->clearTradeCurrency();
-
-	// TODO:
-	StringStream tradeSummary;
-	tradeSummary << "[Trade Summary] " << pCharacterA->getName() << " trading with " << pCharacterB->getName();
-	
-	// Give A to B.
-	if (!unorderedA.empty()) {
-		orderItems(unorderedA, orderedA);
-		if (!giveItems(pCharacterB, orderedA))
-			mLog->error("Failed to give items A to B");
-	}
-	inventoryB->addCurrency(CurrencySlot::Personal, platinumA, goldA, silverA, copperA, CurrencyReason::Trade);
-	pCharacterB->getConnection()->sendCurrencyUpdate();
-
-	// Give B to A.
-	if (!unorderedB.empty()) {
-		orderItems(unorderedB, orderedB);
-		if(!giveItems(pCharacterA, orderedB))
-			mLog->error("Failed to give items B to A");
-	}
-	inventoryA->addCurrency(CurrencySlot::Personal, platinumB, goldB, silverB, copperB, CurrencyReason::Trade);
-	pCharacterA->getConnection()->sendCurrencyUpdate();
-
-	// Check: The total number of copper pieces between the two Characters matches the pre-trade total.
-	// Note: This /should/ catch 99.9% of errors / duping that involves trading.
-	const auto postTradeCurrency = inventoryA->getTotalCurrency() + inventoryB->getTotalCurrency();
-	if (preTradeCurrency != postTradeCurrency) {
-		mLog->error("Post trade currency total did not match! pre= " + toString(preTradeCurrency) + " post=" + toString(postTradeCurrency));
-		return false;
-	}
-
-	return true;
-}
-
-void Zone::orderItems(std::list<Item*>& pUnordered, std::list<Item*>& pOrdered) {
-	// Adjust order of Items so that containers are sent first.
-	for (auto returnItem = pUnordered.begin(); returnItem != pUnordered.end();) {
-		if ((*returnItem)->isContainer()) {
-			pOrdered.push_back(*returnItem);
-			returnItem = pUnordered.erase(returnItem);
-			continue;
-		}
-		returnItem++;
-	}
-
-	// Add remaining Items.
-	for (auto returnItem : pUnordered)
-		pOrdered.push_back(returnItem);
 }
 
 const bool Zone::onCampBegin(Character* pCharacter) {

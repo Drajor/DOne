@@ -872,8 +872,11 @@ const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 p
 	return true;
 }
 
-const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper) {
-	
+const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
+	StringStream ss;
+	ss << "Removing (" << pReason << ") currency c=(" << pCopper << ") s=(" << pSilver << ") g=(" << pGold << ") p=(" << pPlatinum << ")";
+	mLog->info(ss.str());
+
 	// Get current currency as copper.
 	i64 currentCurrency = 0;
 	EXPECTED_BOOL(Utility::convertCurrency(currentCurrency, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()));

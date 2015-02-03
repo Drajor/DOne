@@ -2498,7 +2498,7 @@ const bool ZoneConnection::handleEndLootRequest(const EQApplicationPacket* pPack
 	SIZE_CHECK(pPacket->size == 0);
 
 	// Notify Zone.
-	mZone->onLootEnd(mCharacter);
+	mZone->onLootFinished(mCharacter);
 	return true;
 }
 
@@ -2547,7 +2547,7 @@ const bool ZoneConnection::handleLootItem(const EQApplicationPacket* pPacket) {
 	sendPacket(const_cast<EQApplicationPacket*>(pPacket));
 
 	// Notify Zone.
-	mZone->onLootItem(mCharacter, mCharacter->getLootingCorpse(), payload->mSlotID);
+	mZone->onLootItem(mCharacter, payload->mSlotID);
 	return true;
 }
 
@@ -3296,7 +3296,7 @@ const bool ZoneConnection::handleShopRequest(const EQApplicationPacket* pPacket)
 	Log::info(payload->_debug());
 
 	// Notify Zone.
-	mZone->handleShopRequest(mCharacter, payload->mNPCSpawnID);
+	mZone->onShopRequest(mCharacter, payload->mNPCSpawnID);
 	return true;
 }
 
@@ -3317,7 +3317,7 @@ const bool ZoneConnection::handleShopEnd(const EQApplicationPacket* pPacket) {
 	auto payload = ShopEnd::convert(pPacket);
 
 	// Notify Zone.
-	mZone->handleShopEnd(mCharacter, payload->mNPCSpawnID);
+	mZone->onShopFinished(mCharacter);
 	return true;
 }
 
@@ -3338,7 +3338,7 @@ const bool ZoneConnection::handleShopSell(const EQApplicationPacket* pPacket) {
 	Log::info(payload->_debug());
 
 	// Notify Zone.
-	mZone->onSellItem(mCharacter, payload->mNPCSpawnID, payload->mSlotID, payload->mStacks);
+	mZone->onShopSell(mCharacter, payload->mSlotID, payload->mStacks);
 	return true;
 }
 
@@ -3360,7 +3360,7 @@ const bool ZoneConnection::handleShopBuy(const EQApplicationPacket* pPacket) {
 	Log::info(payload->_debug());
 
 	// Notify Zone.
-	mZone->onBuyItem(mCharacter, payload->mNPCSpawnID, payload->mItemInstanceID, payload->mStacks);
+	mZone->onShopBuy(mCharacter, payload->mItemInstanceID, payload->mStacks);
 	return true;
 }
 
