@@ -396,6 +396,7 @@ namespace CharacterXML {
 		SCA LastName = "last_name";
 		SCA Title = "title";
 		SCA Suffix = "suffix";
+		SCA InspectMessage = "inspect_message";
 		SCA AutoConsentGroup = "auto_consent_group";
 		SCA AutoConsentRaid = "auto_consent_raid";
 		SCA AutoConsentGuild = "auto_consent_guild";
@@ -570,6 +571,7 @@ const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Chara
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::LastName, pCharacter->mLastName));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Title, pCharacter->mTitle));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::Suffix, pCharacter->mSuffix));
+	EXPECTED_BOOL(readAttribute(characterElement, Attribute::InspectMessage, pCharacter->mInspectMessage));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid));
 	EXPECTED_BOOL(readAttribute(characterElement, Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild));
@@ -837,6 +839,7 @@ const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data:
 	characterElement->SetAttribute(Attribute::LastName, pCharacter->mLastName.c_str());
 	characterElement->SetAttribute(Attribute::Title, pCharacter->mTitle.c_str());
 	characterElement->SetAttribute(Attribute::Suffix, pCharacter->mSuffix.c_str());
+	characterElement->SetAttribute(Attribute::InspectMessage, pCharacter->mInspectMessage.c_str());
 	characterElement->SetAttribute(Attribute::AutoConsentGroup, pCharacter->mAutoConsentGroup);
 	characterElement->SetAttribute(Attribute::AutoConsentRaid, pCharacter->mAutoConsentRaid);
 	characterElement->SetAttribute(Attribute::AutoConsentGuild, pCharacter->mAutoConsentGuild);

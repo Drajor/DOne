@@ -118,6 +118,7 @@ namespace Data {
 		String mLastName = "";
 		String mTitle = "";
 		String mSuffix = "";
+		String mInspectMessage = "";
 		bool mGM = false;
 		bool mMuted = false;
 		bool mNew = true; // This flag is set to false the first time the Character enters the world.

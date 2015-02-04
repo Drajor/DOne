@@ -104,6 +104,7 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	setLastName(mData->mLastName);
 	setTitle(mData->mTitle);
 	setSuffix(mData->mSuffix);
+	setInspectMessage(mData->mInspectMessage);
 	setRace(mData->mRace);
 	setIsGM(mData->mGM);
 	setMuted(mData->mMuted);
@@ -297,6 +298,7 @@ const bool Character::_updateForSave() {
 	mData->mLastName = getLastName();
 	mData->mTitle = getTitle();
 	mData->mSuffix = getSuffix();
+	mData->mInspectMessage = getInspectMessage();
 
 	// Experience.
 	auto experienceController = getExperienceController();

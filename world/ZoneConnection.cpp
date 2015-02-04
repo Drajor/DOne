@@ -3866,6 +3866,9 @@ const bool ZoneConnection::handleSetInspectMessage(const EQApplicationPacket* pP
 	STRING_CHECK(payload->mMessage, 256);
 	const String newMessage(payload->mMessage);
 
+	// Note: UF sends this when the inspect window is closed, even if the message not been changed.
+	if (newMessage == mCharacter->getInspectMessage()) return;
+
 	mCharacter->setInspectMessage(newMessage);
 	mCharacter->notify("Inspect message updated.");
 	return true;
