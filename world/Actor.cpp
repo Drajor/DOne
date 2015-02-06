@@ -32,13 +32,13 @@ const uint32 Actor::getDataSize() const {
 
 	// Remove the maximum size of variable sized attributes.
 	result -= sizeof(mActorData.mName);
-	result -= sizeof(mActorData.mLastName);
+	result -= sizeof(mActorData.mSurname);
 	result -= sizeof(mActorData.mTitle);
 	result -= sizeof(mActorData.mSuffix);
 
 	// Add variable strings
 	result += strlen(mActorData.mName) + 1;
-	result += strlen(mActorData.mLastName) + 1;
+	result += strlen(mActorData.mSurname) + 1;
 	
 	if (hasTitle())
 		result += strlen(mActorData.mTitle) + 1;
@@ -61,11 +61,11 @@ const bool Actor::copyData(Utility::MemoryWriter& pWriter) {
 	pWriter.writeString(String(mActorData.mName));
 
 	// Chunk Zero.
-	std::size_t chunk0 = (unsigned int)&(mActorData.mLastName) - (unsigned int)&(mActorData.mSpawnID);
+	std::size_t chunk0 = (unsigned int)&(mActorData.mSurname) - (unsigned int)&(mActorData.mSpawnID);
 	pWriter.writeChunk((void*)&(mActorData.mSpawnID), chunk0);
 
 	// Write last name.
-	pWriter.writeString(String(mActorData.mLastName));
+	pWriter.writeString(String(mActorData.mSurname));
 
 	// Check One.
 	std::size_t chunk1Size = (unsigned int)&(mActorData.mColours) - (unsigned int)&(mActorData.mAAtitle);

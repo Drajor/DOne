@@ -3170,7 +3170,7 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleSurname_Overflow_1) {
 	auto p = makePacket(Payload::Zone::Surname::size());
 	auto payload = Payload::Zone::Surname::convert(p);
 	// Setup string with no null termination.
-	memset(payload->mLastName, 1, sizeof(payload->mLastName));
+	memset(payload->mSurname, 1, sizeof(payload->mSurname));
 
 	EXPECT_FALSE(mZoneConnection->hasStringError());
 	EXPECT_FALSE(mZoneConnection->handleSurname(p));

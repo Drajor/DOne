@@ -408,7 +408,7 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	//payload->mU8 = 15;
 	//payload->mU9 = 15;
 	strcpy(payload->mName, pCharacter->getName().c_str());
-	strcpy(payload->mLastName, pCharacter->getLastName().c_str());
+	strcpy(payload->mLastName, pCharacter->getSurname().c_str());
 	//payload->mUnknown13[8]; // Unknown.
 	payload->mGuildID = pCharacter->getGuildID();
 	payload->mCharacterCreated = 0;

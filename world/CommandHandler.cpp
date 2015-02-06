@@ -505,21 +505,22 @@ public:
 	SurnameCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #surname <name>");
 		mRequiresTarget = true;
-		mMinimumParameters = 1;
+		mMinimumParameters = 0;
 		mMaximumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		Actor* changeActor = mInvoker->getTarget();
+		auto target = mInvoker->getTarget();
+
+		const String surname = pParameters.size() == 1 ? pParameters[0] : "";
 
 		// Check: Length.
-		if (!Limits::Character::surnameLengthClient(pParameters[0])) {
+		if (!Limits::Character::surnameLengthClient(surname)) {
 			mInvoker->notify("Length invalid");
 			return false;
 		}
 
-		changeActor->setLastName(pParameters[0]);
-		changeActor->getZone()->handleSurnameChange(changeActor);
+		target->getZone()->onSurnameChange(target, surname);
 		return true;
 	}
 };
@@ -1915,22 +1916,22 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 			}
 		}
 	}
-	else if (pCommandName == "sn") {
-		using namespace Payload::Zone;
-		auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());
-		auto payload = SurnameUpdate::convert(outPacket->pBuffer);
+	//else if (pCommandName == "sn") {
+	//	using namespace Payload::Zone;
+	//	auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());
+	//	auto payload = SurnameUpdate::convert(outPacket->pBuffer);
 
-		strcpy(payload->mCharaterName, pParameters[0].c_str());
-		strcpy(payload->mGMName, pCharacter->getName().c_str());
-		strcpy(payload->mLastName, pParameters[1].c_str());
+	//	strcpy(payload->mCharaterName, pParameters[0].c_str());
+	//	strcpy(payload->mGMName, pCharacter->getName().c_str());
+	//	strcpy(payload->mLastName, pParameters[1].c_str());
 
-		Utility::stoSafe(payload->mUnknown0[0], pParameters[2]);
-		Utility::stoSafe(payload->mUnknown0[1], pParameters[3]);
-		Utility::stoSafe(payload->mUnknown0[2], pParameters[4]);
-		Utility::stoSafe(payload->mUnknown0[3], pParameters[5]);
+	//	Utility::stoSafe(payload->mUnknown[0], pParameters[2]);
+	//	Utility::stoSafe(payload->mUnknown[1], pParameters[3]);
+	//	Utility::stoSafe(payload->mUnknown[2], pParameters[4]);
+	//	Utility::stoSafe(payload->mUnknown[3], pParameters[5]);
 
-		pCharacter->getConnection()->sendPacket(outPacket);
-	}
+	//	pCharacter->getConnection()->sendPacket(outPacket);
+	//}
 	else if (pCommandName == "rn") {
 		auto outPacket = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
 		memset(outPacket->pBuffer, 0, sizeof(outPacket->pBuffer));

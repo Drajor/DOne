@@ -101,7 +101,7 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	mInventory = pInventory;
 	mExperienceController = pExperienceController;
 
-	setLastName(mData->mLastName);
+	setSurname(mData->mLastName);
 	setTitle(mData->mTitle);
 	setSuffix(mData->mSuffix);
 	setInspectMessage(mData->mInspectMessage);
@@ -295,7 +295,7 @@ const bool Character::_updateForSave() {
 	mData->mMuted = isMuted();
 	mData->mNew = isNew();
 	mData->mName = getName();
-	mData->mLastName = getLastName();
+	mData->mLastName = getSurname();
 	mData->mTitle = getTitle();
 	mData->mSuffix = getSuffix();
 	mData->mInspectMessage = getInspectMessage();

@@ -779,26 +779,41 @@ namespace Payload {
 
 		// C<->S
 		struct Surname : public FixedT<Surname, OP_Surname> {
-			static EQApplicationPacket* construct(const u32 pApproved, const String& pName, const String& pLastName) {
+			static EQApplicationPacket* construct(const u32 pApproved, const String& pCharacterName, const String& pSurname) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mApproved = pApproved;
-				strcpy(payload->mCharacterName, pName.c_str());
-				strcpy(payload->mLastName, pLastName.c_str());
+				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strcpy(payload->mSurname, pSurname.c_str());
 
 				return packet;
 			}
 			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			u32 mApproved = 0;
-			char mLastName[Limits::Character::MAX_LAST_NAME_LENGTH];
+			char mSurname[Limits::Character::MAX_LAST_NAME_LENGTH];
 		};
 
 		// S->C
-		struct SurnameUpdate : public Fixed<SurnameUpdate> {
-			char mCharaterName[Limits::Character::MAX_NAME_LENGTH];
+		struct SurnameUpdate : public FixedT<SurnameUpdate, OP_GMLastName> {
+			SurnameUpdate() {
+				memset(mActorName, 0, sizeof(mActorName));
+				memset(mGMName, 0, sizeof(mGMName));
+				memset(mSurname, 0, sizeof(mSurname));
+				memset(mUnknown, 1, sizeof(mUnknown));
+			}
+			static EQApplicationPacket* construct(const String& pActorName, const String& pSurname) {
+				auto packet = create();
+				auto payload = convert(packet);
+				strcpy(payload->mActorName, pActorName.c_str());
+				strcpy(payload->mGMName, pActorName.c_str());
+				strcpy(payload->mSurname, pSurname.c_str());
+
+				return packet;
+			}
+			char mActorName[Limits::Character::MAX_NAME_LENGTH];
 			char mGMName[Limits::Character::MAX_NAME_LENGTH];
-			char mLastName[Limits::Character::MAX_NAME_LENGTH];
-			u16 mUnknown0[4];
+			char mSurname[Limits::Character::MAX_NAME_LENGTH];
+			u16 mUnknown[4];
 		};
 
 		// C<->S
@@ -2789,7 +2804,7 @@ namespace Payload {
 	struct ActorData {
 		ActorData() {
 			memset(mName, 0, sizeof(mName));
-			memset(mLastName, 0, sizeof(mLastName));
+			memset(mSurname, 0, sizeof(mSurname));
 			memset(mTitle, 0, sizeof(mTitle));
 			memset(mSuffix, 0, sizeof(mSuffix));
 			memset(mUnknowns, 0, sizeof(mUnknowns));
@@ -2910,7 +2925,7 @@ namespace Payload {
 		u8 __Unknown6 = 0;
 		u8 mShowHelm = 0; // TODO: Figure out how this works.
 
-		char mLastName[100];
+		char mSurname[100];
 
 		u32 mAAtitle = 0; // TODO: Figure out how this works.
 		u8 __Unknown8 = 0;

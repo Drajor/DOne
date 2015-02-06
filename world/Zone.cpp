@@ -981,32 +981,21 @@ void Zone::removeActor(Actor* pActor) {
 	}
 }
 
-void Zone::handleSurnameChange(Actor* pActor) {
+void Zone::onSurnameChange(Actor* pActor, const String& pSurname) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	if (!pActor) return;
 
-	auto outPacket = new EQApplicationPacket(OP_GMLastName, SurnameUpdate::size());
-	auto payload = SurnameUpdate::convert(outPacket->pBuffer);
+	// Update Actor.
+	pActor->setSurname(pSurname);
 
-	strcpy(payload->mCharaterName, pActor->getName().c_str());
-	strcpy(payload->mGMName, pActor->getName().c_str());
-	strcpy(payload->mLastName, pActor->getLastName().c_str());
+	// Update Zone.
+	auto packet = SurnameUpdate::construct(pActor->getName(), pActor->getSurname());
+	sendToVisible(pActor, packet, true);
+	delete packet;
 
-	payload->mUnknown0[0] = 1;
-	payload->mUnknown0[1] = 1;
-	payload->mUnknown0[2] = 1;
-	payload->mUnknown0[3] = 1;
-
-	// Character surname changed.
-	if (pActor->isCharacter()) {
-		sendToVisible(Actor::cast<Character*>(pActor), outPacket, true);
-	}
-	// NPC surname changed.
-	else {
-		sendToVisible(pActor, outPacket);
-	}
-
-	safe_delete(outPacket);
+	// Send approval.
+	if (pActor->isCharacter())
+		Actor::cast<Character*>(pActor)->getConnection()->sendSurnameApproval(true);
 }
 
 void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const u32 pSpellID) {

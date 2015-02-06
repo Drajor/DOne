@@ -281,7 +281,7 @@ public:
 	void handleVisibilityAdd(Character* pCharacter, Actor* pAddActor);
 	void handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor);
 
-	void handleSurnameChange(Actor* pActor);
+	void onSurnameChange(Actor* pActor, const String& pSurname);
 
 	void handleCastingBegin(Character* pCharacter, const u16 pSlot, const u32 pSpellID);
 	void handleCastingFinished(Actor* pActor);

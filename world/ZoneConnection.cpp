@@ -2344,18 +2344,11 @@ const bool ZoneConnection::handleSurname(const EQApplicationPacket* pPacket) {
 	auto payload = Surname::convert(pPacket);
 
 	STRING_CHECK(payload->mCharacterName, Limits::Character::MAX_NAME_LENGTH);
-	STRING_CHECK(payload->mLastName, Limits::Character::MAX_LAST_NAME_LENGTH);
-	const String lastName(payload->mLastName);
+	STRING_CHECK(payload->mSurname, Limits::Character::MAX_LAST_NAME_LENGTH);
+	const String surname(payload->mSurname);
 
-	if (!Limits::Character::surnameLengthClient(lastName)) return false;
-
-	// TODO: Check for special characters / Captialisation.
-
-	// Update Character.
-	mCharacter->setLastName(lastName);
-	sendSurnameApproval(true);
-	// Update Zone.
-	mZone->handleSurnameChange(mCharacter);
+	// Notify Zone.
+	mZone->onSurnameChange(mCharacter, surname);
 	return true;
 }
 
@@ -2364,7 +2357,7 @@ void ZoneConnection::sendSurnameApproval(const bool pSuccess) {
 	using namespace Payload::Zone;
 	EXPECTED(mConnected);
 
-	auto packet = Surname::construct(pSuccess ? 1 : 0, mCharacter->getName(), mCharacter->getLastName());
+	auto packet = Surname::construct(pSuccess ? 1 : 0, mCharacter->getName(), mCharacter->getSurname());
 	sendPacket(packet);
 	delete packet;
 }
@@ -2378,10 +2371,8 @@ const bool ZoneConnection::handleClearSurname(const EQApplicationPacket* pPacket
 	if(!pPacket) return false;
 	SIZE_CHECK(pPacket->size == 0);
 
-	// Update Character.
-	mCharacter->setLastName("");
-	// Update Zone.
-	mZone->handleSurnameChange(mCharacter);
+	// Notify Zone.
+	mZone->onSurnameChange(mCharacter, "");
 	return true;
 }
 
@@ -3867,7 +3858,7 @@ const bool ZoneConnection::handleSetInspectMessage(const EQApplicationPacket* pP
 	const String newMessage(payload->mMessage);
 
 	// Note: UF sends this when the inspect window is closed, even if the message not been changed.
-	if (newMessage == mCharacter->getInspectMessage()) return;
+	if (newMessage == mCharacter->getInspectMessage()) return true;
 
 	mCharacter->setInspectMessage(newMessage);
 	mCharacter->notify("Inspect message updated.");

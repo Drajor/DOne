@@ -185,7 +185,7 @@ NPC* NPCFactory::create(const u32 pTypeID) {
 
 	NPC* npc = new NPC(hateController);
 	npc->setName(type->mName);
-	npc->setLastName(type->mLastName);
+	npc->setSurname(type->mLastName);
 	npc->setClass(type->mClass);
 	
 	npc->setRace(appearance->mRaceID);

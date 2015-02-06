@@ -135,8 +135,8 @@ public:
 
 	inline const String& getName() const { return mName; }
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
-	inline const String& getLastName() const { return mLastName; }
-	inline void setLastName(const String& pLastName) { mLastName = pLastName; _setLastName(pLastName.c_str()); }
+	inline const String& getSurname() const { return mSurname; }
+	inline void setSurname(const String& pSurname) { mSurname = pSurname; _setSurname(pSurname.c_str()); }
 	
 	inline const bool hasTitle() const { return mTitle.length() > 0; }
 	inline const String& getTitle() const { return mTitle; }
@@ -544,7 +544,7 @@ private:
 	bool mDestroy = false;
 
 	String mName = "";
-	String mLastName = "";
+	String mSurname = "";
 	String mTitle = "";
 	String mSuffix = "";
 
@@ -593,7 +593,7 @@ private:
 	LootController* mLootController = nullptr;
 
 	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
-	inline void _setLastName(const char* pLastName) { strncpy(mActorData.mLastName, pLastName, Limits::Character::MAX_LAST_NAME_LENGTH); }
+	inline void _setSurname(const char* pSurname) { strncpy(mActorData.mSurname, pSurname, Limits::Character::MAX_LAST_NAME_LENGTH); }
 	inline void _setTitle(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
 	inline void _setSuffix(const char* pSuffix) { strncpy(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 
