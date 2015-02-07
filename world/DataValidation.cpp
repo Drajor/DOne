@@ -3,7 +3,6 @@
 #include "Data.h"
 #include "Utility.h"
 #include "Limits.h"
-#include "Profile.h"
 #include "ItemDataStore.h"
 #include "AlternateCurrencyManager.h"
 #include "NPCFactory.h"
@@ -16,8 +15,15 @@ const bool validateAlternateCurrencies();
 const bool validateNPCTypes();
 const bool validateZoneData();
 
+//#define PROFILE_DATA_VALIDATION
+#ifdef PROFILE_DATA_VALIDATION
+#include "Profile.h"
+#endif
+
 const bool validateData() {
-	Profile p("validateData");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 	Log::info("[Data Validation] Validation starting.");
 
 	EXPECTED_BOOL(validateShopData());
@@ -31,7 +37,9 @@ const bool validateData() {
 }
 
 const bool validateShopData() {
-	Profile p("validateShopData");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 
 	auto shopData = ServiceLocator::getShopDataStore()->getShopData();
 	for (auto i : shopData) {
@@ -47,13 +55,17 @@ const bool validateShopData() {
 }
 
 const bool validateTransmutationData() {
-	Profile p("validateTransmutationData");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 
 	return true;
 }
 
 const bool validateAlternateCurrencies() {
-	Profile p("validateAlternateCurrencies");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 
 	auto alternateCurrencies = ServiceLocator::getAlternateCurrencyManager()->getCurrencies();
 	for (auto i : alternateCurrencies) {
@@ -67,7 +79,9 @@ const bool validateAlternateCurrencies() {
 }
 
 const bool validateNPCTypes() {
-	Profile p("validateNPCTypes");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 
 	auto npcTypes = ServiceLocator::getNPCFactory()->getNPCTypes();
 	for (auto i : npcTypes) {
@@ -87,7 +101,9 @@ const bool validateNPCTypes() {
 }
 
 const bool validateZoneData() {
-	Profile p("validateZoneData");
+#ifdef PROFILE_DATA_VALIDATION
+	Profile p(String(__FUNCTION__), mLog);
+#endif
 
 	auto zoneData = ServiceLocator::getZoneDataManager()->getData();
 	for (auto i : zoneData) {

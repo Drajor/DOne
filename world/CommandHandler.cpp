@@ -520,6 +520,7 @@ public:
 			return false;
 		}
 
+		// Notify Zone.
 		target->getZone()->onSurnameChange(target, surname);
 		return true;
 	}

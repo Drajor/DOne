@@ -2,7 +2,7 @@
 #include <windows.h>
 #include "LogSystem.h"
 
-Profile::Profile(String pName) : mName(pName) {
+Profile::Profile(const String& pName, ILog* pLog) : mName(pName), mLog(pLog) {
 	LARGE_INTEGER li;
 	QueryPerformanceFrequency(&li);
 	mFrequency = double(li.QuadPart) / 1000.0;
@@ -16,8 +16,10 @@ Profile::~Profile()
 	QueryPerformanceCounter(&li);
 	double ms = double(li.QuadPart - mStart) / mFrequency;
 
-	StringStream ss;
-	ss << "[Profile " << mName << "] Completed in " << ms << " ms";
-	Log::info(ss.str());
+	if (mLog) {
+		StringStream ss;
+		ss << "[Profile (" << mName << ")] @ " << ms << " ms";
+		mLog->info(ss.str());
+	}
 }
 

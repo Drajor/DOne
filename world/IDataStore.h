@@ -3,11 +3,13 @@
 #include "Types.h"
 #include <list>
 
+class ILogFactory;
 struct ItemData;
 
 namespace Data {
 	struct Account;
 	struct Character;
+	struct Inventory;
 	struct Guild;
 	struct GuildMember;
 	struct Zone;
@@ -34,7 +36,6 @@ class IDataStore {
 public:
 
 	virtual ~IDataStore() { };
-	virtual const bool initialise() = 0;
 
 	// Settings
 	virtual const bool loadSettings() = 0;

@@ -5,6 +5,7 @@
 #include "Profile.h"
 #include "Settings.h"
 #include "ItemData.h"
+#include "LogSystem.h"
 
 #include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
@@ -12,7 +13,7 @@
 static bool AttributeFound = true;
 static bool AttributeNotFound = false;
 
-//#define PROFILE_XML_DS
+#define PROFILE_XML_DS
 
 template <typename T>
 inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
@@ -95,7 +96,22 @@ inline void writeVector3(TiXmlElement* pElement, const Vector3& pVector) {
 	pElement->SetDoubleAttribute("z", pVector.z);
 }
 
-const bool XMLDataStore::initialise() { return true; }
+XMLDataStore::~XMLDataStore() {
+	if (mLog) {
+		delete mLog;
+		mLog = nullptr;
+	}
+}
+
+
+const bool XMLDataStore::initialise(ILogFactory* pLogFactory) {
+	if (!pLogFactory) return false;
+
+	mLog = pLogFactory->make();
+	mLog->setContext("[DataStore]");
+
+	return true;
+}
 
 namespace AccountXML {
 #define SCA static const auto
@@ -120,11 +136,16 @@ namespace AccountXML {
 const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadAccounts");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pAccounts.empty());
+	if (!pAccounts.empty()) return false;
+
+	// Load document.
 	TiXmlDocument document(AccountXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(AccountXML::FileLocation));
+		return false;
+	}
 
 	auto accountsElement = document.FirstChildElement(Tag::Accounts);
 	EXPECTED_BOOL(accountsElement);
@@ -156,7 +177,7 @@ const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
 const bool XMLDataStore::saveAccounts(Data::AccountList pAccounts) {
 	using namespace AccountXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveAccounts");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	TiXmlDocument document(FileLocation);
 
@@ -222,11 +243,17 @@ namespace AccountCharacterDataXML {
 const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadAccountCharacterData");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pAccount);
-	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
-	EXPECTED_BOOL(document.LoadFile());
+	if (!pAccount) return false;
+
+	// Load document.
+	const String fileLocation = "./data/accounts/" + pAccount->mLoginAccountName + ".xml";
+	TiXmlDocument document(fileLocation.c_str());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(fileLocation));
+		return false;
+	}
 
 	auto accountElement = document.FirstChildElement(Tag::Account);
 	EXPECTED_BOOL(accountElement);
@@ -291,9 +318,10 @@ const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
 const bool XMLDataStore::saveAccountCharacterData(Data::Account* pAccount) {
 	using namespace AccountCharacterDataXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveAccountCharacterData");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pAccount);
+	if (!pAccount) return false;
+
 	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
 
 	auto accountElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Account)));
@@ -487,7 +515,7 @@ namespace InventoryXML {
 
 const bool loadItem(TiXmlElement* pElement, Data::Item& pItem) {
 	using namespace InventoryXML;
-	EXPECTED_BOOL(pElement);
+	if (!pElement) return false;
 
 	// Load Item
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pItem.mItemID));
@@ -511,12 +539,12 @@ const bool loadItem(TiXmlElement* pElement, Data::Item& pItem) {
 	return true;
 }
 
-const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
+const bool XMLDataStore::loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
 	using namespace InventoryXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadInventory");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pElement);
+	if (!pElement) return false;
 
 	auto itemElement = pElement->FirstChildElement(Tag::Item);
 	while (itemElement) {
@@ -532,7 +560,7 @@ const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory) {
 
 const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience) {
 	using namespace CharacterXML;
-	EXPECTED_BOOL(pElement);
+	if (!pElement) return false;
 
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::Level, pExperience.mLevel));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Experience::MaximumLevel, pExperience.mMaximumLevel));
@@ -550,11 +578,17 @@ const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience)
 const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
 	using namespace CharacterXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadCharacter");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pCharacter);
-	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
-	EXPECTED_BOOL(document.LoadFile());
+	if (!pCharacter) return false;
+
+	// Load document.
+	const String fileLocation = "./data/characters/" + pCharacterName + ".xml";
+	TiXmlDocument document(fileLocation.c_str());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + fileLocation);
+		return false;
+	}
 
 	// Tag::Character
 	auto characterElement = document.FirstChildElement(Tag::Character);
@@ -787,10 +821,10 @@ const bool saveItem(TiXmlElement* pParent, const Data::Item& pItem) {
 	return true;
 }
 
-const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInventory) {
+const bool XMLDataStore::saveInventory(TiXmlElement* pElement, const Data::Inventory& pInventory) {
 	using namespace InventoryXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveInventory");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	EXPECTED_BOOL(pElement);
 
@@ -820,9 +854,9 @@ const bool writeExperience(TiXmlElement* pElement, const Data::Experience& pExpe
 const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data::Character* pCharacter) {
 	using namespace CharacterXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveCharacter");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pCharacter);
+	if (!pCharacter) return false;
 	TiXmlDocument document(String("./data/characters/" + pCharacterName + ".xml").c_str());
 
 	// Tag::Character
@@ -1010,8 +1044,13 @@ namespace SettingsXML {
 
 const bool XMLDataStore::loadSettings() {
 	using namespace SettingsXML;
+
+	// Load document.
 	TiXmlDocument document(SettingsXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(SettingsXML::FileLocation));
+		return false;
+	}
 
 	// Tag::Settings
 	auto settingsElement = document.FirstChildElement(Tag::Settings);
@@ -1115,11 +1154,16 @@ namespace NPCAppearanceXML {
 const bool XMLDataStore::loadNPCAppearanceData(std::list<Data::NPCAppearance*>& pAppearances) {
 	using namespace NPCAppearanceXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadNPCAppearanceData");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pAppearances.empty());
+	if (!pAppearances.empty()) return false;
+
+	// Load document.
 	TiXmlDocument document(NPCAppearanceXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(NPCAppearanceXML::FileLocation));
+		return false;
+	}
 
 	auto appearancesElement = document.FirstChildElement(Tag::Appearances);
 	EXPECTED_BOOL(appearancesElement);
@@ -1241,11 +1285,16 @@ namespace NPCTypeXML {
 const bool XMLDataStore::loadNPCTypeData(std::list<Data::NPCType*>& pTypes) {
 	using namespace NPCTypeXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadNPCTypeData");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pTypes.empty());
+	if (!pTypes.empty()) return false;
+
+	// Load document.
 	TiXmlDocument document(NPCTypeXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(NPCTypeXML::FileLocation));
+		return false;
+	}
 
 	auto typesElement = document.FirstChildElement(Tag::Types);
 	EXPECTED_BOOL(typesElement);
@@ -1297,13 +1346,18 @@ namespace SpellDataXML {
 const bool XMLDataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
 	using namespace SpellDataXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadSpells");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pSpells);
+	if (!pSpells) return false;
+
+	// Load document.
+	TiXmlDocument document(SpellDataXML::FileLocation);
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(SpellDataXML::FileLocation));
+		return false;
+	}
 
 	pNumSpellsLoaded = 0;
-	TiXmlDocument document(SpellDataXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
 
 	auto spellsElement = document.FirstChildElement(Tag::Spells);
 	EXPECTED_BOOL(spellsElement);
@@ -1439,13 +1493,18 @@ namespace ItemDataXML {
 const bool XMLDataStore::loadItems(ItemData* pItemData, uint32& pNumItemsLoaded) {
 	using namespace ItemDataXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadItems");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pItemData);
+	if (!pItemData) return false;
+
+	// Load document.
+	TiXmlDocument document(ItemDataXML::FileLocation);
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(ItemDataXML::FileLocation));
+		return false;
+	}
 
 	pNumItemsLoaded = 0;
-	TiXmlDocument document(ItemDataXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
 	return true;
 }
 
@@ -1537,12 +1596,16 @@ namespace ZoneXML {
 const bool XMLDataStore::loadZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadZones");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pZones.empty());
+	if (!pZones.empty()) return false;
 
+	// Load document.
 	TiXmlDocument document(ZoneXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(ZoneXML::FileLocation));
+		return false;
+	}
 
 	auto zonesElement = document.FirstChildElement(Tag::Zones);
 	EXPECTED_BOOL(zonesElement);
@@ -1714,7 +1777,7 @@ const bool XMLDataStore::loadZones(Data::ZoneList pZones) {
 const bool XMLDataStore::saveZones(Data::ZoneList pZones) {
 	using namespace ZoneXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveZones");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	TiXmlDocument document(ZoneXML::FileLocation);
 
@@ -1885,12 +1948,16 @@ namespace TransmutationComponentXML {
 const bool XMLDataStore::loadTransmutationComponents(Data::TransmutationComponentList pComponents) {
 	using namespace TransmutationComponentXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadTransmutationComponents");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pComponents.empty());
+	if (!pComponents.empty()) return false;
 
+	// Load document.
 	TiXmlDocument document(TransmutationComponentXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(TransmutationComponentXML::FileLocation));
+		return false;
+	}
 
 	auto componentsElement = document.FirstChildElement(Tag::Components);
 	EXPECTED_BOOL(componentsElement);
@@ -1931,12 +1998,16 @@ namespace AlternateCurrencyXML {
 const bool XMLDataStore::loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) {
 	using namespace AlternateCurrencyXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadAlternateCurrencies");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pCurrencies.empty());
+	if (!pCurrencies.empty()) return false;
 
+	// Load document.
 	TiXmlDocument document(AlternateCurrencyXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(AlternateCurrencyXML::FileLocation));
+		return false;
+	}
 
 	auto currenciesElement = document.FirstChildElement(Tag::Currencies);
 	EXPECTED_BOOL(currenciesElement);
@@ -1976,12 +2047,16 @@ namespace ShopXML {
 const bool XMLDataStore::loadShops(Data::ShopList pShops) {
 	using namespace ShopXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadShops");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
-	EXPECTED_BOOL(pShops.empty());
+	if (!pShops.empty()) return false;
 
+	// Load document.
 	TiXmlDocument document(ShopXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(ShopXML::FileLocation));
+		return false;
+	}
 
 	auto shopsElement = document.FirstChildElement(Tag::Shops);
 	EXPECTED_BOOL(shopsElement);
@@ -2048,7 +2123,7 @@ namespace GuildXML {
 const bool XMLDataStore::readGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::readGuildMember");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	if (!pElement) return false;
 	if (!pMember) return false;
@@ -2070,7 +2145,7 @@ const bool XMLDataStore::readGuildMember(TiXmlElement* pElement, Data::GuildMemb
 const bool XMLDataStore::readGuild(TiXmlElement* pElement, Data::Guild* pGuild) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::readGuild");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	if (!pElement) return false;
 	if (!pGuild) return false;
@@ -2104,12 +2179,16 @@ const bool XMLDataStore::readGuild(TiXmlElement* pElement, Data::Guild* pGuild) 
 const bool XMLDataStore::loadGuilds(Data::GuildList pGuilds) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::loadGuilds");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	if (!pGuilds.empty()) return false;
 
+	// Load document.
 	TiXmlDocument document(GuildXML::FileLocation);
-	EXPECTED_BOOL(document.LoadFile());
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(GuildXML::FileLocation));
+		return false;
+	}
 
 	auto guildsElement = document.FirstChildElement(Tag::Guilds);
 	EXPECTED_BOOL(guildsElement);
@@ -2133,7 +2212,7 @@ const bool XMLDataStore::loadGuilds(Data::GuildList pGuilds) {
 const bool XMLDataStore::writeGuildMember(TiXmlElement* pElement, Data::GuildMember* pMember) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::writeGuildMember");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	if (!pElement) return false;
 	if (!pMember) return false;
@@ -2155,7 +2234,7 @@ const bool XMLDataStore::writeGuildMember(TiXmlElement* pElement, Data::GuildMem
 const bool XMLDataStore::writeGuild(TiXmlElement* pElement, Data::Guild* pGuild) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::writeGuild");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	if (!pElement) return false;
 	if (!pGuild) return false;
@@ -2184,7 +2263,7 @@ const bool XMLDataStore::writeGuild(TiXmlElement* pElement, Data::Guild* pGuild)
 const bool XMLDataStore::saveGuilds(Data::GuildList pGuilds) {
 	using namespace GuildXML;
 #ifdef PROFILE_XML_DS
-	Profile p("DataStore::saveGuilds");
+	Profile p(String(__FUNCTION__), mLog);
 #endif
 	TiXmlDocument document(GuildXML::FileLocation);
 

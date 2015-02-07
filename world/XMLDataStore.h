@@ -2,11 +2,14 @@
 
 #include "IDataStore.h"
 
+class ILogFactory;
+class ILog;
 class TiXmlElement;
 
 class XMLDataStore : public IDataStore {
 public:
-	const bool initialise();
+	~XMLDataStore();
+	const bool initialise(ILogFactory* pLogFactory);
 	
 	// Settings
 	const bool loadSettings();
@@ -19,7 +22,11 @@ public:
 
 	// Character Data
 	const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData);
+	const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory);
+
 	const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData);
+	const bool saveInventory(TiXmlElement* pElement, const Data::Inventory& pInventory);
+
 	const bool deleteCharacter(const String& pCharacterName);
 
 	// Guild
@@ -50,4 +57,8 @@ public:
 
 	const bool loadShops(Data::ShopList pShops);
 	const bool loadTitles(Data::TitleList pTitles);
+
+private:
+
+	ILog* mLog = nullptr;
 };
