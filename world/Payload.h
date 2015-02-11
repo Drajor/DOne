@@ -499,12 +499,13 @@ namespace Payload {
 		// S->C
 		namespace TitleUpdateAction { enum : u32 { Title = 0, Suffix = 1, }; }
 		struct TitleUpdate : public FixedT<TitleUpdate, OP_SetTitleReply> {
+			TitleUpdate() { memset(mText, 0, sizeof(mText)); }
 			static EQApplicationPacket* construct(const u32 pAction, const u32 pSpawnID, const String& pText) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mAction = pAction;
 				payload->mSpawnID = pSpawnID;
-				strcpy(payload->mText, pText.c_str());
+				strncpy_s(payload->mText, _countof(payload->mText), pText.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -782,15 +783,15 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pApproved, const String& pCharacterName, const String& pSurname) {
 				auto packet = create();
 				auto payload = convert(packet);
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mSurname, _countof(payload->mSurname), pSurname.c_str(), _TRUNCATE);
 				payload->mApproved = pApproved;
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
-				strcpy(payload->mSurname, pSurname.c_str());
 
 				return packet;
 			}
-			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
+			char mCharacterName[64];
 			u32 mApproved = 0;
-			char mSurname[Limits::Character::MAX_LAST_NAME_LENGTH];
+			char mSurname[32];
 		};
 
 		// S->C
@@ -804,15 +805,15 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pActorName, const String& pSurname) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mActorName, pActorName.c_str());
-				strcpy(payload->mGMName, pActorName.c_str());
-				strcpy(payload->mSurname, pSurname.c_str());
+				strncpy_s(payload->mActorName, _countof(payload->mActorName), pActorName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mGMName, _countof(payload->mGMName), pActorName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mSurname, _countof(payload->mSurname), pSurname.c_str(), _TRUNCATE);
 
 				return packet;
 			}
-			char mActorName[Limits::Character::MAX_NAME_LENGTH];
-			char mGMName[Limits::Character::MAX_NAME_LENGTH];
-			char mSurname[Limits::Character::MAX_NAME_LENGTH];
+			char mActorName[64];
+			char mGMName[64];
+			char mSurname[64];
 			u16 mUnknown[4];
 		};
 
@@ -1031,7 +1032,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pCharacterName, const u16 pZoneID, const u16 pInstanceID, const Vector3& pPosition, const i32 pSuccess) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 				payload->mZoneID = pZoneID;
 				payload->mInstanceID = pInstanceID;
 				payload->mX = pPosition.x;
@@ -1400,7 +1401,7 @@ namespace Payload {
 				auto payload = convert(packet);
 				payload->mSpawnID = pSpawnID;
 				payload->mNumber = pNumber;
-				strcpy(payload->mName, pName.c_str());
+				strncpy_s(payload->mName, _countof(payload->mName), pName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -1640,7 +1641,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pCharacterName, const u32 pCurrencyID, const u32 pQuantity) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 				payload->mCurrencyID = pCurrencyID;
 				payload->mQuantity = pQuantity;
 
@@ -1686,7 +1687,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pCharacterName, const u32 pLow, const u32 pHigh, const u32 pResult) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 				payload->mLow = pLow;
 				payload->mHigh= pHigh;
 				payload->mResult = pResult;
@@ -1809,17 +1810,17 @@ namespace Payload {
 		};
 
 		// C->S
-		namespace EmoteLimits { static const auto MAX_MESSAGE = 1024; }
 		struct Emote : public FixedT <Emote, OP_Emote> {
+			Emote() { memset(mMessage, 0, sizeof(mMessage)); }
 			static EQApplicationPacket* construct(const String& pMessage) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mMessage, pMessage.c_str());
+				strncpy_s(payload->mMessage, _countof(payload->mMessage), pMessage.c_str(), _TRUNCATE);
 
 				return packet;
 			}
 			u32 mUnknown = 0;
-			char mMessage[EmoteLimits::MAX_MESSAGE];
+			char mMessage[1024];
 		};
 		
 		// S->C
@@ -2181,7 +2182,7 @@ namespace Payload {
 				auto payload = convert(packet);
 				payload->mRace = pRace;
 				payload->mGender = pGender;
-				strcpy(payload->mName, pName.c_str());
+				strncpy_s(payload->mName, _countof(payload->mName), pName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2195,7 +2196,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pIP, const u16 pPort) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mIP, pIP.c_str());
+				strncpy_s(payload->mIP, _countof(payload->mIP), pIP.c_str(), _TRUNCATE);
 				payload->mPort = pPort;
 
 				return packet;
@@ -2210,7 +2211,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pZoneName) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mZoneName, pZoneName.c_str());
+				strncpy_s(payload->mZoneName, _countof(payload->mZoneName), pZoneName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2328,8 +2329,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pFrom, const String& pTo) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mFrom, pFrom.c_str());
-				strcpy(payload->mTo, pTo.c_str());
+				strncpy_s(payload->mFrom, _countof(payload->mFrom), pFrom.c_str(), _TRUNCATE);
+				strncpy_s(payload->mTo, _countof(payload->mTo), pTo.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2387,13 +2388,12 @@ namespace Payload {
 		};
 
 		// S->C
-		//typedef FixedT<Disband, OP_GroupDisbandYou> DisbandYou;
 		struct DisbandYou : public FixedT<Disband, OP_GroupDisbandYou> {
 			static EQApplicationPacket* construct(const String& pCharacterName, const String& pRemoverNamer) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mName1, pCharacterName.c_str());
-				strcpy(payload->mName2, pRemoverNamer.c_str());
+				strncpy_s(payload->mName1, _countof(payload->mName1), pCharacterName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mName2, _countof(payload->mName2), pRemoverNamer.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2405,8 +2405,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pCharacterName) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mName1, pCharacterName.c_str());
-				strcpy(payload->mName2, pCharacterName.c_str());
+				strncpy_s(payload->mName1, _countof(payload->mName1), pCharacterName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mName2, _countof(payload->mName2), pCharacterName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2459,7 +2459,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pLeaderName) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mLeaderName, pLeaderName.c_str());
+				strncpy_s(payload->mLeaderName, _countof(payload->mLeaderName), pLeaderName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2477,8 +2477,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pTargetName, const String& pSetterName, const u32 pRoleID, const u8 pToggle) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mTargetName, pTargetName.c_str());
-				strcpy(payload->mSetterName, pSetterName.c_str());
+				strncpy_s(payload->mTargetName, _countof(payload->mTargetName), pTargetName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mSetterName, _countof(payload->mSetterName), pSetterName.c_str(), _TRUNCATE);
 				payload->mRoleID = pRoleID;
 				payload->mToggle = pToggle;
 
@@ -2533,7 +2533,7 @@ namespace Payload {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mRank = pRank;
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2595,7 +2595,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pCharacterName, const u32 pLevel, const u32 pClass, const u32 pZoneID) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 				payload->mGuildID = pGuildID;
 				payload->mLevel = pLevel;
 				payload->mClass = pClass;
@@ -2620,7 +2620,7 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pCharacterName) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mCharacterName, pCharacterName.c_str());
+				strncpy_s(payload->mCharacterName, _countof(payload->mCharacterName), pCharacterName.c_str(), _TRUNCATE);
 				payload->mGuildID = pGuildID;
 
 				return packet;
@@ -2639,8 +2639,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pSetByName, const String& pMOTD) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mSetByName, pSetByName.c_str());
-				strcpy(payload->mMOTD, pMOTD.c_str());
+				strncpy_s(payload->mSetByName, _countof(payload->mSetByName), pSetByName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mMOTD, _countof(payload->mMOTD), pMOTD.c_str(), _TRUNCATE);
 
 				return packet;
 			}
@@ -2661,13 +2661,13 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pSetByName, const String& pMOTD) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mSetByName, pSetByName.c_str());
-				strcpy(payload->mMOTD, pMOTD.c_str());
+				strncpy_s(payload->mSetByName, _countof(payload->mSetByName), pSetByName.c_str(), _TRUNCATE);
+				strncpy_s(payload->mMOTD, _countof(payload->mMOTD), pMOTD.c_str(), _TRUNCATE);
 
 				return packet;
 			}
 			u32 mUnknown0 = 0;
-			char mCharacterName[Limits::Character::MAX_NAME_LENGTH]; // Receiver name.. why.
+			char mCharacterName[Limits::Character::MAX_NAME_LENGTH];
 			char mSetByName[Limits::Character::MAX_NAME_LENGTH];
 			u32 mUnknown1 = 0;
 			char mMOTD[Limits::Guild::MAX_MOTD_LENGTH];
@@ -2689,8 +2689,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pAction, const String& pText) {
 				auto packet = create();
 				auto payload = convert(packet);
+				strncpy_s(payload->mText, _countof(payload->mText), pText.c_str(), _TRUNCATE);
 				payload->mAction = pAction;
-				strcpy(payload->mText, pText.c_str());
 
 				return packet;
 			}
@@ -2708,8 +2708,8 @@ namespace Payload {
 				memset(mNote, 0, sizeof(mNote));
 			}
 			u32 mUnknown = 0; // Probably Guild ID.
-			char mSenderName[Limits::Character::MAX_NAME_LENGTH];
-			char mTargetName[Limits::Character::MAX_NAME_LENGTH];
+			char mSenderName[64];
+			char mTargetName[64];
 			char mNote[256];
 		};
 
@@ -2719,8 +2719,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pZoneID, const u16 pInstanceID, const u32 pLastSeen) {
 				auto packet = create();
 				auto payload = convert(packet);
+				strncpy_s(payload->mMemberName, _countof(payload->mMemberName), pMemberName.c_str(), _TRUNCATE);
 				payload->mGuildID = pGuildID;
-				strcpy(payload->mMemberName, pMemberName.c_str());
 				payload->mZoneID = pZoneID;
 				payload->mInstanceID = pInstanceID;
 				payload->mLastSeen = pLastSeen;
@@ -2741,8 +2741,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const u32 pGuildID, const String& pMemberName, const u32 pLevel) {
 				auto packet = create();
 				auto payload = convert(packet);
+				strncpy_s(payload->mMemberName, _countof(payload->mMemberName), pMemberName.c_str(), _TRUNCATE);
 				payload->mGuildID = pGuildID;
-				strcpy(payload->mMemberName, pMemberName.c_str());
 				payload->mLevel = pLevel;
 
 				return packet;

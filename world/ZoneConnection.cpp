@@ -1394,7 +1394,7 @@ const bool ZoneConnection::handleEmote(const EQApplicationPacket* pPacket) {
 
 	auto payload = Emote::convert(pPacket);
 
-	STRING_CHECK(payload->mMessage, EmoteLimits::MAX_MESSAGE);
+	STRING_CHECK(payload->mMessage, _countof(payload->mMessage));
 	String message(payload->mMessage);
 
 	// Notify Zone.
