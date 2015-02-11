@@ -5,6 +5,7 @@
 #include "NPC.h"
 #include "Zone.h"
 #include "ZoneData.h"
+#include "SpellDataStore.h"
 #include "ZoneManager.h"
 #include "GuildManager.h"
 #include "Utility.h"
@@ -368,7 +369,7 @@ public:
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		ZoneDataSearchResults results = ServiceLocator::getZoneDataManager()->searchByName(pParameters[0]);
+		auto results = ServiceLocator::getZoneDataManager()->searchByName(pParameters[0]);
 		mInvoker->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
 		for (auto i : results){
 			mInvoker->message(MessageType::Yellow, "[Zone " + std::to_string(i.mID) + "] " + i.mShortName + " | " + i.mLongName );
@@ -526,20 +527,38 @@ public:
 	}
 };
 
-class FindSpellCommand : public Command {
+class SpellSearchCommand : public Command {
 public:
-	FindSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #findspell <name>");
+	SpellSearchCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #ss <name>");
+		mMinimumParameters = 1;
 	};
 
 	const bool handleCommand(CommandParameters pParameters) {
-		// Check: Parameter #
-		if (pParameters.size() != 1) {
-			invalidParameters(pParameters);
-			return false;
+		SpellSearchResults results;
+		ServiceLocator::getSpellDataStore()->searchByName(pParameters[0], results);
+
+		// Handle: No results.
+		if (results.empty()) {
+			mInvoker->notify("No spells found.");
+			return true;
 		}
 
-		// TODO:
+		Utility::PopupHelper helper;
+
+		// Write title.
+		helper.startColour(Utility::PopupHelper::Colour::GREEN);
+		helper.writeBr("Spell Search Results");
+		helper.endColour();
+		helper.breakLine();
+
+		helper.startColour(Utility::PopupHelper::Colour::YELLOW);
+		for (auto i : results) {
+			helper.writeBr("(" + toString(i.mID) + ") " + i.mName);
+		}
+
+		mInvoker->getConnection()->sendPopup("Search Results", helper.getText());
+
 		return true;
 	}
 };
@@ -1767,7 +1786,7 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 
 	mCommands.push_back(new SurnameCommand(100, { "surname" }));
 
-	mCommands.push_back(new FindSpellCommand(100, { "findspell", "fs" }));
+	mCommands.push_back(new SpellSearchCommand(100, { "spellsearch", "ss", "findspell", "fs" }));
 
 	mCommands.push_back(new SetSkillCommand(100, { "setskill" }));
 	mCommands.push_back(new GetSkillCommand(100, { "getskill" }));

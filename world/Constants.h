@@ -83,9 +83,6 @@ namespace Limits {
 		static const uint8 MIN_LEVEL_SURNAME = 20; // The minimum level to change surname.
 		static const auto MAX_CLASS_ID = 16;
 	}
-	namespace Spells {
-		static const auto MAX_SPELL_ID = 50000;
-	}
 	namespace StaticItems {
 		static const auto MAX_ITEM_ID = 10000;
 	}

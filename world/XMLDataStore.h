@@ -47,7 +47,7 @@ public:
 	const bool loadNPCTypeData(Data::NPCTypeList pTypes);
 
 	// Spells
-	const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded);
+	const bool loadSpells(Data::SpellDataArray pSpells, const u32 pMaxSpellID, u32& pNumSpellsLoaded);
 	
 	// Items
 	const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded);

@@ -7,10 +7,10 @@
 SpellDataStore::~SpellDataStore() {
 	mDataStore = nullptr;
 
-	if (mData) {
-		delete[] mData;
-		mData = nullptr;
-	}
+	//if (mData) {
+	//	delete[] mData;
+	//	mData = nullptr;
+	//}
 
 	if (mLog) {
 		delete mLog;
@@ -30,14 +30,16 @@ const bool SpellDataStore::initialise(IDataStore* pDataStore, ILogFactory* pLogF
 	mLog->status("Initialising.");
 
 	// Allocate block of memory for spells.
-	mData = new Data::Spell[Limits::Spells::MAX_SPELL_ID];
+	//mData = new Data::Spell[MaxSpellID];
+	for (auto& i : mData) i = new Data::Spell();
 
 	// Load data.
 	u32 numSpellsLoaded = 0;
-	if (!mDataStore->loadSpells(mData, numSpellsLoaded)){
+	if (!mDataStore->loadSpells(mData, MaxSpellID, numSpellsLoaded)){
 		mLog->error("Failed to load data.");
 		return false;
 	}
+	mLog->info(mData[6]->mName);
 	mLog->info("Loaded data for " + toString(numSpellsLoaded) + " Spells.");
 
 	mLog->status("Finished initialising.");
@@ -52,14 +54,21 @@ const Data::Spell* SpellDataStore::getData(const u16 pSpellID) {
 		return nullptr;
 	}
 	
-	return &mData[pSpellID];
+	return mData[pSpellID];
+}
+
+void SpellDataStore::searchByName(const String& pName, SpellSearchResults& pResults) const {
+	for (auto i = 0; i < MaxSpellID; i++) {
+		auto spell = mData[i];
+		if (Utility::findCI(spell->mName, pName)) pResults.push_back({spell->mID, spell->mName});
+	}
 }
 
 namespace Spell {
 	const bool canClassUse(const Data::Spell* pSpell, const u8 pClassID, const u8 pLevel) {
 		EXPECTED_BOOL(pSpell);
 		EXPECTED_BOOL(Limits::Character::classID(pClassID));
-		return pSpell->mRequiredClassLevels[pClassID] <= pLevel;
+		return pSpell->mLevels[pClassID] <= pLevel;
 	}
 
 	const bool zoneAllowed(const Data::Spell* pSpell, const Zone* pZone) {

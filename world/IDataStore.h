@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Types.h"
+#include "SpellContants.h"
 #include <list>
+#include <array>
 
 class ILogFactory;
 struct ItemData;
@@ -18,6 +20,8 @@ namespace Data {
 	struct Shop;
 	struct AlternateCurrency;
 	struct Spell;
+	struct SpellEffect;
+	struct SpellComponent;
 	struct Title;
 	struct TransmutationComponent;
 
@@ -30,6 +34,7 @@ namespace Data {
 	typedef std::list<Data::AlternateCurrency*>& AlternateCurrencyList;
 	typedef std::list<Data::Title*>& TitleList;
 	typedef std::list<Data::TransmutationComponent*>& TransmutationComponentList;
+	typedef std::array<Data::Spell*, MaxSpellID>& SpellDataArray;
 }
 
 class IDataStore {
@@ -64,7 +69,7 @@ public:
 	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes) = 0;
 
 	// Spells
-	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded) = 0;
+	virtual const bool loadSpells(Data::SpellDataArray pSpellData, const u32 pMaxSpellID, u32& pNumSpellsLoaded) = 0;
 
 	// Items
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) = 0;

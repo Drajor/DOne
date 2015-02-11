@@ -1,4 +1,5 @@
 #include "Limits.h"
+#include "SpellContants.h"
 #include "Utility.h"
 
 std::size_t stringLength(const String& pString) { return pString.length() + 1; }
@@ -147,7 +148,7 @@ const bool Limits::SpellBar::spellIDValid(const uint32 pSpellID) {
 }
 
 const bool Limits::Spells::spellIDValid(const uint16 pSpellID) {
-	return pSpellID < Limits::Spells::MAX_SPELL_ID;
+	return pSpellID < MaxSpellID;
 }
 
 const bool Limits::Skills::validID(const uint32 pSkillID) {

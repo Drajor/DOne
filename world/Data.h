@@ -287,23 +287,26 @@ namespace Data {
 		std::map<u32, i32> mItems;
 	};
 
+	struct SpellEffect {
+		u32 mBaseValue = 0;
+		u32 mLimitValue = 0;
+		u32 mMaximum = 0;
+		u32 mFormula = 0;
+		u32 mType = 0;
+	};
+
+	struct SpellComponent {
+		u32 mItemID = 0;
+		u32 mStacks = 0;
+	};
+
 	struct Spell {
-		struct Effect {
-			u32 mBaseValue = 0;
-			u32 mLimitValue = 0;
-			u32 mMaximum = 0;
-			u32 mFormula = 0;
-			u32 mEffectID = 0;
-		};
-		
-		struct Component {
-			u32 mItemID = 0;
-			u32 mStacks = 0;
-		};
 
 		bool mInUse = false;
 		u32 mID = 0;
 		String mName = "";
+		String mPlayer = "";
+		String mTeleportZone = "";
 
 		String mYouCastMessage = "";
 		String mOtherCastsMessage = "";
@@ -312,14 +315,28 @@ namespace Data {
 		String mFadeMessage = "";
 
 		i32 mManaCost = 0;
+		u32 mIcon = 0;
+		u32 mMemIcon = 0;
+
+		u32 mRange = 0;
+		u32 mAOERange = 0;
+		u32 mPushBack = 0;
+		u32 mPushUp = 0;
+		u32 mBuffDurationFormula = 0;
+		u32 mBuffDuration = 0;
+		u32 mAOEDuration = 0;
+		
+		u32 mCastTime = 0;
+		u32 mRecoveryTime = 0;
+		u32 mRecastTime = 0;
 
 		u32 mTargetType = 0; // TODO: Enumeration.
 
-		u8 mRequiredClassLevels[Limits::Character::MAX_CLASS_ID];
-		u8 mRequiredDeities[16];
+		u8 mLevels[Limits::Character::MAX_CLASS_ID];
+		u8 mDeities[16];
 
-		Effect mEffects[12];
-		Component mComponents[4];
+		std::vector<SpellEffect*> mEffects;
+		std::vector<SpellComponent*> mComponents;
 
 	};
 

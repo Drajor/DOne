@@ -3,17 +3,23 @@
 #include "SpellContants.h"
 #include "Types.h"
 #include <array>
+#include <list>
 
 namespace Data {
 	struct Spell;
 }
 
+// For the #spellsearch command.
+struct SpellSearchEntry {
+	u32 mID;
+	String mName;
+};
+typedef std::list<SpellSearchEntry> SpellSearchResults;
+
 class ILog;
 class ILogFactory;
 class IDataStore;
 class Zone;
-
-typedef std::array<Data::Spell, MaxSpellID> SpellDataArray;
 
 class SpellDataStore {
 public:
@@ -24,13 +30,15 @@ public:
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 	const Data::Spell* getData(const u16 pSpellID);
 
+	void searchByName(const String& pName, SpellSearchResults& pResults) const;
+
 private:
 
 	bool mInitialised = false;
 	ILog* mLog = nullptr;
 	IDataStore* mDataStore = nullptr;
 
-	Data::Spell* mData = nullptr;
+	std::array<Data::Spell*, MaxSpellID> mData;
 };
 
 namespace Spell {

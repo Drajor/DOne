@@ -6,7 +6,9 @@
 #include "Settings.h"
 #include "ItemData.h"
 #include "LogSystem.h"
+#include "SpellContants.h"
 
+#include <fstream>
 #include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
 
@@ -1328,51 +1330,223 @@ const bool XMLDataStore::deleteCharacter(const String& pCharacterName) {
 	return true;
 }
 
-namespace SpellDataXML {
-#define SCA static const auto
-	SCA FileLocation = "./data/spells.xml";
-	namespace Tag {
-		SCA Spells = "spells";
-		SCA Spell = "spell";
-	}
-	namespace Attribute {
-		// Tag::Spell
-		SCA ID = "id";
-		SCA Name = "name";
-	}
-#undef SCA
+namespace SpellField {
+	enum : int {
+		ID,
+		Name,
+		Player,
+		TeleportZone,
+		YouCast,
+		OtherCasts,
+		CastOnYou,
+		CastOnOther,
+		FadeMessage,
+		Range,
+		AOERange,
+		PushBack,
+		PushUp,
+		CastTime,
+		RecoveryTime,
+		RecastTime,
+		BuffDurationFormula,
+		BuffDuration,
+		AOEDuration,
+		ManaCost,
+		EffectBase1,
+		EffectBase2,
+		EffectBase3,
+		EffectBase4,
+		EffectBase5,
+		EffectBase6,
+		EffectBase7,
+		EffectBase8,
+		EffectBase9,
+		EffectBase10,
+		EffectBase11,
+		EffectBase12,
+		EffectLimit1,
+		EffectLimit2,
+		EffectLimit3,
+		EffectLimit4,
+		EffectLimit5,
+		EffectLimit6,
+		EffectLimit7,
+		EffectLimit8,
+		EffectLimit9,
+		EffectLimit10,
+		EffectLimit11,
+		EffectLimit12,
+		EffectMax1,
+		EffectMax2,
+		EffectMax3,
+		EffectMax4,
+		EffectMax5,
+		EffectMax6,
+		EffectMax7,
+		EffectMax8,
+		EffectMax9,
+		EffectMax10,
+		EffectMax11,
+		EffectMax12,
+		Icon,
+		MemIcon,
+		ComponentID_1,
+		ComponentID_2,
+		ComponentID_3,
+		ComponentID_4,
+		ComponentCount_1,
+		ComponentCount_2,
+		ComponentCount_3,
+		ComponentCount_4,
+		NoExpendReagent_1,
+		NoExpendReagent_2,
+		NoExpendReagent_3,
+		NoExpendReagent_4,
+		EffectFormula1,
+		EffectFormula2,
+		EffectFormula3,
+		EffectFormula4,
+		EffectFormula5,
+		EffectFormula6,
+		EffectFormula7,
+		EffectFormula8,
+		EffectFormula9,
+		EffectFormula10,
+		EffectFormula11,
+		EffectFormula12,
+		LightType,
+		GoodEffect,
+		Activated,
+		ResistType,
+		EffectType1,
+		EffectType2,
+		EffectType3,
+		EffectType4,
+		EffectType5,
+		EffectType6,
+		EffectType7,
+		EffectType8,
+		EffectType9,
+		EffectType10,
+		EffectType11,
+		EffectType12,
+		TargetType,
+		BaseDifficulty,
+		ZoneType,
+		EnvironmentType,
+		TimeOfDay,
+		UNK,
+		WAR_Level,
+		CLR_Level,
+		PAL_Level,
+		RNG_Level,
+		SHD_Level,
+		DRU_Level,
+		MNK_Level,
+		BRD_Level,
+		ROG_Level,
+		SHM_Level,
+		NEC_Level,
+		WIZ_Level,
+		MAG_Level,
+		ENC_Level,
+		BST_Level,
+		BER_Level,
+	};
 }
-
-const bool XMLDataStore::loadSpells(Data::Spell* pSpells, uint32& pNumSpellsLoaded) {
-	using namespace SpellDataXML;
+const bool XMLDataStore::loadSpells(Data::SpellDataArray pSpells, const u32 pMaxSpellID, u32& pNumSpellsLoaded) {
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
-	if (!pSpells) return false;
+	//if (!pSpells) return false;
 
-	// Load document.
-	TiXmlDocument document(SpellDataXML::FileLocation);
-	if (!document.LoadFile()) {
-		mLog->error("Failed to load " + String(SpellDataXML::FileLocation));
+	// Load file.
+	static const String FileLocation = "./data/spells_us.txt";
+	std::ifstream input;
+	input.open(FileLocation, std::ios::in);
+	if (!input.is_open()) {
+		mLog->error("Failed to load " + FileLocation);
 		return false;
 	}
 
-	pNumSpellsLoaded = 0;
-
-	auto spellsElement = document.FirstChildElement(Tag::Spells);
-	EXPECTED_BOOL(spellsElement);
-	auto spellElement = spellsElement->FirstChildElement(Tag::Spell);
-
-	while (spellElement) {
-		auto spellID = 0;
-		EXPECTED_BOOL(readAttribute(spellElement, Attribute::ID, spellID));
-		EXPECTED_BOOL(spellID > 0 && spellID < Limits::Spells::MAX_SPELL_ID);
-		auto currentSpell = &pSpells[spellID];
-		currentSpell->mInUse = true;
-		currentSpell->mID = spellID;
-
-		spellElement = spellElement->NextSiblingElement(Tag::Spell);
+	// Read file.
+	String line;
+	while (std::getline(input, line)) {
 		pNumSpellsLoaded++;
+		// Split each line into an array.
+		StringStream ss(line);
+		static const auto NumFields = 215;
+		std::array<String, NumFields> fields;
+		for (auto i = 0; i < NumFields; i++) {
+			std::getline(ss, fields[i], '^');
+		}
+
+		u32 id = 0;
+		EXPECTED_BOOL(Utility::stoSafe(id, fields[SpellField::ID]));
+
+		// Process.
+		auto spell = pSpells[id];
+		spell->mID = id;
+		spell->mName = fields[SpellField::Name];
+		spell->mPlayer = fields[SpellField::Player];
+		spell->mTeleportZone = fields[SpellField::TeleportZone];
+		spell->mYouCastMessage = fields[SpellField::YouCast];
+		spell->mOtherCastsMessage = fields[SpellField::OtherCasts];
+		spell->mCastOnYouMessage = fields[SpellField::CastOnYou];
+		spell->mCastOnOtherMessage = fields[SpellField::CastOnOther];
+		spell->mFadeMessage = fields[SpellField::FadeMessage];
+
+		EXPECTED_BOOL(Utility::stoSafe(spell->mRange, fields[SpellField::Range]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mAOERange, fields[SpellField::AOERange]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mPushBack, fields[SpellField::PushBack]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mPushUp, fields[SpellField::PushUp]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mCastTime, fields[SpellField::CastTime]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mRecoveryTime, fields[SpellField::RecoveryTime]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mRecastTime, fields[SpellField::RecastTime]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mBuffDurationFormula, fields[SpellField::BuffDurationFormula]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mBuffDuration, fields[SpellField::BuffDuration]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mAOEDuration, fields[SpellField::AOEDuration]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mManaCost, fields[SpellField::ManaCost]));
+
+		EXPECTED_BOOL(Utility::stoSafe(spell->mIcon, fields[SpellField::Icon]));
+		EXPECTED_BOOL(Utility::stoSafe(spell->mMemIcon, fields[SpellField::MemIcon]));
+
+		// Classes.
+		for (auto i = 0; i < 16; i++)
+			EXPECTED_BOOL(Utility::stoSafe(spell->mLevels[i], fields[SpellField::WAR_Level + i]));
+
+		// Effects.
+		static const auto NumEffects = 12;
+		for (auto i = 0; i < NumEffects; i++) {
+			// 254 = no effect.
+			u32 effectType = 0;
+			EXPECTED_BOOL(Utility::stoSafe(effectType, fields[SpellField::EffectType1 + i]));
+			if (effectType == 254) continue;
+
+			auto effect = new Data::SpellEffect();
+			spell->mEffects.push_back(effect);
+
+			effect->mType = effectType;
+			EXPECTED_BOOL(Utility::stoSafe(effect->mBaseValue, fields[SpellField::EffectBase1 + i]));
+			EXPECTED_BOOL(Utility::stoSafe(effect->mLimitValue, fields[SpellField::EffectLimit1 + i]));
+			EXPECTED_BOOL(Utility::stoSafe(effect->mMaximum, fields[SpellField::EffectMax1 + i]));
+			EXPECTED_BOOL(Utility::stoSafe(effect->mFormula, fields[SpellField::EffectFormula1 + i]));
+		}
+
+		// Components.
+		static const auto NumComponents = 4;
+		for (auto i = 0; i < NumComponents; i++) {
+			// -1 = no component.
+			i32 itemID = 0;
+			EXPECTED_BOOL(Utility::stoSafe(itemID, fields[SpellField::ComponentID_1 + i]));
+			if (itemID == -1) continue;
+
+			auto component = new Data::SpellComponent();
+			spell->mComponents.push_back(component);
+
+			component->mItemID = itemID;
+			EXPECTED_BOOL(Utility::stoSafe(component->mStacks, fields[SpellField::ComponentCount_1 + i]));
+		}
 	}
 
 	return true;

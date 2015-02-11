@@ -1420,8 +1420,8 @@ namespace Payload {
 			static EQApplicationPacket* construct(const String& pTitle, const String& pText) {
 				auto packet = create();
 				auto payload = convert(packet);
-				strcpy(payload->mTitle, pTitle.c_str());
-				strcpy(payload->mText, pText.c_str());
+				strncpy_s(payload->mTitle, _countof(payload->mTitle), pTitle.c_str(), _TRUNCATE);
+				strncpy_s(payload->mText, _countof(payload->mText), pText.c_str(), _TRUNCATE);
 
 				return packet;
 

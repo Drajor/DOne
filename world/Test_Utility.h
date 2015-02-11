@@ -20,7 +20,7 @@ public:
 	virtual const bool saveZones(Data::ZoneList pZones) { return true; }
 	virtual const bool loadNPCAppearanceData(Data::NPCAppearanceList pAppearances) { return true; }
 	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes) { return true; }
-	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded) { return true; }
+	virtual const bool loadSpells(Data::SpellDataArray pSpells, const u32 pMaxSpellID, u32& pNumSpellsLoaded) { return true; }
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) { return true; }
 	virtual const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents) { return true; }
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return true; }
@@ -45,7 +45,7 @@ public:
 	virtual const bool saveZones(Data::ZoneList pZones) { return false; }
 	virtual const bool loadNPCAppearanceData(Data::NPCAppearanceList pAppearances) { return false; }
 	virtual const bool loadNPCTypeData(Data::NPCTypeList pTypes) { return false; }
-	virtual const bool loadSpells(Data::Spell* pSpellData, u32& pNumSpellsLoaded) { return false; }
+	virtual const bool loadSpells(Data::SpellDataArray pSpells, const u32 pMaxSpellID, u32& pNumSpellsLoaded) { return false; }
 	virtual const bool loadItems(ItemData* pItemData, u32& pNumItemsLoaded) { return false; }
 	virtual const bool loadTransmutationComponents(Data::TransmutationComponentList pComponents) { return false; }
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return false; }
