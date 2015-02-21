@@ -36,8 +36,26 @@ namespace FUCK {
 class Character;
 class Zone;
 class HateController;
-struct AttackerData;
 class LootController;
+class BuffController;
+class ActorBonuses;
+class Bonuses;
+
+struct CastingState {
+	u16 mTargetID = 0;
+	u16 mSpellID = 0;
+	u16 mCastTimeMS = 0;
+	Vector3 mOrigin;
+
+	void clear() {
+		mTargetID = 0;
+		mSpellID = 0;
+		mCastTimeMS = 0;
+		mOrigin.x = 0.0f;
+		mOrigin.y = 0.0f;
+		mOrigin.z = 0.0f;
+	}
+};
 
 class Actor {
 public:
@@ -51,6 +69,11 @@ public:
 	Zone* getZone() const { return mZone; }
 
 	inline HateController* getHateController() const { return mHateController; }
+	inline LootController* getLootController() const { return mLootController; }
+	inline BuffController* getBuffController() const { return mBuffController; }
+	inline ActorBonuses* getActorBonuses() const { return mActorBonuses; }
+	inline Bonuses* getBaseBonuses() const { return mBaseBonuses; }
+	inline CastingState& getCastingState() { return mCastingState; }
 	
 	// Returns a copy of the hate list.
 	inline std::list<Actor*> getHaters() { return mHaters; }
@@ -58,8 +81,6 @@ public:
 	inline void addHater(Actor* pHater) { mHaters.push_back(pHater); }
 	inline void removeHater(Actor* pHater) { mHaters.remove(pHater); }
 	inline void clearHaters() { mHaters.clear(); }
-
-	inline LootController* getLootController() { return mLootController; }
 
 
 	// Returns whether this Actor is a Character or not.
@@ -354,11 +375,17 @@ public:
 	// Sets the level of this Actor.
 	virtual void setLevel(const u8 pLevel) { mActorData.mLevel = pLevel; }
 
+	// Returns the owner of this Actor.
+	inline const Actor* getOwner() const { return mOwner; }
+
+	// Sets the owner of this Actor.
+	inline void setOwner(Actor* pOwner) { mOwner = pOwner; }
+
 	// Returns the spawn ID of the owner of this Actor.
-	inline const uint32 getOwnerSpawnID() const { return mActorData.mOwnerSpawnID; }
+	inline const uint32 getOwnerID() const { return mActorData.mOwnerID; }
 
 	// Sets the spawn ID of the owner of this Actor.
-	inline void setOwnerSpawnID(const uint32 pSpawnID) { mActorData.mOwnerSpawnID = pSpawnID; }
+	inline void setOwnerID(const u32 pID) { mActorData.mOwnerID = pID; }
 
 	// Returns the guild rank of this Actor.
 	inline const uint32 getGuildRank() const { return mActorData.mGuildRank; }
@@ -459,6 +486,9 @@ public:
 	inline const bool isInvulnerable() const { return mIsInvulnerable; }
 	inline void setInvulnerable(const bool pValue) { mIsInvulnerable = pValue; }
 
+	inline const bool isCasting() const { return mIsCasting; }
+	inline void setIsCasting(const bool pValue) { mIsCasting = pValue; }
+
 	inline const int32 getCurrentHP() const { return mCurrentHP; }
 	inline void setCurrentHP(const int32 pValue) { mCurrentHP = pValue; }
 	inline const int32 getMaximumHP() const { return mMaximumHP; }
@@ -495,6 +525,10 @@ protected:
 	}
 
 	HateController* mHateController = nullptr;
+	BuffController* mBuffController = nullptr;
+	ActorBonuses* mActorBonuses = nullptr;
+	Bonuses* mBaseBonuses = nullptr;
+
 	std::list<Actor*> mHaters; // List of Actors who currently hate this Actor.
 
 	Vector3 mPosition;
@@ -573,6 +607,8 @@ private:
 	bool mIsStunImmune = false;
 	bool mIsStunned = false;
 	bool mIsDead = false;
+	bool mIsCasting = false;
+	CastingState mCastingState;
 
 	int32 mCurrentHP = 50;
 	int32 mMaximumHP = 50;
@@ -587,6 +623,7 @@ private:
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.
 	std::bitset<65535> mVisibleToSpawnID;
 
+	Actor* mOwner = nullptr;
 	Actor* mTarget = nullptr; // Current target.
 	std::list<Actor*> mTargeters; // Actors currently targeting this Actor.
 

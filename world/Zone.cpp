@@ -41,6 +41,7 @@
 #include "ExperienceCalculator.h"
 #include "HateController.h"
 #include "CommandHandler.h"
+#include "BuffController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -241,6 +242,11 @@ void Zone::onEnterZone(Character* pCharacter) {
 
 	mLog->info("Character (" + pCharacter->getName() + ") entering zone.");
 	pCharacter->onEnterZone();
+
+	// Send buff update. This should probably be sent earlier.
+	auto packet = Payload::updateBuffIcons(pCharacter->getSpawnID(), pCharacter->getBuffController()->getData());
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
 
 	// Add.
 	addActor(pCharacter);
@@ -998,57 +1004,85 @@ void Zone::onSurnameChange(Actor* pActor, const String& pSurname) {
 		Actor::cast<Character*>(pActor)->getConnection()->sendSurnameApproval(true);
 }
 
-void Zone::handleCastingBegin(Character* pCharacter, const uint16 pSlot, const u32 pSpellID) {
+void Zone::onCast(Character* pCharacter, const u16 pTargetID, const u16 pSlot, const u16 pSpellID) {
+	if (!pCharacter) return;
+
+	// TODO: Verifications, cast time calculation etc.
+
+	onBeginCast(pCharacter, pTargetID, pSpellID, 500);
+}
+
+void Zone::onBeginCast(Actor* pActor, const u16 pTargetID, const u32 pSpellID, const u32 pCastTime) {
 	using namespace Payload::Zone;
-	EXPECTED(Limits::SpellBar::slotValid(pSlot));
-	EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
-	EXPECTED(pCharacter);
-	EXPECTED(pCharacter->isCaster());
-	EXPECTED(pCharacter->isCasting() == false);
-	EXPECTED(pCharacter->hasSpell(pSlot, pSpellID)); // Check: pCharacter has the spell on the Spell Bar.
-	EXPECTED(pCharacter->canCast(pSpellID)); // Check: pCharacter can cast the spell.
+	if (!pActor) return;
 
-	auto spellData = ServiceLocator::getSpellDataStore()->getData(pSpellID);
-	EXPECTED(spellData);
+	//EXPECTED(Limits::SpellBar::slotValid(pSlot));
+	//EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
+	//EXPECTED(pActor);
+	//EXPECTED(pActor->isCaster());
+	//EXPECTED(pActor->isCasting() == false);
+	//EXPECTED(pActor->hasSpell(pSlot, pSpellID)); // Check: pCharacter has the spell on the Spell Bar.
+	//EXPECTED(pActor->canCast(pSpellID)); // Check: pCharacter can cast the spell.
 
-	// Check: Pre-Conditions for casting
-	if (pCharacter->preCastingChecks(spellData) == false) {
+	//auto spellData = ServiceLocator::getSpellDataStore()->getData(pSpellID);
+	//EXPECTED(spellData);
 
-		//return; TODO: Once we have things sorted out more.
+	//// Check: Pre-Conditions for casting
+	//if (pActor->preCastingChecks(spellData) == false) {
+
+	//	//return; TODO: Once we have things sorted out more.
+	//}
+
+	//// Update Character state.
+	//EXPECTED(pActor->beginCasting(pSlot, pSpellID));
+
+	// Record casting state.
+	pActor->setIsCasting(true);
+	auto& castingState = pActor->getCastingState();
+	castingState.mTargetID = pTargetID;
+	castingState.mSpellID = pSpellID;
+	castingState.mCastTimeMS = pCastTime;
+	//castingState.mFinishTime = Utility::Time::now() + pCastTime;
+	castingState.mOrigin = pActor->getPosition();
+	
+	// Instant cast.
+	if (pCastTime == 0) {
+		onFinishCast(pActor);
+		return;
 	}
 
-	// Update Character state.
-	EXPECTED(pCharacter->beginCasting(pSlot, pSpellID));
-
-	// Update Character + those visible to
-	auto packet = BeginCast::construct(pCharacter->getSpawnID(), pSpellID, 500);
-	sendToVisible(pCharacter, packet, true);
+	// Notify Characters.
+	auto packet = BeginCast::construct(pActor->getSpawnID(), pSpellID, pCastTime);
+	sendToVisible(pActor, packet, true);
 	delete packet;
 }
 
-void Zone::handleCastingFinished(Actor* pActor) {
+void Zone::onFinishCast(Actor* pActor) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	if (!pActor) return;
 
-	auto outPacket = new EQApplicationPacket(OP_Action, Action::size());
-	auto payload = Action::convert(outPacket->pBuffer);
-
-	payload->mTargetSpawnID = pActor->getSpawnID();
-	payload->mSourceSpawnID = payload->mTargetSpawnID; // TODO:
-	payload->mSpellID = 1000; // TODO:
-	payload->mType = 231; // Spell = 231
-	payload->buff_unknown = 0;
-
-	// Character has finished casting.
-	if (pActor->isCharacter()) {
-		sendToVisible(Actor::cast<Character*>(pActor), outPacket, true);
-	}
-	// NPC has finished casting.
-	else {
-		sendToVisible(pActor, outPacket);
+	// Check: Actor is currently casting.
+	if (!pActor->isCasting()) {
+		mLog->error(pActor->getName() + " finished casting but was not casting.");
+		return;
 	}
 
-	safe_delete(outPacket);
+	auto sequence = Random::make<u32>(0, 20304843);
+	auto& castingState = pActor->getCastingState();
+
+	const bool success = true;
+
+	auto packet = FinishCast::construct(castingState.mTargetID, pActor->getSpawnID(), castingState.mSpellID, success ? 4 : 0, sequence);
+	sendToVisible(pActor, packet, true);
+	delete packet;
+
+	packet = Damage::construct(castingState.mTargetID, pActor->getSpawnID(), 0, 231, sequence, castingState.mSpellID);
+	sendToVisible(pActor, packet, true); // TODO: This needs to be range based.
+	delete packet;
+
+	// Reset casting state.
+	pActor->setIsCasting(false);
+	castingState.clear();
 }
 
 
@@ -2631,12 +2665,12 @@ void Zone::onCampBegin(Character* pCharacter) {
 	}
 }
 
-void Zone::onInspectRequest(Character* pCharacter, const u32 pSpawnID) {
+void Zone::onInspectRequest(Character* pCharacter, const u32 pActorID) {
 	using namespace Payload::Zone;
 	if (!pCharacter) return;
-	mLog->info(pCharacter->getName() + " requesting to inspect Spawn ID: " + toString(pSpawnID));
+	mLog->info(pCharacter->getName() + " requesting to inspect Actor ID: " + toString(pActorID));
 
-	auto actor = getActor(pSpawnID);
+	auto actor = getActor(pActorID);
 
 	// Check: Actor is valid.
 	if (!actor) {
@@ -2680,4 +2714,22 @@ void Zone::onInspectRequest(Character* pCharacter, const u32 pSpawnID) {
 
 	// Send notification to Character being inspected.
 	target->getConnection()->sendSimpleMessage(MessageType::White, StringID::BeingInspected, pCharacter->getName());
+}
+
+void Zone::onRemoveBuffRequest(Character* pCharacter, const u32 pActorID, const u32 pSlotID) {
+	if (!pCharacter) return;
+	mLog->info(pCharacter->getName() + " requesting to remove buff from Actor ID: " + toString(pActorID) + " at slot: " + toString(pSlotID));
+
+	auto actor = getActor(pActorID);
+
+	if (!actor) {
+		mLog->error("Actor does not exist.");
+		return;
+	}
+
+	// Check: Actor is either the Character or owned by the Character (pet).
+	if (actor != pCharacter && actor->getOwner() != pCharacter) {
+		mLog->error("Actor is not valid.");
+		return;
+	}
 }

@@ -303,34 +303,6 @@ public:
 
 	static float getDefaultSize(uint32 pRace);
 
-	// Base Stats
-	uint32 getBaseStatistic(Statistic pStatistic);
-	void setBaseStatistic(Statistic pStatistic, uint32 pValue);
-
-	inline const i32 getBasePoisonResist() const { return 0; }
-	inline const i32 getBaseMagicResist() const { return 0; }
-	inline const i32 getBaseDiseaseResist() const { return 0; }
-	inline const i32 getBaseFireResist() const { return 0; }
-	inline const i32 getBaseColdResist() const { return 0; }
-	inline const i32 getBaseCorruptionResist() const { return 0; }
-
-	inline const u32 getBaseStrength() const { return mBaseStrength; };
-	inline const u32 getBaseStamina() const { return mBaseStamina; };
-	inline const u32 getBaseCharisma() const { return mBaseCharisma; };
-	inline const u32 getBaseDexterity() const { return mBaseDexterity; };
-	inline const u32 getBaseIntelligence() const { return mBaseIntelligence; };
-	inline const u32 getBaseAgility() const { return mBaseAgility; };
-	inline const u32 getBaseWisdom() const { return mBaseWisdom; };
-
-	// 
-	inline const u32 getStrength() const { return 0; };
-	inline const u32 getStamina() const { return 0; };
-	inline const u32 getCharisma() const { return 0; };
-	inline const u32 getDexterity() const { return 0; };
-	inline const u32 getIntelligence() const { return 0; };
-	inline const u32 getAgility() const { return 0; };
-	inline const u32 getWisdom() const { return 0; };
-
 	// Consent
 	inline const bool getAutoConsentGroup() const { return mAutoConsentGroup; }
 	inline void setAutoConsentGroup(const bool pConsent) { mAutoConsentGroup = pConsent; }
@@ -344,7 +316,7 @@ public:
 	inline std::list<NPC*>& getVisibleNPCs() { return mVisibleNPCs; }
 	inline void clearVisibleNPCs() { mVisibleNPCs.clear(); }
 
-	inline const bool isCasting() const { return mIsCasting; }
+	//inline const bool isCasting() const { return mIsCasting; }
 
 	// Returns whether this Character has a spell in their SpellBook
 	const bool hasSpell(const u32 pSpellID) const;
@@ -364,8 +336,8 @@ public:
 
 	const bool preCastingChecks(const Data::Spell* pSpell);
 	const bool postCastingChecks(const Data::Spell* pSpell);
-	const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
-	const bool finishCasting();
+	//const bool beginCasting(const uint16 pSlot, const uint32 pSpellID);
+	//const bool finishCasting();
 
 	const Data::Character* getData() const { return mData; }
 
@@ -446,15 +418,6 @@ private:
 
 	Filters mFilters;
 
-	u32 mBaseStrength = 0;
-	u32 mBaseStamina = 0;
-	u32 mBaseCharisma = 0;
-	u32 mBaseDexterity = 0;
-	u32 mBaseIntelligence = 0;
-	u32 mBaseAgility = 0;
-	u32 mBaseWisdom = 0;
-
-	bool mIsCasting = false;
 	uint32 mCastingSpellID = 0;
 	uint16 mCastingSlot = 0; // The Spell Bar slot ID used to cast a spell
 	Timer mCastingTimer;

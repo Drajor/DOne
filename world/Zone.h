@@ -228,7 +228,10 @@ public:
 	const bool onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot);
 	void onCampBegin(Character* pCharacter);
 	void onDropItem(Character* pCharacter);
-	void onInspectRequest(Character* pCharacter, const u32 pSpawnID);
+	void onInspectRequest(Character* pCharacter, const u32 pActorID);
+
+	// The Character is requesting to remove a buff.
+	void onRemoveBuffRequest(Character* pCharacter, const u32 pActorID, const u32 pSlotID);
 
 	void handleActorPositionChange(Actor* pActor);
 
@@ -283,8 +286,9 @@ public:
 
 	void onSurnameChange(Actor* pActor, const String& pSurname);
 
-	void handleCastingBegin(Character* pCharacter, const u16 pSlot, const u32 pSpellID);
-	void handleCastingFinished(Actor* pActor);
+	void onCast(Character* pCharacter, const u16 pTargetID, const u16 pSlot, const u16 pSpellID);
+	void onBeginCast(Actor* pActor, const u16 pTargetID, const u32 pSpellID, const u32 pCastTime);
+	void onFinishCast(Actor* pActor);
 
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket);
 	void sendToVisible(Actor* pActor, EQApplicationPacket* pPacket, bool pIncludeSender);

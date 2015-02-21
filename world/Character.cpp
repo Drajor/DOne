@@ -18,6 +18,8 @@
 #include "HateController.h"
 #include "RespawnOptions.h"
 #include "ExperienceController.h"
+#include "ActorBonuses.h"
+#include "BuffController.h"
 
 #include "Group.h"
 #include "Guild.h"
@@ -64,11 +66,11 @@ Character::~Character() {
 
 void Character::update() {
 
-	if (isCasting()) {
-		if (mCastingTimer.Check()) {
-			finishCasting();
-		}
-	}
+	//if (isCasting()) {
+	//	if (mCastingTimer.Check()) {
+	//		finishCasting();
+	//	}
+	//}
 
 	if (mAutoSave.Check()) {
 		mZone->saveCharacter(this);
@@ -100,6 +102,24 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	mAccount = pAccount;
 	mInventory = pInventory;
 	mExperienceController = pExperienceController;
+
+	getActorBonuses()->add(pInventory);
+
+	// Add base stats.
+	auto bonuses = getBaseBonuses();
+	bonuses->_addStrength(mData->mStrength);
+	bonuses->_addStamina(mData->mStamina);
+	bonuses->_addIntelligence(mData->mIntelligence);
+	bonuses->_addWisdom(mData->mWisdom);
+	bonuses->_addAgility(mData->mAgility);
+	bonuses->_addDexterity(mData->mDexterity);
+	bonuses->_addCharisma(mData->mCharisma);
+
+	// temp.
+	auto buffs = getBuffController();
+	buffs->add(1447, 10);
+	buffs->add(60, 10);
+	buffs->add(11, 10);
 
 	setSurname(mData->mLastName);
 	setTitle(mData->mTitle);
@@ -153,14 +173,6 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 
 	// Shared Bank Currency
 	mInventory->setCurrency(CurrencySlot::SharedBank, CurrencyType::Platinum, mAccount->getSharedPlatinum());
-
-	mBaseStrength = mData->mStrength;
-	mBaseStamina = mData->mStamina;
-	mBaseCharisma = mData->mCharisma;
-	mBaseDexterity = mData->mDexterity;
-	mBaseIntelligence = mData->mIntelligence;
-	mBaseAgility = mData->mAgility;
-	mBaseWisdom = mData->mWisdom;
 
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++) {
@@ -354,13 +366,14 @@ const bool Character::_updateForSave() {
 	mData->mPosition = mPosition;
 	mData->mHeading = mHeading;
 
-	mData->mStrength = mBaseStrength;
-	mData->mStamina = mBaseStamina;
-	mData->mCharisma = mBaseCharisma;
-	mData->mDexterity = mBaseDexterity;
-	mData->mIntelligence = mBaseIntelligence;
-	mData->mAgility = mBaseAgility;
-	mData->mWisdom = mBaseWisdom;
+	auto bonuses = getBaseBonuses();
+	mData->mStrength = bonuses->getStrength();
+	mData->mStamina = bonuses->getStamina();
+	mData->mIntelligence = bonuses->getIntelligence();
+	mData->mWisdom = bonuses->getWisdom();
+	mData->mAgility = bonuses->getAgility();
+	mData->mDexterity = bonuses->getDexterity();
+	mData->mCharisma = bonuses->getCharisma();
 
 	// Skills
 	for (int i = 0; i < Limits::Skills::MAX_ID; i++)
@@ -418,67 +431,6 @@ const bool Character::_updateForSave() {
 	}
 
 	return true;
-}
-
-uint32 Character::getBaseStatistic(Statistic pStatistic) {
-	switch (pStatistic)
-	{
-	case Statistic::Strength:
-		return mBaseStrength;
-		break;
-	case Statistic::Stamina:
-		return mBaseStamina;
-		break;
-	case Statistic::Charisma:
-		return mBaseCharisma;
-		break;
-	case Statistic::Dexterity:
-		return mBaseDexterity;
-		break;
-	case Statistic::Intelligence:
-		return mBaseIntelligence;
-		break;
-	case Statistic::Agility:
-		return mBaseAgility;
-		break;
-	case Statistic::Wisdom:
-		return mBaseWisdom;
-		break;
-	default:
-		Log::error("[Character] Unknown Statistic in getBaseStatistic.");
-		break;
-	}
-
-	return 0;
-}
-
-void Character::setBaseStatistic(Statistic pStatistic, uint32 pValue) {
-	switch (pStatistic) {
-	case Statistic::Strength:
-		mBaseStrength = pValue;
-		break;
-	case Statistic::Stamina:
-		mBaseStamina = pValue;
-		break;
-	case Statistic::Charisma:
-		mBaseCharisma = pValue;
-		break;
-	case Statistic::Dexterity:
-		mBaseDexterity = pValue;
-		break;
-	case Statistic::Intelligence:
-		mBaseIntelligence = pValue;
-		break;
-	case Statistic::Agility:
-		mBaseAgility = pValue;
-		break;
-	case Statistic::Wisdom:
-		mBaseWisdom = pValue;
-		break;
-	default:
-		Log::error("[Character] Unknown Statistic in setBaseStatistic.");
-		break;
-	}
 }
 
 void Character::_processMessageQueue() {
@@ -583,36 +535,36 @@ const bool Character::canCast(const uint32 pSpellID) const {
 	return true;
 }
 
-const bool Character::beginCasting(const uint16 pSlot, const uint32 pSpellID) {
-	EXPECTED_BOOL(isCaster());
-	EXPECTED_BOOL(isCasting() == false);
-
-	mIsCasting = true;
-	mCastingSlot = pSlot;
-	mCastingSpellID = pSpellID;
-	mCastingTimer.Start(1000);
-
-	return true;
-}
-
-const bool Character::finishCasting() {
-	EXPECTED_BOOL(isCaster());
-	EXPECTED_BOOL(isCasting());
-
-	// Update Zone.
-	mZone->handleCastingFinished(this);
-
-	mConnection->sendRefreshSpellBar(mCastingSlot, mCastingSpellID);
-	mConnection->sendEnableSpellBar(mCastingSpellID);
-	//mConnection->sendSpellCastOn(); // temp
-
-	mIsCasting = false;
-	mCastingSlot = 0;
-	mCastingSpellID = 0;
-	mCastingTimer.Disable();
-
-	return true;
-}
+//const bool Character::beginCasting(const uint16 pSlot, const uint32 pSpellID) {
+//	EXPECTED_BOOL(isCaster());
+//	EXPECTED_BOOL(isCasting() == false);
+//
+//	mIsCasting = true;
+//	mCastingSlot = pSlot;
+//	mCastingSpellID = pSpellID;
+//	mCastingTimer.Start(1000);
+//
+//	return true;
+//}
+//
+//const bool Character::finishCasting() {
+//	EXPECTED_BOOL(isCaster());
+//	EXPECTED_BOOL(isCasting());
+//
+//	// Update Zone.
+//	mZone->onFinishCast(this);
+//
+//	mConnection->sendRefreshSpellBar(mCastingSlot, mCastingSpellID);
+//	mConnection->sendEnableSpellBar(mCastingSpellID);
+//	//mConnection->sendSpellCastOn(); // temp
+//
+//	mIsCasting = false;
+//	mCastingSlot = 0;
+//	mCastingSpellID = 0;
+//	mCastingTimer.Disable();
+//
+//	return true;
+//}
 
 const bool Character::preCastingChecks(const Data::Spell* pSpell) {
 	EXPECTED_BOOL(pSpell);

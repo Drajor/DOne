@@ -20,6 +20,8 @@
 #include "NPCFactory.h"
 #include "Random.h"
 #include "ExperienceController.h"
+#include "ActorBonuses.h"
+#include "BuffController.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -328,33 +330,6 @@ public:
 			invalidParameters(pParameters);
 			return false;
 		}
-
-		String statStr = pParameters[0];
-		String statName = "unknown";
-		uint32 value = 0;
-		Statistic statistic;
-		// Check: Parameter conversion.
-		const bool ok = Utility::stoSafe(value, pParameters[1]);
-		if (!ok) {
-			return false;
-		}
-
-		// Determine which statistic is changing.
-		if (statStr == "str") { statistic = Statistic::Strength; statName = "strength"; }
-		else if (statStr == "sta") { statistic = Statistic::Stamina; statName = "stamina"; }
-		else if (statStr == "cha") { statistic = Statistic::Charisma; statName = "charisma"; }
-		else if (statStr == "dex") { statistic = Statistic::Dexterity; statName = "dexterity"; }
-		else if (statStr == "int") { statistic = Statistic::Intelligence; statName = "intelligence"; }
-		else if (statStr == "agi") { statistic = Statistic::Agility; statName = "agility"; }
-		else if (statStr == "wis") { statistic = Statistic::Wisdom; statName = "wisdom"; }
-		else {
-			return false;
-		}
-
-		StringStream ss;
-		ss << "Changing " << mInvoker->getName() << "'s " << statName << " from " << mInvoker->getBaseStatistic(statistic) << " to " << value;
-		mInvoker->message(MessageType::LightGreen, ss.str());
-		mInvoker->setBaseStatistic(statistic, value);
 
 		return true;
 	}
@@ -1743,6 +1718,22 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class CastSpellCommand :public Command{
+public:
+	CastSpellCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #cast <spell_id>");
+		mMinimumParameters = 1;
+	};
+
+	const bool handleCommand(CommandParameters pParameters) {
+		u16 spellID = 0;
+		if (!convertParameter(0, spellID)) return false;
+
+		mInvoker->getZone()->onBeginCast(mInvoker, mInvoker->getSpawnID(), spellID, 0);
+	}
+};
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -1787,6 +1778,7 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 	mCommands.push_back(new SurnameCommand(100, { "surname" }));
 
 	mCommands.push_back(new SpellSearchCommand(100, { "spellsearch", "ss", "findspell", "fs" }));
+	mCommands.push_back(new CastSpellCommand(100, { "cast" }));
 
 	mCommands.push_back(new SetSkillCommand(100, { "setskill" }));
 	mCommands.push_back(new GetSkillCommand(100, { "getskill" }));
@@ -2228,6 +2220,218 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	//}
 	else if (pCommandName == "msg2") {
 		//pCharacter->getConnection()->sendSimpleMessage(0, 1127, 17);
+	}
+	//else if (pCommandName == "buffs") {
+	//	//auto packet = Payload::updateBuffSlots(pCharacter->getSpawnID(), pCharacter->getBuffController()->getData());
+	//	auto packet = Payload::updateBuffsXX(pCharacter->getSpawnID());
+	//	pCharacter->getConnection()->sendPacket(packet);
+	//	delete packet;
+	//}
+	else if (pCommandName == "buffsx"/* && pParameters.size() == 3*/) {
+		//u8 action = 0;
+		//Utility::stoSafe(action, pParameters[0]);
+		//u32 slot = 0;
+		//Utility::stoSafe(slot, pParameters[1]);
+		//u32 fade = 0;
+		//Utility::stoSafe(fade, pParameters[2]);
+
+		//auto packet = Payload::Zone::BuffX::construct(pCharacter->getSpawnID(), action, slot, fade);
+		Payload::Zone::BuffX payload;
+		payload.mActorID = pCharacter->getSpawnID();
+		payload.mAction = 2;
+		payload.mSpellID = 0xFFFFFFFF;
+		payload.mSlot = 1;
+		payload.mFade = 1;
+
+		auto packet = Payload::Zone::BuffX::create(payload);
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
+	}
+	//else if (pCommandName == "action" && pParameters.size() == 2) {
+	//	u8 flag = 0;
+	//	Utility::stoSafe(flag, pParameters[0]);
+	//	u16 spellID = 0;
+	//	Utility::stoSafe(spellID, pParameters[1]);
+
+	//	//auto packet = Payload::Zone::Action::construct(pCharacter->getSpawnID(), spellID, 0);
+	//	//pCharacter->getConnection()->sendPacket(packet);
+	//	//delete packet;
+
+	//	auto packet2 = Payload::Zone::FinishCast::construct(pCharacter->getSpawnID(), spellID, 4);
+	//	pCharacter->getConnection()->sendPacket(packet2);
+	//	delete packet2;
+
+	//	auto packet3 = Payload::Zone::Damage::construct(pCharacter->getSpawnID(), pCharacter->getSpawnID(), 0, 231, 21123, spellID);
+	//	pCharacter->getConnection()->sendPacket(packet3);
+	//	delete packet3;
+	//}
+	else if (pCommandName == "table") {
+		
+		auto actorBonuses = pCharacter->getActorBonuses();
+		auto bonuses = actorBonuses->getBonuses();
+
+		Utility::PopupHelper helper;
+
+		helper.tableBegin();
+
+		// Heading.
+		helper.rowBegin();
+		helper.writeColumn("");
+		helper.writeColumn("Total");
+		helper.writeColumn("Cap");
+		helper.writeColumn("Actual");
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(i->getName());
+		helper.rowEnd();
+
+		// Strength.
+		helper.rowBegin();
+		helper.writeColumn("STR");
+		helper.writeColumn(toString(actorBonuses->getStrength()));
+		helper.writeColumn(toString(actorBonuses->getHeroicStrength()));
+		helper.writeColumn(toString(actorBonuses->getCappedStrength()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getStrength()));
+
+		helper.rowEnd();
+
+		// Stamina.
+		helper.rowBegin();
+		helper.writeColumn("STA");
+		helper.writeColumn(toString(actorBonuses->getStamina()));
+		helper.writeColumn(toString(actorBonuses->getHeroicStamina()));
+		helper.writeColumn(toString(actorBonuses->getCappedStamina()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getStamina()));
+		helper.rowEnd();
+
+		// Intelligence.
+		helper.rowBegin();
+		helper.writeColumn("INT");
+		helper.writeColumn(toString(actorBonuses->getIntelligence()));
+		helper.writeColumn(toString(actorBonuses->getHeroicIntelligence()));
+		helper.writeColumn(toString(actorBonuses->getCappedIntelligence()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getIntelligence()));
+		helper.rowEnd();
+
+		// Wisdom.
+		helper.rowBegin();
+		helper.writeColumn("WIS");
+		helper.writeColumn(toString(actorBonuses->getWisdom()));
+		helper.writeColumn(toString(actorBonuses->getHeroicWisdom()));
+		helper.writeColumn(toString(actorBonuses->getCappedWisdom()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getWisdom()));
+		helper.rowEnd();
+
+		// Agility.
+		helper.rowBegin();
+		helper.writeColumn("AGI");
+		helper.writeColumn(toString(actorBonuses->getAgility()));
+		helper.writeColumn(toString(actorBonuses->getHeroicAgility()));
+		helper.writeColumn(toString(actorBonuses->getCappedAgility()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getAgility()));
+		helper.rowEnd();
+
+		// Dexterity.
+		helper.rowBegin();
+		helper.writeColumn("DEX");
+		helper.writeColumn(toString(actorBonuses->getDexterity()));
+		helper.writeColumn(toString(actorBonuses->getHeroicDexterity()));
+		helper.writeColumn(toString(actorBonuses->getCappedDexterity()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getDexterity()));
+		helper.rowEnd();
+
+		// Charisma.
+		helper.rowBegin();
+		helper.writeColumn("CHA");
+		helper.writeColumn(toString(actorBonuses->getCharisma()));
+		helper.writeColumn(toString(actorBonuses->getHeroicCharisma()));
+		helper.writeColumn(toString(actorBonuses->getCappedCharisma()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getCharisma()));
+		helper.rowEnd();
+
+		// Magic Resist.
+		helper.rowBegin();
+		helper.writeColumn("MR");
+		helper.writeColumn(toString(actorBonuses->getMagicResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicMagicResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedMagicResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getMagicResist()));
+		helper.rowEnd();
+
+		// Fire Resist.
+		helper.rowBegin();
+		helper.writeColumn("FR");
+		helper.writeColumn(toString(actorBonuses->getFireResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicFireResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedFireResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getFireResist()));
+		helper.rowEnd();
+
+		// Cold Resist.
+		helper.rowBegin();
+		helper.writeColumn("CR");
+		helper.writeColumn(toString(actorBonuses->getColdResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicColdResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedColdResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getColdResist()));
+		helper.rowEnd();
+
+		// Disease Resist.
+		helper.rowBegin();
+		helper.writeColumn("DR");
+		helper.writeColumn(toString(actorBonuses->getDiseaseResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicDiseaseResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedDiseaseResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getDiseaseResist()));
+		helper.rowEnd();
+
+		// Poison Resist.
+		helper.rowBegin();
+		helper.writeColumn("PR");
+		helper.writeColumn(toString(actorBonuses->getPoisonResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicPoisonResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedPoisonResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getPoisonResist()));
+		helper.rowEnd();
+
+		// Corruption Resist.
+		helper.rowBegin();
+		helper.writeColumn("COR");
+		helper.writeColumn(toString(actorBonuses->getCorruptionResist()));
+		helper.writeColumn(toString(actorBonuses->getHeroicCorruptionResist()));
+		helper.writeColumn(toString(actorBonuses->getCappedCorruptionResist()));
+		helper.writeColumn("|");
+		for (auto i : bonuses)
+			helper.writeColumn(toString(i->getCorruptionResist()));
+		helper.rowEnd();
+
+		helper.tableEnd();
+
+		pCharacter->getConnection()->sendPopup("Table", helper.getText());
 	}
 	else {
 		pCharacter->message(MessageType::Yellow, "Unknown command.");

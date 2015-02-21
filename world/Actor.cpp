@@ -1,9 +1,17 @@
 #include "Actor.h"
 #include "Utility.h"
 #include "LootController.h"
+#include "BuffController.h"
+#include "ActorBonuses.h"
 
 Actor::Actor() {
 	mLootController = new LootController();
+	mBuffController = new BuffController();
+
+	mActorBonuses = new ActorBonuses();
+	mBaseBonuses = new Bonuses("Base");
+	mActorBonuses->add(mBaseBonuses);
+	mActorBonuses->add(mBuffController);
 }
 
 Actor::~Actor() {

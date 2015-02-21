@@ -2285,11 +2285,11 @@ const bool ZoneConnection::handleCastSpell(const EQApplicationPacket* pPacket) {
 		EXPECTED_BOOL(payload->mTargetID == 0);
 	}
 
-	EXPECTED_BOOL(Limits::SpellBar::slotValid(payload->mSlot));
+	EXPECTED_BOOL(Limits::SpellBar::slotValid(payload->mSpellBarSlot));
 	EXPECTED_BOOL(Limits::SpellBar::spellIDValid(payload->mSpellID));
 
 	// Casting from Spell Bar.
-	mZone->handleCastingBegin(mCharacter, payload->mSlot, payload->mSpellID);
+	mZone->onCast(mCharacter, payload->mTargetID, payload->mSpellBarSlot, payload->mSpellID);
 	return true;
 }
 
@@ -3872,7 +3872,10 @@ const bool ZoneConnection::handleRemoveBuffRequest(const EQApplicationPacket* pP
 
 	auto payload = RemoveBuffRequest::convert(pPacket);
 
-	// TODO:
+	// Notify Zone.
+	mZone->onRemoveBuffRequest(mCharacter, payload->mActorID, payload->mSlotID);
+
+	sendPacket(pPacket);
 	return true;
 }
 

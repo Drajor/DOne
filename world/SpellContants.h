@@ -2,6 +2,7 @@
 
 #include "Types.h"
 
+static const auto MaxBuffs = 30;
 static const auto MaxSpellID = 35000;
 //static const auto NumClasses = 16;
 //static const auto NumEffects = 12;

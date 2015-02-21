@@ -558,6 +558,12 @@ namespace Utility {
 		inline String getText() const { return mText; }
 		inline void write(const String pText) { mText += pText; }
 		inline void writeBr(const String pText) { write(pText); breakLine(); }
+
+		inline void tableBegin() { mText += "<table>"; }
+		inline void tableEnd() { mText += "</table>"; }
+		inline void rowBegin() { mText += "<tr>"; }
+		inline void rowEnd() { mText += "</tr>"; }
+		inline void writeColumn(const String& pText) { mText += "<td>" + pText + "</td>"; }
 		
 		//template <typename T>
 		//inline void write(const string pString, const T pValue) { write(pString + std::to_string(pValue)); }

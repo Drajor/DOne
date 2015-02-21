@@ -4,6 +4,7 @@
 #include "Guild.h"
 #include "Group.h"
 #include "Character.h"
+#include "BuffController.h"
 #include "Inventory.h"
 #include "ExperienceController.h"
 #include "TitleManager.h"
@@ -349,14 +350,22 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	//payload->mTrainingPoints = 0;
 	payload->mMana = pCharacter->getCurrentMana();
 	payload->mHealth = pCharacter->getCurrentHP();
-	payload->mStrength = pCharacter->getBaseStrength();
-	payload->mStamina = pCharacter->getBaseStamina();
-	payload->mCharisma = pCharacter->getBaseCharisma();
-	payload->mDexterity = pCharacter->getBaseDexterity();
-	payload->mIntelligence = pCharacter->getBaseIntelligence();
-	payload->mAgility = pCharacter->getBaseAgility();
-	payload->mWisdom = pCharacter->getBaseWisdom();
+	auto bonuses = pCharacter->getBaseBonuses();
+	payload->mStrength = bonuses->getStrength();
+	payload->mStamina = bonuses->getStamina();
+	payload->mCharisma = bonuses->getCharisma();
+	payload->mDexterity = bonuses->getDexterity();
+	payload->mIntelligence = bonuses->getIntelligence();
+	payload->mAgility = bonuses->getAgility();
+	payload->mWisdom = bonuses->getWisdom();
 	//payload->mUnknown5[28]; // Unknown.
+	payload->mUnknown5[0] = 2;
+	payload->mUnknown5[1] = 4;
+	payload->mUnknown5[2] = 6;
+	payload->mUnknown5[3] = 8;
+	payload->mUnknown5[4] = 10;
+	payload->mUnknown5[5] = 12;
+	payload->mUnknown5[6] = 14;
 	payload->mFaceStyle = pCharacter->getFaceStyle();
 	//payload->mUnknown6[147]; // Unknown.
 	//payload->mSpellBook[720];
@@ -374,6 +383,13 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	//payload->mToxicity = 0;
 	payload->mThirst = 0;
 	payload->mHunger = 0;
+	auto& buffs = pCharacter->getBuffController()->getData();
+	//buffs[0].mType = 2;
+	//buffs[0].mSpellID = 1447;
+	//buffs[0].mDuration = 1000;
+	//buffs[0].mUnknown1 = 0x3f800000;
+	//buffs[0].mUnknown1 = 1000000;
+	memcpy(payload->mBuffs, &buffs, sizeof(buffs));
 	//Buff mBuffs[30];
 	//Disciplines mDisciplines;
 	//payload->mRecastTimers[20];
@@ -539,4 +555,114 @@ EQApplicationPacket* Payload::makeTitleList(const std::list<Data::Title*>& pTitl
 	}
 
 	return new EQApplicationPacket(OP_SendTitleList, data, size);
+}
+
+unsigned char* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Zone::Buff& pBuff, u32& pSize) {
+	// Calculate size.
+	u32 size = 0;
+
+	size += 12; // Header.
+	size += 17; // Buff.
+
+	pSize = size;
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Header.
+	writer.write<u32>(pActorID);
+	writer.write<u32>(0); // Unknown.
+	writer.write<u8>(0); // 1 = All buffs. 0 = 1 buff.
+	writer.write<u16>(1); // Count.
+
+	// Buff.
+	writer.write<u32>(pSlot); // Slot.
+	writer.write<u32>(pBuff.mSpellID); // Spell ID.
+	writer.write<u32>(pBuff.mDuration); // Tics remaining.
+	writer.write<u32>(0); // Hits remaining.
+	writer.write<u8>(0); // Unknown. String?
+
+	// Footer.
+	writer.write<u8>(0); // Unknown.
+
+	return data;
+}
+
+unsigned char* Payload::updateBuffIcons(const u32 pActorID, std::array<Zone::Buff, MaxBuffs>& pBuffs, u32& pSize) {
+	u16 count = 0;
+	// Calculate count.
+	for (auto& i : pBuffs)
+		if (i.mSpellID != 0xFFFFFFFF) count++;
+
+	// Calculate size.
+	u32 size = 0;
+
+	size += 12; // Header.
+	size += 17 * count; // Buff.
+
+	pSize = size;
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Header.
+	writer.write<u32>(pActorID);
+	writer.write<u32>(0); // Unknown.
+	writer.write<u8>(1); // 1 = All buffs. 0 = 1 buff.
+	writer.write<u16>(count); // Count.
+
+	// Buffs.
+	u32 slot = 0;
+	for (auto i = 0; i < MaxBuffs; i++) {
+		auto& buff = pBuffs[i];
+		if (buff.mSpellID == 0xFFFFFFFF) continue; // Skip empty buff slots.
+
+		writer.write<u32>(i); // Slot.
+		writer.write<u32>(buff.mSpellID); // Spell ID.
+		writer.write<u32>(buff.mDuration); // Tics remaining.
+		writer.write<u32>(0); // Hits remaining.
+		writer.write<u8>(0); // Unknown. String?
+	}
+
+	// Footer.
+	writer.write<u8>(0); // Unknown.
+
+	return data;
+}
+
+EQApplicationPacket* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+	u32 size = 0;
+	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	return new EQApplicationPacket(OP_BuffCreate, data, size);
+}
+
+EQApplicationPacket* Payload::updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+	u32 size = 0;
+	auto data = updateBuffIcons(pActorID, pBuffs, size);
+	return new EQApplicationPacket(OP_BuffCreate, data, size);
+}
+
+EQApplicationPacket* Payload::updateTargetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+	u32 size = 0;
+	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	return new EQApplicationPacket(OP_TargetBuffs, data, size);
+}
+
+EQApplicationPacket* Payload::updateTargetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+	u32 size = 0;
+	auto data = updateBuffIcons(pActorID, pBuffs, size);
+	return new EQApplicationPacket(OP_TargetBuffs, data, size);
+}
+
+EQApplicationPacket* Payload::updatePetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+	u32 size = 0;
+	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	return new EQApplicationPacket(OP_PetBuffWindow, data, size);
+}
+
+EQApplicationPacket* Payload::updatePetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+	u32 size = 0;
+	auto data = updateBuffIcons(pActorID, pBuffs, size);
+	return new EQApplicationPacket(OP_PetBuffWindow, data, size);
+
 }

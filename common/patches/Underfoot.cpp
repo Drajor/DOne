@@ -1734,54 +1734,54 @@ ENCODE(OP_LogServer) {
 //	FINISH_ENCODE();
 //}
 
-ENCODE(OP_Action) {
-	ENCODE_LENGTH_EXACT(Action_Struct);
-	SETUP_DIRECT_ENCODE(Action_Struct, structs::ActionAlt_Struct);
-	OUT(target);
-	OUT(source);
-	OUT(level);
-	eq->instrument_mod = 1.0f + (emu->instrument_mod - 10) / 10.0f;
-	eq->knockback_angle = emu->sequence;
-	OUT(type);
-	OUT(spell);
-	eq->level2 = eq->level;
-	eq->effect_flag = emu->buff_unknown;
-	eq->unknown37 = 0x01;
-	eq->unknown44 = 0xFFFFFFFF;
-	eq->unknown48 = 0xFFFFFFFF;
-	eq->unknown52 = 0xFFFFFFFF;
+//ENCODE(OP_Action) {
+//	ENCODE_LENGTH_EXACT(Action_Struct);
+//	SETUP_DIRECT_ENCODE(Action_Struct, structs::ActionAlt_Struct);
+//	OUT(target);
+//	OUT(source);
+//	OUT(level);
+//	eq->instrument_mod = 1.0f + (emu->instrument_mod - 10) / 10.0f;
+//	eq->knockback_angle = emu->sequence;
+//	OUT(type);
+//	OUT(spell);
+//	eq->level2 = eq->level;
+//	eq->effect_flag = emu->buff_unknown;
+//	eq->unknown37 = 0x01;
+//	eq->unknown44 = 0xFFFFFFFF;
+//	eq->unknown48 = 0xFFFFFFFF;
+//	eq->unknown52 = 0xFFFFFFFF;
+//
+//	/*OUT(target);
+//	OUT(source);
+//	OUT(level);
+//	OUT(instrument_mod);
+//	eq->sequence = emu->sequence;
+//	OUT(type);
+//	//OUT(damage);
+//	OUT(spell);
+//	eq->level2 = emu->level;
+//	OUT(buff_unknown); // if this is 4, a buff icon is made
+//	//eq->unknown0036 = -1;
+//	//eq->unknown0040 = -1;
+//	//eq->unknown0044 = -1;*/
+//	FINISH_ENCODE();
+//}
 
-	/*OUT(target);
-	OUT(source);
-	OUT(level);
-	OUT(instrument_mod);
-	eq->sequence = emu->sequence;
-	OUT(type);
-	//OUT(damage);
-	OUT(spell);
-	eq->level2 = emu->level;
-	OUT(buff_unknown); // if this is 4, a buff icon is made
-	//eq->unknown0036 = -1;
-	//eq->unknown0040 = -1;
-	//eq->unknown0044 = -1;*/
-	FINISH_ENCODE();
-}
-
-ENCODE(OP_Buff) {
-	ENCODE_LENGTH_EXACT(SpellBuffFade_Struct);
-	SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
-	OUT(entityid);
-	OUT(slot);
-	OUT(level);
-	OUT(effect);
-	//eq->unknown7 = 10;
-	OUT(spellid);
-	OUT(duration);
-	OUT(slotid);
-	OUT(bufffade);	// Live (October 2011) sends a 2 rather than 0 when a buff is created, but it doesn't seem to matter.
-	eq->unknown008 = 1.0f;
-	FINISH_ENCODE();
-}
+//ENCODE(OP_Buff) {
+//	ENCODE_LENGTH_EXACT(SpellBuffFade_Struct);
+//	SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
+//	OUT(entityid);
+//	OUT(slot);
+//	OUT(level);
+//	OUT(effect);
+//	//eq->unknown7 = 10;
+//	OUT(spellid);
+//	OUT(duration);
+//	OUT(slotid);
+//	OUT(bufffade);	// Live (October 2011) sends a 2 rather than 0 when a buff is created, but it doesn't seem to matter.
+//	eq->unknown008 = 1.0f;
+//	FINISH_ENCODE();
+//}
 
 //ENCODE(OP_CancelTrade) {
 //	ENCODE_LENGTH_EXACT(CancelTrade_Struct);
@@ -2532,76 +2532,76 @@ ENCODE(OP_DzJoinExpeditionConfirm)
 	strcpy(eq->player_name, emu->player_name);
 	FINISH_ENCODE();
 }
-
-ENCODE(OP_TargetBuffs) {  ENCODE_FORWARD(OP_BuffCreate); }
-ENCODE(OP_BuffCreate)
-{
-	SETUP_VAR_ENCODE(BuffIcon_Struct);
-
-	uint32 sz = 12 + (17 * emu->count);
-	__packet->size = sz;
-	__packet->pBuffer = new unsigned char[sz];
-	memset(__packet->pBuffer, 0, sz);
-
-	uchar *ptr = __packet->pBuffer;
-	*((uint32*)ptr) = emu->entity_id;
-	ptr += sizeof(uint32);
-	ptr += sizeof(uint32);
-	*((uint8*)ptr) = 1;
-	ptr += sizeof(uchar);
-	*((uint16*)ptr) = emu->count;
-	ptr += sizeof(uint16);
-
-	for(uint16 i = 0; i < emu->count; ++i)
-	{
-		uint16 buffslot = emu->entries[i].buff_slot;
-		if(emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
-		{
-			buffslot += 5;
-		}
-		else if(emu->entries[i].buff_slot >= 37)
-		{
-			buffslot += 14;
-		}
-
-		*((uint32*)ptr) = buffslot;
-		ptr += sizeof(uint32);
-		*((uint32*)ptr) = emu->entries[i].spell_id;
-		ptr += sizeof(uint32);
-		*((uint32*)ptr) = emu->entries[i].tics_remaining;
-		ptr += sizeof(uint32);
-		ptr += sizeof(uint32);
-		ptr += 1;
-	}
-	FINISH_ENCODE();
-	/*
-	uint32 write_var32 = 60;
-	uint8 write_var8 = 1;
-	ss.write((const char*)&emu->entity_id, sizeof(uint32));
-	ss.write((const char*)&write_var32, sizeof(uint32));
-	ss.write((const char*)&write_var8, sizeof(uint8));
-	ss.write((const char*)&emu->count, sizeof(uint16));
-	write_var32 = 0;
-	write_var8 = 0;
-	for(uint16 i = 0; i < emu->count; ++i)
-	{
-		if(emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
-		{
-			emu->entries[i].buff_slot += 5;
-		}
-		else if(emu->entries[i].buff_slot >= 37)
-		{
-			emu->entries[i].buff_slot += 14;
-		}
-		ss.write((const char*)&emu->entries[i].buff_slot, sizeof(uint32));
-		ss.write((const char*)&emu->entries[i].spell_id, sizeof(uint32));
-		ss.write((const char*)&emu->entries[i].tics_remaining, sizeof(uint32));
-		ss.write((const char*)&write_var32, sizeof(uint32));
-		ss.write((const char*)&write_var8, sizeof(uint8));
-	}
-	ss.write((const char*)&write_var8, sizeof(uint8));
-	*/
-}
+//
+//ENCODE(OP_TargetBuffs) {  ENCODE_FORWARD(OP_BuffCreate); }
+//ENCODE(OP_BuffCreate)
+//{
+//	SETUP_VAR_ENCODE(BuffIcon_Struct);
+//
+//	uint32 sz = 12 + (17 * emu->count);
+//	__packet->size = sz;
+//	__packet->pBuffer = new unsigned char[sz];
+//	memset(__packet->pBuffer, 0, sz);
+//
+//	uchar *ptr = __packet->pBuffer;
+//	*((uint32*)ptr) = emu->entity_id;
+//	ptr += sizeof(uint32);
+//	ptr += sizeof(uint32);
+//	*((uint8*)ptr) = 1;
+//	ptr += sizeof(uchar);
+//	*((uint16*)ptr) = emu->count;
+//	ptr += sizeof(uint16);
+//
+//	for(uint16 i = 0; i < emu->count; ++i)
+//	{
+//		uint16 buffslot = emu->entries[i].buff_slot;
+//		if(emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
+//		{
+//			buffslot += 5;
+//		}
+//		else if(emu->entries[i].buff_slot >= 37)
+//		{
+//			buffslot += 14;
+//		}
+//
+//		*((uint32*)ptr) = buffslot;
+//		ptr += sizeof(uint32);
+//		*((uint32*)ptr) = emu->entries[i].spell_id;
+//		ptr += sizeof(uint32);
+//		*((uint32*)ptr) = emu->entries[i].tics_remaining;
+//		ptr += sizeof(uint32);
+//		ptr += sizeof(uint32);
+//		ptr += 1;
+//	}
+//	FINISH_ENCODE();
+//	/*
+//	uint32 write_var32 = 60;
+//	uint8 write_var8 = 1;
+//	ss.write((const char*)&emu->entity_id, sizeof(uint32));
+//	ss.write((const char*)&write_var32, sizeof(uint32));
+//	ss.write((const char*)&write_var8, sizeof(uint8));
+//	ss.write((const char*)&emu->count, sizeof(uint16));
+//	write_var32 = 0;
+//	write_var8 = 0;
+//	for(uint16 i = 0; i < emu->count; ++i)
+//	{
+//		if(emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
+//		{
+//			emu->entries[i].buff_slot += 5;
+//		}
+//		else if(emu->entries[i].buff_slot >= 37)
+//		{
+//			emu->entries[i].buff_slot += 14;
+//		}
+//		ss.write((const char*)&emu->entries[i].buff_slot, sizeof(uint32));
+//		ss.write((const char*)&emu->entries[i].spell_id, sizeof(uint32));
+//		ss.write((const char*)&emu->entries[i].tics_remaining, sizeof(uint32));
+//		ss.write((const char*)&write_var32, sizeof(uint32));
+//		ss.write((const char*)&write_var8, sizeof(uint8));
+//	}
+//	ss.write((const char*)&write_var8, sizeof(uint8));
+//	*/
+//}
 
 //ENCODE(OP_WearChange)
 //{
@@ -2964,19 +2964,19 @@ DECODE(OP_AdventureMerchantSell) {
 //	FINISH_DIRECT_DECODE();
 //}
 
-DECODE(OP_Buff) {
-	DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Underfoot);
-	SETUP_DIRECT_DECODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
-	IN(entityid);
-	IN(slot);
-	IN(level);
-	IN(effect);
-	IN(spellid);
-	IN(duration);
-	IN(slotid);
-	IN(bufffade);
-	FINISH_DIRECT_DECODE();
-}
+//DECODE(OP_Buff) {
+//	DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Underfoot);
+//	SETUP_DIRECT_DECODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
+//	IN(entityid);
+//	IN(slot);
+//	IN(level);
+//	IN(effect);
+//	IN(spellid);
+//	IN(duration);
+//	IN(slotid);
+//	IN(bufffade);
+//	FINISH_DIRECT_DECODE();
+//}
 
 //DECODE(OP_ShopPlayerSell) {
 //	DECODE_LENGTH_EXACT(structs::Merchant_Purchase_Struct);

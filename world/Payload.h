@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpellContants.h"
 #include "Constants.h"
 #include "Utility.h"
 #include "Vector3.h"
@@ -20,6 +21,9 @@ class Character;
 #pragma pack(1)
 
 namespace Payload {
+	namespace Zone {
+		struct Buff;
+	}
 
 	template <typename T>
 	struct Fixed {
@@ -72,6 +76,31 @@ namespace Payload {
 	EQApplicationPacket* makeGroupMemberList(::Group* pGroup);
 
 	EQApplicationPacket* makeTitleList(const std::list<Data::Title*>& pTitles);
+
+	// Updates a specific Character buff icon.
+	EQApplicationPacket* updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+
+	// Updates all Character buff icons.
+	EQApplicationPacket* updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+
+	// Updates a specific target buff icon.
+	EQApplicationPacket* updateTargetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+
+	// Updates all target buff icon.
+	EQApplicationPacket* updateTargetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+
+	// Updates a specific pet buff icon.
+	EQApplicationPacket* updatePetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+
+	// Updates all pet buff icons.
+	EQApplicationPacket* updatePetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+
+	unsigned char* updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff, u32& pSize);
+	unsigned char* updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs, u32& pSize);
+
+	//EQApplicationPacket* makeBuffs(const u32 pActorID);
+	//EQApplicationPacket* makeBuffs(Character* pCharacter);
+	//EQApplicationPacket* makeTargetBuffs(const u32 pActorID);
 
 	namespace Zone {
 
@@ -239,12 +268,15 @@ namespace Payload {
 
 		// Used: CharacterProfile
 		struct Buff {
+			Buff() {
+				memset(mUnknown3, 0, sizeof(mUnknown3));
+			}
 			u8 mType = 0; // Note sure yet.
 			u8 mLevel = 0;
 			u8 mBardModifier = 0;
 			u8 mUnknown0 = 0; // Unknown.
-			u32 mUnknown1 = 0; // Unknown.
-			u32 mSpellID = 0;
+			u32 mUnknown1 = 0; // Unknown. HC as 0x3f800000 to make the buff take effect.
+			u32 mSpellID = 0xFFFFFFFF;
 			u32 mDuration = 0;
 			u32 mUnknown2 = 0; // Unknown.
 			u32 mCasterSpawnID = 0;
@@ -310,7 +342,8 @@ namespace Payload {
 			u32 mIntelligence = 0;
 			u32 mAgility = 0;
 			u32 mWisdom = 0;
-			u8 mUnknown5[28]; // Unknown. Tested.
+			//u8 mUnknown5[28]; // Unknown. Tested.
+			i32 mUnknown5[7];
 			u8 mFaceStyle = 0;
 			u8 mUnknown6[147]; // Unknown. Tested.
 			u32 mSpellBook[720];
@@ -631,7 +664,7 @@ namespace Payload {
 
 		// C->S
 		struct CastSpell : public Fixed<CastSpell> {
-			u32 mSlot = 0;
+			u32 mSpellBarSlot = 0;
 			u32 mSpellID = 0;
 			u32 mInventorySlot = 0; // slot for clicky item, 0xFFFF = normal cast
 			u32 mTargetID; // SpawnID?
@@ -640,18 +673,47 @@ namespace Payload {
 
 		// S->C
 		struct BeginCast : public FixedT<BeginCast, OP_BeginCast> {
-			static EQApplicationPacket* construct(const u16 pSpawnID, const u16 pSpellID, const u32 pCastTime) {
+			static EQApplicationPacket* construct(const u16 pActorID, const u16 pSpellID, const u32 pCastTime) {
 				auto packet = create();
 				auto payload = convert(packet);
-				payload->mSpawnID = pSpawnID;
+				payload->mCasterID = pActorID;
 				payload->mSpellID = pSpellID;
 				payload->mCastTime = pCastTime;
 
 				return packet;
 			}
-			u16 mSpawnID = 0; // Caster
+			u16 mCasterID = 0; // Actor ID.
 			u16 mSpellID = 0;
 			u32 mCastTime = 0; // MS
+		};
+
+		// S->C
+		struct FinishCast : public FixedT<FinishCast, OP_Action> {
+			static EQApplicationPacket* construct(const u16 pTargetID, const u16 pCasterID, const u16 pSpellID, const u8 pFlag, const u32 pSequence) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTargetID = pTargetID;
+				payload->mCasterID = pCasterID;
+				payload->mSpellID = pSpellID;
+				payload->mFlag = pFlag;
+				payload->mSequence = pSequence;
+
+				return packet;
+			}
+			u16 mTargetID = 0; // Actor ID.
+			u16 mCasterID = 0; // Actor ID.
+			u16 mCasterLevel = 1;
+			u32 mUnknown0 = 0;
+			float mInstrumentMod = 0.0f;
+			u32 mUnknown1 = 0;
+			u32 mSequence = 0;
+			u32 mUnknown2 = 0;
+			u8 mType = 231;
+			i32 mDamage = 0;
+			u16 mUnknown3 = 0;
+			u16 mSpellID = 0;
+			u8 level2 = 1;
+			u8 mFlag = 0;
 		};
 
 		// S->C
@@ -711,24 +773,6 @@ namespace Payload {
 			u32 mCurrentEndurance = 0;
 			u32 mMaximumEndurance = 0;
 			u16 mSpawnID = 0;
-		};
-
-		// S->C
-		// Based on: Action_Struct
-		struct Action : public Fixed<Action> {
-			u16 mTargetSpawnID = 0;
-			u16 mSourceSpawnID = 0;
-			u16 mCasterLevel = 1;
-			u16 instrument_mod = 0;
-			u32 bard_focus_id = 0;
-			u16 mUnknown0 = 0;
-			u32 mSequence = 0;
-			u32 mUnknown1 = 0;
-			u8 mType = 0;		// 231 (0xE7) for spells
-			u32 mUnknown2 = 0;
-			u16 mSpellID = 0; // u16?? hmm
-			u8 mUnknown3 = 0;
-			u8 buff_unknown = 0;	// if this is 4, a buff icon is made
 		};
 
 		// C->S
@@ -2033,7 +2077,7 @@ namespace Payload {
 		// C->S
 		struct RemoveBuffRequest : public Fixed<RemoveBuffRequest> {
 			u32 mSlotID = 0;
-			u32 mSpawnID = 0;
+			u32 mActorID = 0;
 		};
 
 		// S->C
@@ -2066,6 +2110,35 @@ namespace Payload {
 				return packet;
 			}
 			u32 mSpawnID = 0;
+		};
+		
+		struct BuffX : public FixedT<BuffX, OP_Buff> {
+			BuffX() { memset(mUnknowns0, 0, sizeof(mUnknowns0)); }
+			static EQApplicationPacket* construct(const u32 pActorID, const u8 pAction, const u32 pSlot, const u32 pFade) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mActorID = pActorID;
+				payload->mAction = pAction;
+				payload->mSlot = pSlot;
+				payload->mFade = pFade;
+
+				return packet;
+			}
+
+			u32 mActorID = 0;
+			u8 mAction = 0; // 
+			u8 mLevel = 1;  // Caster level?
+			u8 mEffect = 0; // ??
+			u8 mUnknown0 = 0;
+			float mUnknown1 = 1.0f;
+			u32 mSpellID = 0;
+			u32 mDuration = 0;
+			u32 mUnknown2 = 0;
+			u32 mPlayerID = 0;	// Global player ID?
+			u32 mUnknown3 = 0;
+			u8 mUnknowns0[48];
+			u32 mSlot = 0;
+			u32 mFade = 0; // ?? 1 = fade, 0 = update.
 		};
 	}
 
@@ -2929,7 +3002,7 @@ namespace Payload {
 
 		u32 mAAtitle = 0; // TODO: Figure out how this works.
 		u8 __Unknown8 = 0;
-		u32 mOwnerSpawnID = 0; // Pet Owner.
+		u32 mOwnerID = 0; // Pet Owner.
 		u8 __Unknown9 = 0;
 		u32 __Unknown10 = 0; // - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 		u32 __Unknown11 = 0;

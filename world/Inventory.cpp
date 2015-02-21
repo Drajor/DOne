@@ -9,7 +9,7 @@
 #include "ItemFactory.h"
 #include "Limits.h"
 
-Inventoryy::Inventoryy() {
+Inventoryy::Inventoryy() : Bonuses("Inventory") {
 	mItems.fill(nullptr);
 	memset(mCurrency, 0, sizeof(mCurrency));
 }
@@ -366,6 +366,8 @@ void Inventoryy::_calculateAdd(Item* pItem) {
 	_addHeroicPoisonResist(pItem->_getHeroicPoisonResist());
 	_addHeroicCorruptionResist(pItem->_getHeroicCorruptionResist());
 
+	_addArmorClass(pItem->_getArmorClass());
+	_addAttack(pItem->_getAttack());
 	_addHealth(pItem->_getHealth());
 	_addMana(pItem->_getMana());
 	_addEndurance(pItem->_getEndurance());
@@ -410,6 +412,8 @@ void Inventoryy::_calculateRemove(Item* pItem) {
 	_removeHeroicPoisonResist(pItem->_getHeroicPoisonResist());
 	_removeHeroicCorruptionResist(pItem->_getHeroicCorruptionResist());
 
+	_removeArmorClass(pItem->_getArmorClass());
+	_removeAttack(pItem->getAttack());
 	_removeHealth(pItem->_getHealth());
 	_removeMana(pItem->_getMana());
 	_removeEndurance(pItem->_getEndurance());

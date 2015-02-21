@@ -536,8 +536,11 @@ public:
 	// Returns the total DoT shield on this Item and augments.
 	inline const i32 _getDoTShield() const { i32 count = 0; for (auto i : mAugments) if (i) count += i->getDoTShield(); return getDoTShield() + count; }
 
-	// TODO: Does attack stack with augs?
+	// Returns the Attack on this Item.
 	inline const i32 getAttack() const { return mItemData->mAttack; }
+
+	// Returns the total Attack on this Item and augments.
+	inline const i32 _getAttack() const { i32 count = 0; for (auto i : mAugments) if (i) count += i->getAttack(); return getAttack() + count; }
 	
 	inline const i32 getHaste() const { return mItemData->mHaste; }
 	inline const i32 getDamageShield() const { return mItemData->mDamageShield; }
