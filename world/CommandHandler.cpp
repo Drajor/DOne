@@ -2236,14 +2236,14 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		//Utility::stoSafe(fade, pParameters[2]);
 
 		//auto packet = Payload::Zone::BuffX::construct(pCharacter->getSpawnID(), action, slot, fade);
-		Payload::Zone::BuffX payload;
+		Payload::Zone::UpdateBuff payload;
 		payload.mActorID = pCharacter->getSpawnID();
 		payload.mAction = 2;
 		payload.mSpellID = 0xFFFFFFFF;
 		payload.mSlot = 1;
 		payload.mFade = 1;
 
-		auto packet = Payload::Zone::BuffX::create(payload);
+		auto packet = Payload::Zone::UpdateBuff::create(payload);
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
 	}

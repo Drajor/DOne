@@ -116,10 +116,10 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	bonuses->_addCharisma(mData->mCharisma);
 
 	// temp.
-	auto buffs = getBuffController();
-	buffs->add(1447, 10);
-	buffs->add(60, 10);
-	buffs->add(11, 10);
+	//auto buffs = getBuffController();
+	//buffs->add(1447, 10);
+	//buffs->add(60, 10);
+	//buffs->add(11, 10);
 
 	setSurname(mData->mLastName);
 	setTitle(mData->mTitle);

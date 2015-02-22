@@ -6,7 +6,7 @@
 
 Actor::Actor() {
 	mLootController = new LootController();
-	mBuffController = new BuffController();
+	mBuffController = new BuffController(this);
 
 	mActorBonuses = new ActorBonuses();
 	mBaseBonuses = new Bonuses("Base");

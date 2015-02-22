@@ -1080,6 +1080,10 @@ void Zone::onFinishCast(Actor* pActor) {
 	sendToVisible(pActor, packet, true); // TODO: This needs to be range based.
 	delete packet;
 
+	// Apply spell.
+	auto controller = pActor->getBuffController();
+	controller->add(castingState.mSpellID, 10);
+
 	// Reset casting state.
 	pActor->setIsCasting(false);
 	castingState.clear();
@@ -2732,4 +2736,7 @@ void Zone::onRemoveBuffRequest(Character* pCharacter, const u32 pActorID, const 
 		mLog->error("Actor is not valid.");
 		return;
 	}
+
+	// Remove.
+	actor->getBuffController()->remove(pSlotID);
 }

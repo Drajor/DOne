@@ -2112,13 +2112,15 @@ namespace Payload {
 			u32 mSpawnID = 0;
 		};
 		
-		struct BuffX : public FixedT<BuffX, OP_Buff> {
-			BuffX() { memset(mUnknowns0, 0, sizeof(mUnknowns0)); }
-			static EQApplicationPacket* construct(const u32 pActorID, const u8 pAction, const u32 pSlot, const u32 pFade) {
+		// S->C
+		struct UpdateBuff : public FixedT<UpdateBuff, OP_Buff> {
+			UpdateBuff() { memset(mUnknowns0, 0, sizeof(mUnknowns0)); }
+			static EQApplicationPacket* construct(const u32 pActorID, const u8 pAction, const u32 pSpellID, const u32 pSlot, const u32 pFade) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mActorID = pActorID;
 				payload->mAction = pAction;
+				payload->mSpellID = pSpellID;
 				payload->mSlot = pSlot;
 				payload->mFade = pFade;
 
