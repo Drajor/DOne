@@ -115,11 +115,8 @@ const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Expe
 	bonuses->_addDexterity(mData->mDexterity);
 	bonuses->_addCharisma(mData->mCharisma);
 
-	// temp.
-	//auto buffs = getBuffController();
-	//buffs->add(1447, 10);
-	//buffs->add(60, 10);
-	//buffs->add(11, 10);
+	// Buffs.
+	mBuffController->onLoad(mData->mBuffs);
 
 	setSurname(mData->mLastName);
 	setTitle(mData->mTitle);
@@ -311,18 +308,15 @@ const bool Character::_updateForSave() {
 	mData->mTitle = getTitle();
 	mData->mSuffix = getSuffix();
 	mData->mInspectMessage = getInspectMessage();
+	
+	// Buffs.
+	for (auto i : mData->mBuffs)
+		delete i;
+	mData->mBuffs.clear();
+	mBuffController->onSave(mData->mBuffs);
 
 	// Experience.
-	auto experienceController = getExperienceController();
-	mData->mExperience.mLevel = experienceController->getLevel();
-	mData->mExperience.mMaximumLevel = experienceController->getMaximumLevel();
-	mData->mExperience.mExperience = experienceController->getExperience();
-	mData->mExperience.mExperienceToAA = experienceController->getExperienceToAA();
-	mData->mExperience.mAAExperience = experienceController->getAAExperience();
-	mData->mExperience.mUnspentAAPoints = experienceController->getUnspentAAPoints();
-	mData->mExperience.mMaximumUnspentAA = experienceController->getMaximumUnspentAAPoints();
-	mData->mExperience.mSpentAAPoints = experienceController->getSpentAAPoints();
-	mData->mExperience.mMaximumSpentAA = experienceController->getMaximumSpentAAPoints();
+	mExperienceController->onSave(&mData->mExperience);
 
 	mData->mRace = getRace();
 	mData->mClass = getClass();

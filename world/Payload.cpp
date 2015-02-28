@@ -384,13 +384,16 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	payload->mThirst = 0;
 	payload->mHunger = 0;
 	auto& buffs = pCharacter->getBuffController()->getData();
-	//buffs[0].mType = 2;
-	//buffs[0].mSpellID = 1447;
-	//buffs[0].mDuration = 1000;
-	//buffs[0].mUnknown1 = 0x3f800000;
-	//buffs[0].mUnknown1 = 1000000;
-	memcpy(payload->mBuffs, &buffs, sizeof(buffs));
-	//Buff mBuffs[30];
+	for (auto i = 0; i < MaxBuffs; i++) {
+		payload->mBuffs[i].mType = buffs[i]->inUse() ? 2 : 0;
+		payload->mBuffs[i].mLevel = 0; // TODO:
+		payload->mBuffs[i].mInstrumentModifier = 0; // TODO:
+		payload->mBuffs[i].mUnknown1 = buffs[i]->inUse() ? 0x3f800000 : 0;
+		payload->mBuffs[i].mSpellID = buffs[i]->mSpellID;
+		payload->mBuffs[i].mDuration = buffs[i]->mTicksRemaining;
+		// Hits remaining?
+	}
+	//memcpy(payload->mBuffs, &buffs, sizeof(buffs));
 	//Disciplines mDisciplines;
 	//payload->mRecastTimers[20];
 	//payload->unknown11052[160]; // Some type of Timers
@@ -557,7 +560,7 @@ EQApplicationPacket* Payload::makeTitleList(const std::list<Data::Title*>& pTitl
 	return new EQApplicationPacket(OP_SendTitleList, data, size);
 }
 
-unsigned char* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Zone::Buff& pBuff, u32& pSize) {
+unsigned char* Payload::updateBuffIcon(const u32 pActorID, Buff* pBuff, u32& pSize) {
 	// Calculate size.
 	u32 size = 0;
 
@@ -576,10 +579,10 @@ unsigned char* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Zone
 	writer.write<u16>(1); // Count.
 
 	// Buff.
-	writer.write<u32>(pSlot); // Slot.
-	writer.write<u32>(pBuff.mSpellID); // Spell ID.
-	writer.write<u32>(pBuff.mDuration); // Tics remaining.
-	writer.write<u32>(0); // Hits remaining.
+	writer.write<u32>(pBuff->mSlotIndex); // Slot.
+	writer.write<u32>(pBuff->mSpellID); // Spell ID.
+	writer.write<u32>(pBuff->mTicksRemaining); // Tics remaining.
+	writer.write<u32>(pBuff->mHitsRemaining); // Hits remaining.
 	writer.write<u8>(0); // Unknown. String?
 
 	// Footer.
@@ -588,11 +591,11 @@ unsigned char* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Zone
 	return data;
 }
 
-unsigned char* Payload::updateBuffIcons(const u32 pActorID, std::array<Zone::Buff, MaxBuffs>& pBuffs, u32& pSize) {
+unsigned char* Payload::updateBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs, u32& pSize) {
 	u16 count = 0;
 	// Calculate count.
-	for (auto& i : pBuffs)
-		if (i.mSpellID != 0xFFFFFFFF) count++;
+	for (auto i : pBuffs)
+		if (i->inUse()) count++;
 
 	// Calculate size.
 	u32 size = 0;
@@ -613,14 +616,15 @@ unsigned char* Payload::updateBuffIcons(const u32 pActorID, std::array<Zone::Buf
 
 	// Buffs.
 	u32 slot = 0;
-	for (auto i = 0; i < MaxBuffs; i++) {
-		auto& buff = pBuffs[i];
-		if (buff.mSpellID == 0xFFFFFFFF) continue; // Skip empty buff slots.
+	for (auto i : pBuffs) {
+	//for (auto i = 0; i < MaxBuffs; i++) {
+		//auto buff = pBuffs[i];
+		if (i->inUse() == false) continue; // Skip empty buff slots.
 
-		writer.write<u32>(i); // Slot.
-		writer.write<u32>(buff.mSpellID); // Spell ID.
-		writer.write<u32>(buff.mDuration); // Tics remaining.
-		writer.write<u32>(0); // Hits remaining.
+		writer.write<u32>(i->mSlotIndex); // Slot.
+		writer.write<u32>(i->mSpellID); // Spell ID.
+		writer.write<u32>(i->mTicksRemaining); // Tics remaining.
+		writer.write<u32>(i->mHitsRemaining); // Hits remaining.
 		writer.write<u8>(0); // Unknown. String?
 	}
 
@@ -630,37 +634,37 @@ unsigned char* Payload::updateBuffIcons(const u32 pActorID, std::array<Zone::Buf
 	return data;
 }
 
-EQApplicationPacket* Payload::updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+EQApplicationPacket* Payload::updateBuffIcon(const u32 pActorID, Buff* pBuff) {
 	u32 size = 0;
-	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	auto data = updateBuffIcon(pActorID, pBuff, size);
 	return new EQApplicationPacket(OP_BuffCreate, data, size);
 }
 
-EQApplicationPacket* Payload::updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+EQApplicationPacket* Payload::updateBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs) {
 	u32 size = 0;
 	auto data = updateBuffIcons(pActorID, pBuffs, size);
 	return new EQApplicationPacket(OP_BuffCreate, data, size);
 }
 
-EQApplicationPacket* Payload::updateTargetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+EQApplicationPacket* Payload::updateTargetBuffIcon(const u32 pActorID, Buff* pBuff) {
 	u32 size = 0;
-	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	auto data = updateBuffIcon(pActorID, pBuff, size);
 	return new EQApplicationPacket(OP_TargetBuffs, data, size);
 }
 
-EQApplicationPacket* Payload::updateTargetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+EQApplicationPacket* Payload::updateTargetBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs) {
 	u32 size = 0;
 	auto data = updateBuffIcons(pActorID, pBuffs, size);
 	return new EQApplicationPacket(OP_TargetBuffs, data, size);
 }
 
-EQApplicationPacket* Payload::updatePetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff) {
+EQApplicationPacket* Payload::updatePetBuffIcon(const u32 pActorID, Buff* pBuff) {
 	u32 size = 0;
-	auto data = updateBuffIcon(pActorID, pSlot, pBuff, size);
+	auto data = updateBuffIcon(pActorID, pBuff, size);
 	return new EQApplicationPacket(OP_PetBuffWindow, data, size);
 }
 
-EQApplicationPacket* Payload::updatePetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs) {
+EQApplicationPacket* Payload::updatePetBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs) {
 	u32 size = 0;
 	auto data = updateBuffIcons(pActorID, pBuffs, size);
 	return new EQApplicationPacket(OP_PetBuffWindow, data, size);

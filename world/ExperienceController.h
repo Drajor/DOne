@@ -26,7 +26,8 @@ namespace Experience {
 		static void _initialise();
 
 		// Initialises the ExperienceController.
-		const bool initalise(Data::Experience* pData);
+		bool onLoad(Data::Experience* pData);
+		bool onSave(Data::Experience* pData) const;
 
 		void add(GainResult& pResult, const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience);
 

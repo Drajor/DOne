@@ -103,6 +103,12 @@ namespace Data {
 		u32 mRaidExperience = 0;
 	};
 
+	struct Buff {
+		u32 mSlotIndex = 0;
+		u32 mSpellID = 0;
+		u32 mTicksRemaining = 0;
+	};
+
 	struct Character {
 		Character() {
 			mSpellBook.resize(Limits::SpellBook::MAX_SLOTS);
@@ -188,6 +194,7 @@ namespace Data {
 
 		std::vector<u32> mSpellBook;
 		std::vector<u32> mSpellBar;
+		std::list<Buff*> mBuffs;
 
 		Inventory mInventory;
 	};

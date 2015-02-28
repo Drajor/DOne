@@ -379,6 +379,8 @@ namespace CharacterXML {
 		SCA Visual = "visual";
 		SCA BindLocations = "bind_locations";
 		SCA BindLocation = "bind_location";
+		SCA Buffs = "buffs";
+		SCA Buff = "buff";
 		SCA Dyes = "dyes";
 		SCA Dye = "dye";
 		SCA Guild = "guild";
@@ -458,6 +460,12 @@ namespace CharacterXML {
 			SCA Y = "y";
 			SCA Z = "z";
 			SCA Heading = "heading";
+		}
+		// Tag::Buff
+		namespace Buff {
+			SCA SlotIndex = "slot";
+			SCA SpellID = "spell_id";
+			SCA TicksRemaining = "ticks_remaining";
 		}
 		// Tag::Dye
 		SCA Colour = "colour";
@@ -655,6 +663,21 @@ const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Chara
 		bindLocationCount++;
 	}
 	EXPECTED_BOOL(bindLocationCount == 5);
+
+	// Tag::Buffs
+	auto buffsElement = characterElement->FirstChildElement(Tag::Buffs);
+	EXPECTED_BOOL(buffsElement);
+	auto buffElement = buffsElement->FirstChildElement(Tag::Buff);
+	while (buffElement) {
+		auto buff = new Data::Buff();
+		pCharacter->mBuffs.push_back(buff);
+
+		EXPECTED_BOOL(readAttribute(buffElement, Attribute::Buff::SlotIndex, buff->mSlotIndex));
+		EXPECTED_BOOL(readAttribute(buffElement, Attribute::Buff::SpellID, buff->mSpellID));
+		EXPECTED_BOOL(readAttribute(buffElement, Attribute::Buff::TicksRemaining, buff->mTicksRemaining));
+
+		buffElement = buffElement->NextSiblingElement(Tag::Buff);
+	}
 
 	// Tag::Dyes
 	auto dyesElement = characterElement->FirstChildElement(Tag::Dyes);
@@ -915,6 +938,16 @@ const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data:
 		bindLocationElement->SetAttribute(Attribute::BindLocation::ZoneID, pCharacter->mBindLocations[i].mZoneID);
 		writeVector3(bindLocationElement, pCharacter->mBindLocations[i].mPosition);
 		bindLocationElement->SetDoubleAttribute(Attribute::BindLocation::Heading, pCharacter->mBindLocations[i].mHeading);
+	}
+
+	// Tag::Buffs
+	auto BuffsElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Buffs)));
+	for (auto& i : pCharacter->mBuffs) {
+		// Tag::Buff
+		auto buffElement = static_cast<TiXmlElement*>(BuffsElement->LinkEndChild(new TiXmlElement(Tag::Buff)));
+		buffElement->SetAttribute(Attribute::Buff::SlotIndex, i->mSlotIndex);
+		buffElement->SetAttribute(Attribute::Buff::SpellID, i->mSpellID);
+		buffElement->SetAttribute(Attribute::Buff::TicksRemaining, i->mTicksRemaining);
 	}
 
 	// Tag::Dyes

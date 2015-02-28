@@ -41,7 +41,7 @@ const u32 Controller::getRaidExperienceForPoint(const u32 pTotalPoints) {
 	return (*mRequiredRaidExperienceFunction)(pTotalPoints);
 }
 
-const bool Controller::initalise(Data::Experience* pData) {
+bool Controller::onLoad(Data::Experience* pData) {
 	if (mInitialised) return false;
 	if (!pData) return false;
 	if (!mRequiredExperienceFunction) return false;
@@ -79,6 +79,19 @@ const bool Controller::initalise(Data::Experience* pData) {
 	mRaidPoints = mData->mRaidPoints;
 
 	mInitialised = true;
+	return true;
+}
+
+bool Experience::Controller::onSave(Data::Experience* pData) const {
+	pData->mLevel = getLevel();
+	pData->mMaximumLevel = getMaximumLevel();
+	pData->mExperience = getExperience();
+	pData->mExperienceToAA = getExperienceToAA();
+	pData->mAAExperience = getAAExperience();
+	pData->mUnspentAAPoints = getUnspentAAPoints();
+	pData->mMaximumUnspentAA = getMaximumUnspentAAPoints();
+	pData->mSpentAAPoints = getSpentAAPoints();
+	pData->mMaximumSpentAA = getMaximumSpentAAPoints();
 	return true;
 }
 

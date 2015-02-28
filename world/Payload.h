@@ -14,6 +14,7 @@ struct ZonePoint;
 class Guild;
 class Group;
 class Character;
+struct Buff;
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
@@ -78,29 +79,25 @@ namespace Payload {
 	EQApplicationPacket* makeTitleList(const std::list<Data::Title*>& pTitles);
 
 	// Updates a specific Character buff icon.
-	EQApplicationPacket* updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+	EQApplicationPacket* updateBuffIcon(const u32 pActorID, Buff* pBuff);
 
 	// Updates all Character buff icons.
-	EQApplicationPacket* updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+	EQApplicationPacket* updateBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs);
 
 	// Updates a specific target buff icon.
-	EQApplicationPacket* updateTargetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+	EQApplicationPacket* updateTargetBuffIcon(const u32 pActorID, Buff* pBuff);
 
 	// Updates all target buff icon.
-	EQApplicationPacket* updateTargetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+	EQApplicationPacket* updateTargetBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs);
 
 	// Updates a specific pet buff icon.
-	EQApplicationPacket* updatePetBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff);
+	EQApplicationPacket* updatePetBuffIcon(const u32 pActorID, Buff* pBuff);
 
 	// Updates all pet buff icons.
-	EQApplicationPacket* updatePetBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs);
+	EQApplicationPacket* updatePetBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs);
 
-	unsigned char* updateBuffIcon(const u32 pActorID, const u32 pSlot, Payload::Zone::Buff& pBuff, u32& pSize);
-	unsigned char* updateBuffIcons(const u32 pActorID, std::array<Payload::Zone::Buff, MaxBuffs>& pBuffs, u32& pSize);
-
-	//EQApplicationPacket* makeBuffs(const u32 pActorID);
-	//EQApplicationPacket* makeBuffs(Character* pCharacter);
-	//EQApplicationPacket* makeTargetBuffs(const u32 pActorID);
+	unsigned char* updateBuffIcon(const u32 pActorID, Buff* pBuff, u32& pSize);
+	unsigned char* updateBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs, u32& pSize);
 
 	namespace Zone {
 
@@ -273,7 +270,7 @@ namespace Payload {
 			}
 			u8 mType = 0; // Note sure yet.
 			u8 mLevel = 0;
-			u8 mBardModifier = 0;
+			u8 mInstrumentModifier = 0;
 			u8 mUnknown0 = 0; // Unknown.
 			u32 mUnknown1 = 0; // Unknown. HC as 0x3f800000 to make the buff take effect.
 			u32 mSpellID = 0xFFFFFFFF;
@@ -687,7 +684,13 @@ namespace Payload {
 			u32 mCastTime = 0; // MS
 		};
 
-		// S->C
+		/*
+			[S->C]
+			- This is sent S->C when a spell has finished casting.
+			- Client uses this to make (some) calculations such as 'how much HP does this buff add to my Character'.
+			- Triggers particle effects on the target.
+			- Triggers the casting animation to end on the caster.
+		*/
 		struct FinishCast : public FixedT<FinishCast, OP_Action> {
 			static EQApplicationPacket* construct(const u16 pTargetID, const u16 pCasterID, const u16 pSpellID, const u8 pFlag, const u32 pSequence) {
 				auto packet = create();

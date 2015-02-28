@@ -57,7 +57,7 @@ Character* CharacterFactory::make(const String& pCharacterName, Account* pAccoun
 
 	// Create and initialise Experience::Controller.
 	auto experienceController = new Experience::Controller();
-	if (!experienceController->initalise(&characterData->mExperience)) {
+	if (!experienceController->onLoad(&characterData->mExperience)) {
 		mLog->error("Failed to initialise Experience::Controller for Character: " + pCharacterName);
 		delete inventory;
 		delete characterData;
