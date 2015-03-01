@@ -76,6 +76,7 @@ SET(world_sources
 	TradeHandler.cpp
 	ShopHandler.cpp
 	BuffController.cpp
+	TaskController.cpp
 )
 
 SET(world_headers
@@ -154,6 +155,7 @@ SET(world_headers
 	TradeHandler.h
 	ShopHandler.h
 	BuffController.h
+	TaskController.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

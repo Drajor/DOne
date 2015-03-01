@@ -222,6 +222,9 @@ public:
 	// The Character has set their suffix.
 	const bool onSetSuffix(Character* pCharacter, const u32 pSuffixID);
 
+	// The Character is requesting history for a task.
+	void onTaskHistoryRequest(Character* pCharacter, const u32 pIndex);
+
 	const bool onSizeChange(Actor * pActor, float pSize);
 	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
 	const bool onTargetChange(Character* pCharacter, const u16 pSpawnID);

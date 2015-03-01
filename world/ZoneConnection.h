@@ -307,6 +307,7 @@ public:
 	const bool handleSetInspectMessage(const EQApplicationPacket* pPacket);
 	const bool handleRemoveBuffRequest(const EQApplicationPacket* pPacket);
 	const bool handleGroupRoleChange(const EQApplicationPacket* pPacket);
+	const bool handleTaskHistoryRequest(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

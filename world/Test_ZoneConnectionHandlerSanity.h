@@ -3682,3 +3682,25 @@ TEST_F(ZoneConnectionHandlerSanityTest, handleGroupRoleChange_Overflow_1) {
 
 	delete p;
 }
+
+/*
+	handleTaskHistoryRequest
+*/
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleTaskHistoryRequest_Null) {
+	EXPECT_TRUE(initialise());
+
+	// Fail: Null.
+	EXPECT_FALSE(mZoneConnection->handleTaskHistoryRequest(nullptr));
+}
+
+TEST_F(ZoneConnectionHandlerSanityTest, handleTaskHistoryRequest_Big) {
+	EXPECT_TRUE(initialise());
+
+	auto p = makePacket(Payload::Zone::TaskHistoryRequest::size() + 1);
+	// Fail: Too big.
+	EXPECT_FALSE(mZoneConnection->hasSizeError());
+	EXPECT_FALSE(mZoneConnection->handleTaskHistoryRequest(p));
+	EXPECT_TRUE(mZoneConnection->hasSizeError());
+	delete p;
+}

@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "Inventory.h"
 #include "ExperienceController.h"
+#include "TaskController.h"
 
 CharacterFactory::~CharacterFactory() {
 	mDataStore = nullptr;
@@ -65,9 +66,14 @@ Character* CharacterFactory::make(const String& pCharacterName, Account* pAccoun
 		return nullptr;
 	}
 
-	// Create and initialise Character.
 	auto character = new Character(characterData);
-	if (!character->initialise(pAccount, inventory, experienceController)) {
+
+	// Create and initialise TaskController.
+	auto taskController = new TaskController(character);
+	taskController->onLoad();
+
+	// Initialise Character.
+	if (!character->initialise(pAccount, inventory, experienceController, taskController)) {
 		mLog->error("Failed to initialise Character: " + pCharacterName);
 		delete inventory;
 		delete characterData;

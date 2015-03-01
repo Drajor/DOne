@@ -7,6 +7,7 @@
 #include "BuffController.h"
 #include "Inventory.h"
 #include "ExperienceController.h"
+#include "TaskController.h"
 #include "TitleManager.h"
 
 #include "../common/crc32.h"
@@ -669,4 +670,127 @@ EQApplicationPacket* Payload::updatePetBuffIcons(const u32 pActorID, std::array<
 	auto data = updateBuffIcons(pActorID, pBuffs, size);
 	return new EQApplicationPacket(OP_PetBuffWindow, data, size);
 
+}
+
+EQApplicationPacket* Payload::makeAvailableTasks(AvailableTasks& pTasks) {
+
+	// Calculate size.
+	u32 size = 0;
+	size += 12; // Header.
+	size += 64 * pTasks.size(); // Fixed per task.
+
+	// Strings.
+	for (auto i : pTasks) {
+		size += i->mTitle.length() + 1;
+		size += i->mDescription.length() + 1;
+	}
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Header.
+	writer.write<u32>(pTasks.size());
+	writer.write<u32>(2); // Unknown.
+	writer.write<u32>(50); // Actor ID?
+
+	// Tasks.
+	for (auto i : pTasks) {
+		writer.write<u32>(i->mID); // Task ID.
+		writer.write<u32>(0x3f800000); // Unknown. HC copy.
+		writer.write<u32>(1000); // Time limit in seconds.
+		writer.write<u32>(0); // Unknown.
+		writer.writeString(i->mTitle); // Task name.
+		writer.writeString(i->mDescription); // Task description.
+		writer.write<u8>(0); // Unknown String.
+		writer.write<u32>(1); // Unknown. HC copy.
+		writer.write<u32>(0); // Unknown.
+		writer.write<u32>(1); // Unknown. HC copy.
+		writer.write<u32>(0); // Unknown.
+		writer.write<u8>(0); // Unknown String.
+		writer.write<u8>(0); // Unknown String.
+		writer.write<u32>(1); // Item count? HC copy.
+		writer.write<u32>(0xFFFFFFFF); // Unknown. HC copy.
+		writer.write<u32>(0xFFFFFFFF); // Unknown. HC copy.
+		writer.write<u32>(29); // Start zone?
+		writer.write<u8>(0); // Unknown String.
+	}
+
+	return new EQApplicationPacket(OP_OpenNewTasksWindow, data, size);
+}
+
+EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, CurrentTask* pTask) {
+	// Calculate size.
+	u32 size = 0;
+
+	// Fixed.
+	size += 47;
+
+	// Strings.
+	size += pTask->mTask->mTitle.length() + 1;
+	size += pTask->mTask->mDescription.length() + 1;
+	size += pTask->mTask->mRewardText.length() + 1;
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	writer.write<u32>(pIndex); // Index
+	writer.write<u32>(pTask->mTask->mID); // ID
+	writer.write<u8>(1); // Unknown. 1 = open 'Quest Journal', 0 = do not open 'Quest Journal'
+	writer.write<u32>(pTask->mTask->mType); // Type. 0 = 'T' (Task), 1 = 'S' (Shared), 2 = 'Q' (Quest).
+	writer.write<u32>(0); // Unknown. Possibly Max Players for Shared Tasks.
+	writer.writeString(pTask->mTask->mTitle); // Title.
+	writer.write<u32>(pTask->mTask->mDuration); // Duration.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pTask->mStartTime); // Start time.
+	writer.writeString(pTask->mTask->mDescription); // Description.
+	writer.write<u8>(1); // 0 = 'Preview Reward' button becomes available.
+	writer.write<u32>(pTask->mTask->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(1); // 1 = adds 'You gain experience!!' to the Reward(s) section.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown.
+	writer.writeString(pTask->mTask->mRewardText);
+	writer.write<i32>(pTask->mTask->mPointsReward); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
+
+	return new EQApplicationPacket(OP_TaskDescription, data, size);
+}
+
+EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pTaskID, CurrentTaskObjective* pObjective) {
+	// Calculate size.
+	u32 size = 0;
+
+	// Fixed.
+	size += 60;
+
+	// Strings.
+	size += pObjective->mObjective->mTextA.length() + 1;
+	size += pObjective->mObjective->mTextB.length() + 1;
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	writer.write<u32>(pTaskIndex); // Index.
+	writer.write<u32>(2); // Unknown. HC copy.
+	writer.write<u32>(pTaskID); // Task ID.
+	writer.write<u32>(pObjective->mObjective->mID); // Objective ID.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pObjective->mObjective->mType); // Objective type.
+	writer.write<u32>(pObjective->mObjective->mOptional ? 1 : 0); // Optional flag.
+	writer.write<u32>(0); // Unknown.
+	writer.writeString(pObjective->mObjective->mTextA); // Text A.
+	writer.writeString(pObjective->mObjective->mTextB); // Text B.
+	writer.write<u32>(pObjective->mObjective->mRequired); // Objective required count.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pObjective->mObjective->mZoneID); // Zone ID.
+	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pObjective->mValue); // Current progress.
+	writer.write<u32>(0); // Unknown.
+
+	return new EQApplicationPacket(OP_TaskActivity, data, size);
 }

@@ -42,6 +42,7 @@
 #include "HateController.h"
 #include "CommandHandler.h"
 #include "BuffController.h"
+#include "TaskController.h"
 
 Zone::Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID) :
 	mPort(pPort),
@@ -2739,4 +2740,11 @@ void Zone::onRemoveBuffRequest(Character* pCharacter, const u32 pActorID, const 
 
 	// Remove.
 	actor->getBuffController()->remove(pSlotID);
+}
+
+void Zone::onTaskHistoryRequest(Character* pCharacter, const u32 pIndex) {
+	if (!pCharacter) return;
+
+	// Notify TaskController.
+	pCharacter->getTaskController()->onHistoryRequest(pIndex);
 }

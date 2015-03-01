@@ -147,7 +147,7 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 
 	switch (opcode) {
 	case OP_Unknown:
-		//handleUnknown(pPacket);
+		handleUnknown(pPacket);
 		break;
 	case OP_AckPacket:
 		// Ignore.
@@ -594,6 +594,9 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		break;
 	case OP_GroupRoles:
 		handleGroupRoleChange(pPacket);
+		break;
+	case OP_TaskHistoryRequest:
+		handleTaskHistoryRequest(pPacket);
 		break;
 	default:
 		//StringStream ss;
@@ -3913,6 +3916,19 @@ const bool ZoneConnection::handleWearChange(const EQApplicationPacket* pPacket) 
 
 	// Notify Zone.
 	mZone->onWearChange(mCharacter, payload->mMaterialID, payload->mEliteMaterialID, payload->mColour, payload->mSlot);
+	return true;
+}
+
+const bool ZoneConnection::handleTaskHistoryRequest(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(TaskHistoryRequest::sizeCheck(pPacket));
+
+	auto payload = TaskHistoryRequest::convert(pPacket);
+	mLog->error("Got: OP_TaskHistoryRequest");
+
+	// Notify Zone.
+	mZone->onTaskHistoryRequest(mCharacter, payload->mIndex);
 	return true;
 }
 

@@ -19,6 +19,7 @@ class ExtendedTargetController;
 class Inventoryy;
 class Item;
 class RespawnOptions;
+class TaskController;
 
 namespace Experience {
 	class Controller;
@@ -82,7 +83,7 @@ public:
 	Character(Data::Character* pCharacterData);
 	~Character();
 
-	const bool initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController);
+	const bool initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController);
 	
 	// Returns the Account this Character belongs to.
 	inline Account* getAccount() const { return mAccount; }
@@ -163,6 +164,7 @@ public:
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
 	inline Experience::Controller* getExperienceController() const { return mExperienceController; }
+	inline TaskController* getTaskController() const { return mTaskController; }
 	
 	bool onEnterZone();
 	void onLeaveZone();
@@ -517,4 +519,5 @@ private:
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
 	Experience::Controller* mExperienceController = nullptr;
+	TaskController* mTaskController = nullptr;
 };

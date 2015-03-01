@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SpellContants.h"
+#include "TaskConstants.h"
+
 #include "Constants.h"
 #include "Utility.h"
 #include "Vector3.h"
@@ -98,6 +100,12 @@ namespace Payload {
 
 	unsigned char* updateBuffIcon(const u32 pActorID, Buff* pBuff, u32& pSize);
 	unsigned char* updateBuffIcons(const u32 pActorID, std::array<Buff*, MaxBuffs>& pBuffs, u32& pSize);
+
+	// Task selection window.
+	EQApplicationPacket* makeAvailableTasks(AvailableTasks& pTasks);
+
+	EQApplicationPacket* makeCurrentTaskDescription(const u32 pIndex, CurrentTask* pTask);
+	EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pTaskID, CurrentTaskObjective* pObjective);
 
 	namespace Zone {
 
@@ -2144,6 +2152,11 @@ namespace Payload {
 			u8 mUnknowns0[48];
 			u32 mSlot = 0;
 			u32 mFade = 0; // ?? 1 = fade, 0 = update.
+		};
+
+		// C->S
+		struct TaskHistoryRequest : Fixed<TaskHistoryRequest> {
+			u32 mIndex = 0;
 		};
 	}
 

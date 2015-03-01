@@ -22,6 +22,7 @@
 #include "ExperienceController.h"
 #include "ActorBonuses.h"
 #include "BuffController.h"
+#include "TaskController.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -2265,6 +2266,29 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	//	pCharacter->getConnection()->sendPacket(packet3);
 	//	delete packet3;
 	//}
+	else if (pCommandName == "tasks") {
+		auto controller = pCharacter->getTaskController();
+		auto packet = Payload::makeAvailableTasks(controller->getAvailableTasks());
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
+	}
+	else if (pCommandName == "tasks2") {
+		//auto controller = pCharacter->getTaskController();
+		auto activeTask = new CurrentTask();
+		auto task = new Task();
+		task->mID = 1;
+		task->mTitle = "Derp Derp!!";
+		task->mDescription = "what desc~!";
+		task->mRewardText = "blah blah reward text";
+		task->mCurrencyReward = 101;
+		task->mType = TaskType::Shared;
+		activeTask->mStartTime = Utility::Time::now();
+		activeTask->mTask = task;
+
+		auto packet = Payload::makeCurrentTaskDescription(0, activeTask);
+		pCharacter->getConnection()->sendPacket(packet);
+		delete packet;
+	}
 	else if (pCommandName == "table") {
 		
 		auto actorBonuses = pCharacter->getActorBonuses();

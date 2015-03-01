@@ -20,6 +20,7 @@
 #include "ExperienceController.h"
 #include "ActorBonuses.h"
 #include "BuffController.h"
+#include "TaskController.h"
 
 #include "Group.h"
 #include "Guild.h"
@@ -93,15 +94,17 @@ void Character::update() {
 	}
 }
 
-const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController) {
+const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController) {
 	if (mInitialised) return false;
 	if (!pAccount) return false;
 	if (!pInventory) return false;
 	if (!pExperienceController) return false;
+	if (!pTaskController) return false;
 
 	mAccount = pAccount;
 	mInventory = pInventory;
 	mExperienceController = pExperienceController;
+	mTaskController = pTaskController;
 
 	getActorBonuses()->add(pInventory);
 
