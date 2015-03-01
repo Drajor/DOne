@@ -5,13 +5,13 @@ TaskController::TaskController(Character* pCharacter) : mOwner(pCharacter) {
 	for (auto i : mCurrentTasks)
 		i = new CurrentTask();
 
-	auto a = new Task();
+	auto a = new Data::Task();
 	a->mID = 1;
 	a->mTitle = "Example Task A";
 	a->mDescription = "Description of Example Task A";
 	mAvailableTasks.push_back(a);
 
-	auto b = new Task();
+	auto b = new Data::Task();
 	b->mID = 2;
 	b->mTitle = "Example Task B";
 	b->mDescription = "Description of Example Task B";

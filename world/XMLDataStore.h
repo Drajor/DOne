@@ -58,6 +58,10 @@ public:
 	const bool loadShops(Data::ShopList pShops);
 	const bool loadTitles(Data::TitleList pTitles);
 
+	const bool loadTasks(Data::TaskList& pTasks);
+	const bool readTask(TiXmlElement* pElement, Data::Task* pTask);
+	const bool readTaskObjective(TiXmlElement* pElement, Data::TaskObjective* pObjective);
+
 private:
 
 	ILog* mLog = nullptr;

@@ -726,25 +726,25 @@ EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, Curre
 	size += 47;
 
 	// Strings.
-	size += pTask->mTask->mTitle.length() + 1;
-	size += pTask->mTask->mDescription.length() + 1;
-	size += pTask->mTask->mRewardText.length() + 1;
+	size += pTask->mTaskData->mTitle.length() + 1;
+	size += pTask->mTaskData->mDescription.length() + 1;
+	size += pTask->mTaskData->mRewardText.length() + 1;
 
 	unsigned char* data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
 
 	writer.write<u32>(pIndex); // Index
-	writer.write<u32>(pTask->mTask->mID); // ID
+	writer.write<u32>(pTask->mTaskData->mID); // ID
 	writer.write<u8>(1); // Unknown. 1 = open 'Quest Journal', 0 = do not open 'Quest Journal'
-	writer.write<u32>(pTask->mTask->mType); // Type. 0 = 'T' (Task), 1 = 'S' (Shared), 2 = 'Q' (Quest).
+	writer.write<u32>(pTask->mTaskData->mType); // Type. 0 = 'T' (Task), 1 = 'S' (Shared), 2 = 'Q' (Quest).
 	writer.write<u32>(0); // Unknown. Possibly Max Players for Shared Tasks.
-	writer.writeString(pTask->mTask->mTitle); // Title.
-	writer.write<u32>(pTask->mTask->mDuration); // Duration.
+	writer.writeString(pTask->mTaskData->mTitle); // Title.
+	writer.write<u32>(pTask->mTaskData->mDuration); // Duration.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(pTask->mStartTime); // Start time.
-	writer.writeString(pTask->mTask->mDescription); // Description.
+	writer.writeString(pTask->mTaskData->mDescription); // Description.
 	writer.write<u8>(1); // 0 = 'Preview Reward' button becomes available.
-	writer.write<u32>(pTask->mTask->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
+	writer.write<u32>(pTask->mTaskData->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
@@ -754,8 +754,8 @@ EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, Curre
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
-	writer.writeString(pTask->mTask->mRewardText);
-	writer.write<i32>(pTask->mTask->mPointsReward); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
+	writer.writeString(pTask->mTaskData->mRewardText);
+	writer.write<i32>(pTask->mTaskData->mPointsReward); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
 
 	return new EQApplicationPacket(OP_TaskDescription, data, size);
 }
@@ -768,8 +768,8 @@ EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pT
 	size += 60;
 
 	// Strings.
-	size += pObjective->mObjective->mTextA.length() + 1;
-	size += pObjective->mObjective->mTextB.length() + 1;
+	size += pObjective->mObjectiveData->mTextA.length() + 1;
+	size += pObjective->mObjectiveData->mTextB.length() + 1;
 
 	unsigned char* data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
@@ -777,17 +777,17 @@ EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pT
 	writer.write<u32>(pTaskIndex); // Index.
 	writer.write<u32>(2); // Unknown. HC copy.
 	writer.write<u32>(pTaskID); // Task ID.
-	writer.write<u32>(pObjective->mObjective->mID); // Objective ID.
+	writer.write<u32>(pObjective->mObjectiveData->mID); // Objective ID.
 	writer.write<u32>(0); // Unknown.
-	writer.write<u32>(pObjective->mObjective->mType); // Objective type.
-	writer.write<u32>(pObjective->mObjective->mOptional ? 1 : 0); // Optional flag.
+	writer.write<u32>(pObjective->mObjectiveData->mType); // Objective type.
+	writer.write<u32>(pObjective->mObjectiveData->mOptional ? 1 : 0); // Optional flag.
 	writer.write<u32>(0); // Unknown.
-	writer.writeString(pObjective->mObjective->mTextA); // Text A.
-	writer.writeString(pObjective->mObjective->mTextB); // Text B.
-	writer.write<u32>(pObjective->mObjective->mRequired); // Objective required count.
+	writer.writeString(pObjective->mObjectiveData->mTextA); // Text A.
+	writer.writeString(pObjective->mObjectiveData->mTextB); // Text B.
+	writer.write<u32>(pObjective->mObjectiveData->mRequired); // Objective required count.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(0); // Unknown.
-	writer.write<u32>(pObjective->mObjective->mZoneID); // Zone ID.
+	writer.write<u32>(pObjective->mObjectiveData->mZoneID); // Zone ID.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(pObjective->mValue); // Current progress.
 	writer.write<u32>(0); // Unknown.

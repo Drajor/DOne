@@ -2935,6 +2935,10 @@ const bool ZoneConnection::handleUnknown(const EQApplicationPacket* pPacket) {
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
 	auto raw = static_cast<EQRawApplicationPacket*>(const_cast<EQApplicationPacket*>(pPacket));
 	Log::info("OpCode= " + std::to_string(raw->GetRawOpcode()));
+
+	if (raw->GetRawOpcode() == 0x43BC) {
+		FileDumpPacketHex("0x43BC.hex", pPacket);
+	}
 	return true;
 }
 

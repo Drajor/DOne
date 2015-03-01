@@ -1,5 +1,6 @@
 #pragma once
 
+#include "TaskConstants.h"
 #include "Constants.h"
 #include "Vector3.h"
 
@@ -525,5 +526,30 @@ namespace Data {
 		u32 mID = 0;
 		String mPrefix;
 		String mSuffix;
+	};
+
+	struct TaskObjective {
+		u32 mID = 0;
+		u32 mType = 0;
+		u32 mZoneID = 0;
+		u32 mRequired = 1;
+		bool mOptional = false;
+		bool mHidden = false;
+		String mTextA;
+		String mTextB;
+	};
+
+	struct Task {
+		u32 mID = 0;
+		u32 mType = TaskType::Quest;
+		u32 mCurrencyReward = 0; // Reward in copper pieces.
+		i32 mPointsReward = 0;
+		u32 mDuration = 0; // Seconds.
+		String mTitle;
+		String mDescription;
+		String mRewardText;
+		bool mRepeatable = true;
+
+		TaskObjectives mObjectives;
 	};
 }

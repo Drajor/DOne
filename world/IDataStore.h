@@ -24,6 +24,8 @@ namespace Data {
 	struct SpellComponent;
 	struct Title;
 	struct TransmutationComponent;
+	struct Task;
+	struct TaskObjective;
 
 	typedef std::list<Data::Account*>& AccountList;
 	typedef std::list<Data::Guild*>& GuildList;
@@ -35,6 +37,8 @@ namespace Data {
 	typedef std::list<Data::Title*>& TitleList;
 	typedef std::list<Data::TransmutationComponent*>& TransmutationComponentList;
 	typedef std::array<Data::Spell*, MaxSpellID>& SpellDataArray;
+	typedef std::list<Data::Task*> TaskList;
+	typedef std::list<Data::TaskObjective*> TaskObjectiveList;
 }
 
 class IDataStore {
@@ -79,4 +83,7 @@ public:
 
 	virtual const bool loadShops(Data::ShopList pShops) = 0;
 	virtual const bool loadTitles(Data::TitleList pTitles) = 0;
+	
+	// Tasks
+	virtual const bool loadTasks(Data::TaskList& pTasks) = 0;
 };

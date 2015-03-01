@@ -7,16 +7,18 @@
 struct CurrentTaskObjective;
 struct CurrentTask;
 struct CompleteTask;
-struct Task;
-struct TaskObjective;
+namespace Data {
+	struct Task;
+	struct TaskObjective;
+}
 
 static const u32 MaxActiveTasks = 10;
 
 typedef std::array<CurrentTask*, MaxActiveTasks> CurrentTasks;
-typedef std::list<Task*> AvailableTasks;
+typedef std::list<Data::Task*> AvailableTasks;
 typedef std::list<CurrentTaskObjective*> CurrentTaskObjectives;
 typedef std::list<CompleteTask*> CompleteTasks;
-typedef std::list<TaskObjective*> TaskObjectives;
+typedef std::list<Data::TaskObjective*> TaskObjectives;
 
 namespace TaskType {
 	enum : u32 {

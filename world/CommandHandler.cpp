@@ -29,6 +29,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/EQPacket.h"
 #include "Payload.h"
+#include "Data.h"
 #endif
 
 /*****************************************************************************************************************************/
@@ -2275,7 +2276,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	else if (pCommandName == "tasks2") {
 		//auto controller = pCharacter->getTaskController();
 		auto activeTask = new CurrentTask();
-		auto task = new Task();
+		auto task = new Data::Task();
 		task->mID = 1;
 		task->mTitle = "Derp Derp!!";
 		task->mDescription = "what desc~!";
@@ -2283,7 +2284,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		task->mCurrencyReward = 101;
 		task->mType = TaskType::Shared;
 		activeTask->mStartTime = Utility::Time::now();
-		activeTask->mTask = task;
+		activeTask->mTaskData = task;
 
 		auto packet = Payload::makeCurrentTaskDescription(0, activeTask);
 		pCharacter->getConnection()->sendPacket(packet);

@@ -2503,3 +2503,115 @@ const bool XMLDataStore::loadTitles(Data::TitleList pTitles) {
 
 	return true;
 }
+
+namespace TaskXML {
+#define SCA static const auto
+	SCA FileLocation = "./data/tasks.xml";
+	namespace Tag {
+		SCA Tasks = "tasks";
+		SCA Task = "task";
+		SCA Objectives = "objectives";
+		SCA Objective = "objective";
+	}
+	namespace Attribute {
+		// Tag::Task
+		SCA ID = "id";
+		SCA Type = "type";
+		SCA Title = "title";
+		SCA Description = "description";
+		SCA Duration = "duration";
+		SCA Repeatable = "repeatable";
+		// Tag::Objective
+		namespace Objective {
+			SCA Type = "type";
+			SCA ZoneID = "zone_id";
+			SCA Required = "required";
+			SCA Hidden = "hidden";
+			SCA Optional = "optional";
+		}
+	}
+#undef SCA
+}
+const bool XMLDataStore::loadTasks(Data::TaskList& pTasks) {
+	using namespace TaskXML;
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+	if (!pTasks.empty()) return false;
+
+	// Load document.
+	TiXmlDocument document(TaskXML::FileLocation);
+	if (!document.LoadFile()) {
+		mLog->error("Failed to load " + String(TaskXML::FileLocation));
+		return false;
+	}
+
+	auto tasksElement = document.FirstChildElement(Tag::Tasks);
+	EXPECTED_BOOL(tasksElement);
+	auto taskElement = tasksElement->FirstChildElement(Tag::Task);
+
+	// Read Data::Task
+	while (taskElement) {
+		auto task = new Data::Task();
+		pTasks.push_back(task);
+
+		if (!readTask(taskElement, task))
+			return false;
+
+		taskElement = taskElement->NextSiblingElement(Tag::Task);
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::readTask(TiXmlElement* pElement, Data::Task* pTask) {
+	using namespace TaskXML;
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+	if (!pElement) return false;
+	if (!pTask) return false;
+
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::ID, pTask->mID));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Type, pTask->mType));
+	EXPECTED_BOOL(TaskType::isValid(pTask->mType));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Title, pTask->mTitle));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Description, pTask->mDescription));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Duration, pTask->mDuration));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Repeatable, pTask->mRepeatable));
+
+	auto objectivesElement = pElement->FirstChildElement(Tag::Objectives);
+	EXPECTED_BOOL(objectivesElement);
+	auto objectiveElement = objectivesElement->FirstChildElement(Tag::Objective);
+
+	// Read Data::TaskObjective
+	while (objectiveElement) {
+		auto objective = new Data::TaskObjective();
+		pTask->mObjectives.push_back(objective);
+
+		if (!readTaskObjective(objectiveElement, objective))
+			return false;
+
+		objectiveElement = objectiveElement->NextSiblingElement(Tag::Objective);
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::readTaskObjective(TiXmlElement* pElement, Data::TaskObjective* pObjective) {
+	using namespace TaskXML;
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+	if (!pElement) return false;
+	if (!pObjective) return false;
+
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Type, pObjective->mType));
+	EXPECTED_BOOL(ObjectiveType::isValid(pObjective->mType));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::ZoneID, pObjective->mZoneID));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Required, pObjective->mRequired));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Hidden, pObjective->mHidden));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Optional, pObjective->mOptional));
+
+	return true;
+}

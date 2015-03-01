@@ -25,46 +25,27 @@ Quest Journal Window:
 
 class Character;
 
-struct TaskObjective {
-	u32 mID = 0;
-	u32 mType = 0;
-	u32 mZoneID = 0;
-	u32 mRequired = 1;
-	bool mOptional = false;
-	String mTextA;
-	String mTextB;
-};
-
-struct Task {
-	u32 mID = 0;
-	u32 mType = TaskType::Quest;
-	u32 mCurrencyReward = 0; // Reward in copper pieces.
-	i32 mPointsReward = 0;
-	u32 mDuration = 10000; // Seconds.
-	String mTitle;
-	String mDescription;
-	String mRewardText;
-	bool mRepeatable = true;
-
-	TaskObjectives mObjectives;
-};
+namespace Data {
+	struct TaskObjective;
+	struct Task;
+}
 
 struct CurrentTaskObjective {
 	u32 mValue = 0;
 	bool mHidden = false;
-	TaskObjective* mObjective;
+	Data::TaskObjective* mObjectiveData;
 };
 
 struct CurrentTask {
 	bool isActive() const { return mActive; } // TODO: Become inactive when timer runs out.
 	bool mActive = true;
 	u32 mStartTime = 0;
-	Task* mTask = nullptr;
+	Data::Task* mTaskData = nullptr;
 	CurrentTaskObjectives mObjectives;
 };
 
 struct CompleteTask {
-	Task* mTask = nullptr;
+	Data::Task* mTask = nullptr;
 	u32 mTimeCompleted = 0;
 };
 
