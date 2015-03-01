@@ -2524,6 +2524,8 @@ namespace TaskXML {
 		// Tag::Objective
 		namespace Objective {
 			SCA Type = "type";
+			SCA TextA = "textA";
+			SCA TextB = "textB";
 			SCA ZoneID = "zone_id";
 			SCA Required = "required";
 			SCA Hidden = "hidden";
@@ -2608,6 +2610,8 @@ const bool XMLDataStore::readTaskObjective(TiXmlElement* pElement, Data::TaskObj
 
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Type, pObjective->mType));
 	EXPECTED_BOOL(ObjectiveType::isValid(pObjective->mType));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextA, pObjective->mTextA));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextB, pObjective->mTextB));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::ZoneID, pObjective->mZoneID));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Required, pObjective->mRequired));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Hidden, pObjective->mHidden));
