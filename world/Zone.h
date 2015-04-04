@@ -106,7 +106,8 @@ public:
 	const bool giveStackableItem(Character* pCharacter, Item* pItem, const String& pReason);
 
 	// Chat Events.
-	const bool onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage);
+	const bool onChannelMessage(Character* pCharacter, const u32 pChannelID, const u32 pType, const String& pSenderName, const String& pTargetName, const String& pMessage);
+	const bool onHail(Character* pCharacter);
 	const bool onGuildMessage(Character* pCharacter, const String& pMessage);
 	const bool onGroupMessage(Character* pCharacter, const String& pMessage);
 	const bool onShoutMessage(Character* pCharacter, const String& pMessage);

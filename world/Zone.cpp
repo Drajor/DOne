@@ -477,7 +477,7 @@ void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const u32 pParam
 	delete packet;
 }
 
-const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, const String& pSenderName, const String& pTargetName, const String& pMessage) {
+const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, const u32 pType, const String& pSenderName, const String& pTargetName, const String& pMessage) {
 	if (!pCharacter) return false;
 	if (pMessage.empty()) return false;
 
@@ -485,6 +485,11 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 	if (pCharacter->isMuted()) {
 		pCharacter->notify("You are muted! Your message was not delivered.");
 		return true;
+	}
+
+	// Check: Character is hailing an NPC
+	if (pType == 1) {
+		onHail(pCharacter);
 	}
 
 	// Handle: Guild.
@@ -542,6 +547,10 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 
 	return true;
 }
+const bool Zone::onHail(Character* pCharacter) {
+	return true;
+}
+
 
 const bool Zone::onGuildMessage(Character* pCharacter, const String& pMessage) {
 	if (!pCharacter) return false;

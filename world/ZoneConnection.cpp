@@ -1056,8 +1056,8 @@ struct ChannelMessage {
 	u32 mUnknown0 = 0;
 	u32 mLanguage = 0;
 	u32 mChannel = 0;
-	u32 mUnknown1 = 0;
-	u8 mUnknown2 = 0;
+	u32 mType = 0; // 1 = Hail (with target).
+	u8 mUnknown1 = 0;
 	u32 mSkill = 0;
 	String mMessage;
 	String _debug() const {
@@ -1068,8 +1068,8 @@ struct ChannelMessage {
 		PRINT_MEMBER(mUnknown0);
 		PRINT_MEMBER(mLanguage);
 		PRINT_MEMBER(mChannel);
-		PRINT_MEMBER(mUnknown1);
-		PRINT_MEMBER((int)mUnknown2);
+		PRINT_MEMBER(mType);
+		PRINT_MEMBER((int)mUnknown1);
 		PRINT_MEMBER(mSkill);
 		PRINT_MEMBER(mMessage);
 		return ss.str();
@@ -1089,8 +1089,8 @@ const bool ZoneConnection::handleChannelMessage(const EQApplicationPacket* pPack
 	CHECKED_READ(reader.read<u32>(m.mUnknown0));
 	CHECKED_READ(reader.read<u32>(m.mLanguage));
 	CHECKED_READ(reader.read<u32>(m.mChannel));
-	CHECKED_READ(reader.read<u32>(m.mUnknown1));
-	CHECKED_READ(reader.read<u8>(m.mUnknown2));
+	CHECKED_READ(reader.read<u32>(m.mType));
+	CHECKED_READ(reader.read<u8>(m.mUnknown1));
 	CHECKED_READ(reader.read<u32>(m.mSkill));
 	CHECKED_READ(reader.readString(m.mMessage, 1500)); // This is just a estimate.
 
@@ -1101,7 +1101,7 @@ const bool ZoneConnection::handleChannelMessage(const EQApplicationPacket* pPack
 	*/
 
 	// Notify Zone.
-	mZone->onChannelMessage(mCharacter, m.mChannel, m.mSender, m.mTarget, m.mMessage);
+	mZone->onChannelMessage(mCharacter, m.mChannel, m.mType, m.mSender, m.mTarget, m.mMessage);
 	return true;
 }
 
