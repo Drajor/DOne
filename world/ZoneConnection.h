@@ -308,6 +308,8 @@ public:
 	const bool handleRemoveBuffRequest(const EQApplicationPacket* pPacket);
 	const bool handleGroupRoleChange(const EQApplicationPacket* pPacket);
 	const bool handleTaskHistoryRequest(const EQApplicationPacket* pPacket);
+	const bool handleRemoveTask(const EQApplicationPacket* pPacket);
+	const bool handleRequestTaskRewardPreview(const EQApplicationPacket* pPacket);
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// TEST LINE

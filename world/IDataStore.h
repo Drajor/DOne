@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Types.h"
+#include "TaskConstants.h"
 #include "SpellContants.h"
 #include <list>
 #include <array>
@@ -37,7 +38,7 @@ namespace Data {
 	typedef std::list<Data::Title*>& TitleList;
 	typedef std::list<Data::TransmutationComponent*>& TransmutationComponentList;
 	typedef std::array<Data::Spell*, MaxSpellID>& SpellDataArray;
-	typedef std::list<Data::Task*> TaskList;
+	typedef std::array<Data::Task*, MaxTaskID> TaskDataArray;
 	typedef std::list<Data::TaskObjective*> TaskObjectiveList;
 }
 
@@ -85,5 +86,5 @@ public:
 	virtual const bool loadTitles(Data::TitleList pTitles) = 0;
 	
 	// Tasks
-	virtual const bool loadTasks(Data::TaskList& pTasks) = 0;
+	virtual const bool loadTasks(Data::TaskDataArray& pTasks, const u32 pMaxTaskID, u32& pTasksLoaded) = 0;
 };

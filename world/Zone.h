@@ -40,6 +40,7 @@ class TitleManager;
 class LootHandler;
 class TradeHandler;
 class ShopHandler;
+class TaskDataStore;
 
 namespace Experience {
 	class Calculator;
@@ -86,7 +87,7 @@ public:
 	Zone(const u16 pPort, const u16 pZoneID, const u16 pInstanceID);
 	~Zone();
 
-	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory);
+	const bool initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory, TaskDataStore* pTaskDataStore);
 
 	// Mutes a Character.
 	const bool mute(Character* pCharacter, const String& pCharacterName);
@@ -224,6 +225,8 @@ public:
 
 	// The Character is requesting history for a task.
 	void onTaskHistoryRequest(Character* pCharacter, const u32 pIndex);
+
+	void onRemoveTask(Character* pCharacter, const u32 pIndex, const u32 pTaskType);
 
 	const bool onSizeChange(Actor * pActor, float pSize);
 	const bool onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed = 10, const bool pIncludeSender = false);
@@ -378,6 +381,7 @@ private:
 	LootHandler* mLootHandler = nullptr;
 	TradeHandler* mTradeHandler = nullptr;
 	ShopHandler* mShopHandler = nullptr;
+	TaskDataStore* mTaskDataStore = nullptr;
 
 	const bool loadZonePoints(Data::ZonePointList pZonePoints);
 	const bool loadObjects(Data::ObjectList pObjects);

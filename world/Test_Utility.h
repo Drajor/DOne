@@ -26,7 +26,7 @@ public:
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return true; }
 	virtual const bool loadShops(Data::ShopList pShops) { return true; }
 	virtual const bool loadTitles(Data::TitleList pTitles) { return true; }
-	virtual const bool loadTasks(Data::TaskList& pTasks) { return true; }
+	virtual const bool loadTasks(Data::TaskDataArray& pTasks, const u32 pMaxTaskID, u32& pTasksLoaded) { return true; }
 };
 
 class FalseDataStore : public IDataStore {
@@ -52,7 +52,7 @@ public:
 	virtual const bool loadAlternateCurrencies(Data::AlternateCurrencyList pCurrencies) { return false; }
 	virtual const bool loadShops(Data::ShopList pShops) { return false; }
 	virtual const bool loadTitles(Data::TitleList pTitles) { return false; }
-	virtual const bool loadTasks(Data::TaskList& pTasks) { return false; }
+	virtual const bool loadTasks(Data::TaskDataArray& pTasks, const u32 pMaxTaskID, u32& pTasksLoaded) { return false; }
 };
 
 class NullLog : public ILog {

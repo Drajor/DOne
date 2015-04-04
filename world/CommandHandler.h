@@ -11,6 +11,7 @@ typedef std::vector<String> CommandParameters;
 
 class IDataStore;
 class Character;
+class Actor;
 
 class Command {
 public:
@@ -21,12 +22,17 @@ public:
 	void setInvoker(Character* pCharacter) { mInvoker = pCharacter; }
 	inline void setParameters(CommandParameters pParameters) { mParameters = pParameters; }
 	inline void clearParameters() { mParameters.clear(); }
-	virtual const bool handleCommand(CommandParameters pParameters) = 0;
+	virtual const bool execute(CommandParameters pParameters) = 0;
 	virtual void helpMessage();
 	inline const bool isLogged() const { return mLogged; }
 	inline const uint8 getMinimumParameters() const { return mMinimumParameters; }
 	inline const uint8 getMaximumParameters() const { return mMaximumParameters; }
 	inline const bool getRequiresTarget() const { return mRequiresTarget; }
+	inline Actor* getTargetActor() const { return mTargetActor; }
+	inline void setTargetActor(Actor* pActor) { mTargetActor = pActor; }
+	inline const bool getRequiresCharacterTarget() const { return mRequiresCharacterTarget; }
+	inline Character* getTargetCharacter() const { return mTargetCharacter; }
+	inline void setTargetCharacter(Character* pCharacter) { mTargetCharacter = pCharacter; }
 	inline void setRequiredParameters(const u8 pMinimum, const u8 pMaximum) { mMinimumParameters = pMinimum; mMaximumParameters = pMaximum; }
 	virtual void invalidParameters(CommandParameters pParameters);
 protected:
@@ -56,18 +62,24 @@ protected:
 	u8 mMinimumParameters = 0;
 	u8 mMaximumParameters = UINT8_MAX;
 	bool mRequiresTarget = false;
+	Actor* mTargetActor = nullptr;
+	bool mRequiresCharacterTarget = false;
+	Character* mTargetCharacter = nullptr;
 };
 
 class CommandHandler {
 public:
 	~CommandHandler();
 	const bool initialise(IDataStore* pDataStore);
-	void command(Character* pCharacter, String pCommandMessage);
+	void command(Character* pInvoker, String pCommandMessage);
 
 private:
 
 	bool mInitialised = false;
 	IDataStore* mDataStore = nullptr;
+
+	const bool preExecute(Command* pCommand, Character* pInvoker, CommandParameters& pParameters) const;
+	void _cleanUp(Command* pCommand);
 
 	void _logCommand(Character* pCharacter, String pCommandMessage);
 	Command* findCommand(String pCommandName);

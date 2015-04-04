@@ -103,6 +103,8 @@ const bool WorldConnection::handlePacket(const EQApplicationPacket* pPacket) {
 		// NOTE: This occurs when the client receives OP_ApproveName.
 		return handleCharacterCreate(pPacket);
 	case OP_EnterWorld:
+		// NOTE: This occurs when the user clicks the 'Enter World' button.
+		// NOTE: This also occurs when the client is changing zones.
 		return handleEnterWorld(pPacket);
 	case OP_DeleteCharacter:
 		// NOTE: This occurs when the user clicks the 'Delete Character' button.
@@ -353,7 +355,7 @@ const bool WorldConnection::handleEnterWorld(const EQApplicationPacket* pPacket)
 	const bool success = mWorld->onEnterWorld(this, characterName, mZoning);
 	if (success) mZoning = true;
 
-	return success;
+	return true;
 }
 
 void WorldConnection::sendChatServer(const String& pCharacterName) {
@@ -402,8 +404,7 @@ void WorldConnection::sendZoneServerInfo(const String& pIP, const u16 pPort) {
 
 void WorldConnection::sendZoneUnavailable() {
 	using namespace Payload::World;
-
-	auto packet = ZoneUnavailable::construct("NONE"); // NOTE: Zone name appears to have no effect.
+	auto packet = ZoneUnavailable::construct("Unknown", 0); // NOTE: Zone name appears to have no effect.
 	sendPacket(packet);
 	delete packet;
 }
@@ -413,7 +414,7 @@ void WorldConnection::sendApproveWorld() {
 
 	auto packet = new EQApplicationPacket(OP_ApproveWorld, ApproveWorld::size());
 	auto payload = ApproveWorld::convert(packet->pBuffer);
-	uchar foo[] = {
+	static uchar foo[] = {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x37, 0x87, 0x13, 0xbe, 0xc8, 0xa7, 0x77, 0xcb,
 		0x27, 0xed, 0xe1, 0xe6, 0x5d, 0x1c, 0xaa, 0xd3, 0x3c, 0x26, 0x3b, 0x6d, 0x8c, 0xdb, 0x36, 0x8d,
 		0x91, 0x72, 0xf5, 0xbb, 0xe0, 0x5c, 0x50, 0x6f, 0x09, 0x6d, 0xc9, 0x1e, 0xe7, 0x2e, 0xf4, 0x38,

@@ -17,13 +17,15 @@ CharacterFactory::~CharacterFactory() {
 	}
 }
 
-const bool CharacterFactory::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory) {
+const bool CharacterFactory::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, TaskDataStore* pTaskDataStore) {
 	if (mInitialised) return false;
 	if (!pDataStore) return false;
 	if (!pLogFactory) return false;
 	if (!pItemFactory) return false;
+	if (!pTaskDataStore) return false;
 
 	mDataStore = pDataStore;
+	mTaskDataStore = pTaskDataStore;
 	mLogFactory = pLogFactory;
 	mItemFactory = pItemFactory;
 	mLog = mLogFactory->make();
@@ -69,8 +71,15 @@ Character* CharacterFactory::make(const String& pCharacterName, Account* pAccoun
 	auto character = new Character(characterData);
 
 	// Create and initialise TaskController.
-	auto taskController = new TaskController(character);
-	taskController->onLoad();
+	auto taskController = new TaskController();
+	if (!taskController->initialise(character, mTaskDataStore, mLogFactory)) {
+		// TODO: Delete
+		return false;
+	}
+	if (!taskController->onLoad(characterData->mCompletedTasks)) {
+		// TODO: Delete.
+		return false;
+	}
 
 	// Initialise Character.
 	if (!character->initialise(pAccount, inventory, experienceController, taskController)) {

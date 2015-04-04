@@ -104,8 +104,10 @@ namespace Payload {
 	// Task selection window.
 	EQApplicationPacket* makeAvailableTasks(AvailableTasks& pTasks);
 
-	EQApplicationPacket* makeCurrentTaskDescription(const u32 pIndex, CurrentTask* pTask);
-	EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pTaskID, CurrentTaskObjective* pObjective);
+	EQApplicationPacket* updateTask(const u32 pIndex, CurrentTask* pTask);
+	EQApplicationPacket* updateTaskObjective(CurrentTask* pTask, CurrentTaskObjective* pObjective);
+	EQApplicationPacket* updateTaskHistory(CompletedTasks& pTasks);
+	EQApplicationPacket* updateTaskObjectiveHistory(const u32 pTaskIndex, Data::Task* pTaskData);
 
 	namespace Zone {
 
@@ -2157,6 +2159,70 @@ namespace Payload {
 		// C->S
 		struct TaskHistoryRequest : Fixed<TaskHistoryRequest> {
 			u32 mIndex = 0;
+			String _debug() const {
+				StringStream ss;
+				ss << "{TaskHistoryRequest} ";
+				PRINT_MEMBER(mIndex);
+				return ss.str();
+			}
+		};
+
+		// S<->C
+		struct RemoveTask : FixedT<RemoveTask, OP_CancelTask> {
+			static EQApplicationPacket* construct(const u32 pIndex, const u32 pTaskType) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTaskIndex = pIndex;
+				payload->mTaskType = pTaskType;
+
+				return packet;
+			}
+			String _debug() const {
+				StringStream ss;
+				ss << "{RemoveTask} ";
+				PRINT_MEMBER(mTaskIndex);
+				PRINT_MEMBER(mTaskType);
+				return ss.str();
+			}
+
+			u32 mTaskIndex = 0;
+			u32 mTaskType = 0;
+		};
+
+		// S->C
+		struct TaskComplete : FixedT<TaskComplete, OP_TaskActivityComplete> {
+			static EQApplicationPacket* construct(const u32 pTaskIndex, const u32 pTaskType, const u32 pTaskID, const u32 pObjectiveIndex, const u32 pTaskComplete, const u32 pObjectiveComplete) {
+				auto packet = create();
+				auto payload = convert(packet);
+				payload->mTaskIndex = pTaskIndex;
+				payload->mTaskType = pTaskType;
+				payload->mTaskID = pTaskID;
+				payload->mObjectiveIndex = pObjectiveIndex;
+				payload->mTaskComplete = pTaskComplete;
+				payload->mObjectiveComplete = pObjectiveComplete;
+
+				return packet;
+			}
+			u32 mTaskIndex = 0;
+			u32 mTaskType = 0;
+			u32 mTaskID = 0;
+			u32 mObjectiveIndex = 0;
+			u32 mTaskComplete = 0; // 0 = Red text "Task XX Failed.", 1 = Green text "Task XX Completed"
+			u32 mObjectiveComplete = 0; // 1 = Yellow text "Task Stage Complete"
+		};
+
+		// C->S
+		struct RequestTaskRewardPreview : Fixed<RequestTaskRewardPreview> {
+			u32 mUnknown0 = 0; // Seen 4
+			u32 mTaskID = 0;
+
+			String _debug() const {
+				StringStream ss;
+				ss << "{PreviewTaskReward} ";
+				PRINT_MEMBER(mUnknown0);
+				PRINT_MEMBER(mTaskID);
+				return ss.str();
+			}
 		};
 	}
 
@@ -2299,10 +2365,11 @@ namespace Payload {
 		// S->C
 		struct ZoneUnavailable : public FixedT<ZoneUnavailable, OP_ZoneUnavail> {
 			ZoneUnavailable() { memset(mZoneName, 0, sizeof(mZoneName)); }
-			static EQApplicationPacket* construct(const String& pZoneName) {
+			static EQApplicationPacket* construct(const String& pZoneName, i32 pUnknown = 0) {
 				auto packet = create();
 				auto payload = convert(packet);
 				strncpy_s(payload->mZoneName, _countof(payload->mZoneName), pZoneName.c_str(), _TRUNCATE);
+				payload->mUnknown = pUnknown;
 
 				return packet;
 			}

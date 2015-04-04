@@ -4,6 +4,7 @@
 #include "Test_Utility.h"
 
 #include "CharacterFactory.h"
+#include "TaskDataStore.h"
 
 class CharacterFactoryTest : public ::testing::Test {
 protected:
@@ -11,6 +12,8 @@ protected:
 		mTrueDataStore = new TrueDataStore();
 		mFalseDataStore = new FalseDataStore();
 		mCharacterFactory = new CharacterFactory();
+		mTaskDataStore = new TaskDataStore();
+
 		mItemFactory = new ItemFactory();
 		mLogFactory = new NullLogFactory();
 	}
@@ -18,6 +21,9 @@ protected:
 	virtual void TearDown() {
 		delete mCharacterFactory;
 		mCharacterFactory = nullptr;
+
+		delete mTaskDataStore;
+		mTaskDataStore = nullptr;
 
 		delete mItemFactory;
 		mItemFactory = nullptr;
@@ -33,6 +39,7 @@ protected:
 	}
 
 	CharacterFactory* mCharacterFactory = nullptr;
+	TaskDataStore* mTaskDataStore = nullptr;
 	TrueDataStore* mTrueDataStore = nullptr;
 	FalseDataStore* mFalseDataStore = nullptr;
 	NullLogFactory* mLogFactory = nullptr;
@@ -42,24 +49,27 @@ protected:
 
 TEST_F(CharacterFactoryTest, InitialiseNull) {
 	// Fail: Null IDataStore.
-	EXPECT_FALSE(mCharacterFactory->initialise(nullptr, mLogFactory, mItemFactory));
+	EXPECT_FALSE(mCharacterFactory->initialise(nullptr, mLogFactory, mItemFactory, mTaskDataStore));
 
 	// Fail: Null ILogFactory.
-	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, nullptr, mItemFactory));
+	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, nullptr, mItemFactory, mTaskDataStore));
 
 	// Fail: Null ItemFactory.
-	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, nullptr));
+	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, nullptr, mTaskDataStore));
+
+	// Fail: Null TaskDataStore.
+	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory, nullptr));
 
 	// Pass:
-	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory));
+	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory, mTaskDataStore));
 }
 
 TEST_F(CharacterFactoryTest, DoubleInitialise) {
 	// Pass:
-	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory));
+	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory, mTaskDataStore));
 
 	// Fail: Already initialised.
-	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory));
+	EXPECT_FALSE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory, mTaskDataStore));
 }
 
 TEST_F(CharacterFactoryTest, InitialiseFalseDataStore) {
@@ -68,7 +78,7 @@ TEST_F(CharacterFactoryTest, InitialiseFalseDataStore) {
 
 TEST_F(CharacterFactoryTest, makeNullAccount) {
 	// Pass:
-	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory));
+	EXPECT_TRUE(mCharacterFactory->initialise(mTrueDataStore, mLogFactory, mItemFactory, mTaskDataStore));
 
 	EXPECT_FALSE(mCharacterFactory->make("", nullptr));
 }

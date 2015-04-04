@@ -9,6 +9,7 @@ class ILog;
 class ILogFactory;
 class NPCFactory;
 class ZoneDataStore;
+class TaskDataStore;
 class GroupManager;
 class RaidManager;
 class GuildManager;
@@ -36,7 +37,7 @@ class ZoneManager {
 public:
 	~ZoneManager();
 
-	const bool initialise(World* pWorld, ZoneDataStore* pZoneDataManager, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
+	const bool initialise(World* pWorld, ZoneDataStore* pZoneDataManager, TaskDataStore* pTaskDataStore, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, ILogFactory* pLogFactory, NPCFactory* pNPCFactory);
 	void update();
 	const bool saveCharacter(Character* pCharacter);
 
@@ -80,7 +81,8 @@ private:
 	ILog* mLog = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	World* mWorld = nullptr;
-	ZoneDataStore* mZoneDataManager = nullptr;
+	ZoneDataStore* mZoneDataStore = nullptr;
+	TaskDataStore* mTaskDataStore = nullptr;
 	GroupManager* mGroupManager = nullptr;
 	RaidManager* mRaidManager = nullptr;
 	GuildManager* mGuildManager = nullptr;

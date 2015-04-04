@@ -11,6 +11,7 @@ SOURCE_GROUP(Zone\\Guild FILES Guild.h Guild.cpp GuildManager.h GuildManager.cpp
 SOURCE_GROUP(Zone\\Command FILES CommandHandler.h CommandHandler.cpp)
 SOURCE_GROUP(Zone\\ZoneConnection FILES ZoneConnection.h ZoneConnection.cpp ZoneConnectionManager.h ZoneConnectionManager.cpp)
 SOURCE_GROUP(Zone\\Spells FILES BuffController.h BuffConstroller.cpp SpellContants.h SpellDataStore.h SpellDataStore.cpp)
+SOURCE_GROUP(Zone\\Tasks FILES TaskConstants.h TaskController.h TaskController.cpp TaskDataStore.h TaskDataStore.cpp)
 SOURCE_GROUP(UCS FILES UCS.h UCS.cpp UCSClientConnection.h UCSClientConnection.cpp)
 SOURCE_GROUP(HateController FILES HateControllerFactory.h HateControllerFactory.cpp)
 
@@ -77,6 +78,7 @@ SET(world_sources
 	ShopHandler.cpp
 	BuffController.cpp
 	TaskController.cpp
+	TaskDataStore.cpp
 )
 
 SET(world_headers
@@ -155,7 +157,9 @@ SET(world_headers
 	TradeHandler.h
 	ShopHandler.h
 	BuffController.h
+	TaskConstants.h
 	TaskController.h
+	TaskDataStore.h
 )
 
 ADD_EXECUTABLE(world ${world_sources} ${world_headers})

@@ -72,7 +72,7 @@ Zone::~Zone() {
 	safe_delete(mLog);
 }
 
-const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory) {
+const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory, Data::Zone* pZoneData, Experience::Calculator* pExperienceCalculator, GroupManager* pGroupManager, RaidManager* pRaidManager, GuildManager* pGuildManager, TitleManager* pTitleManager, CommandHandler* pCommandHandler, ItemFactory* pItemFactory, NPCFactory* pNPCFactory, TaskDataStore* pTaskDataStore) {
 	if (mInitialised) return false;
 	if (!pZoneManager) return false;
 	if (!pLogFactory) return false;
@@ -85,6 +85,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	if (!pCommandHandler) return false;
 	if (!pItemFactory) return false;
 	if (!pNPCFactory) return false;
+	if (!pTaskDataStore) return false;
 
 	mZoneManager = pZoneManager;
 	mLogFactory = pLogFactory;
@@ -96,6 +97,7 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mCommandHandler = pCommandHandler;
 	mItemFactory = pItemFactory;
 	mNPCFactory = pNPCFactory;
+	mTaskDataStore = pTaskDataStore;
 
 	// Create and configure Zone log.
 	mLog = mLogFactory->make();
@@ -263,6 +265,8 @@ void Zone::onEnterZone(Character* pCharacter) {
 
 	// Notify ZoneManager.
 	mZoneManager->onEnterZone(pCharacter);
+
+	pCharacter->getTaskController()->onEnterZone();
 }
 
 void Zone::onLeaveZone(Character* pCharacter) {
@@ -2747,4 +2751,9 @@ void Zone::onTaskHistoryRequest(Character* pCharacter, const u32 pIndex) {
 
 	// Notify TaskController.
 	pCharacter->getTaskController()->onHistoryRequest(pIndex);
+}
+
+void Zone::onRemoveTask(Character* pCharacter, const u32 pIndex, const u32 pTaskType) {
+	if (!pCharacter) return;
+	pCharacter->getTaskController()->remove(pIndex, pTaskType);
 }

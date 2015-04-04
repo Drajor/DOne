@@ -2,23 +2,34 @@
 
 #include <array>
 #include <list>
+#include <vector>
 #include "Types.h"
 
 struct CurrentTaskObjective;
 struct CurrentTask;
-struct CompleteTask;
+struct CompletedTask;
+
 namespace Data {
+	struct CompletedTask;
 	struct Task;
 	struct TaskObjective;
 }
 
-static const u32 MaxActiveTasks = 10;
+static const u32 MaxTaskID = 5000;
+static const u32 MaxSoloTasks = 1;
+static const u32 MaxSharedTasks = 1;
+static const u32 MaxQuestTasks = 19;
+//static const u32 MaxActiveTasks = MaxSoloTasks + MaxSharedTasks + MaxQuestTasks;
 
-typedef std::array<CurrentTask*, MaxActiveTasks> CurrentTasks;
+//typedef std::array<CurrentTask*, MaxQuestTasks> CurrentTasks;
+typedef std::list<CurrentTask*> CurrentTasks;
+typedef std::vector<CompletedTask> CompletedTasks;
+
 typedef std::list<Data::Task*> AvailableTasks;
 typedef std::list<CurrentTaskObjective*> CurrentTaskObjectives;
-typedef std::list<CompleteTask*> CompleteTasks;
-typedef std::list<Data::TaskObjective*> TaskObjectives;
+
+typedef std::list<Data::CompletedTask> CompletedTasksData;
+typedef std::list<Data::TaskObjective*> TaskObjectivesData;
 
 namespace TaskType {
 	enum : u32 {
@@ -37,6 +48,25 @@ namespace TaskType {
 				return true;
 			default:
 				break;
+		}
+		return false;
+	}
+}
+
+namespace TaskRewardType {
+	enum : u8 {
+		Complex = 0,
+		Simple = 1,
+	};
+
+	static bool isValid(const u8 pTaskRewardType) {
+		switch (pTaskRewardType) {
+		case TaskRewardType::Complex:
+			return true;
+		case TaskRewardType::Simple:
+			return true;
+		default:
+			break;
 		}
 		return false;
 	}

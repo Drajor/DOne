@@ -598,6 +598,15 @@ bool ZoneConnection::handlePacket(const EQApplicationPacket* pPacket) {
 	case OP_TaskHistoryRequest:
 		handleTaskHistoryRequest(pPacket);
 		break;
+	case OP_CancelTask:
+		handleRemoveTask(pPacket);
+		break;
+	case OP_0x43BC:
+		FileDumpPacketHex("0x43BC.hex", pPacket);
+		break;
+	case OP_PreviewTaskReward:
+		handleRequestTaskRewardPreview(pPacket);
+		break;
 	default:
 		//StringStream ss;
 		//ss << "Unknown Packet: " << opcode;
@@ -2935,10 +2944,6 @@ const bool ZoneConnection::handleUnknown(const EQApplicationPacket* pPacket) {
 	Log::info("Unknown Packet, size=" + std::to_string(pPacket->size));
 	auto raw = static_cast<EQRawApplicationPacket*>(const_cast<EQApplicationPacket*>(pPacket));
 	Log::info("OpCode= " + std::to_string(raw->GetRawOpcode()));
-
-	if (raw->GetRawOpcode() == 0x43BC) {
-		FileDumpPacketHex("0x43BC.hex", pPacket);
-	}
 	return true;
 }
 
@@ -3929,10 +3934,35 @@ const bool ZoneConnection::handleTaskHistoryRequest(const EQApplicationPacket* p
 	SIZE_CHECK(TaskHistoryRequest::sizeCheck(pPacket));
 
 	auto payload = TaskHistoryRequest::convert(pPacket);
-	mLog->error("Got: OP_TaskHistoryRequest");
+	mLog->info(payload->_debug());
 
 	// Notify Zone.
 	mZone->onTaskHistoryRequest(mCharacter, payload->mIndex);
+	return true;
+}
+
+const bool ZoneConnection::handleRemoveTask(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(RemoveTask::sizeCheck(pPacket));
+
+	auto payload = RemoveTask::convert(pPacket);
+	mLog->error(payload->_debug());
+
+	// Notify Zone.
+	mZone->onRemoveTask(mCharacter, payload->mTaskIndex, payload->mTaskType);
+	return true;
+}
+
+const bool ZoneConnection::handleRequestTaskRewardPreview(const EQApplicationPacket* pPacket) {
+	using namespace Payload::Zone;
+	if (!pPacket) return false;
+	SIZE_CHECK(RequestTaskRewardPreview::sizeCheck(pPacket));
+
+	auto payload = RequestTaskRewardPreview::convert(pPacket);
+	mLog->error(payload->_debug());
+
+	// TODO: I do not know the correct response to this..
 	return true;
 }
 

@@ -5,6 +5,12 @@
 #include "Vector3.h"
 
 namespace Data {
+
+	struct CompletedTask {
+		u32 mTaskID = 0;
+		u32 mCompleted = 0; // Time stamp.
+	};
+
 	struct AccountCharacter {
 		String mName = "<none>";
 		u32 mLevel = 0;
@@ -196,6 +202,7 @@ namespace Data {
 		std::vector<u32> mSpellBook;
 		std::vector<u32> mSpellBar;
 		std::list<Buff*> mBuffs;
+		std::list<CompletedTask> mCompletedTasks;
 
 		Inventory mInventory;
 	};
@@ -531,17 +538,20 @@ namespace Data {
 	struct TaskObjective {
 		u32 mID = 0;
 		u32 mType = 0;
+		u32 mStage = 0;
 		u32 mZoneID = 0;
 		u32 mRequired = 1;
 		bool mOptional = false;
 		bool mHidden = false;
 		String mTextA;
 		String mTextB;
+		String mTextC; // This overrides mTextA / mTextB
 	};
 
 	struct Task {
 		u32 mID = 0;
 		u32 mType = TaskType::Quest;
+		u8 mRewardType = TaskRewardType::Simple;
 		u32 mCurrencyReward = 0; // Reward in copper pieces.
 		i32 mPointsReward = 0;
 		u32 mDuration = 0; // Seconds.
@@ -550,6 +560,6 @@ namespace Data {
 		String mRewardText;
 		bool mRepeatable = true;
 
-		TaskObjectives mObjectives;
+		TaskObjectivesData mObjectives;
 	};
 }

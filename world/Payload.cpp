@@ -718,12 +718,16 @@ EQApplicationPacket* Payload::makeAvailableTasks(AvailableTasks& pTasks) {
 	return new EQApplicationPacket(OP_OpenNewTasksWindow, data, size);
 }
 
-EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, CurrentTask* pTask) {
+EQApplicationPacket* Payload::updateTask(const u32 pIndex, CurrentTask* pTask) {
 	// Calculate size.
 	u32 size = 0;
 
 	// Fixed.
 	size += 47;
+
+	if (pTask->mTaskData->mRewardType == TaskRewardType::Simple) {
+
+	}
 
 	// Strings.
 	size += pTask->mTaskData->mTitle.length() + 1;
@@ -743,8 +747,9 @@ EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, Curre
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(pTask->mStartTime); // Start time.
 	writer.writeString(pTask->mTaskData->mDescription); // Description.
-	writer.write<u8>(1); // 0 = 'Preview Reward' button becomes available.
-	writer.write<u32>(pTask->mTaskData->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
+	writer.write<u8>(pTask->mTaskData->mRewardType); // TaskRewardType.
+	//writer.write<u32>(pTask->mTaskData->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
+	writer.write<u32>(3); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
@@ -753,44 +758,118 @@ EQApplicationPacket* Payload::makeCurrentTaskDescription(const u32 pIndex, Curre
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
-	writer.write<u8>(0); // Unknown.
+	writer.write<u8>(0); // Unknown. Non-zero here appears to change the expected size client side.
 	writer.writeString(pTask->mTaskData->mRewardText);
 	writer.write<i32>(pTask->mTaskData->mPointsReward); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
 
 	return new EQApplicationPacket(OP_TaskDescription, data, size);
 }
 
-EQApplicationPacket* makeCurrentTaskObjective(const u32 pTaskIndex, const u32 pTaskID, CurrentTaskObjective* pObjective) {
+EQApplicationPacket* Payload::updateTaskObjective(CurrentTask* pTask, CurrentTaskObjective* pObjective) {
 	// Calculate size.
 	u32 size = 0;
 
 	// Fixed.
-	size += 60;
+	size += 56;
 
 	// Strings.
 	size += pObjective->mObjectiveData->mTextA.length() + 1;
 	size += pObjective->mObjectiveData->mTextB.length() + 1;
+	size += pObjective->mObjectiveData->mTextC.length() + 1;
 
 	unsigned char* data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
 
-	writer.write<u32>(pTaskIndex); // Index.
-	writer.write<u32>(2); // Unknown. HC copy.
-	writer.write<u32>(pTaskID); // Task ID.
+	writer.write<u32>(pTask->mIndex); // Index.
+	writer.write<u32>(pTask->mTaskData->mType); // Task Type
+	writer.write<u32>(pTask->mTaskData->mID); // Task ID.
 	writer.write<u32>(pObjective->mObjectiveData->mID); // Objective ID.
-	writer.write<u32>(0); // Unknown.
+	writer.write<u32>(pObjective->mObjectiveData->mStage); // Objective stage
 	writer.write<u32>(pObjective->mObjectiveData->mType); // Objective type.
 	writer.write<u32>(pObjective->mObjectiveData->mOptional ? 1 : 0); // Optional flag.
 	writer.write<u32>(0); // Unknown.
 	writer.writeString(pObjective->mObjectiveData->mTextA); // Text A.
 	writer.writeString(pObjective->mObjectiveData->mTextB); // Text B.
-	writer.write<u32>(pObjective->mObjectiveData->mRequired); // Objective required count.
+	writer.write<i32>(pObjective->mObjectiveData->mRequired); // Objective required count.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(pObjective->mObjectiveData->mZoneID); // Zone ID.
 	writer.write<u32>(0); // Unknown.
-	writer.write<u32>(pObjective->mValue); // Current progress.
-	writer.write<u32>(0); // Unknown.
+	writer.writeString(pObjective->mObjectiveData->mTextC); // Text override.
+	writer.write<i32>(pObjective->mValue);
+	// Emu had 3 extra bytes after mValue, but I can not determine whether they are needed are not.
+	//writer.write<u8>(0); // Unknown.
+	//writer.write<u8>(0); // Unknown.
+	//writer.write<u8>(0); // Unknown.
 
 	return new EQApplicationPacket(OP_TaskActivity, data, size);
+}
+
+EQApplicationPacket* Payload::updateTaskHistory(CompletedTasks& pTasks) {
+	// Calculate size.
+	u32 size = 0;
+
+	u32 count = pTasks.size();
+
+	size += 4; // Count.
+	size += 8 * count; // Fixed
+
+	// Strings
+	for (auto i : pTasks)
+		size += i.mTaskData->mTitle.length() + 1;
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	// Count.
+	writer.write<u32>(count);
+
+	// Tasks.
+	for (auto i : pTasks) {
+		writer.write<u32>(i.mTaskData->mID); // Task ID.
+		writer.writeString(i.mTaskData->mTitle); // Task title.
+		writer.write<u32>(i.mTimeCompleted); // Completed time stamp.
+	}
+
+	return new EQApplicationPacket(OP_CompletedTasks, data, size);
+}
+
+EQApplicationPacket* Payload::updateTaskObjectiveHistory(const u32 pTaskIndex, Data::Task* pTaskData) {
+	if (!pTaskData) return nullptr;
+
+	// Calculate size.
+	u32 size = 0;
+
+	u32 objectiveCount = pTaskData->mObjectives.size();
+
+	size += 4; // Task index.
+	size += 4; // Objective count.
+	size += 24 * objectiveCount; // Fixed.
+
+	// Strings.
+	for (auto i : pTaskData->mObjectives) {
+		size += i->mTextA.length() + 1;
+		size += i->mTextB.length() + 1;
+		size += i->mTextC.length() + 1;
+	}
+
+	unsigned char* data = new unsigned char[size];
+	Utility::MemoryWriter writer(data, size);
+
+	writer.write<u32>(pTaskIndex); // Task index.
+	writer.write<u32>(objectiveCount); // Objective count.
+
+	for (auto i : pTaskData->mObjectives) {
+		writer.write<u32>(i->mType); // Objective type.
+		writer.writeString(i->mTextA);
+		writer.writeString(i->mTextB);
+		writer.write<u32>(i->mRequired); // Required value.
+		writer.write<u32>(0); // Unknown.
+		writer.write<u32>(0); // Unknown.
+		writer.write<u32>(i->mZoneID); // Zone ID.
+		writer.write<u32>(0); // Unknown.
+		writer.writeString(i->mTextC);
+	}
+
+	return new EQApplicationPacket(OP_TaskHistoryReply, data, size);
 }

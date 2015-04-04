@@ -427,6 +427,9 @@ const bool Character::_updateForSave() {
 		mData->mBindLocations[i].mHeading = bindLocation.getHeading();
 	}
 
+	// Tasks.
+	mTaskController->onSave(mData->mCompletedTasks);
+
 	return true;
 }
 

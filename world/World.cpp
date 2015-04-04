@@ -292,7 +292,10 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	auto account = pConnection->getAccount();
 
 	// Check: Account owns Character.
-	if (!account->ownsCharacter(pCharacterName)) return false;
+	if (!account->ownsCharacter(pCharacterName)) {
+		mLog->error("Ownership check failed for Character: " + pCharacterName);
+		return false;
+	}
 
 	// Create Character.
 	auto character = mCharacterFactory->make(pCharacterName, account);
@@ -528,16 +531,14 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 	if (!success) {
 		// Character Select to World -OR- Character Create to World.
 		if (!pZoning) {
+			// NOTE: This just bumps the client to Character Select screen.
 			pConnection->sendZoneUnavailable();
 			pConnection->sendCharacterSelection();
-			// NOTE: This just bumps the client to Character Select screen.
-			return true;
 		}
 		// Zoning
 		else {
 			// TODO:
 		}
-		return true;
 	}
 
 	return success;

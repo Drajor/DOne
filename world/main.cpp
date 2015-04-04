@@ -13,6 +13,7 @@
 #include "TitleManager.h"
 #include "XMLDataStore.h"
 #include "SpellDataStore.h"
+#include "TaskDataStore.h"
 #include "StaticItemData.h"
 #include "ItemDataStore.h"
 #include "LogSystem.h"
@@ -83,6 +84,10 @@ int main(int argc, char** argv)  {
 	ServiceLocator::setZoneDataManager(zoneDataManager);
 	EXPECTED_MAIN(zoneDataManager->initialise(dataStore, logFactory));
 
+	auto taskDataStore = new TaskDataStore();
+	//ServiceLocator::setZoneDataManager(zoneDataManager);
+	EXPECTED_MAIN(taskDataStore->initialise(dataStore, logFactory));
+
 	TitleManager* titleManager = new TitleManager();
 	ServiceLocator::setTitleManager(titleManager);
 	EXPECTED_MAIN(titleManager->initialise(dataStore, logFactory));
@@ -130,9 +135,9 @@ int main(int argc, char** argv)  {
 	ServiceLocator::setWorld(world);
 
 	CharacterFactory* characterFactory = new CharacterFactory();
-	EXPECTED_MAIN(characterFactory->initialise(dataStore, logFactory, itemFactory));
+	EXPECTED_MAIN(characterFactory->initialise(dataStore, logFactory, itemFactory, taskDataStore));
 
-	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, groupManager, raidManager, guildManager, titleManager, commandHandler, itemFactory, logFactory, npcFactory));
+	EXPECTED_MAIN(zoneManager->initialise(world, zoneDataManager, taskDataStore, groupManager, raidManager, guildManager, titleManager, commandHandler, itemFactory, logFactory, npcFactory));
 	EXPECTED_MAIN(groupManager->initialise(logFactory, zoneManager));
 	EXPECTED_MAIN(raidManager->initialise(zoneManager));
 	EXPECTED_MAIN(guildManager->initialise(dataStore, logFactory));

@@ -41,7 +41,7 @@ public:
 		mMinimumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Try: Convert zone ID.
 		uint32 zoneID = 0;
 		if (!convertParameter(0, zoneID)) {
@@ -81,7 +81,7 @@ public:
 		mHelpMessages.push_back("Usage: #warp <name> (warps you to a specific Character).");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Warp to target.
 		if (pParameters.empty()) {
 			Actor* target = mInvoker->getTarget();
@@ -141,7 +141,7 @@ public:
 		mMaximumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		bool gm = pParameters[0] == "on";
 		mInvoker->setIsGM(gm);
 		mInvoker->getZone()->notifyCharacterGM(mInvoker);
@@ -158,7 +158,7 @@ public:
 		mHelpMessages.push_back("Usage: #zonelist");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		ZoneSearchResult result = ServiceLocator::getZoneManager()->getAllZones();
 		for (auto i : result) {
 			StringStream ss; ss << "[Zone] " << i.mName << "(" << i.mID << "," << i.mInstanceID << ") Players: " << i.mNumCharacters;
@@ -179,7 +179,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is a Character.
 		if (!mInvoker->targetIsCharacter()) { return false; }
 
@@ -202,7 +202,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is a Character.
 		if (!mInvoker->targetIsCharacter()) { return false; }
 
@@ -225,7 +225,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is a Character.
 		if (!mInvoker->targetIsCharacter()) { return false; }
 
@@ -248,7 +248,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is a Character.
 		if (!mInvoker->targetIsCharacter()) { return false; }
 
@@ -271,7 +271,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is a Character.
 		if (!mInvoker->targetIsCharacter()) { return false; }
 
@@ -290,7 +290,7 @@ public:
 		mHelpMessages.push_back("Usage: #loc");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		Vector3 position = mInvoker->getPosition();
 		StringStream ss;
 		ss << "Your location is " << position.toString() << " Heading: " << mInvoker->getHeading();
@@ -310,7 +310,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u8 level = 0;
 		if (!convertParameter(0, level)) { return false; }
 
@@ -326,7 +326,7 @@ public:
 		mHelpMessages.push_back("Usage Example: #setstat str 10");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 2) {
 			invalidParameters(pParameters);
@@ -345,7 +345,7 @@ public:
 		mMinimumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		auto results = ServiceLocator::getZoneDataManager()->searchByName(pParameters[0]);
 		mInvoker->message(MessageType::Yellow, "Search found " + std::to_string(results.size()) + " results.");
 		for (auto i : results){
@@ -363,7 +363,7 @@ public:
 		mHelpMessages.push_back("Usage: #guildsearch <optional text>");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Get all guilds.
 		if (pParameters.size() == 0) {
 			GuildSearchResults results = ServiceLocator::getGuildManager()->getAllGuilds();
@@ -390,7 +390,7 @@ public:
 		mHelpMessages.push_back("Usage: #ginfo");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		if (mInvoker->hasGuild()) {
 			static const String RankNames[] = { "Member", "Officer", "Leader" };
 			mInvoker->message(MessageType::Yellow, RankNames[mInvoker->getGuildRank()] + " of " + std::to_string(mInvoker->getGuildID()));
@@ -460,7 +460,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 slotID = 0;
 		if (!convertParameter(0, slotID)) { return false; }
 
@@ -487,7 +487,7 @@ public:
 		mMaximumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		auto target = mInvoker->getTarget();
 
 		const String surname = pParameters.size() == 1 ? pParameters[0] : "";
@@ -511,7 +511,7 @@ public:
 		mMinimumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		SpellSearchResults results;
 		ServiceLocator::getSpellDataStore()->searchByName(pParameters[0], results);
 
@@ -546,7 +546,7 @@ public:
 		mHelpMessages.push_back("Usage: #setskill <id> <value>");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 2) {
 			invalidParameters(pParameters);
@@ -581,7 +581,7 @@ public:
 		mHelpMessages.push_back("Usage: #getskill <id>");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pParameters);
@@ -618,7 +618,7 @@ public:
 		mHelpMessages.push_back("Usage: #skills");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		for (int i = 0; i < Limits::Skills::MAX_ID; i++)
 			mInvoker->notify(std::to_string(i) + " - " + Utility::Skills::fromID(i));
 		return true;
@@ -631,7 +631,7 @@ public:
 		mHelpMessages.push_back("Usage: #setlanguage <id> <value>");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 2) {
 			invalidParameters(pParameters);
@@ -666,7 +666,7 @@ public:
 		mHelpMessages.push_back("Usage: #getlanguage <id>");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pParameters);
@@ -702,7 +702,7 @@ public:
 		mHelpMessages.push_back("Usage: #languages");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		for (int i = 0; i < Limits::Languages::MAX_ID; i++)
 			mInvoker->notify(std::to_string(i) + " - " + Utility::Languages::fromID(i));
 		return true;
@@ -715,7 +715,7 @@ public:
 		mHelpMessages.push_back("Usage: #depop");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		mInvoker->notify("Depopulating Zone...");
 		mInvoker->getZone()->depopulate();
 		return false;
@@ -728,7 +728,7 @@ public:
 		mHelpMessages.push_back("Usage: #pop");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		mInvoker->notify("Populating Zone...");
 		mInvoker->getZone()->populate();
 		return true;
@@ -741,7 +741,7 @@ public:
 		mHelpMessages.push_back("Usage: #repop");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		mInvoker->notify("Repopulating Zone...");
 		mInvoker->notify("Depopulating Zone...");
 		mInvoker->getZone()->depopulate();
@@ -757,7 +757,7 @@ public:
 		mHelpMessages.push_back("Usage: #lock 1/0");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Parameter #
 		if (pParameters.size() != 1) {
 			invalidParameters(pParameters);
@@ -786,7 +786,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		Actor* target = mInvoker->getTarget();
 		mInvoker->getZone()->handleDeath(target, mInvoker, 1, 0);
 		return true;
@@ -802,7 +802,7 @@ public:
 		setMaximumParameters(3);
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 itemID = 0;
 		if (!Utility::stoSafe(itemID, pParameters[0])) {
 			conversionError(pParameters[0]);
@@ -853,7 +853,7 @@ public:
 		mHelpMessages.push_back("Types: cont, head, chest, arms, wrists, legs, hands, feet ");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		ItemGenerator* itemGenerator = ServiceLocator::getItemGenerator();
 
 		// Check: Parameter #
@@ -999,7 +999,7 @@ public:
 		mHelpMessages.push_back("Usage: #summon <name> or current target.");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 
 		// Summon target.
 		if (pParameters.empty()) {
@@ -1058,7 +1058,7 @@ public:
 		mHelpMessages.push_back("Usage: #kick <name> (kicks a specific Character)");
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		Character* character = nullptr;
 		
 		// Kick target.
@@ -1095,7 +1095,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		bool invulnerable = pParameters[0] == "on";
 		Actor* target = mInvoker->getTarget();
 		target->setInvulnerable(invulnerable);
@@ -1115,7 +1115,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		auto target = mInvoker->getTarget();
 
 		mInvoker->notify("-- Information -- ");
@@ -1170,7 +1170,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		if (mInvoker->targetIsNPC()) { return inspectNPC(Actor::cast<NPC*>(mInvoker->getTarget())); }
 		if (mInvoker->targetIsCharacter()) { return inspectCharacter(Actor::cast<Character*>(mInvoker->getTarget())); }
 
@@ -1268,7 +1268,7 @@ public:
 		mMaximumParameters = 3;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 a = 0;
 		if (!convertParameter(0, a)) { return false; }
 		uint32 b = 0;
@@ -1309,7 +1309,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 nimbusID = 0;
 		if (!convertParameter(0, nimbusID)) { return false; }
 
@@ -1331,7 +1331,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 nimbusID = 0;
 		if (!convertParameter(0, nimbusID)) { return false; }
 
@@ -1353,7 +1353,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is Character.
 		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
 
@@ -1385,7 +1385,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is Character.
 		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
 
@@ -1416,7 +1416,7 @@ public:
 		mMaximumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		uint32 typeID = 0;
 		if (!convertParameter(0, typeID)) { return false; };
 
@@ -1443,7 +1443,7 @@ public:
 		mMaximumParameters = 2;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		String asset;
 		u32 assetID = 0;
 		if (convertParameter(0, assetID)) {
@@ -1471,7 +1471,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is Character.
 		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
 		
@@ -1508,7 +1508,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		// Check: Target is Character.
 		if (mInvoker->getTarget()->isCharacter() == false) { return false; }
 
@@ -1541,7 +1541,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u32 race = 0;
 		if (!convertParameter(0, race)) { return false; }
 
@@ -1563,7 +1563,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		float size = 0.0f;
 		if (!convertParameter(0, size)) { return false; }
 
@@ -1584,7 +1584,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u8 gender = 0;
 		if (!convertParameter(0, gender)) { return false; }
 
@@ -1606,7 +1606,7 @@ public:
 		mRequiresTarget = true;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u8 texture = 0;
 		if (!convertParameter(0, texture)) { return false; }
 
@@ -1627,7 +1627,7 @@ public:
 		mMaximumParameters = 2;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u16 zoneID = 0;
 		if (!convertParameter(0, zoneID)) { return false; }
 
@@ -1663,7 +1663,7 @@ public:
 		mMaximumParameters = 2;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u16 zoneID = 0;
 		if (!convertParameter(0, zoneID)) { return false; }
 
@@ -1706,7 +1706,7 @@ public:
 		mMaximumParameters = 2;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		const String characterName = pParameters[0];
 		bool mute = true;
 		if (!convertParameter(1, mute)) { return false; }
@@ -1728,11 +1728,69 @@ public:
 		mMinimumParameters = 1;
 	};
 
-	const bool handleCommand(CommandParameters pParameters) {
+	const bool execute(CommandParameters pParameters) {
 		u16 spellID = 0;
 		if (!convertParameter(0, spellID)) return false;
 
 		mInvoker->getZone()->onBeginCast(mInvoker, mInvoker->getSpawnID(), spellID, 0);
+
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class AddTaskCommand : public Command {
+public:
+	AddTaskCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: +task <id>");
+		mMinimumParameters = 1;
+		mRequiresCharacterTarget = true;
+	};
+
+	const bool execute(CommandParameters pParameters) {
+		auto target = getTargetCharacter();
+		
+		u32 taskID = 0;
+		if (!convertParameter(0, taskID)) return false;
+
+		const bool success = target->getTaskController()->add(taskID, true);
+
+		if (!success) {
+			mInvoker->notify("Failed to add task to " + target->getName() + ", see log for details.");
+		}
+		else {
+			mInvoker->notify("Task added to " + target->getName());
+		}
+
+		return true;
+	}
+};
+
+/*****************************************************************************************************************************/
+class RemoveTaskCommand : public Command {
+public:
+	RemoveTaskCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: -task <id>");
+		mMinimumParameters = 1;
+		mRequiresCharacterTarget = true;
+	};
+
+	const bool execute(CommandParameters pParameters) {
+		auto target = getTargetCharacter();
+
+		u32 taskID = 0;
+		if (!convertParameter(0, taskID)) return false;
+
+		const bool success = target->getTaskController()->remove(taskID);
+
+		if (!success) {
+			mInvoker->notify("Failed to remove task from " + target->getName() + ", see log for details.");
+		}
+		else {
+			mInvoker->notify("Task removed from " + target->getName());
+		}
+
+		return true;
 	}
 };
 
@@ -1825,63 +1883,61 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 	mCommands.push_back(new GenderCommand(100, { "gender" }));
 	mCommands.push_back(new TextureCommand(100, { "texture" }));
 
+	mCommands.push_back(new AddTaskCommand(100, { "+task", "addtask" }));
+	mCommands.push_back(new RemoveTaskCommand(100, { "-task", "removetask" }));
+
 	return true;
 }
 
-void CommandHandler::command(Character* pCharacter, String pCommandMessage) {
+void CommandHandler::command(Character* pInvoker, String pCommandMessage) {
 	// Break up the message.
-	std::vector<String> elements = Utility::split(pCommandMessage, ' ');
+	auto elements = Utility::split(pCommandMessage, ' ');
 	// Extract command name.
-	String commandName = elements[0].substr(1, elements[0].length() - 1);
+	auto commandName = elements[0].substr(1, elements[0].length() - 1);
 	// Remove command name (#zone)
 	elements.erase(elements.begin());
 
-	Command* command = findCommand(commandName);
-	if (command) {
-		// Check: Invoker has the required status.
-		if (command->getMinimumStatus() > pCharacter->getStatus()) { return; }
+	auto command = findCommand(commandName);
 
-		command->setInvoker(pCharacter);
-
-		// Check: Invoker wants help.
-		if (elements.size() == 1 && elements[0][0] == HELP_TOKEN) {
-			command->helpMessage();
-			command->setInvoker(nullptr);
-			return;
-		}
-
-		// Check: Parameter range.
-		if (elements.size() < command->getMinimumParameters() || elements.size() > command->getMaximumParameters()) {
-			command->invalidParameters(elements);
-			command->setInvoker(nullptr);
-			return;
-		}
-
-		// Check: Target required.
-		if (command->getRequiresTarget() && !pCharacter->hasTarget()) {
-			pCharacter->notify("Command requires a target!");
-			command->setInvoker(nullptr);
-			return;
-		}
-
-		// Check: Log Command usage if required.
-		if (command->isLogged())
-			_logCommand(pCharacter, pCommandMessage);
-
-		command->setParameters(elements);
-		bool success = command->handleCommand(elements);
-		command->setInvoker(nullptr);
-		command->clearParameters();
-
-		if (!success) {
-			pCharacter->notify("Command failed.");
-		}
-	}
-	else {
+	if (!command) {
 		// Hack/Test commands can be handled in here.
-		_logCommand(pCharacter, pCommandMessage);
-		_handleCommand(pCharacter, commandName, elements);
+		_logCommand(pInvoker, pCommandMessage);
+		_handleCommand(pInvoker, commandName, elements);
+		return;
 	}
+
+	// Check: Invoker has the required status.
+	if (command->getMinimumStatus() > pInvoker->getStatus()) { return; }
+
+	command->setInvoker(pInvoker);
+
+	// Check: Invoker wants help.
+	if (elements.size() == 1 && elements[0][0] == HELP_TOKEN) {
+		command->helpMessage();
+		// Clean up.
+		_cleanUp(command);
+		return;
+	}
+
+	// Do pre-execution checks.
+	if (!preExecute(command, pInvoker, elements)) {
+		// Clean up.
+		_cleanUp(command);
+		return;
+	}
+
+	// Check: Log Command usage if required.
+	if (command->isLogged())
+		_logCommand(pInvoker, pCommandMessage);
+
+	// Execute command.
+	if (!command->execute(elements)) {
+		// Notify invoker if command failed.
+		pInvoker->notify("Command failed.");
+	}
+
+	// Do post-execution clean up.
+	_cleanUp(command);
 }
 
 void CommandHandler::_handleCommand(Character* pCharacter, const String& pCommandName, std::vector<String> pParameters) {
@@ -2267,11 +2323,37 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 	//	pCharacter->getConnection()->sendPacket(packet3);
 	//	delete packet3;
 	//}
-	else if (pCommandName == "tasks") {
-		auto controller = pCharacter->getTaskController();
-		auto packet = Payload::makeAvailableTasks(controller->getAvailableTasks());
+	//else if (pCommandName == "+task" && pParameters.size() == 1) {
+	//	u32 taskID = 0;
+	//	if (!Utility::stoSafe(taskID, pParameters[0])) { return; }
+
+	//	pCharacter->getTaskController()->add(taskID, true);
+	//	//auto controller = pCharacter->getTaskController();
+	//	//auto packet = Payload::makeAvailableTasks(controller->getAvailableTasks());
+	//	//pCharacter->getConnection()->sendPacket(packet);
+	//	//delete packet;
+	//}
+	else if (pCommandName == "tcom" && pParameters.size() == 2) {
+		u32 u0 = 0;
+		if (!Utility::stoSafe(u0, pParameters[0])) { return; }
+		u32 u1 = 0;
+		if (!Utility::stoSafe(u1, pParameters[1])) { return; }
+
+		auto packet = Payload::Zone::TaskComplete::construct(0, 2, 1, 0, u0, u1);
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
+
+		//pCharacter->getTaskController()->updateObjective(u0, u);
+		//auto controller = pCharacter->getTaskController();
+		//auto packet = Payload::makeAvailableTasks(controller->getAvailableTasks());
+		//pCharacter->getConnection()->sendPacket(packet);
+		//delete packet;
+	}
+	else if (pCommandName == "4112") {
+		auto packet = new EQApplicationPacket(OP_0x43BC, 4112);
+		memset(packet->pBuffer, 1, 4112);
+		pCharacter->getConnection()->sendPacket(packet);
+		//packet->buf
 	}
 	else if (pCommandName == "tasks2") {
 		//auto controller = pCharacter->getTaskController();
@@ -2286,7 +2368,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		activeTask->mStartTime = Utility::Time::now();
 		activeTask->mTaskData = task;
 
-		auto packet = Payload::makeCurrentTaskDescription(0, activeTask);
+		auto packet = Payload::updateTask(0, activeTask);
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
 	}
@@ -2489,6 +2571,47 @@ void CommandHandler::_logCommand(Character* pCharacter, String pCommandMessage) 
 	Log::info(ss.str());
 }
 
+const bool CommandHandler::preExecute(Command* pCommand, Character* pInvoker, CommandParameters& pParameters) const {
+
+	// Check: Parameter range.
+	if (pParameters.size() < pCommand->getMinimumParameters() || pParameters.size() > pCommand->getMaximumParameters()) {
+		pInvoker->notify("Command parameters were invalid.");
+		return false;
+	}
+	pCommand->setParameters(pParameters);
+
+	// Check: Target required.
+	if (pCommand->getRequiresTarget()) {
+		// No target.
+		if (!pInvoker->hasTarget()) {
+			pInvoker->notify("Command requires a target!");
+			return false;
+		}
+		// Record target.
+		pCommand->setTargetActor(pInvoker->getTarget());
+	}
+
+	// Check: Character target required.
+	if (pCommand->getRequiresCharacterTarget()) {
+		// No Character target.
+		if (!pInvoker->targetIsCharacter()) {
+			pInvoker->notify("Command requires a Character target!");
+			return false;
+		}
+		// Record Character target.
+		pCommand->setTargetCharacter(Actor::cast<Character*>(pInvoker->getTarget()));
+	}
+	
+	return true;
+}
+
+void CommandHandler::_cleanUp(Command* pCommand) {
+	pCommand->setInvoker(nullptr);
+	pCommand->setTargetActor(nullptr);
+	pCommand->setTargetCharacter(nullptr);
+	pCommand->clearParameters();
+}
+
 void Command::invalidParameters(CommandParameters pParameters) {
 	mInvoker->getConnection()->sendMessage(MessageType::Red, "Command parameters were invalid.");
 }
@@ -2499,10 +2622,10 @@ void Command::conversionError(String& pParameter) {
 
 void Command::helpMessage() {
 	if (mHelpMessages.size() == 0){
-		mInvoker->getConnection()->sendMessage(MessageType::Yellow, "This command has no help message.");
+		mInvoker->notify("This command has no help message.");
 		return;
 	}
 
 	for (auto i : mHelpMessages)
-		mInvoker->getConnection()->sendMessage(MessageType::Yellow, i);
+		mInvoker->notify(i);
 }

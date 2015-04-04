@@ -6,6 +6,7 @@ class ILog;
 class ILogFactory;
 class IDataStore;
 class ItemFactory;
+class TaskDataStore;
 class Account;
 class Character;
 
@@ -13,7 +14,7 @@ class CharacterFactory {
 public:
 	~CharacterFactory();
 
-	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory);
+	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, TaskDataStore* pTaskDataStore);
 	Character* make(const String& pCharacterName, Account* pAccount);
 
 private:
@@ -23,4 +24,5 @@ private:
 	ILogFactory* mLogFactory = nullptr;
 	IDataStore* mDataStore = nullptr;
 	ItemFactory* mItemFactory = nullptr;
+	TaskDataStore* mTaskDataStore = nullptr;
 };

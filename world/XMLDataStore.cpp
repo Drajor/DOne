@@ -399,6 +399,10 @@ namespace CharacterXML {
 		SCA Lanaguages = "languages";
 		SCA Language = "language";
 		SCA Inventory = "inventory";
+		SCA Tasks = "tasks";
+		SCA Task = "task";
+		SCA TaskHistory = "task_history";
+		SCA CompletedTask = "task";
 	}
 	namespace Attribute {
 		// Tag::Character
@@ -503,6 +507,10 @@ namespace CharacterXML {
 		// Tag::Language
 		SCA LanguageID = "id";
 		SCA LanguageValue = "value";
+		namespace CompletedTask {
+			SCA TaskID = "id";
+			SCA CompletedTime = "time";
+		}
 	}
 #undef SCA
 }
@@ -819,6 +827,21 @@ const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Chara
 	EXPECTED_BOOL(inventoryElement);
 	EXPECTED_BOOL(loadInventory(inventoryElement, pCharacter->mInventory));
 
+	// Tag::TaskHistory
+	auto taskHistoryElement = characterElement->FirstChildElement(Tag::TaskHistory);
+	EXPECTED_BOOL(taskHistoryElement);
+	auto completedTaskElement = taskHistoryElement->FirstChildElement(Tag::CompletedTask);
+
+	while (completedTaskElement) {
+		// Tag::CompletedTask
+		Data::CompletedTask completedTask;
+		EXPECTED_BOOL(readAttribute(completedTaskElement, Attribute::CompletedTask::TaskID, completedTask.mTaskID));
+		EXPECTED_BOOL(readAttribute(completedTaskElement, Attribute::CompletedTask::CompletedTime, completedTask.mCompleted));
+		pCharacter->mCompletedTasks.push_front(completedTask);
+
+		completedTaskElement = completedTaskElement->NextSiblingElement(Tag::CompletedTask);
+	}
+
 	return true;
 }
 
@@ -1046,6 +1069,15 @@ const bool XMLDataStore::saveCharacter(const String& pCharacterName, const Data:
 	// Tag::Inventory
 	auto inventoryElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Inventory)));
 	EXPECTED_BOOL(saveInventory(inventoryElement, pCharacter->mInventory));
+
+	// Tag::TaskHistory
+	auto taskHistoryElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::TaskHistory)));
+	for (auto i : pCharacter->mCompletedTasks) {
+		// Tag::CompletedTask
+		auto completedTaskElement = static_cast<TiXmlElement*>(taskHistoryElement->LinkEndChild(new TiXmlElement(Tag::CompletedTask)));
+		completedTaskElement->SetAttribute(Attribute::CompletedTask::TaskID, i.mTaskID);
+		completedTaskElement->SetAttribute(Attribute::CompletedTask::CompletedTime, i.mCompleted);
+	}
 
 	EXPECTED_BOOL(document.SaveFile());
 	return true;
@@ -2519,11 +2551,13 @@ namespace TaskXML {
 		SCA Type = "type";
 		SCA Title = "title";
 		SCA Description = "description";
+		SCA RewardText = "reward_text";
 		SCA Duration = "duration";
 		SCA Repeatable = "repeatable";
 		// Tag::Objective
 		namespace Objective {
 			SCA Type = "type";
+			SCA Stage = "stage";
 			SCA TextA = "textA";
 			SCA TextB = "textB";
 			SCA ZoneID = "zone_id";
@@ -2534,12 +2568,11 @@ namespace TaskXML {
 	}
 #undef SCA
 }
-const bool XMLDataStore::loadTasks(Data::TaskList& pTasks) {
+const bool XMLDataStore::loadTasks(Data::TaskDataArray& pTasks, const u32 pMaxTaskID, u32& pTasksLoaded) {
 	using namespace TaskXML;
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
-	if (!pTasks.empty()) return false;
 
 	// Load document.
 	TiXmlDocument document(TaskXML::FileLocation);
@@ -2554,12 +2587,17 @@ const bool XMLDataStore::loadTasks(Data::TaskList& pTasks) {
 
 	// Read Data::Task
 	while (taskElement) {
-		auto task = new Data::Task();
-		pTasks.push_back(task);
-
+		// Check: Task ID is valid.
+		u32 taskID = 0;
+		EXPECTED_BOOL(readAttribute(taskElement, Attribute::ID, taskID));
+		if (taskID >= pMaxTaskID) return false; // Range.
+		if (pTasks[taskID]->mID != 0) return false; // Duplicate ID.
+		
+		auto task = pTasks[taskID];
 		if (!readTask(taskElement, task))
 			return false;
 
+		pTasksLoaded++;
 		taskElement = taskElement->NextSiblingElement(Tag::Task);
 	}
 
@@ -2579,6 +2617,7 @@ const bool XMLDataStore::readTask(TiXmlElement* pElement, Data::Task* pTask) {
 	EXPECTED_BOOL(TaskType::isValid(pTask->mType));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Title, pTask->mTitle));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Description, pTask->mDescription));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::RewardText, pTask->mRewardText));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Duration, pTask->mDuration));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Repeatable, pTask->mRepeatable));
 
@@ -2589,6 +2628,7 @@ const bool XMLDataStore::readTask(TiXmlElement* pElement, Data::Task* pTask) {
 	// Read Data::TaskObjective
 	while (objectiveElement) {
 		auto objective = new Data::TaskObjective();
+		objective->mID = pTask->mObjectives.size();
 		pTask->mObjectives.push_back(objective);
 
 		if (!readTaskObjective(objectiveElement, objective))
@@ -2610,6 +2650,7 @@ const bool XMLDataStore::readTaskObjective(TiXmlElement* pElement, Data::TaskObj
 
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Type, pObjective->mType));
 	EXPECTED_BOOL(ObjectiveType::isValid(pObjective->mType));
+	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Stage, pObjective->mStage));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextA, pObjective->mTextA));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextB, pObjective->mTextB));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::ZoneID, pObjective->mZoneID));

@@ -20,6 +20,7 @@ void StructStrategy::Encode(EQApplicationPacket **p, EQStream *dest, bool ack_re
 	EmuOpcode op = (*p)->GetOpcode();
 	Encoder proc = encoders[op];
 	proc(p, dest, ack_req);
+	//PassEncoder(p, dest, ack_req);
 }
 
 void StructStrategy::Decode(EQApplicationPacket *p) const {
