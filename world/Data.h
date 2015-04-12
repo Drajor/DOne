@@ -536,16 +536,23 @@ namespace Data {
 	};
 
 	struct TaskObjective {
-		u32 mID = 0;
+		u32 mIndex = 0;
 		u32 mType = 0;
-		u32 mStage = 0;
-		u32 mZoneID = 0;
+		u32 mZoneID = 0; // 0 = ALL
 		u32 mRequired = 1;
 		bool mOptional = false;
 		bool mHidden = false;
 		String mTextA;
 		String mTextB;
 		String mTextC; // This overrides mTextA / mTextB
+
+		u32 mNPCTypeID = 0;
+		u32 mItemID = 0;
+	};
+
+	struct TaskStage {
+		u32 mIndex = 0;
+		std::list<TaskObjective*> mObjectives;
 	};
 
 	struct Task {
@@ -560,6 +567,6 @@ namespace Data {
 		String mRewardText;
 		bool mRepeatable = true;
 
-		TaskObjectivesData mObjectives;
+		TaskStagesData mStages;
 	};
 }

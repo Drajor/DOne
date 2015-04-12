@@ -7,7 +7,7 @@
 #include "BuffController.h"
 #include "Inventory.h"
 #include "ExperienceController.h"
-#include "TaskController.h"
+#include "Task.h"
 #include "TitleManager.h"
 
 #include "../common/crc32.h"
@@ -718,37 +718,36 @@ EQApplicationPacket* Payload::makeAvailableTasks(AvailableTasks& pTasks) {
 	return new EQApplicationPacket(OP_OpenNewTasksWindow, data, size);
 }
 
-EQApplicationPacket* Payload::updateTask(const u32 pIndex, CurrentTask* pTask) {
+EQApplicationPacket* Payload::updateTask(TaskSystem::Task* pTask) {
 	// Calculate size.
 	u32 size = 0;
 
 	// Fixed.
 	size += 47;
 
-	if (pTask->mTaskData->mRewardType == TaskRewardType::Simple) {
+	if (pTask->getRewardType() == TaskRewardType::Simple) {
 
 	}
 
 	// Strings.
-	size += pTask->mTaskData->mTitle.length() + 1;
-	size += pTask->mTaskData->mDescription.length() + 1;
-	size += pTask->mTaskData->mRewardText.length() + 1;
+	size += pTask->getTitle().length() + 1;
+	size += pTask->getDescription().length() + 1;
+	size += pTask->getRewardText().length() + 1;
 
 	unsigned char* data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
 
-	writer.write<u32>(pIndex); // Index
-	writer.write<u32>(pTask->mTaskData->mID); // ID
+	writer.write<u32>(pTask->getIndex()); // Index
+	writer.write<u32>(pTask->getID()); // ID
 	writer.write<u8>(1); // Unknown. 1 = open 'Quest Journal', 0 = do not open 'Quest Journal'
-	writer.write<u32>(pTask->mTaskData->mType); // Type. 0 = 'T' (Task), 1 = 'S' (Shared), 2 = 'Q' (Quest).
+	writer.write<u32>(pTask->getType()); // Type. 0 = 'T' (Task), 1 = 'S' (Shared), 2 = 'Q' (Quest).
 	writer.write<u32>(0); // Unknown. Possibly Max Players for Shared Tasks.
-	writer.writeString(pTask->mTaskData->mTitle); // Title.
-	writer.write<u32>(pTask->mTaskData->mDuration); // Duration.
+	writer.writeString(pTask->getTitle()); // Title.
+	writer.write<u32>(pTask->getDuration()); // Duration.
 	writer.write<u32>(0); // Unknown.
-	writer.write<u32>(pTask->mStartTime); // Start time.
-	writer.writeString(pTask->mTaskData->mDescription); // Description.
-	writer.write<u8>(pTask->mTaskData->mRewardType); // TaskRewardType.
-	//writer.write<u32>(pTask->mTaskData->mCurrencyReward); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
+	writer.write<u32>(pTask->getStartTime()); // Start time.
+	writer.writeString(pTask->getDescription()); // Description.
+	writer.write<u8>(pTask->getRewardType()); // TaskRewardType.
 	writer.write<u32>(3); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
@@ -759,13 +758,16 @@ EQApplicationPacket* Payload::updateTask(const u32 pIndex, CurrentTask* pTask) {
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown. Non-zero here appears to change the expected size client side.
-	writer.writeString(pTask->mTaskData->mRewardText);
-	writer.write<i32>(pTask->mTaskData->mPointsReward); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
+	writer.writeString(pTask->getRewardText());
+	writer.write<i32>(pTask->getRewardPoints()); // Points reward. Non-zero adds 'X points' to the Reward(s) section.
 
 	return new EQApplicationPacket(OP_TaskDescription, data, size);
 }
 
-EQApplicationPacket* Payload::updateTaskObjective(CurrentTask* pTask, CurrentTaskObjective* pObjective) {
+EQApplicationPacket* Payload::updateTaskObjective(TaskSystem::Objective* pObjective) {
+	auto parentTask = pObjective->getParentTask();
+	auto parentStage = pObjective->getParentStage();
+
 	// Calculate size.
 	u32 size = 0;
 
@@ -773,30 +775,30 @@ EQApplicationPacket* Payload::updateTaskObjective(CurrentTask* pTask, CurrentTas
 	size += 56;
 
 	// Strings.
-	size += pObjective->mObjectiveData->mTextA.length() + 1;
-	size += pObjective->mObjectiveData->mTextB.length() + 1;
-	size += pObjective->mObjectiveData->mTextC.length() + 1;
+	size += pObjective->getTextA().length() + 1;
+	size += pObjective->getTextB().length() + 1;
+	size += pObjective->getTextC().length() + 1;
 
 	unsigned char* data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
 
-	writer.write<u32>(pTask->mIndex); // Index.
-	writer.write<u32>(pTask->mTaskData->mType); // Task Type
-	writer.write<u32>(pTask->mTaskData->mID); // Task ID.
-	writer.write<u32>(pObjective->mObjectiveData->mID); // Objective ID.
-	writer.write<u32>(pObjective->mObjectiveData->mStage); // Objective stage
-	writer.write<u32>(pObjective->mObjectiveData->mType); // Objective type.
-	writer.write<u32>(pObjective->mObjectiveData->mOptional ? 1 : 0); // Optional flag.
+	writer.write<u32>(parentTask->getIndex()); // Task Index.
+	writer.write<u32>(parentTask->getType()); // Task Type
+	writer.write<u32>(parentTask->getID()); // Task ID.
+	writer.write<u32>(pObjective->getIndex()); // Objective Index.
+	writer.write<u32>(parentStage->getIndex()); // Stage Index.
+	writer.write<u32>(pObjective->getType()); // Objective type.
+	writer.write<u32>(pObjective->isOptional() ? 1 : 0); // Optional flag.
 	writer.write<u32>(0); // Unknown.
-	writer.writeString(pObjective->mObjectiveData->mTextA); // Text A.
-	writer.writeString(pObjective->mObjectiveData->mTextB); // Text B.
-	writer.write<i32>(pObjective->mObjectiveData->mRequired); // Objective required count.
+	writer.writeString(pObjective->getTextA()); // Text A.
+	writer.writeString(pObjective->getTextB()); // Text B.
+	writer.write<i32>(pObjective->getRequired()); // Objective required count.
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(0); // Unknown.
-	writer.write<u32>(pObjective->mObjectiveData->mZoneID); // Zone ID.
+	writer.write<u32>(pObjective->getZoneID()); // Zone ID.
 	writer.write<u32>(0); // Unknown.
-	writer.writeString(pObjective->mObjectiveData->mTextC); // Text override.
-	writer.write<i32>(pObjective->mValue);
+	writer.writeString(pObjective->getTextC()); // Text override.
+	writer.write<i32>(pObjective->getValue());
 	// Emu had 3 extra bytes after mValue, but I can not determine whether they are needed are not.
 	//writer.write<u8>(0); // Unknown.
 	//writer.write<u8>(0); // Unknown.
@@ -834,23 +836,28 @@ EQApplicationPacket* Payload::updateTaskHistory(CompletedTasks& pTasks) {
 	return new EQApplicationPacket(OP_CompletedTasks, data, size);
 }
 
-EQApplicationPacket* Payload::updateTaskObjectiveHistory(const u32 pTaskIndex, Data::Task* pTaskData) {
+EQApplicationPacket* Payload::updateTaskObjectiveHistory(const u32 pTaskIndex, const Data::Task* pTaskData) {
 	if (!pTaskData) return nullptr;
 
 	// Calculate size.
 	u32 size = 0;
 
-	u32 objectiveCount = pTaskData->mObjectives.size();
+	u32 objectiveCount = 0;
+	for (auto i : pTaskData->mStages) {
+		objectiveCount += i->mObjectives.size();
+	}
 
 	size += 4; // Task index.
 	size += 4; // Objective count.
 	size += 24 * objectiveCount; // Fixed.
 
 	// Strings.
-	for (auto i : pTaskData->mObjectives) {
-		size += i->mTextA.length() + 1;
-		size += i->mTextB.length() + 1;
-		size += i->mTextC.length() + 1;
+	for (auto i : pTaskData->mStages) {
+		for (auto j : i->mObjectives) {
+			size += j->mTextA.length() + 1;
+			size += j->mTextB.length() + 1;
+			size += j->mTextC.length() + 1;
+		}
 	}
 
 	unsigned char* data = new unsigned char[size];
@@ -859,16 +866,18 @@ EQApplicationPacket* Payload::updateTaskObjectiveHistory(const u32 pTaskIndex, D
 	writer.write<u32>(pTaskIndex); // Task index.
 	writer.write<u32>(objectiveCount); // Objective count.
 
-	for (auto i : pTaskData->mObjectives) {
-		writer.write<u32>(i->mType); // Objective type.
-		writer.writeString(i->mTextA);
-		writer.writeString(i->mTextB);
-		writer.write<u32>(i->mRequired); // Required value.
-		writer.write<u32>(0); // Unknown.
-		writer.write<u32>(0); // Unknown.
-		writer.write<u32>(i->mZoneID); // Zone ID.
-		writer.write<u32>(0); // Unknown.
-		writer.writeString(i->mTextC);
+	for (auto i : pTaskData->mStages) {
+		for (auto j : i->mObjectives) {
+			writer.write<u32>(j->mType); // Objective type.
+			writer.writeString(j->mTextA);
+			writer.writeString(j->mTextB);
+			writer.write<u32>(j->mRequired); // Required value.
+			writer.write<u32>(0); // Unknown.
+			writer.write<u32>(0); // Unknown.
+			writer.write<u32>(j->mZoneID); // Zone ID.
+			writer.write<u32>(0); // Unknown.
+			writer.writeString(j->mTextC);
+		}
 	}
 
 	return new EQApplicationPacket(OP_TaskHistoryReply, data, size);

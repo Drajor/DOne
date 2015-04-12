@@ -184,6 +184,7 @@ NPC* NPCFactory::create(const u32 pTypeID) {
 	auto hateController = mHateControllerFactory->make("proximity");
 
 	NPC* npc = new NPC(hateController);
+	npc->setNPCTypeID(pTypeID);
 	npc->setName(type->mName);
 	npc->setSurname(type->mLastName);
 	npc->setClass(type->mClass);

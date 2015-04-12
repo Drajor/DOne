@@ -547,10 +547,22 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 
 	return true;
 }
-const bool Zone::onHail(Character* pCharacter) {
-	return true;
-}
 
+const bool Zone::onHail(Character* pCharacter) {
+	if (!pCharacter) return false;
+	
+	// Character has not hailed an NPC.
+	if (!pCharacter->targetIsNPC()) return true;
+
+	// Character has no 'Speak With' task objectives.
+
+	auto npc = Actor::cast<NPC*>(pCharacter->getTarget());
+	
+	//// Check: Distance to NPC is small enough to trigger a 
+
+	// Notify TaskController.
+	return pCharacter->getTaskController()->onHail(npc->getNPCTypeID(), getID());
+}
 
 const bool Zone::onGuildMessage(Character* pCharacter, const String& pMessage) {
 	if (!pCharacter) return false;

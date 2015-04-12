@@ -2542,7 +2542,8 @@ namespace TaskXML {
 	namespace Tag {
 		SCA Tasks = "tasks";
 		SCA Task = "task";
-		SCA Objectives = "objectives";
+		SCA Stage = "stage";
+		//SCA Objectives = "objectives";
 		SCA Objective = "objective";
 	}
 	namespace Attribute {
@@ -2557,7 +2558,6 @@ namespace TaskXML {
 		// Tag::Objective
 		namespace Objective {
 			SCA Type = "type";
-			SCA Stage = "stage";
 			SCA TextA = "textA";
 			SCA TextB = "textB";
 			SCA ZoneID = "zone_id";
@@ -2621,20 +2621,30 @@ const bool XMLDataStore::readTask(TiXmlElement* pElement, Data::Task* pTask) {
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Duration, pTask->mDuration));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Repeatable, pTask->mRepeatable));
 
-	auto objectivesElement = pElement->FirstChildElement(Tag::Objectives);
-	EXPECTED_BOOL(objectivesElement);
-	auto objectiveElement = objectivesElement->FirstChildElement(Tag::Objective);
+	u32 objectiveID = 0;
+	// Iterate stages.
+	auto stageElement = pElement->FirstChildElement(Tag::Stage);
+	while (stageElement) {
+		auto stage = new Data::TaskStage();
+		stage->mIndex = pTask->mStages.size();
+		pTask->mStages.push_back(stage);
 
-	// Read Data::TaskObjective
-	while (objectiveElement) {
-		auto objective = new Data::TaskObjective();
-		objective->mID = pTask->mObjectives.size();
-		pTask->mObjectives.push_back(objective);
+		auto objectiveElement = stageElement->FirstChildElement(Tag::Objective);
 
-		if (!readTaskObjective(objectiveElement, objective))
-			return false;
+		// Read Data::TaskObjective
+		while (objectiveElement) {
+			auto objective = new Data::TaskObjective();
+			objective->mIndex = objectiveID;
+			objectiveID++;
+			stage->mObjectives.push_back(objective);
 
-		objectiveElement = objectiveElement->NextSiblingElement(Tag::Objective);
+			if (!readTaskObjective(objectiveElement, objective))
+				return false;
+
+			objectiveElement = objectiveElement->NextSiblingElement(Tag::Objective);
+		}
+
+		stageElement = stageElement->NextSiblingElement(Tag::Stage);
 	}
 
 	return true;
@@ -2650,7 +2660,6 @@ const bool XMLDataStore::readTaskObjective(TiXmlElement* pElement, Data::TaskObj
 
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Type, pObjective->mType));
 	EXPECTED_BOOL(ObjectiveType::isValid(pObjective->mType));
-	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::Stage, pObjective->mStage));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextA, pObjective->mTextA));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::TextB, pObjective->mTextB));
 	EXPECTED_BOOL(readAttribute(pElement, Attribute::Objective::ZoneID, pObjective->mZoneID));

@@ -23,6 +23,7 @@
 #include "ActorBonuses.h"
 #include "BuffController.h"
 #include "TaskController.h"
+#include "Task.h"
 
 #define PACKET_PLAY
 #ifdef PACKET_PLAY
@@ -1166,13 +1167,24 @@ public:
 	InspectCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
 		mHelpMessages.push_back("Usage: #inspect");
 		mMinimumParameters = 0;
-		mMaximumParameters = 0;
+		mMaximumParameters = 1;
 		mRequiresTarget = true;
 	};
 
 	const bool execute(CommandParameters pParameters) {
-		if (mInvoker->targetIsNPC()) { return inspectNPC(Actor::cast<NPC*>(mInvoker->getTarget())); }
-		if (mInvoker->targetIsCharacter()) { return inspectCharacter(Actor::cast<Character*>(mInvoker->getTarget())); }
+
+		if (pParameters.size() == 0) {
+			if (mInvoker->targetIsNPC()) { return inspectNPC(Actor::cast<NPC*>(mInvoker->getTarget())); }
+			if (mInvoker->targetIsCharacter()) { return inspectCharacter(Actor::cast<Character*>(mInvoker->getTarget())); }
+
+			return false;
+		}
+
+		auto type = pParameters[0];
+
+		// Inspect Tasks.
+		if (type == "tasks" && mTargetActor->isCharacter()) return inspectTasks(Actor::cast<Character*>(mInvoker->getTarget()));
+
 
 		return false;
 	}
@@ -1254,6 +1266,54 @@ public:
 		StringStream ss;
 		ss << "P(" << platinum << ") G(" << gold << ") S" << silver << ") C(" << copper << ")";
 		mInvoker->notify(ss.str());
+
+		return true;
+	}
+
+	bool inspectTasks(Character* pCharacter) {
+		if (!pCharacter) return false;
+
+		auto controller = pCharacter->getTaskController();
+
+		Utility::PopupHelper helper;
+		helper.tableBegin();
+
+		// Heading.
+		helper.rowBegin();
+		helper.writeColumn("Tasks for " + pCharacter->getName());
+		helper.rowEnd();
+
+		// Iterate Tasks.
+		for (auto i : controller->getTasks()) {
+			helper.rowBegin();
+			helper.writeColumn(toString(i->getIndex()));
+			helper.writeColumn("|");
+			helper.writeColumn(i->getTitle());
+			helper.rowEnd();
+
+			// Iterate Stages.
+			for (auto j : i->getStages()) {
+				helper.rowBegin();
+				helper.writeColumn("Stage Index: " + toString(j->getIndex()));
+				helper.rowEnd();
+
+				// Iterate Objectives.
+				for (auto k : j->getObjectives()) {
+					helper.rowBegin();
+					helper.writeColumn("Objective ID: " + toString(k->getIndex()));
+					helper.writeColumn("|");
+					helper.writeColumn(ObjectiveType::toString(k->getType()) + " " + k->getTextA());
+					helper.writeColumn("|");
+					helper.writeColumn(toString(k->getValue()) + "/" + toString(k->getRequired()));
+					
+					helper.rowEnd();
+				}
+			}
+		}
+
+		helper.tableEnd();
+
+		pCharacter->getConnection()->sendPopup("Inspect Tasks", helper.getText());
 
 		return true;
 	}
@@ -1794,6 +1854,39 @@ public:
 	}
 };
 
+/*****************************************************************************************************************************/
+class IncrementTaskCommand : public Command {
+public:
+	IncrementTaskCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
+		mHelpMessages.push_back("Usage: #inctask <task index> <stage index> <objective ID>");
+		mMinimumParameters = 3;
+		mMaximumParameters = 3;
+		mRequiresCharacterTarget = true;
+	};
+
+	const bool execute(CommandParameters pParameters) {
+		auto target = getTargetCharacter();
+
+		u32 taskIndex = 0;
+		if (!convertParameter(0, taskIndex)) return false;
+		u32 stageIndex = 0;
+		if (!convertParameter(1, stageIndex)) return false;
+		u32 objectiveIndex = 0;
+		if (!convertParameter(2, objectiveIndex)) return false;
+
+		const bool success = target->getTaskController()->incrementObjective(taskIndex, stageIndex, objectiveIndex);
+
+		if (!success) {
+			mInvoker->notify("Failed to increment task objective for " + target->getName() + ", see log for details.");
+		}
+		else {
+			mInvoker->notify("Task objective incremented " + target->getName());
+		}
+
+		return true;
+	}
+};
+
 ///*****************************************************************************************************************************/
 //class YOURCOMMAND : public Command {
 //public:
@@ -1885,6 +1978,7 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 
 	mCommands.push_back(new AddTaskCommand(100, { "+task", "addtask" }));
 	mCommands.push_back(new RemoveTaskCommand(100, { "-task", "removetask" }));
+	mCommands.push_back(new IncrementTaskCommand(100, { "inctask" }));
 
 	return true;
 }
@@ -2339,7 +2433,7 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		u32 u1 = 0;
 		if (!Utility::stoSafe(u1, pParameters[1])) { return; }
 
-		auto packet = Payload::Zone::TaskComplete::construct(0, 2, 1, 0, u0, u1);
+		auto packet = Payload::Zone::TaskMessage::construct(0, 2, 1, 0, u0, u1);
 		pCharacter->getConnection()->sendPacket(packet);
 		delete packet;
 
@@ -2355,23 +2449,23 @@ void CommandHandler::_handleCommand(Character* pCharacter, const String& pComman
 		pCharacter->getConnection()->sendPacket(packet);
 		//packet->buf
 	}
-	else if (pCommandName == "tasks2") {
-		//auto controller = pCharacter->getTaskController();
-		auto activeTask = new CurrentTask();
-		auto task = new Data::Task();
-		task->mID = 1;
-		task->mTitle = "Derp Derp!!";
-		task->mDescription = "what desc~!";
-		task->mRewardText = "blah blah reward text";
-		task->mCurrencyReward = 101;
-		task->mType = TaskType::Shared;
-		activeTask->mStartTime = Utility::Time::now();
-		activeTask->mTaskData = task;
+	//else if (pCommandName == "tasks2") {
+	//	//auto controller = pCharacter->getTaskController();
+	//	auto activeTask = new CurrentTask();
+	//	auto task = new Data::Task();
+	//	task->mID = 1;
+	//	task->mTitle = "Derp Derp!!";
+	//	task->mDescription = "what desc~!";
+	//	task->mRewardText = "blah blah reward text";
+	//	task->mCurrencyReward = 101;
+	//	task->mType = TaskType::Shared;
+	//	activeTask->mStartTime = Utility::Time::now();
+	//	activeTask->mTaskData = task;
 
-		auto packet = Payload::updateTask(0, activeTask);
-		pCharacter->getConnection()->sendPacket(packet);
-		delete packet;
-	}
+	//	auto packet = Payload::updateTask(0, activeTask);
+	//	pCharacter->getConnection()->sendPacket(packet);
+	//	delete packet;
+	//}
 	else if (pCommandName == "table") {
 		
 		auto actorBonuses = pCharacter->getActorBonuses();

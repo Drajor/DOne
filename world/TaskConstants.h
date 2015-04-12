@@ -12,6 +12,7 @@ struct CompletedTask;
 namespace Data {
 	struct CompletedTask;
 	struct Task;
+	struct TaskStage;
 	struct TaskObjective;
 }
 
@@ -21,6 +22,12 @@ static const u32 MaxSharedTasks = 1;
 static const u32 MaxQuestTasks = 19;
 //static const u32 MaxActiveTasks = MaxSoloTasks + MaxSharedTasks + MaxQuestTasks;
 
+struct CompletedTask {
+	CompletedTask(const Data::Task* pTaskData, const u32 pTimeCompleted) : mTaskData(pTaskData), mTimeCompleted(pTimeCompleted) {};
+	const Data::Task* mTaskData;
+	const u32 mTimeCompleted;
+};
+
 //typedef std::array<CurrentTask*, MaxQuestTasks> CurrentTasks;
 typedef std::list<CurrentTask*> CurrentTasks;
 typedef std::vector<CompletedTask> CompletedTasks;
@@ -29,6 +36,7 @@ typedef std::list<Data::Task*> AvailableTasks;
 typedef std::list<CurrentTaskObjective*> CurrentTaskObjectives;
 
 typedef std::list<Data::CompletedTask> CompletedTasksData;
+typedef std::list<Data::TaskStage*> TaskStagesData;
 typedef std::list<Data::TaskObjective*> TaskObjectivesData;
 
 namespace TaskType {
@@ -100,5 +108,25 @@ namespace ObjectiveType {
 			break;
 		}
 		return false;
+	}
+
+	static const String toString(const u32 pObjectiveType) {
+		switch (pObjectiveType) {
+		case ObjectiveType::Deliver:
+			return "Deliver";
+		case ObjectiveType::Kill:
+			return "Kill";
+		case ObjectiveType::Loot:
+			return "Loot";
+		case ObjectiveType::Hail:
+			return "Speak to";
+		case ObjectiveType::Explore:
+			return "Explore";
+		case ObjectiveType::Tradeskill:
+			return "Tradeskill";
+		default:
+			break;
+		}
+		return "Unknown";
 	}
 }

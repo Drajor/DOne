@@ -26,6 +26,9 @@ public:
 	inline SpawnPoint* getSpawnPoint() const { return mSpawnPoint; }
 	inline void setSpawnPoint(SpawnPoint* pSpawnPoint) { mSpawnPoint = pSpawnPoint; }
 
+	inline void setNPCTypeID(const u32 pNPCTypeID) { mNPCTypeID = pNPCTypeID; }
+	inline const u32 getNPCTypeID() const { return mNPCTypeID; }
+
 	// Standard Currency
 	inline const int32 getCopper() const { return mCopper; }
 	inline void setCopper(const int32 pCopper) { mCopper = pCopper; }
@@ -99,6 +102,7 @@ public:
 	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifier.get(); }
 
 private:
+	u32 mNPCTypeID = 0;
 	float mSellRate = 2.457f;
 	int32 mCopper = 0;
 	int32 mSilver = 0;

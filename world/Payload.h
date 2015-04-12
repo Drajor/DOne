@@ -12,6 +12,11 @@ namespace Data {
 	struct Account;
 	struct Title;
 }
+namespace TaskSystem {
+	class Task;
+	class Objective;
+}
+
 struct ZonePoint;
 class Guild;
 class Group;
@@ -104,10 +109,10 @@ namespace Payload {
 	// Task selection window.
 	EQApplicationPacket* makeAvailableTasks(AvailableTasks& pTasks);
 
-	EQApplicationPacket* updateTask(const u32 pIndex, CurrentTask* pTask);
-	EQApplicationPacket* updateTaskObjective(CurrentTask* pTask, CurrentTaskObjective* pObjective);
+	EQApplicationPacket* updateTask(TaskSystem::Task* pTask);
+	EQApplicationPacket* updateTaskObjective(TaskSystem::Objective* pObjective);
 	EQApplicationPacket* updateTaskHistory(CompletedTasks& pTasks);
-	EQApplicationPacket* updateTaskObjectiveHistory(const u32 pTaskIndex, Data::Task* pTaskData);
+	EQApplicationPacket* updateTaskObjectiveHistory(const u32 pTaskIndex, const Data::Task* pTaskData);
 
 	namespace Zone {
 
@@ -2190,8 +2195,8 @@ namespace Payload {
 		};
 
 		// S->C
-		struct TaskComplete : FixedT<TaskComplete, OP_TaskActivityComplete> {
-			static EQApplicationPacket* construct(const u32 pTaskIndex, const u32 pTaskType, const u32 pTaskID, const u32 pObjectiveIndex, const u32 pTaskComplete, const u32 pObjectiveComplete) {
+		struct TaskMessage : FixedT<TaskMessage, OP_TaskActivityComplete> {
+			static EQApplicationPacket* construct(const u32 pTaskIndex, const u32 pTaskType, const u32 pTaskID, const u32 pObjectiveIndex, const u32 pTaskComplete, const u32 pStageComplete) {
 				auto packet = create();
 				auto payload = convert(packet);
 				payload->mTaskIndex = pTaskIndex;
@@ -2199,7 +2204,7 @@ namespace Payload {
 				payload->mTaskID = pTaskID;
 				payload->mObjectiveIndex = pObjectiveIndex;
 				payload->mTaskComplete = pTaskComplete;
-				payload->mObjectiveComplete = pObjectiveComplete;
+				payload->mStageComplete = pStageComplete;
 
 				return packet;
 			}
@@ -2208,7 +2213,7 @@ namespace Payload {
 			u32 mTaskID = 0;
 			u32 mObjectiveIndex = 0;
 			u32 mTaskComplete = 0; // 0 = Red text "Task XX Failed.", 1 = Green text "Task XX Completed"
-			u32 mObjectiveComplete = 0; // 1 = Yellow text "Task Stage Complete"
+			u32 mStageComplete = 0; // 1 = Yellow text "Task Stage Complete"
 		};
 
 		// C->S

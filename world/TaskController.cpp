@@ -1,26 +1,10 @@
 #include "TaskController.h"
 #include "TaskDataStore.h"
 #include "Data.h"
+#include "Task.h"
 #include "LogSystem.h"
 #include "Character.h"
 #include "ZoneConnection.h"
-
-//TaskController::TaskController(Character* pCharacter, TaskDataStore* pTaskDataStore) : mOwner(pCharacter), mTaskDataStore(pTaskDataStore) {
-//	for (auto i : mCurrentTasks)
-//		i = new CurrentTask();
-//
-//	auto a = new Data::Task();
-//	a->mID = 1;
-//	a->mTitle = "Example Task A";
-//	a->mDescription = "Description of Example Task A";
-//	mAvailableTasks.push_back(a);
-//
-//	auto b = new Data::Task();
-//	b->mID = 2;
-//	b->mTitle = "Example Task B";
-//	b->mDescription = "Description of Example Task B";
-//	mAvailableTasks.push_back(b);
-//}
 
 TaskController::~TaskController() {
 	for (auto i : mQuestTasks)
@@ -42,9 +26,6 @@ bool TaskController::initialise(Character* pCharacter, TaskDataStore* pTaskDataS
 	mTaskDataStore = pTaskDataStore;
 	mLog = pLogFactory->make();
 	mLog->setContext("[TaskController (" + mOwner->getName() + ")]");
-
-	for (auto i : mQuestTasks)
-		i = new CurrentTask();
 
 	return true;
 }
@@ -87,7 +68,7 @@ void TaskController::onHistoryRequest(const u32 pIndex) {
 
 	// Check: Packet is valid.
 	if (!packet) {
-		mLog->error("");
+		mLog->error("Failed to create Task History packet.");
 		return;
 	}
 
@@ -137,15 +118,17 @@ bool TaskController::add(const u32 pTaskID, const bool pShowQuestJournal) {
 	auto newTask = makeQuestTask(task);
 
 	// Send description.
-	auto packet = Payload::updateTask(newTask->mIndex, newTask);
+	auto packet = Payload::updateTask(newTask);
 	mOwner->getConnection()->sendPacket(packet);
 	delete packet;
 
 	// Send objectives.
-	for (auto i : newTask->mObjectives) {
-		packet = Payload::updateTaskObjective(newTask, i);
-		mOwner->getConnection()->sendPacket(packet);
-		delete packet;
+	for (auto i : newTask->getStages()) {
+		for (auto j : i->getObjectives()) {
+			packet = Payload::updateTaskObjective(j);
+			mOwner->getConnection()->sendPacket(packet);
+			delete packet;
+		}
 	}
 
 	return true;
@@ -156,8 +139,8 @@ bool TaskController::remove(const u32 pTaskID) {
 
 	// Find Task index/type and remove.
 	for (auto& i : mQuestTasks) {
-		if (i->mTaskData->mID == pTaskID)
-			return remove(i->mIndex, i->mTaskData->mType);
+		if (i->getID() == pTaskID)
+			return remove(i->getIndex(), i->getType());
 	}
 
 	return false;
@@ -169,7 +152,7 @@ bool TaskController::remove(const u32 pIndex, const u32 pTaskType) {
 	auto found = false;
 	if (pTaskType == TaskType::Quest) {
 		for (auto i = mQuestTasks.begin(); i != mQuestTasks.end(); i++) {
-			if ((*i)->mIndex == pIndex) {
+			if ((*i)->getIndex() == pIndex) {
 				auto task = *i;
 				mQuestTasks.erase(i);
 				delete task;
@@ -184,6 +167,7 @@ bool TaskController::remove(const u32 pIndex, const u32 pTaskType) {
 		return false;
 	}
 
+	// Send removal.
 	auto packet = Payload::Zone::RemoveTask::construct(pIndex, pTaskType);
 	mOwner->getConnection()->sendPacket(packet);
 	delete packet;
@@ -193,24 +177,23 @@ bool TaskController::remove(const u32 pIndex, const u32 pTaskType) {
 
 bool TaskController::hasTask(const u32 pTaskID) const {
 	for (auto i : mQuestTasks) {
-		if (i->mTaskData->mID == pTaskID)
+		if (i->getID() == pTaskID)
 			return true;
 	}
 
 	return false;
 }
 
-CurrentTask* TaskController::makeQuestTask(Data::Task* pTask) {
-	auto task = new CurrentTask();
-	task->mIndex = mQuestTasks.size();
-	task->mTaskData = pTask;
+TaskSystem::Task* TaskController::makeQuestTask(Data::Task* pTask) {
+	auto task = new TaskSystem::Task(pTask);
+	task->setIndex(mQuestTasks.size());
 	mQuestTasks.push_back(task);
 
-	for (auto i : pTask->mObjectives) {
-		auto objective = new CurrentTaskObjective();
-		objective->mObjectiveData = i;
-		task->mObjectives.push_back(objective);
-	}
+	//for (auto i : pTask->mObjectives) {
+	//	auto objective = new CurrentTaskObjective();
+	//	objective->mObjectiveData = i;
+	//	task->mObjectives.push_back(objective);
+	//}
 
 	return task;
 }
@@ -221,3 +204,132 @@ void TaskController::onEnterZone() {
 	delete packet;
 }
 
+bool TaskController::onHail(const u32 pNPCTypeID, const u16 pZoneID) {
+
+	//// Iterate active tasks.
+	//for (auto& i : mQuestTasks) {
+	//	if (!i->isActive()) continue; // Task has expired and the user has not yet removed it from their list.
+	//	if (i->isFree()) continue;
+	//	if (i->isComplete()) continue; // Task was completed earlier this update.
+
+	//	// Iterate active objectives.
+ //		for (auto& j : i->mObjectives) {
+	//		if (j->mHidden) continue; // Objective is still hidden, keep looking.
+	//		if (j->mComplete) continue; // Objective is complete, keep looking.
+
+	//		// Check: Objective type matches.
+	//		if (j->mObjectiveData->mType == ObjectiveType::Hail) {
+
+	//			const bool zoneMatch = j->mObjectiveData->mZoneID != 0 && j->mObjectiveData->mZoneID == pZoneID;
+	//			const bool npcMatch = j->mObjectiveData->mNPCTypeID == pNPCTypeID;
+
+	//			if (zoneMatch && npcMatch) {
+	//				//j->mValue++;
+	//				incrementObjective(j);
+	//			}
+
+	//			//// Check: Objective Zone ID matches.
+	//			//if (j->mObjectiveData->mZoneID != 0 && j->mObjectiveData->mZoneID == pZoneID) {
+	//			//	// Check: Objective NPC Type ID matches.
+	//			//	if (j->mObjectiveData->mNPCTypeID == pNPCTypeID) {
+	//			//		//incrementObjective(j);
+
+	//			//		j->mValue++;
+	//			//	}
+	//			//}
+	//		}
+	//	}
+	//}
+
+	return true;
+}
+
+bool TaskController::incrementObjective(const u32 pTaskIndex, const u32 pStageIndex, const u32 pObjectiveIndex) {
+
+	// Find Task by index.
+	auto task = getTask(pTaskIndex);
+	if (!task) return false;
+
+	// Find Stage by index.
+	auto stage = task->getStage(pStageIndex);
+	if (!stage) return false;
+
+	// Find Objective by index.
+	auto objective = stage->getObjective(pObjectiveIndex);
+	if (!objective) return false;
+
+	// Increment Objective.
+	return incrementObjective(objective);
+}
+
+bool TaskController::incrementObjective(TaskSystem::Objective* pObjective) {
+	if (!pObjective) return false;
+
+	// Check: Objective is already complete.
+	if (pObjective->isComplete()) return false;
+
+	bool objectiveComplete = false;
+	bool stageComplete = false;
+	bool taskComplete = false;
+	auto stage = pObjective->getParentStage();
+	auto task = stage->getParentTask();
+
+	pObjective->addValue(1);
+
+	auto packet = Payload::updateTaskObjective(pObjective);
+	mOwner->getConnection()->sendPacket(packet);
+	delete packet;
+
+	// Check: Objective is now complete.
+	pObjective->checkComplete();
+	objectiveComplete = pObjective->isComplete();
+
+	if (objectiveComplete) {
+		// Check: Stage is now complete.
+		stage->checkComplete();
+		stageComplete = stage->isComplete();
+
+		// Notify player that the objective was completed.
+		mOwner->message(MessageType::White, "Your task '" + task->getTitle() + "' has been updated.");
+	}
+	if (stageComplete) {
+		// Check: Task is now complete.
+		task->checkComplete();
+		taskComplete = task->isComplete();
+	}
+
+	if (stageComplete && !taskComplete) {
+
+		auto messagePacket = Payload::Zone::TaskMessage::construct(task->getIndex(), task->getType(), task->getID(), pObjective->getIndex(), 0, 1);
+		mOwner->getConnection()->sendPacket(messagePacket);
+		delete messagePacket;
+	}
+
+	if (taskComplete) {
+		auto messagePacket = Payload::Zone::TaskMessage::construct(task->getIndex(), task->getType(), task->getID(), pObjective->getIndex(), 1, 0);
+		mOwner->getConnection()->sendPacket(messagePacket);
+		delete messagePacket;
+	}
+
+	return true;
+}
+
+TaskSystem::Task* TaskController::getTask(const u32 pTaskIndex) {
+	for (auto i : mQuestTasks) {
+		if (i->getIndex() == pTaskIndex)
+			return i;
+	}
+	return nullptr;
+}
+
+void TaskController::onObjectiveComplete() {
+
+}
+
+void TaskController::onStageComplete() {
+
+}
+
+void TaskController::onTaskComplete() {
+
+}
