@@ -747,7 +747,8 @@ EQApplicationPacket* Payload::updateTask(TaskSystem::Task* pTask) {
 	writer.write<u32>(0); // Unknown.
 	writer.write<u32>(pTask->getStartTime()); // Start time.
 	writer.writeString(pTask->getDescription()); // Description.
-	writer.write<u8>(pTask->getRewardType()); // TaskRewardType.
+	//writer.write<u8>(pTask->getRewardType()); // TaskRewardType.
+	writer.write<u8>(0); // TaskRewardType.
 	writer.write<u32>(3); // Coin reward. Non-zero adds 'X platinum, X gold, X silver, X copper' to the Reward(s) section.
 	writer.write<u8>(0); // Unknown.
 	writer.write<u8>(0); // Unknown.

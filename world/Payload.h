@@ -2956,7 +2956,7 @@ namespace Payload {
 		signed mDeltaY : 13;
 		signed padding0006 : 9;
 		signed mY : 19;
-		signed mAnimation : 13;
+		signed mAnimation : 13;		// this is 'forward delta',
 		unsigned mHeading : 12;
 		signed mX : 19;
 		signed padding0014 : 1;
