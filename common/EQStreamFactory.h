@@ -5,7 +5,6 @@
 #include <queue>
 #include <map>
 #include "../common/EQStream.h"
-#include "../common/Condition.h"
 #include "../common/timeoutmgr.h"
 #include "../common/opcodemgr.h"
 #include "../common/timer.h"
@@ -19,8 +18,6 @@ class EQStreamFactory : private Timeoutable {
 		Mutex MReaderRunning;
 		bool WriterRunning;
 		Mutex MWriterRunning;
-
-		Condition WriterWork;
 
 		EQStreamType StreamType;
 
@@ -51,8 +48,7 @@ class EQStreamFactory : private Timeoutable {
 		void WriterLoop();
 		void Stop() { StopReader(); StopWriter(); }
 		void StopReader() { MReaderRunning.lock(); ReaderRunning=false; MReaderRunning.unlock(); }
-		void StopWriter() { MWriterRunning.lock(); WriterRunning=false; MWriterRunning.unlock(); WriterWork.Signal(); }
-		void SignalWriter() { WriterWork.Signal(); }
+		void StopWriter() { MWriterRunning.lock(); WriterRunning=false; MWriterRunning.unlock(); }
 };
 
 #endif

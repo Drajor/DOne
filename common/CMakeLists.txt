@@ -2,7 +2,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(common_sources
 	BasePacket.cpp
-	Condition.cpp
 	crash.cpp
 	CRC16.cpp
 	crc32.cpp
@@ -16,7 +15,6 @@ SET(common_sources
 	EQStreamFactory.cpp
 	EQStreamIdent.cpp
 	EQStreamProxy.cpp
-	ipc_mutex.cpp
 	logsys.cpp
 	logsys_eqemu.cpp
 	misc.cpp
@@ -54,7 +52,6 @@ SET(common_sources
 
 SET(common_headers
 	BasePacket.h
-	Condition.h
 	crash.h
 	CRC16.h
 	crc32.h
@@ -74,11 +71,8 @@ SET(common_headers
 	EQStreamLocator.h
 	EQStreamProxy.h
 	EQStreamType.h
-	ipc_mutex.h
-	linked_list.h
 	logsys.h
 	logtypes.h
-	loottable.h
 	mail_oplist.h
 	misc.h
 	MiscFunctions.h
@@ -92,7 +86,6 @@ SET(common_headers
 	servertalk.h
     StringUtil.h
 	StructStrategy.h
-	TCPBasicServer.h
 	TCPConnection.h
 	TCPServer.h
 	timeoutmgr.h

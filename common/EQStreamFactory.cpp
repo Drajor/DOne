@@ -190,7 +190,6 @@ timeval sleep_time;
 						EQStream *s = new EQStream(from);
 						s->SetStreamType(StreamType);
 						Streams[std::make_pair(from.sin_addr.s_addr, from.sin_port)]=s;
-						WriterWork.Signal();
 						Push(s);
 						s->AddBytesRecv(length);
 						s->Process(buffer,length);
@@ -316,11 +315,6 @@ Timer DecayTimer(20);
 		MStreams.lock();
 		stream_count=Streams.size();
 		MStreams.unlock();
-		if (!stream_count) {
-			//std::cout << "No streams, waiting on condition" << std::endl;
-			WriterWork.Wait();
-			//std::cout << "Awake from condition, must have a stream now" << std::endl;
-		}
 	}
 }
 

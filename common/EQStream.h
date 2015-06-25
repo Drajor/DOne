@@ -15,7 +15,6 @@
 #include "Mutex.h"
 #include "../common/opcodemgr.h"
 #include "../common/misc.h"
-#include "../common/Condition.h"
 #include "../common/timer.h"
 
 #define FLAG_COMPRESSED	0x01
@@ -78,11 +77,9 @@ struct SessionStats {
 #pragma pack()
 
 class OpcodeManager;
-class EQStreamPair;
 class EQRawApplicationPacket;
 
 class EQStream : public EQStreamInterface {
-	friend class EQStreamPair;	//for collector.
 	protected:
 		typedef enum {
 			SeqPast,
@@ -178,8 +175,6 @@ class EQStream : public EQStreamInterface {
 		void SetSession(uint32 s) { Session=s; }
 
 		void ProcessPacket(EQProtocolPacket *p);
-
-		bool Stale(uint32 now, uint32 timeout=30) { return (LastPacket && (now-LastPacket) > timeout); }
 
 		void InboundQueuePush(EQRawApplicationPacket *p);
 		EQRawApplicationPacket *PeekPacket();	//for collector.
