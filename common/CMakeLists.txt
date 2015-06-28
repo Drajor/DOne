@@ -5,7 +5,6 @@ SET(common_sources
 	crash.cpp
 	CRC16.cpp
 	crc32.cpp
-	debug.cpp
 	emu_opcodes.cpp
 	EmuTCPConnection.cpp
 	EmuTCPServer.cpp

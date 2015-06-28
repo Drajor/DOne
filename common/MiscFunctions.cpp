@@ -15,6 +15,19 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
+#if defined(_DEBUG) && defined(WIN32)
+#ifndef _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+#endif
+#endif
+
+#include "../common/Mutex.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <WinSock2.h>
+
 #include "MiscFunctions.h"
 #include <string.h>
 #include <time.h>
@@ -63,21 +76,6 @@ static unsigned int case_5 (void);
 static unsigned int case_6 (void);
 uint32 rnd_hash(time_t t, clock_t c);
 void oneseed(const uint32 seed);
-
-void CoutTimestamp(bool ms) {
-	time_t rawtime;
-	struct tm* gmt_t;
-	time(&rawtime);
-	gmt_t = gmtime(&rawtime);
-
-	struct timeval read_time;
-	gettimeofday(&read_time,0);
-
-	std::cout << (gmt_t->tm_year + 1900) << "/" << std::setw(2) << std::setfill('0') << (gmt_t->tm_mon + 1) << "/" << std::setw(2) << std::setfill('0') << gmt_t->tm_mday << " " << std::setw(2) << std::setfill('0') << gmt_t->tm_hour << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_min << ":" << std::setw(2) << std::setfill('0') << gmt_t->tm_sec;
-	if (ms)
-		std::cout << "." << std::setw(3) << std::setfill('0') << (read_time.tv_usec / 1000);
-	std::cout << " GMT";
-}
 
 uint32 ResolveIP(const char* hostname, char* errbuf) {
 #ifdef _WINDOWS
