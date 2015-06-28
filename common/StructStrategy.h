@@ -4,7 +4,6 @@
 class EQApplicationPacket;
 class EQStream;
 #include "emu_opcodes.h"
-#include "clientversions.h"
 
 #include <string>
 
@@ -24,7 +23,6 @@ public:
 	void Decode(EQApplicationPacket *p) const;
 
 	virtual std::string Describe() const = 0;
-	virtual const EQClientVersion ClientVersion() const = 0;
 
 protected:
 	//some common coders:

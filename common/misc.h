@@ -3,11 +3,6 @@
 
 #include <stdio.h>
 #include <string>
-#include <map>
-
-#ifndef WIN32
-int print_stacktrace();
-#endif
 
 void dump_message_column(unsigned char *buffer, unsigned long length, std::string leader="", FILE *to = stdout);
 std::string long2ip(unsigned long ip);

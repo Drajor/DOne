@@ -39,14 +39,6 @@
 #define VARSTRUCT_ENCODE_TYPE(Type, Buffer, Value) { *(Type *)Buffer = Value; Buffer += sizeof(Type); }
 #define VARSTRUCT_SKIP_TYPE(Type, Buffer) Buffer += sizeof(Type);
 
-#define VERIFY_PACKET_LENGTH(OPCode, Packet, StructName) \
-	if(Packet->size != sizeof(StructName)) \
-	{ \
-		_log(NET__ERROR, "Size mismatch in " #OPCode " expected %i got %i", sizeof(StructName), Packet->size); \
-		DumpPacket(Packet); \
-		return; \
-	}
-
 // Definitions for WELLRNG
 //
 #define W 32
@@ -111,29 +103,6 @@ class InitWinsock {
 public:
 	InitWinsock();
 	~InitWinsock();
-};
-
-template<class T> class AutoDelete {
-public:
-	AutoDelete(T** iVar, T* iSetTo = 0) {
-		init(iVar, iSetTo);
-	}
-	AutoDelete() { pVar = nullptr; }
-	void init(T** iVar, T* iSetTo = 0)
-	{
-		pVar = iVar;
-		if (iSetTo)
-			*pVar = iSetTo;
-	}
-	~AutoDelete() {
-		if(pVar != nullptr)
-			safe_delete(*pVar);
-	}
-	void ReallyClearIt() {
-		pVar = nullptr;
-	}
-private:
-	T** pVar;
 };
 
 #endif

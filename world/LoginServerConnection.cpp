@@ -1,7 +1,6 @@
 #include "LoginServerConnection.h"
 
 #include "../common/debug.h"
-#include "../common/version.h"
 
 
 #include "../common/EmuTCPConnection.h"
@@ -133,8 +132,8 @@ void LoginServerConnection::sendWorldInformation(const String& pAccount, const S
 	strcpy(payload->mPassword, pPassword.c_str());
 	strcpy(payload->mLongName, pLongName.c_str());
 	strcpy(payload->mShortName, pShortName.c_str());
-	strcpy(payload->protocolversion, EQEMU_PROTOCOL_VERSION);
-	strcpy(payload->serverversion, LOGIN_VERSION);
+	strcpy(payload->protocolversion, "0.3.10");
+	strcpy(payload->serverversion, "0.8.0");
 
 	sendPacket(packet);
 	delete packet;

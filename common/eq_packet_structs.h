@@ -23,8 +23,6 @@
 #include <string>
 #include <list>
 #include <time.h>
-#include "../common/version.h"
-//#include "../common/item_struct.h"
 
 static const uint32 BUFF_COUNT = 25;
 static const uint32 MAX_MERC = 100;
