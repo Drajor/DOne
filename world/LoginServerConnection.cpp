@@ -1,8 +1,5 @@
 #include "LoginServerConnection.h"
 
-#include "../common/debug.h"
-
-
 #include "../common/EmuTCPConnection.h"
 #include "../common/servertalk.h"
 

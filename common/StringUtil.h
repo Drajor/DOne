@@ -16,39 +16,19 @@
 #ifndef _STRINGUTIL_H_
 #define _STRINGUTIL_H_
 
-#include <sstream>
-#include <vector>
-#include <cstdarg>
+#include <string>
 #include "types.h"
 
-
-void vStringFormat(std::string& output, const char* format, va_list args);
-void StringFormat(std::string& output, const char* format, ...);
-std::string EscapeString(const std::string &s);
-
-const char *MakeLowerString(const char *source);
-
-void MakeLowerString(const char *source, char *target);
-
-int MakeAnyLenString(char** ret, const char* format, ...);
-uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
-
-uint32 hextoi(const char* num);
-uint64 hextoi64(const char* num);
-bool atobool(const char* iBool);
-
-char* strn0cpy(char* dest, const char* source, uint32 size);
-		// return value =true if entire string(source) fit, false if it was truncated
-bool strn0cpyt(char* dest, const char* source, uint32 size);
-
-char *CleanMobName(const char *in, char *out);
-
-const char *ConvertArray(int input, char *returnchar);
-const char *ConvertArrayF(float input, char *returnchar);
-
-void RemoveApostrophes(std::string &s);
-char *RemoveApostrophes(const char *s);
-
-std::vector<std::string> SplitString(const std::string &s, char delim);
+static char* strn0cpy(char* dest, const char* source, uint32 size) {
+	if (!dest)
+		return 0;
+	if (size == 0 || source == 0) {
+		dest[0] = 0;
+		return dest;
+	}
+	strncpy(dest, source, size);
+	dest[size - 1] = 0;
+	return dest;
+}
 
 #endif

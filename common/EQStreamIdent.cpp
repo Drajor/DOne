@@ -1,4 +1,3 @@
-#include "debug.h"
 #include "EQStreamIdent.h"
 #include "EQStreamProxy.h"
 #include "logsys.h"

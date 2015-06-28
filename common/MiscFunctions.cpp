@@ -15,11 +15,12 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
 #include "MiscFunctions.h"
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <windows.h>
+
 #ifndef WIN32
 #include <netinet/in.h>
 #include <sys/socket.h>

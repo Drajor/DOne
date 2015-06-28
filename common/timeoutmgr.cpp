@@ -15,9 +15,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-
-//#define TIMEOUT_DEBUG
 
 #include "timeoutmgr.h"
 
@@ -42,9 +39,9 @@ void TimeoutManager::CheckTimeouts() {
 	for(; cur != end; ++cur) {
 		Timeoutable *it = *cur;
 		if(it->next_check.Check()) {
-#ifdef TIMEOUT_DEBUG
-			LogFile->write(EQEMuLog::Debug, "Checking timeout on 0x%x\n", it);
-#endif
+//#ifdef TIMEOUT_DEBUG
+//			LogFile->write(EQEMuLog::Debug, "Checking timeout on 0x%x\n", it);
+//#endif
 			it->CheckTimeout();
 		}
 	}
@@ -57,15 +54,15 @@ void TimeoutManager::AddMember(Timeoutable *who) {
 
 	DeleteMember(who);	//just in case... prolly not needed.
 	members.push_back(who);
-#ifdef TIMEOUT_DEBUG
-	LogFile->write(EQEMuLog::Debug, "Adding timeoutable 0x%x\n", who);
-#endif
+//#ifdef TIMEOUT_DEBUG
+//	LogFile->write(EQEMuLog::Debug, "Adding timeoutable 0x%x\n", who);
+//#endif
 }
 
 void TimeoutManager::DeleteMember(Timeoutable *who) {
-#ifdef TIMEOUT_DEBUG
-	LogFile->write(EQEMuLog::Debug, "Removing timeoutable 0x%x\n", who);
-#endif
+//#ifdef TIMEOUT_DEBUG
+//	LogFile->write(EQEMuLog::Debug, "Removing timeoutable 0x%x\n", who);
+//#endif
 	std::vector<Timeoutable *>::iterator cur,end;
 	cur = members.begin();
 	end = members.end();

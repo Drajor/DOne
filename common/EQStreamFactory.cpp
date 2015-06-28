@@ -1,4 +1,3 @@
-#include "debug.h"
 #include "EQStreamFactory.h"
 #ifdef _WINDOWS
 	#include <winsock.h>

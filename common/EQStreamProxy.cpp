@@ -1,5 +1,4 @@
 
-#include "debug.h"
 #include "EQStreamProxy.h"
 #include "EQStream.h"
 #include "StructStrategy.h"

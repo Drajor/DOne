@@ -15,17 +15,13 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
 #include <iostream>
 #include <iomanip>
 #include <string.h>
 #include <zlib.h>
 #include "packet_dump.h"
 #include "packet_functions.h"
-
-#ifndef WIN32
-	#include <netinet/in.h>
-#endif
+#include <winsock2.h>
 
 uint32 roll(uint32 in, uint8 bits);
 uint64 roll(uint64 in, uint8 bits);

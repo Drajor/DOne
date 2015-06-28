@@ -15,15 +15,10 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/debug.h"
-// Disgrace: for windows compile
-#ifndef WIN32
-	#include <sys/time.h>
-#else
-	#include <sys/timeb.h>
-#endif
 
+#include <sys/timeb.h>
 #include <iostream>
+#include <WinSock2.h>
 
 #include "timer.h"
 
@@ -65,7 +60,7 @@ Timer::Timer(uint32 start, uint32 timer, bool iUseAcurateTiming = false) {
 }
 
 /* Reimplemented for MSVC - Bounce */
-#ifdef _WINDOWS
+//#ifdef _WINDOWS
 int gettimeofday (timeval *tp, ...)
 {
 	timeb tb;
@@ -77,7 +72,7 @@ int gettimeofday (timeval *tp, ...)
 
 	return 0;
 }
-#endif
+//#endif
 
 /* This function checks if the timer triggered */
 bool Timer::Check(bool iReset)

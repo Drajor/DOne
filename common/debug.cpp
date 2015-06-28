@@ -19,7 +19,6 @@
 #endif
 
 #include "debug.h"
-#include "StringUtil.h"
 #include "MiscFunctions.h"
 #include "platform.h"
 
@@ -180,71 +179,6 @@ bool EQEMuLog::write(LogIDs id, const char *fmt, ...) {
 	return true;
 }
 
-//write with Prefix and a VA_list
-bool EQEMuLog::writePVA(LogIDs id, const char *prefix, const char *fmt, va_list argptr) {
-	if (!logFileValid) {
-		return false;
-	}
-	if (id >= MaxLogID) {
-		return false;
-	}
-	bool dofile = false;
-	if (pLogStatus[id] & 1) {
-		dofile = open(id);
-	}
-	if (!(dofile || pLogStatus[id] & 2)) {
-		return false;
-	}
-	LockMutex lock(&MLog[id]);
-	if (!logFileValid)
-		return false;	//check again for threading race reasons (to avoid two mutexes)
-
-	time_t aclock;
-	struct tm *newtime;
-
-	time( &aclock ); /* Get time in seconds */
-	newtime = localtime( &aclock ); /* Convert time to struct */
-
-	va_list tmpargptr;
-
-	if (dofile) {
-#ifndef NO_PIDLOG
-		fprintf(fp[id], "[%02d.%02d. - %02d:%02d:%02d] %s", newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec, prefix);
-#else
-		fprintf(fp[id], "%04i [%02d.%02d. - %02d:%02d:%02d] %s", getpid(), newtime->tm_mon+1, newtime->tm_mday, newtime->tm_hour, newtime->tm_min, newtime->tm_sec, prefix);
-#endif
-		va_copy(tmpargptr, argptr);
-		vfprintf( fp[id], fmt, tmpargptr );
-	}
-	if(logCallbackPva[id]) {
-		msgCallbackPva p = logCallbackPva[id];
-		va_copy(tmpargptr, argptr);
-		p(id, prefix, fmt, tmpargptr );
-	}
-	if (pLogStatus[id] & 2) {
-		if (pLogStatus[id] & 8) {
-			fprintf(stderr, "[%s] %s", LogNames[id], prefix);
-			vfprintf( stderr, fmt, argptr );
-		}
-		else {
-			fprintf(stdout, "[%s] %s", LogNames[id], prefix);
-			vfprintf( stdout, fmt, argptr );
-		}
-	}
-	va_end(argptr);
-	if (dofile)
-		fprintf(fp[id], "\n");
-	if (pLogStatus[id] & 2) {
-		if (pLogStatus[id] & 8)
-			fprintf(stderr, "\n");
-		else
-			fprintf(stdout, "\n");
-	}
-	if(dofile)
-		fflush(fp[id]);
-	return true;
-}
-
 bool EQEMuLog::writebuf(LogIDs id, const char *buf, uint8 size, uint32 count) {
 	if (!logFileValid) {
 		return false;
@@ -315,73 +249,6 @@ bool EQEMuLog::writeNTS(LogIDs id, bool dofile, const char *fmt, ...) {
 	va_end(argptr);
 	return true;
 };
-
-bool EQEMuLog::Dump(LogIDs id, uint8* data, uint32 size, uint32 cols, uint32 skip) {
-	if (!logFileValid) {
-#if EQDEBUG >= 10
-	std::cerr << "Error: Dump() from null pointer" << std::endl;
-#endif
-		return false;
-	}
-	if (size == 0)
-		return true;
-	if (!LogFile)
-		return false;
-	if (id >= MaxLogID)
-		return false;
-	bool dofile = false;
-	if (pLogStatus[id] & 1) {
-		dofile = open(id);
-	}
-	if (!(dofile || pLogStatus[id] & 2))
-		return false;
-	LockMutex lock(&MLog[id]);
-	if (!logFileValid)
-		return false;	//check again for threading race reasons (to avoid two mutexes)
-
-	write(id, "Dumping Packet: %i", size);
-	// Output as HEX
-	
-	int beginningOfLineOffset = 0; 
-	uint32 indexInData;
-	std::string asciiOutput;
-
-	for(indexInData=skip; indexInData<size; indexInData++) {
-		if ((indexInData-skip)%cols==0) {
-			if (indexInData != skip)
-				writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
-			writeNTS(id, dofile, "%4i: ", indexInData-skip);
-			asciiOutput.clear();
-			beginningOfLineOffset = 0;
-		}
-		else if ((indexInData-skip)%(cols/2) == 0) {
-			writeNTS(id, dofile, "- ");
-		}
-		writeNTS(id, dofile, "%02X ", (unsigned char)data[indexInData]);
-
-		if (data[indexInData] >= 32 && data[indexInData] < 127)
-		{
-			// According to http://msdn.microsoft.com/en-us/library/vstudio/ee404875(v=vs.100).aspx
-			// Visual Studio 2010 doesn't have std::to_string(int) but it does have the long long 
-			// version.
-			asciiOutput.append(std::to_string((long long)data[indexInData]));
-		}
-		else
-		{
-			asciiOutput.append(".");
-		}
-	}
-	uint32 k = ((indexInData-skip)-1)%cols;
-	if (k < 8)
-		writeNTS(id, dofile, "  ");
-	for (uint32 h = k+1; h < cols; h++) {
-		writeNTS(id, dofile, "   ");
-	}
-	writeNTS(id, dofile, " | %s\n", asciiOutput.c_str());
-	if (dofile)
-		fflush(fp[id]);
-	return true;
-}
 
 void EQEMuLog::SetCallback(LogIDs id, msgCallbackFmt proc) {
 	if (!logFileValid)

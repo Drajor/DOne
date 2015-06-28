@@ -16,7 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "debug.h"
 #include "EQPacket.h"
 #include "EQStream.h"
 #include "misc.h"
@@ -24,6 +23,7 @@
 #include "op_codes.h"
 #include "CRC16.h"
 #include "platform.h"
+#include "logsys.h"
 
 #include <string>
 #include <iomanip>
@@ -89,7 +89,6 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(EQProtocolPacket *p)
 {
 	EQRawApplicationPacket *ap=nullptr;
 	_log(NET__APP_CREATE, _L "Creating new application packet, length %d" __L, p->size);
-	_raw(NET__APP_CREATE_HEX, 0xFFFF, p);
 	ap = p->MakeAppPacket();
 	return ap;
 }
@@ -98,7 +97,6 @@ EQRawApplicationPacket *EQStream::MakeApplicationPacket(const unsigned char *buf
 {
 	EQRawApplicationPacket *ap=nullptr;
 	_log(NET__APP_CREATE, _L "Creating new application packet, length %d" __L, len);
-	_hex(NET__APP_CREATE_HEX, buf, len);
 	ap = new EQRawApplicationPacket(buf, len);
 	return ap;
 }
@@ -129,7 +127,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 
 	if (!Session && p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
 		_log(NET__DEBUG, _L "Session not initialized, packet ignored" __L);
-		_raw(NET__DEBUG, 0xFFFF, p);
 		return;
 	}
 
@@ -140,7 +137,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				subpacket_length=*(p->pBuffer+processed);
 				EQProtocolPacket *subp=MakeProtocolPacket(p->pBuffer+processed+1,subpacket_length);
 				_log(NET__NET_CREATE, _L "Extracting combined packet of length %d" __L, subpacket_length);
-				_raw(NET__NET_CREATE_HEX, 0xFFFF, subp);
 				subp->copyInfo(p);
 				ProcessPacket(subp);
 				delete subp;
@@ -181,7 +177,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
 					_log(NET__DEBUG, _L "Future OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
-					_raw(NET__DEBUG, seq, p);
 
 					PacketQueue[seq]=p->Copy();
 					_log(NET__APP_TRACE, _L "OP_Packet Queue size=%d" __L, PacketQueue.size());
@@ -190,7 +185,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 
 			} else if (check == SeqPast) {
 				_log(NET__DEBUG, _L "Duplicate OP_Packet: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
-				_raw(NET__DEBUG, seq, p);
 				SendOutOfOrderAck(seq); //we already got this packet but it was out of order
 			} else {
 				// In case we did queue one before as well.
@@ -206,7 +200,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				if (*(p->pBuffer+2)==0x00 && *(p->pBuffer+3)==0x19) {
 					EQProtocolPacket *subp=MakeProtocolPacket(p->pBuffer+2,p->size-2);
 					_log(NET__NET_CREATE, _L "seq %d, Extracting combined packet of length %d" __L, seq, subp->size);
-					_raw(NET__NET_CREATE_HEX, seq, subp);
 					subp->copyInfo(p);
 					ProcessPacket(subp);
 					delete subp;
@@ -231,7 +224,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			SeqOrder check=CompareSequence(NextInSeq,seq);
 			if (check == SeqFuture) {
 				_log(NET__DEBUG, _L "Future OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
-				_raw(NET__DEBUG, seq, p);
 
 				PacketQueue[seq]=p->Copy();
 				_log(NET__APP_TRACE, _L "OP_Fragment Queue size=%d" __L, PacketQueue.size());
@@ -240,7 +232,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 
 			} else if (check == SeqPast) {
 				_log(NET__DEBUG, _L "Duplicate OP_Fragment: Expecting Seq=%d, but got Seq=%d" __L, NextInSeq, seq);
-				_raw(NET__DEBUG, seq, p);
 				SendOutOfOrderAck(seq);
 			} else {
 				// In case we did queue one before as well.
@@ -846,18 +837,6 @@ sockaddr_in address;
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr=remote_ip;
 	address.sin_port=remote_port;
-#ifdef NOWAY
-	uint32 ip=address.sin_addr.s_addr;
-	std::cout << "Sending to: "
-		<< (int)*(unsigned char *)&ip
-		<< "." << (int)*((unsigned char *)&ip+1)
-		<< "." << (int)*((unsigned char *)&ip+2)
-		<< "." << (int)*((unsigned char *)&ip+3)
-		<< "," << (int)ntohs(address.sin_port) << "(" << p->size << ")" << std::endl;
-
-	p->DumpRaw();
-	std::cout << "-------------" << std::endl;
-#endif
 	length=p->serialize(buffer);
 	if (p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
 		if (compressed) {
@@ -1012,11 +991,11 @@ EQRawApplicationPacket *p=nullptr;
 	if(p) {
 		if(OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
-#if EQDEBUG >= 4
-			if(emu_op == OP_Unknown) {
-				LogFile->write(EQEMuLog::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
-			}
-#endif
+//#if EQDEBUG >= 4
+//			if(emu_op == OP_Unknown) {
+//				LogFile->write(EQEMuLog::Debug, "Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
+//			}
+//#endif
 			p->SetOpcode(emu_op);
 		}
 	}
@@ -1148,7 +1127,6 @@ uint32 newlength=0;
 		ProcessQueue();
 	} else {
 		_log(NET__DEBUG, _L "Incoming packet failed checksum" __L);
-		_hex(NET__NET_CREATE_HEX, buffer, length);
 	}
 }
 

@@ -1,6 +1,6 @@
 
-#include "../debug.h"
 #include "Underfoot.h"
+#include "../StringUtil.h"
 #include "../opcodemgr.h"
 #include "../logsys.h"
 #include "../EQStreamIdent.h"
@@ -8,7 +8,6 @@
 
 #include "../eq_packet_structs.h"
 #include "../MiscFunctions.h"
-#include "../StringUtil.h"
 #include "Underfoot_structs.h"
 #include "../packet_dump_file.h"
 

@@ -104,8 +104,6 @@ public:
 
 	bool writebuf(LogIDs id, const char *buf, uint8 size, uint32 count);
 	bool write(LogIDs id, const char *fmt, ...);
-	bool writePVA(LogIDs id, const char *prefix, const char *fmt, va_list args);
-	bool Dump(LogIDs id, uint8* data, uint32 size, uint32 cols=16, uint32 skip=0);
 private:
 	bool open(LogIDs id);
 	bool writeNTS(LogIDs id, bool dofile, const char *fmt, ...); // no error checking, assumes is open, no locking, no timestamp, no newline
@@ -127,21 +125,4 @@ private:
 };
 
 extern EQEMuLog* LogFile;
-
-#ifdef _EQDEBUG
-class PerformanceMonitor {
-public:
-	PerformanceMonitor(int64* ip) {
-		p = ip;
-		QueryPerformanceCounter(&tmp);
-	}
-	~PerformanceMonitor() {
-		LARGE_INTEGER tmp2;
-		QueryPerformanceCounter(&tmp2);
-		*p += tmp2.QuadPart - tmp.QuadPart;
-	}
-	LARGE_INTEGER tmp;
-	int64* p;
-};
-#endif
 #endif

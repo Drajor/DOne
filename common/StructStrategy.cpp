@@ -1,5 +1,4 @@
 
-#include "debug.h"
 #include "StructStrategy.h"
 #include "logsys.h"
 #include "EQStream.h"

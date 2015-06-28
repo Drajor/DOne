@@ -23,8 +23,6 @@ crap into its own subclass of this object, it will clean things up
 tremendously.
 */
 
-#include "../common/debug.h"
-
 #include <iostream>
 #include <string.h>
 #include <stdio.h>

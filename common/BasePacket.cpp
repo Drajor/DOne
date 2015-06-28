@@ -15,7 +15,6 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "debug.h"
 #include "BasePacket.h"
 #include "misc.h"
 #include "packet_dump.h"
@@ -88,27 +87,6 @@ void BasePacket::DumpRawHeaderNoTime(uint16 seq, FILE *to) const
 	if (seq != 0xffff)
 		fprintf(to, "[Seq=%u] ",seq);
 }
-
-void BasePacket::DumpRaw(FILE *to) const
-{
-	DumpRawHeader();
-	if (pBuffer && size)
-		dump_message_column(pBuffer, size, " ", to);
-	fprintf(to, "\n");
-}
-
-//void BasePacket::ReadString(char *str, uint32 Offset, uint32 MaxLength) const
-//{
-//	uint32 i = 0, j = Offset;
-//
-//	do
-//	{
-//		str[i++] = pBuffer[j++];
-//	}
-//	while((j < size) && (i < MaxLength) && (str[i - 1] != 0));
-//
-//	str[i - 1] = '\0';
-//}
 
 void DumpPacketHex(const BasePacket* app)
 {

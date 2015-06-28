@@ -18,13 +18,8 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+#include <stdarg.h>
 #include "types.h"
-
-// Disgrace: for windows compile
-#ifdef _WINDOWS
-	#include "debug.h"
-	int gettimeofday (timeval *tp, ...);
-#endif
 
 class Timer
 {
