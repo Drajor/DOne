@@ -3,18 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#ifdef _WINDOWS
-	#include <process.h>
-#else
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <errno.h>
-	#include <fcntl.h>
-	#define INVALID_SOCKET -1
-	#define SOCKET_ERROR -1
-#endif
-
+#include <process.h>
 #define SERVER_LOOP_GRANULARITY 3	//# of ms between checking our socket/queues
 
 BaseTCPServer::BaseTCPServer(uint16 in_port) {

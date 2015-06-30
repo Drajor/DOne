@@ -31,18 +31,18 @@
 #include <vector>
 #include <algorithm>
 
-#ifdef _WINDOWS
-	#include <time.h>
-#else
-	#include <sys/types.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <sys/time.h>
-	#include <sys/socket.h>
-	#include <netdb.h>
-	#include <fcntl.h>
-	#include <arpa/inet.h>
-#endif
+//#ifdef _WINDOWS
+//	#include <time.h>
+//#else
+//	#include <sys/types.h>
+//	#include <sys/socket.h>
+//	#include <netinet/in.h>
+//	#include <sys/time.h>
+//	#include <sys/socket.h>
+//	#include <netdb.h>
+//	#include <fcntl.h>
+//	#include <arpa/inet.h>
+//#endif
 
 //for logsys
 #define _L "%s:%d: "

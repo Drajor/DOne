@@ -22,27 +22,12 @@
 	-Quagmire
 */
 
-#ifdef _WINDOWS
-	#include <WinSock2.h>
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
+#include <WinSock2.h>
+#define snprintf	_snprintf
+#define strncasecmp	_strnicmp
+#define strcasecmp	_stricmp
 
-	#include <process.h>
-#else
-	#include <pthread.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <netdb.h>
-	#include <unistd.h>
-	#include <errno.h>
-	#include <fcntl.h>
-	#define INVALID_SOCKET -1
-	#define SOCKET_ERROR -1
-	#include "unix.h"
-
-#endif
+#include <process.h>
 
 #include "types.h"
 #include "Mutex.h"

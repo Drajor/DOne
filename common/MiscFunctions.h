@@ -93,11 +93,11 @@ int FloatToEQH(float d);
 
 
 
-#define _ITOA_BUFLEN	25
-const char *itoa(int num);	//not thread safe
-#ifndef _WINDOWS
-const char *itoa(int num, char* a,int b);
-#endif
+//#define _ITOA_BUFLEN	25
+//const char *itoa(int num);	//not thread safe
+//#ifndef _WINDOWS
+//const char *itoa(int num, char* a,int b);
+//#endif
 
 class InitWinsock {
 public:

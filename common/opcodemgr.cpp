@@ -116,19 +116,6 @@ const char *OpcodeManager::EQToName(const uint16 eq_op) {
 	return(OpcodeNames[emu_op]);
 }
 
-EmuOpcode OpcodeManager::NameSearch(const char *name) {
-	EmuOpcode emu_op;
-	//stupid enum wont let me ++ on it...
-	for(emu_op = OP_Unknown; emu_op < _maxEmuOpcode; emu_op=(EmuOpcode)(emu_op+1)) {
-		//get the name of this emu opcode
-		const char *op_name = OpcodeNames[emu_op];
-		if(!strcasecmp(op_name, name)) {
-			return(emu_op);
-		}
-	}
-	return(OP_Unknown);
-}
-
 RegularOpcodeManager::RegularOpcodeManager()
 : OpcodeManager()
 {

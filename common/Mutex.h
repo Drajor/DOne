@@ -18,13 +18,8 @@
 #ifndef MYMUTEX_H
 #define MYMUTEX_H
 
-#ifdef _WINDOWS
-	#define _WINSOCKAPI_
-	#include <windows.h>
-#else
-	#include <pthread.h>
-	#include "../common/unix.h"
-#endif
+#define _WINSOCKAPI_
+#include <windows.h>
 #include "../common/types.h"
 
 class Mutex {

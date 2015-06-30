@@ -35,8 +35,8 @@
 #include "CharacterFactory.h"
 
 #include "Testing.h"
-#include "gtest/gtest.h"
-#pragma comment(lib, "../../dependencies/gtest/gtestd.lib")
+//#include "gtest/gtest.h"
+//#pragma comment(lib, "../../dependencies/gtest/gtestd.lib")
 
 #include <memory>
 

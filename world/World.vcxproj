@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{824B312E-C6DA-4CFA-BBD1-074F5AE337B4}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>World</RootNamespace>
+    <ProjectName>World</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <TargetName>$(ProjectName)d</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)bin\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../dependencies/gtest/</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Commond.lib;zdll.lib;Ws2_32.lib;gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../dependencies/gtest/;../dependencies/zlib128/lib/;../bin/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../dependencies/gtest/</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <FloatingPointModel>Fast</FloatingPointModel>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>Common.lib;zdll.lib;Ws2_32.lib;gtest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../dependencies/gtest/;../dependencies/zlib128/lib/;../bin/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Account.h" />
+    <ClInclude Include="AccountManager.h" />
+    <ClInclude Include="Actor.h" />
+    <ClInclude Include="ActorBonuses.h" />
+    <ClInclude Include="AlternateCurrencyManager.h" />
+    <ClInclude Include="BindLocation.h" />
+    <ClInclude Include="Bonuses.h" />
+    <ClInclude Include="BuffController.h" />
+    <ClInclude Include="Character.h" />
+    <ClInclude Include="CharacterFactory.h" />
+    <ClInclude Include="ClientAuthentication.h" />
+    <ClInclude Include="CombatSystem.h" />
+    <ClInclude Include="CommandHandler.h" />
+    <ClInclude Include="Constants.h" />
+    <ClInclude Include="Data.h" />
+    <ClInclude Include="DataValidation.h" />
+    <ClInclude Include="EventDispatcher.h" />
+    <ClInclude Include="ExperienceCalculator.h" />
+    <ClInclude Include="ExperienceController.h" />
+    <ClInclude Include="ExtendedTargetController.h" />
+    <ClInclude Include="Group.h" />
+    <ClInclude Include="GroupConstants.h" />
+    <ClInclude Include="GroupManager.h" />
+    <ClInclude Include="Guild.h" />
+    <ClInclude Include="GuildManager.h" />
+    <ClInclude Include="HateController.h" />
+    <ClInclude Include="HateControllerFactory.h" />
+    <ClInclude Include="IDataStore.h" />
+    <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Item.h" />
+    <ClInclude Include="ItemData.h" />
+    <ClInclude Include="ItemDataStore.h" />
+    <ClInclude Include="ItemFactory.h" />
+    <ClInclude Include="ItemGenerator.h" />
+    <ClInclude Include="Limits.h" />
+    <ClInclude Include="LoginServerConnection.h" />
+    <ClInclude Include="LogSystem.h" />
+    <ClInclude Include="LootAllocator.h" />
+    <ClInclude Include="LootController.h" />
+    <ClInclude Include="LootHandler.h" />
+    <ClInclude Include="NPC.h" />
+    <ClInclude Include="NPCFactory.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="OpCodes.h" />
+    <ClInclude Include="Payload.h" />
+    <ClInclude Include="Profile.h" />
+    <ClInclude Include="Raid.h" />
+    <ClInclude Include="RaidManager.h" />
+    <ClInclude Include="Random.h" />
+    <ClInclude Include="RespawnOptions.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="ShopDataStore.h" />
+    <ClInclude Include="ShopHandler.h" />
+    <ClInclude Include="Singleton.h" />
+    <ClInclude Include="SpawnGroup.h" />
+    <ClInclude Include="SpawnPoint.h" />
+    <ClInclude Include="SpawnPointManager.h" />
+    <ClInclude Include="SpellContants.h" />
+    <ClInclude Include="SpellDataStore.h" />
+    <ClInclude Include="StaticItemData.h" />
+    <ClInclude Include="Task.h" />
+    <ClInclude Include="TaskConstants.h" />
+    <ClInclude Include="TaskController.h" />
+    <ClInclude Include="TaskDataStore.h" />
+    <ClInclude Include="Testing.h" />
+    <ClInclude Include="Test_AccountManager.h" />
+    <ClInclude Include="Test_AlternateCurrencyManager.h" />
+    <ClInclude Include="Test_CharacterFactory.h" />
+    <ClInclude Include="Test_GuildManager.h" />
+    <ClInclude Include="Test_ItemDataStore.h" />
+    <ClInclude Include="Test_ItemFactory.h" />
+    <ClInclude Include="Test_ItemGenerator.h" />
+    <ClInclude Include="Test_NPCFactory.h" />
+    <ClInclude Include="Test_ShopDataStore.h" />
+    <ClInclude Include="Test_SpellDataStore.h" />
+    <ClInclude Include="Test_Transmutation.h" />
+    <ClInclude Include="Test_Utility.h" />
+    <ClInclude Include="Test_WorldConnectionHandlerSanity.h" />
+    <ClInclude Include="Test_ZoneConnectionHandlerSanity.h" />
+    <ClInclude Include="Test_ZoneDataStore.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="TimeUtility.h" />
+    <ClInclude Include="TitleManager.h" />
+    <ClInclude Include="TradeHandler.h" />
+    <ClInclude Include="Transmutation.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="UCS.h" />
+    <ClInclude Include="UCSClientConnection.h" />
+    <ClInclude Include="Utility.h" />
+    <ClInclude Include="VariablePayload.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="World.h" />
+    <ClInclude Include="WorldConnection.h" />
+    <ClInclude Include="XMLDataStore.h" />
+    <ClInclude Include="Zone.h" />
+    <ClInclude Include="ZoneConnection.h" />
+    <ClInclude Include="ZoneConnectionManager.h" />
+    <ClInclude Include="ZoneData.h" />
+    <ClInclude Include="ZoneManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Account.cpp" />
+    <ClCompile Include="AccountManager.cpp" />
+    <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="AlternateCurrencyManager.cpp" />
+    <ClCompile Include="BuffController.cpp" />
+    <ClCompile Include="Character.cpp" />
+    <ClCompile Include="CharacterFactory.cpp" />
+    <ClCompile Include="CombatSystem.cpp" />
+    <ClCompile Include="CommandHandler.cpp" />
+    <ClCompile Include="DataValidation.cpp" />
+    <ClCompile Include="EventDispatcher.cpp" />
+    <ClCompile Include="ExperienceCalculator.cpp" />
+    <ClCompile Include="ExperienceController.cpp" />
+    <ClCompile Include="ExtendedTargetController.cpp" />
+    <ClCompile Include="Group.cpp" />
+    <ClCompile Include="GroupManager.cpp" />
+    <ClCompile Include="Guild.cpp" />
+    <ClCompile Include="GuildManager.cpp" />
+    <ClCompile Include="HateController.cpp" />
+    <ClCompile Include="HateControllerFactory.cpp" />
+    <ClCompile Include="Inventory.cpp" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="ItemDataStore.cpp" />
+    <ClCompile Include="ItemFactory.cpp" />
+    <ClCompile Include="ItemGenerator.cpp" />
+    <ClCompile Include="Limits.cpp" />
+    <ClCompile Include="LoginServerConnection.cpp" />
+    <ClCompile Include="LogSystem.cpp" />
+    <ClCompile Include="LootAllocator.cpp" />
+    <ClCompile Include="LootController.cpp" />
+    <ClCompile Include="LootHandler.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="NPC.cpp" />
+    <ClCompile Include="NPCFactory.cpp" />
+    <ClCompile Include="Payload.cpp" />
+    <ClCompile Include="Profile.cpp" />
+    <ClCompile Include="RaidManager.cpp" />
+    <ClCompile Include="Random.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="ShopDataStore.cpp" />
+    <ClCompile Include="ShopHandler.cpp" />
+    <ClCompile Include="SpawnGroup.cpp" />
+    <ClCompile Include="SpawnPoint.cpp" />
+    <ClCompile Include="SpawnPointManager.cpp" />
+    <ClCompile Include="SpellDataStore.cpp" />
+    <ClCompile Include="StaticItemData.cpp" />
+    <ClCompile Include="Task.cpp" />
+    <ClCompile Include="TaskController.cpp" />
+    <ClCompile Include="TaskDataStore.cpp" />
+    <ClCompile Include="TestServercpp.cpp" />
+    <ClCompile Include="TitleManager.cpp" />
+    <ClCompile Include="TradeHandler.cpp" />
+    <ClCompile Include="Transmutation.cpp" />
+    <ClCompile Include="UCS.cpp" />
+    <ClCompile Include="UCSClientConnection.cpp" />
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="World.cpp" />
+    <ClCompile Include="WorldConnection.cpp" />
+    <ClCompile Include="XMLDataStore.cpp" />
+    <ClCompile Include="Zone.cpp" />
+    <ClCompile Include="ZoneConnection.cpp" />
+    <ClCompile Include="ZoneConnectionManager.cpp" />
+    <ClCompile Include="ZoneData.cpp" />
+    <ClCompile Include="ZoneManager.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

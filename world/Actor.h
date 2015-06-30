@@ -629,10 +629,10 @@ private:
 
 	LootController* mLootController = nullptr;
 
-	inline void _setName(const char* pName) { strncpy(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
-	inline void _setSurname(const char* pSurname) { strncpy(mActorData.mSurname, pSurname, Limits::Character::MAX_LAST_NAME_LENGTH); }
-	inline void _setTitle(const char* pTitle) { strncpy(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
-	inline void _setSuffix(const char* pSuffix) { strncpy(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
+	inline void _setName(const char* pName) { strncpy_s(mActorData.mName, pName, Limits::Character::MAX_NAME_LENGTH); }
+	inline void _setSurname(const char* pSurname) { strncpy_s(mActorData.mSurname, pSurname, Limits::Character::MAX_LAST_NAME_LENGTH); }
+	inline void _setTitle(const char* pTitle) { strncpy_s(mActorData.mTitle, pTitle, Limits::Character::MAX_TITLE_LENGTH); }
+	inline void _setSuffix(const char* pSuffix) { strncpy_s(mActorData.mSuffix, pSuffix, Limits::Character::MAX_SUFFIX_LENGTH); }
 
 	const bool sendsEquipment() const;
 };

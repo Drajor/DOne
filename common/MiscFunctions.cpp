@@ -45,23 +45,11 @@
 #endif
 #include "../common/timer.h"
 
-#ifdef _WINDOWS
-	#include <windows.h>
+#include <windows.h>
 
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
-#else
-	#include <stdlib.h>
-	#include <ctype.h>
-	#include <stdarg.h>
-	#include <sys/types.h>
-	#include <sys/time.h>
-	#include <sys/stat.h>
-	#include <unistd.h>
-	#include <netdb.h>
-	#include <errno.h>
-#endif
+#define snprintf	_snprintf
+#define strncasecmp	_strnicmp
+#define strcasecmp	_stricmp
 
 static bool WELLRNG_init = false;
 static int state_i = 0;
@@ -127,22 +115,22 @@ InitWinsock::~InitWinsock() {
 #endif
 
 
-const char * itoa(int num) {
-		static char temp[_ITOA_BUFLEN];
-		memset(temp,0,_ITOA_BUFLEN);
-		snprintf(temp,_ITOA_BUFLEN,"%d",num);
-		return temp;
-}
-
-#ifndef WIN32
-const char * itoa(int num, char* a,int b) {
-		static char temp[_ITOA_BUFLEN];
-		memset(temp,0,_ITOA_BUFLEN);
-		snprintf(temp,_ITOA_BUFLEN,"%d",num);
-		return temp;
-		return temp;
-}
-#endif
+//const char * itoa(int num) {
+//		static char temp[_ITOA_BUFLEN];
+//		memset(temp,0,_ITOA_BUFLEN);
+//		snprintf(temp,_ITOA_BUFLEN,"%d",num);
+//		return temp;
+//}
+//
+//#ifndef WIN32
+//const char * itoa(int num, char* a,int b) {
+//		static char temp[_ITOA_BUFLEN];
+//		memset(temp,0,_ITOA_BUFLEN);
+//		snprintf(temp,_ITOA_BUFLEN,"%d",num);
+//		return temp;
+//		return temp;
+//}
+//#endif
 
 /*
  * generate a random integer in the range low-high this

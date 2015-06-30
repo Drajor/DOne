@@ -1,0 +1,4 @@
+#ignore compiler generated folders
+debug/
+release/
+*.user

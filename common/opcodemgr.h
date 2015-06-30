@@ -37,7 +37,6 @@ public:
 
 	static const char *EmuToName(const EmuOpcode emu_op);
 	const char *EQToName(const uint16 emu_op);
-	EmuOpcode NameSearch(const char *name);
 
 	//This has to be public for stupid visual studio
 	class OpcodeSetStrategy {

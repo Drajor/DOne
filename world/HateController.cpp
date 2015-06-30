@@ -29,7 +29,6 @@ void HateController::remove(Actor* pAttacker) {
 	}
 }
 
-
 Actor* ProximityHateController::select() const {
 	Actor* selected = nullptr;
 	float d = std::numeric_limits<float>::max();

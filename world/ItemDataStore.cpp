@@ -5,7 +5,7 @@
 #include "Item.h"
 
 ItemDataStore::ItemDataStore() {
-	mItemData.resize(1000000);
+	mItemData.resize(10000);
 }
 
 ItemDataStore::~ItemDataStore() {
