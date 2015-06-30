@@ -1,0 +1,5 @@
+zlib version 1.2.8 - downloaded 29/06/2015
+As of 29/06/2015 EQEmu is using version 1.2.3
+
+gtest version ?? - downloaded ??
+Recompiled gtest on 30/06/2015 to use the DLL c/c++ runtime.
