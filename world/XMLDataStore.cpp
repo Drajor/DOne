@@ -12,6 +12,11 @@
 #include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
 
+#include "Poco/Data/Session.h"
+#include "Poco/Data/SQLite/Connector.h"
+#include "Poco/Format.h"
+#include "Poco/Exception.h"
+
 static bool AttributeFound = true;
 static bool AttributeNotFound = false;
 
@@ -1388,9 +1393,11 @@ const bool XMLDataStore::deleteCharacter(const String& pCharacterName) {
 	const String existingFile = "./data/characters/" + pCharacterName + ".xml";
 	const String newFile = "./data/characters/deleted/" + std::to_string(Utility::Time::now()) + "_" + pCharacterName + ".xml";
 	// Copy the character xml to the deleted directory.
-	EXPECTED_BOOL(CopyFile(existingFile.c_str(), newFile.c_str(), true));
+	//EXPECTED_BOOL(CopyFile(existingFile.c_str(), newFile.c_str(), true));
 	// Delete the character file.
-	EXPECTED_BOOL(DeleteFile(existingFile.c_str()));
+	//EXPECTED_BOOL(DeleteFile(existingFile.c_str()));
+
+	// removed calls to CopyFile and DeleteFile for now as I am getting some strange errors.
 
 	return true;
 }
