@@ -185,9 +185,6 @@ const bool WorldConnection::handleConnect(const EQApplicationPacket* pPacket) {
 	const String accountIDStr(payload->mInformation);
 	STRING_CHECK(payload->mInformation + accountIDStr.length() + 1, 16);
 	String accountKey(payload->mInformation + accountIDStr.length() + 1);
-
-	//String accountIDStr = Utility::safeString(payload->mInformation, 19);
-	//String accountKey = Utility::safeString(payload->mInformation + accountIDStr.length() + 1, 16);
 	
 	u32 accountID = 0;
 	if (!Utility::stoSafe(accountID, accountIDStr)) {
@@ -465,7 +462,7 @@ void WorldConnection::updateLogContext() {
 	context << "[WorldConnection (IP: " << mStreamInterface->GetRemoteIP() << " Port: " << mStreamInterface->GetRemotePort();
 
 	if (mAccount) {
-		context << " LSID: " << mAccount->getLoginServerID() << " LSAID: " << mAccount->getLoginAccountID() << " LSAN: " << mAccount->getLoginAccountName();
+		context << " LSID: " << mAccount->getLSID() << " LSAID: " << mAccount->getLSAccountID() << " LSAN: " << mAccount->getLSAccountName();
 	}
 
 	context << ")]";

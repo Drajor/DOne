@@ -25,6 +25,8 @@ const bool GroupManager::initialise(ILogFactory* pLogFactory, ZoneManager* pZone
 	if (!pZoneManager) return false;
 
 	mZoneManager = pZoneManager;
+
+	// Create and configure logging.
 	mLog = pLogFactory->make();
 	mLog->setContext("[GroupManager]");
 	mLog->status("Initialising.");

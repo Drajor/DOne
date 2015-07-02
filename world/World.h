@@ -47,11 +47,11 @@ public:
 	void setLocked(bool pLocked);
 
 	// LoginServerConnection
-	void onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID);
-	void onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP);
+	void onConnectRequest(LoginServerConnection* pConnection, const u32 pLSAccountID);
+	void onAuthentication(LoginServerConnection* pConnection, const u32 pLSAccountID, const String& pLSAccountName, const String& pKey, const u32 pIP);
 
 	// WorldConnection.
-	const bool onConnect(WorldConnection* pConnection, const u32 pLoginAccountID, const String& pKey, const bool pZoning);
+	const bool onConnect(WorldConnection* pConnection, const u32 pLSAccountID, const String& pKey, const bool pZoning);
 	const bool onApproveName(WorldConnection* pConnection, const String& pCharacterName);
 	const bool onCreateCharacter(WorldConnection* pConnection, Payload::World::CreateCharacter* pPayload);
 	const bool onDeleteCharacter(WorldConnection* pConnection, const String& pCharacterName);

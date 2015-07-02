@@ -140,31 +140,41 @@ const bool World::saveCharacter(Character* pCharacter) {
 	return true;
 }
 
-void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLoginAccountID) {
+void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLSAccountID) {
 	if (!pConnection) return;
 
 	const auto loginServerID = pConnection->getID();
-	auto account = mAccountManager->getAccount(pLoginAccountID, loginServerID);
+	const auto accountCreated = mAccountManager->isCreated(pLSAccountID, loginServerID);
+	const auto worldLocked = isLocked();
 
-	// Account does not exist yet.
-	if (!account) {
-		// Server is currently locked, do not let them in.
-		if (isLocked()) {
-			mLog->info("Unknown Account attempted connection to locked server.");
-			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Denied);
-			return;
-		}
-
-		// Server is not locked, let them in.
+	// Server is currently locked and the connecting Account is unknown, deny connection.
+	if (worldLocked && !accountCreated) {
+		mLog->info("Unknown Account attempted connection to locked server.");
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
+		return;
+	}
+	// Server is not currently locked and the connecting Account is not known, allow connection.
+	else if (!worldLocked && !accountCreated) {
 		mLog->info("Unknown Account connecting to server.");
-		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
 		return;
 	}
 
-	// Check: Account is already logged in.
-	if (account->hasAuthentication()) {
-		mLog->info("Account is already logged in, denying connection.");
-		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Full);
+	const auto connected = mAccountManager->isConnected(pLSAccountID, loginServerID);
+
+	// Check: Account is already connected.
+	if (connected) {
+		mLog->info("Account is already connected, denying connection.");
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Full);
+		return;
+	}
+
+	auto account = mAccountManager->load(pLSAccountID, loginServerID);
+
+	// Account failed to load, deny connection.
+	if (!account) {
+		mLog->error("Account failed to load!");
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
 		return;
 	}
 
@@ -172,18 +182,17 @@ void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLogi
 	if (account->isSuspended()) {
 		mAccountManager->checkSuspension(account);
 	}
+	// Account is suspended.
+	if (account->isSuspended()) {
+		mLog->info("Suspended Account attempted connection.");
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Suspended);
+		return;
+	}
 	
 	// Account is banned.
 	if (account->isBanned()) {
 		mLog->info("Banned Account attempted connection.");
-		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Banned);
-		return;
-	}
-
-	// Account is suspended.
-	if (account->isSuspended()) {
-		mLog->info("Suspended Account attempted connection.");
-		pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Suspended);
+		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Banned);
 		return;
 	}
 
@@ -192,19 +201,20 @@ void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLogi
 		// Account has enough status to bypass lock.
 		if (account->getStatus() >= AccountStatus::BypassLock) {
 			mLog->info("Server Locked: connection allowed.");
-			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
-			return;
+			pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
 		}
 		// Account does not have enough status to bypass lock.
 		else {
 			mLog->info("Server Locked: connection denied.");
-			pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Denied);
+			pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
 		}
+
+		return;
 	}
 
 	// Speak friend and enter.
 	mLog->info("Connection allowed.");
-	pConnection->sendConnectResponse(pLoginAccountID, ResponseID::Allowed);
+	pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
 }
 
 void World::checkIncomingConnections() {
@@ -336,69 +346,64 @@ void World::updateLoginServer() const {
 	mLoginServerConnection->sendWorldStatus(getStatus(), numPlayers(), numZones());
 }
 
-void World::onAuthentication(LoginServerConnection* pConnection, const u32 pLoginAccountID, const String& pLoginAccountName, const String& pLoginKey, const u32 pIP) {
+void World::onAuthentication(LoginServerConnection* pConnection, const u32 pLSAccountID, const String& pLSAccountName, const String& pKey, const u32 pIP) {
 	const auto loginServerID = pConnection->getID();
-	
-	// Find existing Account.
-	auto account = mAccountManager->getAccount(pLoginAccountID, loginServerID);
 
-	// Account does not exist, make one.
-	if (!account) {
-		account = mAccountManager->createAccount(pLoginAccountID, pLoginAccountName, loginServerID);
+	// Check: Has this Account been created yet?
+	if (!mAccountManager->isCreated(pLSAccountID, pConnection->getID())) {
+		// Account does not exist, create it.
+		auto account = mAccountManager->create(pLSAccountID, pLSAccountName, loginServerID);
 
 		// Account creation failed.
 		if (!account) {
-			// LOG
+			// NOTE: This failure is logged within AccountManager::createAccount
 			return;
 		}
+
+		// Set authentication on newly created Account.
+		account->setAuthentication(pKey, pIP);
+		return;
+	}
+
+
+	// Check: Is this Account already connected?
+	else if(mAccountManager->isConnected(pLSAccountID, pLSAccountID)) {
+		// This should never occur as an Account that is already connect is blocked in onConnectRequest().
+		return;
+	}
+	
+	auto account = mAccountManager->load(pLSAccountID, pConnection->getID());
+	if (!account) {
+		// TODO: LOG
+		return;
 	}
 
 	// Check: Account status is allowed.
 	if (account->getStatus() < AccountStatus::Default) {
-		// LOG
+		// TODO: LOG
 		return;
 	}
 
-	account->setAuthentication(pLoginKey, pIP);
+	account->setAuthentication(pKey, pIP);
 }
 
 
-const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccountID, const String& pKey, const bool pZoning) {
+const bool World::onConnect(WorldConnection* pConnection, const u32 pLSAccountID, const String& pKey, const bool pZoning) {
 	if (!pConnection) return false;
 	if (pConnection->hasAccount()) return false;
 
-	auto account = mAccountManager->getAuthenticatedAccount(pLoginAccountID, pKey, pConnection->getIP());
+	auto account = mAccountManager->load(pLSAccountID, 1); // TODO: Figure out how to remove this HC Login Server ID.
 
 	if (!account) {
-		struct Bypass {
-			u32 mLoginAccountID;
-			u32 mLoginServerID;
-			String mKey;
-		};
-		std::list<Bypass> bypasses;
-		bypasses.push_back({ 2, 1, "passwords" });
-		bypasses.push_back({ 3, 1, "passwords" });
-
-		// Find bypass.
-		bool bypassFound = false;
-		for (auto i : bypasses) {
-			if (i.mLoginAccountID == pLoginAccountID && i.mKey == pKey) {
-				bypassFound = true;
-				account = mAccountManager->getAccount(i.mLoginAccountID, i.mLoginServerID);
-				if (!account) {
-					// LOG
-					return false;
-				}
-			}
-		}
-
-		// No authenticated Account and no bypass found.
-		if (!bypassFound) {
-			return false;
-		}
+		return false;
 	}
 
-	account->setAuthentication(pKey, pConnection->getIP());
+	// Check: Authentication matches.
+	if (account->getKey() != pKey || account->getIP() != pConnection->getIP()) {
+		return false;
+	}
+
+	// Associate WorldConnection and Account.
 	pConnection->setAccount(account);
 
 	// Going to: Another Zone
@@ -416,11 +421,9 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLoginAccoun
 	}
 	// Going to: Character Selection Screen.
 	else {
-		if (!account->isLoaded()) {
-			if (!mAccountManager->onConnect(account)){
-				// LOG/ This is really bad.
-				return false;
-			}
+		if (!mAccountManager->onConnect(account)){
+			// LOG/ This is really bad.
+			return false;
 		}
 
 		// NOTE: Required. Character guild names do not work (on entering world) without it.
@@ -552,6 +555,8 @@ void World::onLeaveWorld(Character* pCharacter) {
 	// LinkDead Character leaving World.
 	if (pCharacter->isLinkDead()) {
 		mLog->info("LinkDead Character (" + pCharacter->getName() + ") leaving world.");
+
+		// Notify AccountManager.
 		mAccountManager->onDisconnect(account);
 	}
 	// Camping Character leaving World.
@@ -561,6 +566,8 @@ void World::onLeaveWorld(Character* pCharacter) {
 	}
 	else {
 		mLog->error("Character leaving world under unknown circumstances.");
+
+		// Notify AccountManager.
 		mAccountManager->onDisconnect(account);
 	}
 

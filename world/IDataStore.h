@@ -8,6 +8,7 @@
 
 class ILogFactory;
 struct ItemData;
+class Account;
 
 namespace Data {
 	struct Account;
@@ -51,8 +52,13 @@ public:
 	virtual const bool loadSettings() = 0;
 
 	// Account Data
-	virtual const bool loadAccounts(Data::AccountList pAccounts) = 0;
-	virtual const bool saveAccounts(Data::AccountList pAccounts) = 0;
+	virtual const bool accountExists(const u32 pLSAccountID, const u32 pLSID) = 0;
+	virtual i32 accountCreate(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLServerID, const u32 pStatus) = 0;
+	virtual const bool accountLoad(Account* pAccount, const u32 pLSAccountID, const u32 pLSID) = 0;
+	virtual const bool accountSave(Account* pAccount) = 0;
+	virtual const i32 accountConnect(Account* pAccount) = 0;
+	virtual const bool accountDisconnect(Account* pAccount) = 0;
+
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) = 0;
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) = 0;
 

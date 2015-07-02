@@ -76,7 +76,7 @@ void ZoneConnection::updateLogContext() {
 
 	if (mCharacter) {
 		auto account = mCharacter->getAccount();
-		context << " LSID: " << account->getLoginServerID() << " LSAID: " << account->getLoginAccountID() << " LSAN: " << account->getLoginAccountName();
+		context << " LSID: " << account->getLSID() << " LSAID: " << account->getLSAccountID() << " LSAN: " << account->getLSAccountName();
 	}
 
 	context << ")]";

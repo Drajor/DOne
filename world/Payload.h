@@ -2431,7 +2431,7 @@ namespace Payload {
 
 		// LS->W
 		struct ConnectRequest : public Fixed<ConnectRequest> {
-			u32 mAccountID = 0;
+			u32 mLSAccountID = 0;
 			u32 mWorldID = 0;
 			u32 mFromID = 0;
 			u32 mToID = 0;

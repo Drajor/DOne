@@ -19,15 +19,6 @@
 
 static const String EmptyString = String("");
 
-namespace AccountStatus {
-	enum : i8 {
-		Banned = -2,
-		Suspended = -1,
-		Default = 0,
-		BypassLock = 20,
-	};
-}
-
 namespace ResponseID {
 	enum : i8 {
 		Allowed = 1,

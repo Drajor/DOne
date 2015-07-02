@@ -90,17 +90,17 @@ void LoginServerConnection::_handleConnectRequest(ServerPacket* pPacket) {
 
 	auto payload = ConnectRequest::convert(pPacket);
 
-	mLog->info("Connect request from AccountID: " + toString(payload->mAccountID));
+	mLog->info("Connect request from Login Server Account ID: " + toString(payload->mLSAccountID));
 
 	// Notify World.
-	mWorld->onConnectRequest(this, payload->mAccountID);
+	mWorld->onConnectRequest(this, payload->mLSAccountID);
 }
 
 void LoginServerConnection::sendConnectResponse(const u32 pAccountID, const u8 pResponse) {
 	using namespace Payload::LoginServer;
 
 	auto packet = new ServerPacket(OpCode::ConnectResponse, ConnectResponse::size());
-	auto payload = ConnectResponse::convert(packet->pBuffer);
+	auto payload = ConnectResponse::convert(packet);
 
 	payload->mAccountID = pAccountID;
 	payload->mResponse = pResponse;

@@ -38,7 +38,7 @@ const bool CharacterFactory::initialise(IDataStore* pDataStore, ILogFactory* pLo
 	return true;
 }
 
-Character* CharacterFactory::make(const String& pCharacterName, Account* pAccount) {
+Character* CharacterFactory::make(const String& pCharacterName, SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
 
 	// Check: Data::Character loaded.

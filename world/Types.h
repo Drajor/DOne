@@ -1,6 +1,13 @@
 #pragma once
 
 #include <stdint.h>
+#include <memory>
+
+template <class T>
+using SharedPtr = std::shared_ptr<T>;
+
+//template std::shared_ptr<T> SharedPtr<T>;
+//typedef std::shared_ptr<T> SharedPtr<T>;
 
 typedef uint8_t byte;
 typedef uint8_t uint8;

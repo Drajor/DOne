@@ -2,6 +2,7 @@
 
 #include "Types.h"
 #include <list>
+#include "Poco/DateTime.h"
 
 namespace Data {
 	struct Account;
@@ -19,6 +20,12 @@ class ILogFactory;
 class Character;
 class Account;
 
+/*
+
+IP ban is not currently supported, it can be added later if it is needed.
+
+*/
+
 class AccountManager {
 public:
 	~AccountManager();
@@ -26,53 +33,54 @@ public:
 	// Initialises the AccountManager.
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory);
 
-	// Returns the total number of Accounts.
-	inline const u32 numAccounts() const { return mAccounts.size(); }
-
 	// Creates a new Account.
-	Account* createAccount(const u32 pAccountID, const String pAccountName, const u32 pLoginServerID);
+	SharedPtr<Account> create(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID);
 
-	// Returns an Account.
-	Account* getAccount(const u32 pLoginAccountID, const u32 pLoginServerID);
-
-	// Returns an authenticated Account.
-	Account* getAuthenticatedAccount(const u32 pLoginAccountID, const String& pKey, const u32 pIP);
-	
-	// Returns the status of Account.
-	const i8 getStatus(const u32 pLoginAccountID, const u32 pLoginServerID);
+	// Loads and returns an existing Account.
+	SharedPtr<Account> load(const u32 pLSAccountID, const u32 pLServerID);
 
 	// Returns whether a specific Account exists.
-	const bool exists(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const;
+	const bool isCreated(const u32 pLSAccountID, const u32 pLSID);
+
+	// Returns whether a specific Account is currently connected to the server.
+	const bool isConnected(const u32 pLSAccountID, const u32 pLSID);
 	
 	// Creates a Character for a specified Account.
-	const bool createCharacter(Account* pAccount, Payload::World::CreateCharacter* pPayload);
+	const bool createCharacter(SharedPtr<Account> pAccount, Payload::World::CreateCharacter* pPayload);
 
 	// Deletes a Character from a specified Account.
-	const bool deleteCharacter(Account* pAccount, const String& pCharacterName);
+	const bool deleteCharacter(SharedPtr<Account> pAccount, const String& pCharacterName);
 
 	// Updates a specific Character.
-	const bool updateCharacter(Account* pAccount, const Character* pCharacter);
+	const bool updateCharacter(SharedPtr<Account> pAccount, const Character* pCharacter);
+
+	// Sets the the status of a specified Account.
+	const bool setStatus(SharedPtr<Account> pAccount, const i32 pStatus);
 
 	// Bans the specified Account.
-	const bool ban(Account* pAccount);
+	const bool ban(SharedPtr<Account> pAccount);
 	
 	// Removes the ban on the specified Account.
-	const bool removeBan(Account* pAccount);
+	const bool removeBan(SharedPtr<Account> pAccount);
 
 	// Suspends the specified Account.
-	const bool suspend(Account* pAccount, const u32 pExpiry);
+	const bool suspend(SharedPtr<Account> pAccount, const Poco::DateTime pExpiry);
 
 	// Removes the suspension on the specified Account.
-	const bool removeSuspension(Account* pAccount);
+	const bool removeSuspension(SharedPtr<Account> pAccount);
 
 	// Checks whether the suspension on the specified Account.
-	void checkSuspension(Account * pAccount);
+	// If the Account is suspended and the suspension has expired, it will be removed.
+	void checkSuspension(SharedPtr<Account> pAccount);
 
 	// Returns whether a Character name is allowed to be used.
 	const bool isCharacterNameAllowed(const String& pCharacterName) const;
 
-	const bool onConnect(Account* pAccount);
-	const bool onDisconnect(Account* pAccount);
+	const bool onConnect(SharedPtr<Account> pAccount);
+	const bool onDisconnect(SharedPtr<Account> pAccount);
+
+	// Saves a specific Account.
+	const bool _save(Account* pAccount);
 
 private:
 
@@ -81,21 +89,14 @@ private:
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
 
-	const bool _loadAccount(Account* pAccount);
-	const bool _unloadAccount(Account* pAccount);
-
 	// Returns whether a specific Character name is already being used.
 	const bool _isCharacterNameInUse(const String& pCharacterName) const;
 
 	// Returns whether a specific Character name is currently reserved.
 	const bool _isCharacterNameReserved(const String& pCharacterName) const;
-
-	bool _save(Data::Account* pAccountData);
-	bool _save();
 	
-	Account* _find(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const;
-	Account* _find(const u32 pLoginAccountID, const u32 pLoginServerID) const;
-	std::list<String> mCharacterNames;
+	SharedPtr<Account> _find(const u32 pLSAccountID, const String& pSAccountName, const u32 pLSID) const;
+	SharedPtr<Account> _find(const u32 pLSAccountID, const u32 pLSID) const;
 
-	std::list<Account*> mAccounts;
+	std::list<SharedPtr<Account>> mAccounts;
 };

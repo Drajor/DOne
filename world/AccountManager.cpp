@@ -9,14 +9,19 @@
 #include "Payload.h"
 #include "Limits.h"
 
+#include "Poco/Format.h"
+#include "Poco/DateTimeFormatter.h"
+
 #include "Character.h"
 #include "Zone.h"
+
+
 
 #include "Shlwapi.h"
 
 AccountManager::~AccountManager() {
-	if (mDataStore)	_save();
-
+	mAccounts.clear();
+	
 	mDataStore = nullptr;
 	mLogFactory = nullptr;
 
@@ -24,10 +29,6 @@ AccountManager::~AccountManager() {
 		delete mLog;
 		mLog = nullptr;
 	}
-
-	for (auto i : mAccounts)
-		delete i;
-	mAccounts.clear();
 }
 
 const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogFactory) {
@@ -44,93 +45,78 @@ const bool AccountManager::initialise(IDataStore* pDataStore, ILogFactory* pLogF
 	mLog->setContext("[AccountManager]");
 	mLog->status("Initialising.");
 
-	// Load Data.
-	std::list<Data::Account*> accountData;
-	if (!mDataStore->loadAccounts(accountData)) {
-		mLog->error("Failed to load accounts!");
-		return false;
-	}
-	
-	// Create Accounts.
-	for (auto i : accountData) {
-		auto account = new Account(i, mLogFactory->make());
-		mAccounts.push_back(account);
-	}
-
-	mLog->info("Loaded data for " + toString(numAccounts()) + " Accounts.");
-
 	mLog->status("Finished initialising.");
 	mInitialised = true;
 	return true;
 }
 
-Account* AccountManager::createAccount(const u32 pLoginAccountID, const String pLoginAccountName, const u32 pLoginServerID) {
+SharedPtr<Account> AccountManager::create(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID) {
+	mLog->info(Poco::format("Creating Account, Login Account ID = %u, Login Account Name = %s, Login Server ID = %u", pLSAccountID, pLSAccountName, pLSID));
+
 	// Check: Account does not already exist.
-	if (exists(pLoginAccountID, pLoginAccountName, pLoginServerID)) {
-		mLog->error("Attempting to create Account that already exists.");
+	if (isCreated(pLSAccountID, pLSID)) {
+		mLog->error("Account already exists.");
 		return nullptr;
 	}
 
-	auto data = new Data::Account();
-	data->mLoginAccountID = pLoginAccountID;
-	data->mLoginAccountName = pLoginAccountName;
-	data->mLoginServerID = pLoginServerID;
-	data->mCreated = Utility::Time::now();
-	data->mStatus = AccountStatus::Default;
-	
-	EXPECTED_BOOL(_save());
-	EXPECTED_BOOL(_save(data));
+	// Create Account.
+	auto accountID = mDataStore->accountCreate(pLSAccountID, pLSAccountName, pLSID, AccountStatus::Default);
 
-	Account* account = new Account(data, mLogFactory->make());
-	mAccounts.push_back(account);
+	// Check: Account was not created.
+	if (accountID == 0) {
+		mLog->error("Account creation failed.");
+		return nullptr;
+	}
 
+	return load(pLSAccountID, pLSID);
+}
+
+SharedPtr<Account> AccountManager::load(const u32 pLSAccountID, const u32 pLSID) {
+	mLog->info(Poco::format("Loading Account, Login Server Account ID = %u, Login Server ID = %u", pLSAccountID, pLSID));
+
+	auto account = std::make_shared<Account>(this);
+	const auto success = mDataStore->accountLoad(account.get(), pLSAccountID, pLSID);
+
+	// This is called because Account object has just had all variables set which make it appear as if needs saving when it doesn't.
+	account->saved();
+
+	// Check:
+	if (!success) {
+		mLog->error("Failed to load Account!");
+		account = nullptr;
+		return nullptr;
+	}
+
+	mLog->info("Successfully loaded Account.");
 	return account;
 }
 
-Account* AccountManager::getAccount(const u32 pLoginAccountID, const u32 pLoginServerID) {
-	return _find(pLoginAccountID, pLoginServerID);
-}
+const bool AccountManager::_save(Account* pAccount) {
+	if (!pAccount) return false;
 
-bool AccountManager::_save() {
-	// This a a kludge for now :(
-	std::list<Data::Account*> accounts;
-	for (auto i : mAccounts) {
-		accounts.push_back(i->getData());
-	}
+	const auto success = mDataStore->accountSave(pAccount);
 
-	if (!mDataStore->saveAccounts(accounts)) {
-		mLog->error("Failed to save Account Data");
+	if (!success) {
+		mLog->error("Failed to save Account, ID = " + toString(pAccount->getAccountID()));
 		return false;
 	}
 
+	pAccount->saved();
 	return true;
 }
 
-bool AccountManager::_save(Data::Account* pAccountData) {
-	if (!pAccountData) return false;
-	
-	if (!mDataStore->saveAccountCharacterData(pAccountData)) {
-		mLog->error("Failed to save Account Character Data.");
-		return false;
-	}
-
-	return true;
+const bool AccountManager::isCreated(const u32 pLSAccountID, const u32 pLSID) {
+	return mDataStore->accountExists(pLSAccountID, pLSID);
 }
 
-const bool AccountManager::exists(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const {
-	auto account = _find(pLoginAccountID, pLoginAccountName, pLoginServerID);
+const bool AccountManager::isConnected(const u32 pLSAccountID, const u32 pLSID) {
+	auto account = _find(pLSAccountID, pLSID);
 	return account ? true : false;
 }
 
-const i8 AccountManager::getStatus(const u32 pLoginAccountID, const u32 pLoginServerID) {
-	auto account = _find(pLoginAccountID, pLoginServerID);
-	return account ? account->getStatus() : AccountStatus::Default;
-}
-
-const bool AccountManager::createCharacter(Account* pAccount, Payload::World::CreateCharacter* pPayload) {
+const bool AccountManager::createCharacter(SharedPtr<Account> pAccount, Payload::World::CreateCharacter* pPayload) {
 	if (!pAccount) return false;
 	if (!pPayload) return false;
-	if (!pAccount->isLoaded()) return false;
 	if (!pAccount->hasReservedCharacterName()) return false;
 
 	// Check: Class ID is valid.
@@ -209,24 +195,23 @@ const bool AccountManager::createCharacter(Account* pAccount, Payload::World::Cr
 	auto data = pAccount->getData();
 	data->mCharacterData.push_back(accountCharacterData);
 
-	// Save.
-	if (!_save(data)){
-		mLog->error("Save failed in " + String(__FUNCTION__));
+	//// Save.
+	//if (!_save(data)){
+	//	mLog->error("Save failed in " + String(__FUNCTION__));
 
-		// Clean up.
-		data->mCharacterData.remove(accountCharacterData);
-		delete accountCharacterData;
-		delete c;
+	//	// Clean up.
+	//	data->mCharacterData.remove(accountCharacterData);
+	//	delete accountCharacterData;
+	//	delete c;
 
-		return false;
-	}
+	//	return false;
+	//}
 
 	return true;
 }
 
-const bool AccountManager::deleteCharacter(Account* pAccount, const String& pCharacterName) {
+const bool AccountManager::deleteCharacter(SharedPtr<Account> pAccount, const String& pCharacterName) {
 	if (!pAccount) return false;
-	if (!pAccount->isLoaded()) return false;
 	if (!pAccount->ownsCharacter(pCharacterName)) return false;
 
 	// Remove from Account.
@@ -239,12 +224,12 @@ const bool AccountManager::deleteCharacter(Account* pAccount, const String& pCha
 		}
 	}
 
-	return _save(data);
+	//return _save(data);
+	return true;
 }
 
-const bool AccountManager::updateCharacter(Account* pAccount, const Character* pCharacter) {
+const bool AccountManager::updateCharacter(SharedPtr<Account> pAccount, const Character* pCharacter) {
 	if (!pAccount) return false;
-	if (!pAccount->isLoaded()) return false;
 	if (!pCharacter) return false;
 	if (!pAccount->ownsCharacter(pCharacter->getName())) return false;
 
@@ -285,84 +270,75 @@ const bool AccountManager::updateCharacter(Account* pAccount, const Character* p
 	// TODO: Materials
 
 	// Save the Account.
-	return _save(pAccount->getData());
+	//return _save(pAccount->getData());
+	return true;
 }
 
-Account* AccountManager::_find(const u32 pLoginAccountID, const String& pLoginAccountName, const u32 pLoginServerID) const {
+SharedPtr<Account> AccountManager::_find(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID) const {
 	for (auto i : mAccounts) {
-		if (i->getLoginAccountID() == pLoginAccountID && i->getLoginAccountName() == pLoginAccountName && i->getLoginServerID() == pLoginServerID)
+		if (i->getLSAccountID() == pLSAccountID && i->getLSAccountName() == pLSAccountName && i->getLSID() == pLSID)
 			return i;
 	}
 
 	return nullptr;
 }
 
-Account* AccountManager::_find(const u32 pLoginAccountID, const u32 pLoginServerID) const {
+SharedPtr<Account> AccountManager::_find(const u32 pLSAccountID, const u32 pLSID) const {
 	for (auto i : mAccounts) {
-		if (i->getLoginAccountID() == pLoginAccountID && i->getLoginServerID() == pLoginServerID)
+		if (i->getLSAccountID() == pLSAccountID && i->getLSID() == pLSID)
 			return i;
 	}
 
 	return nullptr;
 }
 
-const bool AccountManager::ban(Account* pAccount) {
+const bool AccountManager::setStatus(SharedPtr<Account> pAccount, const i32 pStatus) {
 	if (!pAccount) return false;
 
-	// Change Account status.
-	pAccount->setStatus(AccountStatus::Banned);
+	mLog->info(Poco::format("Changing Account status from %d to %d.", pAccount->getStatus(), pStatus));
+	pAccount->setStatus(pStatus);
 
-	// Save.
-	return _save();
+	return true;
 }
 
-const bool AccountManager::removeBan(Account* pAccount) {
+const bool AccountManager::ban(SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
 
-	// Change Account status.
-	pAccount->setStatus(AccountStatus::Default);
-
-	// Save.
-	return _save();
+	mLog->info(Poco::format("Banning Account ID = %u", pAccount->getAccountID()));
+	return setStatus(pAccount, AccountStatus::Banned);
 }
 
-const bool AccountManager::suspend(Account* pAccount, const u32 pExpiry) {
+const bool AccountManager::removeBan(SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
 
-	// Change Account status.
-	pAccount->setStatus(AccountStatus::Suspended);
-	pAccount->setSuspensionTime(pExpiry);
-
-	// Save.
-	return _save();
+	mLog->info(Poco::format("Unbanning Account ID = %u", pAccount->getAccountID()));
+	return setStatus(pAccount, AccountStatus::Default);
 }
 
-const bool AccountManager::removeSuspension(Account* pAccount) {
+const bool AccountManager::suspend(SharedPtr<Account> pAccount, const Poco::DateTime pExpiry) {
 	if (!pAccount) return false;
 
-	// Change Account status.
-	pAccount->setStatus(AccountStatus::Default);
-	pAccount->setSuspensionTime(0);
-
-	// Save.
-	return _save();
+	mLog->info(Poco::format("Suspending Account ID = %u, Expiry = %s", pAccount->getAccountID(), Poco::DateTimeFormatter::format(pExpiry, "%e %b %Y %H:%M")));
+	pAccount->setSuspensionExpiry(pExpiry);
+	return setStatus(pAccount, AccountStatus::Suspended);
 }
 
-void AccountManager::checkSuspension(Account * pAccount) {
+const bool AccountManager::removeSuspension(SharedPtr<Account> pAccount) {
+	if (!pAccount) return false;
+
+	mLog->info(Poco::format("Unsuspending Account ID = %u", pAccount->getAccountID()));
+	pAccount->setSuspensionExpiry(Poco::DateTime(0, 1, 1, 0, 0, 0, 0, 0));
+	return setStatus(pAccount, AccountStatus::Default);
+}
+
+void AccountManager::checkSuspension(SharedPtr<Account> pAccount) {
 	if (!pAccount) return;
 	if (!pAccount->isSuspended()) return;
 
 	// Check: Has the suspension expired?
-	if (Utility::Time::now() >= pAccount->getSuspensionTime())
+	Poco::DateTime now;
+	if (now >= pAccount->getSuspensionExpiry())
 		removeSuspension(pAccount);
-}
-
-Account* AccountManager::getAuthenticatedAccount(const u32 pLoginAccountID, const String& pKey, const u32 pIP) {
-	auto f = [pLoginAccountID, pKey, pIP](const Account* pAccount) {
-		return pAccount->getLoginAccountID() == pLoginAccountID && pAccount->getKey() == pKey && pAccount->getIP() == pIP;
-	};
-	auto i = std::find_if(mAccounts.begin(), mAccounts.end(), f);
-	return i == mAccounts.end() ? nullptr : *i;
 }
 
 const bool AccountManager::isCharacterNameAllowed(const String& pCharacterName) const {
@@ -401,61 +377,34 @@ const bool AccountManager::_isCharacterNameReserved(const String& pCharacterName
 	return false;
 }
 
-const bool AccountManager::onConnect(Account* pAccount) {
-	if (!pAccount) return false;
-	if (pAccount->isLoaded()) return false; // Already loaded.
-
-	return _loadAccount(pAccount);
-}
-
-const bool AccountManager::onDisconnect(Account* pAccount) {
-	if (!pAccount) return false;
-	if (!pAccount->isLoaded()) return true;
-
-	auto character = pAccount->getActiveCharacter();
-	if (character) {
-		updateCharacter(pAccount, character);
-		pAccount->clearActiveCharacter();
-	}
-
-	_unloadAccount(pAccount);
-
-	pAccount->clearAuthentication();
-
-	return _save();
-}
-
-const bool AccountManager::_loadAccount(Account* pAccount) {
+const bool AccountManager::onConnect(SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
 
-	if (pAccount->isLoaded()) {
-		mLog->error("Failure: Attempt to load Account that is already loaded.");
-		return false;
-	}
-	
-	if (!mDataStore->loadAccountCharacterData(pAccount->getData())) {
-		mLog->error("Failure: Unable to load Account Character Data.");
-		return false;
-	}
+	// Configure Account session.
+	pAccount->setSessionBeginTime(Poco::DateTime());
+	const auto sessionID = mDataStore->accountConnect(pAccount.get());
+	pAccount->setSessionID(sessionID);
 
-	pAccount->setLoaded(true);
+	mAccounts.push_back(pAccount);
 	return true;
 }
 
-const bool AccountManager::_unloadAccount(Account* pAccount) {
+const bool AccountManager::onDisconnect(SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
-	
-	if (!pAccount->isLoaded()) {
-		mLog->error("Failure: Attempt to unload Account that is not loaded.");
-		return false;
+
+	auto character = pAccount->getActiveCharacter();
+	if (character) {
+		//updateCharacter(pAccount, character);
+		pAccount->clearActiveCharacter();
 	}
 
-	auto& characterData = pAccount->getData()->mCharacterData;
-	for (auto i : characterData) {
-		delete i;
-	}
-	characterData.clear();
+	// Clean up Account session.
+	pAccount->setSessionEndTime(Poco::DateTime());
+	mDataStore->accountDisconnect(pAccount.get());
 
-	pAccount->setLoaded(false);
+	// Clean up Account authentication.
+	pAccount->clearAuthentication();
+
+	mAccounts.remove(pAccount);
 	return true;
 }

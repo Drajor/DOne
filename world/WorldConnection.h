@@ -16,8 +16,8 @@ public:
 	const bool initialise(World* pWorld, ILogFactory* pLogFactory, EQStreamInterface* pStreamInterface);
 	bool update();
 
-	inline Account* getAccount() const { return mAccount; }
-	inline void setAccount(Account* pAccount) { mAccount = pAccount; }
+	inline SharedPtr<Account> getAccount() const { return mAccount; }
+	inline void setAccount(SharedPtr<Account> pAccount) { mAccount = pAccount; }
 	inline const bool hasAccount() const { return mAccount != nullptr; }
 	inline const bool isZoning() const { return mZoning; }
 
@@ -53,7 +53,7 @@ private:
 
 	bool mInitialised = false;
 	ILog* mLog = nullptr;
-	Account* mAccount = nullptr;
+	SharedPtr<Account> mAccount = nullptr;			// Pointer to the Account this Character belongs to.
 	EQStreamInterface* mStreamInterface = nullptr;
 	World* mWorld = nullptr;
 

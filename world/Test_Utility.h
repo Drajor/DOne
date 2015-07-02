@@ -7,8 +7,14 @@ class TrueDataStore : public IDataStore {
 public:
 	virtual const bool initialise() { return true; }
 	virtual const bool loadSettings() { return true; }
-	virtual const bool loadAccounts(Data::AccountList pAccounts) { return true; }
-	virtual const bool saveAccounts(Data::AccountList pAccounts) { return true; }
+
+	virtual const bool accountExists(const u32 pLSAccountID, const u32 pLSID) { return true; }
+	virtual i32 accountCreate(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID, const u32 pStatus) { return true; }
+	virtual const bool accountLoad(Account* pAccount, const u32 pLSAccountID, const u32 pLSID) { return true; }
+	virtual const bool accountSave(Account* pAccount) { return true; }
+	virtual const i32 accountConnect(Account* pAccount) { return true; }
+	virtual const bool accountDisconnect(Account* pAccount) { return true; }
+
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return true; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return true; }
 	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) { return true; }
@@ -33,8 +39,14 @@ class FalseDataStore : public IDataStore {
 public:
 	virtual const bool initialise() { return false; }
 	virtual const bool loadSettings() { return false; }
-	virtual const bool loadAccounts(Data::AccountList pAccounts) { return false; }
-	virtual const bool saveAccounts(Data::AccountList pAccounts) { return false; }
+	
+	virtual const bool accountExists(const u32 pLSAccountID, const u32 pLSID) { return false; }
+	virtual i32 accountCreate(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID, const u32 pStatus) { return false; }
+	virtual const bool accountLoad(Account* pAccount, const u32 pLSAccountID, const u32 pLSID) { return false; }
+	virtual const bool accountSave(Account* pAccount) { return false; }
+	virtual const i32 accountConnect(Account* pAccount) { return false; }
+	virtual const bool accountDisconnect(Account* pAccount) { return false; }
+
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return false; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return false; }
 	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) { return false; }

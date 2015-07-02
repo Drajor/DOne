@@ -83,10 +83,10 @@ public:
 	Character(Data::Character* pCharacterData);
 	~Character();
 
-	const bool initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController);
+	const bool initialise(SharedPtr<Account> pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController);
 	
 	// Returns the Account this Character belongs to.
-	inline Account* getAccount() const { return mAccount; }
+	inline SharedPtr<Account> getAccount() const { return mAccount; }
 
 	inline const bool isCharacter() const { return true; }
 	inline const bool isInitialised() const { return mInitialised; }
@@ -404,7 +404,7 @@ public:
 
 private:
 
-	Account* mAccount = nullptr;
+	SharedPtr<Account> mAccount = nullptr;
 
 	ZoneChange mZoneChange;
 	BindLocation mBindLocations[5];

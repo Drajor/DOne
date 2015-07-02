@@ -94,7 +94,7 @@ void Character::update() {
 	}
 }
 
-const bool Character::initialise(Account* pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController) {
+const bool Character::initialise(SharedPtr<Account> pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController) {
 	if (mInitialised) return false;
 	if (!pAccount) return false;
 	if (!pInventory) return false;

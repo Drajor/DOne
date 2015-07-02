@@ -8,19 +8,25 @@
 #include "LogSystem.h"
 #include "SpellContants.h"
 
+#include "Account.h"
+
 #include <fstream>
 #include <Windows.h>
 #include "../common/tinyxml/tinyxml.h"
 
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"
+#include "Poco/Data/RecordSet.h"
+#include "Poco/Data/SimpleRowFormatter.h"
 #include "Poco/Format.h"
 #include "Poco/Exception.h"
 
+#define PROFILE_XML_DS
+
+using namespace Poco::Data::Keywords;
+
 static bool AttributeFound = true;
 static bool AttributeNotFound = false;
-
-#define PROFILE_XML_DS
 
 template <typename T>
 inline bool readAttribute(TiXmlElement* pElement, const String& pAttributeName, T& pAttributeValue, bool pRequired = true, bool& pFound = AttributeNotFound) {
@@ -108,103 +114,259 @@ XMLDataStore::~XMLDataStore() {
 		delete mLog;
 		mLog = nullptr;
 	}
+
+	if (mSession) {
+		mSession->close();
+		delete mSession;
+		mSession = nullptr;
+	}
 }
 
 
 const bool XMLDataStore::initialise(ILogFactory* pLogFactory) {
+	if (mInitialised) return false;
 	if (!pLogFactory) return false;
-
+	
+	// Create and configure logging.
 	mLog = pLogFactory->make();
 	mLog->setContext("[DataStore]");
+	mLog->status("Initialising.");
+	
+	// Create and configure SQLite.
+	Poco::Data::SQLite::Connector::registerConnector();
+	mSession = new Poco::Data::Session("SQLite", "data.db");
 
-	return true;
-}
-
-namespace AccountXML {
-#define SCA static const auto
-	SCA FileLocation = "./data/accounts.xml";
-	namespace Tag {
-		SCA Accounts = "accounts";
-		SCA Account = "account";
-	}
-	namespace Attribute {
-		// Tag::Account
-		SCA LSServerID = "ls_id";
-		SCA LSAccountID = "ls_account_id";
-		SCA Name = "name";
-		SCA Status = "status";
-		SCA SuspendedUntil = "suspend_until";
-		SCA LastLogin = "last_login";
-		SCA Created = "created";
-	}
-#undef SCA
-}
-
-const bool XMLDataStore::loadAccounts(Data::AccountList pAccounts) {
-	using namespace AccountXML;
-#ifdef PROFILE_XML_DS
-	Profile p(String(__FUNCTION__), mLog);
-#endif
-	if (!pAccounts.empty()) return false;
-
-	// Load document.
-	TiXmlDocument document(AccountXML::FileLocation);
-	if (!document.LoadFile()) {
-		mLog->error("Failed to load " + String(AccountXML::FileLocation));
+	if (!setup()) {
+		mLog->status("setup failed!");
 		return false;
 	}
 
-	auto accountsElement = document.FirstChildElement(Tag::Accounts);
-	EXPECTED_BOOL(accountsElement);
-	auto accountElement = accountsElement->FirstChildElement(Tag::Account);
-	
-	// There are no accounts yet.
-	if (!accountElement)
-		return true;
-
-	// Iterate over each "account" element.
-	while (accountElement) {
-		auto accountData = new Data::Account();
-		pAccounts.push_back(accountData);
-
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::LSServerID, accountData->mLoginServerID));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::LSAccountID, accountData->mLoginAccountID));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Name, accountData->mLoginAccountName));
-		EXPECTED_BOOL(Limits::LoginServer::accountNameLength(accountData->mLoginAccountName));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Status, accountData->mStatus));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::SuspendedUntil, accountData->mSuspendedUntil));
-		EXPECTED_BOOL(readAttribute(accountElement, Attribute::Created, accountData->mCreated));
-		
-		accountElement = accountElement->NextSiblingElement(Tag::Account);
-	}
-	
+	mLog->status("Finished initialising.");
+	mInitialised = true;
 	return true;
 }
 
-const bool XMLDataStore::saveAccounts(Data::AccountList pAccounts) {
-	using namespace AccountXML;
-#ifdef PROFILE_XML_DS
-	Profile p(String(__FUNCTION__), mLog);
-#endif
-	TiXmlDocument document(FileLocation);
+const bool XMLDataStore::setup() {
 
-	auto accountsElement = new TiXmlElement(Tag::Accounts);
-	document.LinkEndChild(accountsElement);
+	static const String createAccountTable =
+		"CREATE TABLE IF NOT EXISTS account (\
+		id INTEGER PRIMARY KEY AUTOINCREMENT,\
+		status INTEGER NOT NULL,\
+		ls_id INTEGER NOT NULL,\
+		ls_account_id INTEGER NOT NULL,\
+		ls_account_name TEXT NOT NULL,\
+		shared_platinum INTEGER NOT NULL,\
+		suspension_time DATETIME DEFAULT '0000-01-01 00:00:00' NOT NULL,\
+		auth_key TEXT DEFAULT '' NOT NULL,\
+		auth_ip INTEGER DEFAULT 0 NOT NULL, \
+		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
+		)";
 
-	for (auto i : pAccounts) {
-		auto accountElement = new TiXmlElement(Tag::Account);
-		accountsElement->LinkEndChild(accountElement);
+	static const String createAccountSessionTable =
+		"CREATE TABLE IF NOT EXISTS account_session (\
+		id INTEGER PRIMARY KEY AUTOINCREMENT,\
+		account_id INTEGER NOT NULL,\
+		begin DATETIME NOT NULL,\
+		end DATETIME DEFAULT '0000-01-01 00:00:00' NOT NULL,\
+		ip TEXT NOT NULL\
+		)";
 
-		accountElement->SetAttribute(Attribute::LSServerID, std::to_string(i->mLoginServerID).c_str());
-		accountElement->SetAttribute(Attribute::LSAccountID, std::to_string(i->mLoginAccountID).c_str());
-		accountElement->SetAttribute(Attribute::Name, i->mLoginAccountName.c_str());
-		accountElement->SetAttribute(Attribute::Status, i->mStatus);
-		accountElement->SetAttribute(Attribute::SuspendedUntil, std::to_string(i->mSuspendedUntil).c_str());
-		accountElement->SetAttribute(Attribute::Created, std::to_string(i->mCreated).c_str());
+	static const String createAccountCharacterTable =
+		"CREATE TABLE IF NOT EXISTS account_character  (\
+		character_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
+		account_id INTEGER NOT NULL,\
+		name TEXT NOT NULL,\
+		level INTEGER NOT NULL,\
+		race INTEGER NOT NULL,\
+		gender INTEGER NOT NULL,\
+		class INTEGER NOT NULL,\
+		deity INTEGER NOT NULL,\
+		zone INTEGER NOT NULL,\
+		face INTEGER NOT NULL,\
+		hair_style INTEGER NOT NULL,\
+		hair_colour INTEGER NOT NULL,\
+		beard_style INTEGER NOT NULL,\
+		beard_colour INTEGER NOT NULL,\
+		eye_colour1 INTEGER NOT NULL,\
+		eye_colour2 INTEGER NOT NULL,\
+		drakkin_heritage INTEGER NOT NULL,\
+		drakkin_tattoo INTEGER NOT NULL,\
+		drakkin_details INTEGER NOT NULL,\
+		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
+		)";
+
+	static const String createCharacterTable =
+		"CREATE TABLE IF NOT EXISTS character (\
+		character_id INTEGER PRIMARY KEY\
+		)";
+
+	static const std::vector<const String> createTables = { createAccountTable, createAccountSessionTable, createAccountCharacterTable, createCharacterTable };
+
+	for (auto i : createTables) {
+		try {
+			(*mSession) << i, now;
+		}
+		catch (Poco::Exception e) {
+			mLog->error(e.message());
+			return false;
+		}
 	}
 
-	EXPECTED_BOOL(document.SaveFile());
 	return true;
+}
+
+i32 XMLDataStore::insertQuery(const String& pQuery) {
+	// Execute INSERT.
+	try {
+		(*mSession) << pQuery, now;
+	}
+	catch (Poco::Exception e) {
+		// INSERT failed.
+		mLog->error("Query Failed: " + pQuery);
+		mLog->error("Reason: " + e.message());
+		return 0;
+	}
+
+	// Retrieve last INSERT id.
+	i32 lastID = 0;
+	static const String query = "SELECT last_insert_rowid()";
+	try {
+		(*mSession) << query, into(lastID), now;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return 0;
+	}
+
+	return lastID;
+}
+
+const bool XMLDataStore::updateQuery(const String& pQuery) {
+	// Execute UPDATE.
+	try {
+		(*mSession) << pQuery, now;
+	}
+	catch (Poco::Exception e) {
+		// INSERT failed.
+		mLog->error("Query Failed: " + pQuery);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
+
+	return true;
+}
+
+const bool XMLDataStore::accountExists(const u32 pLSAccountID, const u32 pLSID) {
+	// Prepare query.
+	static const String selectAccount = "SELECT id FROM account WHERE ls_id = %u AND ls_account_id = %u";
+	auto query = Poco::format(selectAccount, pLSID, pLSAccountID);
+
+	// Execute query.
+	try {
+		u32 accountID = 0;
+		(*mSession) << query, into(accountID), now;
+
+		return accountID != 0;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
+}
+
+i32 XMLDataStore::accountCreate(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID, const u32 pStatus) {
+	// Prepare query.
+	static const String insertAccount = "INSERT INTO account (status, ls_id, ls_account_id, ls_account_name, shared_platinum) VALUES(%u, %u, %u, '%s', 0)";
+	auto query = Poco::format(insertAccount, pStatus, pLSID, pLSAccountID, pLSAccountName);
+
+	// Execute query.
+	return insertQuery(query);
+}
+
+const bool XMLDataStore::accountLoad(Account* pAccount, const u32 pLSAccountID, const u32 pLSID) {
+	if (!pAccount) return false;
+
+	// Prepare query.
+	static const auto selectAccount = "SELECT * FROM account WHERE ls_id = %u AND ls_account_id = %u";
+	auto query = Poco::format(selectAccount, pLSAccountID, pLSID);
+
+	// Execute query.
+	try {
+		Poco::Data::Statement select((*mSession) << query);
+		select.execute();
+		Poco::Data::RecordSet rs(select);
+
+		// Check: We have a single result as expected.
+		if (rs.rowCount() != 1) return false;
+
+		// Extract data from result.
+		u32 col = 0;
+		auto row = rs.row(0);
+		pAccount->setAccountID(row.get(col).convert<u32>());
+		pAccount->setStatus(row.get(++col).convert<i32>());
+		pAccount->setLSID(row.get(++col).convert<u32>());
+		pAccount->setLSAccountID(row.get(++col).convert<u32>());
+		pAccount->setLSAccountName(row.get(++col).convert<String>());
+		pAccount->setSharedPlatinum(row.get(++col).convert<i32>());
+		pAccount->setSuspensionExpiry(row.get(++col).convert<Poco::DateTime>());
+		pAccount->setKey(row.get(++col).convert<String>());
+		pAccount->setIP(row.get(++col).convert<u32>());
+		pAccount->setCreated(row.get(++col).convert<Poco::DateTime>());
+
+		return true;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
+}
+
+const bool XMLDataStore::accountSave(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Convert SuspensionExpiry Poco::DateTime into compatible DB string.
+	const auto suspension = Poco::DateTimeFormatter::format(pAccount->getSuspensionExpiry(), "%Y-%m-%d %H:%M:%S");
+
+	// Prepare query.
+	static const auto updateAccount = "UPDATE account SET status = %d, ls_id = %u, ls_account_id = %u, ls_account_name = '%s', shared_platinum = %d, suspension_time = '%s', auth_key = '%s', auth_ip = %u WHERE id = %u";
+	auto query = Poco::format(updateAccount, pAccount->getStatus(), pAccount->getLSID(), pAccount->getLSAccountID(), pAccount->getLSAccountName(), pAccount->getSharedPlatinum(), suspension, pAccount->getKey(), pAccount->getIP(), pAccount->getAccountID());
+
+	// Execute query.
+	return updateQuery(query);
+}
+
+const i32 XMLDataStore::accountConnect(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Convert SessionBeginTime Poco::DateTime into compatible DB string.
+	const auto beginStr = Poco::DateTimeFormatter::format(pAccount->getSessionBeginTime(), "%Y-%m-%d %H:%M:%S");
+
+	// Convert IP to compatible DB string.
+	const auto ipStr = "nope";
+
+	// Prepare query.
+	static const auto insertAccountSession = "INSERT INTO account_session (account_id, begin, ip) VALUES(%u, '%s', '%s')";
+	auto query = Poco::format(insertAccountSession, pAccount->getAccountID(), beginStr, ipStr);
+
+	// Execute query.
+	return insertQuery(query);
+}
+
+const bool XMLDataStore::accountDisconnect(Account* pAccount) {
+	if (!pAccount) return false;
+
+	// Convert SessionEndTime Poco::DateTime into compatible DB string.
+	const auto endStr = Poco::DateTimeFormatter::format(pAccount->getSessionEndTime(), "%Y-%m-%d %H:%M:%S");
+
+	// Prepare query.
+	static const auto updateAccountSession = "UPDATE account_session SET end = '%s' WHERE id = %d ";
+	auto query = Poco::format(updateAccountSession, endStr, pAccount->getSessionID());
+
+	// Execute query.
+	return updateQuery(query);
 }
 
 namespace AccountCharacterDataXML {
