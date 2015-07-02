@@ -6,17 +6,41 @@ class ILogFactory;
 class ILog;
 class TiXmlElement;
 
+namespace Poco {
+	namespace Data {
+		class Session;
+	}
+}
+
 class XMLDataStore : public IDataStore {
 public:
 	~XMLDataStore();
 	const bool initialise(ILogFactory* pLogFactory);
+	const bool setup();
 	
 	// Settings
 	const bool loadSettings();
 
 	// Account Data
-	const bool loadAccounts(Data::AccountList pAccounts);
-	const bool saveAccounts(Data::AccountList pAccounts);
+
+	i32 insertQuery(const String& pQuery);
+	const bool updateQuery(const String& pQuery);
+
+	// Returns whether an account already exists
+	const bool accountExists(const u32 pLSAccountID, const u32 pLSID);
+
+	// Creates an account and returns the ID.
+	i32 accountCreate(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID, const u32 pStatus);
+
+	// Loads an Account.
+	const bool accountLoad(Account* pAccount, const u32 pLSAccountID, const u32 pLSID);
+
+	// Saves an Account.
+	const bool accountSave(Account* pAccount);
+
+	const i32 accountConnect(Account* pAccount);
+	const bool accountDisconnect(Account* pAccount);
+
 	const bool loadAccountCharacterData(Data::Account* pAccount);
 	const bool saveAccountCharacterData(Data::Account* pAccount);
 
@@ -64,5 +88,7 @@ public:
 
 private:
 
+	bool mInitialised = false;
 	ILog* mLog = nullptr;
+	Poco::Data::Session* mSession = nullptr;
 };
