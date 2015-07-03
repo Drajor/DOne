@@ -176,6 +176,9 @@ const bool XMLDataStore::setup() {
 	static const String createCharacterTableSQLITE =
 		"CREATE TABLE IF NOT EXISTS _character (\
 		id INTEGER PRIMARY KEY AUTOINCREMENT\
+		account_id INTEGER NOT NULL,\
+		name VARCHAR(50) NOT NULL,\
+		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
 		)";
 
 
@@ -342,10 +345,10 @@ const i32 XMLDataStore::accountConnect(Account* pAccount) {
 	if (!pAccount) return false;
 
 	// Convert SessionBeginTime Poco::DateTime into compatible DB string.
-	const auto beginStr = Poco::DateTimeFormatter::format(pAccount->getSessionBeginTime(), "%Y-%m-%d %H:%M:%S");
+	const String beginStr = Poco::DateTimeFormatter::format(pAccount->getSessionBeginTime(), "%Y-%m-%d %H:%M:%S");
 
 	// Convert IP to compatible DB string.
-	const auto ipStr = "nope";
+	const String ipStr = "nope";
 
 	// Prepare query.
 	static const auto insertAccountSession = "INSERT INTO _account_session (account_id, begin, ip) VALUES(%u, '%s', '%s')";
@@ -362,14 +365,38 @@ const bool XMLDataStore::accountDisconnect(Account* pAccount) {
 	if (!pAccount) return false;
 
 	// Convert SessionEndTime Poco::DateTime into compatible DB string.
-	const auto endStr = Poco::DateTimeFormatter::format(pAccount->getSessionEndTime(), "%Y-%m-%d %H:%M:%S");
+	const String endStr = Poco::DateTimeFormatter::format(pAccount->getSessionEndTime(), "%Y-%m-%d %H:%M:%S");
 
 	// Prepare query.
-	static const auto updateAccountSession = "UPDATE _account_session SET end = '%s' WHERE id = %d ";
+	static const String updateAccountSession = "UPDATE _account_session SET end = '%s' WHERE id = %d ";
 	auto query = Poco::format(updateAccountSession, endStr, pAccount->getSessionID());
 
 	// Execute query.
 	return updateQuery(query);
+}
+
+const bool XMLDataStore::isCharacterNameInUse(const String& pCharacterName, bool& pResult) {
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+	// Prepare query.
+	static const String selectCharacter = "SELECT id FROM _character WHERE name = '%s'";
+	auto query = Poco::format(selectCharacter, pCharacterName);
+
+	// Execute query.
+	try {
+		Poco::Data::Statement select((*mSession) << query);
+		select.execute();
+		Poco::Data::RecordSet rs(select);
+
+		pResult = rs.rowCount() != 0;
+		return true;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
 }
 
 const bool XMLDataStore::accountCharactersLoad(Account* pAccount) {

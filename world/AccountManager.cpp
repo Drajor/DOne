@@ -117,19 +117,40 @@ const bool AccountManager::isConnected(const u32 pLSAccountID, const u32 pLSID) 
 const bool AccountManager::createCharacter(SharedPtr<Account> pAccount, Payload::World::CreateCharacter* pPayload) {
 	if (!pAccount) return false;
 	if (!pPayload) return false;
-	if (!pAccount->hasReservedCharacterName()) return false;
+
+	mLog->info(Poco::format("Creating Character, Account ID = %u", pAccount->getAccountID()));
+
+	// Check: Does this Account have a name reserved?
+	if (!pAccount->hasReservedCharacterName()) {
+		mLog->error("Failed to create Character, no reserved name.");
+		return false;
+	}
 
 	// Check: Class ID is valid.
-	if (!Limits::Character::classID(pPayload->mClass)) return false;
+	if (!Limits::Character::classID(pPayload->mClass)){
+		mLog->error(Poco::format("Failed to create Character, class (%u) not valid.", pPayload->mClass));
+		return false;
+	}
 
 	// Check: Race ID is valid.
-	if (!Limits::Character::raceID(pPayload->mRace)) return false;
+	if (!Limits::Character::raceID(pPayload->mRace)) {
+		mLog->error(Poco::format("Failed to create Character, race (%u) not valid.", pPayload->mRace));
+		return false;
+	}
 
 	// Check: Gender ID is valid.
-	if (!Limits::Character::genderID(pPayload->mGender)) return false;
+	if (!Limits::Character::genderID(pPayload->mGender)) {
+		mLog->error(Poco::format("Failed to create Character, gender (%u) not valid.", pPayload->mGender));
+		return false;
+	}
 
 	// Check: Deity ID is valid.
-	if (!Limits::Character::deityID(pPayload->mDeity)) return false;
+	if (!Limits::Character::deityID(pPayload->mDeity)) {
+		mLog->error(Poco::format("Failed to create Character, deity (%u) not valid.", pPayload->mDeity));
+		return false;
+	}
+	
+	// TODO: Validate Character appearance details. Not sure how I am going to be able to determine what is and is not valid :/
 
 	// TODO: Check Race is unlocked for the account.
 
@@ -137,63 +158,65 @@ const bool AccountManager::createCharacter(SharedPtr<Account> pAccount, Payload:
 	String characterName = pAccount->getReservedCharacterName();
 	pAccount->clearReservedCharacterName();
 
-	auto c = new Data::Character();
-	c->mName = characterName;
-	c->mClass = pPayload->mClass;
-	c->mZoneID = 1; // TODO:
+	//auto c = new Character();
 
-	c->mExperience.mLevel = 1;
-	c->mExperience.mMaximumLevel = 10;
+	//auto c = new Data::Character();
+	//c->mName = characterName;
+	//c->mClass = pPayload->mClass;
+	//c->mZoneID = 1; // TODO:
 
-	// Appearance Data
-	c->mRace = pPayload->mRace;
-	c->mGender = pPayload->mGender;
-	c->mFaceStyle = pPayload->mFaceStyle;
-	c->mHairStyle = pPayload->mHairStyle;
-	c->mBeardStyle = pPayload->mBeardStyle;
-	c->mHairColour = pPayload->mHairColour;
-	c->mBeardColour = pPayload->mBeardColour;
-	c->mEyeColourLeft = pPayload->mEyeColour1;
-	c->mEyeColourRight = pPayload->mEyeColour2;
-	c->mDrakkinHeritage = pPayload->mDrakkinHeritage;
-	c->mDrakkinTattoo = pPayload->mDrakkinTattoo;
-	c->mDrakkinDetails = pPayload->mDrakkinDetails;
-	c->mDeity = pPayload->mDeity;
-	c->mNew = true;
+	//c->mExperience.mLevel = 1;
+	//c->mExperience.mMaximumLevel = 10;
 
-	// Save Character.
-	if (!mDataStore->saveCharacter(characterName, c)) {
-		mLog->error("Failure: Creating Character.");
-		delete c;
-		return false;
-	}
+	//// Appearance Data
+	//c->mRace = pPayload->mRace;
+	//c->mGender = pPayload->mGender;
+	//c->mFaceStyle = pPayload->mFaceStyle;
+	//c->mHairStyle = pPayload->mHairStyle;
+	//c->mBeardStyle = pPayload->mBeardStyle;
+	//c->mHairColour = pPayload->mHairColour;
+	//c->mBeardColour = pPayload->mBeardColour;
+	//c->mEyeColourLeft = pPayload->mEyeColour1;
+	//c->mEyeColourRight = pPayload->mEyeColour2;
+	//c->mDrakkinHeritage = pPayload->mDrakkinHeritage;
+	//c->mDrakkinTattoo = pPayload->mDrakkinTattoo;
+	//c->mDrakkinDetails = pPayload->mDrakkinDetails;
+	//c->mDeity = pPayload->mDeity;
+	//c->mNew = true;
 
-	// Create Data::AccountCharacter for the new Character.
-	
-	auto accountCharacterData = new Data::AccountCharacter();
-	accountCharacterData->mName = characterName;
-	accountCharacterData->mLevel = c->mExperience.mLevel;
-	accountCharacterData->mRace = c->mRace;
-	accountCharacterData->mClass = c->mClass;
-	accountCharacterData->mDeity = c->mDeity;
-	accountCharacterData->mZoneID = c->mZoneID;
-	accountCharacterData->mGender = c->mGender;
-	accountCharacterData->mFaceStyle = c->mFaceStyle;
-	accountCharacterData->mHairStyle = c->mHairStyle;
-	accountCharacterData->mHairColour = c->mHairColour;
-	accountCharacterData->mBeardStyle = c->mBeardStyle;
-	accountCharacterData->mBeardColour = c->mBeardColour;
-	accountCharacterData->mEyeColourLeft = c->mEyeColourLeft;
-	accountCharacterData->mEyeColourRight = c->mEyeColourRight;
-	accountCharacterData->mDrakkinHeritage = c->mDrakkinHeritage;
-	accountCharacterData->mDrakkinTattoo = c->mDrakkinTattoo;
-	accountCharacterData->mDrakkinDetails = c->mDrakkinDetails;
-	accountCharacterData->mPrimary = 0;
-	accountCharacterData->mSecondary = 0;
+	//// Save Character.
+	//if (!mDataStore->saveCharacter(characterName, c)) {
+	//	mLog->error("Failed to create Character, could not be saved.");
+	//	delete c;
+	//	return false;
+	//}
 
-	// Add to Account.
-	auto data = pAccount->getData();
-	data->mCharacterData.push_back(accountCharacterData);
+	//// Create Data::AccountCharacter for the new Character.
+	//
+	//auto accountCharacterData = new Data::AccountCharacter();
+	//accountCharacterData->mName = characterName;
+	//accountCharacterData->mLevel = c->mExperience.mLevel;
+	//accountCharacterData->mRace = c->mRace;
+	//accountCharacterData->mClass = c->mClass;
+	//accountCharacterData->mDeity = c->mDeity;
+	//accountCharacterData->mZoneID = c->mZoneID;
+	//accountCharacterData->mGender = c->mGender;
+	//accountCharacterData->mFaceStyle = c->mFaceStyle;
+	//accountCharacterData->mHairStyle = c->mHairStyle;
+	//accountCharacterData->mHairColour = c->mHairColour;
+	//accountCharacterData->mBeardStyle = c->mBeardStyle;
+	//accountCharacterData->mBeardColour = c->mBeardColour;
+	//accountCharacterData->mEyeColourLeft = c->mEyeColourLeft;
+	//accountCharacterData->mEyeColourRight = c->mEyeColourRight;
+	//accountCharacterData->mDrakkinHeritage = c->mDrakkinHeritage;
+	//accountCharacterData->mDrakkinTattoo = c->mDrakkinTattoo;
+	//accountCharacterData->mDrakkinDetails = c->mDrakkinDetails;
+	//accountCharacterData->mPrimary = 0;
+	//accountCharacterData->mSecondary = 0;
+
+	//// Add to Account.
+	//auto data = pAccount->getData();
+	//data->mCharacterData.push_back(accountCharacterData);
 
 	//// Save.
 	//if (!_save(data)){
@@ -365,7 +388,16 @@ const bool AccountManager::isCharacterNameAllowed(const String& pCharacterName) 
 }
 
 const bool AccountManager::_isCharacterNameInUse(const String& pCharacterName) const {
-	return false;
+	bool result = true;
+	if (!mDataStore->isCharacterNameInUse(pCharacterName, result)) {
+		mLog->error("Failed to check if Character name in use");
+
+		// NOTE: We return true, indicating that the Character name is in use even though that may not be true.
+		// This is prevent any chance of a duplicate Character name getting into the DB.
+		return true;
+	}
+
+	return result;
 }
 
 const bool AccountManager::_isCharacterNameReserved(const String& pCharacterName) const {

@@ -461,14 +461,14 @@ const bool World::onApproveName(WorldConnection* pConnection, const String& pCha
 		return true;
 	}
 
-	const bool nameAllowed = mAccountManager->isCharacterNameAllowed(pCharacterName);
+	const bool allowed = mAccountManager->isCharacterNameAllowed(pCharacterName);
 
 	// Reserve name for Account.
-	if (nameAllowed) {
+	if (allowed) {
 		account->setReservedCharacterName(pCharacterName);
 	}
 
-	pConnection->sendApproveNameResponse(nameAllowed);
+	pConnection->sendApproveNameResponse(allowed);
 	return true;
 }
 

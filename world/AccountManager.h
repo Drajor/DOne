@@ -82,18 +82,18 @@ public:
 	// Saves a specific Account.
 	const bool _save(Account* pAccount);
 
+	// Returns whether a specific Character name is already being used.
+	const bool _isCharacterNameInUse(const String& pCharacterName) const;
+
+	// Returns whether a specific Character name is currently reserved.
+	const bool _isCharacterNameReserved(const String& pCharacterName) const;
+
 private:
 
 	bool mInitialised = false;
 	IDataStore* mDataStore = nullptr;
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
-
-	// Returns whether a specific Character name is already being used.
-	const bool _isCharacterNameInUse(const String& pCharacterName) const;
-
-	// Returns whether a specific Character name is currently reserved.
-	const bool _isCharacterNameReserved(const String& pCharacterName) const;
 	
 	SharedPtr<Account> _find(const u32 pLSAccountID, const String& pSAccountName, const u32 pLSID) const;
 	SharedPtr<Account> _find(const u32 pLSAccountID, const u32 pLSID) const;

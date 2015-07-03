@@ -14,6 +14,7 @@ public:
 	virtual const bool accountSave(Account* pAccount) { return true; }
 	virtual const i32 accountConnect(Account* pAccount) { return true; }
 	virtual const bool accountDisconnect(Account* pAccount) { return true; }
+	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) { return true; }
 
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return true; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return true; }
@@ -46,6 +47,7 @@ public:
 	virtual const bool accountSave(Account* pAccount) { return false; }
 	virtual const i32 accountConnect(Account* pAccount) { return false; }
 	virtual const bool accountDisconnect(Account* pAccount) { return false; }
+	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) { return false; }
 
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return false; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return false; }

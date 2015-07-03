@@ -41,6 +41,9 @@ public:
 	const i32 accountConnect(Account* pAccount);
 	const bool accountDisconnect(Account* pAccount);
 
+	// Returns whether a Character name is already being used.
+	const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult);
+
 	const bool accountCharactersLoad(Account* pAccount);
 
 	const bool loadAccountCharacterData(Data::Account* pAccount);

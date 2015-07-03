@@ -216,6 +216,8 @@ const bool WorldConnection::handleApproveName(const EQApplicationPacket* pPacket
 	STRING_CHECK(payload->mName, Limits::Character::MAX_INPUT_LENGTH);
 	const String characterName(payload->mName);
 
+	mLog->info(payload->_debug());
+
 	// Notify World.
 	return mWorld->onApproveName(this, characterName);
 }

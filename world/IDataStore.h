@@ -59,6 +59,8 @@ public:
 	virtual const i32 accountConnect(Account* pAccount) = 0;
 	virtual const bool accountDisconnect(Account* pAccount) = 0;
 
+	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) = 0;
+
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) = 0;
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) = 0;
 
