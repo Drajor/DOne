@@ -16,7 +16,6 @@
 
 #include "Poco/Data/Session.h"
 #include "Poco/Data/SQLite/Connector.h"
-#include "Poco/Data/MySQL/Connector.h"
 #include "Poco/Data/RecordSet.h"
 #include "Poco/Data/SimpleRowFormatter.h"
 #include "Poco/Format.h"
@@ -137,10 +136,7 @@ const bool XMLDataStore::initialise(ILogFactory* pLogFactory) {
 	Poco::Data::SQLite::Connector::registerConnector();
 	mSession = new Poco::Data::Session("SQLite", "data.db");
 
-	(*mSession) << "PRAGMA synchronous = OFF", now;
-
-	//Poco::Data::MySQL::Connector::registerConnector();
-	//mSession = new Poco::Data::Session("MySQL", "host=127.0.0.1;port=3307;user=root;password=password;db=tits;compress=false;auto-reconnect=false");
+	//(*mSession) << "PRAGMA synchronous = OFF", now;
 
 	if (!setup()) {
 		mLog->status("setup failed!");
@@ -154,23 +150,8 @@ const bool XMLDataStore::initialise(ILogFactory* pLogFactory) {
 
 const bool XMLDataStore::setup() {
 
-	static const String createAccountTableMYSQL =
-		"CREATE TABLE IF NOT EXISTS account (\
-		id INTEGER AUTO_INCREMENT,\
-		status INTEGER NOT NULL,\
-		ls_id INTEGER NOT NULL,\
-		ls_account_id INTEGER NOT NULL,\
-		ls_account_name VARCHAR(50) NOT NULL,\
-		shared_platinum INTEGER NOT NULL,\
-		suspension_time DATETIME DEFAULT '0000-01-01 00:00:00' NOT NULL,\
-		auth_key VARCHAR(50) DEFAULT '' NOT NULL,\
-		auth_ip INTEGER DEFAULT 0 NOT NULL, \
-		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,\
-		PRIMARY KEY (id)\
-		)";
-
 	static const String createAccountTableSQLITE =
-		"CREATE TABLE IF NOT EXISTS account (\
+		"CREATE TABLE IF NOT EXISTS _account (\
 		id INTEGER PRIMARY KEY AUTOINCREMENT,\
 		status INTEGER NOT NULL,\
 		ls_id INTEGER NOT NULL,\
@@ -183,18 +164,8 @@ const bool XMLDataStore::setup() {
 		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
 		)";
 
-	static const String createAccountSessionTableMYSQL =
-		"CREATE TABLE IF NOT EXISTS account_session (\
-		id INTEGER AUTO_INCREMENT,\
-		account_id INTEGER NOT NULL,\
-		begin DATETIME NOT NULL,\
-		end DATETIME DEFAULT '0000-01-01 00:00:00' NOT NULL,\
-		ip VARCHAR(50) NOT NULL,\
-		PRIMARY KEY (id)\
-		)";
-
 	static const String createAccountSessionTableSQLITE =
-		"CREATE TABLE IF NOT EXISTS account_session (\
+		"CREATE TABLE IF NOT EXISTS _account_session (\
 		id INTEGER PRIMARY KEY AUTOINCREMENT,\
 		account_id INTEGER NOT NULL,\
 		begin DATETIME NOT NULL,\
@@ -202,59 +173,13 @@ const bool XMLDataStore::setup() {
 		ip VARCHAR(50) NOT NULL\
 		)";
 
-	//static const String createAccountCharacterTable =
-	//	"CREATE TABLE IF NOT EXISTS account_character  (\
-	//	id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,\
-	//	account_id INTEGER NOT NULL,\
-	//	name TEXT NOT NULL,\
-	//	level INTEGER NOT NULL,\
-	//	race INTEGER NOT NULL,\
-	//	gender INTEGER NOT NULL,\
-	//	class INTEGER NOT NULL,\
-	//	deity INTEGER NOT NULL,\
-	//	zone INTEGER NOT NULL,\
-	//	face INTEGER NOT NULL,\
-	//	hair_style INTEGER NOT NULL,\
-	//	hair_colour INTEGER NOT NULL,\
-	//	beard_style INTEGER NOT NULL,\
-	//	beard_colour INTEGER NOT NULL,\
-	//	eye_colour1 INTEGER NOT NULL,\
-	//	eye_colour2 INTEGER NOT NULL,\
-	//	drakkin_heritage INTEGER NOT NULL,\
-	//	drakkin_tattoo INTEGER NOT NULL,\
-	//	drakkin_details INTEGER NOT NULL,\
-	//	created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
-	//	)";
-	//String mName;
-	//u32 mLevel = 0;
-	//u32 mClass = 0;
-	//u32 mRace = 0;
-	//u32 mGender = 0;
-	//u32 mDeity = 0;
-	//u32 mZoneID = 0;
-	//u32 mFaceStyle = 0;
-	//u32 mHairStyle = 0;
-	//u32 mHairColour = 0;
-	//u32 mBeardStyle = 0;
-	//u32 mBeardColour = 0;
-	//u32 mEyeColourLeft = 0;
-	//u32 mEyeColourRight = 0;
-	//u32 mDrakkinHeritage = 0;
-	//u32 mDrakkinTattoo = 0;
-	//u32 mDrakkinDetails = 0;
 	static const String createCharacterTableSQLITE =
 		"CREATE TABLE IF NOT EXISTS _character (\
 		id INTEGER PRIMARY KEY AUTOINCREMENT\
 		)";
 
-	static const String createCharacterTableMYSQL =
-		"CREATE TABLE IF NOT EXISTS _character (\
-		id INTEGER AUTO_INCREMENT,\
-		PRIMARY KEY(id)\
-		)";
 
-	static const std::vector<const String> createTables = { createAccountTableSQLITE, createAccountSessionTableSQLITE/*, createAccountCharacterTable*/, createCharacterTableSQLITE };
-	//static const std::vector<const String> createTables = { createAccountTableMYSQL, createAccountSessionTableMYSQL, createCharacterTableMYSQL };
+	static const std::vector<const String> createTables = { createAccountTableSQLITE, createAccountSessionTableSQLITE, createCharacterTableSQLITE };
 
 	for (auto i : createTables) {
 		try {
@@ -287,7 +212,6 @@ i32 XMLDataStore::insertQuery(const String& pQuery) {
 	// Retrieve last INSERT id.
 	i32 lastID = 0;
 	static const String query = "SELECT last_insert_rowid()";
-	//static const String query = "SELECT LAST_INSERT_ID()";
 	try {
 		(*mSession) << query, into(lastID), now;
 	}
@@ -323,7 +247,7 @@ const bool XMLDataStore::accountExists(const u32 pLSAccountID, const u32 pLSID) 
 	Profile p(String(__FUNCTION__), mLog);
 #endif
 	// Prepare query.
-	static const String selectAccount = "SELECT id FROM account WHERE ls_id = %u AND ls_account_id = %u";
+	static const String selectAccount = "SELECT id FROM _account WHERE ls_id = %u AND ls_account_id = %u";
 	auto query = Poco::format(selectAccount, pLSID, pLSAccountID);
 
 	// Execute query.
@@ -345,7 +269,7 @@ i32 XMLDataStore::accountCreate(const u32 pLSAccountID, const String& pLSAccount
 	Profile p(String(__FUNCTION__), mLog);
 #endif
 	// Prepare query.
-	static const String insertAccount = "INSERT INTO account (status, ls_id, ls_account_id, ls_account_name, shared_platinum) VALUES(%u, %u, %u, '%s', 0)";
+	static const String insertAccount = "INSERT INTO _account (status, ls_id, ls_account_id, ls_account_name, shared_platinum) VALUES(%u, %u, %u, '%s', 0)";
 	auto query = Poco::format(insertAccount, pStatus, pLSID, pLSAccountID, pLSAccountName);
 
 	// Execute query.
@@ -359,7 +283,7 @@ const bool XMLDataStore::accountLoad(Account* pAccount, const u32 pLSAccountID, 
 	if (!pAccount) return false;
 
 	// Prepare query.
-	static const auto selectAccount = "SELECT * FROM account WHERE ls_id = %u AND ls_account_id = %u";
+	static const auto selectAccount = "SELECT * FROM _account WHERE ls_id = %u AND ls_account_id = %u";
 	auto query = Poco::format(selectAccount, pLSAccountID, pLSID);
 
 	// Execute query.
@@ -404,7 +328,7 @@ const bool XMLDataStore::accountSave(Account* pAccount) {
 	const auto suspension = Poco::DateTimeFormatter::format(pAccount->getSuspensionExpiry(), "%Y-%m-%d %H:%M:%S");
 
 	// Prepare query.
-	static const auto updateAccount = "UPDATE account SET status = %d, ls_id = %u, ls_account_id = %u, ls_account_name = '%s', shared_platinum = %d, suspension_time = '%s', auth_key = '%s', auth_ip = %u WHERE id = %u";
+	static const auto updateAccount = "UPDATE _account SET status = %d, ls_id = %u, ls_account_id = %u, ls_account_name = '%s', shared_platinum = %d, suspension_time = '%s', auth_key = '%s', auth_ip = %u WHERE id = %u";
 	auto query = Poco::format(updateAccount, pAccount->getStatus(), pAccount->getLSID(), pAccount->getLSAccountID(), pAccount->getLSAccountName(), pAccount->getSharedPlatinum(), suspension, pAccount->getKey(), pAccount->getIP(), pAccount->getAccountID());
 
 	// Execute query.
@@ -424,7 +348,7 @@ const i32 XMLDataStore::accountConnect(Account* pAccount) {
 	const auto ipStr = "nope";
 
 	// Prepare query.
-	static const auto insertAccountSession = "INSERT INTO account_session (account_id, begin, ip) VALUES(%u, '%s', '%s')";
+	static const auto insertAccountSession = "INSERT INTO _account_session (account_id, begin, ip) VALUES(%u, '%s', '%s')";
 	auto query = Poco::format(insertAccountSession, pAccount->getAccountID(), beginStr, ipStr);
 
 	// Execute query.
@@ -441,7 +365,7 @@ const bool XMLDataStore::accountDisconnect(Account* pAccount) {
 	const auto endStr = Poco::DateTimeFormatter::format(pAccount->getSessionEndTime(), "%Y-%m-%d %H:%M:%S");
 
 	// Prepare query.
-	static const auto updateAccountSession = "UPDATE account_session SET end = '%s' WHERE id = %d ";
+	static const auto updateAccountSession = "UPDATE _account_session SET end = '%s' WHERE id = %d ";
 	auto query = Poco::format(updateAccountSession, endStr, pAccount->getSessionID());
 
 	// Execute query.
