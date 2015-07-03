@@ -1,16 +1,19 @@
 #pragma once
 
-#include "Constants.h"
-
-class ILog;
+#include "LogSystem.h"
+#include "Poco/Stopwatch.h"
 
 class Profile {
 public:
-	Profile(const String& pName, ILog* pLog);
-	~Profile();
+	Profile(const String& pName, ILog* pLog) : mLog(pLog) {
+		mText = "[Profile (" + pName + ")] @ ";
+		mStopwatch.start();
+	}
+	~Profile() {
+		mLog->info(mText + toString(mStopwatch.elapsed() / 1000.0f) + " ms");
+	}
 private:
-	String mName = "unnamed";
+	String mText;
 	ILog* mLog = nullptr;
-	__int64 mStart = 0;
-	double mFrequency = 0.0f;
+	Poco::Stopwatch mStopwatch;
 };
