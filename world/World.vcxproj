@@ -56,7 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../dependencies/gtest/;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Foundation\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Data\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Data\SQLite\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Net\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies/gtest/;../dependencies/Poco/Foundation/include;../dependencies/Poco/Data/include;../dependencies/Poco/Data/SQLite/include;../dependencies/Poco/Data/MySQL/include;../dependencies/Poco/Net/include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>false</MinimalRebuild>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../dependencies/gtest/;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Foundation\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Data\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Data\SQLite\include;C:\Users\Mark\Documents\GitHub\DOne\dependencies\Poco\Net\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../dependencies/gtest/;../dependencies/Poco/Foundation/include;../dependencies/Poco/Data/include;../dependencies/Poco/Data/SQLite/include;../dependencies/Poco/Data/MySQL/include;../dependencies/Poco/Net/include</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FloatingPointModel>Fast</FloatingPointModel>
@@ -97,6 +97,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Account.h" />
+    <ClInclude Include="AccountConstants.h" />
     <ClInclude Include="AccountManager.h" />
     <ClInclude Include="Actor.h" />
     <ClInclude Include="ActorBonuses.h" />

@@ -41,6 +41,8 @@ public:
 	const i32 accountConnect(Account* pAccount);
 	const bool accountDisconnect(Account* pAccount);
 
+	const bool accountCharactersLoad(Account* pAccount);
+
 	const bool loadAccountCharacterData(Data::Account* pAccount);
 	const bool saveAccountCharacterData(Data::Account* pAccount);
 

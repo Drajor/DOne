@@ -1,7 +1,12 @@
 #pragma once
 
-#include "Types.h"
+#include <list>
+
 #include "Poco/DateTime.h"
+
+#include "Types.h"
+#include "Constants.h"
+#include "AccountConstants.h"
 
 namespace Data {
 	struct Account;
@@ -11,20 +16,47 @@ namespace Data {
 class AccountManager;
 class Character;
 
-namespace AccountStatus {
-	enum : i32 {
-		Banned = -2,
-		Suspended = -1,
-		Default = 0,
-		BypassLock = 20,
-	};
-}
+
 
 /*
 
 An Account is persistent from the time a client connects to World till when they disconnect.
 
 */
+
+struct AccountCharacter {
+	String mName;
+	u32 mLevel = 0;
+	u32 mClass = 0;
+	u32 mRace = 0;
+	u32 mGender = 0;
+	u32 mDeity = 0;
+	u32 mZoneID = 0;
+	u32 mFaceStyle = 0;
+	u32 mHairStyle = 0;
+	u32 mHairColour = 0;
+	u32 mBeardStyle = 0;
+	u32 mBeardColour = 0;
+	u32 mEyeColourLeft = 0;
+	u32 mEyeColourRight = 0;
+	u32 mDrakkinHeritage = 0;
+	u32 mDrakkinTattoo = 0;
+	u32 mDrakkinDetails = 0;
+	u32 mPrimary = 0;
+	u32 mSecondary = 0;
+	u32 mHeadMaterial = 0;
+	u32 mHeadColour = 0;
+
+	bool mCanReturnHome = true;
+	bool mCanEnterTutorial = false;
+
+	struct Equipment {
+		u32 mMaterial = 0;
+		u32 mColour = 0;
+	};
+
+	Equipment mEquipment[Limits::Account::MAX_EQUIPMENT_SLOTS];
+};
 
 class Account {
 public:
@@ -35,6 +67,8 @@ public:
 	~Account();
 
 	inline void saved() { mSaveNeeded = false; }
+
+	inline std::list<AccountCharacter*>& getCharacters() { return mCharacters; }
 
 	// Returns the data for this Account.
 	Data::Account* getData() { return mData; }
@@ -114,9 +148,6 @@ public:
 	// Sets the authentication on this Account.
 	inline void setAuthentication(const String& pKey, const u32 pIP) { mKey = pKey; mIP = pIP; mSaveNeeded = true; }
 
-	//// Returns whether or not this Account has authentication.
-	//inline const bool hasAuthentication() const { return !(mKey.empty() && mIP == 0); }
-
 	// Clears the authentication on this Account.
 	inline void clearAuthentication() { mKey = ""; mIP = 0; mSaveNeeded = true; }
 
@@ -155,6 +186,7 @@ private:
 	// Flag indicates if an Account has had changes that are unsaved.
 	bool mSaveNeeded = false;
 	AccountManager* mOwner = nullptr;
+	Character* mActiveCharacter = nullptr;
 
 	u32 mAccountID = 0;						// (World) Internal ID.
 	u32 mExtraCharacterSlots = 0;			// The number of extra Characters that can be created on this Account. TODO!
@@ -163,7 +195,9 @@ private:
 	Poco::DateTime mCreated;				// Time the Account was created.
 	Poco::DateTime mSuspensionExpiry;		// Time when an Account suspension expires.
 
-	i32 mSessionID = 0;						// 
+	i32 mSessionID = 0;						// Current Session ID.
+	String mKey;
+	u32 mIP = 0;
 	Poco::DateTime mSessionBeginTime;		// Time when connected (if connected)
 	Poco::DateTime mSessionEndTime;			// Time when disconnected.
 
@@ -172,9 +206,9 @@ private:
 	String mLSAccountName = "";				// Provided by Login Server
 	u32 mLSID = 1;							// ID of the Login Server this Account originates from.
 
+	std::list<AccountCharacter*> mCharacters;
+
 	Data::Account* mData = nullptr;
-	Character* mActiveCharacter = nullptr;
-	String mKey;
-	u32 mIP = 0;
+
 	String mReservedCharacterName;
 };
