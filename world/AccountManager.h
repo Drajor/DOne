@@ -76,8 +76,13 @@ public:
 	// Returns whether a Character name is allowed to be used.
 	const bool isCharacterNameAllowed(const String& pCharacterName) const;
 
+	const i8 onConnectRequest(const u32 pLSAccountID, const u32 pLSID, const bool pWorldLocked);
 	const bool onConnect(SharedPtr<Account> pAccount);
 	const bool onDisconnect(SharedPtr<Account> pAccount);
+
+	// Called when 
+	//const bool onEnterWorld(Character* pCharacter);
+	//const bool onLeaveWorld(Character* pCharacter);
 
 	// Saves a specific Account.
 	const bool _save(Account* pAccount);
@@ -88,6 +93,8 @@ public:
 	// Returns whether a specific Character name is currently reserved.
 	const bool _isCharacterNameReserved(const String& pCharacterName) const;
 
+	SharedPtr<Account> _find(const u32 pLSAccountID, const u32 pLSID) const;
+
 private:
 
 	bool mInitialised = false;
@@ -95,8 +102,8 @@ private:
 	ILogFactory* mLogFactory = nullptr;
 	ILog* mLog = nullptr;
 	
-	SharedPtr<Account> _find(const u32 pLSAccountID, const String& pSAccountName, const u32 pLSID) const;
-	SharedPtr<Account> _find(const u32 pLSAccountID, const u32 pLSID) const;
+	
+	
 
 	std::list<SharedPtr<Account>> mAccounts;
 };

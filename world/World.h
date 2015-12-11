@@ -59,6 +59,8 @@ public:
 
 	void onLeaveWorld(Character* pCharacter);
 
+	const bool sendCharacterSelection(WorldConnection* pConnection);
+
 private:
 
 	bool mInitialised = false;

@@ -27,6 +27,10 @@
 
 static const int AUTO_SAVE_FREQUENCY = 10000;
 
+Character::Character() {
+
+}
+
 Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
 	EXPECTED(mData);
 	setName(pCharacterData->mName); // NOTE: This is required for ID before initialise has been called.
@@ -60,7 +64,14 @@ Character::Character(Data::Character* pCharacterData) : mData(pCharacterData) {
 	mRespawnOptions->add(option);
 }
 
+
+
 Character::~Character() {
+	mAccount = nullptr;
+	mExperienceController = nullptr;
+	mInventory = nullptr;
+	mTaskController = nullptr;
+
 	delete mXTargetController;
 	delete mRespawnOptions;
 }
@@ -94,17 +105,17 @@ void Character::update() {
 	}
 }
 
-const bool Character::initialise(SharedPtr<Account> pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController) {
+const bool Character::initialise(SharedPtr<Account> pAccount, Inventory* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController) {
 	if (mInitialised) return false;
 	if (!pAccount) return false;
 	if (!pInventory) return false;
 	if (!pExperienceController) return false;
 	if (!pTaskController) return false;
 
-	mAccount = pAccount;
-	mInventory = pInventory;
-	mExperienceController = pExperienceController;
-	mTaskController = pTaskController;
+	//mAccount = pAccount;
+	//mInventory = pInventory;
+	//mExperienceController = pExperienceController;
+	//mTaskController = pTaskController;
 
 	getActorBonuses()->add(pInventory);
 

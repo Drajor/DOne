@@ -16,7 +16,7 @@ class Raid;
 class EQApplicationPacket;
 class ZoneConnection;
 class ExtendedTargetController;
-class Inventoryy;
+class Inventory;
 class Item;
 class RespawnOptions;
 class TaskController;
@@ -80,13 +80,25 @@ public:
 		uint16 mInstanceID = 0;
 	};
 public:
+
+	Character();
 	Character(Data::Character* pCharacterData);
 	~Character();
 
-	const bool initialise(SharedPtr<Account> pAccount, Inventoryy* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController);
-	
-	// Returns the Account this Character belongs to.
+	inline void setAccount(SharedPtr<Account> pAccount) { mAccount = pAccount; }
 	inline SharedPtr<Account> getAccount() const { return mAccount; }
+
+	inline void setExperienceController(Experience::Controller* pController) { mExperienceController = pController; }
+	inline Experience::Controller* getExperienceController() const { return mExperienceController; }
+	
+	inline void setInventory(SharedPtr<Inventory> pInventory) { mInventory = pInventory; }
+	inline SharedPtr<Inventory> getInventory() const { return mInventory; }
+
+	inline void setTaskController(SharedPtr<TaskController> pTaskController) { mTaskController = pTaskController; }
+	inline SharedPtr<TaskController> getTaskController() const { return mTaskController; }
+	
+	const bool initialise(SharedPtr<Account> pAccount, Inventory* pInventory, Experience::Controller* pExperienceController, TaskController* pTaskController);
+	
 
 	inline const bool isCharacter() const { return true; }
 	inline const bool isInitialised() const { return mInitialised; }
@@ -160,11 +172,10 @@ public:
 	inline void setZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) { mAuthenticatedZoneID = pZoneID; mAuthicatedInstanceID = pInstanceID; }
 	inline const bool checkZoneAuthentication(const uint16 pZoneID, const uint16 pInstanceID) const { return mAuthenticatedZoneID == pZoneID && mAuthicatedInstanceID == pInstanceID; }
 
-	inline Inventoryy* getInventory() const { return mInventory; }
+	
 	inline ExtendedTargetController* getXTargetController() { return mXTargetController; }
 	inline RespawnOptions* getRespawnOptions() const { return mRespawnOptions; }
-	inline Experience::Controller* getExperienceController() const { return mExperienceController; }
-	inline TaskController* getTaskController() const { return mTaskController; }
+	
 	
 	bool onEnterZone();
 	void onLeaveZone();
@@ -514,10 +525,10 @@ private:
 	SpellBar* mSpellBar = nullptr;
 	const std::vector<uint32> getSpellBarData() const;
 	// Inventory
-	Inventoryy* mInventory = nullptr;
+	SharedPtr<Inventory> mInventory = nullptr;
 
 	ExtendedTargetController* mXTargetController = nullptr;
 	RespawnOptions* mRespawnOptions = nullptr;
 	Experience::Controller* mExperienceController = nullptr;
-	TaskController* mTaskController = nullptr;
+	SharedPtr<TaskController> mTaskController = nullptr;
 };

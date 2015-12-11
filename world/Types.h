@@ -2,9 +2,13 @@
 
 #include <stdint.h>
 #include <memory>
+#include <list>
 
 template <class T>
 using SharedPtr = std::shared_ptr<T>;
+
+template <class T>
+using SharedPtrList = std::list<std::shared_ptr<T>>;
 
 //template std::shared_ptr<T> SharedPtr<T>;
 //typedef std::shared_ptr<T> SharedPtr<T>;

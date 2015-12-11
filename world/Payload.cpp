@@ -1,4 +1,5 @@
 #include "Payload.h"
+#include "Account.h"
 #include "Data.h"
 #include "Zone.h"
 #include "Guild.h"
@@ -58,14 +59,12 @@ struct CharacterSelectionPartB {
 
 #pragma pack()
 
-EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
-	if (!pData) return nullptr;
-
-	const u32 numAccountCharacters = pData->mCharacterData.size();
+EQApplicationPacket* Payload::makeCharacterSelection(SharedPtrList<AccountCharacter> pCharacters) {
+	const u32 numAccountCharacters = pCharacters.size();
 	u32 size = 0;
 
 	// Add name lengths.
-	for (auto i : pData->mCharacterData) {
+	for (auto i : pCharacters) {
 		size += i->mName.length() + 1;
 	}
 
@@ -82,7 +81,7 @@ EQApplicationPacket* Payload::makeCharacterSelection(Data::Account* pData) {
 	header.mAdditionalSlots = 0; // Total Slots = 8 + additional slots.
 	writer.write<CharacterSelectionHeader>(header);
 
-	for (auto i : pData->mCharacterData) {
+	for (auto i : pCharacters) {
 		// Part A.
 		CharacterSelectionPartA pA;
 		pA.mLevel = i->mLevel;
@@ -400,8 +399,8 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	//payload->unknown11052[160]; // Some type of Timers
 	payload->mEndurance = pCharacter->getCurrentEndurance();
 	//payload->mUnknown9[20]; // Unknown.
-	payload->mSpentAAPoints = experience->getSpentAAPoints();
-	payload->mAAPoints = experience->getUnspentAAPoints();
+	payload->mSpentAAPoints = experience->getSpentAA();
+	payload->mAAPoints = experience->getUnspentAA();
 	//payload->mUnknown10[4]; // Unknown.
 	//Bandolier mBandoliers[20];
 	//PotionBeltItem mPotionBelt[5];
@@ -439,7 +438,7 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	payload->mAnonymous = pCharacter->getAnonymous();
 	payload->mGM = pCharacter->isGM() ? 1 : 0;
 	payload->mGuildRank = pCharacter->getGuildRank();
-	payload->mGuildFlags = 0;
+	payload->mGuildFlags = 0; // pCharacter->getGuildFlags(); // TODO
 	//payload->mUnknown14[4];
 	payload->mExperience = experience->getExperience();
 	//payload->mUnknown15[8]; // Unknown.
@@ -481,7 +480,7 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	//char mGroupLeaderName[64];
 	//payload->mUnknown21[540]; // Unknown. Possible group/raid members
 	payload->mEntityID = 0; // Not sure yet.
-	payload->mLeadershipExperienceOn = experience->isLeadershipOn() ? 1 : 0;
+	payload->mLeadershipExperienceOn = 0; // Not implemented.
 	//payload->mUnknown22[4]; // Unknown.
 	payload->mGUKEarned = 0;
 	payload->mMIREarned = 0;
@@ -503,10 +502,10 @@ EQApplicationPacket* Payload::makeCharacterProfile(Character* pCharacter) {
 	payload->mTribiteOn = 0;
 	//Tribute tributes[5]; // Not sure yet.
 	//payload->mUnknown31[4]; // Unknown.
-	payload->mGroupExperience = experience->getGroupExperience();
-	payload->mRaidExperience = experience->getRaidExperience();
-	payload->mGroupPoints = experience->getGroupPoints();
-	payload->mRaidPoints = experience->getRaidPoints();
+	payload->mGroupExperience = 0; // Not implemented.
+	payload->mRaidExperience = 0; // Not implemented.
+	payload->mGroupPoints = 0; // Not implemented.
+	payload->mRaidPoints = 0; // Not implemented.
 	//GroupLeaderAA mGroupLeaderAA;
 	for (auto i = 0; i < 16; i++)
 		payload->mGroupLeaderAA.mRanks[i] = 1;

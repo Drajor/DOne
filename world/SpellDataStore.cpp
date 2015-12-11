@@ -34,13 +34,13 @@ const bool SpellDataStore::initialise(IDataStore* pDataStore, ILogFactory* pLogF
 	for (auto& i : mData) i = new Data::Spell();
 
 	// Load data.
-	u32 numSpellsLoaded = 0;
-	if (!mDataStore->loadSpells(mData, MaxSpellID, numSpellsLoaded)){
-		mLog->error("Failed to load data.");
-		return false;
-	}
-	mLog->info(mData[6]->mName);
-	mLog->info("Loaded data for " + toString(numSpellsLoaded) + " Spells.");
+	////////u32 numSpellsLoaded = 0;
+	////////if (!mDataStore->loadSpells(mData, MaxSpellID, numSpellsLoaded)){
+	////////	mLog->error("Failed to load data.");
+	////////	return false;
+	////////}
+	////////mLog->info(mData[6]->mName);
+	////////mLog->info("Loaded data for " + toString(numSpellsLoaded) + " Spells.");
 
 	mLog->status("Finished initialising.");
 	mInitialised = true;

@@ -22,6 +22,7 @@ class Guild;
 class Group;
 class Character;
 struct Buff;
+struct AccountCharacter;
 
 #define SIZE_CHECK(pCondition) if(!(pCondition))  { StringStream ss; ss << "[SIZE_CHECK] ("<< ARG_STR(pCondition) << ") Failed in " << __FUNCTION__; mLog->error(ss.str()); mSizeError = true; return false; }
 #define STRING_CHECK(pCString, pMaxSize) if(!Utility::isSafe(pCString, pMaxSize)) { StringStream ss; ss << "[STRING_CHECK] Failed in " << __FUNCTION__; mLog->error(ss.str()); mStringError = true; return false; }
@@ -76,7 +77,7 @@ namespace Payload {
 	// More complex and variable length packets.
 
 	EQApplicationPacket* makeCharacterProfile(Character* pCharacter);
-	EQApplicationPacket* makeCharacterSelection(Data::Account* pData);
+	EQApplicationPacket* makeCharacterSelection(SharedPtrList<AccountCharacter> pCharacters);
 	EQApplicationPacket* makeZonePoints(const std::list<ZonePoint*>& pZonePoints);
 	EQApplicationPacket* makeGuildNameList(const std::list<::Guild*>& pGuilds);
 

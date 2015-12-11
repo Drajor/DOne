@@ -15,7 +15,7 @@ public:
 	~CharacterFactory();
 
 	const bool initialise(IDataStore* pDataStore, ILogFactory* pLogFactory, ItemFactory* pItemFactory, TaskDataStore* pTaskDataStore);
-	Character* make(const String& pCharacterName, SharedPtr<Account> pAccount);
+	SharedPtr<Character> make(const String& pCharacterName, SharedPtr<Account> pAccount);
 
 private:
 

@@ -9,6 +9,9 @@
 #include "SpellContants.h"
 
 #include "Account.h"
+#include "Character.h"
+#include "Bonuses.h"
+#include "ExperienceController.h"
 
 #include <fstream>
 #include <Windows.h>
@@ -175,21 +178,60 @@ const bool XMLDataStore::setup() {
 
 	static const String createCharacterTableSQLITE =
 		"CREATE TABLE IF NOT EXISTS _character (\
-		id INTEGER PRIMARY KEY AUTOINCREMENT\
+		id INTEGER PRIMARY KEY AUTOINCREMENT,\
 		account_id INTEGER NOT NULL,\
 		name VARCHAR(50) NOT NULL,\
+		level INTEGER NOT NULL,\
+		max_level INTEGER NOT NULL,\
+		class INTEGER NOT NULL,\
+		race INTEGER NOT NULL,\
+		gender INTEGER NOT NULL,\
+		deity INTEGER NOT NULL,\
+		face_style INTEGER NOT NULL,\
+		left_eye_colour INTEGER NOT NULL,\
+		right_eye_colour INTEGER NOT NULL,\
+		hair_style INTEGER NOT NULL,\
+		hair_colour INTEGER NOT NULL,\
+		beard_style INTEGER NOT NULL,\
+		beard_colour INTEGER NOT NULL,\
+		drakkin_heritage INTEGER NOT NULL,\
+		drakkin_tattoo INTEGER NOT NULL,\
+		drakkin_details INTEGER NOT NULL,\
+		strength INTEGER NOT NULL,\
+		stamina INTEGER NOT NULL,\
+		intelligence INTEGER NOT NULL,\
+		wisdom INTEGER NOT NULL,\
+		agility INTEGER NOT NULL,\
+		dexterity INTEGER NOT NULL,\
+		charisma INTEGER NOT NULL,\
+		exp INTEGER NOT NULL,\
+		aa_exp INTEGER NOT NULL,\
+		spent_aa INTEGER NOT NULL,\
+		max_spent_aa INTEGER NOT NULL,\
+		unspent_aa INTEGER NOT NULL,\
+		max_unspent_aa INTEGER NOT NULL,\
+		exp_to_aa INTEGER NOT NULL,\
+		zone_id INTEGER NOT NULL,\
+		instance_id INTEGER NOT NULL,\
+		x REAL NOT NULL,\
+		y REAL NOT NULL,\
+		z REAL NOT NULL,\
 		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
 		)";
 
-
-	static const std::vector<const String> createTables = { createAccountTableSQLITE, createAccountSessionTableSQLITE, createCharacterTableSQLITE };
+	static const std::vector<const String> createTables = { 
+		createAccountTableSQLITE, 
+		createAccountSessionTableSQLITE,
+		createCharacterTableSQLITE
+	};
 
 	for (auto i : createTables) {
 		try {
 			(*mSession) << i, now;
 		}
 		catch (Poco::Exception e) {
-			mLog->error(e.message());
+			mLog->error("Query Failed: " + i);
+			mLog->error("Reason: " + e.message());
 			return false;
 		}
 	}
@@ -227,7 +269,7 @@ i32 XMLDataStore::insertQuery(const String& pQuery) {
 	return lastID;
 }
 
-const bool XMLDataStore::updateQuery(const String& pQuery) {
+const bool XMLDataStore::runQuery(const String& pQuery) {
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
@@ -296,7 +338,10 @@ const bool XMLDataStore::accountLoad(Account* pAccount, const u32 pLSAccountID, 
 		Poco::Data::RecordSet rs(select);
 
 		// Check: We have a single result as expected.
-		if (rs.rowCount() != 1) return false;
+		if (rs.rowCount() != 1) {
+			pAccount->saved(); // Reset Account save flag.
+			return false;
+		}
 
 		// Extract data from result.
 		u32 col = 0;
@@ -312,11 +357,14 @@ const bool XMLDataStore::accountLoad(Account* pAccount, const u32 pLSAccountID, 
 		pAccount->setIP(row.get(++col).convert<u32>());
 		pAccount->setCreated(row.get(++col).convert<Poco::DateTime>());
 
+		pAccount->saved(); // Reset Account save flag.
 		return true;
 	}
 	catch (Poco::Exception e) {
 		mLog->error("Query Failed: " + query);
 		mLog->error("Reason: " + e.message());
+
+		pAccount->saved(); // Reset Account save flag.
 		return false;
 	}
 }
@@ -331,11 +379,23 @@ const bool XMLDataStore::accountSave(Account* pAccount) {
 	const auto suspension = Poco::DateTimeFormatter::format(pAccount->getSuspensionExpiry(), "%Y-%m-%d %H:%M:%S");
 
 	// Prepare query.
-	static const auto updateAccount = "UPDATE _account SET status = %d, ls_id = %u, ls_account_id = %u, ls_account_name = '%s', shared_platinum = %d, suspension_time = '%s', auth_key = '%s', auth_ip = %u WHERE id = %u";
-	auto query = Poco::format(updateAccount, pAccount->getStatus(), pAccount->getLSID(), pAccount->getLSAccountID(), pAccount->getLSAccountName(), pAccount->getSharedPlatinum(), suspension, pAccount->getKey(), pAccount->getIP(), pAccount->getAccountID());
+	static const String updateAccount = "UPDATE _account SET status = %d, ls_id = %u, ls_account_id = %u, ls_account_name = '%s', shared_platinum = %d, suspension_time = '%s', auth_key = '%s', auth_ip = %u WHERE id = %u";
+	
+	String query;
+	std::vector<Poco::Any> values;
+	values.push_back(pAccount->getStatus());
+	values.push_back(pAccount->getLSID());
+	values.push_back(pAccount->getLSAccountID());
+	values.push_back(pAccount->getLSAccountName());
+	values.push_back(pAccount->getSharedPlatinum());
+	values.push_back(suspension);
+	values.push_back(pAccount->getKey());
+	values.push_back(pAccount->getIP());
+	values.push_back(pAccount->getAccountID());
+	Poco::format(query, updateAccount, values);
 
 	// Execute query.
-	return updateQuery(query);
+	return runQuery(query);
 }
 
 const i32 XMLDataStore::accountConnect(Account* pAccount) {
@@ -372,8 +432,82 @@ const bool XMLDataStore::accountDisconnect(Account* pAccount) {
 	auto query = Poco::format(updateAccountSession, endStr, pAccount->getSessionID());
 
 	// Execute query.
-	return updateQuery(query);
+	return runQuery(query);
 }
+
+const bool XMLDataStore::accountLoadCharacters(const u32 pAccountID, SharedPtrList<AccountCharacter>& pCharacters) {
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+
+	// Prepare query.
+	static const auto selectCharacters = "SELECT name, level, class, race, gender, deity, zone_id, face_style, hair_style, hair_colour, beard_style, beard_colour, left_eye_colour, right_eye_colour, drakkin_heritage, drakkin_tattoo, drakkin_details FROM _character WHERE account_id = %u";
+	auto query = Poco::format(selectCharacters, pAccountID);
+
+	// Execute query.
+	try {
+		Poco::Data::Statement select((*mSession) << query);
+		select.execute();
+		Poco::Data::RecordSet rs(select);
+
+		// Extract data from result.
+		for (auto i : rs) {
+			u32 col = 0;
+			auto c = std::make_shared<AccountCharacter>();
+			pCharacters.push_back(c);
+
+			c->mName = i.get(col).convert<String>();
+			c->mLevel = i.get(++col).convert<u32>();
+			c->mClass = i.get(++col).convert<u32>();
+			c->mRace = i.get(++col).convert<u32>();
+			c->mGender = i.get(++col).convert<u32>();
+			c->mDeity = i.get(++col).convert<u32>();
+			c->mZoneID = i.get(++col).convert<u32>();
+			c->mFaceStyle = i.get(++col).convert<u32>();
+			c->mHairStyle = i.get(++col).convert<u32>();
+			c->mHairColour = i.get(++col).convert<u32>();
+			c->mBeardStyle = i.get(++col).convert<u32>();
+			c->mBeardColour = i.get(++col).convert<u32>();
+			c->mEyeColourLeft = i.get(++col).convert<u32>();
+			c->mEyeColourRight = i.get(++col).convert<u32>();
+			c->mDrakkinHeritage = i.get(++col).convert<u32>();
+			c->mDrakkinTattoo = i.get(++col).convert<u32>();
+			c->mDrakkinDetails = i.get(++col).convert<u32>();
+		}
+
+		return true;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
+}
+
+const bool XMLDataStore::accountOwnsCharacter(const u32 pAccountID, const String& pCharacterName, bool& pResult) {
+#ifdef PROFILE_XML_DS
+	Profile p(String(__FUNCTION__), mLog);
+#endif
+	// Prepare query.
+	static const String selectCharacter = "SELECT id FROM _character WHERE account_id = %u AND name = '%s'";
+	auto query = Poco::format(selectCharacter, pAccountID, pCharacterName);
+
+	// Execute query.
+	try {
+		Poco::Data::Statement select((*mSession) << query);
+		select.execute();
+		Poco::Data::RecordSet rs(select);
+
+		pResult = rs.rowCount() == 1;
+		return true;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
+}
+
 
 const bool XMLDataStore::isCharacterNameInUse(const String& pCharacterName, bool& pResult) {
 #ifdef PROFILE_XML_DS
@@ -399,186 +533,203 @@ const bool XMLDataStore::isCharacterNameInUse(const String& pCharacterName, bool
 	}
 }
 
-const bool XMLDataStore::accountCharactersLoad(Account* pAccount) {
+const i32 XMLDataStore::characterCreate(Character* pCharacter) {
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
-	if (!pAccount) return false;
+	if (!pCharacter) {
+		// TODO: Log.
+		return 0;
+	}
 
-	auto characters = pAccount->getCharacters();
+	// Check: Character has a valid Account.
+	auto account = pCharacter->getAccount();
+	if (!account) {
+		// TODO: Log.
+		return 0;
+	}
 
-	// Check: Already loaded.
-	if (!characters.empty()) return false;
+	// Check: Character has a valid Experience::Controller.
+	auto expController = pCharacter->getExperienceController();
+	if (!expController) {
+		// TODO: Log.
+		return 0;
+	}
 
-	return true;
+	// Check: Character has valid.
+	auto bonuses = pCharacter->getBaseBonuses();
+	if (!bonuses) {
+		// TODO: Log.
+		return 0;
+	}
+
+	// Prepare query.
+	static const String query = "INSERT INTO _character (account_id, name, level, max_level, class, race, gender, deity, face_style, left_eye_colour, right_eye_colour, hair_style, hair_colour, beard_style, beard_colour, drakkin_heritage, drakkin_tattoo, drakkin_details, strength, stamina, intelligence, wisdom, agility, dexterity, charisma, exp, aa_exp, spent_aa, max_spent_aa, unspent_aa, max_unspent_aa, exp_to_aa, zone_id, instance_id, x, y, z) VALUES(%u, '%s', %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %d, %d, %d, %d, %d, %d, %d, %u, %u, %u, %u, %u, %u, %u, %u, %u, %f, %f, %f)";
+
+	String characterQuery;
+	std::vector<Poco::Any> values;
+	values.push_back(account->getAccountID());
+	values.push_back(pCharacter->getName());
+	values.push_back(static_cast<u32>(expController->getLevel()));
+	values.push_back(static_cast<u32>(expController->getMaximumLevel()));
+	values.push_back(static_cast<u32>(pCharacter->getClass()));
+	values.push_back(pCharacter->getRace());
+	values.push_back(static_cast<u32>(pCharacter->getGender()));
+	values.push_back(pCharacter->getDeity());
+	values.push_back(static_cast<u32>(pCharacter->getFaceStyle()));
+	values.push_back(static_cast<u32>(pCharacter->getLeftEyeColour()));
+	values.push_back(static_cast<u32>(pCharacter->getRightEyeColour()));
+	values.push_back(static_cast<u32>(pCharacter->getHairStyle()));
+	values.push_back(static_cast<u32>(pCharacter->getHairColour()));
+	values.push_back(static_cast<u32>(pCharacter->getBeardStyle()));
+	values.push_back(static_cast<u32>(pCharacter->getBeardColour()));
+	values.push_back(pCharacter->getDrakkinHeritage());
+	values.push_back(pCharacter->getDrakkinTattoo());
+	values.push_back(pCharacter->getDrakkinDetails());
+	values.push_back(bonuses->getStrength());
+	values.push_back(bonuses->getStamina());
+	values.push_back(bonuses->getIntelligence());
+	values.push_back(bonuses->getWisdom());
+	values.push_back(bonuses->getAgility());
+	values.push_back(bonuses->getDexterity());
+	values.push_back(bonuses->getCharisma());
+	values.push_back(expController->getExperience());
+	values.push_back(expController->getAAExperience());
+	values.push_back(expController->getSpentAA());
+	values.push_back(expController->getMaximumSpentAA());
+	values.push_back(expController->getUnspentAA());
+	values.push_back(expController->getMaximumUnspentAA());
+	values.push_back(expController->getExperienceToAA());
+	values.push_back(static_cast<u32>(0)); // Zone ID
+	values.push_back(static_cast<u32>(0)); // Instance ID
+	values.push_back(static_cast<double>(0.0f)); // x
+	values.push_back(static_cast<double>(0.0f)); // y
+	values.push_back(static_cast<double>(0.0f)); // z
+	Poco::format(characterQuery, query, values);
+
+	const auto characterID = insertQuery(characterQuery);
+	if (characterID == 0) return 0;
+
+	// Execute query.
+	return characterID;
 }
 
-namespace AccountCharacterDataXML {
-#define SCA static const auto
-	namespace Tag {
-		SCA Account = "account";
-		SCA Characters = "characters";
-		SCA Character = "character";
-		SCA Equipment = "equipment";
-		SCA Slot = "slot";
-	}
-	namespace Attribute {
-		// Tag::Account
-		SCA SharedPlatinum = "shared_platinum";
-		// Tag::Character
-		SCA Name = "name";
-		SCA Race = "race";
-		SCA Class = "class";
-		SCA Level = "level";
-		SCA Gender = "gender";
-		SCA Deity = "deity";
-		SCA Zone = "zone";
-		SCA FaceStyle = "face";
-		SCA HairStyle = "hair_style";
-		SCA HairColour = "hair_colour";
-		SCA BeardStyle = "beard_style";
-		SCA BeardColour = "beard_colour";
-		SCA LeftEyeColour = "eye_colour1";
-		SCA RightEyeColour = "eye_colour2";
-		SCA DrakkinHeritage = "drakkin_heritage";
-		SCA DrakkinTattoo = "drakkin_tattoo";
-		SCA DrakkinDetails = "drakkin_details";
-		// Tag::Equipment
-		SCA Primary = "primary";
-		SCA Secondary = "secondary";
-		// Tag::Slot
-		SCA Material = "material";
-		SCA Colour = "colour";
-	}
-#undef SCA
-}
-
-const bool XMLDataStore::loadAccountCharacterData(Data::Account* pAccount) {
-	using namespace AccountCharacterDataXML;
+const bool XMLDataStore::characterLoad(const String& pCharacterName, Character* pCharacter) {
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
-	if (!pAccount) return false;
-
-	// Load document.
-	const String fileLocation = "./data/accounts/" + pAccount->mLoginAccountName + ".xml";
-	TiXmlDocument document(fileLocation.c_str());
-	if (!document.LoadFile()) {
-		mLog->error("Failed to load " + String(fileLocation));
+	if (!pCharacter) {
+		// TODO: Log.
 		return false;
 	}
 
-	auto accountElement = document.FirstChildElement(Tag::Account);
-	EXPECTED_BOOL(accountElement);
-	EXPECTED_BOOL(readAttribute(accountElement, Attribute::SharedPlatinum, pAccount->mPlatinumSharedBank));
-	auto charactersElement = accountElement->FirstChildElement(Tag::Characters);
-	EXPECTED_BOOL(charactersElement);
-	auto characterElement = charactersElement->FirstChildElement(Tag::Character);
-
-	// There are no characters yet.
-	if (!characterElement)
-		return true;
-
-	// Iterate over each "account" element.
-	auto characterSlot = 0;
-	while (characterElement && characterSlot < Limits::Account::MAX_NUM_CHARACTERS) {
-		auto characterData = new Data::AccountCharacter();
-		pAccount->mCharacterData.push_back(characterData);
-
-		// Read the basic/visual information about each character.
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Name, characterData->mName));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Race, characterData->mRace));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Class, characterData->mClass));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Level, characterData->mLevel));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Gender, characterData->mGender));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Deity, characterData->mDeity));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::Zone, characterData->mZoneID));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::FaceStyle, characterData->mFaceStyle));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::HairStyle, characterData->mHairStyle));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::HairColour, characterData->mHairColour));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::BeardStyle, characterData->mBeardStyle));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::BeardColour, characterData->mBeardColour));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::LeftEyeColour, characterData->mEyeColourLeft));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::RightEyeColour, characterData->mEyeColourRight));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinHeritage, characterData->mDrakkinHeritage));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinTattoo, characterData->mDrakkinTattoo));
-		EXPECTED_BOOL(readAttribute(characterElement, Attribute::DrakkinDetails, characterData->mDrakkinDetails));
-
-		// Read the equipment information about each character.
-		auto equipmentElement = characterElement->FirstChildElement(Tag::Equipment);
-		EXPECTED_BOOL(equipmentElement);
-		EXPECTED_BOOL(readAttribute(equipmentElement, Attribute::Primary, characterData->mPrimary)); // IDFile of item in primary slot.
-		EXPECTED_BOOL(readAttribute(equipmentElement, Attribute::Secondary, characterData->mSecondary)); // IDFile of item in secondary slot.
-
-		auto slotElement = equipmentElement->FirstChildElement(Tag::Slot);
-		auto slotCount = 0;
-		EXPECTED_BOOL(slotElement);
-		while (slotElement && slotCount < Limits::Account::MAX_EQUIPMENT_SLOTS) {
-			EXPECTED_BOOL(readAttribute(slotElement, Attribute::Material, characterData->mEquipment[slotCount].mMaterial));
-			EXPECTED_BOOL(readAttribute(slotElement, Attribute::Colour, characterData->mEquipment[slotCount].mColour));
-			slotCount++;
-			slotElement = slotElement->NextSiblingElement(Tag::Slot);
-		}
-		EXPECTED_BOOL(slotCount == Limits::Account::MAX_EQUIPMENT_SLOTS); // Check that we read the correct amount of slot data.
-
-		characterSlot++;
-		characterElement = characterElement->NextSiblingElement(Tag::Character);
+	// Check: Character has a valid Account.
+	auto account = pCharacter->getAccount();
+	if (!account) {
+		// TODO: Log.
+		return 0;
 	}
 
-	return true;
+	// Check: Character has a valid Experience::Controller.
+	auto expController = pCharacter->getExperienceController();
+	if (!expController) {
+		// TODO: Log.
+		return 0;
+	}
+
+	// Check: Character has valid.
+	auto bonuses = pCharacter->getBaseBonuses();
+	if (!bonuses) {
+		// TODO: Log.
+		return 0;
+	}
+
+	// Prepare query.
+	static const String selectCharacter = "SELECT * FROM _character WHERE name = '%s'";
+	auto query = Poco::format(selectCharacter, pCharacterName);
+
+	// Execute query.
+	try {
+		Poco::Data::Statement select((*mSession) << query);
+		select.execute();
+		Poco::Data::RecordSet rs(select);
+
+		// Check: We have a single result as expected.
+		if (rs.rowCount() != 1) {
+			// TODO: Log.
+			return false;
+		}
+
+		// Extract data from result.
+		u32 col = 0;
+		auto row = rs.row(0);
+		col++; // TODO: Character ID.
+		col++; // TODO: Should I double check Account ID matches?
+		pCharacter->setName(row.get(++col).convert<String>());
+		//pCharacter->setLevel(row.get(++col).convert<u8>());
+
+
+		/*
+		"CREATE TABLE IF NOT EXISTS _character (\
+		id INTEGER PRIMARY KEY AUTOINCREMENT,\
+		account_id INTEGER NOT NULL,\
+		name VARCHAR(50) NOT NULL,\
+		level INTEGER NOT NULL,\
+		max_level INTEGER NOT NULL,\
+		class INTEGER NOT NULL,\
+		race INTEGER NOT NULL,\
+		gender INTEGER NOT NULL,\
+		deity INTEGER NOT NULL,\
+		face_style INTEGER NOT NULL,\
+		left_eye_colour INTEGER NOT NULL,\
+		right_eye_colour INTEGER NOT NULL,\
+		hair_style INTEGER NOT NULL,\
+		hair_colour INTEGER NOT NULL,\
+		beard_style INTEGER NOT NULL,\
+		beard_colour INTEGER NOT NULL,\
+		drakkin_heritage INTEGER NOT NULL,\
+		drakkin_tattoo INTEGER NOT NULL,\
+		drakkin_details INTEGER NOT NULL,\
+		strength INTEGER NOT NULL,\
+		stamina INTEGER NOT NULL,\
+		intelligence INTEGER NOT NULL,\
+		wisdom INTEGER NOT NULL,\
+		agility INTEGER NOT NULL,\
+		dexterity INTEGER NOT NULL,\
+		charisma INTEGER NOT NULL,\
+		exp INTEGER NOT NULL,\
+		aa_exp INTEGER NOT NULL,\
+		spent_aa INTEGER NOT NULL,\
+		max_spent_aa INTEGER NOT NULL,\
+		unspent_aa INTEGER NOT NULL,\
+		max_unspent_aa INTEGER NOT NULL,\
+		exp_to_aa INTEGER NOT NULL,\
+		zone_id INTEGER NOT NULL,\
+		instance_id INTEGER NOT NULL,\
+		x REAL NOT NULL,\
+		y REAL NOT NULL,\
+		z REAL NOT NULL,\
+		created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL\
+		*/
+
+		return true;
+	}
+	catch (Poco::Exception e) {
+		mLog->error("Query Failed: " + query);
+		mLog->error("Reason: " + e.message());
+		return false;
+	}
 }
 
-const bool XMLDataStore::saveAccountCharacterData(Data::Account* pAccount) {
-	using namespace AccountCharacterDataXML;
+const bool XMLDataStore::characterDelete(const String& pCharacterName) {
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);
 #endif
-	if (!pAccount) return false;
+	// Prepare query.
+	static const String deleteCharacter = "DELETE FROM _character WHERE name = '%s'";
+	auto query = Poco::format(deleteCharacter, pCharacterName);
 
-	TiXmlDocument document(String("./data/accounts/" + pAccount->mLoginAccountName + ".xml").c_str());
-
-	auto accountElement = static_cast<TiXmlElement*>(document.LinkEndChild(new TiXmlElement(Tag::Account)));
-	accountElement->SetAttribute(Attribute::SharedPlatinum, pAccount->mPlatinumSharedBank);
-
-	auto charactersElement = accountElement->LinkEndChild(new TiXmlElement(Tag::Characters));
-	
-	// Write 
-	for (auto i : pAccount->mCharacterData) {
-		auto characterElement = static_cast<TiXmlElement*>(charactersElement->LinkEndChild(new TiXmlElement(Tag::Character)));
-
-		characterElement->SetAttribute(Attribute::Name, i->mName.c_str());
-		characterElement->SetAttribute(Attribute::Race, i->mRace);
-		characterElement->SetAttribute(Attribute::Class, i->mClass);
-		characterElement->SetAttribute(Attribute::Level, i->mLevel);
-		characterElement->SetAttribute(Attribute::Gender, i->mGender);
-		characterElement->SetAttribute(Attribute::Deity, i->mDeity);
-		characterElement->SetAttribute(Attribute::Zone, i->mZoneID);
-		characterElement->SetAttribute(Attribute::FaceStyle, i->mFaceStyle);
-		characterElement->SetAttribute(Attribute::Gender, i->mGender);
-		characterElement->SetAttribute(Attribute::HairStyle, i->mHairStyle);
-		characterElement->SetAttribute(Attribute::HairColour, i->mHairColour);
-		characterElement->SetAttribute(Attribute::BeardStyle, i->mBeardStyle);
-		characterElement->SetAttribute(Attribute::BeardColour, i->mBeardColour);
-		characterElement->SetAttribute(Attribute::LeftEyeColour, i->mEyeColourLeft);
-		characterElement->SetAttribute(Attribute::RightEyeColour, i->mEyeColourRight);
-		characterElement->SetAttribute(Attribute::DrakkinHeritage, i->mDrakkinHeritage);
-		characterElement->SetAttribute(Attribute::DrakkinTattoo, i->mDrakkinTattoo);
-		characterElement->SetAttribute(Attribute::DrakkinDetails, i->mDrakkinDetails);
-
-		auto equipmentElement = static_cast<TiXmlElement*>(characterElement->LinkEndChild(new TiXmlElement(Tag::Equipment)));
-		equipmentElement->SetAttribute(Attribute::Primary, i->mPrimary);
-		equipmentElement->SetAttribute(Attribute::Secondary, i->mSecondary);
-
-		// Write equipment material / colours.
-		for (int j = 0; j < Limits::Account::MAX_EQUIPMENT_SLOTS; j++) {
-			auto slotElement = static_cast<TiXmlElement*>(equipmentElement->LinkEndChild(new TiXmlElement(Tag::Slot)));
-			slotElement->SetAttribute(Attribute::Material, i->mEquipment[j].mMaterial);
-			slotElement->SetAttribute(Attribute::Colour, i->mEquipment[j].mColour);
-		}
-	}
-
-	EXPECTED_BOOL(document.SaveFile());
-	return true;
+	return runQuery(query);
 }
 
 namespace CharacterXML {
@@ -804,7 +955,7 @@ const bool readExperience(TiXmlElement* pElement, Data::Experience& pExperience)
 	return true;
 }
 
-const bool XMLDataStore::loadCharacter(const String& pCharacterName, Data::Character* pCharacter) {
+const bool XMLDataStore::characterLoad(const String& pCharacterName, Data::Character* pCharacter) {
 	using namespace CharacterXML;
 #ifdef PROFILE_XML_DS
 	Profile p(String(__FUNCTION__), mLog);

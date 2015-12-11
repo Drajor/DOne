@@ -13,11 +13,10 @@
 #include "Poco/DateTimeFormatter.h"
 
 #include "Character.h"
+#include "Bonuses.h"
+#include "ExperienceController.h"
 #include "Zone.h"
 
-
-
-#include "Shlwapi.h"
 
 AccountManager::~AccountManager() {
 	mAccounts.clear();
@@ -158,152 +157,74 @@ const bool AccountManager::createCharacter(SharedPtr<Account> pAccount, Payload:
 	String characterName = pAccount->getReservedCharacterName();
 	pAccount->clearReservedCharacterName();
 
-	//auto c = new Character();
+	auto c = std::make_shared<Character>();
+	auto e = new Experience::Controller();
+	c->setAccount(pAccount);
+	c->setExperienceController(e);
 
-	//auto c = new Data::Character();
-	//c->mName = characterName;
-	//c->mClass = pPayload->mClass;
-	//c->mZoneID = 1; // TODO:
+	c->setName(characterName);
+	c->setClass(static_cast<u8>(pPayload->mClass));
+	//c->setZoneID();
+	c->setDeityID(pPayload->mDeity);
 
-	//c->mExperience.mLevel = 1;
-	//c->mExperience.mMaximumLevel = 10;
+	
+	if (!e->initialise(1, 10, 0, 0, 0, 5000, 0, 1000, 0)) {
+	}
+	
 
-	//// Appearance Data
-	//c->mRace = pPayload->mRace;
-	//c->mGender = pPayload->mGender;
-	//c->mFaceStyle = pPayload->mFaceStyle;
-	//c->mHairStyle = pPayload->mHairStyle;
-	//c->mBeardStyle = pPayload->mBeardStyle;
-	//c->mHairColour = pPayload->mHairColour;
-	//c->mBeardColour = pPayload->mBeardColour;
-	//c->mEyeColourLeft = pPayload->mEyeColour1;
-	//c->mEyeColourRight = pPayload->mEyeColour2;
-	//c->mDrakkinHeritage = pPayload->mDrakkinHeritage;
-	//c->mDrakkinTattoo = pPayload->mDrakkinTattoo;
-	//c->mDrakkinDetails = pPayload->mDrakkinDetails;
-	//c->mDeity = pPayload->mDeity;
-	//c->mNew = true;
+	//c->setLevel()
 
-	//// Save Character.
-	//if (!mDataStore->saveCharacter(characterName, c)) {
-	//	mLog->error("Failed to create Character, could not be saved.");
-	//	delete c;
-	//	return false;
-	//}
+	//c->getExperienceController()->set
+	//c->setLevel(1); // TODO: Default level.
+	//c->getExperienceController()->set
 
-	//// Create Data::AccountCharacter for the new Character.
-	//
-	//auto accountCharacterData = new Data::AccountCharacter();
-	//accountCharacterData->mName = characterName;
-	//accountCharacterData->mLevel = c->mExperience.mLevel;
-	//accountCharacterData->mRace = c->mRace;
-	//accountCharacterData->mClass = c->mClass;
-	//accountCharacterData->mDeity = c->mDeity;
-	//accountCharacterData->mZoneID = c->mZoneID;
-	//accountCharacterData->mGender = c->mGender;
-	//accountCharacterData->mFaceStyle = c->mFaceStyle;
-	//accountCharacterData->mHairStyle = c->mHairStyle;
-	//accountCharacterData->mHairColour = c->mHairColour;
-	//accountCharacterData->mBeardStyle = c->mBeardStyle;
-	//accountCharacterData->mBeardColour = c->mBeardColour;
-	//accountCharacterData->mEyeColourLeft = c->mEyeColourLeft;
-	//accountCharacterData->mEyeColourRight = c->mEyeColourRight;
-	//accountCharacterData->mDrakkinHeritage = c->mDrakkinHeritage;
-	//accountCharacterData->mDrakkinTattoo = c->mDrakkinTattoo;
-	//accountCharacterData->mDrakkinDetails = c->mDrakkinDetails;
-	//accountCharacterData->mPrimary = 0;
-	//accountCharacterData->mSecondary = 0;
+	// Appearance.
+	c->setRace(pPayload->mRace);
+	c->setGender(pPayload->mGender);
+	c->setFaceStyle(static_cast<u8>(pPayload->mFaceStyle));
+	c->setHairStyle(static_cast<u8>(pPayload->mHairStyle));
+	c->setBeardStyle(static_cast<u8>(pPayload->mBeardStyle));
+	c->setHairColour(static_cast<u8>(pPayload->mHairColour));
+	c->setBeardColour(static_cast<u8>(pPayload->mBeardColour));
+	c->setLeftEyeColour(static_cast<u8>(pPayload->mEyeColour1));
+	c->setRightEyeColour(static_cast<u8>(pPayload->mEyeColour2));
+	c->setDrakkinHeritage(pPayload->mDrakkinHeritage);
+	c->setDrakkinTattoo(pPayload->mDrakkinTattoo);
+	c->setDrakkinDetails(pPayload->mDrakkinDetails);
 
-	//// Add to Account.
-	//auto data = pAccount->getData();
-	//data->mCharacterData.push_back(accountCharacterData);
+	// Base Stats.
+	//auto bonuses = c->getBaseBonuses();
+	//bonuses->_addStrength(0);
 
-	//// Save.
-	//if (!_save(data)){
-	//	mLog->error("Save failed in " + String(__FUNCTION__));
+	// Misc.
+	c->setSkill(Skills::Swimming, 200);
+	c->setLanguage(LanguageID::CommonTongue, 200);
 
-	//	// Clean up.
-	//	data->mCharacterData.remove(accountCharacterData);
-	//	delete accountCharacterData;
-	//	delete c;
+	const auto characterID = mDataStore->characterCreate(c.get());
 
-	//	return false;
-	//}
+	if (characterID == 0) {
+		return false;
+	}
 
 	return true;
 }
 
 const bool AccountManager::deleteCharacter(SharedPtr<Account> pAccount, const String& pCharacterName) {
 	if (!pAccount) return false;
-	if (!pAccount->ownsCharacter(pCharacterName)) return false;
+	//if (!pAccount->ownsCharacter(pCharacterName)) return false;
 
-	// Remove from Account.
-	auto data = pAccount->getData();
-	for (auto i : data->mCharacterData) {
-		if (i->mName == pCharacterName) {
-			delete i;
-			data->mCharacterData.remove(i);
-			break;
-		}
-	}
+	//// Remove from Account.
+	//auto data = pAccount->getData();
+	//for (auto i : data->mCharacterData) {
+	//	if (i->mName == pCharacterName) {
+	//		delete i;
+	//		data->mCharacterData.remove(i);
+	//		break;
+	//	}
+	//}
 
-	//return _save(data);
+	////return _save(data);
 	return true;
-}
-
-const bool AccountManager::updateCharacter(SharedPtr<Account> pAccount, const Character* pCharacter) {
-	if (!pAccount) return false;
-	if (!pCharacter) return false;
-	if (!pAccount->ownsCharacter(pCharacter->getName())) return false;
-
-	// Check: Data exists.
-	auto data = pAccount->getData(pCharacter->getName());
-	if (!data) {
-		mLog->error("Failure: Failed to find Data::CharacterData when updating Character");
-		return false;
-	}
-
-	// Check: Character is in a Zone.
-	auto zone = pCharacter->getZone();
-	if (!zone) {
-		// TODO: When this happens we need to continue with the save and either save a destination zone (if they are zoning) or bind if neither.
-		return false;
-	}
-
-	data->mName = pCharacter->getName();
-	data->mLevel = pCharacter->getLevel();
-	data->mClass = pCharacter->getClass();
-	data->mRace = pCharacter->getRace();
-	data->mGender = pCharacter->getGender();
-	data->mDeity = pCharacter->getDeity();
-	data->mZoneID = pCharacter->getZone()->getID();
-	data->mFaceStyle = pCharacter->getFaceStyle();
-	data->mHairStyle = pCharacter->getHairStyle();
-	data->mHairColour = pCharacter->getHairColour();
-	data->mBeardStyle = pCharacter->getBeardStyle();
-	data->mBeardColour = pCharacter->getBeardColour();
-	data->mEyeColourLeft = pCharacter->getLeftEyeColour();
-	data->mEyeColourRight = pCharacter->getRightEyeColour();
-	data->mDrakkinHeritage = pCharacter->getDrakkinHeritage();
-	data->mDrakkinTattoo = pCharacter->getDrakkinTattoo();
-	data->mDrakkinDetails = pCharacter->getDrakkinDetails();
-	data->mPrimary = 0; // TODO: Items
-	data->mSecondary = 0; // TODO: Items
-
-	// TODO: Materials
-
-	// Save the Account.
-	//return _save(pAccount->getData());
-	return true;
-}
-
-SharedPtr<Account> AccountManager::_find(const u32 pLSAccountID, const String& pLSAccountName, const u32 pLSID) const {
-	for (auto i : mAccounts) {
-		if (i->getLSAccountID() == pLSAccountID && i->getLSAccountName() == pLSAccountName && i->getLSID() == pLSID)
-			return i;
-	}
-
-	return nullptr;
 }
 
 SharedPtr<Account> AccountManager::_find(const u32 pLSAccountID, const u32 pLSID) const {
@@ -409,12 +330,80 @@ const bool AccountManager::_isCharacterNameReserved(const String& pCharacterName
 	return false;
 }
 
+const i8 AccountManager::onConnectRequest(const u32 pLSAccountID, const u32 pLSID, const bool pWorldLocked) {
+
+	const auto accountCreated = isCreated(pLSAccountID, pLSID);
+
+	// Server is currently locked and the connecting Account is unknown, deny connection.
+	if (pWorldLocked && !accountCreated) {
+		mLog->info("Unknown Account attempted connection to locked server, denying connection.");
+		return ResponseID::Denied;
+	}
+	// Server is not currently locked and the connecting Account is not known, allow connection.
+	else if (!pWorldLocked && !accountCreated) {
+		mLog->info("Unknown Account connecting to server, allowing connection.");
+		return ResponseID::Allowed;
+	}
+
+	const auto connected = isConnected(pLSAccountID, pLSID);
+
+	// Check: Account is already connected.
+	if (connected) {
+		mLog->info("Account is already connected, denying connection.");
+		return ResponseID::Full;
+	}
+
+	auto account = load(pLSAccountID, pLSID);
+
+	// Account failed to load, deny connection.
+	if (!account) {
+		mLog->error("Failed to load Account, denying connection.");
+		return ResponseID::Denied;
+	}
+
+	// Check: Suspended Account time may have expired.
+	if (account->isSuspended()) {
+		checkSuspension(account);
+	}
+	// Account is suspended.
+	if (account->isSuspended()) {
+		mLog->info("Suspended Account, denying connection.");
+		return ResponseID::Suspended;
+	}
+
+	// Account is banned.
+	if (account->isBanned()) {
+		mLog->info("Banned Account, denying connection.");
+		return ResponseID::Banned;
+	}
+
+	// Server is currently locked.
+	if (pWorldLocked) {
+		// Account has enough status to bypass lock.
+		if (account->getStatus() >= AccountStatus::BypassLock) {
+			mLog->info("World locked but Account has a high enough status to bypass lock, allowing connection.");
+			return ResponseID::Allowed;
+		}
+		// Account does not have enough status to bypass lock.
+		else {
+			mLog->info("World locked but Account does not have high enough status to bypass lock, denying connect.");
+			return ResponseID::Denied;
+		}
+	}
+	
+	return ResponseID::Allowed;
+}
+
 const bool AccountManager::onConnect(SharedPtr<Account> pAccount) {
 	if (!pAccount) return false;
 
 	// Configure Account session.
 	pAccount->setSessionBeginTime(Poco::DateTime());
 	const auto sessionID = mDataStore->accountConnect(pAccount.get());
+	if (sessionID == 0) {
+		// This should never occur.
+		return false;
+	}
 	pAccount->setSessionID(sessionID);
 
 	mAccounts.push_back(pAccount);

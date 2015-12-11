@@ -151,8 +151,8 @@ public:
 	inline void addVisibleTo(Character* pCharacter) { mVisibleTo.push_back(pCharacter); }
 	inline void removeVisibleTo(Character* pCharacter) { mVisibleTo.remove(pCharacter); }
 
-	inline const uint32 getSpawnID() const { return mActorData.mSpawnID; }
-	inline void setSpawnID(const uint32 pSpawnID) { mActorData.mSpawnID = pSpawnID; mActorData.mPosition.mSpawnID = pSpawnID; }
+	inline const u32 getSpawnID() const { return mActorData.mSpawnID; }
+	inline void setSpawnID(const u32 pSpawnID) { mActorData.mSpawnID = pSpawnID; mActorData.mPosition.mSpawnID = pSpawnID; }
 
 	inline const String& getName() const { return mName; }
 	inline void setName(const String& pName) { mName = pName; _setName(pName.c_str()); }
@@ -197,37 +197,37 @@ public:
 	inline const float getHeadingDelta() const { return mHeadingDelta; }
 	inline void setHeadingDelta(const float pHeadingDelta) { mHeadingDelta = pHeadingDelta; }
 
-	inline const int32 getAnimation() const { return mAnimation; }
-	inline void setAnimation(const int32 pAnimation) { mAnimation = pAnimation; }
+	inline const i32 getAnimation() const { return mAnimation; }
+	inline void setAnimation(const i32 pAnimation) { mAnimation = pAnimation; }
 
-	inline const uint8 getStandingState() const { return mActorData.mStandState; }
-	inline void setStandingState(const uint8 pStandingState) { mActorData.mStandState = pStandingState; }
+	inline const u8 getStandingState() const { return mActorData.mStandState; }
+	inline void setStandingState(const u8 pStandingState) { mActorData.mStandState = pStandingState; }
 
 	// Visual
-	inline const uint8 getFaceStyle() const { return mActorData.mFaceStyle; }
-	inline const uint8 getLeftEyeColour() const { return mActorData.mLeftEyeColour; }
-	inline const uint8 getRightEyeColour() const { return mActorData.mRightEyeColour; }
-	inline const uint8 getHairStyle() const { return mActorData.mHairStyle; }
-	inline const uint8 getBeardStyle() const { return mActorData.mBeardStyle; }
-	inline const uint8 getHairColour() const { return mActorData.mHairColour; }
-	inline const uint8 getBeardColour() const { return mActorData.mBeardColour; }
-	inline const uint32 getDrakkinHeritage() const { return mActorData.mDrakkinHeritage; }
-	inline const uint32 getDrakkinTattoo() const { return mActorData.mDrakkinTattoo; }
-	inline const uint32 getDrakkinDetails() const { return mActorData.mDrakkinDetails; }
-	inline const uint8 getTexture() const { return mActorData.mTexture; }
+	inline const u8 getFaceStyle() const { return mActorData.mFaceStyle; }
+	inline const u8 getLeftEyeColour() const { return mActorData.mLeftEyeColour; }
+	inline const u8 getRightEyeColour() const { return mActorData.mRightEyeColour; }
+	inline const u8 getHairStyle() const { return mActorData.mHairStyle; }
+	inline const u8 getBeardStyle() const { return mActorData.mBeardStyle; }
+	inline const u8 getHairColour() const { return mActorData.mHairColour; }
+	inline const u8 getBeardColour() const { return mActorData.mBeardColour; }
+	inline const u32 getDrakkinHeritage() const { return mActorData.mDrakkinHeritage; }
+	inline const u32 getDrakkinTattoo() const { return mActorData.mDrakkinTattoo; }
+	inline const u32 getDrakkinDetails() const { return mActorData.mDrakkinDetails; }
+	inline const u8 getTexture() const { return mActorData.mTexture; }
 	inline const u8 getHelmTexture() const { return mActorData.mShowHelm; }
 
-	inline void setFaceStyle(const uint8 pFaceStyle) { mActorData.mFaceStyle = pFaceStyle; }
-	inline void setLeftEyeColour(const uint8 pLeftEyeColour) { mActorData.mLeftEyeColour = pLeftEyeColour; }
-	inline void setRightEyeColour(const uint8 pRightEyeColour) { mActorData.mRightEyeColour = pRightEyeColour; }
-	inline void setHairStyle(const uint8 pHairStyle) { mActorData.mHairStyle = pHairStyle; }
-	inline void setBeardStyle(const uint8 pBeardStyle) { mActorData.mBeardStyle = pBeardStyle; }
-	inline void setHairColour(const uint8 pHairColour) { mActorData.mHairColour = pHairColour; }
-	inline void setBeardColour(const uint8 pBeardColour) { mActorData.mBeardColour = pBeardColour; }
-	inline void setDrakkinHeritage(const uint32 pDrakkinHeritage) { mActorData.mDrakkinHeritage = pDrakkinHeritage; }
-	inline void setDrakkinTattoo(const uint32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
-	inline void setDrakkinDetails(const uint32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
-	inline void setTexture(const uint8 pValue) { mActorData.mTexture = pValue; }
+	inline void setFaceStyle(const u8 pFaceStyle) { mActorData.mFaceStyle = pFaceStyle; }
+	inline void setLeftEyeColour(const u8 pLeftEyeColour) { mActorData.mLeftEyeColour = pLeftEyeColour; }
+	inline void setRightEyeColour(const u8 pRightEyeColour) { mActorData.mRightEyeColour = pRightEyeColour; }
+	inline void setHairStyle(const u8 pHairStyle) { mActorData.mHairStyle = pHairStyle; }
+	inline void setBeardStyle(const u8 pBeardStyle) { mActorData.mBeardStyle = pBeardStyle; }
+	inline void setHairColour(const u8 pHairColour) { mActorData.mHairColour = pHairColour; }
+	inline void setBeardColour(const u8 pBeardColour) { mActorData.mBeardColour = pBeardColour; }
+	inline void setDrakkinHeritage(const u32 pDrakkinHeritage) { mActorData.mDrakkinHeritage = pDrakkinHeritage; }
+	inline void setDrakkinTattoo(const u32 pDrakkinTattoo) { mActorData.mDrakkinTattoo = pDrakkinTattoo; }
+	inline void setDrakkinDetails(const u32 pDrakkinDetails) { mActorData.mDrakkinDetails = pDrakkinDetails; }
+	inline void setTexture(const u8 pValue) { mActorData.mTexture = pValue; }
 	inline void setHelmTexture(const u8 pValue) { mActorData.mShowHelm = pValue; }
 
 	// Flags
@@ -249,11 +249,11 @@ public:
 	inline const bool isGM() const { return mActorData.mFlags.mIsGM == 1; }
 	inline void setIsGM(const bool pIsGM) { mActorData.mFlags.mIsGM = pIsGM ? 1 : 0; }
 
-	inline const uint8 getAnonymous() const { return mActorData.mFlags.mAnonymous; }
+	inline const u8 getAnonymous() const { return mActorData.mFlags.mAnonymous; }
 	inline const bool isAnonymous() const { return getAnonymous() == AnonType::Anonymous; }
 	inline const bool isRoleplaying() const { return getAnonymous() == AnonType::Roleplay; }
 
-	inline void setAnonymous(const uint8 pAnonType) {
+	inline void setAnonymous(const u8 pAnonType) {
 		mActorData.mFlags.mAnonymous = 0;
 		switch (pAnonType) {
 		case AnonType::None:
@@ -271,12 +271,12 @@ public:
 		}
 	};
 
-	inline const uint8 getGender() const { return mActorData.mFlags.mGender; }
+	inline const u8 getGender() const { return mActorData.mFlags.mGender; }
 	inline const bool isMale() const { return getGender() == Gender::Male; }
 	inline const bool isFemale() const { return getGender() == Gender::Female; }
 	inline const bool isMonster() const { return getGender() == Gender::Monster; }
 
-	inline void setGender(const uint8 pGender) {
+	inline void setGender(const u8 pGender) {
 		mActorData.mFlags.mGender = 0;
 		switch (pGender) {
 		case Gender::Male:
@@ -331,19 +331,19 @@ public:
 	inline void setTargetable(const bool pValue) { mActorData.mFlags.mTargetable = pValue ? 1 : 0; }
 	
 	// Returns the class of this Actor.
-	inline const uint8 getClass() const { return mActorData.mClass; }
+	inline const u8 getClass() const { return mActorData.mClass; }
 
 	// Sets the class of this Actor.
-	inline void setClass(const uint8 pClassID) { mActorData.mClass = pClassID; }
+	inline void setClass(const u8 pClassID) { mActorData.mClass = pClassID; }
 	
 	//inline const AATitle getAATitle() const { return mSpawnData.mAATitle; }
 	//inline void setAATitle(const AATitle pAATitle) { mSpawnData.mAATitle = pAATitle; }
 	
 	// Returns the deity of this Actor.
-	inline const uint32 getDeity() const { return mActorData.mDeity; }
+	inline const u32 getDeity() const { return mActorData.mDeity; }
 
 	// Sets the deity of this Actor.
-	inline void setDeityID(const uint32 pDeityID) { mActorData.mDeity = pDeityID; }
+	inline void setDeityID(const u32 pDeityID) { mActorData.mDeity = pDeityID; }
 
 	// Returns the size of this Actor.
 	inline const float getSize() const { return mActorData.mSize; }
@@ -352,22 +352,22 @@ public:
 	inline void setSize(const float pSize) { mActorData.mSize = pSize; }
 
 	// Returns the actor type of this Actor. See Constants 'ActorType' enumeration.
-	inline const uint8 getActorType() const { return mActorData.mActorType; }
+	inline const u8 getActorType() const { return mActorData.mActorType; }
 
 	// Sets the actor type of this Actor. See Constants 'ActorType' enumeration.
-	inline void setActorType(const uint8 pActorType) { mActorData.mActorType = pActorType; }
+	inline void setActorType(const u8 pActorType) { mActorData.mActorType = pActorType; }
 
 	// Returns the health percentage of this Actor.
-	inline const uint8 getHPPercent() const { return mActorData.mHPPercent; }
+	inline const u8 getHPPercent() const { return mActorData.mHPPercent; }
 
 	// Sets the health percentage of this Actor.
-	inline void setHPPercent(const uint8 pValue) { mActorData.mHPPercent = pValue; }
+	inline void setHPPercent(const u8 pValue) { mActorData.mHPPercent = pValue; }
 
 	// Returns the stand state of this Actor.
-	inline const uint8 getStandState() const { return mActorData.mStandState; }
+	inline const u8 getStandState() const { return mActorData.mStandState; }
 
 	// Sets the stand state of this Actor.
-	inline void setStandState(const uint8 pStandState) { mActorData.mStandState = pStandState; }
+	inline void setStandState(const u8 pStandState) { mActorData.mStandState = pStandState; }
 
 	// Returns the level of this Actor.
 	virtual const u8 getLevel() const { return mActorData.mLevel; }
@@ -382,24 +382,24 @@ public:
 	inline void setOwner(Actor* pOwner) { mOwner = pOwner; }
 
 	// Returns the spawn ID of the owner of this Actor.
-	inline const uint32 getOwnerID() const { return mActorData.mOwnerID; }
+	inline const u32 getOwnerID() const { return mActorData.mOwnerID; }
 
 	// Sets the spawn ID of the owner of this Actor.
 	inline void setOwnerID(const u32 pID) { mActorData.mOwnerID = pID; }
 
 	// Returns the guild rank of this Actor.
-	inline const uint32 getGuildRank() const { return mActorData.mGuildRank; }
+	inline const u32 getGuildRank() const { return mActorData.mGuildRank; }
 
 	// Sets the guild rank of this Actor.
-	inline void setGuildRank(const uint32 pGuildRank) { mActorData.mGuildRank = pGuildRank; }
+	inline void setGuildRank(const u32 pGuildRank) { mActorData.mGuildRank = pGuildRank; }
 
-	inline const uint32 getMaterial(const u8 pSlotID) const {
+	inline const u32 getMaterial(const u8 pSlotID) const {
 		// TODO: Guard this.
 		//return mSpawnData.mEquipmentMaterials[pSlotID];
 		// TODO!
 		return 0;
 	}
-	inline const uint32 getMaterial(const int pSlotID) const {
+	inline const u32 getMaterial(const int pSlotID) const {
 		// TODO: Guard this.
 		//return mSpawnData.mEquipmentMaterials[pSlotID];
 		// TODO!
@@ -412,11 +412,11 @@ public:
 	inline const float getRunSpeed() const { return mActorData.mRunSpeed; }
 	inline void setRunSpeed(const float pRunSpeed) { mActorData.mRunSpeed = pRunSpeed; }
 
-	inline const uint32 getGuildID() const { return mActorData.mGuildID; }
-	inline void setGuildID(const uint32 pGuildID) { mActorData.mGuildID = pGuildID; }
+	inline const u32 getGuildID() const { return mActorData.mGuildID; }
+	inline void setGuildID(const u32 pGuildID) { mActorData.mGuildID = pGuildID; }
 
-	inline const uint32 getRace() const { return mActorData.mRace; }
-	inline void setRace(const uint32 pRaceID) { mActorData.mRace = pRaceID; }
+	inline const u32 getRace() const { return mActorData.mRace; }
+	inline void setRace(const u32 pRaceID) { mActorData.mRace = pRaceID; }
 
 	inline const bool isPVP() const { return mActorData.mPVP == 1; }
 	inline void setIsPVP(const bool pValue) { mActorData.mPVP = pValue ? 1 : 0; }
@@ -424,14 +424,14 @@ public:
 	inline const float getWalkSpeed() const { return mActorData.mWalkSpeed; }
 	inline void setWalkSpeed(const float pWalkSpeed) { mActorData.mWalkSpeed = pWalkSpeed; }
 
-	inline const uint8 getLight() const { return mActorData.mLight; }
-	inline void setLight(const uint8 pLight) { mActorData.mLight = pLight; }
+	inline const u8 getLight() const { return mActorData.mLight; }
+	inline void setLight(const u8 pLight) { mActorData.mLight = pLight; }
 
-	inline const uint8 getFlyMode() const { return mActorData.mFlyMode; }
-	inline void getFlyMode(const uint8 pFlyMode) { mActorData.mFlyMode = pFlyMode; }
+	inline const u8 getFlyMode() const { return mActorData.mFlyMode; }
+	inline void getFlyMode(const u8 pFlyMode) { mActorData.mFlyMode = pFlyMode; }
 
-	inline const uint32 getBodyType() const { return mActorData.mBodyType; }
-	inline void setBodyType(const uint32 pBodyType) { mActorData.mBodyType = pBodyType; }
+	inline const u32 getBodyType() const { return mActorData.mBodyType; }
+	inline void setBodyType(const u32 pBodyType) { mActorData.mBodyType = pBodyType; }
 
 	//inline const Colour getColour(const int pSlotID) const {
 	//	// TODO: Guard this.
@@ -442,7 +442,7 @@ public:
 	//	//mSpawnData.mEquipmentColours[pSlotID] = pColour;
 	//	mActorData.mColours[pSlotID] = pColour.mColour;
 	//}
-	inline void setColour(const int pSlotID, const uint32 pColour) {
+	inline void setColour(const int pSlotID, const u32 pColour) {
 		// TODO: Guard this.
 		//mSpawnData.mEquipmentColours[pSlotID].mColour = pColour;
 		mActorData.mColours[pSlotID] = pColour;
@@ -458,24 +458,24 @@ public:
 	inline void destroy() { mDestroy = true; }
 	inline const bool getDestroy() const { return mDestroy; }
 
-	const uint32 getDataSize() const;
+	const u32 getDataSize() const;
 	const bool copyData(Utility::MemoryWriter& pWriter);
 
-	inline const uint8 getPrimaryDamageType() const { return mPrimaryDamageType; }
-	inline const uint8 getSecondaryDamageType() const { return mSecondaryDamageType; }
-	inline const uint8 getRangeDamageType() const { return mRangeDamageType; }
+	inline const u8 getPrimaryDamageType() const { return mPrimaryDamageType; }
+	inline const u8 getSecondaryDamageType() const { return mSecondaryDamageType; }
+	inline const u8 getRangeDamageType() const { return mRangeDamageType; }
 
-	inline void setPrimaryDamageType(const uint8 pValue) { mPrimaryDamageType = pValue; }
-	inline void setSecondaryDamageType(const uint8 pValue) { mSecondaryDamageType = pValue; }
-	inline void setRangeDamageType(const uint8 pValue) { mRangeDamageType = pValue; }
+	inline void setPrimaryDamageType(const u8 pValue) { mPrimaryDamageType = pValue; }
+	inline void setSecondaryDamageType(const u8 pValue) { mSecondaryDamageType = pValue; }
+	inline void setRangeDamageType(const u8 pValue) { mRangeDamageType = pValue; }
 
-	inline const uint8 getPrimaryAttackAnimation() const { return mPrimaryAttackAnimation; }
-	inline const uint8 getSecondaryAttackAnimation() const { return mSecondaryAttackAnimation; }
-	inline const uint8 getRangeAttackAnimation() const { return mRangeAttackAnimation; }
+	inline const u8 getPrimaryAttackAnimation() const { return mPrimaryAttackAnimation; }
+	inline const u8 getSecondaryAttackAnimation() const { return mSecondaryAttackAnimation; }
+	inline const u8 getRangeAttackAnimation() const { return mRangeAttackAnimation; }
 
-	inline void setPrimaryAttackAnimation(const uint8 pValue) { mPrimaryAttackAnimation = pValue; }
-	inline void setSecondaryAttackAnimation(const uint8 pValue) { mSecondaryAttackAnimation = pValue; }
-	inline void setRangeAttackAnimation(const uint8 pValue) { mRangeAttackAnimation = pValue; }
+	inline void setPrimaryAttackAnimation(const u8 pValue) { mPrimaryAttackAnimation = pValue; }
+	inline void setSecondaryAttackAnimation(const u8 pValue) { mSecondaryAttackAnimation = pValue; }
+	inline void setRangeAttackAnimation(const u8 pValue) { mRangeAttackAnimation = pValue; }
 
 	inline const bool isStunImmune() const { return mIsStunImmune; }
 	inline void setStunImmune(const bool pValue) { mIsStunImmune = pValue; }
@@ -489,36 +489,36 @@ public:
 	inline const bool isCasting() const { return mIsCasting; }
 	inline void setIsCasting(const bool pValue) { mIsCasting = pValue; }
 
-	inline const int32 getCurrentHP() const { return mCurrentHP; }
-	inline void setCurrentHP(const int32 pValue) { mCurrentHP = pValue; }
-	inline const int32 getMaximumHP() const { return mMaximumHP; }
-	inline void setMaximumHP(const int32 pValue) { mMaximumHP = pValue; }
-	inline const int32 getCurrentMana() const { return mCurrentMana; }
-	inline void setCurrentMana(const int32 pValue) { mCurrentMana = pValue; }
-	inline const int32 getMaximumMana() const { return mMaximumMana; }
-	inline void setMaximumMana(const int32 pValue) { mMaximumMana = pValue; }
-	inline const int32 getCurrentEndurance() const { return mCurrentEndurance; }
-	inline void setCurrentEndurance(const int32 pValue) { mCurrentEndurance = pValue; }
-	inline const int32 getMaximumEndurance() const { return mMaximumEndurance; }
-	inline void setMaximumEndurance(const int32 pValue) { mMaximumEndurance = pValue; }
+	inline const i32 getCurrentHP() const { return mCurrentHP; }
+	inline void setCurrentHP(const i32 pValue) { mCurrentHP = pValue; }
+	inline const i32 getMaximumHP() const { return mMaximumHP; }
+	inline void setMaximumHP(const i32 pValue) { mMaximumHP = pValue; }
+	inline const i32 getCurrentMana() const { return mCurrentMana; }
+	inline void setCurrentMana(const i32 pValue) { mCurrentMana = pValue; }
+	inline const i32 getMaximumMana() const { return mMaximumMana; }
+	inline void setMaximumMana(const i32 pValue) { mMaximumMana = pValue; }
+	inline const i32 getCurrentEndurance() const { return mCurrentEndurance; }
+	inline void setCurrentEndurance(const i32 pValue) { mCurrentEndurance = pValue; }
+	inline const i32 getMaximumEndurance() const { return mMaximumEndurance; }
+	inline void setMaximumEndurance(const i32 pValue) { mMaximumEndurance = pValue; }
 
 	inline const bool isDead() const { return mIsDead; }
 	inline void setIsDead(const bool pValue) { mIsDead = pValue; }
 	inline const bool isAlive() const { return !isDead(); }
 
-	void damage(const int32 pAmount);
+	void damage(const i32 pAmount);
 
 	const TTimer& getDecayTimer() const { return mDecayTimer; }
 	TTimer& getOpenTimer() { return mOpenTimer; }
 
-	inline void addNimbus(const uint32 pNimbusID) { mNimbuses.push_back(pNimbusID); }
-	inline void removeNimbus(const uint32 pNimbusID) { mNimbuses.remove(pNimbusID); }
-	inline std::list<uint32> getNimbuses() { return mNimbuses; }
+	inline void addNimbus(const u32 pNimbusID) { mNimbuses.push_back(pNimbusID); }
+	inline void removeNimbus(const u32 pNimbusID) { mNimbuses.remove(pNimbusID); }
+	inline std::list<u32> getNimbuses() { return mNimbuses; }
 
 protected:
 
 	// Returns a number of type T between 0-100 representing current HP percentage.
-	template <typename T = uint8>
+	template <typename T = u8>
 	inline const T _calcHPPercent() const {
 		static_assert(std::is_arithmetic<T>::value, "T must be a number.");
 		return static_cast<T>(std::floor((static_cast<float>(mCurrentHP) / static_cast<float>(mMaximumHP)) * 100));
@@ -535,7 +535,7 @@ protected:
 	float mHeading = 0.0f;
 	Vector3 mPositionDelta;
 	float mHeadingDelta = 0.0f;
-	int32 mAnimation = 0;
+	i32 mAnimation = 0;
 
 	TTimer mDecayTimer; // Time until corpse rots.
 	TTimer mOpenTimer; // Time until corpse becomes open, i.e. anyone can loot.
@@ -549,27 +549,27 @@ protected:
 
 	void _clearPrimary();
 
-	inline const uint32 getPrimaryDamage() const { return mPrimaryDamage; }
-	inline const uint32 getPrimaryMagicDamage() const { return mPrimaryMagicDamage; }
-	inline const uint32 getPrimaryFireDamage() const { return mPriamryFireDamage; }
-	inline const uint32 getPrimaryColdDamage() const { return mPrimaryColdDamage; }
-	inline const uint32 getPrimaryPoisonDamage() const { return mPrimaryPoisonDamage; }
-	inline const uint32 getPrimaryDiseaseDamage() const { return mPrimaryDiseaseDamage; }
-	inline const uint32 getPrimaryChromaticDamage() const { return mPrimaryChromaticDamage; }
-	inline const uint32 getPrimaryPrismaticDamage() const { return mPrimaryPrismaticDamage; }
-	inline const uint32 getPrimaryPhysicalDamage() const { return mPrimaryPhysicalDamage; }
-	inline const uint32 getPrimaryCorruptionDamage() const { return mPrimaryCorruptionDamage; }
+	inline const u32 getPrimaryDamage() const { return mPrimaryDamage; }
+	inline const u32 getPrimaryMagicDamage() const { return mPrimaryMagicDamage; }
+	inline const u32 getPrimaryFireDamage() const { return mPriamryFireDamage; }
+	inline const u32 getPrimaryColdDamage() const { return mPrimaryColdDamage; }
+	inline const u32 getPrimaryPoisonDamage() const { return mPrimaryPoisonDamage; }
+	inline const u32 getPrimaryDiseaseDamage() const { return mPrimaryDiseaseDamage; }
+	inline const u32 getPrimaryChromaticDamage() const { return mPrimaryChromaticDamage; }
+	inline const u32 getPrimaryPrismaticDamage() const { return mPrimaryPrismaticDamage; }
+	inline const u32 getPrimaryPhysicalDamage() const { return mPrimaryPhysicalDamage; }
+	inline const u32 getPrimaryCorruptionDamage() const { return mPrimaryCorruptionDamage; }
 
-	inline void setPrimaryDamage(const uint32 pValue) { mPrimaryDamage = pValue; }
-	inline void setPrimaryMagicDamage(const uint32 pValue) { mPrimaryMagicDamage = pValue; }
-	inline void setPrimaryFireDamage(const uint32 pValue) { mPriamryFireDamage = pValue; }
-	inline void setPrimaryColdDamage(const uint32 pValue) { mPrimaryColdDamage = pValue; }
-	inline void setPrimaryPoisonDamage(const uint32 pValue) { mPrimaryPoisonDamage = pValue; }
-	inline void setPrimaryDiseaseDamage(const uint32 pValue) { mPrimaryDiseaseDamage = pValue; }
-	inline void setPrimaryChromaticDamage(const uint32 pValue) { mPrimaryChromaticDamage = pValue; }
-	inline void setPrimaryPrismaticDamage(const uint32 pValue) { mPrimaryPrismaticDamage = pValue; }
-	inline void setPrimaryPhysicalDamage(const uint32 pValue) { mPrimaryPhysicalDamage = pValue; }
-	inline void setPrimaryCorruptionDamage(const uint32 pValue) { mPrimaryCorruptionDamage = pValue; }
+	inline void setPrimaryDamage(const u32 pValue) { mPrimaryDamage = pValue; }
+	inline void setPrimaryMagicDamage(const u32 pValue) { mPrimaryMagicDamage = pValue; }
+	inline void setPrimaryFireDamage(const u32 pValue) { mPriamryFireDamage = pValue; }
+	inline void setPrimaryColdDamage(const u32 pValue) { mPrimaryColdDamage = pValue; }
+	inline void setPrimaryPoisonDamage(const u32 pValue) { mPrimaryPoisonDamage = pValue; }
+	inline void setPrimaryDiseaseDamage(const u32 pValue) { mPrimaryDiseaseDamage = pValue; }
+	inline void setPrimaryChromaticDamage(const u32 pValue) { mPrimaryChromaticDamage = pValue; }
+	inline void setPrimaryPrismaticDamage(const u32 pValue) { mPrimaryPrismaticDamage = pValue; }
+	inline void setPrimaryPhysicalDamage(const u32 pValue) { mPrimaryPhysicalDamage = pValue; }
+	inline void setPrimaryCorruptionDamage(const u32 pValue) { mPrimaryCorruptionDamage = pValue; }
 
 private:
 
@@ -583,25 +583,25 @@ private:
 	String mSuffix = "";
 
 	// Primary Damage
-	uint32 mPrimaryDamage = 0;
+	u32 mPrimaryDamage = 0;
 	// Primary Elemental Damage
-	uint32 mPrimaryMagicDamage = 0;
-	uint32 mPriamryFireDamage = 0;
-	uint32 mPrimaryColdDamage = 0;
-	uint32 mPrimaryPoisonDamage = 0;
-	uint32 mPrimaryDiseaseDamage = 0;
-	uint32 mPrimaryChromaticDamage = 0;
-	uint32 mPrimaryPrismaticDamage = 0;
-	uint32 mPrimaryPhysicalDamage = 0;
-	uint32 mPrimaryCorruptionDamage = 0;
+	u32 mPrimaryMagicDamage = 0;
+	u32 mPriamryFireDamage = 0;
+	u32 mPrimaryColdDamage = 0;
+	u32 mPrimaryPoisonDamage = 0;
+	u32 mPrimaryDiseaseDamage = 0;
+	u32 mPrimaryChromaticDamage = 0;
+	u32 mPrimaryPrismaticDamage = 0;
+	u32 mPrimaryPhysicalDamage = 0;
+	u32 mPrimaryCorruptionDamage = 0;
 
-	uint8 mPrimaryDamageType = DamageType::HandtoHand;
-	uint8 mSecondaryDamageType = DamageType::HandtoHand;
-	uint8 mRangeDamageType = DamageType::Archery;
+	u8 mPrimaryDamageType = DamageType::HandtoHand;
+	u8 mSecondaryDamageType = DamageType::HandtoHand;
+	u8 mRangeDamageType = DamageType::Archery;
 
-	uint8 mPrimaryAttackAnimation = Animation::ANIM_HAND2HAND;
-	uint8 mSecondaryAttackAnimation = Animation::ANIM_HAND2HAND;
-	uint8 mRangeAttackAnimation = Animation::ANIM_SHOOTBOW;
+	u8 mPrimaryAttackAnimation = Animation::ANIM_HAND2HAND;
+	u8 mSecondaryAttackAnimation = Animation::ANIM_HAND2HAND;
+	u8 mRangeAttackAnimation = Animation::ANIM_SHOOTBOW;
 	
 	bool mIsInvulnerable = false;
 	bool mIsStunImmune = false;
@@ -610,14 +610,14 @@ private:
 	bool mIsCasting = false;
 	CastingState mCastingState;
 
-	int32 mCurrentHP = 50;
-	int32 mMaximumHP = 50;
-	int32 mCurrentMana = 100;
-	int32 mMaximumMana = 100;
-	int32 mCurrentEndurance = 100;
-	int32 mMaximumEndurance = 100;
+	i32 mCurrentHP = 50;
+	i32 mMaximumHP = 50;
+	i32 mCurrentMana = 100;
+	i32 mMaximumMana = 100;
+	i32 mCurrentEndurance = 100;
+	i32 mMaximumEndurance = 100;
 
-	std::list<uint32> mNimbuses;
+	std::list<u32> mNimbuses;
 
 	float mVisibleRange = 300.0f;
 	std::list<Character*> mVisibleTo; // Characters who can see this Actor.

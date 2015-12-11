@@ -6,19 +6,13 @@ using namespace Experience;
 
 std::function<u32(u8)>* Controller::mRequiredExperienceFunction = nullptr;
 std::function<u32(u32)>* Controller::mRequiredAAExperienceFunction = nullptr;
-std::function<u32(u32)>* Controller::mRequiredGroupExperienceFunction = nullptr;
-std::function<u32(u32)>* Controller::mRequiredRaidExperienceFunction = nullptr;
 
 static std::function<u32(u8)> defaultExperienceFunction = [](u8 pLevel) { return 5; };
 static std::function<u32(u32)> defaultAAExperienceFunction = [](u32 pPoints) { return 100; };
-static std::function<u32(u32)> defaultGroupExperienceFunction = [](u32 pPoints) { return 1000; };
-static std::function<u32(u32)> defaultRaidExperienceFunction = [](u32 pPoints) { return 2000; };
 
 void Controller::_initialise() {
 	setRequiredExperienceFunction(&defaultExperienceFunction);
 	setRequiredAAExperienceFunction(&defaultAAExperienceFunction);
-	setRequiredGroupExperienceFunction(&defaultGroupExperienceFunction);
-	setRequiredRaidExperienceFunction(&defaultRaidExperienceFunction);
 }
 
 const u32 Controller::getExperienceForLevel(const u8 pLevel) {
@@ -31,14 +25,41 @@ const u32 Controller::getAAExperienceForPoint(const u32 pTotalPoints) {
 	return (*mRequiredAAExperienceFunction)(pTotalPoints);
 }
 
-const u32 Controller::getGroupExperienceForPoint(const u32 pTotalPoints) {
-	EXPECTED_VAR(mRequiredGroupExperienceFunction, std::numeric_limits<u32>::max());
-	return (*mRequiredGroupExperienceFunction)(pTotalPoints);
-}
+const bool Experience::Controller::initialise(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pAAExperience, const u32 pSpentAA, const u32 pMaximumSpentAA, const u32 pUnspentAA, const u32 pMaximumUnspentAA, const u32 pExperienceToAA) {
+	if (mInitialised) return false;
+	if (!mRequiredExperienceFunction) return false;
+	if (!mRequiredAAExperienceFunction) return false;
 
-const u32 Controller::getRaidExperienceForPoint(const u32 pTotalPoints) {
-	EXPECTED_VAR(mRequiredRaidExperienceFunction, std::numeric_limits<u32>::max());
-	return (*mRequiredRaidExperienceFunction)(pTotalPoints);
+	// Check: Level is not 0 (invalid).
+	if (pLevel == 0) return false;
+
+	// Check: Level is not greater than the maximum.
+	if (pLevel > pMaximumLevel) return false;
+
+	// Check: Experience towards AA is not greater than 100%.
+	if (pExperienceToAA > 100) return false;
+
+	// Check: Number of unspent AA is not greater than the maximum
+	if (pUnspentAA > pMaximumUnspentAA) return false;
+
+	// Check: Number of spent AA is not greater than the maximum.
+	if (pSpentAA > pMaximumSpentAA) return false;
+
+	// Normal experience.
+	mLevel = pLevel;
+	mMaximumLevel = pMaximumLevel;
+	mExperience = pExperience;
+
+	// Alternate Advanced experience.
+	mExperienceToAA = pExperienceToAA;
+	mAAExperience = pAAExperience;
+	mUnspentAA = pUnspentAA;
+	mMaximumUnspentAA = pMaximumUnspentAA;
+	mSpentAA = pSpentAA;
+	mMaximumSpentAA = pMaximumSpentAA;
+
+	mInitialised = true;
+	return true;
 }
 
 bool Controller::onLoad(Data::Experience* pData) {
@@ -46,8 +67,6 @@ bool Controller::onLoad(Data::Experience* pData) {
 	if (!pData) return false;
 	if (!mRequiredExperienceFunction) return false;
 	if (!mRequiredAAExperienceFunction) return false;
-	if (!mRequiredGroupExperienceFunction) return false;
-	if (!mRequiredRaidExperienceFunction) return false;
 	
 	mData = pData;
 	if (mData->mLevel == 0) return false;
@@ -64,19 +83,10 @@ bool Controller::onLoad(Data::Experience* pData) {
 	// Alternate Advanced experience.
 	mExperienceToAA = mData->mExperienceToAA;
 	mAAExperience = mData->mAAExperience;
-	mUnspentAAPoints = mData->mUnspentAAPoints;
-	mMaximumUnspentAAPoints = mData->mMaximumUnspentAA;
-	mSpentAAPoints = mData->mSpentAAPoints;
-	mMaximumSpentAAPoints = mData->mMaximumSpentAA;
-
-	// Leadership experience.
-	mLeadershipExperienceOn = mData->mLeadershipExperienceOn;
-	
-	mGroupExperience = mData->mGroupExperience;
-	mGroupPoints = mData->mGroupPoints;
-
-	mRaidExperience = mData->mRaidExperience;
-	mRaidPoints = mData->mRaidPoints;
+	mUnspentAA = mData->mUnspentAAPoints;
+	mMaximumUnspentAA = mData->mMaximumUnspentAA;
+	mSpentAA = mData->mSpentAAPoints;
+	mMaximumSpentAA = mData->mMaximumSpentAA;
 
 	mInitialised = true;
 	return true;
@@ -88,14 +98,14 @@ bool Experience::Controller::onSave(Data::Experience* pData) const {
 	pData->mExperience = getExperience();
 	pData->mExperienceToAA = getExperienceToAA();
 	pData->mAAExperience = getAAExperience();
-	pData->mUnspentAAPoints = getUnspentAAPoints();
-	pData->mMaximumUnspentAA = getMaximumUnspentAAPoints();
-	pData->mSpentAAPoints = getSpentAAPoints();
-	pData->mMaximumSpentAA = getMaximumSpentAAPoints();
+	pData->mUnspentAAPoints = getUnspentAA();
+	pData->mMaximumUnspentAA = getMaximumUnspentAA();
+	pData->mSpentAAPoints = getSpentAA();
+	pData->mMaximumSpentAA = getMaximumSpentAA();
 	return true;
 }
 
-void Controller::add(GainResult& pResult, const u32 pExperience, const u32 pAAExperience, const u32 pGroupExperience, const u32 pRaidExperience) {
+void Controller::add(GainResult& pResult, const u32 pExperience, const u32 pAAExperience) {
 	// Add normal experience.
 	if (pExperience) {
 		const auto preLevel = getLevel();
@@ -105,23 +115,9 @@ void Controller::add(GainResult& pResult, const u32 pExperience, const u32 pAAEx
 
 	// Add Alternate Advancement experience.
 	if (pAAExperience) {
-		const auto prePoints = getUnspentAAPoints();
+		const auto prePoints = getUnspentAA();
 		addAAExperience(pAAExperience);
-		pResult.mAAPoints = getUnspentAAPoints() - prePoints;
-	}
-
-	// Add Group Leadership experience.
-	if (pGroupExperience) {
-		const auto prePoints = getGroupPoints();
-		addGroupExperience(pGroupExperience);
-		pResult.mGroupPoints = getGroupPoints() - prePoints;
-	}
-
-	// Add Raid Leadership experience.
-	if (pRaidExperience) {
-		const auto prePoints = getRaidPoints();
-		addRaidExperience(pRaidExperience);
-		pResult.mRaidPoints = getRaidPoints() - prePoints;
+		pResult.mAAPoints = getUnspentAA() - prePoints;
 	}
 }
 
@@ -131,23 +127,14 @@ const bool Controller::canGainExperience() const {
 }
 
 const bool Controller::canGainAAExperience() const {
-	if (getUnspentAAPoints() < getMaximumUnspentAAPoints()) return true;
+	if (getUnspentAA() < getMaximumUnspentAA()) return true;
 	return getAAExperience() < getAAExperienceForNextPoint() - 1;
-}
-
-const bool Controller::canGainGroupExperience() const {
-	if (getGroupPoints() < getMaxGroupPoints()) return true;
-	return getGroupExperience() < getGroupExperienceForNextPoint() - 1;
-}
-
-const bool Controller::canGainRaidExperience() const {
-	if (getRaidPoints() < getMaxRaidPoints()) return true;
-	return getRaidExperience() < getRaidExperienceForNextPoint() - 1;
 }
 
 void Controller::setLevel(const u8 pLevel) {
 	mLevel = Utility::clamp<u8>(pLevel, 1, getMaximumLevel());
 	mExperience = 0;
+	mSaveNeeded = true;
 }
 
 void Controller::addExperience(const u32 pExperience) {
@@ -158,12 +145,14 @@ void Controller::addExperience(const u32 pExperience) {
 	while (canGainExperience() && mExperience >= getExperienceForNextLevel()) {
 		mExperience -= getExperienceForNextLevel();
 		mLevel++;
+		mSaveNeeded = true;
 	}
 	
 	// Special case: Experience cap reached.
 	if (canGainExperience() == false) {
 		// Set experience to cap.
 		mExperience = getExperienceCap();
+		mSaveNeeded = true;
 		return;
 	}
 }
@@ -179,14 +168,6 @@ const u32 Controller::getAAExperienceRatio() const {
 	return static_cast<u32>(330.0f * (getAAExperience() / static_cast<float>(getAAExperienceForNextPoint())));
 }
 
-const double Controller::getGroupRatio() const {
-	return static_cast<double>(1000.0f * (getGroupExperience() / static_cast<double>(getGroupExperienceForNextPoint())));
-}
-
-const double Controller::getRaidRatio() const {
-	return static_cast<double>(2000.0f * (getRaidExperience() / static_cast<double>(getRaidExperienceForNextPoint())));
-}
-
 void Controller::addAAExperience(const u32 pAAExperience) {
 	EXPECTED(canGainAAExperience());
 
@@ -194,74 +175,26 @@ void Controller::addAAExperience(const u32 pAAExperience) {
 	mAAExperience += pAAExperience;
 	while (canGainAAExperience() && mAAExperience >= getAAExperienceForNextPoint()) {
 		mAAExperience -= getAAExperienceForNextPoint();
-		mUnspentAAPoints++;
+		mUnspentAA++;
+		mSaveNeeded = true;
 	}
 
 	// Special case: AA experience cap reached.
 	if (canGainAAExperience() == false) {
 		// Set AA experience to cap.
 		mAAExperience = getAAExperienceForNextPoint() - 1;
+		mSaveNeeded = true;
 		return;
 	}
 }
 
 void Controller::setExperienceToAA(const u32 pToAA) {
 	mExperienceToAA = Utility::clamp<u32>(pToAA, 0, 100);
+	mSaveNeeded = true;
 }
 
 void Controller::setUnspentAAPoints(const u32 pPoints) {
-	mUnspentAAPoints = Utility::clamp<u8>(pPoints, 0, getMaximumUnspentAAPoints());
+	mUnspentAA = Utility::clamp<u8>(pPoints, 0, getMaximumUnspentAA());
 	mAAExperience = 0;
-}
-
-void Controller::addGroupExperience(const u32 pExperience) {
-	EXPECTED(canGainGroupExperience());
-
-	// Add experience and points(s).
-	mGroupExperience += pExperience;
-	while (canGainGroupExperience() && mGroupExperience >= getGroupExperienceForNextPoint()) {
-		mGroupExperience -= getGroupExperienceForNextPoint();
-		mGroupPoints++;
-	}
-
-	// Special case: Experience cap reached.
-	if (canGainGroupExperience() == false) {
-		// Set experience to cap.
-		mGroupExperience = getGroupExperienceForNextPoint() - 1;
-		return;
-	}
-}
-
-void Controller::addRaidExperience(const u32 pExperience) {
-	EXPECTED(canGainRaidExperience());
-
-	// Add experience and points(s).
-	mRaidExperience += pExperience;
-	while (canGainRaidExperience() && mRaidExperience >= getRaidExperienceForNextPoint()) {
-		mRaidExperience -= getRaidExperienceForNextPoint();
-		mRaidPoints++;
-	}
-
-	// Special case: Experience cap reached.
-	if (canGainRaidExperience() == false) {
-		// Set experience to cap.
-		mRaidExperience = getRaidExperienceForNextPoint() - 1;
-		return;
-	}
-}
-
-const u32 Controller::getMaxRaidPoints() const {
-	// [Client Limitation]
-	// NOTE: This limitation is cosmetic. Underfoot can go past this number.
-	if (mLevel < 45) return 6;
-	if (mLevel < 55) return 8;
-	return 10;
-}
-
-const u32 Controller::getMaxGroupPoints() const {
-	// [Client Limitation]
-	// NOTE: This limitation is cosmetic. Underfoot can go past this number.
-	if (mLevel < 35) return 4;
-	if (mLevel < 51) return 6;
-	return 8;
+	mSaveNeeded = true;
 }

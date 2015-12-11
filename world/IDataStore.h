@@ -9,6 +9,8 @@
 class ILogFactory;
 struct ItemData;
 class Account;
+class Character;
+struct AccountCharacter;
 
 namespace Data {
 	struct Account;
@@ -58,16 +60,13 @@ public:
 	virtual const bool accountSave(Account* pAccount) = 0;
 	virtual const i32 accountConnect(Account* pAccount) = 0;
 	virtual const bool accountDisconnect(Account* pAccount) = 0;
+	virtual const bool accountLoadCharacters(const u32 pAccountID, SharedPtrList<AccountCharacter>& pCharacters) = 0;
+	virtual const bool accountOwnsCharacter(const u32 pAccountID, const String& pCharacterName, bool& pResult) = 0;
 
 	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) = 0;
-
-	virtual const bool loadAccountCharacterData(Data::Account* pAccount) = 0;
-	virtual const bool saveAccountCharacterData(Data::Account* pAccount) = 0;
-
-	// Character Data
-	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) = 0;
-	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData) = 0;
-	virtual const bool deleteCharacter(const String& pCharacterName) = 0;
+	virtual const i32 characterCreate(Character* pCharacter) = 0;
+	virtual const bool characterLoad(const String& pCharacterName, Character* pCharacter) = 0;
+	virtual const bool characterDelete(const String& pCharacterName) = 0;
 
 	// Guild
 	virtual const bool loadGuilds(Data::GuildList pGuilds) = 0;

@@ -161,17 +161,11 @@ void WorldConnection::sendExpansionInfo() {
 	delete packet;
 }
 
-void WorldConnection::sendCharacterSelection() {
-	auto packet = Payload::makeCharacterSelection(mAccount->getData());
-	sendPacket(packet);
-	delete packet;
-}
-
 void WorldConnection::sendPostEnterWorld() {
-	auto outPacket = new EQApplicationPacket(OP_PostEnterWorld, 1);
-	outPacket->size = 0;
-	mStreamInterface->QueuePacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_PostEnterWorld, 1);
+	packet->size = 0;
+	mStreamInterface->QueuePacket(packet);
+	delete packet;
 }
 
 const bool WorldConnection::handleConnect(const EQApplicationPacket* pPacket) {
@@ -385,8 +379,6 @@ const bool WorldConnection::handleDeleteCharacter(const EQApplicationPacket* pPa
 
 	STRING_CHECK(reinterpret_cast<char*>(pPacket->pBuffer), pPacket->size);
 	String characterName(reinterpret_cast<char*>(pPacket->pBuffer));
-	
-	mLog->info("Deleting " + characterName);
 
 	// Notify World.
 	return mWorld->onDeleteCharacter(this, characterName);

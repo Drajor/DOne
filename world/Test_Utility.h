@@ -14,11 +14,16 @@ public:
 	virtual const bool accountSave(Account* pAccount) { return true; }
 	virtual const i32 accountConnect(Account* pAccount) { return true; }
 	virtual const bool accountDisconnect(Account* pAccount) { return true; }
+	virtual const bool accountLoadCharacters(const u32 pAccountID, SharedPtrList<AccountCharacter>& pCharacters) { return true; }
+	virtual const bool accountOwnsCharacter(const u32 pAccountID, const String& pCharacterName, bool& pResult) { return true; }
 	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) { return true; }
+	virtual const i32 characterCreate(Character* pCharacter) { return true; }
+	virtual const bool characterLoad(const String& pCharacterName, Character* pCharacter) { return true; }
+	virtual const bool characterDelete(const String& pCharacterName) { return true; }
 
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return true; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return true; }
-	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) { return true; }
+	virtual const bool characterLoad(const String& pCharacterName, Data::Character* pCharacterData) { return true; }
 	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData) { return true; }
 	virtual const bool deleteCharacter(const String& pCharacterName) { return true; }
 	virtual const bool loadGuilds(Data::GuildList pGuilds) { return true; };
@@ -47,11 +52,16 @@ public:
 	virtual const bool accountSave(Account* pAccount) { return false; }
 	virtual const i32 accountConnect(Account* pAccount) { return false; }
 	virtual const bool accountDisconnect(Account* pAccount) { return false; }
+	virtual const bool accountLoadCharacters(const u32 pAccountID, SharedPtrList<AccountCharacter>& pCharacters) { return false; }
+	virtual const bool accountOwnsCharacter(const u32 pAccountID, const String& pCharacterName, bool& pResult) { return false; }
 	virtual const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult) { return false; }
+	virtual const i32 characterCreate(Character* pCharacter) { return false; }
+	virtual const bool characterLoad(const String& pCharacterName, Character* pCharacter) { return false; }
+	virtual const bool characterDelete(const String& pCharacterName) { return false; }
 
 	virtual const bool loadAccountCharacterData(Data::Account* pAccount) { return false; }
 	virtual const bool saveAccountCharacterData(Data::Account* pAccount) { return false; }
-	virtual const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData) { return false; }
+	virtual const bool characterLoad(const String& pCharacterName, Data::Character* pCharacterData) { return false; }
 	virtual const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData) { return false; }
 	virtual const bool deleteCharacter(const String& pCharacterName) { return false; }
 	virtual const bool loadGuilds(Data::GuildList pGuilds) { return false; };

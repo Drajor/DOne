@@ -7,29 +7,30 @@ Account::Account(AccountManager* pOwner) : mOwner(pOwner) {
 }
 
 Account::~Account() {
-	if (mOwner && mSaveNeeded) {
+	if (mOwner && mTouched) {
 		mOwner->_save(this);
 	}
 }
 
 
-const u32 Account::numCharacters() const {
-	return mData->mCharacterData.size();
-}
+//const u32 Account::numCharacters() const {
+//	//return mData->mCharacterData.size();
+//	return 0;
+//}
 
-const bool Account::ownsCharacter(const String& pCharacterName) const {
-	for (auto i : mData->mCharacterData) {
-		if (i->mName == pCharacterName)
-			return true;
-	}
-
-	return false;
-}
-
-Data::AccountCharacter* Account::getData(const String& pCharacterName) {
-	for (auto i : mData->mCharacterData) {
-		if (i->mName == pCharacterName)
-			return i;
-	}
-	return nullptr;
-}
+//const bool Account::ownsCharacter(const String& pCharacterName) const {
+//	for (auto i : mData->mCharacterData) {
+//		if (i->mName == pCharacterName)
+//			return true;
+//	}
+//
+//	return false;
+//}
+//
+//Data::AccountCharacter* Account::getData(const String& pCharacterName) {
+//	for (auto i : mData->mCharacterData) {
+//		if (i->mName == pCharacterName)
+//			return i;
+//	}
+//	return nullptr;
+//}

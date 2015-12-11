@@ -24,7 +24,7 @@ public:
 	// Account Data
 
 	i32 insertQuery(const String& pQuery);
-	const bool updateQuery(const String& pQuery);
+	const bool runQuery(const String& pQuery);
 
 	// Returns whether an account already exists
 	const bool accountExists(const u32 pLSAccountID, const u32 pLSID);
@@ -40,17 +40,22 @@ public:
 
 	const i32 accountConnect(Account* pAccount);
 	const bool accountDisconnect(Account* pAccount);
+	const bool accountLoadCharacters(const u32 pAccountID, SharedPtrList<AccountCharacter>& pCharacters);
+
+	// pResult is set to true an Account with pAccountID has a Character with pCharacterName.
+	// Returns true if the check succeeds, otherwise false.
+	const bool accountOwnsCharacter(const u32 pAccountID, const String& pCharacterName, bool& pResult);
 
 	// Returns whether a Character name is already being used.
 	const bool isCharacterNameInUse(const String& pCharacterName, bool& pResult);
 
-	const bool accountCharactersLoad(Account* pAccount);
-
-	const bool loadAccountCharacterData(Data::Account* pAccount);
-	const bool saveAccountCharacterData(Data::Account* pAccount);
+	// Creates a new Character and returns the ID.
+	const i32 characterCreate(Character* pCharacter);
+	const bool characterLoad(const String& pCharacterName, Character* pCharacter);
+	const bool characterDelete(const String& pCharacterName);
 
 	// Character Data
-	const bool loadCharacter(const String& pCharacterName, Data::Character* pCharacterData);
+	const bool characterLoad(const String& pCharacterName, Data::Character* pCharacterData);
 	const bool loadInventory(TiXmlElement* pElement, Data::Inventory& pInventory);
 
 	const bool saveCharacter(const String& pCharacterName, const Data::Character* pCharacterData);

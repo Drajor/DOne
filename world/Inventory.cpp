@@ -9,12 +9,12 @@
 #include "ItemFactory.h"
 #include "Limits.h"
 
-Inventoryy::Inventoryy() : Bonuses("Inventory") {
+Inventory::Inventory() : Bonuses("Inventory") {
 	mItems.fill(nullptr);
 	memset(mCurrency, 0, sizeof(mCurrency));
 }
 
-Inventoryy::~Inventoryy() {
+Inventory::~Inventory() {
 	mItemFactory = nullptr;
 	mData = nullptr;
 
@@ -24,7 +24,7 @@ Inventoryy::~Inventoryy() {
 	}
 }
 
-const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFactory, ILogFactory* pLogFactory, const String& pCharacterName) {
+const bool Inventory::initialise(Data::Inventory* pData, ItemFactory* pItemFactory, ILogFactory* pLogFactory, const String& pCharacterName) {
 	if (mInitialised) return false;
 	if (!pData) return false;
 	if (!pItemFactory) return false;
@@ -88,7 +88,7 @@ const bool Inventoryy::initialise(Data::Inventory* pData, ItemFactory* pItemFact
 	return true;
 }
 
-Item* Inventoryy::loadItem(Data::Item& pItem) {
+Item* Inventory::loadItem(Data::Item& pItem) {
 	auto item = mItemFactory->make(pItem.mItemID, pItem.mStacks);
 	if (!item)
 		return nullptr;
@@ -100,7 +100,7 @@ Item* Inventoryy::loadItem(Data::Item& pItem) {
 	return item;
 }
 
-const unsigned char* Inventoryy::getData(u32& pSize) {
+const unsigned char* Inventory::getData(u32& pSize) {
 	unsigned char * data = nullptr;
 	u32 numItems = 0;
 
@@ -140,7 +140,7 @@ const unsigned char* Inventoryy::getData(u32& pSize) {
 	return data;
 }
 
-Item* Inventoryy::get(const u32 pSlot) const {
+Item* Inventory::get(const u32 pSlot) const {
 	// Handle: Item being put io cursor.
 	if (SlotID::isCursor(pSlot)) return mCursorItems.empty() ? nullptr : mCursorItems.front();
 
@@ -165,7 +165,7 @@ Item* Inventoryy::get(const u32 pSlot) const {
 	return nullptr;
 }
 
-const bool Inventoryy::put(Item* pItem, const u32 pSlot, const String& pReason) {
+const bool Inventory::put(Item* pItem, const u32 pSlot, const String& pReason) {
 	if (!pItem) return false;
 
 	// All puts are logged.
@@ -236,7 +236,7 @@ const bool Inventoryy::put(Item* pItem, const u32 pSlot, const String& pReason) 
 }
 
 
-const bool Inventoryy::moveItem(const u32 pFromSlot, const u32 pToSlot, const u32 pStacks) {
+const bool Inventory::moveItem(const u32 pFromSlot, const u32 pToSlot, const u32 pStacks) {
 	mLog->info("MOVE " + toString(pFromSlot) + " to " + toString(pToSlot) + " | Stacks: " + toString(pStacks));
 
 	// NOTE: The client sends this when an item is summoned to their cursor.
@@ -287,7 +287,7 @@ const bool Inventoryy::moveItem(const u32 pFromSlot, const u32 pToSlot, const u3
 	return false;
 }
 
-Item* Inventoryy::_popCursor() {
+Item* Inventory::_popCursor() {
 	if (mCursorItems.empty()) {
 		mLog->error("Attempt to pop cursor when it is empty.");
 		return nullptr;
@@ -298,12 +298,12 @@ Item* Inventoryy::_popCursor() {
 	return item;
 }
 
-Item* Inventoryy::_peekCursor() const {
+Item* Inventory::_peekCursor() const {
 	if (isCursorEmpty()) return nullptr;
 	return mCursorItems.front();
 }
 
-const bool Inventoryy::pushCursor(Item* pItem) {
+const bool Inventory::pushCursor(Item* pItem) {
 	if (!pItem) return false;
 
 	mCursorItems.push_back(pItem);
@@ -311,7 +311,7 @@ const bool Inventoryy::pushCursor(Item* pItem) {
 	return true;
 }
 
-const bool Inventoryy::consume(const u32 pSlot, const u32 pStacks) {
+const bool Inventory::consume(const u32 pSlot, const u32 pStacks) {
 	// NOTE: UF will only consume from the Main Inventory
 
 	auto item = get(pSlot);
@@ -333,7 +333,7 @@ const bool Inventoryy::consume(const u32 pSlot, const u32 pStacks) {
 	return true;
 }
 
-void Inventoryy::_calculateAdd(Item* pItem) {
+void Inventory::_calculateAdd(Item* pItem) {
 	EXPECTED(pItem);
 
 	_addStrength(pItem->_getStrength());
@@ -379,7 +379,7 @@ void Inventoryy::_calculateAdd(Item* pItem) {
 	// TODO: MOD2
 }
 
-void Inventoryy::_calculateRemove(Item* pItem) {
+void Inventory::_calculateRemove(Item* pItem) {
 	EXPECTED(pItem);
 
 	_removeStrength(pItem->_getStrength());
@@ -423,7 +423,7 @@ void Inventoryy::_calculateRemove(Item* pItem) {
 	_removeEnduranceRegen(pItem->_getEnduranceRegen());
 }
 
-void Inventoryy::updateConsumables() {
+void Inventory::updateConsumables() {
 	auto food = findFirst(ItemType::Food);
 	
 	// There was already food.
@@ -469,7 +469,7 @@ void Inventoryy::updateConsumables() {
 	}
 }
 
-Item* Inventoryy::findFirst(const u8 pItemType) const {
+Item* Inventory::findFirst(const u8 pItemType) const {
 	// Search: Main Inventory slots first.
 	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		if (mItems[i] && mItems[i]->getItemType() == pItemType)
@@ -488,7 +488,7 @@ Item* Inventoryy::findFirst(const u8 pItemType) const {
 	return nullptr;
 }
 
-Item* Inventoryy::findPartialStack(const u32 pItemID) const {
+Item* Inventory::findPartialStack(const u32 pItemID) const {
 	// Search: Main slots.
 	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = mItems[i];
@@ -509,7 +509,7 @@ Item* Inventoryy::findPartialStack(const u32 pItemID) const {
 	return nullptr;
 }
 
-const bool Inventoryy::_clear(const u32 pSlot) {
+const bool Inventory::_clear(const u32 pSlot) {
 	
 	// Handle: Clearing cursor.
 	if (SlotID::isCursor(pSlot)) {
@@ -565,7 +565,7 @@ const bool Inventoryy::_clear(const u32 pSlot) {
 	return false;
 }
 
-const bool Inventoryy::_putDown(const u32 pToSlot, const u32 pStacks) {
+const bool Inventory::_putDown(const u32 pToSlot, const u32 pStacks) {
 
 	// Check: Existing Item in pToSlot.
 	Item* existing = get(pToSlot);
@@ -614,7 +614,7 @@ const bool Inventoryy::_putDown(const u32 pToSlot, const u32 pStacks) {
 	return true;
 }
 
-const bool Inventoryy::_stackMergeCursor(const u32 pToSlot, const u32 pStackSize) {
+const bool Inventory::_stackMergeCursor(const u32 pToSlot, const u32 pStackSize) {
 
 	Item* cursorItem = _peekCursor();
 	EXPECTED_BOOL(cursorItem); // Failure = desync.
@@ -656,7 +656,7 @@ const bool Inventoryy::_stackMergeCursor(const u32 pToSlot, const u32 pStackSize
 	}
 }
 
-const bool Inventoryy::_pickUp(const u32 pFromSlot, const u32 pStackSize) {
+const bool Inventory::_pickUp(const u32 pFromSlot, const u32 pStackSize) {
 	Item* pickUp = get(pFromSlot);
 	EXPECTED_BOOL(pickUp);
 
@@ -690,7 +690,7 @@ const bool Inventoryy::_pickUp(const u32 pFromSlot, const u32 pStackSize) {
 	return true;
 }
 
-Item* Inventoryy::find(const u32 pItemID, const u32 pInstanceID) const {
+Item* Inventory::find(const u32 pItemID, const u32 pInstanceID) const {
 
 	// Search Worn Slots
 	for (u32 i = SlotID::CHARM; i <= SlotID::AMMO; i++) {
@@ -716,21 +716,21 @@ Item* Inventoryy::find(const u32 pItemID, const u32 pInstanceID) const {
 	return nullptr;
 }
 
-const bool Inventoryy::removeRadiantCrystals(const u32 pCrystals) {
+const bool Inventory::removeRadiantCrystals(const u32 pCrystals) {
 	EXPECTED_BOOL(mRadiantCrystals >= pCrystals);
 
 	mRadiantCrystals -= pCrystals;
 	return true;
 }
 
-const bool Inventoryy::removeEbonCrystals(const u32 pCrystals) {
+const bool Inventory::removeEbonCrystals(const u32 pCrystals) {
 	EXPECTED_BOOL(mEbonCrystals >= pCrystals);
 
 	mEbonCrystals -= pCrystals;
 	return true;
 }
 
-const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount) {
+const bool Inventory::moveCurrency(const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount) {
 	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pFromSlot));
 	EXPECTED_BOOL(Limits::General::moneySlotIDValid(pToSlot));
 	EXPECTED_BOOL(Limits::General::moneyTypeValid(pFromType));
@@ -769,7 +769,7 @@ const bool Inventoryy::moveCurrency(const u32 pFromSlot, const u32 pToSlot, cons
 	return true;
 }
 
-const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
+const bool Inventory::addCurrency(const u32 pSlot, const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	StringStream ss;
 	ss << "Add currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
 	mLog->info(ss.str());
@@ -781,7 +781,7 @@ const bool Inventoryy::addCurrency(const u32 pSlot, const i32 pPlatinum, const i
 	return true;
 }
 
-const u64 Inventoryy::getTotalCurrency() const {
+const u64 Inventory::getTotalCurrency() const {
 	u64 total = 0;
 	for (auto i = 0; i < CurrencySlot::MAX; i++) {
 		for (auto j = 0; j < CurrencyType::MAX; j++) {
@@ -791,7 +791,7 @@ const u64 Inventoryy::getTotalCurrency() const {
 	return total;
 }
 
-const bool Inventoryy::currencyValid() const {
+const bool Inventory::currencyValid() const {
 	for (auto i = 0; i < CurrencySlot::MAX; i++) {
 		for (auto j = 0; j < CurrencyType::MAX; j++) {
 			if (_getCurrency(i, j) < 0)
@@ -802,7 +802,7 @@ const bool Inventoryy::currencyValid() const {
 	return true;
 }
 
-const u32 Inventoryy::findEmptySlot(Item* pItem) const {
+const u32 Inventory::findEmptySlot(Item* pItem) const {
 	if (!pItem) return SlotID::CURSOR; // If null gets passed in here, we have a big problem.
 
 	// Check: Main
@@ -828,7 +828,7 @@ const u32 Inventoryy::findEmptySlot(Item* pItem) const {
 	return SlotID::CURSOR;
 }
 
-const u32 Inventoryy::findSlotFor(const bool pContainer, const u8 pItemSize) const {
+const u32 Inventory::findSlotFor(const bool pContainer, const u8 pItemSize) const {
 	// Check: Main
 	for (u32 i = SlotID::MAIN_0; i <= SlotID::MAIN_7; i++) {
 		auto item = get(i);
@@ -850,7 +850,7 @@ const u32 Inventoryy::findSlotFor(const bool pContainer, const u8 pItemSize) con
 	return SlotID::None;
 }
 
-const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
+const bool Inventory::addCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	StringStream ss;
 	ss << "Add currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
 	mLog->info(ss.str());
@@ -876,7 +876,7 @@ const bool Inventoryy::addCurrency(const i32 pPlatinum, const i32 pGold, const i
 	return true;
 }
 
-const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) {
+const bool Inventory::addCurrency(const u32 pSlot, const u32 pType, const i32 pAmount) {
 	if (!CurrencySlot::isValid(pSlot)) return false;
 	if (!CurrencyType::isValid(pType)) return false;
 	if (pAmount < 0) return false;
@@ -885,7 +885,7 @@ const bool Inventoryy::addCurrency(const u32 pSlot, const u32 pType, const i32 p
 	return true;
 }
 
-const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
+const bool Inventory::removeCurrency(const i32 pPlatinum, const i32 pGold, const i32 pSilver, const i32 pCopper, const String& pReason) {
 	StringStream ss;
 	ss << "Remove currency (" << pReason << ")  Copper: " << pCopper << " | Silver: " << pSilver << " | Gold: " << pGold << " | Platinum: " << pPlatinum;
 	mLog->info(ss.str());
@@ -913,48 +913,48 @@ const bool Inventoryy::removeCurrency(const i32 pPlatinum, const i32 pGold, cons
 	return true;
 }
 
-const u64 Inventoryy::getTotalCursorCurrency() const {
+const u64 Inventory::getTotalCursorCurrency() const {
 	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getCursorPlatinum(), getCursorGold(), getCursorSilver(), getCursorCopper()), 0);
 	return value;
 }
 
-const u64 Inventoryy::getTotalPersonalCurrency() const {
+const u64 Inventory::getTotalPersonalCurrency() const {
 	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getPersonalPlatinum(), getPersonalGold(), getPersonalSilver(), getPersonalCopper()), 0);
 	return value;
 }
 
-const u64 Inventoryy::getTotalBankCurrency() const {
+const u64 Inventory::getTotalBankCurrency() const {
 	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getBankPlatinum(), getBankGold(), getBankSilver(), getBankCopper()), 0);
 	return value;
 }
 
-const u64 Inventoryy::getTotalTradeCurrency() const {
+const u64 Inventory::getTotalTradeCurrency() const {
 	i64 value = 0;
 	EXPECTED_VAR(Utility::convertCurrency(value, getTradePlatinum(), getTradeGold(), getTradeSilver(), getTradeCopper()), 0);
 	return value;
 }
 
-const u64 Inventoryy::getTotalSharedBankCurrency() const {
+const u64 Inventory::getTotalSharedBankCurrency() const {
 	i64 value = 0;
 	// NOTE: The shared bank only supports storing platinum.
 	EXPECTED_VAR(Utility::convertCurrency(value, getSharedBankPlatinum(), 0, 0, 0), 0);
 	return value;
 }
 
-const u32 Inventoryy::getAlternateCurrencyQuantity(const u32 pCurrencyID) const {
+const u32 Inventory::getAlternateCurrencyQuantity(const u32 pCurrencyID) const {
 	auto search = mAlternateCurrency.find(pCurrencyID);
 	if (search == mAlternateCurrency.end()) return 0;
 	return search->second;
 }
 
-void Inventoryy::addAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
+void Inventory::addAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
 	setAlternateCurrencyQuantity(pCurrencyID, getAlternateCurrencyQuantity(pCurrencyID) + pQuantity);
 }
 
-void Inventoryy::removeAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
+void Inventory::removeAlternateCurrency(const u32 pCurrencyID, const u32 pQuantity) {
 	const u32 currentQuantity = getAlternateCurrencyQuantity(pCurrencyID);
 	if (currentQuantity >= pQuantity)
 		setAlternateCurrencyQuantity(pCurrencyID, currentQuantity - pQuantity);
@@ -1000,7 +1000,7 @@ const bool saveItem(Item* pItem, std::list<Data::Item>& pList) {
 	return true;
 }
 
-const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
+const bool Inventory::updateForSave(Data::Inventory& pInventoryData) {
 	// Worn / Primary Inventory.
 	for (auto i : mItems) {
 		if (i) {
@@ -1015,7 +1015,7 @@ const bool Inventoryy::updateForSave(Data::Inventory& pInventoryData) {
 	return true;
 }
 
-const u32 Inventoryy::getContainerSlotIndex(const u32 pSlotID) {
+const u32 Inventory::getContainerSlotIndex(const u32 pSlotID) {
 	if (SlotID::isMainContents(pSlotID)) return (pSlotID - SlotID::MainContentsBegin) % 10;
 	if (SlotID::isBankContents(pSlotID)) return (pSlotID - SlotID::BankContentsBegin) % 10;
 	if (SlotID::isSharedBankContents(pSlotID)) return (pSlotID - SlotID::SharedBankContentsBegin) % 10;
@@ -1023,21 +1023,21 @@ const u32 Inventoryy::getContainerSlotIndex(const u32 pSlotID) {
 	return SlotID::None;
 }
 
-void Inventoryy::clearTradeItems() {
+void Inventory::clearTradeItems() {
 	static const auto tradeBegin = SlotID::getPrimarySlotIndex(SlotID::TradeBegin);
 	static const auto tradeEnd = SlotID::getPrimarySlotIndex(SlotID::TradeEnd);
 	for (auto i = tradeBegin; i < tradeEnd; i++)
 		mItems[i] = nullptr;
 }
 
-void Inventoryy::clearTradeCurrency() {
+void Inventory::clearTradeCurrency() {
 	setCurrency(CurrencySlot::Trade, CurrencyType::Platinum, 0);
 	setCurrency(CurrencySlot::Trade, CurrencyType::Gold, 0);
 	setCurrency(CurrencySlot::Trade, CurrencyType::Silver, 0);
 	setCurrency(CurrencySlot::Trade, CurrencyType::Copper, 0);
 }
 
-void Inventoryy::getTradeItems(std::list<Item*>& pItems) const {
+void Inventory::getTradeItems(std::list<Item*>& pItems) const {
 	static const auto tradeBegin = SlotID::getPrimarySlotIndex(SlotID::TradeBegin);
 	static const auto tradeEnd = SlotID::getPrimarySlotIndex(SlotID::TradeEnd);
 	for (auto i = tradeBegin; i < tradeEnd; i++) {

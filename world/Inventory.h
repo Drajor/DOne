@@ -40,11 +40,11 @@ namespace InventoryReason {
 //	};
 //}
 
-class Inventoryy : public Bonuses { // We get an extra y for now.
+class Inventory : public Bonuses {
 
 public:
-	Inventoryy();
-	~Inventoryy();
+	Inventory();
+	~Inventory();
 
 	const bool initialise(Data::Inventory* pData, ItemFactory* pItemFactory, ILogFactory* pLogFactory, const String& pCharacterName);
 

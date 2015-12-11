@@ -125,17 +125,11 @@ void World::update() {
 const bool World::saveCharacter(Character* pCharacter) {
 	if (!pCharacter) return false;
 
-	// Save Character.
-	if (!mDataStore->saveCharacter(pCharacter->getName(), pCharacter->getData())) {
-		mLog->error("Failed to save Character: " + pCharacter->getName());
-		return false;
-	}
-
-	// Update the Account
-	if (!mAccountManager->updateCharacter(pCharacter->getAccount(), pCharacter)){
-		mLog->error("Failed to update Account for Character: " + pCharacter->getName());
-		return false;
-	}
+	//// Save Character.
+	//if (!mDataStore->saveCharacter(pCharacter->getName(), pCharacter->getData())) {
+	//	mLog->error("Failed to save Character: " + pCharacter->getName());
+	//	return false;
+	//}
 
 	return true;
 }
@@ -143,78 +137,8 @@ const bool World::saveCharacter(Character* pCharacter) {
 void World::onConnectRequest(LoginServerConnection* pConnection, const u32 pLSAccountID) {
 	if (!pConnection) return;
 
-	const auto loginServerID = pConnection->getID();
-	const auto accountCreated = mAccountManager->isCreated(pLSAccountID, loginServerID);
-	const auto worldLocked = isLocked();
-
-	// Server is currently locked and the connecting Account is unknown, deny connection.
-	if (worldLocked && !accountCreated) {
-		mLog->info("Unknown Account attempted connection to locked server.");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
-		return;
-	}
-	// Server is not currently locked and the connecting Account is not known, allow connection.
-	else if (!worldLocked && !accountCreated) {
-		mLog->info("Unknown Account connecting to server.");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
-		return;
-	}
-
-	const auto connected = mAccountManager->isConnected(pLSAccountID, loginServerID);
-
-	// Check: Account is already connected.
-	if (connected) {
-		mLog->info("Account is already connected, denying connection.");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Full);
-		return;
-	}
-
-	auto account = mAccountManager->load(pLSAccountID, loginServerID);
-
-	// Account failed to load, deny connection.
-	if (!account) {
-		mLog->error("Account failed to load!");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
-		return;
-	}
-
-	// Check: Suspended Account time may have expired.
-	if (account->isSuspended()) {
-		mAccountManager->checkSuspension(account);
-	}
-	// Account is suspended.
-	if (account->isSuspended()) {
-		mLog->info("Suspended Account attempted connection.");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Suspended);
-		return;
-	}
-	
-	// Account is banned.
-	if (account->isBanned()) {
-		mLog->info("Banned Account attempted connection.");
-		pConnection->sendConnectResponse(pLSAccountID, ResponseID::Banned);
-		return;
-	}
-
-	// Server is currently locked.
-	if (isLocked()) {
-		// Account has enough status to bypass lock.
-		if (account->getStatus() >= AccountStatus::BypassLock) {
-			mLog->info("Server Locked: connection allowed.");
-			pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
-		}
-		// Account does not have enough status to bypass lock.
-		else {
-			mLog->info("Server Locked: connection denied.");
-			pConnection->sendConnectResponse(pLSAccountID, ResponseID::Denied);
-		}
-
-		return;
-	}
-
-	// Speak friend and enter.
-	mLog->info("Connection allowed.");
-	pConnection->sendConnectResponse(pLSAccountID, ResponseID::Allowed);
+	const auto response = mAccountManager->onConnectRequest(pLSAccountID, pConnection->getID(), isLocked());
+	pConnection->sendConnectResponse(pLSAccountID, response);
 }
 
 void World::checkIncomingConnections() {
@@ -302,12 +226,17 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	auto account = pConnection->getAccount();
 
 	// Check: Account owns Character.
-	if (!account->ownsCharacter(pCharacterName)) {
+	auto ownership = false;
+	if (!mDataStore->accountOwnsCharacter(account->getAccountID(), pCharacterName, ownership)) {
+		mLog->error("Failed to check Character ownership!");
+		return false;
+	}
+	if (!ownership) {
 		mLog->error("Ownership check failed for Character: " + pCharacterName);
 		return false;
 	}
 
-	// Create Character.
+	// Load Character.
 	auto character = mCharacterFactory->make(pCharacterName, account);
 	if (!character) {
 		mLog->error("Failed to make Character: " + pCharacterName);
@@ -322,15 +251,14 @@ bool World::_handleEnterWorld(WorldConnection* pConnection, const String& pChara
 	// Check: Destination Zone is available to pCharacter.
 	if (!mZoneManager->isZoneAvailable(zoneID, instanceID)) {
 		mLog->error("Zone unavailable to Character: " + pCharacterName);
-		delete character;
 		return false;
 	}
 
 	if (character->getGuildID() != 0xFFFFFFFF)
-		mGuildManager->onConnect(character, character->getGuildID());
+		mGuildManager->onConnect(character.get(), character->getGuildID());
 
 	// Register Zone Change
-	mZoneManager->onLeaveZone(character);
+	mZoneManager->onLeaveZone(character.get());
 	character->setZoneAuthentication(zoneID, instanceID);
 
 	// Send the client off to the Zone.
@@ -391,40 +319,31 @@ void World::onAuthentication(LoginServerConnection* pConnection, const u32 pLSAc
 const bool World::onConnect(WorldConnection* pConnection, const u32 pLSAccountID, const String& pKey, const bool pZoning) {
 	if (!pConnection) return false;
 	if (pConnection->hasAccount()) return false;
+	if (!mAccountManager) return false;
 
-	auto account = mAccountManager->load(pLSAccountID, 1); // TODO: Figure out how to remove this HC Login Server ID.
-
-	if (!account) {
-		return false;
-	}
-
-	// Check: Authentication matches.
-	if (account->getKey() != pKey || account->getIP() != pConnection->getIP()) {
-		return false;
-	}
-
-	// Associate WorldConnection and Account.
-	pConnection->setAccount(account);
-
-	// Going to: Another Zone
-	if (pZoning) {
-		auto character = account->getActiveCharacter();
-		if (!character) {
-			mLog->error("Got null Character while zoning");
+	// Handle: Going to Character Selection.
+	if (!pZoning) {
+		
+		// Check: Account loaded successfully.
+		auto account = std::make_shared<Account>(mAccountManager);
+		if (!mDataStore->accountLoad(account.get(), pLSAccountID, 1)) {
+			// TODO: Log.
 			return false;
 		}
 
-		pConnection->sendLogServer();
-		pConnection->sendApproveWorld();
-		pConnection->sendEnterWorld(character->getName());
-		pConnection->sendPostEnterWorld();
-	}
-	// Going to: Character Selection Screen.
-	else {
-		if (!mAccountManager->onConnect(account)){
-			// LOG/ This is really bad.
+		// Check: Account authentication matches.
+		if (account->getKey() != pKey || account->getIP() != pConnection->getIP()) {
+			// TODO: Log.
 			return false;
 		}
+
+		// Notify AccountManager.
+		if (!mAccountManager->onConnect(account)) {
+			// TODO: Log.
+			return false;
+		}
+
+		pConnection->setAccount(account);
 
 		// NOTE: Required. Character guild names do not work (on entering world) without it.
 		auto packet = Payload::makeGuildNameList(mGuildManager->getGuilds());
@@ -436,15 +355,34 @@ const bool World::onConnect(WorldConnection* pConnection, const u32 pLSAccountID
 		pConnection->sendEnterWorld(""); // Empty character name when coming from Server Select. 
 		pConnection->sendPostEnterWorld(); // Required.
 		pConnection->sendExpansionInfo(); // Required.
-		pConnection->sendCharacterSelection(); // Required.
+		sendCharacterSelection(pConnection);
+
+		return true;
 	}
+	// Handle: Zoning.
+	else {
 
-	/*
-	OP_GuildsList, OP_LogServer, OP_ApproveWorld
-	All sent in EQEmu but not actually required to get to Character Select. More research on the effects of not sending are required.
-	*/
+		// Check: Account is currently connected.
+		auto account = mAccountManager->_find(pLSAccountID, 1);
+		if (!account) {
+			// TODO: Log.
+			return false;
+		}
 
-	return true;
+		// Check: Account has an active Character.
+		auto character = account->getActiveCharacter();
+		if (!character) {
+			mLog->error("Got null Character while zoning");
+			return false;
+		}
+
+		pConnection->sendLogServer();
+		pConnection->sendApproveWorld();
+		pConnection->sendEnterWorld(character->getName());
+		pConnection->sendPostEnterWorld();
+
+		return true;
+	}
 }
 
 const bool World::onApproveName(WorldConnection* pConnection, const String& pCharacterName) {
@@ -456,10 +394,10 @@ const bool World::onApproveName(WorldConnection* pConnection, const String& pCha
 	// NOTE: Unfortunately I can not find a better place to prevent accounts from going over the maximum number of characters.
 	// So we check here and just reject the name if the account is at max.
 	// It would be better if I could figure out how the client limits it and duplicate that.
-	if (account->numCharacters() >= Limits::Account::MAX_NUM_CHARACTERS) {
-		pConnection->sendApproveNameResponse(false);
-		return true;
-	}
+	//if (account->numCharacters() >= Limits::Account::MAX_NUM_CHARACTERS) {
+	//	pConnection->sendApproveNameResponse(false);
+	//	return true;
+	//}
 
 	const bool allowed = mAccountManager->isCharacterNameAllowed(pCharacterName);
 
@@ -473,16 +411,36 @@ const bool World::onApproveName(WorldConnection* pConnection, const String& pCha
 }
 
 const bool World::onDeleteCharacter(WorldConnection* pConnection, const String& pCharacterName) {
-	if (!pConnection) return false;
-	if (!pConnection->hasAccount()) return false;
+	// A WorldConnection is attempting to delete a Character.
+	// This only occurs when the delete button is pressed at the Character Selection Screen.
+
+	// Check: WorldConnection is valid.
+	if (!pConnection) {
+		mLog->error("Null WorldConnection in " + String(__FUNCTION__));
+		return false;
+	}
 
 	auto account = pConnection->getAccount();
 
+	// Check: WorldConnection has an Account.
+	if (!account) {
+		mLog->error("Attempt to delete Character when WorldConnection has no Account.");
+		return false;
+	}
+	
 	// Check: Account owns Character.
-	if (!account->ownsCharacter(pCharacterName)) return false;
+	auto ownership = false;
+	if (!mDataStore->accountOwnsCharacter(account->getAccountID(), pCharacterName, ownership)) {
+		mLog->error("Failed to check Character ownership!");
+		return false;
+	}
+	if (!ownership) {
+		mLog->error("Ownership check failed for Character: " + pCharacterName);
+		return false;
+	}
 
-	// Delete the Character.
-	if (!mAccountManager->deleteCharacter(account, pCharacterName)) {
+	// Delete Character.
+	if (!mDataStore->characterDelete(pCharacterName)) {
 		mLog->error("Failed to delete " + pCharacterName);
 		return false;
 	}
@@ -491,7 +449,7 @@ const bool World::onDeleteCharacter(WorldConnection* pConnection, const String& 
 	// Notify GuildManager
 	mGuildManager->onCharacterDelete(pCharacterName);
 
-	pConnection->sendCharacterSelection();
+	sendCharacterSelection(pConnection);
 	return true;
 }
 
@@ -505,7 +463,7 @@ const bool World::onCreateCharacter(WorldConnection* pConnection, Payload::World
 	// Create the Character.
 	if (mAccountManager->createCharacter(account, pPayload)) {
 		mLog->info("Success: Character created.");
-		pConnection->sendCharacterSelection();
+		sendCharacterSelection(pConnection);
 		return true;
 	}
 
@@ -519,10 +477,7 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 
 	auto account = pConnection->getAccount();
 
-	// Check: Account owns the Character.
-	if (!account->ownsCharacter(pCharacterName)) return false;
-
-	bool success = false;
+	auto success = false;
 	if (pZoning) {
 		success = _handleZoning(pConnection, pCharacterName);
 	}
@@ -536,7 +491,7 @@ const bool World::onEnterWorld(WorldConnection* pConnection, const String& pChar
 		if (!pZoning) {
 			// NOTE: This just bumps the client to Character Select screen.
 			pConnection->sendZoneUnavailable();
-			pConnection->sendCharacterSelection();
+			sendCharacterSelection(pConnection);
 		}
 		// Zoning
 		else {
@@ -572,4 +527,22 @@ void World::onLeaveWorld(Character* pCharacter) {
 	}
 
 	delete pCharacter;
+}
+
+const bool World::sendCharacterSelection(WorldConnection* pConnection) {
+	if (!pConnection) return false;
+	if (!pConnection->getAccount()) return false;
+
+	// Check: AccountCharacter(s) loaded successfully.
+	SharedPtrList<AccountCharacter> characters;
+	if (!mDataStore->accountLoadCharacters(pConnection->getAccount()->getAccountID(), characters)) {
+		// TODO: Log.
+		return false;
+	}
+
+	auto packet = Payload::makeCharacterSelection(characters);
+	pConnection->sendPacket(packet);
+	delete packet;
+
+	return true;
 }

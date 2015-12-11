@@ -389,8 +389,6 @@ protected:
 
 		Experience::Controller::setRequiredAAExperienceFunction(nullptr);
 		Experience::Controller::setRequiredExperienceFunction(nullptr);
-		Experience::Controller::setRequiredGroupExperienceFunction(nullptr);
-		Experience::Controller::setRequiredRaidExperienceFunction(nullptr);
 	}
 
 	void setExpFunction() {
@@ -403,17 +401,7 @@ protected:
 		Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
 	}
 
-	void setGroupExpFunction() {
-		static std::function<u32(u32)> expGLF = [](u32) { return 1; };
-		Experience::Controller::setRequiredGroupExperienceFunction(&expGLF);
-	}
-
-	void setRaidExpFunction() {
-		static std::function<u32(u32)> expRLF = [](u32) { return 1; };
-		Experience::Controller::setRequiredRaidExperienceFunction(&expRLF);
-	}
-
-	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
+	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience) {
 		mData.mLevel = pLevel;
 		mData.mMaximumLevel = pMaximumLevel;
 		mData.mExperience = pExperience;
@@ -424,12 +412,6 @@ protected:
 		mData.mSpentAAPoints = pSpentAAPoints;
 		mData.mMaximumSpentAA = pMaximumSpentAAPoints;
 		mData.mAAExperience = pAAExperience;
-
-		mData.mGroupExperience = pGroupExperience;
-		mData.mGroupPoints = pGroupPoints;
-
-		mData.mRaidExperience = pRaidExperience;
-		mData.mRaidPoints = pRaidPoints;
 	}
 
 	Data::Experience mData;
@@ -440,9 +422,7 @@ TEST_F(ExperienceControllerTest, InitialiseFunctions) {
 	// Make it fail!
 	Experience::Controller::setRequiredAAExperienceFunction(nullptr);
 	Experience::Controller::setRequiredExperienceFunction(nullptr);
-	Experience::Controller::setRequiredGroupExperienceFunction(nullptr);
-	Experience::Controller::setRequiredRaidExperienceFunction(nullptr);
-	setData(1, 10, 2, 20, 3, 4, 4, 5, 6, 7, 1, 6, 2);
+	setData(1, 10, 2, 20, 3, 4, 4, 5, 6);
 	
 	EXPECT_FALSE(mController->onLoad(&mData));
 
@@ -455,48 +435,33 @@ TEST_F(ExperienceControllerTest, InitialiseFunctions) {
 	std::function<u32(u32)> expAAF = [](u32) { return 1; };
 	Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
 	EXPECT_FALSE(mController->onLoad(&mData));
-
-	// Set the Group Leadership experience function.
-	std::function<u32(u32)> expGLF = [](u32) { return 1; };
-	Experience::Controller::setRequiredGroupExperienceFunction(&expGLF);
-	EXPECT_FALSE(mController->onLoad(&mData));
-
-	// Set the Raid Leadership experience function. (should succeed)
-	std::function<u32(u32)> expRLF = [](u32) { return 1; };
-	Experience::Controller::setRequiredRaidExperienceFunction(&expRLF);
-	EXPECT_TRUE(mController->onLoad(&mData));
 }
 
 TEST_F(ExperienceControllerTest, InitialiseParameterChecks) {
 	setExpFunction();
 	setAAExpFunction();
-	setGroupExpFunction();
-	setRaidExpFunction();
-
 	// Fail: Zero level.
-	setData(0, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	setData(0, 2, 3, 70, 4, 5, 6, 7, 8);
 	EXPECT_FALSE(mController->onLoad(&mData));
 
 	// Fail: Level greater than max level.
-	setData(3, 2, 3, 70, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+	setData(3, 2, 3, 70, 4, 5, 6, 7, 8);
 	EXPECT_FALSE(mController->onLoad(&mData));
 
 	// Fail: Unspent AA greater than max.
-	setData(1, 2, 3, 70, 5, 4, 6, 7, 8, 9, 10, 11, 12);
+	setData(1, 2, 3, 70, 5, 4, 6, 7, 8);
 	EXPECT_FALSE(mController->onLoad(&mData));
 
 	// Fail: Spent AA greater than max.
-	setData(1, 2, 3, 70, 4, 5, 7, 6, 8, 9, 10, 11, 12);
+	setData(1, 2, 3, 70, 4, 5, 7, 6, 8);
 	EXPECT_FALSE(mController->onLoad(&mData));
 }
 
 TEST_F(ExperienceControllerTest, DoubleInitialise) {
 	setExpFunction();
 	setAAExpFunction();
-	setGroupExpFunction();
-	setRaidExpFunction();
 
-	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+	setData(1, 10, 2, 20, 3, 4, 5, 6, 7);
 	EXPECT_TRUE(mController->onLoad(&mData));
 	EXPECT_FALSE(mController->onLoad(&mData));
 }
@@ -504,24 +469,18 @@ TEST_F(ExperienceControllerTest, DoubleInitialise) {
 TEST_F(ExperienceControllerTest, InitalisedValues) {
 	setExpFunction();
 	setAAExpFunction();
-	setGroupExpFunction();
-	setRaidExpFunction();
 
-	setData(1, 10, 2, 20, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+	setData(1, 10, 2, 20, 3, 4, 5, 6, 7);
 	EXPECT_TRUE(mController->onLoad(&mData));
 	EXPECT_EQ(1, mController->getLevel());
 	EXPECT_EQ(10, mController->getMaximumLevel());
 	EXPECT_EQ(2, mController->getExperience());
 	EXPECT_EQ(20, mController->getExperienceToAA());
-	EXPECT_EQ(3, mController->getUnspentAAPoints());
-	EXPECT_EQ(4, mController->getMaximumUnspentAAPoints());
-	EXPECT_EQ(5, mController->getSpentAAPoints());
-	EXPECT_EQ(6, mController->getMaximumSpentAAPoints());
+	EXPECT_EQ(3, mController->getUnspentAA());
+	EXPECT_EQ(4, mController->getMaximumUnspentAA());
+	EXPECT_EQ(5, mController->getSpentAA());
+	EXPECT_EQ(6, mController->getMaximumSpentAA());
 	EXPECT_EQ(7, mController->getAAExperience());
-	EXPECT_EQ(8, mController->getGroupExperience());
-	EXPECT_EQ(9, mController->getGroupPoints());
-	EXPECT_EQ(10, mController->getRaidExperience());
-	EXPECT_EQ(11, mController->getRaidPoints());
 }
 
 class ExperienceControllerTestAddExperience : public ::testing::Test {
@@ -530,10 +489,8 @@ protected:
 		mController = std::make_shared<Experience::Controller>();
 		Experience::Controller::setRequiredExperienceFunction(&expF);
 		Experience::Controller::setRequiredAAExperienceFunction(&expAAF);
-		Experience::Controller::setRequiredGroupExperienceFunction(&expGF);
-		Experience::Controller::setRequiredRaidExperienceFunction(&expRF);
 
-		setData(1, 20, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0);
+		setData(1, 20, 0, 0, 0, 3, 0, 0, 0);
 		mController->onLoad(&mData);
 	}
 	virtual void TearDown() {
@@ -543,7 +500,7 @@ protected:
 		Experience::Controller::setRequiredExperienceFunction(nullptr);
 	}
 
-	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience, const u32 pGroupExperience, const u32 pGroupPoints, const u32 pRaidExperience, const u32 pRaidPoints) {
+	void setData(const u8 pLevel, const u8 pMaximumLevel, const u32 pExperience, const u32 pExperienceToAA, const u32 pUnspentAAPoints, const u32 pMaximumUnspentAAPoints, const u32 pSpentAAPoints, const u32 pMaximumSpentAAPoints, const u32 pAAExperience) {
 		mData.mLevel = pLevel;
 		mData.mMaximumLevel = pMaximumLevel;
 		mData.mExperience = pExperience;
@@ -554,20 +511,12 @@ protected:
 		mData.mSpentAAPoints = pSpentAAPoints;
 		mData.mMaximumSpentAA = pMaximumSpentAAPoints;
 		mData.mAAExperience = pAAExperience;
-
-		mData.mGroupExperience = pGroupExperience;
-		mData.mGroupPoints = pGroupPoints;
-
-		mData.mRaidExperience = pRaidExperience;
-		mData.mRaidPoints = pRaidPoints;
 	}
 
 	Data::Experience mData;
 
 	std::function<u32(u8)> expF = [](u8 pLevel) { return pLevel * 5; };
 	std::function<u32(u32)> expAAF = [](u32 pPoints) { return 10; };
-	std::function<u32(u32)> expGF = [](u32 pPoints) { return 5; };
-	std::function<u32(u32)> expRF = [](u32 pPoints) { return 5; };
 	std::shared_ptr<Experience::Controller> mController = 0;
 };
 
@@ -613,56 +562,20 @@ TEST_F(ExperienceControllerTestAddExperience, Adding) {
 }
 
 TEST_F(ExperienceControllerTestAddExperience, AddingAAExperience) {
-	EXPECT_EQ(0, mController->getUnspentAAPoints()); // Start with 0 unspent AA.
+	EXPECT_EQ(0, mController->getUnspentAA()); // Start with 0 unspent AA.
 	EXPECT_EQ(0, mController->getAAExperience()); // Start with 0 AA experience.
 
 	mController->addAAExperience(4);
-	EXPECT_EQ(0, mController->getUnspentAAPoints()); // Still 0 unspent AA
+	EXPECT_EQ(0, mController->getUnspentAA()); // Still 0 unspent AA
 	EXPECT_EQ(4, mController->getAAExperience()); // Gained 4 experience.
 
 	mController->addAAExperience(12);
-	EXPECT_EQ(1, mController->getUnspentAAPoints()); // Now 1 unspent AA.
+	EXPECT_EQ(1, mController->getUnspentAA()); // Now 1 unspent AA.
 	EXPECT_EQ(6, mController->getAAExperience()); // We expect 3 experience after wrap.
 
 	mController->addAAExperience(998374623); // Really big hit, max unspent points.
-	EXPECT_EQ(3, mController->getUnspentAAPoints());
+	EXPECT_EQ(3, mController->getUnspentAA());
 	EXPECT_FALSE(mController->canGainAAExperience()); // Can no longer gain AA experience.
-}
-
-TEST_F(ExperienceControllerTestAddExperience, AddingGroupLeadershipExperience) {
-	EXPECT_EQ(1, mController->getLevel()); // Level 1 (Max group points depends on level).
-	EXPECT_EQ(0, mController->getGroupPoints()); // Start with 0 unspent group points.
-	EXPECT_EQ(0, mController->getGroupExperience()); // Start with 0 group experience.
-
-	mController->addGroupExperience(3);
-	EXPECT_EQ(0, mController->getGroupPoints()); // Still 0 group points.
-	EXPECT_EQ(3, mController->getGroupExperience()); // Now 3 group experience.
-
-	mController->addGroupExperience(4);
-	EXPECT_EQ(1, mController->getGroupPoints()); // Now 1 group points.
-	EXPECT_EQ(2, mController->getGroupExperience()); // Now 2 group experience after wrap.
-
-	mController->addGroupExperience(12312312);
-	EXPECT_EQ(mController->getMaxGroupPoints(), mController->getGroupPoints()); // At max group points.
-	EXPECT_EQ(mController->getGroupExperienceForNextPoint() - 1, mController->getGroupExperience()); // At group experience cap.
-}
-
-TEST_F(ExperienceControllerTestAddExperience, AddingRaidLeadershipExperience) {
-	EXPECT_EQ(1, mController->getLevel()); // Level 1 (Max raid points depends on level).
-	EXPECT_EQ(0, mController->getRaidPoints()); // Start with 0 unspent raid points.
-	EXPECT_EQ(0, mController->getRaidExperience()); // Start with 0 raid experience.
-
-	mController->addRaidExperience(3);
-	EXPECT_EQ(0, mController->getRaidPoints()); // Still 0 raid points.
-	EXPECT_EQ(3, mController->getRaidExperience()); // Now 3 raid experience.
-
-	mController->addRaidExperience(4);
-	EXPECT_EQ(1, mController->getRaidPoints()); // Now 1 raid points.
-	EXPECT_EQ(2, mController->getRaidExperience()); // Now 2 raid experience after wrap.
-
-	mController->addRaidExperience(12312312);
-	EXPECT_EQ(mController->getMaxRaidPoints(), mController->getRaidPoints()); // At max raid points.
-	EXPECT_EQ(mController->getRaidExperienceForNextPoint() - 1, mController->getRaidExperience()); // At raid experience cap.
 }
 
 class LootControllerTest : public ::testing::Test {
@@ -910,7 +823,7 @@ TEST_F(convertCurrencyTest2, Test6) {
 class InventoryCurrencyTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		mInventory = new Inventoryy();
+		mInventory = new Inventory();
 	}
 
 	virtual void TearDown() {
@@ -933,7 +846,7 @@ protected:
 		mInventory->setCurrency(pSlot, CurrencyType::Copper, pCopper);
 	}
 
-	Inventoryy* mInventory;
+	Inventory* mInventory;
 };
 
 TEST_F(InventoryCurrencyTest, DefaultChecks) {
@@ -1207,7 +1120,7 @@ TEST_F(InventoryCurrencyTest, MoveBroadOne) {
 class InventoryAlternateCurrencyTest : public ::testing::Test {
 protected:
 	virtual void SetUp() {
-		mInventory = new Inventoryy();
+		mInventory = new Inventory();
 	}
 
 	virtual void TearDown() {
@@ -1215,7 +1128,7 @@ protected:
 		mInventory = nullptr;
 	}
 
-	Inventoryy* mInventory;
+	Inventory* mInventory;
 };
 
 TEST_F(InventoryAlternateCurrencyTest, General) {

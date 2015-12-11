@@ -217,52 +217,6 @@ public:
 };
 
 /*****************************************************************************************************************************/
-class AddGroupLeadershipExperienceCommand : public Command {
-public:
-	AddGroupLeadershipExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #+glxp <number>");
-		mMinimumParameters = 1;
-		mMaximumParameters = 1;
-		mRequiresTarget = true;
-	};
-
-	const bool execute(CommandParameters pParameters) {
-		// Check: Target is a Character.
-		if (!mInvoker->targetIsCharacter()) { return false; }
-
-		u32 experience = 0;
-		if (!convertParameter(0, experience)) { return false; }
-
-		auto character = Actor::cast<Character*>(mInvoker->getTarget());
-		character->getZone()->giveGroupLeadershipExperience(character, experience);
-		return true;
-	}
-};
-
-/*****************************************************************************************************************************/
-class AddRaidLeadershipExperienceCommand : public Command {
-public:
-	AddRaidLeadershipExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
-		mHelpMessages.push_back("Usage: #+rlxp <number>");
-		mMinimumParameters = 1;
-		mMaximumParameters = 1;
-		mRequiresTarget = true;
-	};
-
-	const bool execute(CommandParameters pParameters) {
-		// Check: Target is a Character.
-		if (!mInvoker->targetIsCharacter()) { return false; }
-
-		u32 experience = 0;
-		if (!convertParameter(0, experience)) { return false; }
-
-		auto character = Actor::cast<Character*>(mInvoker->getTarget());
-		character->getZone()->giveRaidLeadershipExperience(character, experience);
-		return true;
-	}
-};
-
-/*****************************************************************************************************************************/
 class RemoveExperienceCommand : public Command {
 public:
 	RemoveExperienceCommand(uint8 pMinimumStatus, std::list<String> pAliases, bool pLogged = true) : Command(pMinimumStatus, pAliases, pLogged) {
@@ -1136,21 +1090,9 @@ public:
 		mInvoker->notify("Experience: " + std::to_string(controller->getExperience()) + " / " + std::to_string(controller->getExperienceForNextLevel()));
 		mInvoker->notify("Experience to AA: " + std::to_string(controller->getExperienceToAA()) + " / 100");
 		mInvoker->notify("AA Experience: " + std::to_string(controller->getAAExperience()) + " / " + std::to_string(controller->getAAExperienceForNextPoint()));
-		mInvoker->notify("Unspent AA: " + std::to_string(controller->getUnspentAAPoints()) + " / " + std::to_string(controller->getMaximumUnspentAAPoints()));
-		mInvoker->notify("Spent AA: " + std::to_string(controller->getSpentAAPoints()) + " / " + std::to_string(controller->getMaximumSpentAAPoints()));
-		
-		String leadershipExp = controller->isLeadershipOn() ? "On" : "Off";
-		mInvoker->notify("Leadership Experience: " + leadershipExp);
+		mInvoker->notify("Unspent AA: " + std::to_string(controller->getUnspentAA()) + " / " + std::to_string(controller->getMaximumUnspentAA()));
+		mInvoker->notify("Spent AA: " + std::to_string(controller->getSpentAA()) + " / " + std::to_string(controller->getMaximumSpentAA()));
 
-		mInvoker->notify("Group Experience: " + std::to_string(controller->getGroupExperience()) + " / " + std::to_string(controller->getGroupExperienceForNextPoint()));
-		mInvoker->notify("Group Points: " + std::to_string(controller->getGroupPoints()) + " / " + std::to_string(controller->getMaxGroupPoints()));
-		mInvoker->notify("Group Points Spent: " + std::to_string(controller->getSpentGroupPoints()));
-		mInvoker->notify("Group Points Total: " + std::to_string(controller->getTotalGroupPoints()));
-
-		mInvoker->notify("Raid Experience: " + std::to_string(controller->getRaidExperience()) + " / " + std::to_string(controller->getRaidExperienceForNextPoint()));
-		mInvoker->notify("Raid Points: " + std::to_string(controller->getRaidPoints()) + " / " + std::to_string(controller->getMaxRaidPoints()));
-		mInvoker->notify("Raid Points Spent: " + std::to_string(controller->getSpentRaidPoints()));
-		mInvoker->notify("Raid Points Total: " + std::to_string(controller->getTotalRaidPoints()));
 		return true;
 	}
 
@@ -1919,8 +1861,6 @@ const bool CommandHandler::initialise(IDataStore* pDataStore) {
 	mCommands.push_back(new AddExperienceCommand(100, { "+xp", "+exp" "addexp" }));
 	mCommands.push_back(new RemoveExperienceCommand(100, { "-xp", "-exp" "remexp" }));
 	mCommands.push_back(new AddAAExperienceCommand(100, { "+aaxp", "+aaexp" "addaaexp" }));
-	mCommands.push_back(new AddGroupLeadershipExperienceCommand(100, { "+glxp", "+glexp" "addglexp" }));
-	mCommands.push_back(new AddRaidLeadershipExperienceCommand(100, { "+rlxp", "+rlexp" "addrlexp" }));
 
 	mCommands.push_back(new LevelCommand(100, { "level", "setlevel" "lvl" }));
 	mCommands.push_back(new StatsCommand(100, { "setstat" }));

@@ -25,7 +25,6 @@ public:
 
 	void sendPacket(const EQApplicationPacket* pPacket);
 
-	void sendCharacterSelection();
 	void sendEnterWorld(const String& pCharacterName);
 	void sendExpansionInfo();
 	void sendLogServer();
@@ -53,7 +52,7 @@ private:
 
 	bool mInitialised = false;
 	ILog* mLog = nullptr;
-	SharedPtr<Account> mAccount = nullptr;			// Pointer to the Account this Character belongs to.
+	SharedPtr<Account> mAccount = nullptr;			// Pointer to the Account this Connection is associated with.
 	EQStreamInterface* mStreamInterface = nullptr;
 	World* mWorld = nullptr;
 

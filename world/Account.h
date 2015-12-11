@@ -66,12 +66,7 @@ public:
 	Account(AccountManager* pOwner);;
 	~Account();
 
-	inline void saved() { mSaveNeeded = false; }
-
-	inline std::list<AccountCharacter*>& getCharacters() { return mCharacters; }
-
-	// Returns the data for this Account.
-	Data::Account* getData() { return mData; }
+	inline void saved() { mTouched = false; }
 
 	// Returns data for a specific Character on this Account.
 	Data::AccountCharacter* getData(const String& pCharacterName);
@@ -86,79 +81,73 @@ public:
 	inline const u32 getAccountID() const { return mAccountID; }
 
 	// Sets the Account ID.
-	inline void setAccountID(const u32 pValue) { mAccountID = pValue; mSaveNeeded = true; }
+	inline void setAccountID(const u32 pValue) { mAccountID = pValue; _touch(); }
 
 	// Returns the Login Server Account ID.
 	inline const u32 getLSAccountID() const { return mLSAccountID; }
 
 	// Sets the Login Server Account ID.
-	inline void setLSAccountID(const u32 pValue) { mLSAccountID = pValue; mSaveNeeded = true; }
+	inline void setLSAccountID(const u32 pValue) { mLSAccountID = pValue; _touch(); }
 	
 	// Returns the Login Server ID this account is associated with.
 	inline const u32 getLSID() const { return mLSID; }
 
 	// Sets the Login Server ID.
-	inline void setLSID(const u32 pValue) { mLSID = pValue; mSaveNeeded = true; }
+	inline void setLSID(const u32 pValue) { mLSID = pValue; _touch(); }
 	
 	// Returns the Login Server Account name.
 	inline const String& getLSAccountName() const { return mLSAccountName; }
 
 	// Sets the Login Server Account name.
-	inline void setLSAccountName(const String& pValue) { mLSAccountName = pValue; mSaveNeeded = true; }
+	inline void setLSAccountName(const String& pValue) { mLSAccountName = pValue; _touch(); }
 	
 	// Returns the amount of shared platinum on this Account.
 	inline const i32 getSharedPlatinum() const { return mSharedPlatinum; }
 
 	// Sets the amount of shared platinum on this Account.
-	inline void setSharedPlatinum(const i32 pValue) { mSharedPlatinum = pValue; mSaveNeeded = true; }
+	inline void setSharedPlatinum(const i32 pValue) { mSharedPlatinum = pValue; _touch(); }
 
 	// Returns the Account status.
 	inline const i32 getStatus() const { return mStatus; }
 
 	// Sets the Account status.
-	void setStatus(const i32 pValue) { mStatus = pValue; mSaveNeeded = true; }
+	void setStatus(const i32 pValue) { mStatus = pValue; _touch(); }
 
 	// Returns the suspension time.
 	const Poco::DateTime getSuspensionExpiry() const { return mSuspensionExpiry; }
 
 	// Sets the suspension time.
-	inline void setSuspensionExpiry(const Poco::DateTime pValue) { mSuspensionExpiry = pValue; mSaveNeeded = true; }
+	inline void setSuspensionExpiry(const Poco::DateTime pValue) { mSuspensionExpiry = pValue; _touch(); }
 
 	// Returns the creation time of the Account.
 	inline const Poco::DateTime getCreated() const { return mCreated; }
 
 	// Sets the creation time of the Account.
-	inline void setCreated(const Poco::DateTime pValue) { mCreated = pValue; mSaveNeeded = true; }
-
-	// Returns the number of Characters on this Account.
-	const u32 numCharacters() const;
-
-	// Returns whether this Account owns the specified Character.
-	const bool ownsCharacter(const String& pCharacterName) const;
+	inline void setCreated(const Poco::DateTime pValue) { mCreated = pValue; _touch(); }
 
 	// Sets the active Character.
-	inline void setActiveCharacter(Character* pCharacter) { mActiveCharacter = pCharacter; }
+	inline void setActiveCharacter(SharedPtr<Character> pCharacter) { mActiveCharacter = pCharacter; }
 
 	// Returns the active Character.
-	inline Character* getActiveCharacter() const { return mActiveCharacter; }
+	inline SharedPtr<Character> getActiveCharacter() const { return mActiveCharacter; }
 
 	// Clears the active Character.
 	inline void clearActiveCharacter() { mActiveCharacter = nullptr; }
 
 	// Sets the authentication on this Account.
-	inline void setAuthentication(const String& pKey, const u32 pIP) { mKey = pKey; mIP = pIP; mSaveNeeded = true; }
+	inline void setAuthentication(const String& pKey, const u32 pIP) { mKey = pKey; mIP = pIP; _touch(); }
 
 	// Clears the authentication on this Account.
-	inline void clearAuthentication() { mKey = ""; mIP = 0; mSaveNeeded = true; }
+	inline void clearAuthentication() { mKey = ""; mIP = 0; _touch(); }
 
 	// Sets the authentication key for this Account.
-	inline void setKey(const String& pValue) { mKey = pValue; mSaveNeeded = true; }
+	inline void setKey(const String& pValue) { mKey = pValue; _touch(); }
 
 	// Returns the authentication key for this Account.
 	inline const String& getKey() const { return mKey; }
 
 	// Sets the authentication IP for this Account.
-	inline void setIP(const u32 pValue) { mIP = pValue; mSaveNeeded = true; }
+	inline void setIP(const u32 pValue) { mIP = pValue; _touch(); }
 
 	// Returns the authentication IP for this Account.
 	inline const u32 getIP() const { return mIP; }
@@ -184,31 +173,29 @@ public:
 
 private:
 	// Flag indicates if an Account has had changes that are unsaved.
-	bool mSaveNeeded = false;
+	bool mTouched = false;
+	inline void _touch() { mTouched = true; }
+
 	AccountManager* mOwner = nullptr;
-	Character* mActiveCharacter = nullptr;
+	SharedPtr<Character> mActiveCharacter = nullptr;
 
 	u32 mAccountID = 0;						// (World) Internal ID.
 	u32 mExtraCharacterSlots = 0;			// The number of extra Characters that can be created on this Account. TODO!
 	i32 mSharedPlatinum = 0;				// Amount of shared platinum on this Account.
 	i32 mStatus = AccountStatus::Default;	// Status of the Account, see enum AccountStatus for more details.
-	Poco::DateTime mCreated;				// Time the Account was created.
-	Poco::DateTime mSuspensionExpiry;		// Time when an Account suspension expires.
+	Poco::DateTime mCreated;				// Date/Time the Account was created.
+	Poco::DateTime mSuspensionExpiry;		// Date/Time when an Account suspension expires.
 
 	i32 mSessionID = 0;						// Current Session ID.
 	String mKey;
 	u32 mIP = 0;
-	Poco::DateTime mSessionBeginTime;		// Time when connected (if connected)
-	Poco::DateTime mSessionEndTime;			// Time when disconnected.
+	Poco::DateTime mSessionBeginTime;		// Date/Time when connected (if connected)
+	Poco::DateTime mSessionEndTime;			// Date/Time when disconnected.
 
 	// Login Server details.
 	u32 mLSAccountID = 0;					// Provided by Login Server
 	String mLSAccountName = "";				// Provided by Login Server
 	u32 mLSID = 1;							// ID of the Login Server this Account originates from.
-
-	std::list<AccountCharacter*> mCharacters;
-
-	Data::Account* mData = nullptr;
 
 	String mReservedCharacterName;
 };
