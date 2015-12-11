@@ -3777,21 +3777,7 @@ const bool ZoneConnection::handleLeadershipExperienceToggle(const EQApplicationP
 	auto payload = LeadershipExperienceToggle::convert(pPacket);
 	auto controller = mCharacter->getExperienceController();
 
-	// Turning leadership experience on.
-	if (payload->mValue == 1) {
-		controller->setLeadershipExperience(true);
-		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOn);
-	}
-	// Turning leadership experience off.
-	else if (payload->mValue == 1) {
-		controller->setLeadershipExperience(false);
-		sendSimpleMessage(MessageType::Experience, StringID::LeadershipOff);
-	}
-	// Unknown.
-	else {
-		mLog->error("Unknown value: " + toString(payload->mValue) + " in " + String(__FUNCTION__));
-		return true;
-	}
+	// TODO: Send message that this feature is disabled.
 
 	return true;
 }
