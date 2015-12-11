@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Constants.h"
+#include "Types.h"
 
 #include <list>
-#include <memory>
 
 class ILog;
 class ILogFactory;
@@ -27,7 +26,7 @@ namespace Experience {
 
 struct ZoneSearchEntry {
 	String mName = "";
-	u16 mID = ZoneIDs::NoZone;
+	u16 mID = 0;
 	u16 mInstanceID = 0;
 	u32 mNumCharacters = 0;
 };
@@ -48,10 +47,11 @@ public:
 	// Returns whether or not the specified Zone is running.
 	const bool isZoneRunning(const u16 pZoneID, const u16 pInstanceID) const;
 
+	// Returns whether or not the specified Zone is available for entry. Will only return false when the Zone is in the process of shutting down.
 	const bool isZoneAvailable(const u16 pZoneID, const u16 pInstanceID);
 
+	// Returns whether or not the specified Zone can be shutdown. Will return false if there are any Characters in the Zone or if there are any Characters zoning into the Zone.
 	const bool canZoneShutdown(const u16 pZoneID, const u16 pInstanceID) const;
-	const bool canZoneShutdown(Zone* pZone) const;
 
 	// Attempt to boot a Zone.
 	const bool requestZoneBoot(const u16 pZoneID, const u16 pInstanceID);
@@ -67,15 +67,18 @@ public:
 	void handleTell(Character* pCharacter, const String& pTargetName, const String& pMessage);
 
 	void handleWhoRequest(Character* pCharacter, const WhoFilter& pFilter, std::list<Character*>& pResults);
-	Character* findCharacter(const String pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr) const;
+	Character* findCharacter(const String& pCharacterName, bool pIncludeZoning = false, Zone* pExcludeZone = nullptr) const;
+	Character* findZoningCharacter(const String& pCharacterName) const;
 
-	void onEnterZone(Character* pCharacter);
-	void onLeaveZone(Character* pCharacter);
-	void onLeaveWorld(Character* pCharacter);
+	bool onEnterZone(Character* pCharacter);
+	bool onLeaveZone(Character* pCharacter);
+	bool onLeaveWorld(Character* pCharacter);
 
 	Character* getZoningCharacter(const String& pCharacterName);
 
 private:
+
+	const bool _canZoneShutdown(Zone* pZone) const;
 
 	bool mInitialised = false;
 	ILog* mLog = nullptr;
@@ -97,5 +100,7 @@ private:
 	const u16 _getNextZonePort();
 	std::list<u16> mAvailableZonePorts;
 	std::list<Zone*> mZones;
+
+	// List of Characters that are currently zoning
 	std::list<Character*> mZoningCharacters;
 };

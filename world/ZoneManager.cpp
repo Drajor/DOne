@@ -33,7 +33,13 @@ void ZoneManager::update() {
 
 const u16 ZoneManager::getZonePort(const u16 pZoneID, const u16 pInstanceID) const {
 	auto zone = _search(pZoneID, pInstanceID);
-	EXPECTED_VAR(zone, 0); // NOTE: If this occurs then something is happening out of order.
+	
+	// NOTE: If this occurs then something is happening out of order.
+	if (!zone) {
+		mLog->error("No Zone found in " + String(__FUNCTION__));
+		return 0;
+	}
+
 	return zone->getPort();
 }
 
@@ -98,11 +104,15 @@ const bool ZoneManager::canZoneShutdown(const u16 pZoneID, const u16 pInstanceID
 	auto zone = _search(pZoneID, pInstanceID);
 	if (!zone) return false;
 
-	return canZoneShutdown(zone);
+	return _canZoneShutdown(zone);
 }
 
-const bool ZoneManager::canZoneShutdown(Zone* pZone) const {
-	EXPECTED_BOOL(pZone);
+const bool ZoneManager::_canZoneShutdown(Zone* pZone) const {
+	// Check: Sanity
+	if (!pZone) {
+		mLog->error("Null Zone in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: Are any Characters currently zoning into Zone.
 	for (auto i : mZoningCharacters) {
@@ -127,7 +137,7 @@ const bool ZoneManager::requestZoneShutdown(const u16 pZoneID, const u16 pInstan
 	auto zone = _search(pZoneID, pInstanceID);
 	if (!zone) return false;
 
-	if (!canZoneShutdown(zone)) return false;
+	if (!_canZoneShutdown(zone)) return false;
 
 	return zone->shutdown();
 }
@@ -193,46 +203,71 @@ void ZoneManager::handleTell(Character* pCharacter, const String& pTargetName, c
 	pCharacter->getConnection()->sendSimpleMessage(MessageType::White, StringID::PLAYER_NOT_ONLINE, pTargetName);
 }
 
-Character* ZoneManager::findCharacter(const String pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) const {
-	Character* character = nullptr;
-
+Character* ZoneManager::findCharacter(const String& pCharacterName, bool pIncludeZoning, Zone* pExcludeZone) const {
 	// Search Zones.
 	for (auto i : mZones) {
 		if (i != pExcludeZone) {
-			character = i->findCharacter(pCharacterName);
+			auto character = i->findCharacter(pCharacterName);
 			if (character)
 				return character;
 		}
 	}
 
-	// Search zoning characters.
-	if (pIncludeZoning) {
-		for (auto i : mZoningCharacters) {
-			if (i->getName() == pCharacterName)
-				return i;
-		}
+	// Search zoning Characters.
+	if (pIncludeZoning) return findZoningCharacter(pCharacterName);
+
+	return nullptr;
+}
+
+Character* ZoneManager::findZoningCharacter(const String& pCharacterName) const {
+	for (auto i : mZoningCharacters) {
+		if (i->getName() == pCharacterName)
+			return i;
 	}
 
 	return nullptr;
 }
 
-void ZoneManager::onEnterZone(Character* pCharacter) {
-	if (!pCharacter) return;
 
-	for (auto i : mZoningCharacters) {
-		if (i == pCharacter) {
-			mZoningCharacters.remove(i);
-			return;
-		}
+bool ZoneManager::onEnterZone(Character* pCharacter) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
 	}
 
-	mLog->error("Failure: Could not find Character in onEnterZone");
+	// Find the Character and remove from 'zoning list'.
+	auto character = findZoningCharacter(pCharacter->getName());
+	if (!character) {
+		mLog->error("Failure: Could not find Character in " + String(__FUNCTION__));
+		return false;
+	}
+
+	mZoningCharacters.remove(pCharacter);
+	return true;
 }
 
-void ZoneManager::onLeaveZone(Character* pCharacter) {
-	if (!pCharacter) return;
+bool ZoneManager::onLeaveZone(Character* pCharacter) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	mZoningCharacters.push_back(pCharacter);
+	return true;
+}
+
+bool ZoneManager::onLeaveWorld(Character* pCharacter) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
+	// Notify World.
+	mWorld->onLeaveWorld(pCharacter);
+	return true;
 }
 
 Character* ZoneManager::getZoningCharacter(const String& pCharacterName) {
@@ -267,13 +302,6 @@ Zone* ZoneManager::_search(const u16 pZoneID, const u16 pInstanceID) const {
 	return nullptr;
 }
 
-void ZoneManager::onLeaveWorld(Character* pCharacter) {
-	if (!pCharacter) return;
-
-	// Notify World.
-	mWorld->onLeaveWorld(pCharacter);
-}
-
 void ZoneManager::onCreateGuild() {
 	for (auto i : mZones)
 		i->onGuildsChanged();
@@ -285,7 +313,11 @@ void ZoneManager::onDeleteGuild() {
 }
 
 const bool ZoneManager::saveCharacter(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	return mWorld->saveCharacter(pCharacter);
 }
