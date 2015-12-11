@@ -207,7 +207,8 @@ public:
 	inline const u16 getInstanceID() const { return mInstanceID; }
 	inline const u16 getPort() const { return mPort; }
 
-	Character* findCharacter(const String pCharacterName) const;
+	// Searches all Characters in this Zone by name.
+	Character* findCharacter(const String& pCharacterName) const;
 
 	// Find Actor by Spawn ID.
 	inline Actor* getActor(const u16 pSpawnID) const { return mActors[pSpawnID]; }
@@ -346,12 +347,6 @@ public:
 
 	// Gives Alternate Advanced experience to a Character.
 	void giveAAExperience(Character* pCharacter, const u32 pExperience);
-
-	// Gives Group Leadership experience to a Character.
-	void giveGroupLeadershipExperience(Character* pCharacter, const u32 pExperience);
-
-	// Gives Raid Leadership experience to a Character.
-	void giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperience);
 
 	// Returns the experience modifier on this Zone.
 	inline Experience::Modifier* getExperienceModifier() { return mExperienceModifer; }

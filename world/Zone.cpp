@@ -109,21 +109,21 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	// Create ZoneConnectionManager.
 	mZoneConnectionManager = new ZoneConnectionManager();
 	if (!mZoneConnectionManager->initialise(mPort, this, mLogFactory, mGuildManager)) {
-		mLog->error("ZoneConnectionManager failed to initialise.");
+		mLog->error("Failed to initialise ZoneConnectionManager in " + String(__FUNCTION__));
 		return false;
 	}
 
 	// Create Scene.
 	mScene = new Scene();
 	if (!mScene->initialise(this, mLogFactory->make())) {
-		mLog->error("Scene failed to initialise.");
+		mLog->error("Failed to initialise Scene in " + String(__FUNCTION__));
 		return false;
 	}
 
 	// Create SpawnPointManager.
 	mSpawnPointManager = new SpawnPointManager();
 	if (!mSpawnPointManager->initialise(this, mNPCFactory, mLogFactory->make(), pZoneData->mSpawnGroups, pZoneData->mSpawnPoints)) {
-		mLog->error("SpawnPointManager failed to initialise.");
+		mLog->error("Failed to initialise SpawnPointManager in " + String(__FUNCTION__));
 		return false;
 	}
 
@@ -144,13 +144,23 @@ const bool Zone::initialise(ZoneManager* pZoneManager, ILogFactory* pLogFactory,
 	mLongNameStringID = pZoneData->mLongNameStringID;
 	mSafePoint = pZoneData->mSafePosition;
 
-	EXPECTED_BOOL(loadZonePoints(pZoneData->mZonePoints));
+	// Check: ZonePoints load successfully.
+	if (!loadZonePoints(pZoneData->mZonePoints)) {
+		mLog->error("Failed to load Zone Points in" + String(__FUNCTION__));
+		return false;
+	}
 
-	// Objects.
-	EXPECTED_BOOL(loadObjects(pZoneData->mObjects));
+	// Check: Objects load successfully.
+	if (!loadObjects(pZoneData->mObjects)) {
+		mLog->error("Failed to load Objects in" + String(__FUNCTION__));
+		return false;
+	}
 
 	// Doors.
-	EXPECTED_BOOL(loadDoors(pZoneData->mDoors));
+	if (!loadDoors(pZoneData->mDoors)) {
+		mLog->error("Failed to load Doors in" + String(__FUNCTION__));
+		return false;
+	}
 
 	mLog->status("Finished initialising.");
 	mInitialised = true;
@@ -163,7 +173,11 @@ const bool Zone::canShutdown() const {
 }
 
 const bool Zone::shutdown() {
-	EXPECTED_BOOL(mShuttingDown == false);
+	// Check: Zone is not already shutting down.
+	if (mShuttingDown) {
+		mLog->error("Shutdown request when Zone is already shutting down.");
+		return true;
+	}
 
 	// TODO: Save any temp data.
 	
@@ -173,7 +187,11 @@ const bool Zone::shutdown() {
 }
 
 const bool Zone::loadZonePoints(Data::ZonePointList pZonePoints) {
-	EXPECTED_BOOL(mZonePoints.empty());
+	// Check: There are no ZonePoints already loaded.
+	if (!mZonePoints.empty()) {
+		mLog->error("ZonePoints are already loaded.");
+		return false;
+	}
 
 	// Create ZonePoints.
 	for (auto i : pZonePoints) {
@@ -463,7 +481,11 @@ void Zone::notifyCharacterGM(Character* pCharacter){ _sendSpawnAppearance(pChara
 
 void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const u32 pParameter, const bool pIncludeSender) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = SpawnAppearance::construct(pActor->getSpawnID(), pType, pParameter);
 	// Character
@@ -478,8 +500,16 @@ void Zone::_sendSpawnAppearance(Actor* pActor, const u16 pType, const u32 pParam
 }
 
 const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, const u32 pType, const String& pSenderName, const String& pTargetName, const String& pMessage) {
-	if (!pCharacter) return false;
-	if (pMessage.empty()) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+	// Check: Sanity
+	if (pMessage.empty()) {
+		mLog->error("Empty channel message by: " + pCharacter->getName() + " in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: Character may be muted.
 	if (pCharacter->isMuted()) {
@@ -542,14 +572,18 @@ const bool Zone::onChannelMessage(Character* pCharacter, const u32 pChannelID, c
 	}
 	// Handle: Unknown.
 	else {
-		mLog->error("Unknown channel ID: " + toString(pChannelID) + " from: " + pCharacter->getName() + " in " + __FUNCTION__);
+		mLog->error("Unknown channel ID: " + toString(pChannelID) + " from: " + pCharacter->getName() + " in " + String(__FUNCTION__));
 	}
 
 	return true;
 }
 
 const bool Zone::onHail(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	
 	// Character has not hailed an NPC.
 	if (!pCharacter->targetIsNPC()) return true;
@@ -565,7 +599,11 @@ const bool Zone::onHail(Character* pCharacter) {
 }
 
 const bool Zone::onGuildMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (!pCharacter->hasGuild()) return false;
 	if (pMessage.empty()) return false;
 
@@ -575,7 +613,11 @@ const bool Zone::onGuildMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onGroupMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (!pCharacter->hasGroup()) return false;
 	if (pMessage.empty()) return false;
 
@@ -585,7 +627,11 @@ const bool Zone::onGroupMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onShoutMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	// Send to other Characters.
@@ -598,7 +644,11 @@ const bool Zone::onShoutMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onAuctionMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	sendMessage(pCharacter, ChannelID::Auction, pMessage);
@@ -608,7 +658,11 @@ const bool Zone::onAuctionMessage(Character* pCharacter, const String& pMessage)
 }
 
 const bool Zone::onOOCMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	sendMessage(pCharacter, ChannelID::OOC, pMessage);
@@ -618,7 +672,11 @@ const bool Zone::onOOCMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onBroadcastMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	// Check: Character is a GM.
@@ -631,7 +689,11 @@ const bool Zone::onBroadcastMessage(Character* pCharacter, const String& pMessag
 }
 
 const bool Zone::onTellMessage(Character* pCharacter, const String& pTargetName, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	mZoneManager->handleTell(pCharacter, pTargetName, pMessage);
@@ -639,7 +701,11 @@ const bool Zone::onTellMessage(Character* pCharacter, const String& pTargetName,
 }
 
 const bool Zone::onSayMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	// Check: Command entered.
@@ -658,7 +724,11 @@ const bool Zone::onSayMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onGMSayMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	// Check: Character is a GM.
@@ -671,7 +741,11 @@ const bool Zone::onGMSayMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onRaidMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (!pCharacter->hasRaid()) return false;
 	if (pMessage.empty()) return false;
 
@@ -681,7 +755,11 @@ const bool Zone::onRaidMessage(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::onUCSMessage(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	return true;
@@ -689,7 +767,11 @@ const bool Zone::onUCSMessage(Character* pCharacter, const String& pMessage) {
 
 const bool Zone::onEmoteMessage(Character* pCharacter, const String& pMessage) {
 	using namespace Payload::Zone;
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	String message = pCharacter->getName() + " " + pMessage;
@@ -701,7 +783,11 @@ const bool Zone::onEmoteMessage(Character* pCharacter, const String& pMessage) {
 }
 
 void Zone::sendMessage(Character* pCharacter, const u32 pChannel, const String pMessage) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	const auto sender = pCharacter->getConnection();
 	auto packet = ZoneConnection::makeChannelMessage(pChannel, pCharacter->getName(), pMessage);
@@ -728,7 +814,11 @@ bool Zone::trySendTell(const String& pSenderName, const String& pTargetName, con
 
 const bool Zone::onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 pSpeed, const bool pIncludeSender) {
 	using namespace Payload::Zone;
-	if (!pActor) return false;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Update Zone.
 	auto packet = ActorAnimation::construct(pActor->getSpawnID(), pAnimation, pSpeed);
@@ -739,7 +829,11 @@ const bool Zone::onAnimationChange(Actor* pActor, const u8 pAnimation, const u8 
 }
 
 void Zone::handleLevelIncrease(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Notify other clients.
 	_sendActorLevel(pCharacter);
@@ -752,7 +846,11 @@ void Zone::handleLevelIncrease(Character* pCharacter) {
 }
 
 void Zone::handleLevelDecrease(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Notify user client.
 	_sendActorLevel(pCharacter);
@@ -764,7 +862,11 @@ void Zone::handleLevelDecrease(Character* pCharacter) {
 
 void Zone::_sendLevelAppearance(Character* pCharacter) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	//auto outPacket = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
 	//auto payload = reinterpret_cast<LevelAppearance_Struct*>(outPacket->pBuffer);
@@ -792,11 +894,21 @@ void Zone::_sendLevelAppearance(Character* pCharacter) {
 }
 
 void Zone::_sendActorLevel(Actor* pActor) {
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
+
 	_sendSpawnAppearance(pActor, SpawnAppearanceTypeID::WhoLevel, pActor->getLevel());
 }
 
 void Zone::saveCharacter(Character*pCharacter) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	pCharacter->_updateForSave();
 
@@ -834,7 +946,7 @@ void Zone::getWhoMatches(std::list<Character*>& pResults, const WhoFilter& pFilt
 	}
 }
 
-Character* Zone::findCharacter(const String pCharacterName) const {
+Character* Zone::findCharacter(const String& pCharacterName) const {
 	for (auto i : mCharacters) {
 		if (i->getName() == pCharacterName)
 			return i;
@@ -845,15 +957,20 @@ Character* Zone::findCharacter(const String pCharacterName) const {
 
 Character* Zone::_findCharacter(const String& pCharacterName, bool pIncludeZoning) {
 	// Search locally first.
-	Character* character = findCharacter(pCharacterName);
+	auto character = findCharacter(pCharacterName);
 	if (character) return character;
 
 	// Proceed to global search.
-	return ServiceLocator::getZoneManager()->findCharacter(pCharacterName, pIncludeZoning, this);
+	return mZoneManager->findCharacter(pCharacterName, pIncludeZoning, this);
 }
 
 void Zone::handleZoneChange(Character* pCharacter, const uint16 pZoneID, const uint16 pInstanceID, const Vector3& pPosition) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	Log::info("handleZoneChange: " + pPosition.toString());
 	// Check: Are we expecting a zone change?
 	if (pCharacter->checkZoneChange(pZoneID, pInstanceID)) {
@@ -898,7 +1015,11 @@ void Zone::onGuildsChanged() {
 }
 
 void Zone::onChangeGuild(Character* pCharacter) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildID, pCharacter->getGuildID(), true);
 	_sendSpawnAppearance(pCharacter, SpawnAppearanceTypeID::GuildRank, pCharacter->getGuildRank(), true);
@@ -906,7 +1027,11 @@ void Zone::onChangeGuild(Character* pCharacter) {
 
 const bool Zone::onTargetChange(Character* pCharacter, const u16 pSpawnID) {
 	using namespace Payload::Zone;
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Character is clearing their target.
 	if (pSpawnID == 0) {
@@ -937,44 +1062,72 @@ const bool Zone::onTargetChange(Character* pCharacter, const u16 pSpawnID) {
 }
 
 void Zone::handleFaceChange(Character* pCharacter) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	_sendAppearanceUpdate(pCharacter);
 }
 
-void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pAddActor) {
-	EXPECTED(pCharacter);
-	EXPECTED(pAddActor);
+void Zone::handleVisibilityAdd(Character* pCharacter, Actor* pActor) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
-	pAddActor->_syncPosition();
+	pActor->_syncPosition();
 
-	u32 size = pAddActor->getDataSize();
-	unsigned char * data = new unsigned char[size];
+	auto size = pActor->getDataSize();
+	auto data = new unsigned char[size];
 	Utility::MemoryWriter writer(data, size);
-	EXPECTED(pAddActor->copyData(writer));
+	if (!pActor->copyData(writer)) {
+		mLog->error("Failed to copy Actor data in " + String(__FUNCTION__));
+		return;
+	}
 
-	auto outPacket = new EQApplicationPacket(OP_ZoneEntry, data, size);
-	pCharacter->getConnection()->sendPacket(outPacket);
-	safe_delete(outPacket);
+	auto packet = new EQApplicationPacket(OP_ZoneEntry, data, size);
+	pCharacter->getConnection()->sendPacket(packet);
+	delete packet;
 
 	// Send nimbuses
-	auto nimbuses = pAddActor->getNimbuses();
+	auto nimbuses = pActor->getNimbuses();
 	for (auto i : nimbuses) {
-		pCharacter->getConnection()->sendAddNimbus(pAddActor->getSpawnID(), i);
+		pCharacter->getConnection()->sendAddNimbus(pActor->getSpawnID(), i);
 	}
 }
 
-void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pRemoveActor) {
+void Zone::handleVisibilityRemove(Character* pCharacter, Actor* pActor) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
-	EXPECTED(pRemoveActor);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
-	auto packet = DespawnActor::construct(pRemoveActor->getSpawnID());
+	auto packet = DespawnActor::construct(pActor->getSpawnID());
 	pCharacter->getConnection()->sendPacket(packet);
 	delete packet;
 }
 
 void Zone::addActor(Actor* pActor) {
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 	
 	// Adding NPC.
 	if (pActor->isNPC()) {
@@ -992,7 +1145,11 @@ void Zone::addActor(Actor* pActor) {
 }
 
 void Zone::removeActor(Actor* pActor) {
-	if (!pActor) return;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	mActors[pActor->getSpawnID()] = nullptr;
 
@@ -1015,7 +1172,11 @@ void Zone::removeActor(Actor* pActor) {
 
 void Zone::onSurnameChange(Actor* pActor, const String& pSurname) {
 	using namespace Payload::Zone;
-	if (!pActor) return;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Update Actor.
 	pActor->setSurname(pSurname);
@@ -1031,7 +1192,11 @@ void Zone::onSurnameChange(Actor* pActor, const String& pSurname) {
 }
 
 void Zone::onCast(Character* pCharacter, const u16 pTargetID, const u16 pSlot, const u16 pSpellID) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	// TODO: Verifications, cast time calculation etc.
 
@@ -1040,7 +1205,11 @@ void Zone::onCast(Character* pCharacter, const u16 pTargetID, const u16 pSlot, c
 
 void Zone::onBeginCast(Actor* pActor, const u16 pTargetID, const u32 pSpellID, const u32 pCastTime) {
 	using namespace Payload::Zone;
-	if (!pActor) return;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	//EXPECTED(Limits::SpellBar::slotValid(pSlot));
 	//EXPECTED(Limits::SpellBar::spellIDValid(pSpellID));
@@ -1085,7 +1254,11 @@ void Zone::onBeginCast(Actor* pActor, const u16 pTargetID, const u32 pSpellID, c
 
 void Zone::onFinishCast(Actor* pActor) {
 	using namespace Payload::Zone;
-	if (!pActor) return;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Check: Actor is currently casting.
 	if (!pActor->isCasting()) {
@@ -1117,8 +1290,16 @@ void Zone::onFinishCast(Actor* pActor) {
 
 
 void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bool pIncludeSender) {
-	EXPECTED(pCharacter);
-	EXPECTED(pPacket);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pPacket) {
+		mLog->error("Null Packet in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Update Character.
 	if (pIncludeSender)
@@ -1129,8 +1310,16 @@ void Zone::sendToVisible(Character* pCharacter, EQApplicationPacket* pPacket, bo
 }
 
 void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
-	EXPECTED(pActor);
-	EXPECTED(pPacket);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pPacket) {
+		mLog->error("Null Packet in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Update anyone who can see pActor.
 	for (auto i : pActor->getVisibleTo())
@@ -1138,8 +1327,16 @@ void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket) {
 }
 
 void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket, bool pIncludeSender) {
-	if (!pActor) return;
-	if (!pPacket) return;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pPacket) {
+		mLog->error("Null Packet in " + String(__FUNCTION__));
+		return;
+	}
 
 	if (pActor->isCharacter())
 		sendToVisible(Actor::cast<Character*>(pActor), pPacket, pIncludeSender);
@@ -1148,8 +1345,16 @@ void Zone::sendToVisible(Actor* pActor, EQApplicationPacket* pPacket, bool pIncl
 }
 
 void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
-	EXPECTED(pActor);
-	EXPECTED(pPacket);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pPacket) {
+		mLog->error("Null Packet in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Update any Character targeting pActor.
 	for (auto i : pActor->getTargeters()) {
@@ -1161,7 +1366,11 @@ void Zone::sendToTargeters(Actor* pActor, EQApplicationPacket* pPacket) {
 
 void Zone::handleDeath(Actor* pActor, Actor* pKiller, const u32 pDamage, const u32 pSkill) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = Death::construct(pActor->getSpawnID(), pKiller ? pKiller->getSpawnID() : 0, pDamage, pSkill);
 	if (pActor->isCharacter())
@@ -1183,7 +1392,11 @@ u32 getExperienceForKill(const u8 pKillerLevel, const u8 pNPCLevel, const float 
 }
 
 void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
-	EXPECTED(pNPC);
+	// Check: Sanity
+	if (!pNPC) {
+		mLog->error("Null NPC in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Dead, pNPC);
@@ -1245,7 +1458,11 @@ void Zone::_handleDeath(NPC* pNPC, Actor* pKiller) {
 }
 
 void Zone::_handleDeath(Character* pCharacter, Actor* pKiller) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Dispatch Event.
 	EventDispatcher::getInstance().event(Event::Dead, pCharacter);
@@ -1261,25 +1478,33 @@ void Zone::onLootFinished(Character* pCharacter) { mLootHandler->onFinished(pCha
 void Zone::onLootItem(Character* pCharacter, const u32 pSlotID) { mLootHandler->onLootItem(pCharacter, pSlotID); }
 
 void Zone::handleConsider(Character* pCharacter, const u32 pSpawnID) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	if (pSpawnID == pCharacter->getSpawnID()){
 		// TODO: Client sends self consider, need to double check how this should be handled.
 		return;
 	}
 	
-	Actor* actor = pCharacter->findVisible(pSpawnID);
-	EXPECTED(actor);
+	auto actor = pCharacter->findVisible(pSpawnID);
+	if (!actor) return;
 
 	pCharacter->getConnection()->sendConsiderResponse(pSpawnID, 1); // TODO: Message
 }
 
 void Zone::handleConsiderCorpse(Character* pCharacter, const u32 pSpawnID) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
-	Actor* actor = pCharacter->findVisible(pSpawnID);
-	EXPECTED(actor);
-	EXPECTED(actor->isCorpse());
+	auto actor = pCharacter->findVisible(pSpawnID);
+	if (!actor) return;
+	if (!actor->isCorpse()) return;
 
 	if (actor->isNPCCorpse()) {
 		auto decayTimer = actor->getDecayTimer();
@@ -1299,7 +1524,12 @@ void Zone::handleConsiderCorpse(Character* pCharacter, const u32 pSpawnID) {
 }
 
 const bool Zone::checkAuthentication(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	return pCharacter->checkZoneAuthentication(mID, mInstanceID);
 }
 
@@ -1319,7 +1549,12 @@ ZonePoint* Zone::_getClosestZonePoint(const Vector3& pPosition) {
 }
 
 const bool Zone::canBank(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	static const float MaxBankingDistance = 405.0f; // TODO:
 
 	float closestDistance = 9999999.0f;
@@ -1336,6 +1571,16 @@ const bool Zone::canBank(Character* pCharacter) {
 
 void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const i32 pAmount, const uint8 pType, const uint16 pSpellID) {
 	using namespace Payload::Zone;
+	// Check: Sanity
+	if (!pAttacker) {
+		mLog->error("Null Attacker in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pDefender) {
+		mLog->error("Null Defender in " + String(__FUNCTION__));
+		return;
+	}
 
 	u32 sequence = Random::make(0, 20304843);
 	auto packet = Damage::construct(pDefender->getSpawnID(), pAttacker->getSpawnID(), pAmount, pType, sequence, pSpellID);
@@ -1349,7 +1594,11 @@ void Zone::handleDamage(Actor* pAttacker, Actor* pDefender, const i32 pAmount, c
 }
 
 void Zone::handleCriticalHit(Actor* pActor, const i32 pDamage) {
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = ZoneConnection::makeSimpleMessage(MessageType::CritMelee, StringID::CRITICAL_HIT, pActor->getName(), std::to_string(pDamage));
 
@@ -1363,16 +1612,24 @@ void Zone::handleCriticalHit(Actor* pActor, const i32 pDamage) {
 
 void Zone::handleHPChange(Actor* pActor) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = ActorHPUpdate::construct(pActor->getSpawnID(), pActor->getHPPercent());
 	sendToVisible(pActor, packet);
-	safe_delete(packet);
+	delete packet;
 }
 
 void Zone::handleNimbusAdded(Actor* pActor, const u32 pNimbusID) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = AddNimbus::create();
 	auto payload = AddNimbus::convert(packet);
@@ -1393,7 +1650,11 @@ void Zone::handleNimbusAdded(Actor* pActor, const u32 pNimbusID) {
 
 void Zone::handleNimbusRemoved(Actor* pActor, const u32 pNimbusID) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = RemoveNimbus::construct(pActor->getSpawnID(), pNimbusID);
 
@@ -1409,7 +1670,11 @@ void Zone::handleNimbusRemoved(Actor* pActor, const u32 pNimbusID) {
 
 void Zone::handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 pHigh) {
 	using namespace Payload::Zone;
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	u32 low = pLow;
 	u32 high = pHigh;
@@ -1418,14 +1683,18 @@ void Zone::handleRandomRequest(Character* pCharacter, const u32 pLow, const u32 
 
 	EXPECTED(low <= high);
 
-	const u32 result = Random::make(low, high);
+	const auto result = Random::make(low, high);
 	auto packet = RandomReply::construct(pCharacter->getName(), low, high, result);
 	sendToVisible(pCharacter, packet, true);
 	delete packet;
 }
 
 void Zone::onDropItem(Character* pCharacter) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto inventory = pCharacter->getInventory();
 	auto item = inventory->peekCursor();
@@ -1474,7 +1743,11 @@ const bool Zone::loadDoors(Data::DoorList pDoors) {
 
 void Zone::_sendAppearanceUpdate(Actor* pActor) {
 	using namespace Payload::Zone;
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	auto packet = AppearanceUpdate::create();
 	auto payload = AppearanceUpdate::convert(packet);
@@ -1507,11 +1780,22 @@ void Zone::_sendAppearanceUpdate(Actor* pActor) {
 }
 
 void Zone::handleAppearanceChange(Actor* pActor) {
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
+
 	_sendAppearanceUpdate(pActor);
 }
 
 void Zone::handleRespawnSelection(Character* pCharacter, const u32 pSelection) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	auto respawnOptions = pCharacter->getRespawnOptions();
 	EXPECTED(respawnOptions);
 	EXPECTED(respawnOptions->isActive()); // Sanity.
@@ -1524,11 +1808,17 @@ void Zone::handleRespawnSelection(Character* pCharacter, const u32 pSelection) {
 }
 
 void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	std::list<Character*> results;
 
 	// /who all
 	if (pFilter.mType == WhoType::All) {
-		ServiceLocator::getZoneManager()->handleWhoRequest(pCharacter, pFilter, results);
+		mZoneManager->handleWhoRequest(pCharacter, pFilter, results);
 	}
 	// /who
 	else if (pFilter.mType == WhoType::Zone) {
@@ -1539,7 +1829,11 @@ void Zone::handleWhoRequest(Character* pCharacter, WhoFilter& pFilter) {
 }
 
 void Zone::handleSetLevel(Actor* pActor, const u8 pLevel) {
-	EXPECTED(pActor);
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return;
+	}
 
 	const auto actorType = pActor->getActorType();
 	switch (actorType) {
@@ -1557,7 +1851,12 @@ void Zone::handleSetLevel(Actor* pActor, const u8 pLevel) {
 
 
 void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	if (pCharacter->getLevel() == pLevel) return;
 
 	auto controller = pCharacter->getExperienceController();
@@ -1576,7 +1875,11 @@ void Zone::handleSetLevel(Character* pCharacter, const u8 pLevel) {
 }
 
 void Zone::handleSetLevel(NPC* pNPC, const u8 pLevel) {
-	EXPECTED(pNPC);
+	// Check: Sanity
+	if (!pNPC) {
+		mLog->error("Null NPC in " + String(__FUNCTION__));
+		return;
+	}
 
 	pNPC->setLevel(pLevel);
 
@@ -1585,7 +1888,12 @@ void Zone::handleSetLevel(NPC* pNPC, const u8 pLevel) {
 }
 
 void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, const u8 pCurrentLevel) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	auto controller = pCharacter->getExperienceController();
 	auto connection = pCharacter->getConnection();
 
@@ -1621,7 +1929,12 @@ void Zone::_handleLevelChange(Character* pCharacter, const u8 pPreviousLevel, co
 
 
 void Zone::giveExperience(Character* pCharacter, const u32 pExperience) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	auto controller = pCharacter->getExperienceController();
 	EXPECTED(controller);
 	if (controller->canGainExperience() == false) return;
@@ -1640,7 +1953,11 @@ void Zone::giveExperience(Character* pCharacter, const u32 pExperience) {
 }
 
 void Zone::giveAAExperience(Character* pCharacter, const u32 pExperience) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 	auto controller = pCharacter->getExperienceController();
 	EXPECTED(controller);
 	if (controller->canGainAAExperience() == false) return;
@@ -1658,41 +1975,17 @@ void Zone::giveAAExperience(Character* pCharacter, const u32 pExperience) {
 	processExperienceResult(pCharacter, result, context);
 }
 
-void Zone::giveGroupLeadershipExperience(Character* pCharacter, const u32 pExperience) {
-	EXPECTED(pCharacter);
-	auto controller = pCharacter->getExperienceController();
-	EXPECTED(controller);
-	if (controller->canGainGroupExperience() == false) return;
-
-	Experience::CalculationResult result;
-	Experience::Context context;
-
-	// Set Group Leadership experience.
-	result.mGroupLeadership = pExperience;
-
-	// Process result.
-	processExperienceResult(pCharacter, result, context);
-}
-
-void Zone::giveRaidLeadershipExperience(Character* pCharacter, const u32 pExperience) {
-	EXPECTED(pCharacter);
-	auto controller = pCharacter->getExperienceController();
-	EXPECTED(controller);
-	if (controller->canGainRaidExperience() == false) return;
-
-	Experience::CalculationResult result;
-	Experience::Context context;
-
-	// Set Raid Leadership experience.
-	result.mRaidLeadership = pExperience;
-
-	// Process result.
-	processExperienceResult(pCharacter, result, context);
-}
-
 void Zone::allocateSoloExperience(Character* pCharacter, NPC* pNPC) {
-	EXPECTED(pCharacter);
-	EXPECTED(pNPC);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pNPC) {
+		mLog->error("Null NPC in " + String(__FUNCTION__));
+		return;
+	}
 
 	static Experience::CalculationResult result;
 	result.reset();
@@ -1714,8 +2007,16 @@ void Zone::allocateSoloExperience(Character* pCharacter, NPC* pNPC) {
 }
 
 void Zone::allocateGroupExperience(Group* pGroup, NPC* pNPC) {
-	EXPECTED(pGroup);
-	EXPECTED(pNPC);
+	// Check: Sanity
+	if (!pGroup) {
+		mLog->error("Null Group in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pNPC) {
+		mLog->error("Null NPC in " + String(__FUNCTION__));
+		return;
+	}
 
 	static Experience::CalculationResult result;
 	result.reset();
@@ -1742,12 +2043,26 @@ void Zone::allocateGroupExperience(Group* pGroup, NPC* pNPC) {
 	}
 }
 
-void Zone::allocateRaidExperience(Raid* pRaid, NPC* pNPC)
-{
-
+void Zone::allocateRaidExperience(Raid* pRaid, NPC* pNPC) {
+	// Check: Sanity
+	if (!pRaid) {
+		mLog->error("Null Raid in " + String(__FUNCTION__));
+		return;
+	}
+	// Check: Sanity
+	if (!pNPC) {
+		mLog->error("Null NPC in " + String(__FUNCTION__));
+		return;
+	}
 }
 
 void Zone::processExperienceResult(Character* pCharacter, Experience::CalculationResult& pCalculationResult, Experience::Context& pContent) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	static Experience::GainResult gainResult;
 	gainResult.reset();
 
@@ -1755,7 +2070,7 @@ void Zone::processExperienceResult(Character* pCharacter, Experience::Calculatio
 	auto connection = pCharacter->getConnection();
 
 	// Apply result.
-	controller->add(gainResult, pCalculationResult.mNormal, pCalculationResult.mAA, pCalculationResult.mGroupLeadership, pCalculationResult.mRaidLeadership);
+	controller->add(gainResult, pCalculationResult.mNormal, pCalculationResult.mAA);
 
 	// Notify Client.
 
@@ -1791,50 +2106,23 @@ void Zone::processExperienceResult(Character* pCharacter, Experience::Calculatio
 	// Gain Alternate Advanced experience.
 	if (pCalculationResult.mAA > 0) {
 		// Update experience bars.
-		connection->sendAAExperienceUpdate(controller->getAAExperienceRatio(), controller->getUnspentAAPoints(), controller->getExperienceToAA());
+		connection->sendAAExperienceUpdate(controller->getAAExperienceRatio(), controller->getUnspentAA(), controller->getExperienceToAA());
 
 		// Gain AA point(s).
 		if (gainResult.mAAPoints > 0) {
 			// "You have gained an ability point!  You now have %1 ability points."
-			connection->sendAAPointGainMessage(controller->getUnspentAAPoints());
+			connection->sendAAPointGainMessage(controller->getUnspentAA());
 		}
 	}
-	// Gain Group Leadership experience.
-	if (pCalculationResult.mGroupLeadership > 0) {
-		// Update experience bars.
-		connection->sendLeadershipExperienceUpdate(controller->getGroupRatio(), controller->getGroupPoints(), controller->getRaidRatio(), controller->getRaidPoints());
-
-		// "You gain group leadership experience! (% 1)"
-		connection->sendGainGroupLeadershipExperienceMessage();
-
-		// Gain Leadership point(s).
-		if (gainResult.mGroupPoints > 0) {
-			// "You have gained a group leadership point!"
-			connection->sendGainGroupLeadershipPointMessage();
-		}
-
-	}
-	// Gain Raid Leadership experience.
-	if (pCalculationResult.mRaidLeadership > 0) {
-		// Update experience bars.
-		connection->sendLeadershipExperienceUpdate(controller->getGroupRatio(), controller->getGroupPoints(), controller->getRaidRatio(), controller->getRaidPoints());
-
-		// "You gain raid leadership experience! (% 1)"
-		connection->sendGainRaidLeadershipExperienceMessage();
-
-		// Gain Raid Leadership point(s).
-		if (gainResult.mRaidPoints > 0) {
-			// "You have gained a raid leadership point!"
-			connection->sendGainRaidLeadershipPointMessage();
-		}
-	}
-
-	// 8584 You have reached the maximum number of unused group leadership points.  You must spend some points before you can receive any more experience.
-	// 8591 You have reached the maximum number of unused raid leadership points.  You must spend some points before you can receive any more experience.
 }
 
 void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
-	EXPECTED(pCharacter);
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
+
 	auto connection = pCharacter->getConnection();
 
 	// Check: Character is in a state that allows for combining.
@@ -1898,7 +2186,11 @@ void Zone::onCombine(Character* pCharacter, const u32 pSlot) {
 }
 
 const bool Zone::onGuildCreate(Character* pCharacter, const String& pGuildName) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onCreate(pCharacter, pGuildName);
@@ -1926,7 +2218,11 @@ const bool Zone::onGuildCreate(Character* pCharacter, const String& pGuildName) 
 }
 
 const bool Zone::onGuildDelete(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	const bool success = mGuildManager->onDelete(pCharacter);
 
@@ -1934,7 +2230,11 @@ const bool Zone::onGuildDelete(Character* pCharacter) {
 }
 
 const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) {
-	if (!pInviter) return false;
+	// Check: Sanity
+	if (!pInviter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	
 	// Try to find Character to invite.
 	auto character = mZoneManager->findCharacter(pInviteeName, false, nullptr);
@@ -1946,7 +2246,7 @@ const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) 
 	}
 
 	// Notify GuildManager.
-	const bool success = mGuildManager->onInvite(pInviter, character);
+	const auto success = mGuildManager->onInvite(pInviter, character);
 
 	// Handle: Failure.
 	if (!success) {
@@ -1978,7 +2278,11 @@ const bool Zone::onGuildInvite(Character* pInviter, const String& pInviteeName) 
 }
 
 const bool Zone::onGuildInviteAccept(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	const bool success = mGuildManager->onInviteAccept(pCharacter);
 
@@ -2001,7 +2305,11 @@ const bool Zone::onGuildInviteAccept(Character* pCharacter) {
 }
 
 const bool Zone::onGuildInviteDecline(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: The Character declining the invite has a pending invite.
 	if (!pCharacter->hasGuildInvitation()) return false;
@@ -2017,21 +2325,33 @@ const bool Zone::onGuildInviteDecline(Character* pCharacter) {
 }
 
 const bool Zone::onGuildRemove(Character* pRemover, const String& pRemoveeName) {
-	if (!pRemover) return false;
+	// Check: Sanity
+	if (!pRemover) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	const bool success = mGuildManager->onRemove(pRemover, pRemoveeName);
 	return true;
 }
 
 const bool Zone::onGuildLeave(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	const bool success = mGuildManager->onLeave(pCharacter);
 	return true;
 }
 
 const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeName) {
-	if (!pPromoter) return false;
+	// Check: Sanity
+	if (!pPromoter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: Character has a valid target.
 	if (!pPromoter->hasTarget()) return false;
@@ -2050,7 +2370,11 @@ const bool Zone::onGuildPromote(Character* pPromoter, const String& pPromoteeNam
 }
 
 const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) {
-	if (!pDemoter) return false;
+	// Check: Sanity
+	if (!pDemoter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: Character has a valid target.
 	if (!pDemoter->hasTarget()) return false;
@@ -2069,7 +2393,11 @@ const bool Zone::onGuildDemote(Character* pDemoter, const String& pDemoteeName) 
 }
 
 const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderName) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	// NOTE: Changing leader does not require that the new leader is targeted (like promote/demote).
 
 	// Notify GuildManager.
@@ -2083,7 +2411,11 @@ const bool Zone::onGuildMakeLeader(Character* pCharacter, const String& pLeaderN
 }
 
 const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onSetMOTD(pCharacter, pMOTD);
@@ -2096,7 +2428,11 @@ const bool Zone::onGuildSetMOTD(Character* pCharacter, const String& pMOTD) {
 }
 
 const bool Zone::onGuildMOTDRequest(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onMOTDRequest(pCharacter);
@@ -2109,7 +2445,11 @@ const bool Zone::onGuildMOTDRequest(Character* pCharacter) {
 }
 
 const bool Zone::onGuildSetURL(Character* pSetter, const String& pURL) {
-	if (!pSetter) return false;
+	// Check: Sanity
+	if (!pSetter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onSetURL(pSetter, pURL);
@@ -2122,7 +2462,11 @@ const bool Zone::onGuildSetURL(Character* pSetter, const String& pURL) {
 }
 
 const bool Zone::onGuildSetChannel(Character* pSetter, const String& pChannel) {
-	if (!pSetter) return false;
+	// Check: Sanity
+	if (!pSetter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onSetChannel(pSetter, pChannel);
@@ -2135,7 +2479,11 @@ const bool Zone::onGuildSetChannel(Character* pSetter, const String& pChannel) {
 }
 
 const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterName, const u32 pFlags) {
-	if (!pSetter) return false;
+	// Check: Sanity
+	if (!pSetter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	const bool success = mGuildManager->onSetFlags(pSetter, pCharacterName, pFlags);
 
@@ -2149,7 +2497,11 @@ const bool Zone::onGuildSetFlags(Character* pSetter, const String& pCharacterNam
 }
 
 const bool Zone::onGuildSetPublicNote(Character* pSetter, const String& pCharacterName, const String& pPublicNote) {
-	if (!pSetter) return false;
+	// Check: Sanity
+	if (!pSetter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Notify GuildManager.
 	const bool success = mGuildManager->onSetPublicNote(pSetter, pCharacterName, pPublicNote);
@@ -2181,11 +2533,21 @@ void Zone::onTradeAccept(Character* pCharacter, const u32 pSpawnID) { mTradeHand
 void Zone::onTradeCancel(Character* pCharacter, const u32 pSpawnID) { mTradeHandler->onCancel(pCharacter, pSpawnID); }
 
 const bool Zone::onPetCommand(Character* pCharacter, const u32 pCommand) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	return true;
 }
 
 const bool Zone::onEmote(Character* pCharacter, const String& pMessage) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pMessage.empty()) return false;
 
 	// Check: Character may be muted.
@@ -2198,6 +2560,12 @@ const bool Zone::onEmote(Character* pCharacter, const String& pMessage) {
 }
 
 const bool Zone::mute(Character* pCharacter, const String& pCharacterName) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	// Find Character.
 	auto character = mZoneManager->findCharacter(pCharacterName, true); // Muting a zoning Character is fine.
 
@@ -2235,6 +2603,12 @@ const bool Zone::mute(Character* pCharacter, const String& pCharacterName) {
 }
 
 const bool Zone::unmute(Character* pCharacter, const String& pCharacterName) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	// Find Character.
 	auto character = mZoneManager->findCharacter(pCharacterName, true); // Unmuting a zoning Character is fine.
 
@@ -2272,11 +2646,21 @@ const bool Zone::unmute(Character* pCharacter, const String& pCharacterName) {
 }
 
 const bool Zone::onRaidInviteDecline(Character* pCharacter) {
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	return true;
 }
 
 const bool Zone::onRequestTitles(Character* pCharacter) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	auto titles = mTitleManager->getTitles(pCharacter);
 	auto packet = Payload::makeTitleList(titles);
@@ -2288,7 +2672,12 @@ const bool Zone::onRequestTitles(Character* pCharacter) {
 
 const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
 	using namespace Payload::Zone;
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	// TODO: Check eligibility
 
 	String prefix = "";
@@ -2310,7 +2699,12 @@ const bool Zone::onSetTitle(Character* pCharacter, const u32 pTitleID) {
 
 const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
 	using namespace Payload::Zone;
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+
 	// TODO: Check eligibility
 
 	String suffix = "";
@@ -2332,7 +2726,11 @@ const bool Zone::onSetSuffix(Character* pCharacter, const u32 pSuffixID) {
 
 const bool Zone::onSizeChange(Actor * pActor, float pSize) {
 	using namespace Payload::Zone;
-	if (!pActor) return false;
+	// Check: Sanity
+	if (!pActor) {
+		mLog->error("Null Actor in " + String(__FUNCTION__));
+		return false;
+	}
 
 	pActor->setSize(pSize);
 	
@@ -2345,7 +2743,11 @@ const bool Zone::onSizeChange(Actor * pActor, float pSize) {
 }
 
 const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pStacks) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: Character is trying to move an Item FROM a trade slot.
 	// Note: This is never allowed under any circumstances.
@@ -2472,7 +2874,11 @@ const bool Zone::onMoveItem(Character* pCharacter, const u32 pFromSlot, const u3
 }
 
 const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, const u32 pToSlot, const u32 pFromType, const u32 pToType, const i32 pAmount) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	// Check: From slot ID is valid.
 	if (!Limits::General::moneySlotIDValid(pFromSlot)) {
@@ -2556,7 +2962,11 @@ const bool Zone::onMoveCurrency(Character* pCharacter, const u32 pFromSlot, cons
 
 const bool Zone::onWearChange(Character* pCharacter, const u32 pMaterialID, u32 pEliteMaterialID, u32 pColour, u8 pSlot) {
 	using namespace Payload::Zone;
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 
 	auto packet = WearChange::construct(pCharacter->getSpawnID(), pMaterialID, pEliteMaterialID, pColour, pSlot);
 	sendToVisible(pCharacter, packet, false);
@@ -2566,8 +2976,16 @@ const bool Zone::onWearChange(Character* pCharacter, const u32 pMaterialID, u32 
 }
 
 const bool Zone::giveStackableItem(Character* pCharacter, Item* pItem, const String& pReason) {
-	if (!pCharacter) return false;
-	if (!pItem) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+	// Check: Sanity
+	if (!pItem) {
+		mLog->error("Null Item in " + String(__FUNCTION__));
+		return false;
+	}
 
 	auto inventory = pCharacter->getInventory();
 
@@ -2629,8 +3047,16 @@ const bool Zone::giveStackableItem(Character* pCharacter, Item* pItem, const Str
 }
 
 const bool Zone::giveItem(Character* pCharacter, Item* pItem, const String& pReason) {
-	if (!pCharacter) return false;
-	if (!pItem) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
+	// Check: Sanity
+	if (!pItem) {
+		mLog->error("Null Item in " + String(__FUNCTION__));
+		return false;
+	}
 
 	auto inventory = pCharacter->getInventory();
 
@@ -2662,7 +3088,11 @@ const bool Zone::giveItem(Character* pCharacter, Item* pItem, const String& pRea
 }
 
 const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems, const String& pReason) {
-	if (!pCharacter) return false;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return false;
+	}
 	if (pItems.empty()) return false;
 
 	for (auto i : pItems) {
@@ -2675,7 +3105,11 @@ const bool Zone::giveItems(Character* pCharacter, std::list<Item*>& pItems, cons
 }
 
 void Zone::onCampBegin(Character* pCharacter) {
-	if (!pCharacter) return;
+	// Check: Sanity
+	if (!pCharacter) {
+		mLog->error("Null Character in " + String(__FUNCTION__));
+		return;
+	}
 
 	// Cancel trade if a Character starts camping.
 	if (pCharacter->isTrading()) {
